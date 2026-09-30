@@ -1,0 +1,767 @@
+{
+ "units": {
+  "L01-00": "한글과 발음"
+ },
+ "episodes": [
+  {
+   "id": "L01-00-01",
+   "title": "세종대왕 — 글자에 주인이 있다",
+   "ready": true,
+   "lines": 15,
+   "duration": 84.5,
+   "langs": [
+    "ne"
+   ]
+  },
+  {
+   "id": "L01-00-02",
+   "title": "하늘·땅·사람 → ㅏㅗ",
+   "ready": false
+  },
+  {
+   "id": "L01-00-03",
+   "title": "세로모음·가로모음 + 획 방향",
+   "ready": false
+  },
+  {
+   "id": "L01-00-04",
+   "title": "ㅏ/ㅓ + ㅜ/ㅗ (첫 발음 편)",
+   "ready": false
+  },
+  {
+   "id": "L01-00-05",
+   "title": "ㅣ/ㅡ + 자음 없으면 ㅇ",
+   "ready": false
+  },
+  {
+   "id": "L01-00-06",
+   "title": "ㅑ/ㅕ + ㅛ/ㅠ",
+   "ready": false
+  },
+  {
+   "id": "L01-00-07",
+   "title": "이중모음 = 둘을 붙인 것",
+   "ready": false
+  },
+  {
+   "id": "L01-00-08",
+   "title": "ㅐ/ㅔ · ㅒ/ㅖ · ㅢ",
+   "ready": false
+  },
+  {
+   "id": "L01-00-09",
+   "title": "ㅘ/ㅝ · ㅚ/ㅙ/ㅞ · ㅟ",
+   "ready": false
+  },
+  {
+   "id": "L01-00-10",
+   "title": "자음은 입 안 모양 — ㄱㄴㅁㅅㅇ (단면 애니)",
+   "ready": false
+  },
+  {
+   "id": "L01-00-11",
+   "title": "나머지 다섯 ㄷㄹㅂㅈㅎ + 자음 자리",
+   "ready": false
+  },
+  {
+   "id": "L01-00-12",
+   "title": "음절 네 꼴 — 나·아·밥·안",
+   "ready": false
+  },
+  {
+   "id": "L01-00-13",
+   "title": "평음 대립 ① 노래/모래 · 가수/다수",
+   "ready": false
+  },
+  {
+   "id": "L01-00-14",
+   "title": "평음 대립 ② 사요/자요 · 고리/도리",
+   "ready": false
+  },
+  {
+   "id": "L01-00-15",
+   "title": "평음 대립 ③ 머리/허리 · 비누/부누",
+   "ready": false
+  },
+  {
+   "id": "L01-00-16",
+   "title": "획 하나 더하면 바람 ㄱ→ㅋ…",
+   "ready": false
+  },
+  {
+   "id": "L01-00-17",
+   "title": "격음 대립 ① 보도/포도 · 기자/기차",
+   "ready": false
+  },
+  {
+   "id": "L01-00-18",
+   "title": "격음 대립 ② 고/코 · 타요/다요",
+   "ready": false
+  },
+  {
+   "id": "L01-00-19",
+   "title": "격음 대립 ③ 치마/지마 · 스키/수키",
+   "ready": false
+  },
+  {
+   "id": "L01-00-20",
+   "title": "겹치면 힘 ㄱ→ㄲ…",
+   "ready": false
+  },
+  {
+   "id": "L01-00-21",
+   "title": "경음 대립 ① 가요/까요 · 차요/짜요",
+   "ready": false
+  },
+  {
+   "id": "L01-00-22",
+   "title": "경음 대립 ② 커요/꺼요 · 사요/싸요",
+   "ready": false
+  },
+  {
+   "id": "L01-00-23",
+   "title": "경음 대립 ③ 부리/뿌리 · 아파요/바빠요",
+   "ready": false
+  },
+  {
+   "id": "L01-00-24",
+   "title": "받침은 아래에 + 「밥」의 두 ㅂ",
+   "ready": false
+  },
+  {
+   "id": "L01-00-25",
+   "title": "받침 소리 일곱 + 겹받침",
+   "ready": false
+  },
+  {
+   "id": "L01-00-26",
+   "title": "받침 대립 ① 곰/공 · 달/답",
+   "ready": false
+  },
+  {
+   "id": "L01-00-27",
+   "title": "받침 대립 ② 목/몸 · 방/발",
+   "ready": false
+  },
+  {
+   "id": "L01-00-28",
+   "title": "받침 대립 ③ 삼/산 · 일/입",
+   "ready": false
+  },
+  {
+   "id": "L01-00-29",
+   "title": "연음 — 밥을[바블]",
+   "ready": false
+  },
+  {
+   "id": "L01-00-30",
+   "title": "인사 ① 안녕하세요~감사합니다",
+   "ready": false
+  },
+  {
+   "id": "L01-00-31",
+   "title": "인사 ② 처음 뵙겠습니다~실례합니다",
+   "ready": false
+  },
+  {
+   "id": "L02-01-01",
+   "title": "01 자기소개",
+   "ready": false
+  },
+  {
+   "id": "L02-01-02",
+   "title": "01 자기소개",
+   "ready": false
+  },
+  {
+   "id": "L02-02-01",
+   "title": "02 생활용품",
+   "ready": false
+  },
+  {
+   "id": "L02-02-02",
+   "title": "02 생활용품",
+   "ready": false
+  },
+  {
+   "id": "L02-03-01",
+   "title": "03 위치와 장소",
+   "ready": false
+  },
+  {
+   "id": "L02-03-02",
+   "title": "03 위치와 장소",
+   "ready": false
+  },
+  {
+   "id": "L02-04-01",
+   "title": "04 동작과 사물",
+   "ready": false
+  },
+  {
+   "id": "L02-04-02",
+   "title": "04 동작과 사물",
+   "ready": false
+  },
+  {
+   "id": "L02-05-01",
+   "title": "05 날짜와 요일",
+   "ready": false
+  },
+  {
+   "id": "L02-05-02",
+   "title": "05 날짜와 요일",
+   "ready": false
+  },
+  {
+   "id": "L02-06-01",
+   "title": "06 하루 일과",
+   "ready": false
+  },
+  {
+   "id": "L02-06-02",
+   "title": "06 하루 일과",
+   "ready": false
+  },
+  {
+   "id": "L02-07-01",
+   "title": "07 계절과 날씨",
+   "ready": false
+  },
+  {
+   "id": "L02-07-02",
+   "title": "07 계절과 날씨",
+   "ready": false
+  },
+  {
+   "id": "L02-08-01",
+   "title": "08 가족과 친구",
+   "ready": false
+  },
+  {
+   "id": "L02-08-02",
+   "title": "08 가족과 친구",
+   "ready": false
+  },
+  {
+   "id": "L03-09-01",
+   "title": "09 음식 주문",
+   "ready": false
+  },
+  {
+   "id": "L03-09-02",
+   "title": "09 음식 주문",
+   "ready": false
+  },
+  {
+   "id": "L03-10-01",
+   "title": "10 물건 구입",
+   "ready": false
+  },
+  {
+   "id": "L03-10-02",
+   "title": "10 물건 구입",
+   "ready": false
+  },
+  {
+   "id": "L03-11-01",
+   "title": "11 집안일",
+   "ready": false
+  },
+  {
+   "id": "L03-11-02",
+   "title": "11 집안일",
+   "ready": false
+  },
+  {
+   "id": "L03-12-01",
+   "title": "12 대중교통",
+   "ready": false
+  },
+  {
+   "id": "L03-12-02",
+   "title": "12 대중교통",
+   "ready": false
+  },
+  {
+   "id": "L03-13-01",
+   "title": "13 주말 활동",
+   "ready": false
+  },
+  {
+   "id": "L03-13-02",
+   "title": "13 주말 활동",
+   "ready": false
+  },
+  {
+   "id": "L03-14-01",
+   "title": "14 길 찾기",
+   "ready": false
+  },
+  {
+   "id": "L03-14-02",
+   "title": "14 길 찾기",
+   "ready": false
+  },
+  {
+   "id": "L03-15-01",
+   "title": "15 옷차림",
+   "ready": false
+  },
+  {
+   "id": "L03-15-02",
+   "title": "15 옷차림",
+   "ready": false
+  },
+  {
+   "id": "L03-16-01",
+   "title": "16 집 구하기",
+   "ready": false
+  },
+  {
+   "id": "L03-16-02",
+   "title": "16 집 구하기",
+   "ready": false
+  },
+  {
+   "id": "L03-17-01",
+   "title": "17 휴가",
+   "ready": false
+  },
+  {
+   "id": "L03-17-02",
+   "title": "17 휴가",
+   "ready": false
+  },
+  {
+   "id": "L03-18-01",
+   "title": "18 취미",
+   "ready": false
+  },
+  {
+   "id": "L03-18-02",
+   "title": "18 취미",
+   "ready": false
+  },
+  {
+   "id": "L03-19-01",
+   "title": "19 요리",
+   "ready": false
+  },
+  {
+   "id": "L03-19-02",
+   "title": "19 요리",
+   "ready": false
+  },
+  {
+   "id": "L03-20-01",
+   "title": "20 인터넷·스마트폰",
+   "ready": false
+  },
+  {
+   "id": "L03-20-02",
+   "title": "20 인터넷·스마트폰",
+   "ready": false
+  },
+  {
+   "id": "L04-21-01",
+   "title": "21 병원",
+   "ready": false
+  },
+  {
+   "id": "L04-21-02",
+   "title": "21 병원",
+   "ready": false
+  },
+  {
+   "id": "L04-22-01",
+   "title": "22 약국",
+   "ready": false
+  },
+  {
+   "id": "L04-22-02",
+   "title": "22 약국",
+   "ready": false
+  },
+  {
+   "id": "L04-23-01",
+   "title": "23 우체국",
+   "ready": false
+  },
+  {
+   "id": "L04-23-02",
+   "title": "23 우체국",
+   "ready": false
+  },
+  {
+   "id": "L04-24-01",
+   "title": "24 은행",
+   "ready": false
+  },
+  {
+   "id": "L04-24-02",
+   "title": "24 은행",
+   "ready": false
+  },
+  {
+   "id": "L04-25-01",
+   "title": "25 외국인 근로자 지원기관",
+   "ready": false
+  },
+  {
+   "id": "L04-25-02",
+   "title": "25 외국인 근로자 지원기관",
+   "ready": false
+  },
+  {
+   "id": "L05-26-01",
+   "title": "26 주거·음식 문화",
+   "ready": false
+  },
+  {
+   "id": "L05-26-02",
+   "title": "26 주거·음식 문화",
+   "ready": false
+  },
+  {
+   "id": "L05-27-01",
+   "title": "27 한국의 기념일",
+   "ready": false
+  },
+  {
+   "id": "L05-27-02",
+   "title": "27 한국의 기념일",
+   "ready": false
+  },
+  {
+   "id": "L05-28-01",
+   "title": "28 한국의 명절",
+   "ready": false
+  },
+  {
+   "id": "L05-28-02",
+   "title": "28 한국의 명절",
+   "ready": false
+  },
+  {
+   "id": "L05-29-01",
+   "title": "29 한국의 예절",
+   "ready": false
+  },
+  {
+   "id": "L05-29-02",
+   "title": "29 한국의 예절",
+   "ready": false
+  },
+  {
+   "id": "L05-30-01",
+   "title": "30 한국의 대중문화",
+   "ready": false
+  },
+  {
+   "id": "L05-30-02",
+   "title": "30 한국의 대중문화",
+   "ready": false
+  },
+  {
+   "id": "L06-31-01",
+   "title": "31 복장과 근무 태도",
+   "ready": false
+  },
+  {
+   "id": "L06-31-02",
+   "title": "31 복장과 근무 태도",
+   "ready": false
+  },
+  {
+   "id": "L06-32-01",
+   "title": "32 회사 시설 이용",
+   "ready": false
+  },
+  {
+   "id": "L06-32-02",
+   "title": "32 회사 시설 이용",
+   "ready": false
+  },
+  {
+   "id": "L06-33-01",
+   "title": "33 동료와의 관계",
+   "ready": false
+  },
+  {
+   "id": "L06-33-02",
+   "title": "33 동료와의 관계",
+   "ready": false
+  },
+  {
+   "id": "L06-34-01",
+   "title": "34 성희롱·성추행 예방",
+   "ready": false
+  },
+  {
+   "id": "L06-34-02",
+   "title": "34 성희롱·성추행 예방",
+   "ready": false
+  },
+  {
+   "id": "L07-35-01",
+   "title": "35 작업장 관리",
+   "ready": false
+  },
+  {
+   "id": "L07-35-02",
+   "title": "35 작업장 관리",
+   "ready": false
+  },
+  {
+   "id": "L07-36-01",
+   "title": "36 출하 관리",
+   "ready": false
+  },
+  {
+   "id": "L07-36-02",
+   "title": "36 출하 관리",
+   "ready": false
+  },
+  {
+   "id": "L07-37-01",
+   "title": "37 기계 가공",
+   "ready": false
+  },
+  {
+   "id": "L07-37-02",
+   "title": "37 기계 가공",
+   "ready": false
+  },
+  {
+   "id": "L07-38-01",
+   "title": "38 기계 조립",
+   "ready": false
+  },
+  {
+   "id": "L07-38-02",
+   "title": "38 기계 조립",
+   "ready": false
+  },
+  {
+   "id": "L07-39-01",
+   "title": "39 금속 가공",
+   "ready": false
+  },
+  {
+   "id": "L07-39-02",
+   "title": "39 금속 가공",
+   "ready": false
+  },
+  {
+   "id": "L07-40-01",
+   "title": "40 플라스틱·고무 성형",
+   "ready": false
+  },
+  {
+   "id": "L07-40-02",
+   "title": "40 플라스틱·고무 성형",
+   "ready": false
+  },
+  {
+   "id": "L07-41-01",
+   "title": "41 섬유 제조",
+   "ready": false
+  },
+  {
+   "id": "L07-41-02",
+   "title": "41 섬유 제조",
+   "ready": false
+  },
+  {
+   "id": "L07-42-01",
+   "title": "42 가구 제작",
+   "ready": false
+  },
+  {
+   "id": "L07-42-02",
+   "title": "42 가구 제작",
+   "ready": false
+  },
+  {
+   "id": "L07-43-01",
+   "title": "43 건축 시공",
+   "ready": false
+  },
+  {
+   "id": "L07-43-02",
+   "title": "43 건축 시공",
+   "ready": false
+  },
+  {
+   "id": "L07-44-01",
+   "title": "44 토목 시공",
+   "ready": false
+  },
+  {
+   "id": "L07-44-02",
+   "title": "44 토목 시공",
+   "ready": false
+  },
+  {
+   "id": "L07-45-01",
+   "title": "45 농작물 재배",
+   "ready": false
+  },
+  {
+   "id": "L07-45-02",
+   "title": "45 농작물 재배",
+   "ready": false
+  },
+  {
+   "id": "L07-46-01",
+   "title": "46 사육 관리",
+   "ready": false
+  },
+  {
+   "id": "L07-46-02",
+   "title": "46 사육 관리",
+   "ready": false
+  },
+  {
+   "id": "L07-47-01",
+   "title": "47 연안 어업·양식",
+   "ready": false
+  },
+  {
+   "id": "L07-47-02",
+   "title": "47 연안 어업·양식",
+   "ready": false
+  },
+  {
+   "id": "L07-48-01",
+   "title": "48 선체 건조",
+   "ready": false
+  },
+  {
+   "id": "L07-48-02",
+   "title": "48 선체 건조",
+   "ready": false
+  },
+  {
+   "id": "L07-49-01",
+   "title": "49 광물 자원 개발",
+   "ready": false
+  },
+  {
+   "id": "L07-49-02",
+   "title": "49 광물 자원 개발",
+   "ready": false
+  },
+  {
+   "id": "L07-50-01",
+   "title": "50 산림 자원 조성",
+   "ready": false
+  },
+  {
+   "id": "L07-50-02",
+   "title": "50 산림 자원 조성",
+   "ready": false
+  },
+  {
+   "id": "L07-51-01",
+   "title": "51 숙박 서비스",
+   "ready": false
+  },
+  {
+   "id": "L07-51-02",
+   "title": "51 숙박 서비스",
+   "ready": false
+  },
+  {
+   "id": "L07-52-01",
+   "title": "52 음식 조리",
+   "ready": false
+  },
+  {
+   "id": "L07-52-02",
+   "title": "52 음식 조리",
+   "ready": false
+  },
+  {
+   "id": "L08-53-01",
+   "title": "53 산업 안전 및 보건 표지",
+   "ready": false
+  },
+  {
+   "id": "L08-53-02",
+   "title": "53 산업 안전 및 보건 표지",
+   "ready": false
+  },
+  {
+   "id": "L08-54-01",
+   "title": "54 산업 안전 및 보건 수칙",
+   "ready": false
+  },
+  {
+   "id": "L08-54-02",
+   "title": "54 산업 안전 및 보건 수칙",
+   "ready": false
+  },
+  {
+   "id": "L08-55-01",
+   "title": "55 산업 안전 및 위생 장비",
+   "ready": false
+  },
+  {
+   "id": "L08-55-02",
+   "title": "55 산업 안전 및 위생 장비",
+   "ready": false
+  },
+  {
+   "id": "L08-56-01",
+   "title": "56 산업 재해 및 응급 처치",
+   "ready": false
+  },
+  {
+   "id": "L08-56-02",
+   "title": "56 산업 재해 및 응급 처치",
+   "ready": false
+  },
+  {
+   "id": "L08-57-01",
+   "title": "57 고용허가제",
+   "ready": false
+  },
+  {
+   "id": "L08-57-02",
+   "title": "57 고용허가제",
+   "ready": false
+  },
+  {
+   "id": "L09-58-01",
+   "title": "58 근로기준법",
+   "ready": false
+  },
+  {
+   "id": "L09-58-02",
+   "title": "58 근로기준법",
+   "ready": false
+  },
+  {
+   "id": "L09-59-01",
+   "title": "59 출입국관리법",
+   "ready": false
+  },
+  {
+   "id": "L09-59-02",
+   "title": "59 출입국관리법",
+   "ready": false
+  },
+  {
+   "id": "L09-60-01",
+   "title": "60 근로자 보험",
+   "ready": false
+  },
+  {
+   "id": "L09-60-02",
+   "title": "60 근로자 보험",
+   "ready": false
+  }
+ ]
+}
