@@ -39,3 +39,16 @@ document.addEventListener('click', function (e) {
 });
 // 글자·낱말이 바뀌면 반복을 멈춘다(옛 renderWriting 이 화면을 다시 그릴 때)
 (function () { var orig = window.renderWriting; window.renderWriting = function () { wrLoopStop(); return orig.apply(this, arguments); }; })();
+
+// [말문] 소리는 한 번에 하나만 — 쓰기 화면에서 새 소리가 나면 앞 소리를 멈춘다(글자·낱말·문장·자모가 겹치던 문제)
+(function () {
+  var play = HTMLMediaElement.prototype.play, live = [];
+  HTMLMediaElement.prototype.play = function () {
+    if (this.tagName === 'AUDIO' && this.volume > 0 && document.querySelector('.writing-overlay')) {
+      for (var i = 0; i < live.length; i++) if (live[i] !== this && !live[i].paused) live[i].pause();
+      live = live.filter(function (a) { return !a.ended; }).slice(-20);
+      if (live.indexOf(this) < 0) live.push(this);
+    }
+    return play.apply(this, arguments);
+  };
+})();

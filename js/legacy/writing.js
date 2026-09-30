@@ -136,8 +136,8 @@ function pressJamo(jamo) {
         if (charDone) {
           if (typeof wrWordAudio !== 'undefined' && wrWordAudio) { wrWordAudio.pause(); wrWordAudio = null; }
           if (ch.audio) { var charAudio = new Audio(ch.audio); charAudio.play().catch(function(){}); }
-          if (isLastWordChar) playQuizSound(true);
-        } else { playQuizSound(true, 0.3); playJamoAudio(jamo); }
+          /* [말문] 글자 소리와 겹쳐서 뺌: if (isLastWordChar) playQuizSound(true); */
+        } else { /* [말문] 삑과 겹쳐서 삑 뺌 */ playJamoAudio(jamo); }
       });
     });
     if (charDone) {
@@ -152,7 +152,7 @@ function pressJamo(jamo) {
       nextDiv.innerHTML = (chAudioPath ? '<button class="wr-char-next-btn wr-char-replay-btn" onclick="wrPlayCharAudio(\'' + escHtml(chAudioPath).replace(/'/g, "\\'") + '\')">🔊 ' + escHtml(ch.char) + '</button>' : '') + '<button class="wr-char-next-btn wr-char-advance-btn" onclick="wrAdvanceChar()">' + L('next_char','अर्को →') /* [말문] */ + '</button>';
       wrBody3.appendChild(nextDiv);
       if (ch.explanation_ne) { var explDiv = document.createElement('div'); explDiv.className = 'wr-explain'; explDiv.textContent = ch.explanation_ne; document.getElementById('wr-body').appendChild(explDiv); } }
-  } else { requestAnimationFrame(function(){ playJamoAudio(jamo); flashJamoBtn(jamo, false); playQuizSound(false); }); }
+  } else { requestAnimationFrame(function(){ /* [말문] 틀리면 삑만(자모 소리와 겹쳐서 뺌) */ flashJamoBtn(jamo, false); playQuizSound(false); }); }
 }
 
 function flashJamoBtn(jamo, correct) { var btns = document.querySelectorAll('.wr-kb-btn'); for (var i = 0; i < btns.length; i++) { if (btns[i].textContent === jamo) { var b = btns[i]; var c = correct ? 'correct-anim' : 'wrong-anim'; b.classList.add(c); (function(bb,cc) { setTimeout(function() { bb.classList.remove(cc); }, correct ? 500 : 400); })(b,c); break; } } }

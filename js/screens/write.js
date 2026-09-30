@@ -38,7 +38,9 @@ export default async function write(app, ep, id) {
   const prev = d.lines[li - 1], next = d.lines[li + 1];
 
   // 자판 소리 = 글자와 같은 목소리(리정혁): 모음은 그 모음 글자(ㅏ → 「아」) · 자음은 이름(ㄱ → 「기역」) · 아직 없으면 옛 자모 소리
-  const jamoSound = name => { const k = VOWEL[name] || CONS[name]; return k && charIdx[k] ? paths.char(charIdx[k]) : paths.jamo(name); };
+  // (09-30 투덜이: 남자 목소리 저음 → 여자 아나운서로 전부 교체 결정) 새 여자 목소리 세트가 들어올 때까지는 자판 40개를 한 목소리(옛 자모 · 여자)로 통일
+  const USE_CHAR_VOICE_FOR_KEYS = false;
+  const jamoSound = name => { const k = VOWEL[name] || CONS[name]; return USE_CHAR_VOICE_FOR_KEYS && k && charIdx[k] ? paths.char(charIdx[k]) : paths.jamo(name); };
   window.MALMUN_WR = { t, jamo: jamoSound, lineAudio: line.lineAudio ? paths.audio(ep, line.lineAudio) : null };
   window.wrStopAll?.();
   window.writingData = buildWriting(line, charIdx, wordIdx);
