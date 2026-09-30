@@ -34,6 +34,23 @@ def main():
         shutil.copy2(dst, os.path.join(APP, "media", "letters", sub, name))
         report.append((r["want"], name, r["active_db"], gain))
     print(len(report), "개 · 크기 조정 범위", min(g for *_, g in report), "~", max(g for *_, g in report), "dB")
+    # 2차: 자르고 한 줄로 바꾸면 잰 값이 조금 달라진다 → 사본을 다시 재서 0.3dB 넘게 벗어난 것만 한 번 더 맞춘다
+    from audit_letters import measure
+    fixed = 0
+    for r in rows:
+        sub = "j" if r["kind"] == "jamo" else "c"
+        name = os.path.basename(r["file"])
+        dst = os.path.join(OUT, sub, name)
+        g = round(TARGET - measure(dst)["active_db"], 1)
+        if abs(g) < 0.3:
+            continue
+        tmp = dst + ".tmp.mp3"
+        subprocess.run([FF, "-y", "-loglevel", "error", "-i", dst, "-af", f"volume={g}dB,alimiter=limit=0.89:level=false",
+                        "-ar", "44100", "-ac", "1", "-b:a", "128k", tmp], check=True)
+        os.replace(tmp, dst)
+        shutil.copy2(dst, os.path.join(APP, "media", "letters", sub, name))
+        fixed += 1
+    print("2차 맞춤", fixed, "개")
 
 
 if __name__ == "__main__":

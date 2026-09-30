@@ -15,6 +15,7 @@ function jamoOf(ch) {
 }
 
 const VOWEL = { a: "아", ae: "애", ya: "야", yae: "얘", eo: "어", e: "에", yeo: "여", ye: "예", o: "오", wa: "와", wae: "왜", oe: "외", yo: "요", u: "우", wo: "워", we: "웨", wi: "위", yu: "유", eu: "으", ui: "의", i: "이" };
+const CONS = { giyeok: "기역", ssang_giyeok: "쌍기역", nieun: "니은", digeut: "디귿", ssang_digeut: "쌍디귿", rieul: "리을", mieum: "미음", bieup: "비읍", ssang_bieup: "쌍비읍", siot: "시옷", ssang_siot: "쌍시옷", ieung: "이응", jieut: "지읒", ssang_jieut: "쌍지읒", chieut: "치읓", kieuk: "키읔", tieut: "티읕", pieup: "피읖", hieut: "히읗" };
 
 let wordsIndex;
 const words = () => (wordsIndex ||= fetch("data/words_index.json").then(r => r.json()).catch(() => ({})));
@@ -36,8 +37,8 @@ export default async function write(app, ep, id) {
   const line = d.lines[li];
   const prev = d.lines[li - 1], next = d.lines[li + 1];
 
-  // 모음 자판 소리 = 그 모음 글자 소리(ㅏ → 「아」 · 글자와 같은 목소리) · 없으면 옛 자모 소리
-  const jamoSound = name => (VOWEL[name] && charIdx[VOWEL[name]] ? paths.char(charIdx[VOWEL[name]]) : paths.jamo(name));
+  // 자판 소리 = 글자와 같은 목소리(리정혁): 모음은 그 모음 글자(ㅏ → 「아」) · 자음은 이름(ㄱ → 「기역」) · 아직 없으면 옛 자모 소리
+  const jamoSound = name => { const k = VOWEL[name] || CONS[name]; return k && charIdx[k] ? paths.char(charIdx[k]) : paths.jamo(name); };
   window.MALMUN_WR = { t, jamo: jamoSound, lineAudio: line.lineAudio ? paths.audio(ep, line.lineAudio) : null };
   window.wrStopAll?.();
   window.writingData = buildWriting(line, charIdx, wordIdx);
