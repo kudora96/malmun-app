@@ -47,8 +47,9 @@ def episode(ep):
 
 
 def chars():
+    from build_chars_index import source  # 옛 글자 폴더 + 본부 새 글자 폴더(05_audio/_chars)
     idx = json.load(open(os.path.join(APP, "data", "chars_index.json"), encoding="utf-8"))
-    return [(f"chars/{f}", os.path.join(OLD, "audio", "chars", f), "audio/mpeg") for f in sorted(set(idx.values()))]
+    return [(f"chars/{f}", source(f), "audio/mpeg") for f in sorted(set(idx.values()))]
 
 
 def jamo():
