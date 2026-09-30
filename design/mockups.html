@@ -83,6 +83,30 @@ body{background:var(--pg-bg);color:var(--pg-fg);font:15px/1.6 var(--f-ui);paddin
 .prog i{display:block;height:100%}
 .times{display:flex;justify-content:space-between;font-size:10.5px;font-variant-numeric:tabular-nums}
 
+/* 쓰기 */
+.write .sent{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:flex-end;flex:none}
+.write .w{display:inline-flex;gap:1px;padding:2px 4px;border-radius:8px}
+.write .c{position:relative;font-size:20px;font-weight:700;padding:2px 3px;border-radius:6px;cursor:pointer}
+.write .c.loop::after{content:"";position:absolute;left:50%;top:-7px;width:8px;height:8px;margin-left:-4px;border-radius:50%;background:currentColor;animation:pulse 1s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.25;transform:scale(.6)}}
+@media (prefers-reduced-motion:reduce){.write .c.loop::after{animation:none}}
+.write .loopnote{font-size:11px;display:flex;align-items:center;gap:6px;flex:none}
+.write .stage{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:center;flex:none}
+.write .box{width:92px;height:92px;position:relative;display:grid;place-items:center}
+.write .box .target{font-size:66px;line-height:1;font-weight:400;opacity:.16}
+.write .box .typed{position:absolute;inset:0;display:grid;place-items:center;font-size:66px;line-height:1;font-weight:700}
+.write .meta{display:grid;gap:4px;min-width:0}
+.write .meta .word{font-size:17px;font-weight:700}
+.write .meta .word b{text-decoration:underline;text-underline-offset:4px}
+.write .meta .rom{font-size:11px;opacity:.7}
+.write .slots{display:flex;gap:6px}
+.write .slot{width:30px;height:32px;display:grid;place-items:center;font-size:16px;font-weight:700;border-radius:7px}
+.write .kb{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;flex:1;align-content:start}
+.write .kb .lab{grid-column:1/-1;font-size:10px;letter-spacing:.06em;opacity:.7;margin-top:2px}
+.write .kb button{height:30px;border-radius:7px;font-size:15px!important;font-weight:600}
+.write .wbtns{display:flex;gap:6px;flex:none}
+.write .wbtns button{flex:1;padding:8px 4px;border-radius:9px;font-size:11.5px;font-weight:600}
+
 /* ───────── A · 궁궐(단청) ───────── */
 .A{--a-bg:#f1f4ee;--a-ink:#1c2a26;--a-cheong:#1e6a5c;--a-ju:#c43d2b;--a-hwang:#d6a23c;--a-mute:#6c7a74;--a-card:#ffffff;
    background:var(--a-bg);color:var(--a-ink);font-family:var(--f-ui)}
@@ -139,6 +163,22 @@ body{background:var(--pg-bg);color:var(--pg-fg);font:15px/1.6 var(--f-ui);paddin
 .A .player{padding:10px 16px 16px;border-top:1px solid #dfe5de;display:grid;gap:6px}
 .A .player .prog{background:#e3e9e3}.A .player .prog i{width:48%;background:var(--a-cheong)}
 .A .times{color:var(--a-mute)}
+.A .write .sent{padding:4px 16px 8px}
+.A .w{background:var(--a-card);border:1px solid #dbe3db}
+.A .w.on{border-color:var(--a-cheong)}
+.A .c.loop{background:var(--a-ju);color:#fff}
+.A .write .loopnote{padding:0 16px 8px;color:var(--a-ju)}
+.A .write .stage{margin:0 14px;padding:12px;background:var(--a-card);border-radius:14px;border:1px solid #dbe3db}
+.A .box{border:1.5px dashed #b9c9bf;border-radius:10px}
+.A .box .typed{color:var(--a-cheong)}
+.A .meta .mean{color:var(--a-cheong);font-size:12px}
+.A .slot{background:#eef3ee;color:#9aaba3}.A .slot.filled{background:var(--a-cheong);color:#fff}.A .slot.current{border:2px solid var(--a-ju);color:var(--a-ink);background:#fff}
+.A .write .kb{padding:10px 14px 4px}
+.A .kb button{background:var(--a-card)!important;border:1px solid #dbe3db!important;color:var(--a-cheong)!important}
+.A .kb button.v{color:var(--a-ju)!important}
+.A .write .wbtns{padding:6px 14px 14px}
+.A .wbtns button{background:#e2e8e1!important;color:var(--a-ink)!important}
+
 
 /* ───────── B · 칠판 ───────── */
 .B{--b-bg:#1d3530;--b-bg2:#244039;--b-chalk:#ecebe4;--b-mute:#9fb3ac;--b-yel:#f2d27a;--b-pink:#f29c8f;--b-blue:#9cc9f0;--b-wood:#8a6443;
@@ -200,6 +240,23 @@ body{background:var(--pg-bg);color:var(--pg-fg);font:15px/1.6 var(--f-ui);paddin
 .B .player{padding:10px 16px 18px;background:var(--b-bg2);display:grid;gap:6px}
 .B .player .prog{background:rgba(255,255,255,.14)}.B .player .prog i{width:48%;background:var(--b-yel)}
 .B .times{color:var(--b-mute)}
+.B .write .sent{padding:4px 16px 8px}
+.B .w{border-bottom:1px dashed rgba(236,235,228,.3);border-radius:0}
+.B .w.on{border-bottom:2px solid var(--b-yel)}
+.B .c.loop{color:var(--b-yel);background:rgba(242,210,122,.12)}
+.B .write .loopnote{padding:0 16px 8px;color:var(--b-yel);font-family:"Gaegu",cursive;font-size:15px}
+.B .write .stage{margin:0 16px;padding:6px 0 12px;border-bottom:1px dashed rgba(236,235,228,.25)}
+.B .box{border:2px solid rgba(236,235,228,.5);border-radius:4px}
+.B .box .target{opacity:.12}
+.B .box .typed{color:var(--b-chalk);text-shadow:0 0 1px rgba(255,255,255,.6)}
+.B .meta .mean{color:var(--b-yel);font-size:12px}
+.B .slot{border:1px dashed rgba(236,235,228,.35);color:#7f958e}.B .slot.filled{border:1px solid var(--b-chalk);color:var(--b-chalk)}.B .slot.current{border:2px solid var(--b-yel);color:var(--b-yel)}
+.B .write .kb{padding:10px 16px 4px}
+.B .kb button{background:var(--b-bg2)!important;color:var(--b-chalk)!important}
+.B .kb button.v{color:var(--b-pink)!important}
+.B .write .wbtns{padding:8px 16px 16px;background:var(--b-bg2)}
+.B .wbtns button{border:1px solid rgba(236,235,228,.3)!important;color:var(--b-chalk)!important}
+
 
 /* ───────── C · 말풍선 ───────── */
 .C{--c-bg:#ffffff;--c-soft:#f3f6fa;--c-ink:#18202b;--c-mute:#6b7685;--c-teacher:#f0a53a;--c-kong:#e5484d;--c-dubu:#1aa6c9;--c-main:#3b5bdb;
@@ -257,18 +314,35 @@ body{background:var(--pg-bg);color:var(--pg-fg);font:15px/1.6 var(--f-ui);paddin
 .C .player{margin:0 12px 14px;padding:10px 12px;border-radius:18px;background:var(--c-ink);color:#fff;display:grid;gap:6px}
 .C .player .prog{background:rgba(255,255,255,.2)}.C .player .prog i{width:48%;background:var(--c-teacher)}
 .C .times{opacity:.7}
+.C .write .sent{padding:4px 14px 8px}
+.C .w{background:var(--c-soft);border-radius:14px}
+.C .w.on{background:#e7ecff}
+.C .c.loop{background:var(--c-main);color:#fff;border-radius:10px}
+.C .write .loopnote{margin:0 14px 8px;padding:6px 10px;border-radius:999px;background:#e7ecff;color:var(--c-main);align-self:flex-start}
+.C .write .stage{margin:0 14px;padding:12px;background:#fff4e3;border-radius:20px}
+.C .box{background:#fff;border-radius:18px}
+.C .box .typed{color:var(--c-main);font-family:"Jua",sans-serif;font-weight:400}
+.C .meta .word{font-family:"Jua",sans-serif;font-weight:400;font-size:19px}
+.C .meta .mean{color:var(--c-main);font-size:12px}
+.C .slot{background:#fff;color:#b3bcc8;border-radius:10px}.C .slot.filled{background:var(--c-main);color:#fff}.C .slot.current{box-shadow:0 0 0 2px var(--c-teacher);color:var(--c-ink)}
+.C .write .kb{padding:10px 12px 4px}
+.C .kb button{background:var(--c-soft)!important;color:var(--c-ink)!important;border-radius:10px}
+.C .kb button.v{background:#fff4e3!important}
+.C .write .wbtns{padding:6px 12px 14px}
+.C .wbtns button{background:var(--c-ink)!important;color:#fff!important;border-radius:14px}
+
 </style>
 </head>
 <body>
 <div class="wrap">
   <header class="intro">
     <h1>말문 앱 디자인 시안 — 세 가지 분위기</h1>
-    <p>세 안 모두 같은 네 화면(언어 고르기 · 편 목록 · 학습 · 설명)을 세종 편 실제 대사와 네팔어 번역으로 그렸습니다. 폰 화면은 옆으로 밀어서 볼 수 있어요.</p>
+    <p>세 안 모두 같은 다섯 화면(언어 고르기 · 편 목록 · 학습 · 설명 · 쓰기)을 세종 편 실제 대사와 네팔어 번역으로 그렸습니다. 폰 화면은 옆으로 밀어서 볼 수 있어요.</p>
     <p>버튼·제목 글씨는 보기 편하게 한국어로 적었습니다. 실제 앱에서는 이 글씨가 학습자 언어(예: 네팔어)로 나옵니다.</p>
     <p class="how">고르는 법: <b>A · B · C</b> 가운데 하나를 고르거나, <b>섞어도</b> 됩니다(예: 「목록은 A, 학습 화면은 C」). 마음에 안 드는 점도 한마디씩 주시면 다음 판에 반영합니다.</p>
   </header>
   <div id="variants" class="wrap" style="gap:56px"></div>
-  <p class="foot">그림: 세종 편 완성본(L01-00-01_final.mp4)에서 뽑은 장면 · 대사 15줄 중 5번째 줄(선생님 「글자는 약속이에요…」)을 재생 중인 상태 · 설명은 네팔어 판(현재 동결본) 문장 그대로.</p>
+  <p class="foot">그림: 세종 편 완성본(L01-00-01_final.mp4)에서 뽑은 장면 · 대사 15줄 중 5번째 줄(선생님 「글자는 약속이에요…」)을 재생 중인 상태 · 설명은 네팔어 판(현재 동결본) 문장 그대로 · 쓰기 화면은 옛 앱 쓰기 연습을 형태 그대로 옮긴 것(자모 칸 + 자모 자판) — 문장 위 글자를 누르면 그 글자 소리가 계속 반복되고, 다시 누르면 멈춥니다.</p>
 </div>
 
 <script>
@@ -332,6 +406,18 @@ function sLearn(v){
    <ol class="lines">${LINES.slice(from,7).map((l,k)=>{const i=k+from;return `<li class="line sp-${SP[l[0]]} ${i===CUR?"cur":""}"><span class="who">${l[0]}</span><p class="ko">${esc(l[1])}</p><p class="tr">${esc(l[2])}</p></li>`}).join("")}</ol>
    <div class="ctrl"><button title="반복">${I.rep}</button><button>${I.prev}</button><button class="play">${I.pause}</button><button>${I.next}</button><button class="spd">0.75×</button></div></div>`;
 }
+function sWrite(v){
+  const kb=(lab,arr,cls)=>`<span class="lab">${lab}</span>`+arr.map(j=>`<button class="${cls}">${j}</button>`).join("");
+  return `<div class="scr write">${v==="A"?'<div class="dan"></div>':""}
+   <div class="bar"><button>${I.back}</button><div class="grow"><div class="t" style="font-size:${v==="B"?"22px":"16px"}">쓰기</div><div class="sub">1 / 15 줄 · 선생님</div></div></div>
+   <div class="sent"><span class="w on"><span class="c loop">어</span><span class="c">서</span></span><span class="w"><span class="c">오</span><span class="c">세</span><span class="c">요</span></span></div>
+   <div class="loopnote">${I.rep.replace('class="ico"','class="ico" style="width:14px;height:14px"')}<span>「어」 소리 반복 중 · 다시 누르면 멈춤</span></div>
+   <div class="stage"><div class="box"><span class="target">어</span><span class="typed">ㅇ</span></div>
+     <div class="meta"><div class="word"><b>어</b>서</div><div class="rom">eo-seo</div><div class="mean tr">छिटो</div>
+       <div class="slots"><span class="slot filled">ㅇ</span><span class="slot current">ㅓ</span></div></div></div>
+   <div class="kb">${kb("자음",["ㄱ","ㄴ","ㄷ","ㄹ","ㅁ","ㅂ","ㅅ","ㅇ","ㅈ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"],"")}${kb("쌍자음",["ㄲ","ㄸ","ㅃ","ㅆ","ㅉ"],"")}${kb("모음",["ㅏ","ㅑ","ㅓ","ㅕ","ㅗ","ㅛ","ㅜ","ㅠ","ㅡ","ㅣ"],"v")}</div>
+   <div class="wbtns"><button>단어 듣기</button><button>문장 듣기</button><button>자동 완성</button></div></div>`;
+}
 function sExp(v){
   return `<div class="scr exp">${v==="A"?'<div class="dan"></div>':""}
    <div class="bar"><button>${I.back}</button><div class="grow"><div class="t" style="font-size:${v==="B"?"22px":"16px"}">설명</div><div class="sub">5 / 15 줄 · 선생님</div></div></div>
@@ -352,7 +438,7 @@ document.getElementById("variants").innerHTML=VARS.map(v=>`
   <div class="vhead"><span class="letter">${v.k}</span><h2>${v.name}</h2><p class="mood">${v.mood}</p>
    <ul>${v.plus.map(x=>`<li>${x}</li>`).join("")}${v.minus.map(x=>`<li class="minus">${x}</li>`).join("")}</ul></div>
   <div class="rail"><div class="phones">
-   ${[["언어 고르기",sLang],["편 목록",sList],["학습 (대사)",sLearn],["설명",sExp]].map(([c,f])=>`<figure class="shot" style="margin:0"><div class="ph ${v.k}">${f(v.k)}</div><figcaption>${c}</figcaption></figure>`).join("")}
+   ${[["언어 고르기",sLang],["편 목록",sList],["학습 (대사)",sLearn],["설명",sExp],["쓰기 (글자 반복 듣기)",sWrite]].map(([c,f])=>`<figure class="shot" style="margin:0"><div class="ph ${v.k}">${f(v.k)}</div><figcaption>${c}</figcaption></figure>`).join("")}
   </div></div>
  </section>`).join("");
 // 재생 중인 줄을 목록 가운데로
