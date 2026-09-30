@@ -9,6 +9,7 @@ export const paths = {
   video: ep => `${MEDIA}/video/${ep}.mp4`,
   poster: ep => `img/${ep}.jpg`,
   audio: (ep, file) => `${MEDIA}/audio/${ep}/${file}`,
-  char: file => `${MEDIA}/chars/${file}`,
-  jamo: name => `${MEDIA}/jamo/${name}.mp3`,
+  // 글자·자모 = 크기를 맞춘 사본(tools/normalize_letters.py → letters/c · letters/j)
+  char: file => `${MEDIA}/letters/c/${file}`,
+  jamo: name => `${MEDIA}/letters/j/${name}.mp3`,
 };

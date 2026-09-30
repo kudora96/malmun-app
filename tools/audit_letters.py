@@ -16,6 +16,8 @@ OUT = os.path.join(APP, "tools", "_audit")
 WHISPER_DIR = os.path.join(os.environ.get("APPDATA", ""), "Subtitle Edit", "Whisper", "Purfview-Whisper-Faster")
 WHISPER_EXE = os.path.join(WHISPER_DIR, "faster-whisper-xxl.exe")
 
+JAMO_DIR = os.environ.get("JAMO_DIR", "media/jamo")
+CHAR_DIR = os.environ.get("CHAR_DIR", "media/chars")
 JAMO = {"a": "아", "ae": "애", "ya": "야", "yae": "얘", "eo": "어", "e": "에", "yeo": "여", "ye": "예", "o": "오", "wa": "와",
         "wae": "왜", "oe": "외", "yo": "요", "u": "우", "wo": "워", "we": "웨", "wi": "위", "yu": "유", "eu": "으", "ui": "의", "i": "이",
         "giyeok": "기역", "ssang_giyeok": "쌍기역", "nieun": "니은", "digeut": "디귿", "ssang_digeut": "쌍디귿", "rieul": "리을",
@@ -25,8 +27,8 @@ JAMO = {"a": "아", "ae": "애", "ya": "야", "yae": "얘", "eo": "어", "e": "�
 
 def expected():
     idx = json.load(open(os.path.join(APP, "data", "chars_index.json"), encoding="utf-8"))
-    items = [("jamo", f"media/jamo/{k}.mp3", v) for k, v in JAMO.items()]
-    items += [("char", f"media/chars/{f}", ch) for ch, f in idx.items()]
+    items = [("jamo", f"{JAMO_DIR}/{k}.mp3", v) for k, v in JAMO.items()]
+    items += [("char", f"{CHAR_DIR}/{f}", ch) for ch, f in idx.items()]
     return [(kind, os.path.join(APP, p), want) for kind, p, want in items if os.path.exists(os.path.join(APP, p))]
 
 

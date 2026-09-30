@@ -6,7 +6,7 @@
   jamo/{name}.mp3           ← 옛 앱 audio/jamo
 
 이미 같은 크기로 올라가 있으면 건너뛴다. 8개씩 동시에 올린다.
-실행: python tools/upload_media.py L01-00-01 [--chars] [--jamo]   (먼저 npx wrangler login)
+실행: python tools/upload_media.py L01-00-01 [--chars] [--jamo] [--letters]   (먼저 npx wrangler login)
 """
 import json, os, subprocess, sys, urllib.request
 from concurrent.futures import ThreadPoolExecutor
@@ -57,10 +57,17 @@ def jamo():
     return [(f"jamo/{f}", os.path.join(d, f), "audio/mpeg") for f in sorted(os.listdir(d)) if f.endswith(".mp3")]
 
 
+def letters():
+    """크기를 맞춘 글자·자모 사본(tools/normalize_letters.py) → letters/c · letters/j"""
+    from normalize_letters import OUT
+    return [(f"letters/{sub}/{f}", os.path.join(OUT, sub, f), "audio/mpeg")
+            for sub in ("c", "j") for f in sorted(os.listdir(os.path.join(OUT, sub))) if f.endswith(".mp3")]
+
+
 if __name__ == "__main__":
     jobs = []
     for a in sys.argv[1:]:
-        jobs += chars() if a == "--chars" else jamo() if a == "--jamo" else episode(a)
+        jobs += chars() if a == "--chars" else jamo() if a == "--jamo" else letters() if a == "--letters" else episode(a)
     bad = 0
     with ThreadPoolExecutor(8) as ex:
         for line in ex.map(put, jobs):

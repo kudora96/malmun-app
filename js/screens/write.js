@@ -14,6 +14,8 @@ function jamoOf(ch) {
   return [CHO[Math.floor(c / 588)], JUNG[Math.floor((c % 588) / 28)], ...JONG[c % 28]];
 }
 
+const VOWEL = { a: "아", ae: "애", ya: "야", yae: "얘", eo: "어", e: "에", yeo: "여", ye: "예", o: "오", wa: "와", wae: "왜", oe: "외", yo: "요", u: "우", wo: "워", we: "웨", wi: "위", yu: "유", eu: "으", ui: "의", i: "이" };
+
 let wordsIndex;
 const words = () => (wordsIndex ||= fetch("data/words_index.json").then(r => r.json()).catch(() => ({})));
 
@@ -34,7 +36,9 @@ export default async function write(app, ep, id) {
   const line = d.lines[li];
   const prev = d.lines[li - 1], next = d.lines[li + 1];
 
-  window.MALMUN_WR = { t, jamo: name => paths.jamo(name), lineAudio: line.lineAudio ? paths.audio(ep, line.lineAudio) : null };
+  // 모음 자판 소리 = 그 모음 글자 소리(ㅏ → 「아」 · 글자와 같은 목소리) · 없으면 옛 자모 소리
+  const jamoSound = name => (VOWEL[name] && charIdx[VOWEL[name]] ? paths.char(charIdx[VOWEL[name]]) : paths.jamo(name));
+  window.MALMUN_WR = { t, jamo: jamoSound, lineAudio: line.lineAudio ? paths.audio(ep, line.lineAudio) : null };
   window.wrStopAll?.();
   window.writingData = buildWriting(line, charIdx, wordIdx);
   window.wrWritingSubId = line.id;
