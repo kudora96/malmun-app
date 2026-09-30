@@ -8,7 +8,7 @@ import { I } from "../ui.js";
 
 const pref = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } };
 
-export default async function explain(app, ep, id) {
+export default async function explain(app, ep, id, view) {
   const d = await episode(ep, lang);
   const idx = Math.max(0, d.lines.findIndex(l => String(l.id) === String(id)));
   const l = d.lines[idx];
@@ -18,7 +18,7 @@ export default async function explain(app, ep, id) {
   const seq = new Sequence();
 
   app.innerHTML = `<section class="scr explain ${showRom ? "" : "hide-rom"}">
-    <div class="bar"><a class="iconbtn" href="#/learn/${ep}" aria-label="${esc(t("back"))}">${I.back}</a>
+    <div class="bar"><a class="iconbtn" href="#/learn/${ep}/${l.id}" aria-label="${esc(t("back"))}">${I.back}</a>
       <div class="grow"><div class="t">${esc(t("explain"))}</div><div class="sub">${idx + 1} / ${d.lines.length} · <span class="ko" lang="ko">${esc(l.speaker)}</span></div></div>
       <a class="chip" href="#/write/${ep}/${l.id}">${esc(t("write"))}</a></div>
     <div class="quote">
@@ -27,11 +27,11 @@ export default async function explain(app, ep, id) {
       ${l.tr ? `<p class="tr">${esc(l.tr)}</p>` : ""}
       <div class="toggles">
         ${cards.length ? `<button data-act="rom" aria-pressed="${showRom}">${esc(t("gloss_toggle"))}</button>` : ""}
-        ${hasTr ? `<button data-act="tr" aria-pressed="false">${esc(langName(lang))}</button>` : ""}
+        ${hasTr ? `<button data-act="tr" aria-pressed="${view === "tr"}">${esc(langName(lang))}</button>` : ""}
       </div>
     </div>
     <div class="paras">${l.krParas.map((p, i) => `<p data-p="${i}">${renderText(p)}</p>`).join("") || `<p>${esc(t("no_explain"))}</p>`}
-      <div class="learner" hidden><h3>${esc(langName(lang))}</h3>${l.trParas.map(p => `<p>${renderText(p)}</p>`).join("")}</div></div>
+      <div class="learner" ${view === "tr" ? "" : "hidden"}><h3>${esc(langName(lang))}</h3>${l.trParas.map(p => `<p>${renderText(p)}</p>`).join("")}</div></div>
     <div class="player">
       <div class="prog"><i style="width:0%"></i></div>
       <div class="row">

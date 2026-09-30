@@ -25,6 +25,34 @@ def source(file):
     return None
 
 
+def build_words():
+    """낱말 음성 색인 data/words_index.json — {낱말: "words_common/x.mp3" | "chars/x.mp3"} (옛 쓰기 데이터에 적힌 것만)
+    로컬 미리보기용으로 media/words_common/ 에 복사한다."""
+    w = {}
+    for f in glob.glob(os.path.join(OLD, "data", "**", "*.json"), recursive=True):
+        try:
+            d = json.load(open(f, encoding="utf-8"))
+        except Exception:
+            continue
+        if not isinstance(d, dict):
+            continue
+        for s in d.get("writing") or []:
+            for wd in s.get("words", []):
+                a = (wd.get("audio") or "").split("?")[0]
+                if wd.get("word") and a.startswith("audio/") and os.path.exists(os.path.join(OLD, a)):
+                    w[wd["word"]] = a[len("audio/"):]
+    with open(os.path.join(APP, "data", "words_index.json"), "w", encoding="utf-8") as f:
+        json.dump(dict(sorted(w.items())), f, ensure_ascii=False, indent=0)
+    local = os.path.join(APP, "media", "words_common")
+    os.makedirs(local, exist_ok=True)
+    for rel in set(w.values()):
+        if rel.startswith("words_common/"):
+            src, dst = os.path.join(OLD, "audio", rel), os.path.join(APP, "media", rel)
+            if not os.path.exists(dst):
+                shutil.copy2(src, dst)
+    print(len(w), "낱말")
+
+
 def build():
     m = {}
     for f in glob.glob(os.path.join(OLD, "data", "**", "*.json"), recursive=True):
@@ -41,6 +69,7 @@ def build():
                     if a and ch:
                         m[ch] = a.split("/")[-1].split("?")[0]
     old_n = len(m)
+    build_words()
     new = os.path.join(NEW_DIR, "chars_new.json")
     if os.path.exists(new):
         m.update(json.load(open(new, encoding="utf-8")))
