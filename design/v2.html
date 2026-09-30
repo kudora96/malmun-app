@@ -1,0 +1,483 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>말문 앱 시안 v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Gaegu:wght@400;700&family=Jua&family=Noto+Sans+KR:wght@400;500;700&family=Noto+Sans+Devanagari:wght@400;500;600&family=Noto+Sans+Bengali:wght@400;500&display=swap">
+<style>
+/* 레이아웃: 시안 한 안 = 한 줄(설명 + 폰 4대 가로 스크롤) · 세 안을 위아래로 */
+:root{
+  --pg-bg:#f4f5f3; --pg-fg:#1b1f1d; --pg-mute:#5d6661; --pg-line:#d8dcd8; --pg-card:#ffffff; --pg-accent:#1e6a5c;
+  --f-ui:"Noto Sans KR","Noto Sans Devanagari","Noto Sans Bengali",system-ui,sans-serif;
+  --f-tr:"Noto Sans Devanagari","Noto Sans Bengali","Noto Sans KR",system-ui,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--pg-bg:#141816;--pg-fg:#e7ebe8;--pg-mute:#9aa49f;--pg-line:#2c3431;--pg-card:#1c2220;--pg-accent:#6cc2ad;color-scheme:dark}}
+:root[data-theme="dark"]{--pg-bg:#141816;--pg-fg:#e7ebe8;--pg-mute:#9aa49f;--pg-line:#2c3431;--pg-card:#1c2220;--pg-accent:#6cc2ad;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--pg-bg);color:var(--pg-fg);font:15px/1.6 var(--f-ui);padding:32px 20px 64px}
+.wrap{max-width:1320px;margin:0 auto;display:grid;gap:56px}
+.intro{max-width:720px;display:grid;gap:10px}
+.intro h1{font-size:28px;line-height:1.25;margin:0;text-wrap:balance}
+.intro p{margin:0;color:var(--pg-mute)}
+.intro .how{background:var(--pg-card);border:1px solid var(--pg-line);border-radius:10px;padding:14px 16px;color:var(--pg-fg)}
+.intro .how b{color:var(--pg-accent)}
+.variant{display:grid;gap:18px}
+.vhead{display:grid;grid-template-columns:auto 1fr;gap:4px 16px;align-items:baseline;max-width:980px}
+.vhead .letter{font-size:40px;font-weight:700;line-height:1;color:var(--pg-accent);grid-row:span 3}
+.vhead h2{margin:0;font-size:21px}
+.vhead .mood{margin:0;color:var(--pg-mute)}
+.vhead ul{margin:4px 0 0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13.5px}
+.vhead li::before{content:"· ";color:var(--pg-mute)}
+.vhead li.minus{color:var(--pg-mute)}
+.rail{overflow-x:auto;padding-bottom:8px}
+.phones{display:flex;gap:22px;width:max-content}
+.shot{display:grid;gap:8px;justify-items:center}
+.shot figcaption{font-size:13px;color:var(--pg-mute)}
+.foot{color:var(--pg-mute);font-size:13.5px;max-width:720px}
+
+/* ───────── 폰 공통 뼈대 ───────── */
+.ph{width:288px;height:600px;border-radius:30px;overflow:hidden;position:relative;border:6px solid #0d0f0e;box-shadow:0 10px 30px rgba(0,0,0,.18)}
+.scr{position:absolute;inset:0;display:flex;flex-direction:column;overflow:hidden}
+.ph button{font:inherit;border:0;background:none;color:inherit;cursor:pointer}
+.ico{width:20px;height:20px;display:block}
+.tr{font-family:var(--f-tr)}
+/* 언어 */
+.lang .langs{list-style:none;margin:0;padding:0;overflow:hidden;flex:1}
+.lang .langs li{display:flex;justify-content:space-between;align-items:center}
+.lang .langs li small{opacity:.6;font-size:11px}
+/* 목록 */
+.list .eps{list-style:none;margin:0;padding:0;overflow:hidden;flex:1}
+.list .eps li{display:grid;grid-template-columns:34px 1fr auto;align-items:center;gap:8px}
+.list .eps .n{font-variant-numeric:tabular-nums}
+.list .eps .st{font-size:11px}
+/* 학습 */
+.learn .video{position:relative;flex:none}
+.learn .video img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover}
+.learn .vbar{position:absolute;left:0;right:0;bottom:0;height:3px;background:rgba(255,255,255,.3)}
+.learn .vbar i{display:block;height:100%;width:27%}
+.learn .lines{list-style:none;margin:0;padding:0;flex:1;overflow:hidden;position:relative}
+.learn .who,.exp .who{font-size:11px;font-weight:700}
+.learn .ko{margin:0}
+.learn .tr{margin:0}
+.ctrl{display:flex;justify-content:space-around;align-items:center;flex:none}
+.ctrl .play{display:grid;place-items:center}
+.ctrl .spd{font-size:13px;font-weight:700;font-variant-numeric:tabular-nums}
+.mode{display:flex;flex:none}
+.mode button{flex:1}
+/* 설명 */
+.exp .glosses{display:flex;flex-wrap:wrap}
+.exp .g{display:grid;justify-items:center;text-align:center}
+.exp .g .rom{font-size:9.5px;opacity:.7;letter-spacing:.02em}
+.exp .g .mean{font-family:var(--f-tr);font-size:10.5px}
+.exp .paras{flex:1;overflow:hidden;position:relative}
+.exp .paras p{margin:0;font-family:var(--f-tr)}
+.exp .gl{font-size:.82em;opacity:.65}
+.bar{display:flex;align-items:center;gap:10px;flex:none}
+.bar .grow{flex:1;min-width:0}
+.prog{height:4px;border-radius:2px;overflow:hidden}
+.prog i{display:block;height:100%}
+.times{display:flex;justify-content:space-between;font-size:10.5px;font-variant-numeric:tabular-nums}
+
+/* 쓰기 */
+.write .sent{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:flex-end;flex:none}
+.write .w{display:inline-flex;gap:1px;padding:2px 4px;border-radius:8px}
+.write .c{position:relative;font-size:20px;font-weight:700;padding:2px 3px;border-radius:6px;cursor:pointer}
+.write .c.loop::after{content:"";position:absolute;left:50%;top:-7px;width:8px;height:8px;margin-left:-4px;border-radius:50%;background:currentColor;animation:pulse 1s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.25;transform:scale(.6)}}
+@media (prefers-reduced-motion:reduce){.write .c.loop::after{animation:none}}
+.write .loopnote{font-size:11px;display:flex;align-items:center;gap:6px;flex:none}
+.write .stage{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:center;flex:none}
+.write .box{width:92px;height:92px;position:relative;display:grid;place-items:center}
+.write .box .target{font-size:66px;line-height:1;font-weight:400;opacity:.16}
+.write .box .typed{position:absolute;inset:0;display:grid;place-items:center;font-size:66px;line-height:1;font-weight:700}
+.write .meta{display:grid;gap:4px;min-width:0}
+.write .meta .word{font-size:17px;font-weight:700}
+.write .meta .word b{text-decoration:underline;text-underline-offset:4px}
+.write .meta .rom{font-size:11px;opacity:.7}
+.write .slots{display:flex;gap:6px}
+.write .slot{width:30px;height:32px;display:grid;place-items:center;font-size:16px;font-weight:700;border-radius:7px}
+.write .kb{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;flex:1;align-content:start}
+.write .kb .lab{grid-column:1/-1;font-size:10px;letter-spacing:.06em;opacity:.7;margin-top:2px}
+.write .kb button{height:30px;border-radius:7px;font-size:15px!important;font-weight:600}
+.write .wbtns{display:flex;gap:6px;flex:none}
+.write .wbtns button{flex:1;padding:8px 4px;border-radius:9px;font-size:11.5px;font-weight:600}
+
+/* ───────── A · 궁궐(단청) ───────── */
+.A{--a-bg:#f1f4ee;--a-ink:#1c2a26;--a-cheong:#1e6a5c;--a-ju:#c43d2b;--a-hwang:#d6a23c;--a-mute:#6c7a74;--a-card:#ffffff;
+   background:var(--a-bg);color:var(--a-ink);font-family:var(--f-ui)}
+.A .dan{height:10px;flex:none;background:
+   repeating-linear-gradient(90deg,var(--a-cheong) 0 14px,var(--a-hwang) 14px 18px,var(--a-ju) 18px 30px,var(--a-hwang) 30px 34px,#2c4a8a 34px 46px,var(--a-hwang) 46px 50px)}
+.A .brand{padding:34px 22px 8px}
+.A .logo{font-family:"Gowun Batang",serif;font-size:46px;font-weight:700;line-height:1;color:var(--a-cheong)}
+.A .tag{display:block;margin-top:6px;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--a-mute)}
+.A .detect{margin:12px 22px 10px;font-size:12px;color:var(--a-mute)}
+.A .detect b{color:var(--a-ink)}
+.A .langs{padding:0 14px}
+.A .langs li{padding:9px 10px;border-bottom:1px solid #dfe5de;font-size:15px}
+.A .langs li.sel{background:var(--a-card);border:1.5px solid var(--a-cheong);border-radius:10px;font-weight:600}
+.A .langs li.sel::after{content:"";width:10px;height:10px;border-radius:50%;background:var(--a-ju)}
+.A .cta{margin:12px 16px 18px;padding:13px;border-radius:12px;background:var(--a-cheong)!important;color:#fff!important;font-weight:700!important;font-size:15px}
+.A .bar{padding:14px 16px 10px}
+.A .bar .t{font-family:"Gowun Batang",serif;font-size:21px;font-weight:700}
+.A .bar .sub{font-size:11.5px;color:var(--a-mute)}
+.A .hero{margin:0 14px 12px;background:var(--a-card);border-radius:14px;overflow:hidden;border:1px solid #dfe5de;flex:none}
+.A .hero img{display:block;width:100%;aspect-ratio:16/8;object-fit:cover}
+.A .hero .body{padding:10px 12px 12px;display:grid;gap:6px}
+.A .hero .ttl{font-weight:700;font-size:15px}
+.A .hero .meta{font-size:11.5px;color:var(--a-mute)}
+.A .hero .prog{background:#e3e9e3}.A .hero .prog i{width:40%;background:var(--a-ju)}
+.A .eps{padding:0 14px}
+.A .eps li{padding:9px 4px;border-bottom:1px solid #e1e6e0;font-size:13.5px}
+.A .eps .n{color:var(--a-cheong);font-weight:700;font-size:12px}
+.A .eps .st{color:var(--a-mute)}
+.A .eps li.soon{color:#94a19b}
+.A .vbar i{background:var(--a-ju)}
+.A .mode{margin:10px 14px 6px;background:#e2e8e1;border-radius:10px;padding:3px}
+.A .mode button{padding:7px;font-size:12.5px;border-radius:8px;color:var(--a-mute)}
+.A .mode button.on{background:var(--a-card);color:var(--a-ink);font-weight:700;box-shadow:0 1px 2px rgba(0,0,0,.1)}
+.A .lines{padding:4px 14px}
+.A .lines li{padding:8px 10px;border-radius:10px;opacity:.45}
+.A .lines li.cur{opacity:1;background:var(--a-card);border:1px solid #dbe3db}
+.A .lines .ko{font-size:15px;font-weight:500}
+.A .lines li.cur .ko{font-size:17px;font-weight:700}
+.A .lines .tr{font-size:12.5px;color:var(--a-mute)}
+.A .who{color:var(--a-cheong)}
+.A .sp-kong .who{color:var(--a-ju)} .A .sp-dubu .who{color:#2c4a8a}
+.A .ctrl{padding:10px 8px 16px;border-top:1px solid #dfe5de;background:var(--a-bg)}
+.A .ctrl .play{width:48px;height:48px;border-radius:50%;background:var(--a-cheong);color:#fff}
+.A .ctrl .spd{color:var(--a-cheong)}
+.A .exp .quote{margin:0 14px;padding:12px;background:var(--a-card);border-radius:14px;border:1px solid #dbe3db;display:grid;gap:8px;flex:none}
+.A .glosses{gap:6px 4px}
+.A .g{padding:4px 6px;border-radius:8px;background:#eef3ee}
+.A .g .ko{font-size:15px;font-weight:700}
+.A .g .mean{color:var(--a-cheong)}
+.A .quote .tr{font-size:12px;color:var(--a-mute);margin:0}
+.A .paras{padding:12px 18px;display:grid;gap:10px;align-content:start}
+.A .paras p{font-size:13px;line-height:1.7;color:var(--a-mute)}
+.A .paras p.cur{color:var(--a-ink);border-left:3px solid var(--a-ju);padding-left:10px;margin-left:-13px}
+.A .player{padding:10px 16px 16px;border-top:1px solid #dfe5de;display:grid;gap:6px}
+.A .player .prog{background:#e3e9e3}.A .player .prog i{width:48%;background:var(--a-cheong)}
+.A .times{color:var(--a-mute)}
+.A .write .sent{padding:4px 16px 8px}
+.A .w{background:var(--a-card);border:1px solid #dbe3db}
+.A .w.on{border-color:var(--a-cheong)}
+.A .c.loop{background:var(--a-ju);color:#fff}
+.A .write .loopnote{padding:0 16px 8px;color:var(--a-ju)}
+.A .write .stage{margin:0 14px;padding:12px;background:var(--a-card);border-radius:14px;border:1px solid #dbe3db}
+.A .box{border:1.5px dashed #b9c9bf;border-radius:10px}
+.A .box .typed{color:var(--a-cheong)}
+.A .meta .mean{color:var(--a-cheong);font-size:12px}
+.A .slot{background:#eef3ee;color:#9aaba3}.A .slot.filled{background:var(--a-cheong);color:#fff}.A .slot.current{border:2px solid var(--a-ju);color:var(--a-ink);background:#fff}
+.A .write .kb{padding:10px 14px 4px}
+.A .kb button{background:var(--a-card)!important;border:1px solid #dbe3db!important;color:var(--a-cheong)!important}
+.A .kb button.v{color:var(--a-ju)!important}
+.A .write .wbtns{padding:6px 14px 14px}
+.A .wbtns button{background:#e2e8e1!important;color:var(--a-ink)!important}
+
+
+/* ───────── B · 칠판 ───────── */
+.B{--b-bg:#1d3530;--b-bg2:#244039;--b-chalk:#ecebe4;--b-mute:#9fb3ac;--b-yel:#f2d27a;--b-pink:#f29c8f;--b-blue:#9cc9f0;--b-wood:#8a6443;
+   background:var(--b-bg);color:var(--b-chalk);font-family:var(--f-ui);
+   background-image:radial-gradient(120% 60% at 30% 10%,rgba(255,255,255,.05),transparent 60%)}
+.B .hand{font-family:"Gaegu",cursive}
+.B .brand{padding:40px 22px 6px;text-align:left}
+.B .logo{font-family:"Gaegu",cursive;font-size:56px;font-weight:700;line-height:.9;color:var(--b-chalk);text-shadow:0 0 1px rgba(255,255,255,.5)}
+.B .tag{display:block;font-family:"Gaegu",cursive;font-size:18px;color:var(--b-yel);margin-top:4px}
+.B .detect{margin:10px 22px 12px;font-size:12px;color:var(--b-mute)}
+.B .detect b{color:var(--b-yel)}
+.B .langs{padding:0 16px;display:grid;grid-template-columns:1fr 1fr;gap:8px;align-content:start}
+.B .langs li{padding:10px;border:1px dashed rgba(236,235,228,.28);border-radius:6px;font-size:14px}
+.B .langs li small{display:none}
+.B .langs li.sel{border:2px solid var(--b-yel);color:var(--b-yel);font-weight:600}
+.B .cta{margin:14px 16px 0;padding:12px;border-radius:6px;background:var(--b-chalk)!important;color:var(--b-bg)!important;font-weight:700;font-size:15px}
+.B .ledge{height:14px;flex:none;margin-top:14px;background:var(--b-wood);box-shadow:inset 0 3px 0 rgba(255,255,255,.12)}
+.B .bar{padding:16px 16px 8px}
+.B .bar .t{font-family:"Gaegu",cursive;font-size:28px;font-weight:700;line-height:1}
+.B .bar .sub{font-size:11.5px;color:var(--b-mute)}
+.B .hero{margin:4px 16px 12px;flex:none;display:grid;grid-template-columns:110px 1fr;gap:10px;align-items:center}
+.B .hero img{width:110px;aspect-ratio:4/3;object-fit:cover;border-radius:4px;border:3px solid var(--b-wood)}
+.B .hero .body{display:grid;gap:4px;min-width:0}
+.B .hero .ttl{font-weight:700;font-size:14px;line-height:1.35}
+.B .hero .meta{font-size:11px;color:var(--b-mute)}
+.B .hero .prog{background:rgba(255,255,255,.12)}.B .hero .prog i{width:40%;background:var(--b-yel)}
+.B .eps{padding:0 16px}
+.B .eps li{padding:9px 2px;border-bottom:1px dashed rgba(236,235,228,.18);font-size:13.5px}
+.B .eps .n{font-family:"Gaegu",cursive;font-size:18px;color:var(--b-yel)}
+.B .eps .st{color:var(--b-mute)}
+.B .eps li.soon{color:#7f958e}
+.B .eps li.soon .n{color:#7f958e}
+.B .video{border-bottom:6px solid var(--b-wood)}
+.B .vbar i{background:var(--b-yel)}
+.B .mode{margin:10px 16px 4px;gap:14px;justify-content:center}
+.B .mode button{flex:none;font-family:"Gaegu",cursive;font-size:18px;color:var(--b-mute);padding:2px 4px}
+.B .mode button.on{color:var(--b-chalk);text-decoration:underline wavy var(--b-yel) 1.5px;text-underline-offset:5px}
+.B .lines{padding:6px 12px;display:flex;flex-direction:column;gap:8px}
+.B .lines li{max-width:86%;padding:8px 12px;border-radius:16px 16px 16px 4px;background:var(--b-bg2);opacity:.45}
+.B .lines li.sp-kong,.B .lines li.sp-dubu{align-self:flex-end;border-radius:16px 16px 4px 16px}
+.B .lines li.cur{opacity:1;box-shadow:0 0 0 2px var(--b-yel);background:#2a4a42}
+.B .lines .ko{font-size:15px}
+.B .lines li.cur .ko{font-size:17px;font-weight:700;line-height:1.4}
+.B .lines .tr{font-size:12.5px;color:var(--b-mute)}
+.B .lines li.cur .tr{color:var(--b-chalk);opacity:.85}
+.B .who{color:var(--b-yel)} .B .sp-kong .who{color:var(--b-pink)} .B .sp-dubu .who{color:var(--b-blue)}
+.B .ctrl{padding:10px 8px 18px;background:var(--b-bg2)}
+.B .ctrl .play{width:50px;height:50px;border-radius:50%;background:var(--b-yel);color:var(--b-bg)}
+.B .ctrl .spd{color:var(--b-yel)}
+.B .exp .quote{margin:0 16px;padding:4px 0 12px;display:grid;gap:10px;flex:none;border-bottom:1px dashed rgba(236,235,228,.25)}
+.B .glosses{gap:10px 8px}
+.B .g .ko{font-size:17px;font-weight:700}
+.B .g .rom{color:var(--b-mute)}
+.B .g .mean{color:var(--b-yel)}
+.B .quote .tr{font-size:12px;color:var(--b-mute);margin:0}
+.B .paras{padding:12px 18px;display:grid;gap:10px;align-content:start}
+.B .paras p{font-size:13px;line-height:1.7;color:#8fa49d}
+.B .paras p.cur{color:var(--b-chalk);background:rgba(242,210,122,.08);border-radius:6px;padding:6px 8px;margin:0 -8px}
+.B .paras .gl{color:var(--b-yel);opacity:.8}
+.B .player{padding:10px 16px 18px;background:var(--b-bg2);display:grid;gap:6px}
+.B .player .prog{background:rgba(255,255,255,.14)}.B .player .prog i{width:48%;background:var(--b-yel)}
+.B .times{color:var(--b-mute)}
+.B .write .sent{padding:4px 16px 8px}
+.B .w{border-bottom:1px dashed rgba(236,235,228,.3);border-radius:0}
+.B .w.on{border-bottom:2px solid var(--b-yel)}
+.B .c.loop{color:var(--b-yel);background:rgba(242,210,122,.12)}
+.B .write .loopnote{padding:0 16px 8px;color:var(--b-yel);font-family:"Gaegu",cursive;font-size:15px}
+.B .write .stage{margin:0 16px;padding:6px 0 12px;border-bottom:1px dashed rgba(236,235,228,.25)}
+.B .box{border:2px solid rgba(236,235,228,.5);border-radius:4px}
+.B .box .target{opacity:.12}
+.B .box .typed{color:var(--b-chalk);text-shadow:0 0 1px rgba(255,255,255,.6)}
+.B .meta .mean{color:var(--b-yel);font-size:12px}
+.B .slot{border:1px dashed rgba(236,235,228,.35);color:#7f958e}.B .slot.filled{border:1px solid var(--b-chalk);color:var(--b-chalk)}.B .slot.current{border:2px solid var(--b-yel);color:var(--b-yel)}
+.B .write .kb{padding:10px 16px 4px}
+.B .kb button{background:var(--b-bg2)!important;color:var(--b-chalk)!important}
+.B .kb button.v{color:var(--b-pink)!important}
+.B .write .wbtns{padding:8px 16px 16px;background:var(--b-bg2)}
+.B .wbtns button{border:1px solid rgba(236,235,228,.3)!important;color:var(--b-chalk)!important}
+
+
+/* 첫 화면 · 언어 시트 */
+.welcome .top{display:flex;justify-content:flex-end;padding:14px 14px 0;flex:none}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:6px 11px;border-radius:999px;font-size:13px;font-family:var(--f-tr)}
+.B .chip{border:1px solid rgba(236,235,228,.35);color:var(--b-chalk)}
+.welcome .board{margin:18px 16px 0;border:6px solid var(--b-wood);border-radius:6px;overflow:hidden;flex:none}
+.welcome .board img{display:block;width:100%;aspect-ratio:16/10;object-fit:cover}
+.welcome .hello{padding:18px 20px 0;display:grid;gap:2px;flex:1;align-content:start}
+.welcome .hello .ko{font-family:"Gaegu",cursive;font-size:40px;font-weight:700;line-height:1.05}
+.welcome .hello .tr{font-size:15px;color:var(--b-yel)}
+.welcome .hello .say{margin-top:10px;font-size:13px;color:var(--b-mute);font-family:var(--f-tr);line-height:1.6}
+.welcome .cta{margin:0 16px 0}
+.sheetwrap .dim{position:absolute;inset:0;background:rgba(0,0,0,.55)}
+.sheet{position:absolute;left:0;right:0;bottom:0;border-radius:20px 20px 0 0;padding:10px 16px 18px;display:grid;gap:10px}
+.B .sheet{background:#243f38;color:var(--b-chalk)}
+.sheet .grab{width:40px;height:4px;border-radius:2px;background:rgba(236,235,228,.3);justify-self:center}
+.sheet h3{margin:0;font-size:15px}
+.sheet .hint{margin:0;font-size:11.5px;color:var(--b-mute)}
+.sheet ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.sheet li{padding:8px 10px;border-radius:8px;font-size:13px;display:flex;justify-content:space-between;align-items:center;background:rgba(0,0,0,.18)}
+.sheet li.sel{outline:2px solid var(--b-yel);color:var(--b-yel);font-weight:600}
+/* ───────── C · 말풍선 ───────── */
+.C{--c-bg:#ffffff;--c-soft:#f3f6fa;--c-ink:#18202b;--c-mute:#6b7685;--c-teacher:#f0a53a;--c-kong:#e5484d;--c-dubu:#1aa6c9;--c-main:#3b5bdb;
+   background:var(--c-bg);color:var(--c-ink);font-family:var(--f-ui)}
+.C .brand{padding:30px 20px 4px;display:flex;align-items:center;gap:12px}
+.C .logo{font-family:"Jua",sans-serif;font-size:38px;line-height:1;color:var(--c-ink);position:relative}
+.C .bubble-logo{background:var(--c-main);color:#fff;border-radius:18px 18px 18px 4px;padding:8px 14px 6px}
+.C .tag{font-size:12px;color:var(--c-mute);line-height:1.3}
+.C .detect{margin:12px 20px 10px;padding:10px 12px;border-radius:12px;background:var(--c-soft);font-size:12px;color:var(--c-mute)}
+.C .detect b{color:var(--c-ink);font-size:14px}
+.C .langs{padding:0 14px;display:flex;flex-wrap:wrap;gap:8px;align-content:start}
+.C .langs li{padding:8px 13px;border-radius:999px;background:var(--c-soft);font-size:14px}
+.C .langs li small{display:none}
+.C .langs li.sel{background:var(--c-main);color:#fff;font-weight:600}
+.C .cta{margin:12px 16px 18px;padding:14px;border-radius:16px;background:var(--c-main)!important;color:#fff!important;font-family:"Jua",sans-serif;font-size:18px}
+.C .bar{padding:16px 16px 10px}
+.C .bar .t{font-family:"Jua",sans-serif;font-size:24px}
+.C .bar .sub{font-size:11.5px;color:var(--c-mute)}
+.C .hero{margin:0 14px 12px;border-radius:20px;overflow:hidden;position:relative;flex:none}
+.C .hero img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover}
+.C .hero .body{position:absolute;left:0;right:0;bottom:0;padding:26px 12px 10px;background:linear-gradient(transparent,rgba(10,16,30,.8));color:#fff;display:grid;gap:4px}
+.C .hero .ttl{font-family:"Jua",sans-serif;font-size:17px}
+.C .hero .meta{font-size:11px;opacity:.85}
+.C .hero .prog{background:rgba(255,255,255,.3)}.C .hero .prog i{width:40%;background:#fff}
+.C .eps{padding:0 14px;display:grid;gap:8px;align-content:start}
+.C .eps li{padding:9px 10px;border-radius:14px;background:var(--c-soft);font-size:13.5px}
+.C .eps .n{font-family:"Jua",sans-serif;font-size:15px;color:var(--c-main)}
+.C .eps .st{color:var(--c-mute)}
+.C .eps li.soon{background:none;border:1.5px dashed #dfe4ec;color:#9aa3b0}
+.C .eps li.soon .n{color:#9aa3b0}
+.C .vbar i{background:var(--c-main)}
+.C .mode{margin:10px 14px 4px;gap:6px}
+.C .mode button{padding:7px;border-radius:999px;font-size:12.5px;background:var(--c-soft);color:var(--c-mute)}
+.C .mode button.on{background:var(--c-ink);color:#fff;font-weight:700}
+.C .lines{padding:6px 12px;display:flex;flex-direction:column;gap:8px}
+.C .lines li{max-width:86%;padding:8px 12px;border-radius:18px 18px 18px 4px;background:var(--c-soft);opacity:.55}
+.C .lines li.sp-kong,.C .lines li.sp-dubu{align-self:flex-end;border-radius:18px 18px 4px 18px}
+.C .lines li.cur{opacity:1;background:#fff4e3;box-shadow:0 0 0 2px var(--c-teacher)}
+.C .lines .ko{font-size:14.5px;font-weight:500}
+.C .lines li.cur .ko{font-size:16px;font-weight:700}
+.C .lines .tr{font-size:12px;color:var(--c-mute)}
+.C .who{color:var(--c-teacher)} .C .sp-kong .who{color:var(--c-kong)} .C .sp-dubu .who{color:var(--c-dubu)}
+.C .ctrl{padding:10px 10px 16px}
+.C .ctrl .play{width:56px;height:56px;border-radius:20px;background:var(--c-main);color:#fff}
+.C .ctrl .spd{color:var(--c-main);background:var(--c-soft);padding:4px 8px;border-radius:8px}
+.C .exp .quote{margin:0 14px;padding:12px;background:#fff4e3;border-radius:20px 20px 20px 6px;display:grid;gap:8px;flex:none}
+.C .glosses{gap:6px}
+.C .g{padding:5px 8px;border-radius:12px;background:#fff;box-shadow:0 1px 0 rgba(0,0,0,.06)}
+.C .g .ko{font-family:"Jua",sans-serif;font-size:16px}
+.C .g .mean{color:var(--c-main)}
+.C .quote .tr{font-size:12px;color:var(--c-mute);margin:0}
+.C .paras{padding:12px 16px;display:grid;gap:8px;align-content:start}
+.C .paras p{font-size:13px;line-height:1.65;color:var(--c-mute);padding:8px 10px;border-radius:14px}
+.C .paras p.cur{color:var(--c-ink);background:var(--c-soft)}
+.C .player{margin:0 12px 14px;padding:10px 12px;border-radius:18px;background:var(--c-ink);color:#fff;display:grid;gap:6px}
+.C .player .prog{background:rgba(255,255,255,.2)}.C .player .prog i{width:48%;background:var(--c-teacher)}
+.C .times{opacity:.7}
+.C .write .sent{padding:4px 14px 8px}
+.C .w{background:var(--c-soft);border-radius:14px}
+.C .w.on{background:#e7ecff}
+.C .c.loop{background:var(--c-main);color:#fff;border-radius:10px}
+.C .write .loopnote{margin:0 14px 8px;padding:6px 10px;border-radius:999px;background:#e7ecff;color:var(--c-main);align-self:flex-start}
+.C .write .stage{margin:0 14px;padding:12px;background:#fff4e3;border-radius:20px}
+.C .box{background:#fff;border-radius:18px}
+.C .box .typed{color:var(--c-main);font-family:"Jua",sans-serif;font-weight:400}
+.C .meta .word{font-family:"Jua",sans-serif;font-weight:400;font-size:19px}
+.C .meta .mean{color:var(--c-main);font-size:12px}
+.C .slot{background:#fff;color:#b3bcc8;border-radius:10px}.C .slot.filled{background:var(--c-main);color:#fff}.C .slot.current{box-shadow:0 0 0 2px var(--c-teacher);color:var(--c-ink)}
+.C .write .kb{padding:10px 12px 4px}
+.C .kb button{background:var(--c-soft)!important;color:var(--c-ink)!important;border-radius:10px}
+.C .kb button.v{background:#fff4e3!important}
+.C .write .wbtns{padding:6px 12px 14px}
+.C .wbtns button{background:var(--c-ink)!important;color:#fff!important;border-radius:14px}
+
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="intro">
+    <h1>말문 앱 시안 v2 — 칠판 + 말풍선</h1>
+    <p>1판의 B(칠판)를 바탕으로, 학습 화면 대사만 C(말풍선)처럼 선생님은 왼쪽 · 콩과 두부는 오른쪽으로 나눴습니다. 폰 화면은 옆으로 밀어서 볼 수 있어요.</p>
+    <p class="how"><b>언어 고르기 화면을 없앴습니다.</b> 앱을 열면 바로 학습자 말로 인사합니다.<br>
+    ① 폰 언어가 20개 언어 중 하나면 그 말로 시작<br>
+    ② 폰이 영어 등으로 되어 있으면(네팔·방글라데시 노동자 폰에 흔함) 폰의 시간대로 나라를 짐작해 그 나라 말로 시작(예: 카트만두 시간 → 네팔어)<br>
+    ③ 그래도 모르면 영어로 시작<br>
+    오른쪽 위 지구 모양 버튼으로 언제든 바꿉니다(아래에서 올라오는 목록).</p>
+    <p>버튼·제목 글씨는 보기 편하게 한국어로 적었습니다. 실제 앱에서는 이 글씨가 학습자 언어(예: 네팔어)로 나옵니다.</p>
+  </header>
+  <div id="variants" class="wrap" style="gap:56px"></div>
+  <p class="foot">그림: 세종 편 완성본(L01-00-01_final.mp4)에서 뽑은 장면 · 대사 15줄 중 5번째 줄(선생님 「글자는 약속이에요…」)을 재생 중인 상태 · 설명은 네팔어 판(현재 동결본) 문장 그대로 · 쓰기 화면은 옛 앱 쓰기 연습을 형태 그대로 옮긴 것(자모 칸 + 자모 자판) — 문장 위 글자를 누르면 그 글자 소리가 계속 반복되고, 다시 누르면 멈춥니다.</p>
+</div>
+
+<script>
+const LINES=[
+ ["선생님","어서 오세요. 경복궁에 온 걸 환영해요.","आउनुहोस्, आउनुहोस्! ग्योङबोकगुङ दरबारमा आउनुभएकोमा स्वागत छ।"],
+ ["콩","선생님! 저 글자 만들었어요!","गुरुआमा! मैले अक्षर बनाएँ!"],
+ ["선생님","글자요? …이건 그림이에요.","अक्षर? …यो त चित्र हो।"],
+ ["콩","글자 아니에요? 왜요?","अक्षर होइन? किन?"],
+ ["선생님","글자는 약속이에요. 다 같이 읽을 수 있어야 글자예요.","अक्षर भनेको सहमति हो। सबैले मिलेर पढ्न सक्नुपर्छ, तब मात्र अक्षर हुन्छ।"],
+ ["콩","아, 저 혼자 알면 글자가 아니구나.","ओहो, मलाई एक्लैलाई मात्र थाहा भए त अक्षर हुँदैन रहेछ।"],
+ ["두부","그럼 그 약속은 누가 정했어요?","त्यसो भए त्यो सहमति कसले तय गर्नुभयो?"]
+];
+const CUR=4;
+const GLOSS='"글자는 (geul-ja-neun, अक्षर) 약속이에요 (yag-sog-i-e-yo, सहमति हो). 다 (da, सबै) 같이 (gat-i, मिलेर) 읽을 수 (ilg-eul su, पढ्न) 있어야 (iss-eo-ya, सक्नुपर्छ) 글자예요 (geul-ja-ye-yo, अक्षर हो)."';
+const PARAS=[
+ '"콩" (Kong) को "왜요?" (wae-yo, किन) को जवाफ शिक्षक (seon-saeng-nim) प्रस्टसँग दिनुहुन्छ। शिक्षकको कुरा यसपटक पनि आदरार्थी बोली (jon-daes-mal) नै हो।',
+ '"약속이에요" (yag-sog-i-e-yo, सहमति हो) को "약속" (yag-sog, सहमति) भनेको धेरै जना मिलेर तय गरेको र सबैले पालना गर्ने कुरा हो। शिक्षक (seon-saeng-nim) अक्षर पनि त्यस्तै हो भन्नुहुन्छ।',
+ '"다 같이" (da gat-i, सबै मिलेर) भनेको सबै जना सँगै भन्ने अर्थ हो। अर्थात् सबैले मिलेर पढ्न सक्नुपर्छ, तब मात्र अक्षर हुन्छ।'
+];
+const LANGS=[["नेपाली","네팔어"],["বাংলা","벵골어"],["Tiếng Việt","베트남어"],["Bahasa Indonesia","인도네시아어"],["ไทย","태국어"],["Монгол","몽골어"],["اردو","우르두어"],["සිංහල","싱할라어"],["Tagalog","타갈로그어"],["Oʻzbekcha","우즈베크어"],["Кыргызча","키르기스어"],["ខ្មែរ","크메르어"],["ລາວ","라오어"],["မြန်မာ","미얀마어"],["中文","중국어"],["日本語","일본어"],["English","영어"],["Español","스페인어"],["Français","프랑스어"],["Português","포르투갈어"]];
+const EPS=[["02","하늘·땅·사람 → ㅏㅗ","만드는 중"],["03","세로모음·가로모음 + 획 방향","준비 중"],["04","ㅏ/ㅓ + ㅜ/ㅗ","준비 중"],["05","ㅣ/ㅡ + 자음 없으면 ㅇ","준비 중"],["06","ㅑ/ㅕ + ㅛ/ㅠ","준비 중"],["07","이중모음 = 둘을 붙인 것","준비 중"],["08","ㅐ/ㅔ · ㅒ/ㅖ · ㅢ","준비 중"]];
+const SP={"선생님":"teacher","콩":"kong","두부":"dubu"};
+
+const I={
+ play:'<svg class="ico" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5z"/></svg>',
+ pause:'<svg class="ico" viewBox="0 0 24 24" fill="currentColor"><rect x="6.5" y="5" width="4" height="14" rx="1"/><rect x="13.5" y="5" width="4" height="14" rx="1"/></svg>',
+ prev:'<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 18l-8-6 8-6zM6 6v12"/></svg>',
+ next:'<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l8 6-8 6zM18 6v12"/></svg>',
+ rep:'<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2l3 3-3 3"/><path d="M4 11V9a4 4 0 014-4h12"/><path d="M7 22l-3-3 3-3"/><path d="M20 13v2a4 4 0 01-4 4H4"/></svg>',
+ back:'<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>'
+};
+const esc=s=>s.replace(/&/g,"&amp;").replace(/</g,"&lt;");
+function glossCards(src){
+  const out=[];const re=/([^\s".()]+)\s\(([^,()]+)(?:,\s*([^()]+))?\)/g;let m;
+  while((m=re.exec(src)))out.push(`<span class="g"><span class="rom">${esc(m[2])}</span><span class="ko">${esc(m[1])}</span><span class="mean">${esc(m[3]||"")}</span></span>`);
+  return out.join("");
+}
+const inlineGl=s=>esc(s).replace(/\(([^()]*)\)/g,'<span class="gl">($1)</span>');
+
+function sLang(v){
+  const brand=v==="C"?`<div class="brand"><span class="logo bubble-logo">말문</span><span class="tag">한국어 첫걸음<br>Malmun</span></div>`
+                     :`<div class="brand"><span class="logo">말문</span><span class="tag">${v==="B"?"한국어, 오늘부터":"Malmun · 한국어"}</span></div>`;
+  return `<div class="scr lang">${v==="A"?'<div class="dan"></div>':""}${brand}
+   <div class="detect">폰 언어로 골라 두었어요 · <b>नेपाली</b></div>
+   <ul class="langs">${LANGS.slice(0,v==="C"?20:(v==="B"?14:9)).map((l,i)=>`<li class="${i?"":"sel"}"><span>${l[0]}</span><small>${l[1]}</small></li>`).join("")}</ul>
+   <button class="cta">시작하기</button>${v==="B"?'<div class="ledge"></div>':""}</div>`;
+}
+const GLOBE='<svg class="ico" style="width:16px;height:16px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 3.7 5.7 3.7 9s-1.2 6.3-3.7 9c-2.5-2.7-3.7-5.7-3.7-9S9.5 5.7 12 3z"/></svg>';
+function sWelcome(v){
+  return `<div class="scr welcome"><div class="top"><span class="chip">${GLOBE}नेपाली</span></div>
+   <div class="board"><img src="img/sejong_20.jpg" alt=""></div>
+   <div class="hello"><span class="ko">안녕하세요!</span><span class="tr">नमस्ते!</span>
+     <span class="say">두부 · 콩 · 선생님과 함께<br>경복궁에서 한글부터 시작해요.</span></div>
+   <button class="cta">सुरु गर्नुहोस्</button><div class="ledge"></div></div>`;
+}
+function sSheet(v){
+  return `<div class="scr sheetwrap">${sWelcome(v).replace('<div class="scr welcome">','<div class="scr welcome" style="position:absolute;inset:0">')}<div class="dim"></div>
+   <div class="sheet"><span class="grab"></span><h3>언어</h3><p class="hint">폰 설정에서 자동으로 골랐어요. 여기서 언제든 바꿀 수 있어요.</p>
+   <ul>${LANGS.map((l,i)=>`<li class="${i?"":"sel"}"><span>${l[0]}</span></li>`).join("")}</ul></div></div>`;
+}
+function sList(v){
+  return `<div class="scr list">${v==="A"?'<div class="dan"></div>':""}
+   <div class="bar"><div class="grow"><div class="t">한글과 발음</div><div class="sub">L01-00 · 예비편 31편</div></div><span class="chip">${GLOBE}नेपाली</span></div>
+   <div class="hero"><img src="img/sejong_6.jpg" alt=""><div class="body">
+     <div class="ttl">01 세종대왕 — 글자에 주인이 있다</div>
+     <div class="meta">1분 25초 · 대사 15줄 · 5줄까지 들음</div>
+     <div class="prog"><i></i></div></div></div>
+   <ol class="eps">${EPS.map(e=>`<li class="${e[2]==="준비 중"||e[2]==="만드는 중"?"soon":""}"><span class="n">${e[0]}</span><span>${e[1]}</span><span class="st">${e[2]}</span></li>`).join("")}</ol></div>`;
+}
+function sLearn(v){
+  const from=1;
+  return `<div class="scr learn"><div class="video"><img src="img/sejong_20.jpg" alt=""><div class="vbar"><i></i></div></div>
+   <div class="mode"><button class="on">대사 → 설명</button><button>설명만 듣기</button></div>
+   <ol class="lines">${LINES.slice(from,7).map((l,k)=>{const i=k+from;return `<li class="line sp-${SP[l[0]]} ${i===CUR?"cur":""}"><span class="who">${l[0]}</span><p class="ko">${esc(l[1])}</p><p class="tr">${esc(l[2])}</p></li>`}).join("")}</ol>
+   <div class="ctrl"><button title="반복">${I.rep}</button><button>${I.prev}</button><button class="play">${I.pause}</button><button>${I.next}</button><button class="spd">0.75×</button></div></div>`;
+}
+function sWrite(v){
+  const kb=(lab,arr,cls)=>`<span class="lab">${lab}</span>`+arr.map(j=>`<button class="${cls}">${j}</button>`).join("");
+  return `<div class="scr write">${v==="A"?'<div class="dan"></div>':""}
+   <div class="bar"><button>${I.back}</button><div class="grow"><div class="t" style="font-size:${v==="B"?"22px":"16px"}">쓰기</div><div class="sub">1 / 15 줄 · 선생님</div></div></div>
+   <div class="sent"><span class="w on"><span class="c loop">어</span><span class="c">서</span></span><span class="w"><span class="c">오</span><span class="c">세</span><span class="c">요</span></span></div>
+   <div class="loopnote">${I.rep.replace('class="ico"','class="ico" style="width:14px;height:14px"')}<span>「어」 소리 반복 중 · 다시 누르면 멈춤</span></div>
+   <div class="stage"><div class="box"><span class="target">어</span><span class="typed">ㅇ</span></div>
+     <div class="meta"><div class="word"><b>어</b>서</div><div class="rom">eo-seo</div><div class="mean tr">छिटो</div>
+       <div class="slots"><span class="slot filled">ㅇ</span><span class="slot current">ㅓ</span></div></div></div>
+   <div class="kb">${kb("자음",["ㄱ","ㄴ","ㄷ","ㄹ","ㅁ","ㅂ","ㅅ","ㅇ","ㅈ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"],"")}${kb("쌍자음",["ㄲ","ㄸ","ㅃ","ㅆ","ㅉ"],"")}${kb("모음",["ㅏ","ㅑ","ㅓ","ㅕ","ㅗ","ㅛ","ㅜ","ㅠ","ㅡ","ㅣ"],"v")}</div>
+   <div class="wbtns"><button>단어 듣기</button><button>문장 듣기</button><button>자동 완성</button></div></div>`;
+}
+function sExp(v){
+  return `<div class="scr exp">${v==="A"?'<div class="dan"></div>':""}
+   <div class="bar"><button>${I.back}</button><div class="grow"><div class="t" style="font-size:${v==="B"?"22px":"16px"}">설명</div><div class="sub">5 / 15 줄 · 선생님</div></div></div>
+   <div class="quote"><span class="who">선생님</span><div class="glosses">${glossCards(GLOSS)}</div><p class="tr">${esc(LINES[CUR][2])}</p></div>
+   <div class="paras">${PARAS.map((p,i)=>`<p class="${i===1?"cur":""}">${inlineGl(p)}</p>`).join("")}</div>
+   <div class="player"><div class="prog"><i></i></div><div class="times"><span>0:15</span><span>설명 2 / 3</span><span>0:31</span></div></div></div>`;
+}
+const VARS=[
+ {k:"B",name:"칠판 + 말풍선",mood:"영상 속 초록 칠판을 옮긴 어두운 화면 · 대사는 말풍선 · 첫 화면은 언어 고르기 없이 바로 인사.",
+  plus:["영상과 한 몸처럼 이어짐","누가 말하는지 한눈에","밤 공부에 눈이 편하고 배터리 절약"],minus:["밝은 화면(낮 모드)은 다음 판에서 폰 설정 따라 자동으로"]}
+];
+document.getElementById("variants").innerHTML=VARS.map(v=>`
+ <section class="variant" id="v${v.k}">
+  <div class="vhead"><span class="letter">v2</span><h2>${v.name}</h2><p class="mood">${v.mood}</p>
+   <ul>${v.plus.map(x=>`<li>${x}</li>`).join("")}${v.minus.map(x=>`<li class="minus">${x}</li>`).join("")}</ul></div>
+  <div class="rail"><div class="phones">
+   ${[["첫 화면 (언어 자동)",sWelcome],["언어 바꾸기 (지구 버튼)",sSheet],["편 목록",sList],["학습 (대사)",sLearn],["설명",sExp],["쓰기 (글자 반복 듣기)",sWrite]].map(([c,f])=>`<figure class="shot" style="margin:0"><div class="ph ${v.k}">${f(v.k)}</div><figcaption>${c}</figcaption></figure>`).join("")}
+  </div></div>
+ </section>`).join("");
+// 재생 중인 줄을 목록 가운데로
+function centerCur(){document.querySelectorAll(".learn .lines,.exp .paras").forEach(ol=>{const c=ol.querySelector(".cur");if(c)ol.scrollTop=c.offsetTop-(ol.clientHeight-c.offsetHeight)/2;});}
+centerCur();document.fonts&&document.fonts.ready.then(centerCur);
+</script>
+</body>
+</html>
