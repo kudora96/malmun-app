@@ -6,7 +6,8 @@ export const MEDIA = LOCAL ? "media" : R2;
 
 export const paths = {
   data: (ep, suffix = "") => `data/${ep}/${ep}${suffix}.json`,
-  video: ep => `${MEDIA}/video/${ep}.mp4`,
+  // ?v= = 판 번호 — 영상을 바꾸면 올려서 폰·브라우저에 남은 옛 영상을 쓰지 않게 한다
+  video: ep => `${MEDIA}/video/${ep}.mp4?v=2`,
   poster: ep => `img/${ep}.jpg`,
   audio: (ep, file) => `${MEDIA}/audio/${ep}/${file}`,
   // 글자·자모 = 크기를 맞춘 사본(tools/normalize_letters.py → letters/c · letters/j)
