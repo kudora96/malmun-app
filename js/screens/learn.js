@@ -17,6 +17,7 @@ import { paths } from "../paths.js";
 import { Sequence } from "../audio.js";
 import { I, progress, SPEAKER } from "../ui.js";
 import writeView from "./write.js";
+import speakView from "./speak.js";
 import { hold } from "../wake.js";
 
 const RATES = [1, 0.75, 0.5];
@@ -55,7 +56,7 @@ export default async function learn(app, ep, startId) {
       <p class="kotext ko" lang="ko">${esc(l.ko)}</p>
       ${l.tr ? `<p class="tr">${esc(l.tr)}</p>` : ""}
       <div class="expl"></div>
-      <div class="acts"><button data-act="once">${I.play}<span>${esc(t("listen_line"))}</span></button><button class="menu" data-act="explain">${esc(t("explain"))}</button><button class="menu" data-act="write">${esc(t("write"))}</button></div>
+      <div class="acts"><button data-act="once">${I.play}<span>${esc(t("listen_line"))}</span></button><button class="menu" data-act="explain">${esc(t("explain"))}</button><button class="menu" data-act="write">${esc(t("write"))}</button><button class="menu" data-act="speak">${esc(t("speak"))}</button></div>
     </li>`).join("")}</ol>
     <div class="ctrl">
       <a class="iconbtn" href="#/list" aria-label="${esc(t("back"))}">${I.back}</a>
@@ -93,8 +94,10 @@ export default async function learn(app, ep, startId) {
   const stick = app.querySelector(".stick"), list = app.querySelector(".lines");
   function underVideo(el) {
     const to = Math.max(0, Math.min(el.getBoundingClientRect().top + scrollY - stick.offsetHeight - 10, document.documentElement.scrollHeight - innerHeight));
-    cancelAnimationFrame(st.anim);
+    cancelAnimationFrame(st.anim); clearTimeout(st.animEnd);
     if (reduce || document.hidden) return scrollTo(0, to);
+    // 화면 그리기 박자가 멈춰도(가려진 창 · 느린 폰) 제자리에 가 있게 — 움직임이 끝날 시각에 한 번 더 맞춘다
+    st.animEnd = setTimeout(() => { cancelAnimationFrame(st.anim); if (Math.abs(scrollY - to) > 2) scrollTo(0, to); }, SCROLL_MS + 80);
     const from = scrollY, t0 = performance.now();
     const step = now => { const k = Math.min(1, (now - t0) / SCROLL_MS); scrollTo(0, from + (to - from) * (1 - (1 - k) ** 3)); if (k < 1) st.anim = requestAnimationFrame(step); };
     st.anim = requestAnimationFrame(step);
@@ -198,7 +201,7 @@ export default async function learn(app, ep, startId) {
     sync();
   };
   ex.a.addEventListener("timeupdate", () => { const a = ex.a, bar = panel.querySelector(".exprog i"); if (bar && a.duration) bar.style.width = (100 * a.currentTime) / a.duration + "%"; });
-  const markButtons = () => items.forEach((li, k) => li.querySelectorAll("[data-act=explain],[data-act=write]").forEach(b => b.setAttribute("aria-pressed", String(!!st.panel && k === st.panel.i && b.dataset.act === st.panel.kind))));
+  const markButtons = () => items.forEach((li, k) => li.querySelectorAll("[data-act=explain],[data-act=write],[data-act=speak]").forEach(b => b.setAttribute("aria-pressed", String(!!st.panel && k === st.panel.i && b.dataset.act === st.panel.kind))));
 
   async function openPanel(kind, i, { autoplay = false } = {}) {
     i = Math.max(0, Math.min(L.length - 1, i));
@@ -211,7 +214,8 @@ export default async function learn(app, ep, startId) {
       panel.innerHTML = explainHTML(i);
       if (autoplay) ex.play(exItems(i));
     } else {
-      const cleanup = await writeView(panel, ep, L[i].id, { embedded: true, onNext: k => openPanel("write", k) }); // 줄을 다 쓰면 다음 줄 쓰기(W6)
+      const view = kind === "speak" ? speakView : writeView; // 줄을 다 쓰면(말하면) 다음 줄의 같은 메뉴로(W6 · S7)
+      const cleanup = await view(panel, ep, L[i].id, { embedded: true, onNext: k => openPanel(kind, k) });
       if (st.panel !== mine) return cleanup?.();
       mine.cleanup = cleanup;
     }
@@ -254,7 +258,8 @@ export default async function learn(app, ep, startId) {
     sync();
   }
   function togglePlay() { // R4
-    if (st.panel?.kind === "write") { panel.__wr?.toggle(); return; } // 쓰기 창: ▶ = 문장 듣기(W6)
+    if (st.panel?.kind === "write") { panel.__wr?.toggle(); return; } // 쓰기 창: ▶ = 이 부분 듣기(W6)
+    if (st.panel?.kind === "speak") { panel.__sp?.toggle(); return; } // 말하기 창: ▶ = 본보기(S2)
     if (st.panel?.kind === "explain") { // 설명 창: ▶ = 설명 읽기 멈춤/이어서
       if (playing()) { clearTimeout(st.gap); st.gap = 0; ex.pause(); }
       else if (ex.q.length) ex.resume(); else ex.play(exItems(st.panel.i));
@@ -296,7 +301,7 @@ export default async function learn(app, ep, startId) {
     if (e.target.closest("a")) return;
     const li = e.target.closest(".line");
     if (!li) return;
-    const i = +li.dataset.i, m = e.target.closest("[data-act=explain],[data-act=write]");
+    const i = +li.dataset.i, m = e.target.closest("[data-act=explain],[data-act=write],[data-act=speak]");
     // 설명·쓰기 = 위 창을 영상 ⇄ 그 메뉴로 바꾸는 토글(설명은 열면 바로 읽어 줌)
     if (m) return st.panel?.kind === m.dataset.act && st.panel.i === i ? closePanel() : openPanel(m.dataset.act, i, { autoplay: m.dataset.act === "explain" });
     // 이 줄 듣기 = 토글(듣는 중이면 멈춤) · 위 창이 설명·쓰기면 영상으로 돌아와 듣기
@@ -342,5 +347,5 @@ export default async function learn(app, ep, startId) {
   v.addEventListener("loadedmetadata", () => { if (v.paused && !st.once) v.currentTime = L[st.cur].start; }, { once: true });
   sync();
   const release = hold(); // 소리 장치 깨워 두기(첫소리 먹힘 방지)
-  return () => { release(); st.panel?.cleanup?.(); ex.stop(); removeEventListener("resize", pad); clearInterval(timer); clearTimeout(st.gap); document.removeEventListener("keydown", onKey); seq.stop(); v.pause(); v.removeAttribute("src"); v.load(); };
+  return () => { clearTimeout(st.animEnd); release(); st.panel?.cleanup?.(); ex.stop(); removeEventListener("resize", pad); clearInterval(timer); clearTimeout(st.gap); document.removeEventListener("keydown", onKey); seq.stop(); v.pause(); v.removeAttribute("src"); v.load(); };
 }

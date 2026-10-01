@@ -4,9 +4,10 @@ import list from "./screens/list.js";
 import learn from "./screens/learn.js";
 import explain from "./screens/explain.js";
 import write from "./screens/write.js";
+import speak from "./screens/speak.js";
 
 const app = document.getElementById("app");
-const routes = { "": welcome, list, learn, explain, write };
+const routes = { "": welcome, list, learn, explain, write, speak };
 let cleanup = null;
 
 async function route() {

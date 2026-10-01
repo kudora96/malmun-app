@@ -50,5 +50,17 @@
  "play_all": "All",
  "explain_kr": "Korean explanation",
  "listen_line": "Play this line",
- "listen_part": "Listen to this part"
+ "listen_part": "Listen to this part",
+ "speak": "Speaking",
+ "model": "Model",
+ "speak_now": "Speak",
+ "my_voice": "My voice",
+ "compare": "Compare",
+ "listening": "Listening… speak now",
+ "speak_hint": "Listen to the model, then press Speak and say it.",
+ "speak_hint_noscore": "Listen to the model, record yourself, and compare.",
+ "no_score": "Recorded. Listen and compare with the model.",
+ "score_pass": "Great!",
+ "score_try": "Try once more, or move on.",
+ "no_mic": "Microphone is not available. Allow it in the browser settings."
 }

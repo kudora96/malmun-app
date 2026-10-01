@@ -50,5 +50,17 @@
  "play_all": "전체",
  "explain_kr": "한국어 설명",
  "listen_line": "이 줄 듣기",
- "listen_part": "이 부분 듣기"
+ "listen_part": "이 부분 듣기",
+ "speak": "말하기",
+ "model": "본보기",
+ "speak_now": "말하기",
+ "my_voice": "내 목소리",
+ "compare": "비교",
+ "listening": "듣고 있어요… 말해 보세요",
+ "speak_hint": "본보기를 듣고, 말하기를 눌러 따라 말해 보세요.",
+ "speak_hint_noscore": "본보기를 듣고, 녹음해서 비교해 보세요.",
+ "no_score": "녹음했어요. 본보기와 비교해 들어 보세요.",
+ "score_pass": "잘했어요!",
+ "score_try": "한 번 더 해 보거나 넘어가세요.",
+ "no_mic": "마이크를 쓸 수 없어요. 브라우저 설정에서 허락해 주세요."
 }
