@@ -19,10 +19,11 @@ export async function episode(ep, lang) {
   const key = `${ep}.${lang}`;
   if (cache.has(key)) return cache.get(key);
   const p = (async () => {
-    const [base, kr, tr] = await Promise.all([
+    const [base, kr, tr, sync] = await Promise.all([
       getJSON(paths.data(ep)),
       getJSON(paths.data(ep, ".kr")).catch(() => ({ explanations: [] })),
       getJSON(paths.data(ep, "." + lang)).catch(() => null),
+      getJSON(paths.data(ep, ".sync")).catch(() => ({ lines: {} })), // 영상 속 실제 목소리 시각(tools/measure_sync.py)
     ]);
     const krBy = new Map(kr.explanations.map(e => [e.sub_id, e]));
     const trSub = new Map((tr?.subtitles || []).map(s => [s.id, s]));
@@ -34,7 +35,8 @@ export async function episode(ep, lang) {
       const x = trExp.get(s.id) || {};
       const paras = (k.kr_audio_text || "").split(/\n\n+/);
       return {
-        id: s.id, start: s.start, end: s.end, ko: s.ko, tag: s.tag,
+        // 줄 시작·끝 = 실제 목소리(재 둔 값이 있으면) — 자막이 소리보다 늦게 뜨거나 한 줄 듣기에 다음 줄 소리가 새지 않게
+        id: s.id, start: sync.lines[s.id]?.on ?? s.start, end: sync.lines[s.id]?.off ?? s.end, ko: s.ko, tag: s.tag,
         speaker: part.speaker || "", lineAudio: part.audio || null,
         tr: trSub.get(s.id)?.t || "",
         // 설명: ¶1 = 대사 인용(음성은 lineAudio) · ¶2~ = audio_kr 조각과 1:1

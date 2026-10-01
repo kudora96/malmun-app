@@ -19,6 +19,8 @@ import { I, progress, SPEAKER } from "../ui.js";
 
 const RATES = [1, 0.75, 0.5];
 const LOOP_GAP = 700;
+const LEAD = 0.35;  // 자막은 목소리보다 0.35초 먼저 영상 아래에(줄 시각 = 실제 목소리 · 느린 속도면 영상 시간으로 줄인다)
+const SCROLL_MS = 220; // 줄을 영상 아래로 올리는 시간 — 먼저 와 있어야 해서 짧게
 const FS = '<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>';
 
 export default async function learn(app, ep, startId) {
@@ -26,7 +28,7 @@ export default async function learn(app, ep, startId) {
   const L = d.lines;
   const last = Math.min(progress.get(ep).at ?? (progress.get(ep).line || 1) - 1, L.length - 1);
   // once = 지금 한 줄만 듣는 중 · rep = 반복 켜짐 · gap = 반복 사이 쉬는 중
-  const st = { mode: "video", cur: Math.max(0, last), once: false, rep: false, gap: 0, rate: 0, handScroll: 0 };
+  const st = { mode: "video", cur: Math.max(0, last), once: false, rep: false, gap: 0, rate: 0, handScroll: 0, anim: 0 };
   const seq = new Sequence();
 
   app.innerHTML = `<section class="scr learn">
@@ -81,8 +83,12 @@ export default async function learn(app, ep, startId) {
   // 지금 줄 = 영상(+모드 줄) 바로 아래 · 앞 줄들은 영상 뒤로 올라간다
   const stick = app.querySelector(".stick"), list = app.querySelector(".lines");
   function underVideo(el) {
-    const y = el.getBoundingClientRect().top + scrollY - stick.offsetHeight - 10;
-    scrollTo({ top: Math.max(0, y), behavior: reduce ? "auto" : "smooth" });
+    const to = Math.max(0, Math.min(el.getBoundingClientRect().top + scrollY - stick.offsetHeight - 10, document.documentElement.scrollHeight - innerHeight));
+    cancelAnimationFrame(st.anim);
+    if (reduce || document.hidden) return scrollTo(0, to);
+    const from = scrollY, t0 = performance.now();
+    const step = now => { const k = Math.min(1, (now - t0) / SCROLL_MS); scrollTo(0, from + (to - from) * (1 - (1 - k) ** 3)); if (k < 1) st.anim = requestAnimationFrame(step); };
+    st.anim = requestAnimationFrame(step);
   }
   // 마지막 줄도 영상 바로 아래까지 올라올 수 있게 목록 아래 여백 = 화면에서 영상을 뺀 높이
   const pad = () => { list.style.paddingBottom = Math.max(120, innerHeight - stick.offsetHeight - 40) + "px"; };
@@ -115,7 +121,8 @@ export default async function learn(app, ep, startId) {
     }
     if (!st.once && !st.rep) {
       let k = -1;
-      for (let i = 0; i < L.length; i++) if (L[i].start <= now + 0.05) k = i;
+      const lead = LEAD * v.playbackRate;
+      for (let i = 0; i < L.length; i++) if (L[i].start <= now + lead) k = i;
       if (k >= 0 && k !== st.cur) select(k);
     }
   }
