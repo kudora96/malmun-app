@@ -49,6 +49,7 @@ export async function episode(ep, lang) {
         speaker: part.speaker || "", lineAudio: part.audio || null,
         words: (wt.lines[String(s.id)] || []).map(w => ({ w: w.w, start: w.cs ?? w.start, end: w.ce ?? w.end })),
         units: un.lines[String(s.id)] || null,
+        say: s.say?.ko ? s.say : null, // 「이제 말해 보세요」 과제(잠정 · 본부 10-01 — 확정되면 app_build_spec.md)
         tr: trSub.get(s.id)?.t || "",
         // 설명: ¶1 = 대사 인용(음성은 lineAudio) · ¶2~ = audio_kr 조각과 1:1
         krParas: paras.slice(1), krAudio: k.audio_kr || [], krHl: k.kr_hl || [],

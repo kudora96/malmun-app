@@ -1,7 +1,7 @@
 // 말하기 — 따라 말하고 · 내 목소리를 다시 듣고 · 본보기와 얼마나 같은지 본다(10-01 투덜이 · 본부 전달)
 //
 // 학습자가 누르면 무엇이 되나
-//  S1 과제 = 지금 줄의 토막(쓰기와 같은 고정 토막) 차례 → 마지막에 줄 전체 · ◀ 1/4 ▶ 로 옮김
+//  S1 과제 = 지금 줄의 토막(쓰기와 같은 고정 토막) 차례 → 줄 전체 → (있으면) 새 설명의 「이제 말해 보세요」 문장 · ◀ 1/4 ▶ 로 옮김
 //  S2 [▶ 본보기] = 그 토막 소리(쓰기의 「이 부분 듣기」와 같은 소리) · 아래 큰 ▶ 도 같다
 //  S3 [● 말하기] = 녹음 시작(처음 누를 때만 마이크 허락을 묻는다) → 말이 끝나고 1초 조용하면 저절로 멈춤 · 다시 눌러도 멈춤 · 길어도 8초
 //  S4 [▶ 내 목소리] = 방금(또는 저장해 둔) 내 말 · [비교] = 본보기 → 내 목소리 이어서
@@ -58,6 +58,8 @@ export default async function speak(app, ep, id, opts = {}) {
   const parts = (line.units?.parts || []).map(p => ({ key: p.id, text: p.text, say: p.say, src: paths.unit(ep, p.id) }));
   if (parts.length !== 1) parts.push({ key: `${ep}_${String(line.id).padStart(2, "0")}_line`, text: line.ko, say: line.ko, src: lineSrc, whole: true });
   else Object.assign(parts[0], { whole: true });
+  // 「이제 말해 보세요. "…"」 과제 — 새 설명이 주는 문장(낱말 하나 바꾼 말)이 있으면 맨 끝에(잠정 필드 subtitles[].say{ko, audio})
+  if (line.say) parts.push({ key: `${ep}_${String(line.id).padStart(2, "0")}_say`, text: line.say.ko, say: line.say.ko, src: line.say.audio ? paths.audio(ep, line.say.audio) : null, task: true });
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   const st = { i: 0, rec: null, stream: null, blob: null, score: null, saved: {}, busy: false, model: false, alive: true, mine: null };
   for (const p of parts) st.saved[p.key] = await recGet(`${ep}/${p.key}`);
@@ -103,7 +105,7 @@ export default async function speak(app, ep, id, opts = {}) {
   async function playModel() {
     stopSounds(); st.model = true; paint();
     const p = cur();
-    if (!(await sfx.play(p.src)) && lineSrc && p.src !== lineSrc) await sfx.play(lineSrc);
+    if (!(p.src && (await sfx.play(p.src))) && lineSrc && p.src !== lineSrc && !p.task) await sfx.play(lineSrc);
     st.model = false; if (st.alive) paint();
   }
   const playMine = () => new Promise(res => {
