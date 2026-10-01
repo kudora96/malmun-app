@@ -37,7 +37,8 @@ function playSrcOk(src, my) {
     const bad = () => { ok = false; done(); };
     voice.addEventListener("ended", done); voice.addEventListener("error", bad);
     const guard = setTimeout(done, 6000);
-    voice.src = src; voice.currentTime = 0; voice.play().catch(bad);
+    // 파일이 없을 때(error 이벤트 · NotSupported)만 「없음」 — 다른 이유로 재생이 끊긴 건 없음이 아니다(원음이 겹쳐 나지 않게)
+    voice.src = src; voice.currentTime = 0; voice.play().catch(e => (e?.name === "NotSupportedError" ? bad() : done()));
   });
 }
 function playSrc(src, my) {

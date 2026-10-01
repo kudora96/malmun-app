@@ -5,7 +5,9 @@
 (async () => {
   const W = ms => new Promise(s => setTimeout(s, ms));
   const play = HTMLMediaElement.prototype.play;
-  HTMLMediaElement.prototype.play = function () { this.muted = true; return play.call(this); };
+  const vd = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, "volume"); // 음소거 대신 아주 작게(뒤 탭 음소거 소리는 크롬이 멈춤)
+  Object.defineProperty(HTMLMediaElement.prototype, "volume", { configurable: true, get() { return vd.get.call(this); }, set(v) { vd.set.call(this, Math.min(v, 0.0001)); } });
+  HTMLMediaElement.prototype.play = function () { this.volume = 0.0001; return play.call(this); };
   const $ = s => document.querySelector(s);
   const L = () => [...document.querySelectorAll(".line")];
   const line = i => L()[i - 1];

@@ -4,14 +4,16 @@
 (async () => { const res = []; try {
   const W = ms => new Promise(s => setTimeout(s, ms));
   const log = []; const T = () => Math.round(performance.now());
+  // 소리 끄기 = 음소거가 아니라 아주 작게(크롬은 뒤에 있는 탭의 「음소거된」 소리를 전기 아끼려 멈춘다 — 10-01 실측)
+  const vd = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, "volume");
+  Object.defineProperty(HTMLMediaElement.prototype, "volume", { configurable: true, get() { return vd.get.call(this); }, set(v) { vd.set.call(this, Math.min(v, 0.0001)); } });
   const op = HTMLMediaElement.prototype.play;
   HTMLMediaElement.prototype.play = function () {
-    this.muted = true;
     const name = decodeURIComponent((this.src || "").split("/").slice(-2).join("/"));
     if (!this.__h) { this.__h = 1;
       this.addEventListener("ended", () => log.push({ t: T(), ev: "끝", name: decodeURIComponent((this.src || "").split("/").slice(-2).join("/")) }));
       this.addEventListener("pause", () => { if (!this.ended) log.push({ t: T(), ev: "멈춤", name: decodeURIComponent((this.src || "").split("/").slice(-2).join("/")), pos: this.currentTime }); }); }
-    log.push({ t: T(), ev: "시작", name }); return op.call(this);
+    this.volume = 0.0001; log.push({ t: T(), ev: "시작", name }); return op.call(this);
   };
   const AC = window.AudioContext, oo = AC.prototype.createOscillator; let lastTone = 0;
   AC.prototype.createOscillator = function () { const now = T(); if (now - lastTone > 50) log.push({ t: now, ev: "효과음", name: "" }); lastTone = now; return oo.call(this); };
@@ -44,19 +46,15 @@
   const ch = [...document.querySelectorAll(".panel .sent .c")].find(c => c.textContent === "오" && !c.classList.contains("noaudio"));
   if (ch) { ch.click(); await W(300); const c2 = [...document.querySelectorAll(".panel .sent .c")].find(c => c.textContent === "오"); ok(c2.classList.contains("loop"), "「오」 누름 → 반복"); c2.click(); await W(200); ok(![...document.querySelectorAll(".panel .sent .c.loop")].length, "다시 → 멈춤"); }
   // 단어 듣기 · 문장 듣기 · 아래 ▶
-  // 단어 듣기 · 이 부분 듣기 = 대사 원음(_sub_t1)을 잘라서 · 줄 전체가 나오면 안 됨
-  const words = await (await fetch("data/L01-00-01/L01-00-01.words.json", { cache: "no-store" })).json();
-  const w1 = words.lines["1"].map(w => ({ w: w.w, start: w.cs ?? w.start, end: w.ce ?? w.end }));
-  const clipCheck = async (btn, wantStart, wantEnd, name) => {
-    const at0 = log.length; $(btn).click(); await idle(6000);
-    const ev = log.slice(at0), st0 = ev.find(e => e.ev === "시작" && e.name.includes("_sub_t1")), stop = ev.find(e => e.ev === "멈춤" && e.name.includes("_sub_t1"));
-    const played = st0 && stop ? (stop.t - st0.t) / 1000 : null;
-    ok(st0 && stop && Math.abs(stop.pos - wantEnd) < 0.12 && Math.abs(played - (wantEnd - wantStart)) < 0.35, name,
-      `원음 ${wantStart.toFixed(2)}~${wantEnd.toFixed(2)}초 · 실제 ${played?.toFixed(2)}초 재생 · 멈춘 곳 ${stop?.pos?.toFixed(2)}`);
+  // 단어 듣기 · 이 부분 듣기 = 본부가 일레븐랩스로 따로 만든 소리(units/{id}.mp3) — 끝까지 다 나오고, 줄 전체(_sub_t1)는 안 나옴
+  const units = await (await fetch("data/L01-00-01/L01-00-01.units.json", { cache: "no-store" })).json();
+  const unitCheck = async (btn, wantId, name) => {
+    const at0 = log.length; $(btn).click(); await idle(8000);
+    const ev = log.slice(at0), st0 = ev.find(e => e.ev === "시작"), end0 = ev.find(e => e.ev === "끝");
+    ok(st0 && st0.name.endsWith(wantId + ".mp3") && end0 && !ev.some(e => e.name.includes("_sub_t1")), name, desc(at0));
   };
-  await clipCheck(".panel [data-act=word]", w1[0].start, w1[0].end, "단어 듣기 → 원음에서 「어서」만");
-  const seg0 = $(".panel .sent").innerText.replace(/\s/g, ""), segWords = w1.filter(w => seg0.includes(w.w.replace(/[^가-힣]/g, "")));
-  await clipCheck(".panel [data-act=sent]", segWords[0].start, segWords[segWords.length - 1].end, `이 부분 듣기 → 원음에서 지금 토막 「${seg0}」만(줄 전체 아님)`);
+  await unitCheck(".panel [data-act=word]", units.lines["1"].words[0].id, "단어 듣기 → 따로 만든 「어서」 소리(끝까지)");
+  await unitCheck(".panel [data-act=sent]", units.lines["1"].parts[0].id, `이 부분 듣기 → 따로 만든 토막 「${units.lines["1"].parts[0].say}」 소리(줄 전체 아님)`);
   $(".panel [data-act=sent]").click(); await W(200); ok($(".panel [data-act=sent]").getAttribute("aria-pressed") === "true", "이 부분 듣기 켜짐");
   $(".panel [data-act=sent]").click(); await W(200); ok($(".panel [data-act=sent]").getAttribute("aria-pressed") === "false", "다시 누르면 멈춤");
   $(".ctrl [data-act=play]").click(); await W(200); ok($(".panel [data-act=sent]").getAttribute("aria-pressed") === "true", "아래 ▶ = 이 부분 듣기"); $(".ctrl [data-act=play]").click(); await W(200);

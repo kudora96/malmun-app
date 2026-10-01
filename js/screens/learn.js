@@ -334,6 +334,10 @@ export default async function learn(app, ep, startId) {
   // R9 — 마지막 줄(또는 쓰기·설명에서 돌아온 줄)에서 멈춘 채 시작
   if (startId) { const k = L.findIndex(l => String(l.id) === String(startId)); if (k >= 0) st.cur = k; }
   select(st.cur, { scroll: st.cur > 0, force: true });
+  // 글꼴·영상 크기가 다 잡힌 뒤 한 번 더(처음 열 때 지금 줄이 영상 아래로 안 오던 문제) — 그사이 손으로 움직였으면 하지 않음
+  const settle = () => { if (st.cur > 0 && Date.now() - st.handScroll > 4000 && !playing()) underVideo(items[st.cur]); };
+  document.fonts?.ready.then(() => setTimeout(settle, 50));
+  setTimeout(settle, 600);
   v.addEventListener("loadedmetadata", () => { if (v.paused && !st.once) v.currentTime = L[st.cur].start; }, { once: true });
   sync();
   return () => { st.panel?.cleanup?.(); ex.stop(); removeEventListener("resize", pad); clearInterval(timer); clearTimeout(st.gap); document.removeEventListener("keydown", onKey); seq.stop(); v.pause(); v.removeAttribute("src"); v.load(); };
