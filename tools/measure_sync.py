@@ -7,7 +7,8 @@
 재는 법: 영상 소리를 말소리 대역(250~3500Hz)으로 걸러 10ms 단위 크기를 본다.
  · 시작 = 자막 시작 앞뒤(-1.6 ~ +0.4초)에서 소리가 크게 올라가는 곳을 찾고, 거기서 거꾸로 걸어 소리가 바닥+6dB 아래였던 마지막 지점
  · 끝   = 자막 끝 앞뒤(-1.0 ~ +0.6초)에서 바닥+6dB 아래로 내려가는 곳 · 다음 줄 시작보다 0.05초 앞을 넘지 않게
-결과는 앱이 줄 바꿈·한 줄 듣기에 쓴다(편 JSON 은 고치지 않는다 — 고칠 값은 본부에 알림).
+검사용(10-01 본부 회신): 앱은 편 JSON 시각을 정본으로 쓰고, 이 도구는 차이가 큰 줄을 찾아 본부에 알릴 때만 쓴다.
+ ⚠ 알려진 약점 — 발소리(1000Hz 아래 짧은 쿵) · 바닥 소음 · 앞 줄 꼬리를 시작으로 잡을 수 있다(세종 2·4·8번). 결과는 tools/_audit/sync/ 에 둔다.
 """
 import json, os, subprocess, sys
 import numpy as np, librosa, scipy.signal as sg
@@ -68,7 +69,7 @@ def measure(ep):
                 off = float(t[k]) + 0.12
                 break
         out[s["id"]]["off"] = round(min(off, nxt - 0.05), 2)
-    path = os.path.join(APP, "data", ep, f"{ep}.sync.json")
+    path = os.path.join(APP, "tools", "_audit", "sync", f"{ep}.sync.json")
     json.dump({"clip_id": ep, "how": "tools/measure_sync.py", "lines": out}, open(path, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
     for i, v in out.items():
         print(f"{i:>3}  자막 {v['start']:6.2f}~{v['end']:6.2f}  →  목소리 {v['on']:6.2f}~{v['off']:6.2f}  (시작 {v['start'] - v['on']:+.2f}초 늦었음)")
