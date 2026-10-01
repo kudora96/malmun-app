@@ -5,7 +5,8 @@
 //  S2 [▶ 본보기] = 그 토막 소리(쓰기의 「이 부분 듣기」와 같은 소리) · 아래 큰 ▶ 도 같다
 //  S3 [● 말하기] = 녹음 시작(처음 누를 때만 마이크 허락을 묻는다) → 말이 끝나고 1초 조용하면 저절로 멈춤 · 다시 눌러도 멈춤 · 길어도 8초
 //     녹음 중에는 들어오는 소리 크기를 막대로 보여 준다 · 마이크가 안 열리면 다른 마이크로 자동으로 다시(블루투스가 붙었다 떨어지면 기본 마이크가
-//     「장치가 제거됨」으로 안 열린다 — 10-01 투덜이 PC 실측) · 2.5초 동안 소리가 안 들어오면 알리고 마이크를 고르게 한다(🎤) · 왜 안 되는지 말해 준다
+//     「장치가 제거됨」으로 안 열린다 — 10-01 투덜이 PC 실측) · 1.5초 동안 신호가 0 이면 다음 마이크로 저절로 바꿔 다시 녹음하고, 소리가 들어온
+//     마이크를 기억한다 · 전부 0 일 때만 알리고 고르게 한다 · 🎤 로 언제든 직접 고를 수 있다 · 왜 안 되는지 말해 준다
 //  S4 [▶ 내 목소리] = 방금(또는 저장해 둔) 내 말 · [비교] = 본보기 → 내 목소리 이어서
 //  S5 점수 = 음성 인식이 되는 곳(크롬 등)에서 알아들은 글자와 대본의 닮음(자모 단위) % — 80% 넘으면 ✓ · 그 녹음을 저장 · 1.5초 뒤 다음 토막으로
 //     못 넘어도 막지 않는다([다음 ▶]) · 음성 인식이 안 되는 곳은 점수 없이 듣고 비교만(녹음은 저장)
@@ -97,7 +98,7 @@ export default async function speak(app, ep, id, opts = {}) {
     const sc = st.score ?? sv?.score ?? null;
     $(".sbar i").style.width = (sc ?? 0) + "%";
     $(".meter").classList.toggle("pass", sc != null && sc >= PASS);
-    $(".msg").textContent = st.rec ? t("listening") : sc == null ? (mineBlob() ? t("no_score") : SR ? t("speak_hint") : t("speak_hint_noscore"))
+    $(".msg").textContent = st.rec ? t(st.switched ? "mic_switched" : "listening") : sc == null ? (mineBlob() ? t("no_score") : SR ? t("speak_hint") : t("speak_hint_noscore"))
       : sc >= PASS ? `${sc}% ✓ ${t("score_pass")}` : `${sc}% · ${t("score_try")}`;
     $("[data-act=mine]").disabled = $("[data-act=both]").disabled = !mineBlob();
     $(".mic").classList.toggle("on", !!st.rec);
@@ -125,25 +126,30 @@ export default async function speak(app, ep, id, opts = {}) {
   // 마이크 열기 — 고른 마이크 → 기본 → 나머지 차례로(하나가 안 열려도 다음 것으로)
   const micPref = v => { try { if (v === undefined) return localStorage.getItem("malmun.mic"); v ? localStorage.setItem("malmun.mic", v) : localStorage.removeItem("malmun.mic"); } catch { return null; } };
   const openOne = c => Promise.race([navigator.mediaDevices.getUserMedia({ audio: c }), new Promise((_, rej) => setTimeout(() => rej(Object.assign(new Error("timeout"), { name: "TimeoutError" })), 8000))]);
+  // 크롬의 「기본」은 윈도우 기본 마이크가 아닐 수 있다(크롬이 따로 고른다 — 10-01 투덜이 PC: 소리가 0 인 블루투스가 잡힘).
+  // 그래서 열어 보고 소리가 0 이면 그 마이크를 dead 에 적고 다음 마이크로 넘어간다 · 소리가 들어온 마이크는 기억한다.
+  const dead = new Set();
+  const devId = s => s?.getAudioTracks()[0]?.getSettings().deviceId || "";
+  const closeMic = () => { st.stream?.getTracks().forEach(x => x.stop()); st.stream = null; };
   async function openMic() {
     if (st.stream?.getAudioTracks()[0]?.readyState === "live") return st.stream;
     st.stream = null;
-    let last = null;
-    const tries = [];
-    if (micPref()) tries.push({ deviceId: { exact: micPref() } });
-    tries.push(true);
-    for (let k = 0; k < tries.length; k++) {
-      try { return (st.stream = await openOne(tries[k])); }
-      catch (e) {
+    let last = null, devs = [];
+    try { devs = (await navigator.mediaDevices.enumerateDevices()).filter(x => x.kind === "audioinput" && x.deviceId).map(x => x.deviceId); } catch {}
+    const tries = [...new Set([micPref() || true, true, ...devs])];
+    for (const c of tries) {
+      if (dead.has(c)) continue;
+      try {
+        const s = await openOne(c === true ? true : { deviceId: { exact: c } });
+        if (dead.has(devId(s))) { s.getTracks().forEach(x => x.stop()); continue; } // 이름만 다른 같은 마이크
+        st.micReq = c;
+        return (st.stream = s);
+      } catch (e) {
         last = e;
         if (e.name === "NotAllowedError" || e.name === "SecurityError") break; // 허락을 안 한 것 — 다른 장치로 해도 같다
-        if (k === tries.length - 1 && !tries.listed) { // 다른 마이크들도 차례로
-          tries.listed = true;
-          try { for (const d of (await navigator.mediaDevices.enumerateDevices()).filter(x => x.kind === "audioinput" && x.deviceId && x.deviceId !== "default")) tries.push({ deviceId: { exact: d.deviceId } }); } catch {}
-        }
       }
     }
-    throw last || new Error("no mic");
+    throw last || Object.assign(new Error("silent"), { name: "SilentError" }); // 열리는 마이크마다 소리가 0
   }
   const micWhy = e => t(e?.name === "NotAllowedError" || e?.name === "SecurityError" ? "mic_denied" : e?.name === "NotFoundError" || e?.name === "OverconstrainedError" ? "mic_none" : "mic_busy");
   async function showMics(note) {
@@ -151,14 +157,19 @@ export default async function speak(app, ep, id, opts = {}) {
     if (!box.hidden && !note) { box.hidden = true; return; }
     let devs = [];
     try { devs = (await navigator.mediaDevices.enumerateDevices()).filter(x => x.kind === "audioinput" && x.deviceId); } catch {}
-    box.innerHTML = (note ? `<p>${esc(note)}</p>` : "") + (devs.length ? devs.map((d, k) => `<button data-mic="${esc(d.deviceId)}" aria-pressed="${(micPref() || "default") === d.deviceId}">${esc(d.label || t("mic_pick") + " " + (k + 1))}</button>`).join("") : `<p>${esc(t("mic_none"))}</p>`);
+    box.innerHTML = (note ? `<p>${esc(note)}</p>` : "") + (devs.length ? devs.map((d, k) => `<button data-mic="${esc(d.deviceId)}" aria-pressed="${[micPref(), devId(st.stream)].includes(d.deviceId)}">${esc(d.label || t("mic_pick") + " " + (k + 1))}</button>`).join("") : `<p>${esc(t("mic_none"))}</p>`);
     box.hidden = false;
   }
-  async function startRec() {
+  async function startRec(switched) {
     stopSounds();
+    st.switched = !!switched;
     $(".msg").textContent = t("mic_opening");
     try { await openMic(); }
-    catch (e) { $(".msg").textContent = micWhy(e); return; }
+    catch (e) {
+      if (e.name === "SilentError") { dead.clear(); $(".msg").textContent = t("mic_silent"); showMics(t("mic_silent")); }
+      else $(".msg").textContent = micWhy(e);
+      return;
+    }
     if (!st.alive) return;
     const rec = new MediaRecorder(st.stream), chunks = [];
     st.rec = rec; st.blob = null; st.score = null; heard = [];
@@ -176,18 +187,22 @@ export default async function speak(app, ep, id, opts = {}) {
     try {
       const ctx = audioCtx(), src = ctx.createMediaStreamSource(st.stream), an = ctx.createAnalyser();
       an.fftSize = 1024; src.connect(an);
-      const buf = new Float32Array(an.fftSize); let spoke = false, quietAt = 0, peak = 0; const began = Date.now();
+      const buf = new Float32Array(an.fftSize); let spoke = false, quietAt = 0, peak = 0, kept = false; const began = Date.now();
       const lvl = $(".lvl"); lvl.hidden = false;
-      meterTimer = setInterval(() => {
+      const timer = (meterTimer = setInterval(() => {
         an.getFloatTimeDomainData(buf);
         const rms = Math.sqrt(buf.reduce((s, v) => s + v * v, 0) / buf.length);
         peak = Math.max(peak, rms);
         lvl.firstElementChild.style.width = Math.min(100, Math.round(rms * 500)) + "%"; // 들어오는 소리 크기
+        // 바꿔서 연 마이크에 신호가 있으면(말하기 전이라도) 기억 — 다음에는 죽은 마이크를 다시 거치지 않는다
+        if (st.switched && !kept && peak >= 0.0002 && Date.now() - began > 1500) { kept = true; micPref(devId(st.stream) || (st.micReq !== true && st.micReq) || ""); }
+        if (rms > 0.02 && !spoke) micPref(devId(st.stream) || (st.micReq !== true && st.micReq) || ""); // 소리가 들어온 마이크를 기억
         if (rms > 0.02) { spoke = true; quietAt = 0; } else if (spoke) { quietAt ||= Date.now(); if (Date.now() - quietAt > QUIET_MS) stopRec(); }
-        // 2.5초 동안 아무 소리도 안 들어오면(꺼진 마이크 · 소리 없는 블루투스) 멈추고 알린다
-        if (!spoke && peak < 0.004 && Date.now() - began > 2500) { stopRec(true); st.stream?.getTracks().forEach(x => x.stop()); st.stream = null; $(".msg").textContent = t("mic_silent"); showMics(t("mic_silent")); }
-      }, 60);
-      rec.addEventListener("stop", () => { clearInterval(meterTimer); try { src.disconnect(); } catch {} }, { once: true });
+        // 1.5초 동안 신호가 아예 0 이면(꺼진 마이크 · 소리 없는 블루투스 — 조용한 방의 산 마이크는 0 이 아니다) 다음 마이크로 바꿔 다시 녹음
+        if (!spoke && peak < 0.0002 && Date.now() - began > 1500) { dead.add(st.micReq); if (devId(st.stream)) dead.add(devId(st.stream)); stopRec(true); closeMic(); startRec(true); }
+      }, 60));
+      rec.addEventListener("stop", () => { clearInterval(timer); // 내 것만 끈다 — 마이크를 바꿔 새로 시작한 녹음의 것을 끄면 안 된다
+        try { src.disconnect(); } catch {} }, { once: true });
     } catch {}
     maxTimer = setTimeout(() => stopRec(), MAX_MS);
     paint();
@@ -230,8 +245,8 @@ export default async function speak(app, ep, id, opts = {}) {
     if (sg) return go(st.i + +sg.dataset.seg);
     const mc = e.target.closest("[data-mic]");
     if (mc) { // 마이크 고르기 → 기억하고 다음 녹음부터 그 마이크
-      micPref(mc.dataset.mic === "default" ? "" : mc.dataset.mic);
-      stopRec(true); st.stream?.getTracks().forEach(x => x.stop()); st.stream = null;
+      micPref(mc.dataset.mic); dead.clear();
+      stopRec(true); closeMic();
       $(".miclist").hidden = true; $(".msg").textContent = t("mic_chosen");
       return;
     }

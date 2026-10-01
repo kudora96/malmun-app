@@ -69,5 +69,6 @@
  "mic_none": "No microphone was found.",
  "mic_busy": "The microphone could not be opened. Another app may be using it, or it was unplugged. Tap 🎤 to choose another one.",
  "mic_silent": "No sound is coming in. Choose another microphone below.",
- "mic_chosen": "Microphone changed. Press Speak again."
+ "mic_chosen": "Microphone changed. Press Speak again.",
+ "mic_switched": "That microphone was silent, so I switched to another one. Speak now."
 }
