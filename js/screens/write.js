@@ -3,24 +3,24 @@
 // 학습자가 누르면 무엇이 되나
 //  W1 위 토막의 글자 누르기 = 그 글자 소리 반복 ⇄ 멈춤(한 번에 한 글자) · 소리 없는 글자는 흐리게
 //  W2 자판 — 맞으면 「딩동」 → 그 자모 소리 · 틀리면 칸이 흔들리고 귀여운 「뿅뿅↘」 → 그래도 그 자모 소리(공부니까 · 10-01)
-//  W3 글자를 다 치면 「딩동」 → 마지막 자모 소리 → 0.5초 쉼 → 글자 소리 → 0.6초 쉼 → 다음 글자(ㅅ … ㅓ … 서 — 붙이지 않는다 · 10-01)
+//  W3 글자를 다 치면 「딩동」 → 마지막 자모 소리 → 0.6초 쉼 → 다음 글자 · 완성된 글자를 읽어 주는 소리는 없다(10-01 투덜이 「굳이 필요 없다」)
 //     소리가 나는 동안은 자판을 받지 않는다(소리가 잘리지 않게)
-//  W4 [단어 듣기] = 지금 낱말 · [이 부분 듣기] = 지금 토막(다시 누르면 멈춤) — 본부가 일레븐랩스로 따로 만든 소리(05_audio/{ep}/units/{id}.mp3 ·
+//  W4 [단어 듣기] = 지금 낱말 통째 · 낱말 칸의 글자(글 · 자 · 가)를 누르면 그 글자 하나 소리(10-01) · [이 부분 듣기] = 지금 토막(다시 누르면 멈춤) — 본부가 일레븐랩스로 따로 만든 소리(05_audio/{ep}/units/{id}.mp3 ·
 //     앞뒤 여유 문장으로 읽혀 그 말만 남김) · 아직 없으면 대사 원음을 잘라서(words.json cs/ce) · 글자 소리 이어 붙이기·줄 전체는 쓰지 않는다
-//     [자동 완성] = 지금 토막의 남은 글자를 앱이 한 자모씩 대신 쳐 준다(손으로 칠 때와 같은 소리·쉼) · 다시 누르거나 자판을 누르면 멈춤
+//     [자동 완성] = 지금 토막의 남은 글자를 앱이 한 자모씩 대신 쳐 준다 — 자음·모음 소리만(글자·단어·문장 소리 없음 · 10-01) · 다시 누르거나 자판을 누르면 멈춤
+//     글자·자모 소리 = 공용 아나운서 목소리(05_audio/_chars_f · data/chars_f.json) · 아직 없는 글자는 지금 글자 소리
 //     토막 = data/{ep}/{ep}.units.json 으로 고정(tools/writing_units.py) — 좁은 화면은 글자를 줄여 맞춘다
 //  W5 소리는 언제나 하나만 · 새 일을 하면 앞 소리는 멈춘다
 //  W6 영상 창 안(embedded): 창 안에서 스크롤 없이 다 보이게 — 긴 문장은 토막으로(◀ 1/3 ▶) ·
 //     토막을 다 쓰면 자동으로 다음 토막 · 줄을 다 쓰면 대사를 듣고 자동으로 다음 줄 쓰기 · 아래 ▶ = 이 부분 듣기
 import { t, lang } from "../i18n.js";
 import { esc, glossCards, toJamo, compose, vowelLen, JAMO_AUDIO } from "../text.js";
-import { episode, chars } from "../data.js";
+import { episode, chars, charsF } from "../data.js";
 import { paths } from "../paths.js";
 import { I } from "../ui.js";
 import { audioCtx, hold } from "../wake.js";
 
 const KEYS = [..."ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎㄲㄸㅃㅆㅉ"], VOW = [..."ㅏㅑㅓㅕㅗㅛㅜㅠㅡㅣ"];
-const GAP_JAMO = 500;     // 마지막 자모 소리 → 글자 소리 사이
 const GAP_NEXT = 600;     // 글자 소리 → 다음 글자 사이
 
 // ── 소리(W5) — 한 줄로만 · 차례 재생 · 취소 ──
@@ -110,7 +110,10 @@ async function run(steps) {
 }
 
 export default async function write(app, ep, id, opts = {}) {
-  const [d, idx] = await Promise.all([episode(ep, lang), chars()]);
+  const [d, idx, cf] = await Promise.all([episode(ep, lang), chars(), charsF()]);
+  // 글자·자모 소리: 공용 아나운서(chars_f) 먼저 · 없으면 지금 글자 소리 · 자모는 옛 jamo 이름
+  const charSrc = ch => (cf[ch] ? paths.charF(cf[ch]) : idx[ch] ? paths.char(idx[ch]) : null);
+  const jamoSrc = j => (cf[j] ? paths.charF(cf[j]) : JAMO_AUDIO[j] ? paths.jamo(JAMO_AUDIO[j]) : null);
   const li = Math.max(0, d.lines.findIndex(l => String(l.id) === String(id)));
   const line = d.lines[li];
   const cards = glossCards(line.glossLine);
@@ -118,7 +121,7 @@ export default async function write(app, ep, id, opts = {}) {
     const text = raw.replace(/[^가-힣]/g, "");
     const card = cards.find(c => c.ko.replace(/[^가-힣]/g, "") === text);
     const tm = line.words?.[wi]?.w === raw ? line.words[wi] : null; // 대사 원음 안 이 낱말의 시각
-    return { raw, text, tm, rom: card?.rom || "", mean: card?.mean || "", end: /[.?!…]$/.test(raw), chars: [...text].map(ch => ({ ch, jamo: toJamo(ch), file: idx[ch] || null })) };
+    return { raw, text, tm, rom: card?.rom || "", mean: card?.mean || "", end: /[.?!…]$/.test(raw), chars: [...text].map(ch => ({ ch, jamo: toJamo(ch), file: charSrc(ch) })) };
   });
   // 토막(W6) = units.json 고정 목록(없으면 같은 규칙으로 여기서 나눔: 문장 끝 · 8글자 · 기대는 말에서 안 끊음)
   const U = line.units;
@@ -193,7 +196,7 @@ export default async function write(app, ep, id, opts = {}) {
     }
     const w = words()[st.w], c = w.chars[st.c], jam = c.jamo;
     work.innerHTML = `<div class="stage"><div class="box"><span class="target ko" lang="ko">${esc(c.ch)}</span><span class="typed ko" lang="ko">${esc(compose(st.typed, vowelLen(c.ch)))}</span></div>
-      <div class="info"><div class="word ko" lang="ko">${w.chars.map((x, i) => (i === st.c ? `<b>${esc(x.ch)}</b>` : esc(x.ch))).join("")}${w.rom ? ` <span class="rom">${esc(w.rom)}</span>` : ""}</div>
+      <div class="info"><div class="word ko" lang="ko">${w.chars.map((x, i) => `<button class="wc ${i === st.c ? "now" : ""}" data-wc="${i}" ${x.file ? "" : "disabled"}>${esc(x.ch)}</button>`).join("")}${w.rom ? ` <span class="rom">${esc(w.rom)}</span>` : ""}</div>
       ${w.mean ? `<div class="mean tr">${esc(w.mean)}</div>` : ""}
       <div class="slots">${jam.map((j, i) => `<span class="slot ${i < st.k ? "filled" : i === st.k ? "current" : ""}">${i <= st.k ? esc(j) : ""}</span>`).join("")}</div></div></div>
       <div class="kb" lang="ko">${KEYS.map((j, i) => `<button class="${i >= 14 ? "dbl" : ""}" data-j="${j}">${j}</button>`).join("")}<span></span>${VOW.map(j => `<button class="v" data-j="${j}">${j}</button>`).join("")}</div>`;
@@ -203,7 +206,7 @@ export default async function write(app, ep, id, opts = {}) {
   async function finishChar(j, c) { // W3
     st.busy = true;
     work.querySelector(".box")?.classList.add("ok");
-    const ok = await run(["ok", JAMO_AUDIO[j] && paths.jamo(JAMO_AUDIO[j]), GAP_JAMO, c.file && paths.char(c.file), GAP_NEXT]);
+    const ok = await run(["ok", jamoSrc(j), GAP_NEXT]);
     if (!ok || !st.alive) { st.busy = false; return; }
     st.busy = false; st.c++; st.k = 0; st.typed = [];
     const w = words()[st.w];
@@ -214,10 +217,10 @@ export default async function write(app, ep, id, opts = {}) {
     }
     render();
   }
-  async function lineDone() { // 줄 끝 → 대사 듣고 → 다음 줄(자동)
+  async function lineDone() { // 줄 끝 → 대사 듣고 → 다음 줄(자동) · 자동 완성으로 끝냈으면 대사 소리 없이(W4)
     render();
-    st.sent = true; markSent();
-    const ok = await run([lineSrc, 900]);
+    st.sent = !st.auto; markSent();
+    const ok = await run(st.auto ? [900] : [lineSrc, 900]);
     st.sent = false; markSent();
     if (ok && st.alive && li < d.lines.length - 1) {
       if (opts.embedded) opts.onNext?.(li + 1);
@@ -233,7 +236,7 @@ export default async function write(app, ep, id, opts = {}) {
       const c = words()[st.w].chars[st.c], j = c.jamo[st.k];
       st.typed.push(j); st.k++; render();
       if (st.k >= c.jamo.length) await finishChar(j, c);
-      else { st.busy = true; await run(["ok", JAMO_AUDIO[j] && paths.jamo(JAMO_AUDIO[j]), 150]); st.busy = false; }
+      else { st.busy = true; await run(["ok", jamoSrc(j), 150]); st.busy = false; }
     }
     st.auto = false; if (st.alive) markAuto();
   }
@@ -242,7 +245,7 @@ export default async function write(app, ep, id, opts = {}) {
     if (st.busy || st.s >= segs.length) return;
     stopLoop(); st.sent = false; markSent();
     const c = words()[st.w].chars[st.c];
-    const voiceSrc = JAMO_AUDIO[j] && paths.jamo(JAMO_AUDIO[j]);
+    const voiceSrc = jamoSrc(j);
     if (c.jamo[st.k] !== j) {
       const s = work.querySelector(".slot.current"); s?.classList.remove("shake"); void s?.offsetWidth; s?.classList.add("shake");
       const k = work.querySelector(`[data-j="${j}"]`); k?.classList.add("wrong"); setTimeout(() => k?.classList.remove("wrong"), 500);
@@ -258,6 +261,13 @@ export default async function write(app, ep, id, opts = {}) {
   app.querySelector(".scr").onclick = e => {
     const k = e.target.closest("[data-j]");
     if (k) return press(k.dataset.j);
+    const wc = e.target.closest("[data-wc]");
+    if (wc) { // 글자 하나 소리(W4)
+      if (st.busy || st.auto) return;
+      const c = words()[st.w].chars[+wc.dataset.wc];
+      if (c.file) { stopLoop(); st.sent = false; markSent(); run([c.file]); }
+      return;
+    }
     const sg = e.target.closest("[data-seg]");
     if (sg) return goSeg(Math.max(0, Math.min(segs.length - 1, st.s + +sg.dataset.seg)));
     const cb = e.target.closest(".sent .c");
@@ -268,7 +278,7 @@ export default async function write(app, ep, id, opts = {}) {
       st.sent = false; markSent();
       if (st.loopAt && st.loopAt.w === w && st.loopAt.c === ci) return stopLoop();
       hush(); st.loopAt = { w, c: ci, ch: c.ch };
-      voice.src = paths.char(c.file); voice.currentTime = 0; loopSrc = voice.src; voice.play().catch(() => {});
+      voice.src = c.file; voice.currentTime = 0; loopSrc = voice.src; voice.play().catch(() => {});
       paintSent(); setNote();
       return;
     }

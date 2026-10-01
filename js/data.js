@@ -15,6 +15,13 @@ export async function chars() {
   return charsIndex;
 }
 
+let charsFIndex;
+// 공용 아나운서 글자·자모 소리 {글자 또는 자모: 파일명}(본부 · 05_audio/_chars_f/chars_f.json → tools/build_chars_index.py 가 data/ 로)
+export async function charsF() {
+  if (!charsFIndex) charsFIndex = getJSON("data/chars_f.json").catch(() => ({}));
+  return charsFIndex;
+}
+
 export async function episode(ep, lang) {
   const key = `${ep}.${lang}`;
   if (cache.has(key)) return cache.get(key);

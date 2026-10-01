@@ -261,3 +261,9 @@ a{color:inherit;text-decoration:none}
 .write .box.ok{border-color:var(--hi);background:var(--hi-soft)}
 .write .box.ok .typed{color:var(--hi)}
 .write .mean{color:var(--hi);font-size:13px}
+
+/* 낱말 칸 글자 = 누르면 그 글자 소리(W4) */
+.write .info .word .wc{font:inherit;font-weight:700;padding:0 1px;border-radius:5px;color:var(--ink)}
+.write .info .word .wc.now{color:var(--hi)}
+.write .info .word .wc:active{background:var(--hi-soft)}
+.write .info .word .wc:disabled{color:inherit;opacity:1}

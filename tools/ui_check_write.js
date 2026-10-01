@@ -38,10 +38,13 @@
   at = log.length; key("ㄱ"); await idle();
   ok(/^효과음 → 시작\(giyeok\.mp3\)/.test(desc(at)) && $(".panel .slot.current")?.classList.contains("shake"), "ㄱ 틀림 → 뿅뿅(귀여운 틀림 소리) → 그래도 ㄱ 소리 · 흔들림", desc(at));
   at = log.length; key("ㅓ"); await W(150); key("ㅅ"); await idle();
-  const ev = log.slice(at), jEnd = ev.find(e => e.ev === "끝" && e.name.includes("eo.mp3")), cStart = ev.find(e => e.ev === "시작" && e.name.includes("eo_char"));
-  ok(jEnd && cStart && cStart.t - jEnd.t >= 450, "ㅓ 완성 → 딩동 → ㅓ … 쉼 … 「어」", `${desc(at)} · 쉼 ${jEnd && cStart ? cStart.t - jEnd.t : "?"}ms`);
+  const ev = log.slice(at);
+  ok(/^효과음 → 시작\(eo\.mp3\) → 끝\(eo\.mp3\)$/.test(desc(at)), "ㅓ 완성 → 딩동 → ㅓ 소리 · 글자를 읽어 주는 소리 없음(W3)", desc(at));
   ok(!ev.some(e => e.name.includes("siot")), "소리 나는 중 누른 ㅅ 은 무시");
   ok($(".panel .target")?.textContent === "서", "다음 글자 「서」");
+  // 낱말 칸의 글자 하나 소리(W4)
+  at = log.length; [...document.querySelectorAll(".panel .info .wc")][1]?.click(); await idle();
+  ok(log.slice(at).filter(e => e.ev === "시작").length === 1 && /uC11C|seo/.test(desc(at)), "낱말 칸 「서」 누름 → 「서」 글자 소리 하나", desc(at));
   // 글자 반복
   const ch = [...document.querySelectorAll(".panel .sent .c")].find(c => c.textContent === "오" && !c.classList.contains("noaudio"));
   if (ch) { ch.click(); await W(300); const c2 = [...document.querySelectorAll(".panel .sent .c")].find(c => c.textContent === "오"); ok(c2.classList.contains("loop"), "「오」 누름 → 반복"); c2.click(); await W(200); ok(![...document.querySelectorAll(".panel .sent .c.loop")].length, "다시 → 멈춤"); }
@@ -61,12 +64,14 @@
   // 자동 완성 — 지금 토막의 남은 글자를 한 자모씩 · 글자마다 모양이 맞나 · 토막이 끝나면 멈춤 · 다시 누르면 멈춤
   const watchShapes = () => { const seen = []; const mo = new MutationObserver(() => { const b = $(".panel .box.ok"); if (b) { const k = b.querySelector(".target").textContent + "=" + b.querySelector(".typed").textContent; if (seen[seen.length - 1] !== k) seen.push(k); } }); mo.observe($(".panel .write"), { subtree: true, childList: true, attributes: true }); return { seen, stop: () => mo.disconnect() }; };
   let segBefore = $(".panel .segnav").innerText.replace(/\s/g, "");
-  let w8 = watchShapes(); $(".panel [data-act=auto]").click(); await W(300);
+  let w8 = watchShapes(); const atAuto = log.length; $(".panel [data-act=auto]").click(); await W(300);
   ok($(".panel [data-act=auto]").getAttribute("aria-pressed") === "true", "자동 완성 누름 → 「멈춤」 단추로 바뀜");
   await idle(30000); w8.stop();
   const badShape = w8.seen.filter(k => { const [a, b] = k.split("="); return a !== b; });
   ok(w8.seen.length >= 1 && !badShape.length && $(".panel .segnav").innerText.replace(/\s/g, "") !== segBefore && $(".panel [data-act=auto]").getAttribute("aria-pressed") === "false",
     "자동 완성 → 남은 글자를 한 자모씩 다 쳐서 토막 끝 · 저절로 멈춤", `${w8.seen.join(" ")}${badShape.length ? " · 틀린 모양 " + badShape.join(" ") : ""} · 토막 ${segBefore} → ${$(".panel .segnav").innerText.replace(/\s/g, "")}`);
+  const autoSounds = log.slice(atAuto).filter(e => e.ev === "시작").map(e => e.name);
+  ok(autoSounds.length > 0 && autoSounds.every(n => /^j\//.test(n) || /\/j_/.test(n)), "자동 완성 → 자음·모음 소리만(글자·단어·문장 소리 없음)", autoSounds.join(","));
   $(".panel [data-act=auto]").click(); await W(1500); $(".panel [data-act=auto]").click(); await W(200);
   ok($(".panel [data-act=auto]").getAttribute("aria-pressed") === "false", "자동 완성 중 다시 누름 → 멈춤");
   await idle(8000);

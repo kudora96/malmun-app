@@ -63,5 +63,22 @@ def build():
     print(len(m), "글자 (옛", old_n, "+ 새", len(m) - old_n, ")")
 
 
+def build_f():
+    """공용 아나운서 글자·자모 소리(본부 · 05_audio/_chars_f) → data/chars_f.json + 로컬 media/chars_f/ 복사"""
+    src = os.path.join(MALMUN, "05_audio", "_chars_f")
+    j = os.path.join(src, "chars_f.json")
+    if not os.path.exists(j):
+        print("chars_f 아직 없음"); return
+    m = {k: v for k, v in json.load(open(j, encoding="utf-8")).items() if os.path.exists(os.path.join(src, v))}
+    with open(os.path.join(APP, "data", "chars_f.json"), "w", encoding="utf-8") as f:
+        json.dump(m, f, ensure_ascii=False, indent=0)
+    local = os.path.join(APP, "media", "chars_f")
+    os.makedirs(local, exist_ok=True)
+    for v in set(m.values()):
+        shutil.copy2(os.path.join(src, v), os.path.join(local, v))
+    print(len(m), "공용 아나운서 글자·자모")
+
+
 if __name__ == "__main__":
     build()
+    build_f()
