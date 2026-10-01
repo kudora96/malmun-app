@@ -62,5 +62,12 @@
  "no_score": "Recorded. Listen and compare with the model.",
  "score_pass": "Great!",
  "score_try": "Try once more, or move on.",
- "no_mic": "Microphone is not available. Allow it in the browser settings."
+ "no_mic": "Microphone is not available.",
+ "mic_pick": "Microphone",
+ "mic_opening": "Turning on the microphone…",
+ "mic_denied": "The microphone is blocked. Allow it in the browser (lock icon next to the address).",
+ "mic_none": "No microphone was found.",
+ "mic_busy": "The microphone could not be opened. Another app may be using it, or it was unplugged. Tap 🎤 to choose another one.",
+ "mic_silent": "No sound is coming in. Choose another microphone below.",
+ "mic_chosen": "Microphone changed. Press Speak again."
 }

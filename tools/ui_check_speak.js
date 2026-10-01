@@ -13,10 +13,17 @@
   HTMLMediaElement.prototype.play = function () { this.volume = 0.0001; mediaPlays.push(this.src.slice(0, 5)); return op.call(this); };
   // 가짜 마이크
   let micAsked = 0;
-  navigator.mediaDevices.getUserMedia = async () => {
-    micAsked++;
+  // __micFail = 앞으로 몇 번 「장치가 제거됨」으로 실패할지 · __micSilent = 열리지만 소리가 0 인 마이크(소리 없는 블루투스)
+  try { localStorage.removeItem("malmun.mic"); } catch {}
+  navigator.mediaDevices.enumerateDevices = async () => [
+    { kind: "audioinput", deviceId: "default", label: "기본값 - 시험 마이크" }, { kind: "audioinput", deviceId: "bt", label: "시험 블루투스" }, { kind: "audioinput", deviceId: "usb", label: "시험 USB 마이크" }];
+  const asked = (window.__asked = []);
+  navigator.mediaDevices.getUserMedia = async c => {
+    micAsked++; asked.push(c.audio === true ? "기본" : c.audio.deviceId.exact);
+    if (window.__micFail > 0) { window.__micFail--; throw new DOMException("Device was removed", "NotReadableError"); }
+    if (window.__micDeny) throw new DOMException("denied", "NotAllowedError");
     const ctx = new AudioContext(), dst = ctx.createMediaStreamDestination(), o = ctx.createOscillator(), g = ctx.createGain();
-    g.gain.value = 0.3; o.connect(g); g.connect(dst); o.start(); window.__mic = { o, g, ctx };
+    g.gain.value = window.__micSilent ? 0 : 0.3; o.connect(g); g.connect(dst); o.start(); window.__mic = { o, g, ctx };
     return dst.stream;
   };
   const speakFor = ms => { const m = window.__mic; if (m) { m.g.gain.value = 0.3; setTimeout(() => { m.g.gain.value = 0; }, ms); } };
@@ -74,6 +81,35 @@
   await open(4);
   await say("아무 말"); await waitIdle();
   ok(!/%/.test($(".panel .msg").textContent) && !$(".panel [data-act=mine]").disabled, "음성 인식 없는 기기 → 점수 없이 녹음되고 [내 목소리]로 비교", $(".panel .msg").textContent);
+  // ── 마이크가 말썽일 때 ──
+  // ① 기본 마이크가 「장치가 제거됨」→ 다른 마이크로 자동으로 다시
+  await open(5); window.__micFail = 2; asked.length = 0;
+  await say("아무 말"); await W(300);
+  ok($(".panel .mic").classList.contains("on") && asked.join(",") === "기본,bt,usb", "기본 마이크·블루투스가 안 열림 → 다음 마이크로 자동으로 다시 → 녹음 시작", asked.join(" → "));
+  ok(!$(".panel .lvl").hidden && parseFloat($(".panel .lvl i").style.width) > 20, "녹음 중 소리 크기 막대가 움직임", $(".panel .lvl i").style.width);
+  await waitIdle();
+  ok($(".panel .lvl").hidden, "녹음이 끝나면 소리 크기 막대 사라짐");
+  // ② 열리지만 소리가 안 들어오는 마이크 → 2.5초 뒤 알리고 마이크 목록
+  await open(6); window.__micSilent = true;
+  $(".panel [data-act=rec]").click(); await W(3600);
+  ok(!$(".panel .mic").classList.contains("on") && !$(".panel .miclist").hidden && $(".panel .miclist").querySelectorAll("button").length === 3 && $(".panel .miclist p") && $(".panel [data-act=mine]").disabled, "소리가 안 들어옴 → 2.5초 뒤 멈추고 알림 + 마이크 목록(녹음은 버림)", $(".panel .msg").textContent);
+  const sp2 = $(".panel .speak"); ok(sp2.scrollHeight - sp2.clientHeight <= 1, "마이크 목록이 떠도 창 안 스크롤 없음", sp2.scrollHeight + "/" + sp2.clientHeight);
+  // ③ 목록에서 고름 → 기억 → 다음 녹음은 그 마이크
+  window.__micSilent = false; asked.length = 0;
+  $(".panel [data-mic=usb]").click(); await W(200);
+  ok($(".panel .miclist").hidden && localStorage.getItem("malmun.mic") === "usb", "마이크 고름 → 목록 닫히고 기억", $(".panel .msg").textContent);
+  await say("아무 말"); await W(300);
+  ok($(".panel .mic").classList.contains("on") && asked[0] === "usb", "다음 녹음은 고른 마이크로", asked.join(" → "));
+  await waitIdle();
+  // ④ 🎤 단추 = 목록 열고 닫기
+  $(".panel [data-act=pick]").click(); await W(200); const o1 = !$(".panel .miclist").hidden && $(".panel [data-mic=usb]").getAttribute("aria-pressed") === "true";
+  $(".panel [data-act=pick]").click(); await W(200);
+  ok(o1 && $(".panel .miclist").hidden, "🎤 → 목록 열림(고른 마이크 표시) · 다시 → 닫힘");
+  // ⑤ 허락 안 함 → 이유를 말해 줌 · 다른 마이크로 헛돌지 않음
+  await open(7); window.__micDeny = true; asked.length = 0;
+  $(".panel [data-act=rec]").click(); await W(500);
+  ok(!$(".panel .mic").classList.contains("on") && asked.length === 1 && $(".panel .msg").textContent.length > 20, "마이크 허락 안 함 → 한 번만 묻고 이유를 알려 줌", $(".panel .msg").textContent);
+  window.__micDeny = false; try { localStorage.removeItem("malmun.mic"); } catch {}
   window.__mic?.ctx.close();
   } catch (e) { res.push("✗ 점검 도중 오류: " + e.message); }
   const out = res.join("\n"); console.log(out); return out;
