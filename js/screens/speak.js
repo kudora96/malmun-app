@@ -180,7 +180,9 @@ export default async function speak(app, ep, id, opts = {}) {
       try {
         sr = new SR(); sr.lang = "ko-KR"; sr.interimResults = false; sr.maxAlternatives = 3;
         sr.onresult = e => { for (let i = 0; i < e.results.length; i++) for (let k = 0; k < e.results[i].length; k++) heard.push(e.results[i][k].transcript); };
-        sr.onerror = () => {}; sr.start();
+        sr.onerror = () => {};
+        // 녹음하는 바로 그 마이크로 알아듣게 한다 — 그냥 start() 는 크롬 기본 마이크(소리 0 인 블루투스일 수 있다)를 듣는다
+        try { sr.start(st.stream.getAudioTracks()[0]); } catch { sr.start(); }
       } catch { sr = null; }
     }
     // 말이 끝나고 1초 조용하면 멈춤
@@ -221,12 +223,12 @@ export default async function speak(app, ep, id, opts = {}) {
     st.blob = blob;
     if (sr) { // 인식 결과가 조금 늦게 온다
       for (let k = 0; k < 20 && !heard.length; k++) await new Promise(r => setTimeout(r, 100));
-      st.score = heard.length ? Math.max(...heard.map(h => similarity(cur().say, h))) : 0;
+      st.score = heard.length ? Math.max(...heard.map(h => similarity(cur().say, h))) : null; // 못 알아들었으면 0% 가 아니라 점수 없음
     } else st.score = null;
     if (!st.alive) return;
     const p = cur(), old = st.saved[p.key];
     // 저장: 80% 넘은 것(더 높은 점수로만 바꿈) · 점수를 못 재는 곳은 방금 것
-    if (st.score == null ? true : st.score >= PASS && st.score >= (old?.score ?? 0)) {
+    if (st.score == null ? !(old?.score >= PASS) : st.score >= PASS && st.score >= (old?.score ?? 0)) {
       st.saved[p.key] = { blob, score: st.score, at: Date.now() };
       recPut(`${ep}/${p.key}`, st.saved[p.key]);
     }

@@ -31,7 +31,7 @@
   };
   const speakFor = ms => { const m = window.__mic; if (m) { m.g.gain.value = 0.3; setTimeout(() => { m.g.gain.value = 0; }, ms); } };
   // 가짜 음성 인식
-  const fakeSR = class { start() { setTimeout(() => this.onresult?.({ results: [[{ transcript: window.__heard }]] }), 500); } stop() {} };
+  const fakeSR = class { start(tr) { window.__srTrack = tr?.kind || null; setTimeout(() => this.onresult?.({ results: [[{ transcript: window.__heard }]] }), 500); } stop() {} };
   window.SpeechRecognition = fakeSR; window.webkitSpeechRecognition = fakeSR;
   const line = i => [...document.querySelectorAll(".line")][i - 1];
   const open = async i => { line(i).querySelector(".kotext").click(); await W(1000); if (!$(".panel.speak")?.offsetHeight) { line(i).querySelector("[data-act=speak]").click(); await W(1200); } document.querySelector("video").pause(); };
@@ -55,6 +55,7 @@
   ok(!$(".panel .mic").classList.contains("on"), "말이 끝나고 조용하면 저절로 멈춤");
   ok(/50%/.test($(".panel .msg").textContent) && !$(".panel .meter").classList.contains("pass") && /1\/4/.test($(".panel .segnav").innerText.replace(/\s/g, "")), "다르게 말함 → 50% · 통과 아님 · 그 자리에 있음(막지 않음)", $(".panel .msg").textContent);
   ok(!$(".panel [data-act=mine]").disabled, "녹음 뒤 [내 목소리] 켜짐");
+  ok(window.__srTrack === "audio", "음성 인식이 녹음하는 그 마이크를 들음(크롬 기본 마이크가 아니라)", String(window.__srTrack));
   const mp = mediaPlays.length; $(".panel [data-act=mine]").click(); await W(600); ok(mediaPlays.length > mp && mediaPlays[mediaPlays.length - 1] === "blob:", "[내 목소리] → 방금 녹음 재생");
   // 맞게 말함 → 통과 · 저장 · 다음 토막
   await say("어서 오세요"); await waitIdle();
