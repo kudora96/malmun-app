@@ -75,5 +75,15 @@
  "score_4": "Well done! You passed.",
  "score_3": "Almost there. Try once more!",
  "score_2": "Not quite yet. Listen to the model again, then try.",
- "score_1": "Let's try again slowly. Listen to the model first."
+ "score_1": "Let's try again slowly. Listen to the model first.",
+ "help": "How to use",
+ "save_rec": "Save my recording",
+ "saved_file": "Saved to your Downloads folder.",
+ "line_done": "This line is done!",
+ "help_close": "Tap anywhere to close",
+ "help_sp_1": "▶ Model — listen to how it is said.",
+ "help_sp_2": "● Speak — say it. It stops by itself when you finish. 80% or more is a pass.",
+ "help_sp_3": "▶ My voice — hear your recording. Compare — the model, then you.",
+ "help_sp_4": "Only recordings that pass (80%+) are kept. Others are gone when you move on.",
+ "help_sp_5": "Recordings stay inside this browser. Clearing site data deletes them. ⬇ saves one as a file."
 }

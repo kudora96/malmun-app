@@ -31,7 +31,10 @@
   };
   const speakFor = ms => { const m = window.__mic; if (m) { m.g.gain.value = 0.3; setTimeout(() => { m.g.gain.value = 0; }, ms); } };
   // 가짜 음성 인식
-  const fakeSR = class { start(tr) { window.__srTrack = tr?.kind || null; setTimeout(() => this.onresult?.({ results: [[{ transcript: window.__heard }]] }), 500); } stop() {} };
+  // 가짜 인식 = 진짜처럼 중간 결과(앞 두 글자)를 먼저 주고 끝 결과를 준다 · continuous 가 아니면 진짜처럼 앞 두 글자에서 끊어 버린다
+  const fakeSR = class { start(tr) { window.__srTrack = tr?.kind || null; const h = window.__heard; window.__srCont = !!this.continuous;
+    setTimeout(() => this.onresult?.({ results: [[{ transcript: h.slice(0, 2) }]] }), 250);
+    setTimeout(() => this.onresult?.({ results: [[{ transcript: this.continuous ? h : h.slice(0, 2) }]] }), 500); } stop() {} };
   window.SpeechRecognition = fakeSR; window.webkitSpeechRecognition = fakeSR;
   const line = i => [...document.querySelectorAll(".line")][i - 1];
   const open = async i => { line(i).querySelector(".kotext").click(); await W(1000); if (!$(".panel.speak")?.offsetHeight) { line(i).querySelector("[data-act=speak]").click(); await W(1200); } document.querySelector("video").pause(); };
@@ -41,7 +44,13 @@
   await new Promise(r => { const q = indexedDB.deleteDatabase("malmun"); q.onsuccess = q.onerror = q.onblocked = r; });
 
   ok(!!line(1).querySelector("[data-act=speak]"), "줄 단추에 [말하기] 있음(쓰기 옆)", line(1).querySelector(".acts").innerText.replace(/\n/g, " · "));
+  try { localStorage.removeItem("malmun.sp.help"); } catch {}
   await open(1);
+  const hb = $(".panel .helpbox"), hbShown = !hb.hidden && hb.querySelectorAll("p").length === 6;
+  $(".panel .task").click(); await W(100);
+  ok(hbShown && hb.hidden, "처음 열면 사용법 풍선이 저절로 · 아무 데나 누르면 닫힘");
+  $(".panel [data-act=help]").click(); await W(100); const hb2 = !hb.hidden; $(".panel [data-act=help]").click(); await W(100);
+  ok(hb2 && hb.hidden && $(".panel [data-act=save]").disabled, "[?] → 풍선 열림 · 다시 → 닫힘 · 녹음 전에는 [⬇] 꺼져 있음");
   const sp = $(".panel .speak"), p = $(".panel").getBoundingClientRect(), btn = $(".panel .sbtns").getBoundingClientRect();
   ok($("#vwrap").offsetHeight === 0 && sp && sp.scrollHeight - sp.clientHeight <= 1 && btn.bottom <= p.bottom + 1, "말하기가 영상 창 자리에 · 창 안 스크롤 없음");
   ok($(".panel .say").textContent === "어서 오세요." && /1\/4/.test($(".panel .segnav").innerText.replace(/\s/g, "")), "과제 = 첫 토막 「어서 오세요.」 · 1/4(토막 3 + 줄 전체)", $(".panel .say").textContent + " " + $(".panel .segnav").innerText.replace(/\s/g, ""));
@@ -55,6 +64,10 @@
   ok(!$(".panel .mic").classList.contains("on"), "말이 끝나고 조용하면 저절로 멈춤");
   ok(/50%/.test($(".panel .msg").textContent) && !$(".panel .meter").classList.contains("pass") && /1\/4/.test($(".panel .segnav").innerText.replace(/\s/g, "")), "다르게 말함 → 50% · 통과 아님 · 그 자리에 있음(막지 않음)", $(".panel .msg").textContent);
   ok(!$(".panel [data-act=mine]").disabled, "녹음 뒤 [내 목소리] 켜짐");
+  let dl = null; const oc = HTMLAnchorElement.prototype.click; HTMLAnchorElement.prototype.click = function () { if (this.download) dl = this.download + " " + this.href.slice(0, 5); else oc.call(this); };
+  $(".panel [data-act=save]").click(); await W(200); HTMLAnchorElement.prototype.click = oc;
+  ok(/^malmun_L01-00-01_01_p01\.(webm|m4a|ogg) blob:$/.test(dl || ""), "[⬇] → 내 녹음을 파일로 내려받음", String(dl));
+  ok(window.__srCont === true, "음성 인식이 말을 끝까지 들음(짧은 말을 중간에 끊지 않음)");
   ok(window.__srTrack === "audio", "음성 인식이 녹음하는 그 마이크를 들음(크롬 기본 마이크가 아니라)", String(window.__srTrack));
   const mp = mediaPlays.length; $(".panel [data-act=mine]").click(); await W(600); ok(mediaPlays.length > mp && mediaPlays[mediaPlays.length - 1] === "blob:", "[내 목소리] → 방금 녹음 재생");
   // 점수에 맞는 한마디 — 반쯤 맞음(50%)과 많이 틀림(40 미만)은 말이 다르다
@@ -83,7 +96,8 @@
     if (!/^1 \//.test($(".panel .whead .sub").textContent)) break;
     await say(heard); await waitIdle(); await W(1900);
   }
-  ok(/^2 \//.test($(".panel .whead .sub")?.textContent || ""), "줄 전체까지 통과 → 2번 줄 말하기로 자동", $(".panel .whead .sub")?.textContent);
+  await W(600);
+  ok(/^1 \//.test($(".panel .whead .sub")?.textContent || "") && /4\/4✓/.test($(".panel .segnav").innerText.replace(/\s/g, "")) && /100% ✓ · .+/.test($(".panel .msg").textContent), "줄 전체까지 통과 → 거기서 끝(다음 줄로 넘어가지 않음) · 「이 줄을 다 했어요」", $(".panel .whead .sub")?.textContent + " · " + $(".panel .msg").textContent);
   // 음성 인식이 없는 기기 → 점수 없이 녹음·비교
   delete window.SpeechRecognition; delete window.webkitSpeechRecognition;
   await open(4);

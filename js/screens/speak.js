@@ -3,6 +3,7 @@
 // 학습자가 누르면 무엇이 되나
 //  S1 과제 = 지금 줄의 토막(쓰기와 같은 고정 토막) 차례 → 줄 전체 → (있으면) 새 설명의 「이제 말해 보세요」 문장 · ◀ 1/4 ▶ 로 옮김
 //  S2 [▶ 본보기] = 그 토막 소리(쓰기의 「이 부분 듣기」와 같은 소리) · 아래 큰 ▶ 도 같다
+//  S8 줄의 마지막 과제를 통과하면 거기서 끝 — 다음 줄로 저절로 넘어가지 않는다 · [⬇] = 내 녹음을 파일로 · [?] = 사용법 풍선(처음 한 번은 저절로)
 //  S3 [● 말하기] = 녹음 시작(처음 누를 때만 마이크 허락을 묻는다) → 말이 끝나고 1초 조용하면 저절로 멈춤 · 다시 눌러도 멈춤 · 길어도 8초
 //     녹음 중에는 들어오는 소리 크기를 막대로 보여 준다 · 마이크가 안 열리면 다른 마이크로 자동으로 다시(블루투스가 붙었다 떨어지면 기본 마이크가
 //     「장치가 제거됨」으로 안 열린다 — 10-01 투덜이 PC 실측) · 1.5초 동안 신호가 0 이면 다음 마이크로 저절로 바꿔 다시 녹음하고, 소리가 들어온
@@ -69,8 +70,9 @@ export default async function speak(app, ep, id, opts = {}) {
 
   app.innerHTML = `<section class="scr speak ${opts.embedded ? "embedded" : ""}">
     <div class="whead"><b>${esc(t("speak"))}</b><span class="sub">${li + 1} / ${d.lines.length} · <span class="ko" lang="ko">${esc(line.speaker)}</span></span>
-      <button class="micpick" data-act="pick" aria-label="${esc(t("mic_pick"))}">🎤</button><span class="segnav"></span></div>
+      <button class="micpick" data-act="help" aria-label="${esc(t("help"))}">?</button><button class="micpick" data-act="save" aria-label="${esc(t("save_rec"))}" title="${esc(t("save_rec"))}" disabled>⬇</button><button class="micpick" data-act="pick" aria-label="${esc(t("mic_pick"))}">🎤</button><span class="segnav"></span></div>
     <div class="miclist" hidden></div>
+    <div class="helpbox" hidden>${[1, 2, 3, 4, 5].map(k => `<p>${esc(t("help_sp_" + k))}</p>`).join("")}<p class="x">${esc(t("help_close"))}</p></div>
     <div class="task"><div class="say ko" lang="ko"></div><div class="tr"></div></div>
     <div class="meter"><div class="lvl" hidden><i></i></div><div class="sbar"><i></i><em style="left:${PASS}%"></em></div><div class="msg" aria-live="polite"></div></div>
     <div class="sbtns">
@@ -100,7 +102,7 @@ export default async function speak(app, ep, id, opts = {}) {
     $(".meter").classList.toggle("pass", sc != null && sc >= PASS);
     $(".msg").textContent = st.rec ? t(st.switched ? "mic_switched" : "listening") : sc == null ? (mineBlob() ? t("no_score") : SR ? t("speak_hint") : t("speak_hint_noscore"))
       : `${sc}%${sc >= PASS ? " ✓" : ""} · ${t(sc >= 95 ? "score_5" : sc >= PASS ? "score_4" : sc >= 60 ? "score_3" : sc >= 40 ? "score_2" : "score_1")}`; // 점수에 맞는 한마디
-    $("[data-act=mine]").disabled = $("[data-act=both]").disabled = !mineBlob();
+    $("[data-act=mine]").disabled = $("[data-act=both]").disabled = $("[data-act=save]").disabled = !mineBlob();
     $(".mic").classList.toggle("on", !!st.rec);
     $(".mic .lab").textContent = st.rec ? t("btn_stop") : t("speak_now");
     $("[data-act=model]").setAttribute("aria-pressed", String(st.model));
@@ -178,8 +180,13 @@ export default async function speak(app, ep, id, opts = {}) {
     rec.start();
     if (SR) {
       try {
-        sr = new SR(); sr.lang = "ko-KR"; sr.interimResults = false; sr.maxAlternatives = 3;
-        sr.onresult = e => { for (let i = 0; i < e.results.length; i++) for (let k = 0; k < e.results[i].length; k++) heard.push(e.results[i][k].transcript); };
+        // continuous + 중간 결과 — 그냥 두면 짧은 말을 「글자」에서 끊고 「예요」를 버린다(10-01 본보기 소리로 실측: 글자예요 → 글자 56%)
+        sr = new SR(); sr.lang = "ko-KR"; sr.continuous = true; sr.interimResults = true; sr.maxAlternatives = 3;
+        sr.onresult = e => {
+          const rs = Array.from(e.results, r => Array.from(r));
+          for (const r of rs) for (const alt of r) heard.push(alt.transcript);
+          if (rs.length > 1) heard.push(rs.map(r => r[0].transcript).join(" ")); // 여러 도막으로 나뉘어 온 말을 이어서도 본다
+        };
         sr.onerror = () => {};
         // 녹음하는 바로 그 마이크로 알아듣게 한다 — 그냥 start() 는 크롬 기본 마이크(소리 0 인 블루투스일 수 있다)를 듣는다
         try { sr.start(st.stream.getAudioTracks()[0]); } catch { sr.start(); }
@@ -237,12 +244,13 @@ export default async function speak(app, ep, id, opts = {}) {
       await new Promise(r => setTimeout(r, 1500));
       if (!st.alive || st.rec || cur() !== p) return;
       if (st.i < parts.length - 1) go(st.i + 1);
-      else if (li < d.lines.length - 1) opts.embedded ? opts.onNext?.(li + 1) : (location.hash = `#/speak/${ep}/${d.lines[li + 1].id}`);
+      else $(".msg").textContent = `${st.score}% ✓ · ${t("line_done")}`; // 이 줄 끝 — 다음 줄로 넘어가지 않는다(다음 줄은 학습자가 고른다)
     }
   }
   app.__sp = { toggle: () => (st.model ? (stopSounds(), paint()) : playModel()), busy: () => !!st.rec || st.model || sfx.playing(), _finish: finish, _state: st };
 
   app.querySelector(".scr").onclick = async e => {
+    if (!$(".helpbox").hidden) { $(".helpbox").hidden = true; if (e.target.closest("[data-act=help], .helpbox")) return; } // 풍선은 아무 데나 누르면 닫힘
     const sg = e.target.closest("[data-seg]");
     if (sg) return go(st.i + +sg.dataset.seg);
     const mc = e.target.closest("[data-mic]");
@@ -256,6 +264,15 @@ export default async function speak(app, ep, id, opts = {}) {
     if (!b || b.disabled) return;
     const a = b.dataset.act;
     if (a === "pick") { stopRec(true); return showMics(); }
+    if (a === "help") { stopRec(true); $(".miclist").hidden = true; $(".helpbox").hidden = false; return; }
+    if (a === "save") { // 내 녹음을 파일로
+      const bl = mineBlob(); if (!bl) return;
+      const u = URL.createObjectURL(bl), el = document.createElement("a");
+      el.href = u; el.download = `malmun_${cur().key}.${/mp4/.test(bl.type) ? "m4a" : /ogg/.test(bl.type) ? "ogg" : "webm"}`;
+      document.body.append(el); el.click(); el.remove(); setTimeout(() => URL.revokeObjectURL(u), 5000);
+      $(".msg").textContent = t("saved_file");
+      return;
+    }
     if (a === "model") { stopRec(true); st.model ? (stopSounds(), paint()) : playModel(); }
     else if (a === "rec") st.rec ? stopRec() : startRec();
     else if (a === "mine") { stopRec(true); playMine(); }
@@ -263,6 +280,7 @@ export default async function speak(app, ep, id, opts = {}) {
   };
 
   paint();
+  try { if (!localStorage.getItem("malmun.sp.help")) { localStorage.setItem("malmun.sp.help", "1"); $(".helpbox").hidden = false; } } catch {} // 처음 한 번은 풍선이 저절로
   sfx.preload([lineSrc, ...parts.map(p => p.src)]);
   const release = hold();
   return () => { st.alive = false; stopRec(true); stopSounds(); st.stream?.getTracks().forEach(x => x.stop()); release(); delete app.__sp; };
