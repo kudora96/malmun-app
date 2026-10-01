@@ -10,7 +10,7 @@ export const paths = {
   video: ep => `${MEDIA}/video/${ep}.mp4?v=2`,
   poster: ep => `img/${ep}.jpg`,
   audio: (ep, file) => `${MEDIA}/audio/${ep}/${file}`,
-  unit: (ep, id) => `${MEDIA}/audio/${ep}/units/${id}.mp3?v=2`, // 쓰기 낱말·토막 소리(본부 일레븐랩스) · v2 = 앞뒤 여유 + 대사와 같은 말투(10-01)
+  unit: (ep, id) => `${MEDIA}/audio/${ep}/units/${id}.mp3?v=3`, // 쓰기 낱말·토막 소리(본부 일레븐랩스) · v2 = 앞뒤 여유 + 대사와 같은 말투 · v3 = 15번 맨 앞 둘 다시(10-01)
   // 글자·자모 = 크기를 맞춘 사본(tools/normalize_letters.py → letters/c · letters/j)
   // ?v= = 소리를 다시 만들면 올린다(폰·브라우저에 남은 옛 소리를 쓰지 않게) — v2: 앞 0.2초·뒤 0.15초 여유(10-01)
   char: file => `${MEDIA}/letters/c/${file}?v=2`,
