@@ -7,7 +7,7 @@
 //  R4 큰 ▶ · 영상 누르기 · 스페이스 = 멈춤 ↔ 이어서(하던 것 그대로 · 한 줄 듣기가 끝난 뒤면 거기서부터 이어 보기)
 //  R5 ◀ ▶(이전·다음 줄)  = 그 줄로 이동 · 재생 중이면 그 줄부터 이어 재생 · 멈춰 있으면 그 줄 처음에서 멈춤
 //  R6 🔁 반복            = 선택한 줄을 끝 → 0.7초 쉼 → 처음으로 계속 · 반복 중 다른 줄을 누르면 그 줄을 반복
-//  R7 재생 중엔 지금 줄이 화면 가운데로 따라옴 — 학습자가 목록을 손으로 움직이면 4초 동안은 따라가지 않음
+//  R7 영상은 늘 맨 위 · 지금 줄은 영상 바로 아래(앞 줄은 영상 뒤로) — 손으로 목록을 움직이면 4초 동안은 따라가지 않음
 //  R8 듣기 모드(대사→설명 · 설명만)도 R1~R6 그대로(영상 대신 소리 조각) · 모드를 바꾸면 멈춤(▶ 로 시작)
 //  R9 다시 들어오면 마지막 줄이 선택된 채 멈춰 있음
 import { t, lang } from "../i18n.js";
@@ -30,6 +30,7 @@ export default async function learn(app, ep, startId) {
   const seq = new Sequence();
 
   app.innerHTML = `<section class="scr learn">
+    <div class="stick">
     <div class="video" id="vwrap"><video playsinline preload="metadata" poster="${paths.poster(ep)}" src="${paths.video(ep)}"></video>
       <span class="vplay" aria-hidden="true">${I.play}</span>
       <button class="vfs" data-act="fs" aria-label="${esc(t("fullscreen"))}">${FS}</button></div>
@@ -37,6 +38,8 @@ export default async function learn(app, ep, startId) {
       <button data-mode="video" aria-pressed="true">${esc(t("mode_video"))}</button>
       <button data-mode="full" aria-pressed="false">${esc(t("mode_full"))}</button>
       <button data-mode="explain" aria-pressed="false">${esc(t("mode_explain"))}</button>
+      <span class="where" aria-live="polite"></span>
+    </div>
     </div>
     <ol class="lines">${L.map((l, i) => `<li class="line sp-${SPEAKER[l.speaker] || "x"} ${l.speaker === "선생님" ? "" : "right"}" data-i="${i}">
       <span class="who ko" lang="ko">${esc(l.speaker)}</span>
@@ -69,10 +72,21 @@ export default async function learn(app, ep, startId) {
       st.cur = i;
     }
     items[i].classList.add("cur");
-    if (scroll && (force || Date.now() - st.handScroll > 4000)) items[i].scrollIntoView({ block: "center", behavior: reduce ? "auto" : "smooth" });
+    items.forEach((li, k) => li.classList.toggle("past", k < i));
+    app.querySelector(".where").textContent = `${i + 1} / ${L.length}`;
+    if (scroll && (force || Date.now() - st.handScroll > 4000)) underVideo(items[i]);
     const p = progress.get(ep);
     progress.set(ep, { at: i, line: Math.max(p.line || 0, i + 1) });
   }
+  // 지금 줄 = 영상(+모드 줄) 바로 아래 · 앞 줄들은 영상 뒤로 올라간다
+  const stick = app.querySelector(".stick"), list = app.querySelector(".lines");
+  function underVideo(el) {
+    const y = el.getBoundingClientRect().top + scrollY - stick.offsetHeight - 10;
+    scrollTo({ top: Math.max(0, y), behavior: reduce ? "auto" : "smooth" });
+  }
+  // 마지막 줄도 영상 바로 아래까지 올라올 수 있게 목록 아래 여백 = 화면에서 영상을 뺀 높이
+  const pad = () => { list.style.paddingBottom = Math.max(120, innerHeight - stick.offsetHeight - 40) + "px"; };
+  addEventListener("resize", pad); pad();
   ["touchmove", "wheel"].forEach(e => window.addEventListener(e, () => { st.handScroll = Date.now(); }, { passive: true }));
 
   const playing = () => (st.mode === "video" ? !v.paused || !!st.gap : seq.playing);
@@ -217,5 +231,5 @@ export default async function learn(app, ep, startId) {
   select(st.cur, { scroll: st.cur > 0, force: true });
   v.addEventListener("loadedmetadata", () => { if (v.paused && !st.once) v.currentTime = L[st.cur].start; }, { once: true });
   sync();
-  return () => { clearInterval(timer); clearTimeout(st.gap); document.removeEventListener("keydown", onKey); seq.stop(); v.pause(); v.removeAttribute("src"); v.load(); };
+  return () => { removeEventListener("resize", pad); clearInterval(timer); clearTimeout(st.gap); document.removeEventListener("keydown", onKey); seq.stop(); v.pause(); v.removeAttribute("src"); v.load(); };
 }
