@@ -13,6 +13,7 @@
     --hi:#f2d27a;--hi-soft:rgba(242,210,122,.12);--pink:#f29c8f;--blue:#9cc9f0;--on-hi:#1d3530;--bubble:#244039;--bubble-cur:#2c4c44;color-scheme:dark}
 }
 *{box-sizing:border-box}
+[hidden]{display:none!important} /* hidden 속성이 다른 display 규칙에 지지 않게(설명 창이 닫혀도 남던 버그) */
 html,body{margin:0;height:100%}
 body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--f-ui);-webkit-tap-highlight-color:transparent}
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;padding:0}
