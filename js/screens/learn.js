@@ -253,7 +253,7 @@ export default async function learn(app, ep, startId) {
     sync();
   }
   function togglePlay() { // R4
-    if (st.panel?.kind === "write") { window.toggleKrSentenceAudio?.(); return; } // 쓰기 창: ▶ = 문장 듣기
+    if (st.panel?.kind === "write") { panel.__wr?.toggle(); return; } // 쓰기 창: ▶ = 문장 듣기(W6)
     if (st.panel?.kind === "explain") { // 설명 창: ▶ = 설명 읽기 멈춤/이어서
       if (playing()) { clearTimeout(st.gap); st.gap = 0; ex.pause(); }
       else if (ex.q.length) ex.resume(); else ex.play(exItems(st.panel.i));
