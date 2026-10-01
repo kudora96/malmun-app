@@ -21,7 +21,7 @@
  "gloss_toggle": "Hangul guide",
  "no_explain": "No explanation for this line yet.",
  "line_audio": "Line",
- "listen_word": "Word",
+ "listen_word": "Listen to the word",
  "listen_sentence": "Listen to the whole sentence",
  "autofill": "Auto-fill",
  "loop_hint": "Tap a letter above to hear it on repeat.",
@@ -49,5 +49,6 @@
  "fullscreen": "Full screen",
  "play_all": "All",
  "explain_kr": "Korean explanation",
- "listen_line": "Play this line"
+ "listen_line": "Play this line",
+ "listen_part": "Listen to this part"
 }

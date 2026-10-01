@@ -2,13 +2,14 @@
 //
 // 학습자가 누르면 무엇이 되나
 //  W1 위 토막의 글자 누르기 = 그 글자 소리 반복 ⇄ 멈춤(한 번에 한 글자) · 소리 없는 글자는 흐리게
-//  W2 자판 — 맞으면 「딩동」 → 그 자모 소리 · 틀리면 칸이 흔들리고 「툭」 → 그래도 그 자모 소리(공부니까 · 10-01)
+//  W2 자판 — 맞으면 「딩동」 → 그 자모 소리 · 틀리면 칸이 흔들리고 귀여운 「뿅뿅↘」 → 그래도 그 자모 소리(공부니까 · 10-01)
 //  W3 글자를 다 치면 「딩동」 → 마지막 자모 소리 → 0.5초 쉼 → 글자 소리 → 0.6초 쉼 → 다음 글자(ㅅ … ㅓ … 서 — 붙이지 않는다 · 10-01)
 //     소리가 나는 동안은 자판을 받지 않는다(소리가 잘리지 않게)
-//  W4 [단어 듣기] = 지금 단어의 글자를 차례로 · [문장 듣기] = 대사 한 줄(다시 누르면 멈춤) · [자동 완성] = 지금 글자를 대신 쳐 줌
+//  W4 [단어 듣기] = 대사 원음에서 지금 낱말만 잘라서 · [이 부분 듣기] = 원음에서 지금 토막만(다시 누르면 멈춤) · [자동 완성] = 지금 글자를 대신 쳐 줌
+//     (글자 소리를 이어 붙이면 기계음 같다 · 줄 전체가 나오면 안 된다 — 10-01 투덜이) · 낱말 시각 = data/{ep}/{ep}.words.json
 //  W5 소리는 언제나 하나만 · 새 일을 하면 앞 소리는 멈춘다
 //  W6 영상 창 안(embedded): 창 안에서 스크롤 없이 다 보이게 — 긴 문장은 토막으로 나눠 한 토막씩(◀ 1/3 ▶) ·
-//     토막을 다 쓰면 자동으로 다음 토막 · 줄을 다 쓰면 대사를 듣고 자동으로 다음 줄 쓰기 · 아래 ▶ = 문장 듣기
+//     토막을 다 쓰면 자동으로 다음 토막 · 줄을 다 쓰면 대사를 듣고 자동으로 다음 줄 쓰기 · 아래 ▶ = 이 부분 듣기
 import { t, lang } from "../i18n.js";
 import { esc, glossCards, toJamo, compose, vowelLen, JAMO_AUDIO } from "../text.js";
 import { episode, chars } from "../data.js";
@@ -34,19 +35,50 @@ function playSrc(src, my) {
     voice.src = src; voice.currentTime = 0; voice.play().catch(done);
   });
 }
-function tone(kind) { // 딩동(맞음) · 툭(틀림)
+// 원음 한 토막만(start~end 초) — 끝에서 정확히 멈춘다
+function playClip(src, start, end, my) {
+  return new Promise(res => {
+    if (my !== token) return res();
+    let iv = 0;
+    const done = () => { clearInterval(iv); clearTimeout(guard); voice.removeEventListener("error", done); voice.pause(); voice.volume = 1; res(); };
+    const guard = setTimeout(done, (end - start) * 1000 + 3000);
+    voice.addEventListener("error", done);
+    const go = () => {
+      voice.currentTime = start; voice.volume = 0;
+      voice.play().catch(done);
+      // 앞뒤 0.03초 페이드(본부 권장 — 이어 말한 낱말 경계의 앞뒤 소리가 툭 튀지 않게)
+      const F = 0.03;
+      iv = setInterval(() => {
+        const t = voice.currentTime;
+        if (my !== token || t >= end || voice.ended) return done();
+        voice.volume = Math.max(0, Math.min(1, (t - start) / F, (end - t) / F));
+      }, 10);
+    };
+    if (voice.src === new URL(src, location.href).href && voice.readyState >= 1) go();
+    else { voice.src = src; voice.addEventListener("loadedmetadata", go, { once: true }); voice.load(); }
+  });
+}
+function tone(kind) { // 딩동(맞음) · 뿅뿅↘(틀림 — 귀엽게)
   try {
     actx ||= new (window.AudioContext || window.webkitAudioContext)();
     if (actx.state === "suspended") actx.resume();
-    const notes = kind === "ok" ? [[880, 0], [1320, 0.09]] : [[170, 0]];
-    for (const [f, at] of notes) {
-      const o = actx.createOscillator(), g = actx.createGain(), t0 = actx.currentTime + at;
-      o.type = kind === "ok" ? "triangle" : "sine"; o.frequency.value = f;
-      g.gain.setValueAtTime(kind === "ok" ? 0.18 : 0.28, t0); g.gain.exponentialRampToValueAtTime(0.001, t0 + (kind === "ok" ? 0.16 : 0.2));
-      o.connect(g); g.connect(actx.destination); o.start(t0); o.stop(t0 + 0.22);
+    if (kind === "ok") {
+      for (const [f, at] of [[880, 0], [1320, 0.09]]) {
+        const o = actx.createOscillator(), g = actx.createGain(), t0 = actx.currentTime + at;
+        o.type = "triangle"; o.frequency.value = f;
+        g.gain.setValueAtTime(0.18, t0); g.gain.exponentialRampToValueAtTime(0.001, t0 + 0.16);
+        o.connect(g); g.connect(actx.destination); o.start(t0); o.stop(t0 + 0.2);
+      }
+    } else { // 뿅뿅↘ — 높은 데서 미끄러져 내려오는 짧은 두 번(장난감 소리처럼)
+      for (const [f0, f1, at] of [[720, 520, 0], [560, 360, 0.12]]) {
+        const o = actx.createOscillator(), g = actx.createGain(), t0 = actx.currentTime + at;
+        o.type = "triangle"; o.frequency.setValueAtTime(f0, t0); o.frequency.exponentialRampToValueAtTime(f1, t0 + 0.1);
+        g.gain.setValueAtTime(0.2, t0); g.gain.exponentialRampToValueAtTime(0.001, t0 + 0.12);
+        o.connect(g); g.connect(actx.destination); o.start(t0); o.stop(t0 + 0.14);
+      }
     }
   } catch {}
-  return wait(kind === "ok" ? 260 : 230);
+  return wait(kind === "ok" ? 260 : 300);
 }
 // steps: "ok" | "bad" | number(쉼 ms) | 소리 주소 — 앞 것을 끊고 차례로
 async function run(steps) {
@@ -55,6 +87,7 @@ async function run(steps) {
     if (my !== token) return false;
     if (s === "ok" || s === "bad") await tone(s);
     else if (typeof s === "number") await wait(s);
+    else if (s && s.clip) await playClip(s.clip, s.start, s.end, my);
     else if (s) await playSrc(s, my);
   }
   return my === token;
@@ -65,10 +98,11 @@ export default async function write(app, ep, id, opts = {}) {
   const li = Math.max(0, d.lines.findIndex(l => String(l.id) === String(id)));
   const line = d.lines[li];
   const cards = glossCards(line.glossLine);
-  const allWords = line.ko.split(/\s+/).filter(w => /[가-힣]/.test(w)).map(raw => {
+  const allWords = line.ko.split(/\s+/).filter(w => /[가-힣]/.test(w)).map((raw, wi) => {
     const text = raw.replace(/[^가-힣]/g, "");
     const card = cards.find(c => c.ko.replace(/[^가-힣]/g, "") === text);
-    return { raw, text, rom: card?.rom || "", mean: card?.mean || "", end: /[.?!…]$/.test(raw), chars: [...text].map(ch => ({ ch, jamo: toJamo(ch), file: idx[ch] || null })) };
+    const tm = line.words?.[wi]?.w === raw ? line.words[wi] : null; // 대사 원음 안 이 낱말의 시각
+    return { raw, text, tm, rom: card?.rom || "", mean: card?.mean || "", end: /[.?!…]$/.test(raw), chars: [...text].map(ch => ({ ch, jamo: toJamo(ch), file: idx[ch] || null })) };
   });
   // 토막 나누기(W6) — 문장 끝(. ? !)에서 끊고, 그래도 길면 낱말 단위로 한 줄에 들어가는 글자 수 안
   // 한 줄에 들어가는 글자 수 = (창 너비 − 양옆 여백 − ◀ 1/5 ▶) ÷ 글자 하나 너비(약 30px · 낱말 사이 포함)
@@ -92,7 +126,7 @@ export default async function write(app, ep, id, opts = {}) {
       <div class="grow"><div class="t">${esc(t("write"))}</div><div class="sub">${li + 1} / ${d.lines.length} · <span class="ko" lang="ko">${esc(line.speaker)}</span></div></div></div><div class="loopnote" aria-live="polite"></div>`}
     <div class="segrow"><div class="sent" lang="ko"></div><div class="segnav"></div></div>
     <div class="work"></div>
-    <div class="wbtns"><button data-act="word">${esc(t("listen_word"))}</button><button data-act="sent">${esc(t("listen_sentence"))}</button><button data-act="auto">${esc(t("autofill"))}</button></div>
+    <div class="wbtns"><button data-act="word">${esc(t("listen_word"))}</button><button data-act="sent">${esc(t("listen_part"))}</button><button data-act="auto">${esc(t("autofill"))}</button></div>
   </section>`;
 
   const $ = s => app.querySelector(s);
@@ -103,11 +137,16 @@ export default async function write(app, ep, id, opts = {}) {
   function stopLoop() { if (!st.loopAt) return; st.loopAt = null; hush(); paintSent(); setNote(); }
   function resetSounds() { stopLoop(); hush(); st.sent = false; markSent(); }
 
-  function toggleSentence() { // W4 · 아래 ▶
-    if (!lineSrc) return;
+  // 지금 토막의 원음 구간(낱말 시각이 없으면 줄 전체)
+  const partStep = () => {
+    const ws = words(), a = ws[0]?.tm, b = ws[ws.length - 1]?.tm;
+    return a && b && lineSrc ? { clip: lineSrc, start: a.start, end: b.end } : lineSrc;
+  };
+  function toggleSentence() { // W4 · 아래 ▶ = 이 부분 듣기
+    if (!lineSrc || st.s >= segs.length) return;
     if (st.sent) { st.sent = false; hush(); return markSent(); }
     stopLoop(); st.sent = true; markSent();
-    run([lineSrc]).then(() => { st.sent = false; markSent(); });
+    run([partStep()]).then(() => { st.sent = false; markSent(); });
   }
   app.__wr = { toggle: toggleSentence, busy: () => st.busy || st.sent || !voice.paused }; // busy = 점검 도구가 소리 끝을 기다릴 때
 
@@ -199,9 +238,10 @@ export default async function write(app, ep, id, opts = {}) {
     if (!b) return;
     const a = b.dataset.act;
     if (a === "sent") toggleSentence();
-    else if (a === "word" && st.s < segs.length && !st.busy) { // W4 — 글자를 차례로(사이 0.25초)
+    else if (a === "word" && st.s < segs.length && !st.busy) { // W4 — 원음에서 이 낱말만
       stopLoop(); st.sent = false; markSent();
-      run(words()[st.w].chars.filter(c => c.file).flatMap(c => [paths.char(c.file), 250]));
+      const w = words()[st.w];
+      run(w.tm && lineSrc ? [{ clip: lineSrc, start: w.tm.start, end: w.tm.end }] : w.chars.filter(c => c.file).flatMap(c => [paths.char(c.file), 250]));
     } else if (a === "auto" && st.s < segs.length && !st.busy) {
       stopLoop(); const c = words()[st.w].chars[st.c];
       st.typed = [...c.jamo]; st.k = c.jamo.length; render(); finishChar(c.jamo[c.jamo.length - 1], c);

@@ -37,6 +37,10 @@ def sync_episode(ep):
     kr = os.path.join(src, f"{ep}.kr.json")
     if os.path.exists(kr):
         shutil.copy2(kr, out)
+    # 대사 원음 낱말 시각(본부 강제 정렬) — 05_audio/{ep}/{ep}.words.json 이 있으면 그것이 정본
+    words = os.path.join(MALMUN, "05_audio", ep, f"{ep}.words.json")
+    if os.path.exists(words):
+        shutil.copy2(words, out)
     langs = []
     for lang in LANGS:
         f = os.path.join(src, f"{ep}.{lang}.json")

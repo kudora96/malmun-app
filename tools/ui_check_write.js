@@ -8,7 +8,9 @@
   HTMLMediaElement.prototype.play = function () {
     this.muted = true;
     const name = decodeURIComponent((this.src || "").split("/").slice(-2).join("/"));
-    if (!this.__h) { this.__h = 1; this.addEventListener("ended", () => log.push({ t: T(), ev: "끝", name: decodeURIComponent((this.src || "").split("/").slice(-2).join("/")) })); }
+    if (!this.__h) { this.__h = 1;
+      this.addEventListener("ended", () => log.push({ t: T(), ev: "끝", name: decodeURIComponent((this.src || "").split("/").slice(-2).join("/")) }));
+      this.addEventListener("pause", () => { if (!this.ended) log.push({ t: T(), ev: "멈춤", name: decodeURIComponent((this.src || "").split("/").slice(-2).join("/")), pos: this.currentTime }); }); }
     log.push({ t: T(), ev: "시작", name }); return op.call(this);
   };
   const AC = window.AudioContext, oo = AC.prototype.createOscillator; let lastTone = 0;
@@ -32,7 +34,7 @@
   let at = log.length; key("ㅇ"); await idle();
   ok(desc(at) === "효과음 → 시작(ieung.mp3) → 끝(ieung.mp3)", "ㅇ 맞음 → 딩동 → 자모 소리", desc(at));
   at = log.length; key("ㄱ"); await idle();
-  ok(/^효과음 → 시작\(giyeok\.mp3\)/.test(desc(at)) && $(".panel .slot.current")?.classList.contains("shake"), "ㄱ 틀림 → 툭 → 그래도 ㄱ 소리 · 흔들림", desc(at));
+  ok(/^효과음 → 시작\(giyeok\.mp3\)/.test(desc(at)) && $(".panel .slot.current")?.classList.contains("shake"), "ㄱ 틀림 → 뿅뿅(귀여운 틀림 소리) → 그래도 ㄱ 소리 · 흔들림", desc(at));
   at = log.length; key("ㅓ"); await W(150); key("ㅅ"); await idle();
   const ev = log.slice(at), jEnd = ev.find(e => e.ev === "끝" && e.name.includes("eo.mp3")), cStart = ev.find(e => e.ev === "시작" && e.name.includes("eo_char"));
   ok(jEnd && cStart && cStart.t - jEnd.t >= 450, "ㅓ 완성 → 딩동 → ㅓ … 쉼 … 「어」", `${desc(at)} · 쉼 ${jEnd && cStart ? cStart.t - jEnd.t : "?"}ms`);
@@ -42,11 +44,22 @@
   const ch = [...document.querySelectorAll(".panel .sent .c")].find(c => c.textContent === "오" && !c.classList.contains("noaudio"));
   if (ch) { ch.click(); await W(300); const c2 = [...document.querySelectorAll(".panel .sent .c")].find(c => c.textContent === "오"); ok(c2.classList.contains("loop"), "「오」 누름 → 반복"); c2.click(); await W(200); ok(![...document.querySelectorAll(".panel .sent .c.loop")].length, "다시 → 멈춤"); }
   // 단어 듣기 · 문장 듣기 · 아래 ▶
-  at = log.length; $(".panel [data-act=word]").click(); await idle();
-  ok(log.slice(at).filter(e => e.ev === "시작").length >= 2, "단어 듣기 → 글자 차례로", desc(at));
-  $(".panel [data-act=sent]").click(); await W(200); ok($(".panel [data-act=sent]").getAttribute("aria-pressed") === "true", "문장 듣기 켜짐");
-  $(".panel [data-act=sent]").click(); await W(200); ok($(".panel [data-act=sent]").getAttribute("aria-pressed") === "false", "문장 듣기 멈춤");
-  $(".ctrl [data-act=play]").click(); await W(200); ok($(".panel [data-act=sent]").getAttribute("aria-pressed") === "true", "아래 ▶ = 문장 듣기"); $(".ctrl [data-act=play]").click(); await W(200);
+  // 단어 듣기 · 이 부분 듣기 = 대사 원음(_sub_t1)을 잘라서 · 줄 전체가 나오면 안 됨
+  const words = await (await fetch("data/L01-00-01/L01-00-01.words.json", { cache: "no-store" })).json();
+  const w1 = words.lines["1"].map(w => ({ w: w.w, start: w.cs ?? w.start, end: w.ce ?? w.end }));
+  const clipCheck = async (btn, wantStart, wantEnd, name) => {
+    const at0 = log.length; $(btn).click(); await idle(6000);
+    const ev = log.slice(at0), st0 = ev.find(e => e.ev === "시작" && e.name.includes("_sub_t1")), stop = ev.find(e => e.ev === "멈춤" && e.name.includes("_sub_t1"));
+    const played = st0 && stop ? (stop.t - st0.t) / 1000 : null;
+    ok(st0 && stop && Math.abs(stop.pos - wantEnd) < 0.12 && Math.abs(played - (wantEnd - wantStart)) < 0.35, name,
+      `원음 ${wantStart.toFixed(2)}~${wantEnd.toFixed(2)}초 · 실제 ${played?.toFixed(2)}초 재생 · 멈춘 곳 ${stop?.pos?.toFixed(2)}`);
+  };
+  await clipCheck(".panel [data-act=word]", w1[0].start, w1[0].end, "단어 듣기 → 원음에서 「어서」만");
+  const seg0 = $(".panel .sent").innerText.replace(/\s/g, ""), segWords = w1.filter(w => seg0.includes(w.w.replace(/[^가-힣]/g, "")));
+  await clipCheck(".panel [data-act=sent]", segWords[0].start, segWords[segWords.length - 1].end, `이 부분 듣기 → 원음에서 지금 토막 「${seg0}」만(줄 전체 아님)`);
+  $(".panel [data-act=sent]").click(); await W(200); ok($(".panel [data-act=sent]").getAttribute("aria-pressed") === "true", "이 부분 듣기 켜짐");
+  $(".panel [data-act=sent]").click(); await W(200); ok($(".panel [data-act=sent]").getAttribute("aria-pressed") === "false", "다시 누르면 멈춤");
+  $(".ctrl [data-act=play]").click(); await W(200); ok($(".panel [data-act=sent]").getAttribute("aria-pressed") === "true", "아래 ▶ = 이 부분 듣기"); $(".ctrl [data-act=play]").click(); await W(200);
   // 1번 줄을 끝까지 → 대사 → 2번 줄 쓰기(자동)
   const t0 = T(); let guard = 0;
   while ($(".panel .target") && /1 \//.test($(".panel .whead .sub").textContent) && guard++ < 60) {
