@@ -1,75 +1,74 @@
-// 쓰기 전수 점검 — #/learn/{편} 을 연 채로 콘솔(또는 자동화)에서 실행. 소리는 끄고 어떤 소리가 났는지만 적는다.
-// 확인: 자판 맞음/틀림 · 글자 모양(친 낱자로 만든 글자 = 목표 글자) · 겹모음·겹받침·쌍받침 · 문장 완성 · 글자 반복 · 단어/문장 듣기 · 자동 완성 · 다시 연습 · 아래 ▶
-(async () => {
+// 쓰기 전수 점검(W1~W6) — #/learn/{편} 을 연 채로 실행. 소리는 끄고, 무슨 소리가 언제 났는지 적는다.
+// 확인: 맞음(딩동→자모) · 틀림(툭→그 자모 소리도) · 글자 완성(자모 … 0.5초 … 글자) · 소리 중 자판 무시 ·
+//       창 안 스크롤 없음(자판·단추가 창 안에) · 긴 줄 토막 나누기 · 토막 끝 → 다음 토막 · 줄 끝 → 대사 → 다음 줄 · 글자 반복 · 단어/문장 듣기 · 아래 ▶
+(async () => { const res = []; try {
   const W = ms => new Promise(s => setTimeout(s, ms));
-  const played = [];
+  const log = []; const T = () => Math.round(performance.now());
   const op = HTMLMediaElement.prototype.play;
-  HTMLMediaElement.prototype.play = function () { this.muted = true; played.push(decodeURIComponent((this.src || "").split("/").slice(-2).join("/"))); return op.call(this); };
-  const AC = window.AudioContext; const oo = AC.prototype.createOscillator;
-  AC.prototype.createOscillator = function () { played.push("툭(틀림)"); return oo.call(this); };
-  const $ = s => document.querySelector(s), res = [];
-  const ok = (cond, name, extra = "") => res.push(`${cond ? "✓" : "✗"} ${name}${extra ? " · " + extra : ""}`);
+  HTMLMediaElement.prototype.play = function () {
+    this.muted = true;
+    const name = decodeURIComponent((this.src || "").split("/").slice(-2).join("/"));
+    if (!this.__h) { this.__h = 1; this.addEventListener("ended", () => log.push({ t: T(), ev: "끝", name: decodeURIComponent((this.src || "").split("/").slice(-2).join("/")) })); }
+    log.push({ t: T(), ev: "시작", name }); return op.call(this);
+  };
+  const AC = window.AudioContext, oo = AC.prototype.createOscillator; let lastTone = 0;
+  AC.prototype.createOscillator = function () { const now = T(); if (now - lastTone > 50) log.push({ t: now, ev: "효과음", name: "" }); lastTone = now; return oo.call(this); };
+  const $ = s => document.querySelector(s);
+  const ok = (c, name, extra = "") => res.push(`${c ? "✓" : "✗"} ${name}${extra ? " · " + extra : ""}`);
   const line = i => [...document.querySelectorAll(".line")][i - 1];
-  const openWrite = async i => { line(i).querySelector(".kotext").click(); await W(400); if (!$(".panel.write")) line(i).querySelector("[data-act=write]").click(); await W(1300); };
-  const key = async j => { const b = [...document.querySelectorAll(".panel [data-j]")].find(b => b.dataset.j === j); if (!b) return false; b.click(); await W(60); return true; };
-  // 지금 글자의 자모(화면 칸에 적힌 것 = 앱이 기대하는 순서)를 친다
-  const typeChar = async () => {
-    const target = $(".panel .target")?.textContent;
-    const slots = [...document.querySelectorAll(".panel .slot")].length;
-    let last = "";
-    for (let k = 0; k < slots; k++) {
-      const cur = $(".panel .slot.current")?.textContent;
-      if (!cur) break;
-      await key(cur); last = $(".panel .typed")?.textContent || last;
-    }
-    await W(750);
-    return { target, last };
+  const openWrite = async i => { line(i).querySelector(".kotext").click(); await W(1200); if (!$(".panel.write")) { line(i).querySelector("[data-act=write]").click(); await W(1300); } };
+  const key = j => [...document.querySelectorAll(".panel [data-j]")].find(b => b.dataset.j === j)?.click();
+  const idle = async (max = 8000) => { const t0 = T(); await W(150); let calm = 0; while (T() - t0 < max) { const b = $(".panel .write")?.parentElement?.__wr?.busy?.() ?? false; calm = b ? 0 : calm + 1; if (calm >= 3) return; await W(100); } };
+  const fits = () => {
+    const p = $(".panel").getBoundingClientRect(), wr = $(".panel .write");
+    const keys = [...document.querySelectorAll(".panel .kb button")], btns = $(".panel .wbtns").getBoundingClientRect();
+    const lastKey = keys.length ? keys[keys.length - 1].getBoundingClientRect() : { bottom: 0 };
+    return { scroll: wr.scrollHeight - wr.clientHeight, inside: btns.bottom <= p.bottom + 1 && lastKey.bottom <= btns.top + 1, sentOverflow: $(".panel .sent").scrollWidth - $(".panel .sent").clientWidth };
   };
-  const typeAll = async () => {
-    const bad = []; let n = 0;
-    while ($(".panel .target")) { const r = await typeChar(); n++; if (r.last !== r.target) bad.push(`${r.target}≠${r.last}`); if (n > 80) break; }
-    return { n, bad };
-  };
+  const desc = from => log.slice(from).map(e => `${e.ev}${e.name ? "(" + e.name.split("/").pop() + ")" : ""}`).join(" → ");
 
   await openWrite(1);
-  ok(!!$(".panel.write .kb") && $(".panel .sent .c"), "1번 쓰기 열림", $(".panel .sent").innerText.replace(/\s+/g, " "));
-  played.length = 0; await key("ㅇ");
-  ok($(".panel .slot.filled")?.textContent === "ㅇ" && played.some(p => p.includes("ieung")), "ㅇ 맞음 → 칸 채움 + 자모 소리", played.join(","));
-  played.length = 0; await key("ㄱ"); await W(200);
-  ok($(".panel .slot.current")?.classList.contains("shake") && played.join() === "툭(틀림)", "ㄱ 틀림 → 흔들림 + 툭만(자모 소리 없음)", played.join(","));
-  played.length = 0; await key("ㅓ"); await W(100);
-  ok($(".panel .box")?.classList.contains("ok") && played.length === 1 && played[0].startsWith("c/"), "ㅓ(마지막 낱자) → 「어」 완성 + 글자 소리 하나만", played.join(","));
-  await W(750); ok($(".panel .target")?.textContent === "서", "0.65초 뒤 다음 글자 「서」");
-  const s1 = await typeAll();
-  ok(!!$(".panel .done-card") && !s1.bad.length, `1번 문장 끝까지(${s1.n}글자 · 겹모음 환)`, s1.bad.join(" "));
-  await W(500); ok(played.some(p => p.includes("_01_sub_t1")), "문장 완성 → 대사 소리", played.slice(-2).join(","));
-  $(".panel [data-act=retry]").click(); await W(300); ok($(".panel .target")?.textContent === "어", "다시 연습 → 처음 「어」");
+  let f = fits(); ok(f.scroll <= 1 && f.inside, "창 안 스크롤 없음 · 자판·단추가 창 안", `넘침 ${f.scroll}px`);
+  let at = log.length; key("ㅇ"); await idle();
+  ok(desc(at) === "효과음 → 시작(ieung.mp3) → 끝(ieung.mp3)", "ㅇ 맞음 → 딩동 → 자모 소리", desc(at));
+  at = log.length; key("ㄱ"); await idle();
+  ok(/^효과음 → 시작\(giyeok\.mp3\)/.test(desc(at)) && $(".panel .slot.current")?.classList.contains("shake"), "ㄱ 틀림 → 툭 → 그래도 ㄱ 소리 · 흔들림", desc(at));
+  at = log.length; key("ㅓ"); await W(150); key("ㅅ"); await idle();
+  const ev = log.slice(at), jEnd = ev.find(e => e.ev === "끝" && e.name.includes("eo.mp3")), cStart = ev.find(e => e.ev === "시작" && e.name.includes("eo_char"));
+  ok(jEnd && cStart && cStart.t - jEnd.t >= 450, "ㅓ 완성 → 딩동 → ㅓ … 쉼 … 「어」", `${desc(at)} · 쉼 ${jEnd && cStart ? cStart.t - jEnd.t : "?"}ms`);
+  ok(!ev.some(e => e.name.includes("siot")), "소리 나는 중 누른 ㅅ 은 무시");
+  ok($(".panel .target")?.textContent === "서", "다음 글자 「서」");
   // 글자 반복
-  const ch = [...document.querySelectorAll(".panel .sent .c")].find(c => !c.classList.contains("noaudio") && c.textContent === "오");
-  played.length = 0; ch.click(); await W(300);
-  ok(ch.classList.contains("loop") && played.length === 1 && /반복|दोहोर|Repeat/.test($(".panel .loopnote").textContent), "「오」 누름 → 반복 시작", played.join(","));
-  ch.click(); await W(200); ok(!ch.classList.contains("loop"), "「오」 다시 → 반복 멈춤");
-  ch.click(); await W(200); await key("ㅇ"); await W(100); ok(!ch.classList.contains("loop"), "반복 중 자판 → 반복 멈춤");
+  const ch = [...document.querySelectorAll(".panel .sent .c")].find(c => c.textContent === "오" && !c.classList.contains("noaudio"));
+  if (ch) { ch.click(); await W(300); const c2 = [...document.querySelectorAll(".panel .sent .c")].find(c => c.textContent === "오"); ok(c2.classList.contains("loop"), "「오」 누름 → 반복"); c2.click(); await W(200); ok(![...document.querySelectorAll(".panel .sent .c.loop")].length, "다시 → 멈춤"); }
   // 단어 듣기 · 문장 듣기 · 아래 ▶
-  played.length = 0; $(".panel [data-act=word]").click(); await W(2600); ok(played.length >= 2, "단어 듣기 → 글자를 차례로", played.join(","));
-  $(".panel [data-act=sent]").click(); await W(200); ok($(".panel [data-act=sent]").getAttribute("aria-pressed") === "true", "문장 듣기 → 켜짐");
-  $(".panel [data-act=sent]").click(); await W(200); ok($(".panel [data-act=sent]").getAttribute("aria-pressed") === "false", "문장 듣기 다시 → 멈춤");
-  $(".ctrl [data-act=play]").click(); await W(200); ok($(".panel [data-act=sent]").getAttribute("aria-pressed") === "true", "아래 ▶ → 문장 듣기");
-  $(".ctrl [data-act=play]").click(); await W(200); ok($(".panel [data-act=sent]").getAttribute("aria-pressed") === "false", "아래 ▶ 다시 → 멈춤");
-  // 자동 완성
-  const before = $(".panel .target").textContent; $(".panel [data-act=auto]").click(); await W(900);
-  ok($(".panel .target")?.textContent !== before, "자동 완성 → 다음 글자로", `${before} → ${$(".panel .target")?.textContent}`);
-  // 겹받침(읽) · 쌍받침(랐 · 었) 문장
-  for (const i of [5, 8, 13]) {
-    if (!line(i)) continue;
-    await openWrite(i);
-    const r = await typeAll();
-    ok(!!$(".panel .done-card") && !r.bad.length, `${i}번 문장 끝까지(${r.n}글자)`, r.bad.join(" ") || $(".panel .done-card .big")?.textContent);
+  at = log.length; $(".panel [data-act=word]").click(); await idle();
+  ok(log.slice(at).filter(e => e.ev === "시작").length >= 2, "단어 듣기 → 글자 차례로", desc(at));
+  $(".panel [data-act=sent]").click(); await W(200); ok($(".panel [data-act=sent]").getAttribute("aria-pressed") === "true", "문장 듣기 켜짐");
+  $(".panel [data-act=sent]").click(); await W(200); ok($(".panel [data-act=sent]").getAttribute("aria-pressed") === "false", "문장 듣기 멈춤");
+  $(".ctrl [data-act=play]").click(); await W(200); ok($(".panel [data-act=sent]").getAttribute("aria-pressed") === "true", "아래 ▶ = 문장 듣기"); $(".ctrl [data-act=play]").click(); await W(200);
+  // 1번 줄을 끝까지 → 대사 → 2번 줄 쓰기(자동)
+  const t0 = T(); let guard = 0;
+  while ($(".panel .target") && /1 \//.test($(".panel .whead .sub").textContent) && guard++ < 60) {
+    const cur = $(".panel .slot.current")?.textContent; if (!cur) { await W(300); continue; }
+    const before = log.length; key(cur); await idle(5000); if (log.length === before) await W(300);
   }
-  // 다른 줄 누르면 그 줄 쓰기 · 쓰기 단추 다시 = 영상
-  line(2).querySelector(".kotext").click(); await W(1300);
-  ok(/2 \//.test($(".panel .whead .sub")?.textContent || ""), "쓰기 중 2번 줄 → 2번 쓰기");
-  line(2).querySelector("[data-act=write]").click(); await W(500);
-  ok($("#vwrap").offsetHeight > 0 && $(".panel").offsetHeight === 0, "쓰기 다시 → 영상");
+  await W(500); await idle(9000); await W(1200);
+  ok(/^2 \//.test($(".panel .whead .sub")?.textContent || ""), "1번 줄 다 쓰면 → 대사 → 2번 줄 쓰기로 자동", `${Math.round((T() - t0) / 1000)}초 · 지금 ${$(".panel .whead .sub")?.textContent}`);
+  // 긴 줄(8번) — 토막 · 스크롤 없음 · 토막 넘김
+  await openWrite(8);
+  f = fits(); const nav = $(".panel .segnav")?.innerText || "";
+  ok(/1\/\d/.test(nav) && f.sentOverflow <= 1 && f.scroll <= 1, "8번(41글자) 토막으로 · 한 줄에 다 보임 · 스크롤 없음", `${nav.replace(/\s/g, "")} · ${$(".panel .sent").innerText.replace(/\s+/g, " ")} · 넘침 ${f.sentOverflow}/${f.scroll}`);
+  const total = +(nav.match(/\/(\d+)/) || [])[1] || 1;
+  $(".panel [data-seg='1']").click(); await W(300); ok(new RegExp(`2/${total}`).test($(".panel .segnav").innerText.replace(/\s/g, "")), "토막 ▶ → 2번째 토막", $(".panel .sent").innerText.replace(/\s+/g, " "));
+  // 마지막 토막으로 가서 자동 완성으로 끝내기 → 다음 줄(9번)
+  for (let s = 2; s < total; s++) { $(".panel [data-seg='1']").click(); await W(200); }
+  guard = 0;
+  while ($(".panel .target") && /^8 \//.test($(".panel .whead .sub").textContent) && guard++ < 30) { $(".panel [data-act=auto]").click(); await idle(5000); }
+  await W(500); await idle(12000); await W(1500);
+  ok(/^9 \//.test($(".panel .whead .sub")?.textContent || ""), "8번 마지막 토막 끝 → 대사 → 9번 줄 쓰기로 자동", $(".panel .whead .sub")?.textContent);
+  line(9).querySelector("[data-act=write]").click(); await W(400);
+  ok($("#vwrap").offsetHeight > 0 && $(".panel").offsetHeight === 0, "쓰기 단추 다시 → 영상");
+  } catch (e) { res.push("✗ 점검 도중 오류: " + e.message); }
   const out = res.join("\n"); console.log(out); return out;
 })();

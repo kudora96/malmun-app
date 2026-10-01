@@ -210,7 +210,7 @@ export default async function learn(app, ep, startId) {
       panel.innerHTML = explainHTML(i);
       if (autoplay) ex.play(exItems(i));
     } else {
-      const cleanup = await writeView(panel, ep, L[i].id, { embedded: true });
+      const cleanup = await writeView(panel, ep, L[i].id, { embedded: true, onNext: k => openPanel("write", k) }); // 줄을 다 쓰면 다음 줄 쓰기(W6)
       if (st.panel !== mine) return cleanup?.();
       mine.cleanup = cleanup;
     }
