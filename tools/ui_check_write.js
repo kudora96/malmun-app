@@ -9,10 +9,10 @@
   Object.defineProperty(HTMLMediaElement.prototype, "volume", { configurable: true, get() { return vd.get.call(this); }, set(v) { vd.set.call(this, Math.min(v, 0.0001)); } });
   const op = HTMLMediaElement.prototype.play;
   HTMLMediaElement.prototype.play = function () {
-    const name = decodeURIComponent((this.src || "").split("/").slice(-2).join("/"));
+    const name = decodeURIComponent((this.src || "").split("?")[0].split("/").slice(-2).join("/"));
     if (!this.__h) { this.__h = 1;
-      this.addEventListener("ended", () => log.push({ t: T(), ev: "끝", name: decodeURIComponent((this.src || "").split("/").slice(-2).join("/")) }));
-      this.addEventListener("pause", () => { if (!this.ended) log.push({ t: T(), ev: "멈춤", name: decodeURIComponent((this.src || "").split("/").slice(-2).join("/")), pos: this.currentTime }); }); }
+      this.addEventListener("ended", () => log.push({ t: T(), ev: "끝", name: decodeURIComponent((this.src || "").split("?")[0].split("/").slice(-2).join("/")) }));
+      this.addEventListener("pause", () => { if (!this.ended) log.push({ t: T(), ev: "멈춤", name: decodeURIComponent((this.src || "").split("?")[0].split("/").slice(-2).join("/")), pos: this.currentTime }); }); }
     this.volume = 0.0001; log.push({ t: T(), ev: "시작", name }); return op.call(this);
   };
   const AC = window.AudioContext, oo = AC.prototype.createOscillator; let lastTone = 0;

@@ -17,6 +17,7 @@ import { esc, glossCards, toJamo, compose, vowelLen, JAMO_AUDIO } from "../text.
 import { episode, chars } from "../data.js";
 import { paths } from "../paths.js";
 import { I } from "../ui.js";
+import { audioCtx, hold } from "../wake.js";
 
 const KEYS = [..."ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎㄲㄸㅃㅆㅉ"], VOW = [..."ㅏㅑㅓㅕㅗㅛㅜㅠㅡㅣ"];
 const GAP_JAMO = 500;     // 마지막 자모 소리 → 글자 소리 사이
@@ -75,8 +76,7 @@ function playClip(src, start, end, my) {
 }
 function tone(kind) { // 딩동(맞음) · 뿅뿅↘(틀림 — 귀엽게)
   try {
-    actx ||= new (window.AudioContext || window.webkitAudioContext)();
-    if (actx.state === "suspended") actx.resume();
+    actx = audioCtx(); // 깨워 둔 장치와 같은 것
     if (kind === "ok") {
       for (const [f, at] of [[880, 0], [1320, 0.09]]) {
         const o = actx.createOscillator(), g = actx.createGain(), t0 = actx.currentTime + at;
@@ -286,5 +286,6 @@ export default async function write(app, ep, id, opts = {}) {
   };
 
   setNote(); render();
-  return () => { st.alive = false; hush(); delete app.__wr; };
+  const release = hold();
+  return () => { release(); st.alive = false; hush(); delete app.__wr; };
 }

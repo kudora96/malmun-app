@@ -17,6 +17,7 @@ import { paths } from "../paths.js";
 import { Sequence } from "../audio.js";
 import { I, progress, SPEAKER } from "../ui.js";
 import writeView from "./write.js";
+import { hold } from "../wake.js";
 
 const RATES = [1, 0.75, 0.5];
 const pref = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } };
@@ -340,5 +341,6 @@ export default async function learn(app, ep, startId) {
   setTimeout(settle, 600);
   v.addEventListener("loadedmetadata", () => { if (v.paused && !st.once) v.currentTime = L[st.cur].start; }, { once: true });
   sync();
-  return () => { st.panel?.cleanup?.(); ex.stop(); removeEventListener("resize", pad); clearInterval(timer); clearTimeout(st.gap); document.removeEventListener("keydown", onKey); seq.stop(); v.pause(); v.removeAttribute("src"); v.load(); };
+  const release = hold(); // 소리 장치 깨워 두기(첫소리 먹힘 방지)
+  return () => { release(); st.panel?.cleanup?.(); ex.stop(); removeEventListener("resize", pad); clearInterval(timer); clearTimeout(st.gap); document.removeEventListener("keydown", onKey); seq.stop(); v.pause(); v.removeAttribute("src"); v.load(); };
 }
