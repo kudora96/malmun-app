@@ -8,7 +8,8 @@ import { I } from "../ui.js";
 
 const pref = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } };
 
-export default async function explain(app, ep, id, view) {
+// opts.embedded = 학습 화면의 영상 창 자리에 띄움(새 화면 아님 · 투덜이 10-01) — 닫기·앞뒤 줄은 학습 화면에 맡긴다
+export default async function explain(app, ep, id, view, opts = {}) {
   const d = await episode(ep, lang);
   const idx = Math.max(0, d.lines.findIndex(l => String(l.id) === String(id)));
   const l = d.lines[idx];
@@ -17,10 +18,11 @@ export default async function explain(app, ep, id, view) {
   const hasTr = l.trParas.some(Boolean);
   const seq = new Sequence();
 
-  app.innerHTML = `<section class="scr explain ${showRom ? "" : "hide-rom"}">
-    <div class="bar"><a class="iconbtn" href="#/learn/${ep}/${l.id}" aria-label="${esc(t("back"))}">${I.back}</a>
+  app.innerHTML = `<section class="scr explain ${opts.embedded ? "embedded" : ""} ${showRom ? "" : "hide-rom"}">
+    ${opts.embedded ? `<div class="pbar"><b>${esc(t("explain"))}</b><span class="sub">${idx + 1} / ${d.lines.length} · <span class="ko" lang="ko">${esc(l.speaker)}</span></span><button class="iconbtn" data-act="close" aria-label="${esc(t("btn_close"))}">✕</button></div>`
+    : `<div class="bar"><a class="iconbtn" href="#/learn/${ep}/${l.id}" aria-label="${esc(t("back"))}">${I.back}</a>
       <div class="grow"><div class="t">${esc(t("explain"))}</div><div class="sub">${idx + 1} / ${d.lines.length} · <span class="ko" lang="ko">${esc(l.speaker)}</span></div></div>
-      <a class="chip" href="#/write/${ep}/${l.id}">${esc(t("write"))}</a></div>
+      <a class="chip" href="#/write/${ep}/${l.id}">${esc(t("write"))}</a></div>`}
     <div class="quote">
       <div class="glosses">${cards.length ? cards.map(c => `<span class="g"><span class="rom">${esc(c.rom)}</span><span class="kw ko" lang="ko">${esc(c.ko)}</span><span class="mean">${esc(c.mean)}</span></span>`).join("")
         : `<span class="kw ko" lang="ko" style="font-size:20px;font-weight:700">${esc(l.ko)}</span>`}</div>
@@ -35,10 +37,10 @@ export default async function explain(app, ep, id, view) {
     <div class="player">
       <div class="prog"><i style="width:0%"></i></div>
       <div class="row">
-        <a class="iconbtn" href="#/explain/${ep}/${d.lines[Math.max(0, idx - 1)].id}" aria-label="${esc(t("previous"))}">${I.prev}</a>
+        ${opts.embedded ? `<button class="iconbtn" data-act="nav" data-d="-1" aria-label="${esc(t("previous"))}">${I.prev}</button>` : `<a class="iconbtn" href="#/explain/${ep}/${d.lines[Math.max(0, idx - 1)].id}" aria-label="${esc(t("previous"))}">${I.prev}</a>`}
         <div class="grow times"><span class="now">0:00</span><span class="where"></span></div>
         <button class="play" data-act="play" aria-label="${esc(t("play"))}">${I.play}</button>
-        <a class="iconbtn" href="#/explain/${ep}/${d.lines[Math.min(d.lines.length - 1, idx + 1)].id}" aria-label="${esc(t("next"))}">${I.next}</a>
+        ${opts.embedded ? `<button class="iconbtn" data-act="nav" data-d="1" aria-label="${esc(t("next"))}">${I.next}</button>` : `<a class="iconbtn" href="#/explain/${ep}/${d.lines[Math.min(d.lines.length - 1, idx + 1)].id}" aria-label="${esc(t("next"))}">${I.next}</a>`}
       </div>
     </div>
   </section>`;
@@ -67,6 +69,8 @@ export default async function explain(app, ep, id, view) {
   app.querySelector(".scr").onclick = e => {
     const b = e.target.closest("[data-act]");
     if (!b) return;
+    if (b.dataset.act === "close") return opts.onClose?.();
+    if (b.dataset.act === "nav") return opts.onNav?.(idx + +b.dataset.d);
     if (b.dataset.act === "play") { if (seq.playing) seq.pause(); else if (seq.q.length) seq.resume(); else seq.play(items); sync(); }
     if (b.dataset.act === "rom") { const on = b.getAttribute("aria-pressed") !== "true"; b.setAttribute("aria-pressed", String(on)); app.querySelector(".scr").classList.toggle("hide-rom", !on); pref("malmun.rom", on ? "1" : "0"); }
     if (b.dataset.act === "tr") { const on = b.getAttribute("aria-pressed") !== "true"; b.setAttribute("aria-pressed", String(on)); app.querySelector(".learner").hidden = !on; }

@@ -16,6 +16,8 @@ import { episode } from "../data.js";
 import { paths } from "../paths.js";
 import { Sequence } from "../audio.js";
 import { I, progress, SPEAKER } from "../ui.js";
+import explainView from "./explain.js";
+import writeView from "./write.js";
 
 const RATES = [1, 0.75, 0.5];
 const LOOP_GAP = 700;
@@ -33,9 +35,12 @@ export default async function learn(app, ep, startId) {
 
   app.innerHTML = `<section class="scr learn">
     <div class="stick">
+    <div class="vstage">
     <div class="video" id="vwrap"><video playsinline preload="metadata" poster="${paths.poster(ep)}" src="${paths.video(ep)}"></video>
       <span class="vplay" aria-hidden="true">${I.play}</span>
       <button class="vfs" data-act="fs" aria-label="${esc(t("fullscreen"))}">${FS}</button></div>
+    <div class="panel" hidden></div>
+    </div>
     <div class="mode" role="group">
       <button data-mode="video" aria-pressed="true">${esc(t("mode_video"))}</button>
       <button data-mode="full" aria-pressed="false">${esc(t("mode_full"))}</button>
@@ -48,7 +53,7 @@ export default async function learn(app, ep, startId) {
       <p class="kotext ko" lang="ko">${esc(l.ko)}</p>
       ${l.tr ? `<p class="tr">${esc(l.tr)}</p>` : ""}
       <div class="expl"></div>
-      <div class="acts"><button data-act="once">${I.play}<span>${esc(t("listen_line"))}</span></button><a href="#/explain/${ep}/${l.id}">${esc(t("explain"))}</a><a href="#/write/${ep}/${l.id}">${esc(t("write"))}</a></div>
+      <div class="acts"><button data-act="once">${I.play}<span>${esc(t("listen_line"))}</span></button><button class="menu" data-act="explain">${esc(t("explain"))}</button><button class="menu" data-act="write">${esc(t("write"))}</button></div>
     </li>`).join("")}</ol>
     <div class="ctrl">
       <a class="iconbtn" href="#/list" aria-label="${esc(t("back"))}">${I.back}</a>
@@ -154,6 +159,34 @@ export default async function learn(app, ep, startId) {
     sync();
   };
 
+  // ── 줄 메뉴(설명 · 쓰기 · 앞으로 생길 것) = 영상 창 자리에 띄운다(R12) ──
+  const VIEWS = { explain: (el, i, o) => explainView(el, ep, L[i].id, null, o), write: (el, i, o) => writeView(el, ep, L[i].id, o) };
+  const panel = app.querySelector(".panel"), vwrap = app.querySelector("#vwrap");
+  st.panel = null;
+  async function openPanel(kind, i) {
+    i = Math.max(0, Math.min(L.length - 1, i));
+    stopAll(); st.once = false; select(i, { scroll: false });
+    st.panel?.cleanup?.();
+    st.panel = { kind, i };
+    vwrap.hidden = true; panel.hidden = false; panel.className = `panel ${kind}`;
+    items.forEach((li, k) => li.querySelectorAll("[data-act=explain],[data-act=write]").forEach(b => b.setAttribute("aria-pressed", String(k === i && b.dataset.act === kind))));
+    const mine = st.panel;
+    const cleanup = await VIEWS[kind](panel, i, { embedded: true, onClose: closePanel, onNav: k => openPanel(kind, k) });
+    if (st.panel !== mine) return cleanup?.();
+    mine.cleanup = cleanup;
+    pad(); underVideo(items[i]);
+    sync();
+  }
+  function closePanel() {
+    if (!st.panel) return;
+    st.panel.cleanup?.(); st.panel = null;
+    panel.hidden = true; panel.innerHTML = ""; vwrap.hidden = false;
+    items.forEach(li => li.querySelectorAll("[aria-pressed]").forEach(b => b.removeAttribute("aria-pressed")));
+    v.currentTime = L[st.cur].start;
+    pad(); underVideo(items[st.cur]);
+    sync();
+  }
+
   // ── 동작 ──
   function goPaused(i) { stopAll(); st.once = false; select(i, { force: true }); v.currentTime = L[i].start; sync(); } // R1
   function playLine(i) { // R3 · R6
@@ -206,14 +239,18 @@ export default async function learn(app, ep, startId) {
     if (e.target.closest("a")) return;
     const li = e.target.closest(".line");
     if (!li) return;
-    if (e.target.closest("[data-act=once]")) return playLine(+li.dataset.i);
-    onLineTap(+li.dataset.i);
+    const i = +li.dataset.i, m = e.target.closest("[data-act=explain],[data-act=write]");
+    if (m) return st.panel?.kind === m.dataset.act && st.panel.i === i ? closePanel() : openPanel(m.dataset.act, i);
+    if (e.target.closest("[data-act=once]")) { closePanel(); return playLine(i); }
+    if (st.panel) { if (i !== st.panel.i) openPanel(st.panel.kind, i); return; } // 메뉴가 떠 있으면 누른 줄의 같은 메뉴로
+    onLineTap(i);
   };
   app.querySelector(".ctrl").onclick = e => {
     const b = e.target.closest("[data-act]");
     if (!b) return;
     const a = b.dataset.act;
-    if (a === "play") togglePlay();
+    if (st.panel && (a === "prev" || a === "next")) return openPanel(st.panel.kind, st.panel.i + (a === "next" ? 1 : -1));
+    if (a === "play") { if (st.panel) closePanel(); togglePlay(); }
     else if (a === "prev") step(-1);
     else if (a === "next") step(1);
     else if (a === "rep") {
@@ -238,5 +275,5 @@ export default async function learn(app, ep, startId) {
   select(st.cur, { scroll: st.cur > 0, force: true });
   v.addEventListener("loadedmetadata", () => { if (v.paused && !st.once) v.currentTime = L[st.cur].start; }, { once: true });
   sync();
-  return () => { removeEventListener("resize", pad); clearInterval(timer); clearTimeout(st.gap); document.removeEventListener("keydown", onKey); seq.stop(); v.pause(); v.removeAttribute("src"); v.load(); };
+  return () => { st.panel?.cleanup?.(); removeEventListener("resize", pad); clearInterval(timer); clearTimeout(st.gap); document.removeEventListener("keydown", onKey); seq.stop(); v.pause(); v.removeAttribute("src"); v.load(); };
 }
