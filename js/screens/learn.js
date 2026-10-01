@@ -38,6 +38,7 @@ export default async function learn(app, ep, startId) {
     <div class="vstage">
     <div class="video" id="vwrap"><video playsinline preload="metadata" poster="${paths.poster(ep)}" src="${paths.video(ep)}"></video>
       <span class="vplay" aria-hidden="true">${I.play}</span>
+      <div class="cap" aria-live="polite"></div>
       <button class="vfs" data-act="fs" aria-label="${esc(t("fullscreen"))}">${FS}</button></div>
     <div class="panel" hidden></div>
     </div>
@@ -81,6 +82,8 @@ export default async function learn(app, ep, startId) {
     items[i].classList.add("cur");
     items.forEach((li, k) => li.classList.toggle("past", k < i));
     app.querySelector(".where").textContent = `${i + 1} / ${L.length}`;
+    // 전체 화면(화면만 보기)에서도 자막은 보여야 한다 — 영상 아래쪽에 지금 줄
+    app.querySelector(".cap").innerHTML = `<span class="ko" lang="ko">${esc(L[i].ko)}</span>${L[i].tr ? `<span class="tr">${esc(L[i].tr)}</span>` : ""}`;
     if (scroll && (force || Date.now() - st.handScroll > 4000)) underVideo(items[i]);
     const p = progress.get(ep);
     progress.set(ep, { at: i, line: Math.max(p.line || 0, i + 1) });
