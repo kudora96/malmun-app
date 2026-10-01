@@ -99,7 +99,7 @@ export default async function speak(app, ep, id, opts = {}) {
     $(".sbar i").style.width = (sc ?? 0) + "%";
     $(".meter").classList.toggle("pass", sc != null && sc >= PASS);
     $(".msg").textContent = st.rec ? t(st.switched ? "mic_switched" : "listening") : sc == null ? (mineBlob() ? t("no_score") : SR ? t("speak_hint") : t("speak_hint_noscore"))
-      : sc >= PASS ? `${sc}% ✓ ${t("score_pass")}` : `${sc}% · ${t("score_try")}`;
+      : `${sc}%${sc >= PASS ? " ✓" : ""} · ${t(sc >= 95 ? "score_5" : sc >= PASS ? "score_4" : sc >= 60 ? "score_3" : sc >= 40 ? "score_2" : "score_1")}`; // 점수에 맞는 한마디
     $("[data-act=mine]").disabled = $("[data-act=both]").disabled = !mineBlob();
     $(".mic").classList.toggle("on", !!st.rec);
     $(".mic .lab").textContent = st.rec ? t("btn_stop") : t("speak_now");

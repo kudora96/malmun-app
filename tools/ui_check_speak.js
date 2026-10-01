@@ -57,6 +57,10 @@
   ok(!$(".panel [data-act=mine]").disabled, "녹음 뒤 [내 목소리] 켜짐");
   ok(window.__srTrack === "audio", "음성 인식이 녹음하는 그 마이크를 들음(크롬 기본 마이크가 아니라)", String(window.__srTrack));
   const mp = mediaPlays.length; $(".panel [data-act=mine]").click(); await W(600); ok(mediaPlays.length > mp && mediaPlays[mediaPlays.length - 1] === "blob:", "[내 목소리] → 방금 녹음 재생");
+  // 점수에 맞는 한마디 — 반쯤 맞음(50%)과 많이 틀림(40 미만)은 말이 다르다
+  await say("안녕하세요"); await waitIdle(); const m3 = $(".panel .msg").textContent;
+  await say("감사합니다"); await waitIdle(); const m1 = $(".panel .msg").textContent;
+  ok(/^\d+% · /.test(m3) && /^\d+% · /.test(m1) && m3.replace(/^\d+%/, "") !== m1.replace(/^\d+%/, ""), "점수마다 한마디가 다름(아직 조금 부족해요 / 천천히 다시)", m3 + " ｜ " + m1);
   // 맞게 말함 → 통과 · 저장 · 다음 토막
   await say("어서 오세요"); await waitIdle();
   ok(/100%/.test($(".panel .msg").textContent) || /2\/4/.test($(".panel .segnav").innerText), "맞게 말함 → 100% ✓", $(".panel .msg").textContent);
