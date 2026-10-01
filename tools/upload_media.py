@@ -43,7 +43,9 @@ def episode(ep):
     kr = json.load(open(os.path.join(APP, "data", ep, f"{ep}.kr.json"), encoding="utf-8"))
     files = [p["audio"] for s in base["subtitles"] for p in s.get("parts", []) if p.get("audio")]
     files += [f for e in kr["explanations"] for f in e.get("audio_kr", [])]
-    return jobs + [(f"audio/{ep}/{f}", os.path.join(MALMUN, "05_audio", ep, f), "audio/mpeg") for f in files]
+    ud = os.path.join(MALMUN, "05_audio", ep, "units")  # 쓰기 낱말·토막 소리(본부)
+    units = [(f"audio/{ep}/units/{f}", os.path.join(ud, f), "audio/mpeg") for f in sorted(os.listdir(ud)) if f.endswith(".mp3")] if os.path.isdir(ud) else []
+    return jobs + units + [(f"audio/{ep}/{f}", os.path.join(MALMUN, "05_audio", ep, f), "audio/mpeg") for f in files]
 
 
 def chars():

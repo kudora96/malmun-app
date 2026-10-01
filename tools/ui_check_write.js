@@ -60,6 +60,20 @@
   $(".panel [data-act=sent]").click(); await W(200); ok($(".panel [data-act=sent]").getAttribute("aria-pressed") === "true", "이 부분 듣기 켜짐");
   $(".panel [data-act=sent]").click(); await W(200); ok($(".panel [data-act=sent]").getAttribute("aria-pressed") === "false", "다시 누르면 멈춤");
   $(".ctrl [data-act=play]").click(); await W(200); ok($(".panel [data-act=sent]").getAttribute("aria-pressed") === "true", "아래 ▶ = 이 부분 듣기"); $(".ctrl [data-act=play]").click(); await W(200);
+  // 자동 완성 — 지금 토막의 남은 글자를 한 자모씩 · 글자마다 모양이 맞나 · 토막이 끝나면 멈춤 · 다시 누르면 멈춤
+  const watchShapes = () => { const seen = []; const mo = new MutationObserver(() => { const b = $(".panel .box.ok"); if (b) { const k = b.querySelector(".target").textContent + "=" + b.querySelector(".typed").textContent; if (seen[seen.length - 1] !== k) seen.push(k); } }); mo.observe($(".panel .write"), { subtree: true, childList: true, attributes: true }); return { seen, stop: () => mo.disconnect() }; };
+  let segBefore = $(".panel .segnav").innerText.replace(/\s/g, "");
+  let w8 = watchShapes(); $(".panel [data-act=auto]").click(); await W(300);
+  ok($(".panel [data-act=auto]").getAttribute("aria-pressed") === "true", "자동 완성 누름 → 「멈춤」 단추로 바뀜");
+  await idle(30000); w8.stop();
+  const badShape = w8.seen.filter(k => { const [a, b] = k.split("="); return a !== b; });
+  ok(w8.seen.length >= 1 && !badShape.length && $(".panel .segnav").innerText.replace(/\s/g, "") !== segBefore && $(".panel [data-act=auto]").getAttribute("aria-pressed") === "false",
+    "자동 완성 → 남은 글자를 한 자모씩 다 쳐서 토막 끝 · 저절로 멈춤", `${w8.seen.join(" ")}${badShape.length ? " · 틀린 모양 " + badShape.join(" ") : ""} · 토막 ${segBefore} → ${$(".panel .segnav").innerText.replace(/\s/g, "")}`);
+  $(".panel [data-act=auto]").click(); await W(1500); $(".panel [data-act=auto]").click(); await W(200);
+  ok($(".panel [data-act=auto]").getAttribute("aria-pressed") === "false", "자동 완성 중 다시 누름 → 멈춤");
+  await idle(8000);
+  $(".panel [data-act=retry]")?.click(); line(1).querySelector(".kotext").click(); await W(300);
+  if ($(".panel.write")) { line(1).querySelector("[data-act=write]").click(); await W(500); } line(1).querySelector("[data-act=write]").click(); await W(1300);
   // 1번 줄을 끝까지 → 대사 → 2번 줄 쓰기(자동)
   const t0 = T(); let guard = 0;
   while ($(".panel .target") && /1 \//.test($(".panel .whead .sub").textContent) && guard++ < 60) {
@@ -71,13 +85,12 @@
   // 긴 줄(8번) — 토막 · 스크롤 없음 · 토막 넘김
   await openWrite(8);
   f = fits(); const nav = $(".panel .segnav")?.innerText || "";
-  ok(/1\/\d/.test(nav) && f.sentOverflow <= 1 && f.scroll <= 1, "8번(41글자) 토막으로 · 한 줄에 다 보임 · 스크롤 없음", `${nav.replace(/\s/g, "")} · ${$(".panel .sent").innerText.replace(/\s+/g, " ")} · 넘침 ${f.sentOverflow}/${f.scroll}`);
+  ok(/1\/\d/.test(nav) && f.sentOverflow <= 1 && f.scroll <= 1, "8번(41글자) 고정 토막으로 · 한 줄에 다 보임 · 스크롤 없음", `${nav.replace(/\s/g, "")} · ${$(".panel .sent").innerText.replace(/\s+/g, " ")} · 넘침 ${f.sentOverflow}/${f.scroll}`);
   const total = +(nav.match(/\/(\d+)/) || [])[1] || 1;
   $(".panel [data-seg='1']").click(); await W(300); ok(new RegExp(`2/${total}`).test($(".panel .segnav").innerText.replace(/\s/g, "")), "토막 ▶ → 2번째 토막", $(".panel .sent").innerText.replace(/\s+/g, " "));
   // 마지막 토막으로 가서 자동 완성으로 끝내기 → 다음 줄(9번)
   for (let s = 2; s < total; s++) { $(".panel [data-seg='1']").click(); await W(200); }
-  guard = 0;
-  while ($(".panel .target") && /^8 \//.test($(".panel .whead .sub").textContent) && guard++ < 30) { $(".panel [data-act=auto]").click(); await idle(5000); }
+  $(".panel [data-act=auto]").click(); await idle(30000);
   await W(500); await idle(12000); await W(1500);
   ok(/^9 \//.test($(".panel .whead .sub")?.textContent || ""), "8번 마지막 토막 끝 → 대사 → 9번 줄 쓰기로 자동", $(".panel .whead .sub")?.textContent);
   line(9).querySelector("[data-act=write]").click(); await W(400);

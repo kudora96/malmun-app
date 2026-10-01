@@ -19,11 +19,12 @@ export async function episode(ep, lang) {
   const key = `${ep}.${lang}`;
   if (cache.has(key)) return cache.get(key);
   const p = (async () => {
-    const [base, kr, tr, wt] = await Promise.all([
+    const [base, kr, tr, wt, un] = await Promise.all([
       getJSON(paths.data(ep)),
       getJSON(paths.data(ep, ".kr")).catch(() => ({ explanations: [] })),
       getJSON(paths.data(ep, "." + lang)).catch(() => null),
       getJSON(paths.data(ep, ".words")).catch(() => ({ lines: {} })), // 대사 원음 안 낱말 시각(쓰기의 단어·부분 듣기)
+      getJSON(paths.data(ep, ".units")).catch(() => ({ lines: {} })), // 쓰기 낱말·토막 목록(고정 · tools/writing_units.py)
     ]);
     const krBy = new Map(kr.explanations.map(e => [e.sub_id, e]));
     const trSub = new Map((tr?.subtitles || []).map(s => [s.id, s]));
@@ -40,6 +41,7 @@ export async function episode(ep, lang) {
         // 낱말 시각 = 본부 eleven_align(일레븐랩스 강제 정렬) · 잘라 듣기는 cs/ce(소리 끝까지 넓힌 값)
         speaker: part.speaker || "", lineAudio: part.audio || null,
         words: (wt.lines[String(s.id)] || []).map(w => ({ w: w.w, start: w.cs ?? w.start, end: w.ce ?? w.end })),
+        units: un.lines[String(s.id)] || null,
         tr: trSub.get(s.id)?.t || "",
         // 설명: ¶1 = 대사 인용(음성은 lineAudio) · ¶2~ = audio_kr 조각과 1:1
         krParas: paras.slice(1), krAudio: k.audio_kr || [], krHl: k.kr_hl || [],

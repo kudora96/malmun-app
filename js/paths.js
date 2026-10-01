@@ -10,6 +10,7 @@ export const paths = {
   video: ep => `${MEDIA}/video/${ep}.mp4?v=2`,
   poster: ep => `img/${ep}.jpg`,
   audio: (ep, file) => `${MEDIA}/audio/${ep}/${file}`,
+  unit: (ep, id) => `${MEDIA}/audio/${ep}/units/${id}.mp3`, // 쓰기 낱말·토막 소리(본부 일레븐랩스)
   // 글자·자모 = 크기를 맞춘 사본(tools/normalize_letters.py → letters/c · letters/j)
   char: file => `${MEDIA}/letters/c/${file}`,
   jamo: name => `${MEDIA}/letters/j/${name}.mp3`,

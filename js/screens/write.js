@@ -5,10 +5,12 @@
 //  W2 자판 — 맞으면 「딩동」 → 그 자모 소리 · 틀리면 칸이 흔들리고 귀여운 「뿅뿅↘」 → 그래도 그 자모 소리(공부니까 · 10-01)
 //  W3 글자를 다 치면 「딩동」 → 마지막 자모 소리 → 0.5초 쉼 → 글자 소리 → 0.6초 쉼 → 다음 글자(ㅅ … ㅓ … 서 — 붙이지 않는다 · 10-01)
 //     소리가 나는 동안은 자판을 받지 않는다(소리가 잘리지 않게)
-//  W4 [단어 듣기] = 대사 원음에서 지금 낱말만 잘라서 · [이 부분 듣기] = 원음에서 지금 토막만(다시 누르면 멈춤) · [자동 완성] = 지금 글자를 대신 쳐 줌
-//     (글자 소리를 이어 붙이면 기계음 같다 · 줄 전체가 나오면 안 된다 — 10-01 투덜이) · 낱말 시각 = data/{ep}/{ep}.words.json
+//  W4 [단어 듣기] = 지금 낱말 · [이 부분 듣기] = 지금 토막(다시 누르면 멈춤) — 본부가 일레븐랩스로 따로 만든 소리(05_audio/{ep}/units/{id}.mp3 ·
+//     앞뒤 여유 문장으로 읽혀 그 말만 남김) · 아직 없으면 대사 원음을 잘라서(words.json cs/ce) · 글자 소리 이어 붙이기·줄 전체는 쓰지 않는다
+//     [자동 완성] = 지금 토막의 남은 글자를 앱이 한 자모씩 대신 쳐 준다(손으로 칠 때와 같은 소리·쉼) · 다시 누르거나 자판을 누르면 멈춤
+//     토막 = data/{ep}/{ep}.units.json 으로 고정(tools/writing_units.py) — 좁은 화면은 글자를 줄여 맞춘다
 //  W5 소리는 언제나 하나만 · 새 일을 하면 앞 소리는 멈춘다
-//  W6 영상 창 안(embedded): 창 안에서 스크롤 없이 다 보이게 — 긴 문장은 토막으로 나눠 한 토막씩(◀ 1/3 ▶) ·
+//  W6 영상 창 안(embedded): 창 안에서 스크롤 없이 다 보이게 — 긴 문장은 토막으로(◀ 1/3 ▶) ·
 //     토막을 다 쓰면 자동으로 다음 토막 · 줄을 다 쓰면 대사를 듣고 자동으로 다음 줄 쓰기 · 아래 ▶ = 이 부분 듣기
 import { t, lang } from "../i18n.js";
 import { esc, glossCards, toJamo, compose, vowelLen, JAMO_AUDIO } from "../text.js";
@@ -26,6 +28,18 @@ let actx, token = 0, loopSrc = null, loopTimer = 0;
 voice.addEventListener("ended", () => { if (loopSrc) loopTimer = setTimeout(() => { if (loopSrc) voice.play().catch(() => {}); }, 600); });
 const wait = ms => new Promise(r => setTimeout(r, ms));
 function hush() { token++; clearTimeout(loopTimer); loopSrc = null; voice.pause(); }
+// 소리 파일을 틀고, 파일이 없으면 false(→ 대신할 것으로)
+function playSrcOk(src, my) {
+  return new Promise(res => {
+    if (my !== token) return res(true);
+    let ok = true;
+    const done = () => { voice.removeEventListener("ended", done); voice.removeEventListener("error", bad); clearTimeout(guard); res(ok); };
+    const bad = () => { ok = false; done(); };
+    voice.addEventListener("ended", done); voice.addEventListener("error", bad);
+    const guard = setTimeout(done, 6000);
+    voice.src = src; voice.currentTime = 0; voice.play().catch(bad);
+  });
+}
 function playSrc(src, my) {
   return new Promise(res => {
     if (my !== token) return res();
@@ -88,6 +102,7 @@ async function run(steps) {
     if (s === "ok" || s === "bad") await tone(s);
     else if (typeof s === "number") await wait(s);
     else if (s && s.clip) await playClip(s.clip, s.start, s.end, my);
+    else if (s && s.unit) { if (!(await playSrcOk(s.unit, my)) && s.fallback) await (s.fallback.clip ? playClip(s.fallback.clip, s.fallback.start, s.fallback.end, my) : playSrc(s.fallback, my)); }
     else if (s) await playSrc(s, my);
   }
   return my === token;
@@ -104,18 +119,20 @@ export default async function write(app, ep, id, opts = {}) {
     const tm = line.words?.[wi]?.w === raw ? line.words[wi] : null; // 대사 원음 안 이 낱말의 시각
     return { raw, text, tm, rom: card?.rom || "", mean: card?.mean || "", end: /[.?!…]$/.test(raw), chars: [...text].map(ch => ({ ch, jamo: toJamo(ch), file: idx[ch] || null })) };
   });
-  // 토막 나누기(W6) — 문장 끝(. ? !)에서 끊고, 그래도 길면 낱말 단위로 한 줄에 들어가는 글자 수 안
-  // 한 줄에 들어가는 글자 수 = (창 너비 − 양옆 여백 − ◀ 1/5 ▶) ÷ 글자 하나 너비(약 30px · 낱말 사이 포함)
-  const SEG_MAX = Math.max(5, Math.min(12, Math.floor(((app.clientWidth || 360) - 28 - 110) / 31)));
-  const segs = [];
+  // 토막(W6) = units.json 고정 목록(없으면 같은 규칙으로 여기서 나눔: 문장 끝 · 8글자 · 기대는 말에서 안 끊음)
+  const U = line.units;
+  allWords.forEach((w, i) => { w.unit = U?.words?.[i]?.id || null; });
+  let segs = U?.parts?.length ? U.parts.map(p => Object.assign(p.words.map(i => allWords[i]).filter(Boolean), { unit: p.id })) : null;
+  const SEG_MAX = 8, BOUND = new Set(["수", "것", "거", "줄", "적", "데", "때", "그", "온", "더", "안", "못", "잘"]);
+  if (!segs) segs = [];
   let cur = [], n = 0;
-  for (const w of allWords) {
-    if (cur.length && n + w.text.length > SEG_MAX) { segs.push(cur); cur = []; n = 0; }
+  for (const w of U?.parts?.length ? [] : allWords) {
+    if (cur.length && n + w.text.length > SEG_MAX && !BOUND.has(cur[cur.length - 1].raw)) { segs.push(cur); cur = []; n = 0; }
     cur.push(w); n += w.text.length;
     if (w.end) { segs.push(cur); cur = []; n = 0; }
   }
   if (cur.length) segs.push(cur);
-  const st = { s: 0, w: 0, c: 0, k: 0, typed: [], busy: false, loopAt: null, sent: false, alive: true };
+  const st = { s: 0, w: 0, c: 0, k: 0, typed: [], busy: false, loopAt: null, sent: false, alive: true, auto: false };
   const lineSrc = line.lineAudio ? paths.audio(ep, line.lineAudio) : null;
   hush();
 
@@ -138,9 +155,15 @@ export default async function write(app, ep, id, opts = {}) {
   function resetSounds() { stopLoop(); hush(); st.sent = false; markSent(); }
 
   // 지금 토막의 원음 구간(낱말 시각이 없으면 줄 전체)
+  const unitSrc = id => (id ? paths.unit(ep, id) : null);
   const partStep = () => {
     const ws = words(), a = ws[0]?.tm, b = ws[ws.length - 1]?.tm;
-    return a && b && lineSrc ? { clip: lineSrc, start: a.start, end: b.end } : lineSrc;
+    const cut = a && b && lineSrc ? { clip: lineSrc, start: a.start, end: b.end } : lineSrc;
+    return ws.unit ? { unit: unitSrc(ws.unit), fallback: cut } : cut;
+  };
+  const wordStep = w => {
+    const cut = w.tm && lineSrc ? { clip: lineSrc, start: w.tm.start, end: w.tm.end } : null;
+    return w.unit ? { unit: unitSrc(w.unit), fallback: cut } : cut;
   };
   function toggleSentence() { // W4 · 아래 ▶ = 이 부분 듣기
     if (!lineSrc || st.s >= segs.length) return;
@@ -148,7 +171,7 @@ export default async function write(app, ep, id, opts = {}) {
     stopLoop(); st.sent = true; markSent();
     run([partStep()]).then(() => { st.sent = false; markSent(); });
   }
-  app.__wr = { toggle: toggleSentence, busy: () => st.busy || st.sent || !voice.paused }; // busy = 점검 도구가 소리 끝을 기다릴 때
+  app.__wr = { toggle: toggleSentence, busy: () => st.busy || st.sent || st.auto || !voice.paused }; // busy = 점검 도구가 소리 끝을 기다릴 때
 
   function paintSent() {
     sentEl.innerHTML = words().map((w, wi) => `<span class="w ${wi === st.w ? "on" : ""}">${w.chars.map((c, ci) =>
@@ -174,7 +197,7 @@ export default async function write(app, ep, id, opts = {}) {
       <div class="slots">${jam.map((j, i) => `<span class="slot ${i < st.k ? "filled" : i === st.k ? "current" : ""}">${i <= st.k ? esc(j) : ""}</span>`).join("")}</div></div></div>
       <div class="kb" lang="ko">${KEYS.map((j, i) => `<button class="${i >= 14 ? "dbl" : ""}" data-j="${j}">${j}</button>`).join("")}<span></span>${VOW.map(j => `<button class="v" data-j="${j}">${j}</button>`).join("")}</div>`;
   }
-  function goSeg(s) { resetSounds(); st.busy = false; Object.assign(st, { s, w: 0, c: 0, k: 0, typed: [] }); render(); }
+  function goSeg(s) { st.auto = false; markAuto(); resetSounds(); st.busy = false; Object.assign(st, { s, w: 0, c: 0, k: 0, typed: [] }); render(); }
 
   async function finishChar(j, c) { // W3
     st.busy = true;
@@ -200,7 +223,21 @@ export default async function write(app, ep, id, opts = {}) {
       else location.hash = `#/write/${ep}/${d.lines[li + 1].id}`;
     }
   }
+  // 자동 완성(W4) — 지금 토막의 남은 글자를 한 자모씩(손으로 칠 때와 같은 소리·쉼) · 토막이 끝나면 멈춤
+  const markAuto = () => { const b = $("[data-act=auto]"); b.setAttribute("aria-pressed", String(!!st.auto)); b.textContent = st.auto ? "⏹ " + t("btn_stop") : t("autofill"); };
+  async function autoPart() {
+    resetSounds(); st.auto = true; markAuto();
+    const part = st.s;
+    while (st.auto && st.alive && st.s === part && st.s < segs.length) {
+      const c = words()[st.w].chars[st.c], j = c.jamo[st.k];
+      st.typed.push(j); st.k++; render();
+      if (st.k >= c.jamo.length) await finishChar(j, c);
+      else { st.busy = true; await run(["ok", JAMO_AUDIO[j] && paths.jamo(JAMO_AUDIO[j]), 150]); st.busy = false; }
+    }
+    st.auto = false; if (st.alive) markAuto();
+  }
   async function press(j) { // W2
+    if (st.auto) { st.auto = false; markAuto(); return; } // 자동 완성 중 자판 = 멈춤
     if (st.busy || st.s >= segs.length) return;
     stopLoop(); st.sent = false; markSent();
     const c = words()[st.w].chars[st.c];
@@ -240,11 +277,10 @@ export default async function write(app, ep, id, opts = {}) {
     if (a === "sent") toggleSentence();
     else if (a === "word" && st.s < segs.length && !st.busy) { // W4 — 원음에서 이 낱말만
       stopLoop(); st.sent = false; markSent();
-      const w = words()[st.w];
-      run(w.tm && lineSrc ? [{ clip: lineSrc, start: w.tm.start, end: w.tm.end }] : w.chars.filter(c => c.file).flatMap(c => [paths.char(c.file), 250]));
-    } else if (a === "auto" && st.s < segs.length && !st.busy) {
-      stopLoop(); const c = words()[st.w].chars[st.c];
-      st.typed = [...c.jamo]; st.k = c.jamo.length; render(); finishChar(c.jamo[c.jamo.length - 1], c);
+      run([wordStep(words()[st.w])]);
+    } else if (a === "auto") {
+      if (st.auto) { st.auto = false; return markAuto(); }
+      if (st.s < segs.length && !st.busy) autoPart();
     } else if (a === "retry") { goSeg(0); }
   };
 
