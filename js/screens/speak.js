@@ -66,7 +66,7 @@ export default async function speak(app, ep, id, opts = {}) {
     <div class="whead"><b>${esc(t("speak"))}</b><span class="sub">${li + 1} / ${d.lines.length} · <span class="ko" lang="ko">${esc(line.speaker)}</span></span>
       <span class="segnav"></span></div>
     <div class="task"><div class="say ko" lang="ko"></div><div class="tr"></div></div>
-    <div class="meter"><div class="bar"><i></i><em style="left:${PASS}%"></em></div><div class="msg" aria-live="polite"></div></div>
+    <div class="meter"><div class="sbar"><i></i><em style="left:${PASS}%"></em></div><div class="msg" aria-live="polite"></div></div>
     <div class="sbtns">
       <button data-act="model">▶ ${esc(t("model"))}</button>
       <button class="mic" data-act="rec"><span class="dot"></span><span class="lab">${esc(t("speak_now"))}</span></button>
@@ -90,7 +90,7 @@ export default async function speak(app, ep, id, opts = {}) {
     $(".segnav").innerHTML = parts.length > 1
       ? `<button data-seg="-1" ${st.i ? "" : "disabled"} aria-label="${esc(t("previous"))}">◀</button><span>${st.i + 1}/${parts.length}${sv?.score >= PASS ? " ✓" : ""}</span><button data-seg="1" ${st.i < parts.length - 1 ? "" : "disabled"} aria-label="${esc(t("next"))}">▶</button>` : "";
     const sc = st.score ?? sv?.score ?? null;
-    $(".bar i").style.width = (sc ?? 0) + "%";
+    $(".sbar i").style.width = (sc ?? 0) + "%";
     $(".meter").classList.toggle("pass", sc != null && sc >= PASS);
     $(".msg").textContent = st.rec ? t("listening") : sc == null ? (mineBlob() ? t("no_score") : SR ? t("speak_hint") : t("speak_hint_noscore"))
       : sc >= PASS ? `${sc}% ✓ ${t("score_pass")}` : `${sc}% · ${t("score_try")}`;
