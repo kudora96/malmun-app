@@ -214,3 +214,21 @@ a{color:inherit;text-decoration:none}
 #vwrap:fullscreen .cap{display:grid;gap:4px;position:absolute;left:50%;bottom:6%;transform:translateX(-50%);max-width:90%;padding:10px 18px;border-radius:12px;background:rgba(0,0,0,.62);color:#fff;text-align:center;pointer-events:none}
 #vwrap:fullscreen .cap .ko{font-size:clamp(20px,3.4vw,40px);font-weight:700;line-height:1.35}
 #vwrap:fullscreen .cap .tr{font-size:clamp(14px,2.2vw,26px);opacity:.85}
+
+/* 설명 창(영상 자리) — 플레이어 없음 · 누르면 멈춤/재생 · 맨 아래 얇은 진행 줄만(R14) */
+.learn .panel{position:relative}
+.exv{position:relative;height:100%;display:flex;flex-direction:column;cursor:pointer}
+.exv .exhead{display:flex;align-items:center;gap:8px;padding:8px 12px 4px 14px;flex:none}
+.exv .exhead b{font-family:var(--f-hand);font-size:22px}
+.exv .exhead .sub{font-size:12px;color:var(--mute)}
+.exv .exhead .grow{flex:1}
+.exv .exhead button{font-size:12px;padding:4px 10px;border-radius:999px;border:1px solid var(--line)}
+.exv .exhead button[aria-pressed=true]{border-color:var(--hi);color:var(--hi)}
+.exv .quote{flex:none;padding-bottom:10px}
+.exv .quote .kw{font-size:19px;font-weight:700}
+.exv .paras{flex:1;overflow-y:auto;padding:10px 16px 14px}
+.exv.hide-rom .g .rom,.exv.hide-rom .gl{display:none}
+.exv .exprog{height:3px;background:var(--line);flex:none}
+.exv .exprog i{display:block;height:100%;width:0;background:var(--hi)}
+.learn .panel .vplay{position:absolute;left:50%;top:50%;width:58px;height:58px;margin:-29px 0 0 -29px;border-radius:50%;display:grid;place-items:center;color:#fff;background:rgba(0,0,0,.45);opacity:0;transition:opacity .2s;pointer-events:none}
+.learn .panel.explain.paused .vplay{opacity:.85}

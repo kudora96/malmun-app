@@ -51,23 +51,17 @@ export default async function write(app, ep, id, opts = {}) {
   app.innerHTML = `<section class="writing-overlay open ${opts.embedded ? "embedded" : ""}">
     <div style="max-width:960px;margin:0 auto;width:100%;height:100%;display:flex;flex-direction:column;overflow:hidden">
     <div class="qo-header">
-      ${opts.embedded ? `<button class="nav-arrow" data-wnav="-1" ${prev ? "" : 'aria-disabled="true"'} aria-label="${esc(t("previous"))}">&#9664;</button>
-      <button class="nav-arrow" data-wnav="1" ${next ? "" : 'aria-disabled="true"'} aria-label="${esc(t("next"))}">&#9654;</button>`
+      ${opts.embedded ? ""
       : `<a class="nav-arrow" ${prev ? `href="#/write/${ep}/${prev.id}"` : 'aria-disabled="true"'} aria-label="${esc(t("previous"))}">&#9664;</a>
       <a class="nav-arrow" ${next ? `href="#/write/${ep}/${next.id}"` : 'aria-disabled="true"'} aria-label="${esc(t("next"))}">&#9654;</a>`}
       <div class="wr-num">#${String(li + 1).padStart(2, "0")}</div>
       <div class="wr-nav-ne">${esc(line.tr || line.ko)}</div>
-      ${opts.embedded ? `<button class="iconbtn wr-x" data-wclose aria-label="${esc(t("btn_close"))}">✕</button>` : ""}
+
     </div>
     <div class="wr-body" id="wr-body"></div>
     ${opts.embedded ? "" : `<div style="padding:6px 14px 10px;flex-shrink:0"><a class="wr-cbtn wr-cbtn-close" href="#/learn/${ep}/${line.id}" style="display:block;text-align:center">&#10005; ${esc(t("btn_close"))}</a></div>`}
     </div>
   </section>`;
-  if (opts.embedded) app.querySelector(".qo-header").onclick = e => {
-    if (e.target.closest("[data-wclose]")) return opts.onClose?.();
-    const n = e.target.closest("[data-wnav]");
-    if (n && n.getAttribute("aria-disabled") !== "true") opts.onNav?.(li + +n.dataset.wnav);
-  };
   window.renderWriting();
   window.preloadJamoAudio();
   return () => { window.wrStopAll?.(); window.wrLoopStop?.(); };
