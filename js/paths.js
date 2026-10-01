@@ -9,11 +9,11 @@ export const paths = {
   // ?v= = 판 번호 — 영상을 바꾸면 올려서 폰·브라우저에 남은 옛 영상을 쓰지 않게 한다
   video: ep => `${MEDIA}/video/${ep}.mp4?v=2`,
   poster: ep => `img/${ep}.jpg`,
-  audio: (ep, file) => `${MEDIA}/audio/${ep}/${file}`,
-  unit: (ep, id) => `${MEDIA}/audio/${ep}/units/${id}.mp3?v=3`, // 쓰기 낱말·토막 소리(본부 일레븐랩스) · v2 = 앞뒤 여유 + 대사와 같은 말투 · v3 = 15번 맨 앞 둘 다시(10-01)
+  audio: (ep, file) => `${MEDIA}/audio/${ep}/${file}?v=4`, // 대사 낭독 v4(10-02) · 설명 음성은 v2 그대로
+  unit: (ep, id) => `${MEDIA}/audio/${ep}/units/${id}.mp3?v=4`, // v4 = 일레븐 v4 판 확정(10-02 · 투덜이 귀로 고름) · 쓰기 낱말·토막 소리(본부 일레븐랩스) · v2 = 앞뒤 여유 + 대사와 같은 말투 · v3 = 15번 맨 앞 둘 다시(10-01)
   // 글자·자모 = 크기를 맞춘 사본(tools/normalize_letters.py → letters/c · letters/j)
   // ?v= = 소리를 다시 만들면 올린다(폰·브라우저에 남은 옛 소리를 쓰지 않게) — v2: 앞 0.2초·뒤 0.15초 여유(10-01)
   char: file => `${MEDIA}/letters/c/${file}?v=2`,
   jamo: name => `${MEDIA}/letters/j/${name}.mp3?v=2`,
-  charF: file => `${MEDIA}/chars_f/${file}?v=1`, // 공용 아나운서 글자·자모 소리(본부 05_audio/_chars_f)
+  charF: file => `${MEDIA}/chars_f/${file}?v=2`, // 공용 아나운서 글자·자모 소리(본부 05_audio/_chars_f)
 };
