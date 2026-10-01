@@ -15,6 +15,7 @@
       this.addEventListener("pause", () => { if (!this.ended) log.push({ t: T(), ev: "멈춤", name: decodeURIComponent((this.src || "").split("?")[0].split("/").slice(-2).join("/")), pos: this.currentTime }); }); }
     this.volume = 0.0001; log.push({ t: T(), ev: "시작", name }); return op.call(this);
   };
+  window.__sfxLog = log; window.__sfxVolume = 0.0001; // 짧은 소리(js/sfx.js 버퍼)는 여기로 적힌다 · 아주 작게
   const AC = window.AudioContext, oo = AC.prototype.createOscillator; let lastTone = 0;
   AC.prototype.createOscillator = function () { const now = T(); if (now - lastTone > 50) log.push({ t: now, ev: "효과음", name: "" }); lastTone = now; return oo.call(this); };
   const $ = s => document.querySelector(s);

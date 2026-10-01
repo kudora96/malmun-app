@@ -19,60 +19,24 @@ import { episode, chars, charsF } from "../data.js";
 import { paths } from "../paths.js";
 import { I } from "../ui.js";
 import { audioCtx, hold } from "../wake.js";
+import * as sfx from "../sfx.js";
 
 const KEYS = [..."ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎㄲㄸㅃㅆㅉ"], VOW = [..."ㅏㅑㅓㅕㅗㅛㅜㅠㅡㅣ"];
 const GAP_NEXT = 600;     // 글자 소리 → 다음 글자 사이
 
-// ── 소리(W5) — 한 줄로만 · 차례 재생 · 취소 ──
-const voice = new Audio();
-let actx, token = 0, loopSrc = null, loopTimer = 0;
-voice.addEventListener("ended", () => { if (loopSrc) loopTimer = setTimeout(() => { if (loopSrc) voice.play().catch(() => {}); }, 600); });
+// ── 소리(W5) — 한 번에 하나 · 차례 재생 · 취소 ── 짧은 소리는 전부 미리 풀어 둔 버퍼로(js/sfx.js)
+let actx, token = 0, loopUrl = null, loopTimer = 0;
 const wait = ms => new Promise(r => setTimeout(r, ms));
-function hush() { token++; clearTimeout(loopTimer); loopSrc = null; voice.pause(); }
-// 소리 파일을 틀고, 파일이 없으면 false(→ 대신할 것으로)
-function playSrcOk(src, my) {
-  return new Promise(res => {
-    if (my !== token) return res(true);
-    let ok = true;
-    const done = () => { voice.removeEventListener("ended", done); voice.removeEventListener("error", bad); clearTimeout(guard); res(ok); };
-    const bad = () => { ok = false; done(); };
-    voice.addEventListener("ended", done); voice.addEventListener("error", bad);
-    const guard = setTimeout(done, 6000);
-    // 파일이 없을 때(error 이벤트 · NotSupported)만 「없음」 — 다른 이유로 재생이 끊긴 건 없음이 아니다(원음이 겹쳐 나지 않게)
-    voice.src = src; voice.currentTime = 0; voice.play().catch(e => (e?.name === "NotSupportedError" ? bad() : done()));
-  });
-}
-function playSrc(src, my) {
-  return new Promise(res => {
-    if (my !== token) return res();
-    const done = () => { voice.removeEventListener("ended", done); voice.removeEventListener("error", done); clearTimeout(guard); res(); };
-    voice.addEventListener("ended", done); voice.addEventListener("error", done);
-    const guard = setTimeout(done, 4000);
-    voice.src = src; voice.currentTime = 0; voice.play().catch(done);
-  });
-}
-// 원음 한 토막만(start~end 초) — 끝에서 정확히 멈춘다
-function playClip(src, start, end, my) {
-  return new Promise(res => {
-    if (my !== token) return res();
-    let iv = 0;
-    const done = () => { clearInterval(iv); clearTimeout(guard); voice.removeEventListener("error", done); voice.pause(); voice.volume = 1; res(); };
-    const guard = setTimeout(done, (end - start) * 1000 + 3000);
-    voice.addEventListener("error", done);
-    const go = () => {
-      voice.currentTime = start; voice.volume = 0;
-      voice.play().catch(done);
-      // 앞뒤 0.03초 페이드(본부 권장 — 이어 말한 낱말 경계의 앞뒤 소리가 툭 튀지 않게)
-      const F = 0.03;
-      iv = setInterval(() => {
-        const t = voice.currentTime;
-        if (my !== token || t >= end || voice.ended) return done();
-        voice.volume = Math.max(0, Math.min(1, (t - start) / F, (end - t) / F));
-      }, 10);
-    };
-    if (voice.src === new URL(src, location.href).href && voice.readyState >= 1) go();
-    else { voice.src = src; voice.addEventListener("loadedmetadata", go, { once: true }); voice.load(); }
-  });
+function hush() { token++; clearTimeout(loopTimer); loopUrl = null; sfx.stopAll(); }
+// 한 글자 소리 반복(W1) — 끝나면 0.6초 쉬고 다시
+function startLoop(url) {
+  hush(); loopUrl = url;
+  const again = async () => {
+    if (loopUrl !== url) return;
+    await sfx.play(url);
+    if (loopUrl === url) loopTimer = setTimeout(again, 600);
+  };
+  again();
 }
 function tone(kind) { // 딩동(맞음) · 뿅뿅↘(틀림 — 귀엽게)
   try {
@@ -102,9 +66,10 @@ async function run(steps) {
     if (my !== token) return false;
     if (s === "ok" || s === "bad") await tone(s);
     else if (typeof s === "number") await wait(s);
-    else if (s && s.clip) await playClip(s.clip, s.start, s.end, my);
-    else if (s && s.unit) { if (!(await playSrcOk(s.unit, my)) && s.fallback) await (s.fallback.clip ? playClip(s.fallback.clip, s.fallback.start, s.fallback.end, my) : playSrc(s.fallback, my)); }
-    else if (s) await playSrc(s, my);
+    else if (s && s.clip) await sfx.play(s.clip, { offset: s.start, dur: s.end - s.start, fade: 0.03 }); // 원음 한 토막(앞뒤 0.03초 페이드)
+    else if (s && s.unit) { // 따로 만든 소리 · 파일이 정말 없을 때만 원음으로
+      if (!(await sfx.play(s.unit)) && s.fallback && my === token) await (s.fallback.clip ? sfx.play(s.fallback.clip, { offset: s.fallback.start, dur: s.fallback.end - s.fallback.start, fade: 0.03 }) : sfx.play(s.fallback));
+    } else if (s) await sfx.play(s);
   }
   return my === token;
 }
@@ -175,7 +140,7 @@ export default async function write(app, ep, id, opts = {}) {
     stopLoop(); st.sent = true; markSent();
     run([partStep()]).then(() => { st.sent = false; markSent(); });
   }
-  app.__wr = { toggle: toggleSentence, busy: () => st.busy || st.sent || st.auto || !voice.paused }; // busy = 점검 도구가 소리 끝을 기다릴 때
+  app.__wr = { toggle: toggleSentence, busy: () => st.busy || st.sent || st.auto || sfx.playing() }; // busy = 점검 도구가 소리 끝을 기다릴 때
 
   function paintSent() {
     sentEl.innerHTML = words().map((w, wi) => `<span class="w ${wi === st.w ? "on" : ""}">${w.chars.map((c, ci) =>
@@ -277,8 +242,8 @@ export default async function write(app, ep, id, opts = {}) {
       if (st.busy) return;
       st.sent = false; markSent();
       if (st.loopAt && st.loopAt.w === w && st.loopAt.c === ci) return stopLoop();
-      hush(); st.loopAt = { w, c: ci, ch: c.ch };
-      voice.src = c.file; voice.currentTime = 0; loopSrc = voice.src; voice.play().catch(() => {});
+      st.loopAt = { w, c: ci, ch: c.ch };
+      startLoop(c.file);
       paintSent(); setNote();
       return;
     }
@@ -297,5 +262,8 @@ export default async function write(app, ep, id, opts = {}) {
 
   setNote(); render();
   const release = hold();
+  // 이 줄에서 쓸 소리를 미리 받아 풀어 둔다(대사 · 낱말·토막 · 글자 · 자판 자모) — 누르는 순간 바로 나오게
+  sfx.preload([lineSrc, ...allWords.map(w => unitSrc(w.unit)), ...segs.map(g => unitSrc(g.unit)),
+    ...allWords.flatMap(w => w.chars.map(c => c.file)), ...[...KEYS, ...VOW].map(jamoSrc)]);
   return () => { release(); st.alive = false; hush(); delete app.__wr; };
 }
