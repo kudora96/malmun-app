@@ -196,19 +196,23 @@ export default async function speak(app, ep, id, opts = {}) {
     try {
       const ctx = audioCtx(), src = ctx.createMediaStreamSource(st.stream), an = ctx.createAnalyser();
       an.fftSize = 1024; src.connect(an);
-      const buf = new Float32Array(an.fftSize); let spoke = false, quietAt = 0, peak = 0, kept = false; const began = Date.now();
+      const buf = new Float32Array(an.fftSize); let spoke = false, quietAt = 0, peak = 0, kept = false, liveMs = 0, lastT = ctx.currentTime, lastAt = Date.now();
+      const DEAD_MS = switched ? 2500 : 1500; // 마이크를 바꾼 직후에는 소리 장치가 자리 잡을 시간을 더 준다(블루투스가 통화 모드로 바뀌며 잠깐 끊긴다)
       const lvl = $(".lvl"); lvl.hidden = false;
       const timer = (meterTimer = setInterval(() => {
+        // 소리 엔진이 실제로 돌아간 시간만 센다 — 엔진이 멈춰 있으면(새로 고친 직후 · 장치가 바뀌는 중) 산 마이크도 0 으로 보인다
+        const now = Date.now(); if (ctx.state === "running" && ctx.currentTime > lastT) liveMs += now - lastAt; else if (ctx.state !== "running") ctx.resume().catch(() => {});
+        lastT = ctx.currentTime; lastAt = now;
         an.getFloatTimeDomainData(buf);
         const rms = Math.sqrt(buf.reduce((s, v) => s + v * v, 0) / buf.length);
         peak = Math.max(peak, rms);
         lvl.firstElementChild.style.width = Math.min(100, Math.round(rms * 500)) + "%"; // 들어오는 소리 크기
         // 바꿔서 연 마이크에 신호가 있으면(말하기 전이라도) 기억 — 다음에는 죽은 마이크를 다시 거치지 않는다
-        if (st.switched && !kept && peak >= 0.0002 && Date.now() - began > 1500) { kept = true; micPref(devId(st.stream) || (st.micReq !== true && st.micReq) || ""); }
+        if (st.switched && !kept && peak >= 0.0002 && liveMs > DEAD_MS) { kept = true; micPref(devId(st.stream) || (st.micReq !== true && st.micReq) || ""); }
         if (rms > 0.02 && !spoke) micPref(devId(st.stream) || (st.micReq !== true && st.micReq) || ""); // 소리가 들어온 마이크를 기억
         if (rms > 0.02) { spoke = true; quietAt = 0; } else if (spoke) { quietAt ||= Date.now(); if (Date.now() - quietAt > QUIET_MS) stopRec(); }
         // 1.5초 동안 신호가 아예 0 이면(꺼진 마이크 · 소리 없는 블루투스 — 조용한 방의 산 마이크는 0 이 아니다) 다음 마이크로 바꿔 다시 녹음
-        if (!spoke && peak < 0.0002 && Date.now() - began > 1500) { dead.add(st.micReq); if (devId(st.stream)) dead.add(devId(st.stream)); stopRec(true); closeMic(); startRec(true); }
+        if (!spoke && peak < 0.0002 && liveMs > DEAD_MS) { dead.add(st.micReq); if (devId(st.stream)) dead.add(devId(st.stream)); stopRec(true); closeMic(); startRec(true); }
       }, 60));
       rec.addEventListener("stop", () => { clearInterval(timer); // 내 것만 끈다 — 마이크를 바꿔 새로 시작한 녹음의 것을 끄면 안 된다
         try { src.disconnect(); } catch {} }, { once: true });
