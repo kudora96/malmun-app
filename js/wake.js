@@ -1,6 +1,7 @@
 // 소리 장치 깨워 두기 — 조용하면 스피커·블루투스가 잠들어 다음 소리의 앞부분(0.1~0.3초)이 먹힌다
 // (10-01 투덜이 「한 번 누를 때랑 두 번 누를 때 틀려진다」 — 앱은 매번 0초부터 똑같이 트는데, 장치가 깨어나며 첫소리가 잘렸다)
-// 학습·쓰기 화면이 열려 있는 동안 들리지 않는 아주 작은 신호(25Hz · −94dB)를 흘려 장치를 깨어 있게 한다.
+// 학습·쓰기 화면이 열려 있는 동안 귀에 안 들리는 낮은 신호(45Hz · gain 0.0126 ≈ −38dB)를 흘려 장치를 깨어 있게 한다.
+// (10-02 확정: 블루투스 스피커는 완전한 무음·너무 작은 신호(25Hz · 0.00002)로는 안 깨어난다 — 투덜이 STOCKWELL II 로 이 값에서 「다 잘 들린다 · 웅 소리 안 들린다」)
 let ctx = null, osc = null, users = 0;
 
 export function audioCtx() {
@@ -15,7 +16,7 @@ function start() {
     if (osc) return;
     osc = c.createOscillator();
     const g = c.createGain();
-    osc.frequency.value = 25; g.gain.value = 0.00002;
+    osc.frequency.value = 45; g.gain.value = 0.0126;
     osc.connect(g); g.connect(c.destination); osc.start();
   } catch {}
 }

@@ -1,10 +1,10 @@
 // 학습자 언어 — 고르게 하지 않는다(CLAUDE.md).
-// ① 저장된 선택 ② 폰 언어가 20개 중 하나 ③ 폰 시간대로 나라 짐작 ④ 영어
+// ① 저장된 선택 ② 폰 언어가 22개 중 하나 ③ 폰 시간대로 나라 짐작 ④ 영어
 export const LANGS = [
   ["ne", "नेपाली"], ["bn", "বাংলা"], ["vi", "Tiếng Việt"], ["id", "Bahasa Indonesia"], ["th", "ไทย"],
   ["mn", "Монгол"], ["ur", "اردو"], ["si", "සිංහල"], ["tl", "Tagalog"], ["uz", "Oʻzbekcha"],
   ["ky", "Кыргызча"], ["km", "ខ្មែរ"], ["lo", "ລາວ"], ["my", "မြန်မာ"], ["zh", "中文"],
-  ["ja", "日本語"], ["en", "English"], ["es", "Español"], ["fr", "Français"], ["pt", "Português"],
+  ["ja", "日本語"], ["ru", "Русский"], ["hi", "हिन्दी"], ["en", "English"], ["es", "Español"], ["fr", "Français"], ["pt", "Português"],
 ];
 const CODES = LANGS.map(l => l[0]);
 const RTL = new Set(["ur"]);
@@ -18,6 +18,11 @@ const TZ = {
   "Asia/Colombo": "si", "Asia/Manila": "tl", "Asia/Tashkent": "uz", "Asia/Samarkand": "uz",
   "Asia/Bishkek": "ky", "Asia/Phnom_Penh": "km", "Asia/Vientiane": "lo", "Asia/Yangon": "my",
   "Asia/Rangoon": "my", "Asia/Shanghai": "zh", "Asia/Urumqi": "zh", "Asia/Tokyo": "ja",
+  // 10-02 러시아어·힌디어 추가(카자흐스탄은 러시아어로 · 키르기스스탄은 시간대로는 ky, 폰이 러시아어면 ru)
+  "Asia/Kolkata": "hi", "Asia/Calcutta": "hi",
+  "Europe/Moscow": "ru", "Europe/Kaliningrad": "ru", "Europe/Samara": "ru", "Europe/Volgograd": "ru", "Asia/Yekaterinburg": "ru", "Asia/Omsk": "ru",
+  "Asia/Novosibirsk": "ru", "Asia/Krasnoyarsk": "ru", "Asia/Irkutsk": "ru", "Asia/Yakutsk": "ru", "Asia/Vladivostok": "ru", "Asia/Sakhalin": "ru",
+  "Asia/Magadan": "ru", "Asia/Kamchatka": "ru", "Asia/Almaty": "ru", "Asia/Qyzylorda": "ru", "Asia/Aqtobe": "ru", "Asia/Aqtau": "ru", "Asia/Atyrau": "ru", "Asia/Oral": "ru", "Asia/Qostanay": "ru",
 };
 const KEY = "malmun.lang";
 

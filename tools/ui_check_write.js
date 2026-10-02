@@ -35,12 +35,12 @@
   await openWrite(1);
   let f = fits(); ok(f.scroll <= 1 && f.inside, "창 안 스크롤 없음 · 자판·단추가 창 안", `넘침 ${f.scroll}px`);
   let at = log.length; key("ㅇ"); await idle();
-  ok(desc(at) === "효과음 → 시작(ieung.mp3) → 끝(ieung.mp3)", "ㅇ 맞음 → 딩동 → 자모 소리", desc(at));
+  ok(desc(at) === "효과음 → 시작(j_ieung.mp3) → 끝(j_ieung.mp3)", "ㅇ 맞음 → 딩동 → 자모 소리", desc(at));
   at = log.length; key("ㄱ"); await idle();
-  ok(/^효과음 → 시작\(giyeok\.mp3\)/.test(desc(at)) && $(".panel .slot.current")?.classList.contains("shake"), "ㄱ 틀림 → 뿅뿅(귀여운 틀림 소리) → 그래도 ㄱ 소리 · 흔들림", desc(at));
+  ok(/^효과음 → 시작\(j_giyeok\.mp3\)/.test(desc(at)) && $(".panel .slot.current")?.classList.contains("shake"), "ㄱ 틀림 → 뿅뿅(귀여운 틀림 소리) → 그래도 ㄱ 소리 · 흔들림", desc(at));
   at = log.length; key("ㅓ"); await W(150); key("ㅅ"); await idle();
   const ev = log.slice(at);
-  ok(/^효과음 → 시작\(eo\.mp3\) → 끝\(eo\.mp3\)$/.test(desc(at)), "ㅓ 완성 → 딩동 → ㅓ 소리 · 글자를 읽어 주는 소리 없음(W3)", desc(at));
+  ok(/^효과음 → 시작\(j_eo\.mp3\) → 끝\(j_eo\.mp3\)$/.test(desc(at)), "ㅓ 완성 → 딩동 → ㅓ 소리 · 글자를 읽어 주는 소리 없음(W3)", desc(at));
   ok(!ev.some(e => e.name.includes("siot")), "소리 나는 중 누른 ㅅ 은 무시");
   ok($(".panel .target")?.textContent === "서", "다음 글자 「서」");
   // 낱말 칸의 글자 하나 소리(W4)
