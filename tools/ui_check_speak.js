@@ -53,7 +53,7 @@
   ok(hb2 && hb.hidden && $(".panel [data-act=save]").disabled, "[?] → 풍선 열림 · 다시 → 닫힘 · 녹음 전에는 [⬇] 꺼져 있음");
   const sp = $(".panel .speak"), p = $(".panel").getBoundingClientRect(), btn = $(".panel .sbtns").getBoundingClientRect();
   ok($("#vwrap").offsetHeight === 0 && sp && sp.scrollHeight - sp.clientHeight <= 1 && btn.bottom <= p.bottom + 1, "말하기가 영상 창 자리에 · 창 안 스크롤 없음");
-  ok($(".panel .say").textContent === "어서 오세요." && /1\/4/.test($(".panel .segnav").innerText.replace(/\s/g, "")), "과제 = 첫 토막 「어서 오세요.」 · 1/4(토막 3 + 줄 전체)", $(".panel .say").textContent + " " + $(".panel .segnav").innerText.replace(/\s/g, ""));
+  ok($(".panel .say").textContent === "어서 오세요." && /1\/5/.test($(".panel .segnav").innerText.replace(/\s/g, "")), "과제 = 첫 토막 「어서 오세요.」 · 1/5(토막 3 + 줄 전체 + 말해 보기)", $(".panel .say").textContent + " " + $(".panel .segnav").innerText.replace(/\s/g, ""));
   ok($(".panel [data-act=mine]").disabled && $(".panel [data-act=both]").disabled, "녹음 전에는 [내 목소리]·[비교] 꺼져 있음");
   let at = log.length; $(".panel [data-act=model]").click(); await W(1800);
   ok(log.slice(at).some(e => e.ev === "시작" && /_01_p01\.mp3$/.test(e.name)) && log.slice(at).some(e => e.ev === "끝"), "[본보기] → 그 토막 소리 끝까지", log.slice(at).map(e => e.ev + "(" + e.name.split("/").pop() + ")").join(" → "));
@@ -62,7 +62,7 @@
   await say("안녕하세요"); ok(micAsked === 1 && $(".panel .mic").classList.contains("on"), "[말하기] → 마이크 허락 1번 · 녹음 중 표시");
   await waitIdle();
   ok(!$(".panel .mic").classList.contains("on"), "말이 끝나고 조용하면 저절로 멈춤");
-  ok(/50%/.test($(".panel .msg").textContent) && !$(".panel .meter").classList.contains("pass") && /1\/4/.test($(".panel .segnav").innerText.replace(/\s/g, "")), "다르게 말함 → 50% · 통과 아님 · 그 자리에 있음(막지 않음)", $(".panel .msg").textContent);
+  ok(/50%/.test($(".panel .msg").textContent) && !$(".panel .meter").classList.contains("pass") && /1\/5/.test($(".panel .segnav").innerText.replace(/\s/g, "")), "다르게 말함 → 50% · 통과 아님 · 그 자리에 있음(막지 않음)", $(".panel .msg").textContent);
   ok(!$(".panel [data-act=mine]").disabled, "녹음 뒤 [내 목소리] 켜짐");
   let dl = null; const oc = HTMLAnchorElement.prototype.click; HTMLAnchorElement.prototype.click = function () { if (this.download) dl = this.download + " " + this.href.slice(0, 5); else oc.call(this); };
   $(".panel [data-act=save]").click(); await W(200); HTMLAnchorElement.prototype.click = oc;
@@ -76,13 +76,13 @@
   ok(/^\d+% · /.test(m3) && /^\d+% · /.test(m1) && m3.replace(/^\d+%/, "") !== m1.replace(/^\d+%/, ""), "점수마다 한마디가 다름(아직 조금 부족해요 / 천천히 다시)", m3 + " ｜ " + m1);
   // 맞게 말함 → 통과 · 저장 · 다음 토막
   await say("어서 오세요"); await waitIdle();
-  ok(/100%/.test($(".panel .msg").textContent) || /2\/4/.test($(".panel .segnav").innerText), "맞게 말함 → 100% ✓", $(".panel .msg").textContent);
+  ok(/100%/.test($(".panel .msg").textContent) || /2\/5/.test($(".panel .segnav").innerText), "맞게 말함 → 100% ✓", $(".panel .msg").textContent);
   await W(1800);
-  ok(/2\/4/.test($(".panel .segnav").innerText.replace(/\s/g, "")) && $(".panel .say").textContent.startsWith("경복궁에"), "통과 1.5초 뒤 다음 토막으로 자동", $(".panel .say").textContent);
+  ok(/2\/5/.test($(".panel .segnav").innerText.replace(/\s/g, "")) && $(".panel .say").textContent.startsWith("경복궁에"), "통과 1.5초 뒤 다음 토막으로 자동", $(".panel .say").textContent);
   ok(micAsked === 1, "마이크 허락은 처음 한 번만", String(micAsked));
   // 저장 확인: 앞 토막으로 돌아가면 ✓ + 내 목소리 켜짐
   $(".panel [data-seg='-1']").click(); await W(300);
-  ok(/1\/4✓/.test($(".panel .segnav").innerText.replace(/\s/g, "")) && !$(".panel [data-act=mine]").disabled, "앞 토막으로 → ✓ 표시 · 저장된 내 목소리 들을 수 있음", $(".panel .segnav").innerText.replace(/\s/g, ""));
+  ok(/1\/5✓/.test($(".panel .segnav").innerText.replace(/\s/g, "")) && !$(".panel [data-act=mine]").disabled, "앞 토막으로 → ✓ 표시 · 저장된 내 목소리 들을 수 있음", $(".panel .segnav").innerText.replace(/\s/g, ""));
   // 녹음 중 다시 누르면 멈춤
   await say("어서 오세요", 5000); await W(600); $(".panel [data-act=rec]").click(); await W(1200);
   ok(!$(".panel .mic").classList.contains("on"), "녹음 중 [말하기] 다시 → 멈춤"); await W(1800);
@@ -92,12 +92,12 @@
   await open(1);
   ok(/✓/.test($(".panel .segnav").innerText), "다시 열어도 ✓ 와 저장된 녹음이 남아 있음", $(".panel .segnav").innerText.replace(/\s/g, ""));
   // 줄 전체까지 통과 → 다음 줄 말하기
-  for (const heard of ["어서 오세요", "경복궁에 온 걸", "환영해요", "어서 오세요 경복궁에 온 걸 환영해요"]) {
+  for (const heard of ["어서 오세요", "경복궁에 온 걸", "환영해요", "어서 오세요 경복궁에 온 걸 환영해요", "한국에 온 걸 환영해요"]) {
     if (!/^1 \//.test($(".panel .whead .sub").textContent)) break;
     await say(heard); await waitIdle(); await W(1900);
   }
   await W(600);
-  ok(/^1 \//.test($(".panel .whead .sub")?.textContent || "") && /4\/4✓/.test($(".panel .segnav").innerText.replace(/\s/g, "")) && /100% ✓ · .+/.test($(".panel .msg").textContent), "줄 전체까지 통과 → 거기서 끝(다음 줄로 넘어가지 않음) · 「이 줄을 다 했어요」", $(".panel .whead .sub")?.textContent + " · " + $(".panel .msg").textContent);
+  ok(/^1 \//.test($(".panel .whead .sub")?.textContent || "") && /5\/5✓/.test($(".panel .segnav").innerText.replace(/\s/g, "")) && /100% ✓ · .+/.test($(".panel .msg").textContent), "줄 전체까지 통과 → 거기서 끝(다음 줄로 넘어가지 않음) · 「이 줄을 다 했어요」", $(".panel .whead .sub")?.textContent + " · " + $(".panel .msg").textContent);
   // 음성 인식이 없는 기기 → 점수 없이 녹음·비교
   delete window.SpeechRecognition; delete window.webkitSpeechRecognition;
   await open(4);

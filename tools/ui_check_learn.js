@@ -31,7 +31,7 @@
   await tap(5); check("5번 줄");
   await tap(5, null, 1200); check("5번 또(그 줄 듣기)");
   await tap(5, "explain", 1200); check("5번 설명");
-  $(".panel .paras").click(); await W(500); check("설명 창 누름(멈춤)");
+  $(".panel .paras, .panel .v9body p").click(); await W(500); check("설명 창 누름(멈춤)"); // 옛 설명 · 새 설명(v9) 카드 둘 다
   await tap(5, "explain"); check("설명 다시 = 영상");
   await tap(5, "write", 1300); check("5번 쓰기");
   await tap(5, "write"); check("쓰기 다시 = 영상");

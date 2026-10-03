@@ -15,5 +15,7 @@ export const paths = {
   // ?v= = 소리를 다시 만들면 올린다(폰·브라우저에 남은 옛 소리를 쓰지 않게) — v2: 앞 0.2초·뒤 0.15초 여유(10-01)
   char: file => `${MEDIA}/letters/c/${file}?v=2`,
   jamo: name => `${MEDIA}/letters/j/${name}.mp3?v=2`,
+  // 새 설명(v9) 시안 소리 — tools/sync_v9.py 가 로컬 media/v9 에만 복사(아직 R2 에 없음 · 「올려」 전)
+  v9: (ep, rel) => `${MEDIA}/v9/${ep}/${rel.split("/").map(encodeURIComponent).join("/")}`,
   charF: file => `${MEDIA}/chars_f/${file}?v=3`, // 공용 아나운서 글자·자모 소리(본부 05_audio/_chars_f)
 };

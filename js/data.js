@@ -26,18 +26,21 @@ export async function episode(ep, lang) {
   const key = `${ep}.${lang}`;
   if (cache.has(key)) return cache.get(key);
   const p = (async () => {
-    const [base, kr, tr, wt, un] = await Promise.all([
+    const [base, kr, tr, wt, un, v9] = await Promise.all([
       getJSON(paths.data(ep)),
       getJSON(paths.data(ep, ".kr")).catch(() => ({ explanations: [] })),
       getJSON(paths.data(ep, "." + lang)).catch(() => null),
       getJSON(paths.data(ep, ".words")).catch(() => ({ lines: {} })), // 대사 원음 안 낱말 시각(쓰기의 단어·부분 듣기)
       getJSON(paths.data(ep, ".units")).catch(() => ({ lines: {} })), // 쓰기 낱말·토막 목록(고정 · tools/writing_units.py)
+      getJSON(paths.data(ep, ".v9")).catch(() => null), // 새 설명(v9 시안 · 본부 10-03) — 있으면 설명 창이 새 카드로
     ]);
     const krBy = new Map(kr.explanations.map(e => [e.sub_id, e]));
     const trSub = new Map((tr?.subtitles || []).map(s => [s.id, s]));
     const trExp = new Map((tr?.explanations || []).map(e => [e.sub_id, e]));
     const bios = new Map((tr?.characters || []).map(c => [c.id, c.bio]));
-    const lines = base.subtitles.map(s => {
+    const v9langs = (v9?.langs || []).filter(c => c !== "ko");
+    const lines = base.subtitles.map((s, n) => {
+      const nv = v9?.lines.find(x => x.n === n + 1) || null;
       const part = (s.parts || [])[0] || {};
       const k = krBy.get(s.id) || {};
       const x = trExp.get(s.id) || {};
@@ -49,7 +52,8 @@ export async function episode(ep, lang) {
         speaker: part.speaker || "", lineAudio: part.audio || null,
         words: (wt.lines[String(s.id)] || []).map(w => ({ w: w.w, start: w.cs ?? w.start, end: w.ce ?? w.end })),
         units: un.lines[String(s.id)] || null,
-        say: s.say?.ko ? s.say : null, // 「이제 말해 보세요」 과제(잠정 · 본부 10-01 — 확정되면 app_build_spec.md)
+        say: s.say?.ko ? s.say : nv?.say ? { ko: nv.say, src: paths.v9(ep, nv.audio.ko.say) } : null, // 「이제 말해 보세요」 과제(잠정 · 본부 10-01) · v9 시안이면 그 문장
+        v9: nv,
         tr: trSub.get(s.id)?.t || "",
         // 설명: ¶1 = 대사 인용(음성은 lineAudio) · ¶2~ = audio_kr 조각과 1:1
         krParas: paras.slice(1), krAudio: k.audio_kr || [], krHl: k.kr_hl || [],
@@ -59,6 +63,7 @@ export async function episode(ep, lang) {
     });
     return {
       id: ep, title: base.title, lang: tr ? lang : null,
+      v9L: v9langs.includes(lang) ? lang : v9langs[0] || null, // v9 「학습자 언어」 — 그 언어 자료가 없으면 있는 언어(지금은 ne 뿐)
       characters: (base.characters || []).map(c => ({ ...c, bio: bios.get(c.id) || "" })),
       lines,
     };

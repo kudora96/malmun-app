@@ -63,9 +63,10 @@ export default async function speak(app, ep, id, opts = {}) {
   if (parts.length !== 1) parts.push({ key: `${ep}_${String(line.id).padStart(2, "0")}_line`, text: line.ko, say: line.ko, src: lineSrc, whole: true });
   else Object.assign(parts[0], { whole: true });
   // 「이제 말해 보세요. "…"」 과제 — 새 설명이 주는 문장(낱말 하나 바꾼 말)이 있으면 맨 끝에(잠정 필드 subtitles[].say{ko, audio})
-  if (line.say) parts.push({ key: `${ep}_${String(line.id).padStart(2, "0")}_say`, text: line.say.ko, say: line.say.ko, src: line.say.audio ? paths.audio(ep, line.say.audio) : null, task: true });
+  if (line.say) parts.push({ key: `${ep}_${String(line.id).padStart(2, "0")}_say`, text: line.say.ko, say: line.say.ko, src: line.say.src || (line.say.audio ? paths.audio(ep, line.say.audio) : null), task: true });
+  if (opts.task === "say" && line.say) parts.startAt = parts.length - 1; // 설명의 「이제 말해 보세요」에서 들어오면 그 과제부터
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  const st = { i: 0, rec: null, stream: null, blob: null, score: null, saved: {}, busy: false, model: false, alive: true, mine: null };
+  const st = { i: parts.startAt || 0, rec: null, stream: null, blob: null, score: null, saved: {}, busy: false, model: false, alive: true, mine: null };
   for (const p of parts) st.saved[p.key] = await recGet(`${ep}/${p.key}`);
 
   app.innerHTML = `<section class="scr speak ${opts.embedded ? "embedded" : ""}">

@@ -85,5 +85,14 @@
  "help_sp_2": "● Speak — say it. It stops by itself when you finish. 80% or more is a pass.",
  "help_sp_3": "▶ My voice — hear your recording. Compare — the model, then you.",
  "help_sp_4": "Only recordings that pass (80%+) are kept. Others are gone when you move on.",
- "help_sp_5": "Recordings stay inside this browser. Clearing site data deletes them. ⬇ saves one as a file."
+ "help_sp_5": "Recordings stay inside this browser. Clearing site data deletes them. ⬇ saves one as a file.",
+ "v9_snd": "🔊 Explanation sound",
+ "v9_txt": "📖 Explanation text",
+ "v9_ex": "Explanation",
+ "v9_other": "Hear it in the other language",
+ "v9_formula": "Pattern",
+ "v9_mode_LL": "Listen and read in your language — start here",
+ "v9_mode_kL": "Listen in Korean, check in your language — cross",
+ "v9_mode_Lk": "Listen in your language, read in Korean — cross",
+ "v9_mode_kk": "Korean only — like a Korean-Korean dictionary"
 }

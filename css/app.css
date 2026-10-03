@@ -314,3 +314,31 @@ a{color:inherit;text-decoration:none}
 .speak .miclist p{font-size:12.5px;color:var(--mute);margin:0 0 2px}
 .speak .miclist button{text-align:start;padding:8px 10px;border-radius:8px;border:1px solid var(--line);font-size:12.5px}
 .speak .miclist button[aria-pressed=true]{border-color:var(--hi);color:var(--hi);font-weight:700}
+
+/* ── 새 설명(v9 시안) — 설명 소리·글 언어를 따로 고름 · 화면에는 표시형만 ── */
+.learn .panel.explain.v9{height:clamp(360px,64dvh,620px)}
+.exv.v9{cursor:default}
+.v9bar{flex:none;display:grid;grid-template-columns:auto 1fr;gap:4px 8px;align-items:center;padding:8px 14px 6px;border-bottom:1px solid var(--line);font-size:12.5px}
+.v9bar b{font-weight:600;white-space:nowrap}
+.v9bar .seg{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden;justify-self:start}
+.v9bar .seg button{padding:3px 11px;font-size:12.5px;background:var(--card)}
+.v9bar .seg button[aria-pressed=true]{background:var(--hi);color:#fff}
+.v9bar .combo{grid-column:1/-1;color:var(--mute);font-size:12px}
+.v9body{flex:1;overflow-y:auto;padding:10px 14px 14px;display:flex;flex-direction:column;gap:8px}
+.v9body .q .kw{font-size:18px;font-weight:700}
+.v9body .q .tr{margin:2px 0 0;color:var(--mute);font-size:13.5px}
+.v9body .chips{display:flex;flex-wrap:wrap;gap:5px}
+.v9body .chip{background:var(--bubble);border-radius:8px;padding:2px 8px;font-size:12.5px}
+.v9body .chip i{font-style:normal;color:var(--mute)}
+.v9body .fx{font-size:12.5px;color:var(--mute)}
+.v9body .fx b{color:var(--ink)}
+.v9body .exh{display:flex;align-items:center;gap:8px;border-top:1px solid var(--line);padding-top:8px}
+.v9body .exh span{flex:1;font-weight:700;color:var(--hi);font-size:13px}
+.v9body .rb{width:32px;height:32px;border-radius:50%;background:var(--hi);color:#fff;font-size:13px;flex:none}
+.v9body .rb.alt{background:none;border:1px solid var(--hi);color:var(--hi)}
+.v9body .rb[aria-pressed=true]{background:var(--pink);border-color:var(--pink);color:#fff}
+.v9body p{margin:0;font-size:14.5px;line-height:1.6}
+.v9body p.cur{background:color-mix(in srgb,var(--hi) 12%,transparent);border-radius:6px}
+.v9body .sayb{background:var(--bubble);border-radius:10px;padding:8px 10px;display:flex;flex-direction:column;gap:6px}
+.v9body .sayb .btns{display:flex;gap:8px;align-items:center}
+.v9body .sayb .mic{padding:5px 12px;border-radius:999px;background:var(--ink);color:var(--bg);font-size:13px;font-weight:700}
