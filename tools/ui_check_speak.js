@@ -66,7 +66,7 @@
   ok(!$(".panel [data-act=mine]").disabled, "녹음 뒤 [내 목소리] 켜짐");
   let dl = null; const oc = HTMLAnchorElement.prototype.click; HTMLAnchorElement.prototype.click = function () { if (this.download) dl = this.download + " " + this.href.slice(0, 5); else oc.call(this); };
   $(".panel [data-act=save]").click(); await W(200); HTMLAnchorElement.prototype.click = oc;
-  ok(/^malmun_L01-00-01_01_p01\.(webm|m4a|ogg) blob:$/.test(dl || ""), "[⬇] → 내 녹음을 파일로 내려받음", String(dl));
+  ok(/^malmun_L01-00-01_01_p01\.(wav|webm|m4a|ogg) blob:$/.test(dl || ""), "[⬇] → 내 녹음을 파일로 내려받음", String(dl));
   ok(window.__srCont === true, "음성 인식이 말을 끝까지 들음(짧은 말을 중간에 끊지 않음)");
   ok(window.__srTrack === "audio", "음성 인식이 녹음하는 그 마이크를 들음(크롬 기본 마이크가 아니라)", String(window.__srTrack));
   const mp = mediaPlays.length; $(".panel [data-act=mine]").click(); await W(600); ok(mediaPlays.length > mp && mediaPlays[mediaPlays.length - 1] === "blob:", "[내 목소리] → 방금 녹음 재생");

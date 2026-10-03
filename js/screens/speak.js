@@ -19,6 +19,7 @@ import { episode } from "../data.js";
 import { paths } from "../paths.js";
 import { audioCtx, hold } from "../wake.js";
 import * as sfx from "../sfx.js";
+import { trimSilence } from "../recorder.js";
 
 export const PASS = 80;
 const MAX_MS = 8000, QUIET_MS = 1000;
@@ -232,6 +233,7 @@ export default async function speak(app, ep, id, opts = {}) {
     paint();
   }
   async function finish(blob) {
+    blob = (await trimSilence(blob)).blob; // 앞뒤 무음 잘라내기(마이크가 열리는 동안의 빈 소리 — 본부 10-03)
     st.blob = blob;
     if (sr) { // 인식 결과가 조금 늦게 온다
       for (let k = 0; k < 20 && !heard.length; k++) await new Promise(r => setTimeout(r, 100));
@@ -273,7 +275,7 @@ export default async function speak(app, ep, id, opts = {}) {
     if (a === "save") { // 내 녹음을 파일로
       const bl = mineBlob(); if (!bl) return;
       const u = URL.createObjectURL(bl), el = document.createElement("a");
-      el.href = u; el.download = `malmun_${cur().key}.${/mp4/.test(bl.type) ? "m4a" : /ogg/.test(bl.type) ? "ogg" : "webm"}`;
+      el.href = u; el.download = `malmun_${cur().key}.${/wav/.test(bl.type) ? "wav" : /mp4/.test(bl.type) ? "m4a" : /ogg/.test(bl.type) ? "ogg" : "webm"}`;
       document.body.append(el); el.click(); el.remove(); setTimeout(() => URL.revokeObjectURL(u), 5000);
       $(".msg").textContent = t("saved_file");
       return;

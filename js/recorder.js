@@ -40,7 +40,35 @@ export const micWhy = e => (e?.name === "NotAllowedError" || e?.name === "Securi
 
 // record() → { stop(discard), done: Promise<{ blob, heard[] } | { error } | { cancelled }> }
 // onLevel(0~1) = 들어오는 소리 크기 · onSwitch() = 소리 0 인 마이크를 버리고 다른 마이크로 다시 시작함
-export function record({ onLevel = () => {}, onSwitch = () => {} } = {}) {
+// 앞뒤 무음 잘라내기(본부 10-03 실측: 투덜이 녹음 앞 2.9초가 마이크가 열리는 동안의 빈 소리 −74dB)
+// 말 시작 0.15초 전 ~ 끝 0.25초 뒤만 남겨 WAV 로 · 실패하면 원래 녹음 그대로. lead = 원래 녹음에서 말이 시작된 초
+export async function trimSilence(blob, { pre = 0.15, post = 0.25 } = {}) {
+  try {
+    const buf = await audioCtx().decodeAudioData(await blob.arrayBuffer());
+    const n = buf.length, sr = buf.sampleRate, win = Math.max(1, Math.round(sr * 0.02));
+    const d = new Float32Array(n);
+    for (let c = 0; c < buf.numberOfChannels; c++) { const x = buf.getChannelData(c); for (let i = 0; i < n; i++) d[i] += x[i] / buf.numberOfChannels; }
+    const rms = [];
+    for (let i = 0; i + win <= n; i += win) { let s = 0; for (let k = i; k < i + win; k++) s += d[k] * d[k]; rms.push(Math.sqrt(s / win)); }
+    const peak = Math.max(0, ...rms);
+    if (peak < 0.003) return { blob, lead: 0 }; // 말이 없음 — 그대로
+    const th = Math.max(0.006, peak * 0.08);
+    const a = rms.findIndex(v => v > th), b = rms.length - 1 - [...rms].reverse().findIndex(v => v > th);
+    const s0 = Math.max(0, Math.round(a * win - pre * sr)), s1 = Math.min(n, Math.round((b + 1) * win + post * sr));
+    const pcm = d.subarray(s0, s1), out = new DataView(new ArrayBuffer(44 + pcm.length * 2));
+    const w = (o, str) => [...str].forEach((ch, i) => out.setUint8(o + i, ch.charCodeAt(0)));
+    w(0, "RIFF"); out.setUint32(4, 36 + pcm.length * 2, true); w(8, "WAVE"); w(12, "fmt "); out.setUint32(16, 16, true); out.setUint16(20, 1, true); out.setUint16(22, 1, true);
+    out.setUint32(24, sr, true); out.setUint32(28, sr * 2, true); out.setUint16(32, 2, true); out.setUint16(34, 16, true); w(36, "data"); out.setUint32(40, pcm.length * 2, true);
+    for (let i = 0; i < pcm.length; i++) out.setInt16(44 + i * 2, Math.max(-1, Math.min(1, pcm[i])) * 0x7fff, true);
+    return { blob: new Blob([out], { type: "audio/wav" }), lead: (a * win) / sr, kept: (s1 - s0) / sr };
+  } catch { return { blob }; }
+}
+// 마이크를 미리 열어 둔다 — 허락을 이미 받은 경우에만(처음 보는 사람에게 카드 열자마자 허락 창을 띄우지 않게)
+export async function warmMic() {
+  try { if ((await navigator.permissions.query({ name: "microphone" })).state === "granted") await openMic(); } catch {}
+}
+
+export function record({ onLevel = () => {}, onSwitch = () => {}, onReady = () => {} } = {}) {
   let stopNow = () => {}, cancelled = false;
   const ctl = { stop: discard => { if (discard) cancelled = true; stopNow(); } };
   ctl.done = (async () => {
@@ -80,7 +108,8 @@ export function record({ onLevel = () => {}, onSwitch = () => {} } = {}) {
         try { sr?.stop(); } catch {}
         rec.onstop = async () => {
           if (sr && !extra.dead && !cancelled) for (let k = 0; k < 20 && !heard.length; k++) await new Promise(r => setTimeout(r, 100)); // 인식 결과는 조금 늦게 온다
-          res({ blob: new Blob(chunks, { type: rec.mimeType || "audio/webm" }), heard, ...extra });
+          const raw = new Blob(chunks, { type: rec.mimeType || "audio/webm" });
+          res({ ...(extra.dead || cancelled ? { blob: raw } : await trimSilence(raw)), heard, ...extra });
         };
         try { rec.state !== "inactive" ? rec.stop() : rec.onstop(); } catch { rec.onstop(); }
       };
@@ -89,7 +118,7 @@ export function record({ onLevel = () => {}, onSwitch = () => {} } = {}) {
         const ctx = audioCtx(), an = ctx.createAnalyser(); src = ctx.createMediaStreamSource(s);
         an.fftSize = 1024; src.connect(an);
         const buf = new Float32Array(an.fftSize), DEAD_MS = switched ? 2500 : 1500;
-        let spoke = false, quietAt = 0, peak = 0, liveMs = 0, lastT = ctx.currentTime, lastAt = Date.now(), kept = false;
+        let ready = false, spoke = false, quietAt = 0, peak = 0, liveMs = 0, lastT = ctx.currentTime, lastAt = Date.now(), kept = false;
         meter = setInterval(() => {
           const now = Date.now(); // 소리 엔진이 실제로 돈 시간만 센다(멈춰 있으면 산 마이크도 0 으로 보인다)
           if (ctx.state === "running" && ctx.currentTime > lastT) liveMs += now - lastAt; else if (ctx.state !== "running") ctx.resume().catch(() => {});
@@ -97,6 +126,7 @@ export function record({ onLevel = () => {}, onSwitch = () => {} } = {}) {
           an.getFloatTimeDomainData(buf);
           const rms = Math.sqrt(buf.reduce((a, v) => a + v * v, 0) / buf.length);
           peak = Math.max(peak, rms); onLevel(Math.min(1, rms * 5));
+          if (!ready && rms > 0) { ready = true; onReady(); } // 마이크에서 실제 소리(바닥 소음이라도)가 들어오기 시작함
           if ((rms > 0.02 || (switched && peak >= DEAD && liveMs > DEAD_MS)) && !kept) { kept = true; pref(devId(s) || (s.req !== true && s.req) || ""); }
           if (rms > 0.02) { spoke = true; quietAt = 0; } else if (spoke) { quietAt ||= now; if (now - quietAt > QUIET_MS) finish(); }
           if (!spoke && peak < DEAD && liveMs > DEAD_MS) finish({ dead: true });

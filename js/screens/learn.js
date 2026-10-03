@@ -18,7 +18,7 @@ import { Sequence } from "../audio.js";
 import { I, progress, SPEAKER } from "../ui.js";
 import writeView from "./write.js";
 import speakView, { similarity, PASS, recGet, recPut } from "./speak.js";
-import { record, micWhy, canScore } from "../recorder.js";
+import { record, micWhy, canScore, warmMic, closeMic, trimSilence } from "../recorder.js";
 import { hold } from "../wake.js";
 
 const RATES = [1, 0.75, 0.5];
@@ -252,7 +252,7 @@ export default async function learn(app, ep, startId) {
     markButtons();
     if (kind === "explain") {
       panel.innerHTML = explainHTML(i);
-      if (L[i].v9) { mine.cleanup = spStop; spInit(i); }
+      if (L[i].v9) { mine.cleanup = spStop; spInit(i); if (L[i].say) warmMic(); } // 허락받은 마이크는 카드가 열릴 때 미리 열어 둔다(카드 안에서 다시 씀)
       if (autoplay) { ex.play(exItems(i)); if (L[i].v9) markPlay(v9pref().snd); }
     } else {
       const view = kind === "speak" ? speakView : writeView; // 줄을 다 쓰면(말하면) 다음 줄의 같은 메뉴로(W6 · S7)
@@ -272,11 +272,12 @@ export default async function learn(app, ep, startId) {
   }
   // 카드 안 말하기(녹음 → 점수 → 내 목소리) — js/recorder.js
   let sp = null; // { i, ctl, blob, audio }
-  function spStop() { sp?.ctl?.stop(true); sp?.audio?.pause(); sp = null; }
+  function spStop() { sp?.ctl?.stop(true); sp?.audio?.pause(); sp = null; closeMic(); }
   async function spInit(i) { // 저장된 내 목소리(✓)가 있으면 바로 들을 수 있게
     const saved = await recGet(sayKey(i));
     if (st.panel?.i !== i || !saved?.blob) return;
-    sp = { i, blob: saved.blob };
+    sp = { i, blob: (await trimSilence(saved.blob)).blob }; // 예전에 저장된 녹음도 앞뒤 무음을 잘라 들려준다(저장된 것은 그대로)
+    if (st.panel?.i !== i) return;
     const m = panel.querySelector(".sayb [data-x=mine]"); if (m) m.disabled = false;
     const g = panel.querySelector(".sayb .smsg"); if (g) g.textContent = saved.score != null ? `${saved.score}% ✓` : "";
   }
@@ -284,9 +285,14 @@ export default async function learn(app, ep, startId) {
     const box = panel.querySelector(".sayb"), msg = box.querySelector(".smsg"), lvl = box.querySelector(".lvl"), mineB = box.querySelector("[data-x=mine]");
     if (sp?.ctl) { sp.ctl.stop(); return; } // 녹음 중 다시 누름 = 멈춤(점수는 냄)
     ex.stop(); sp?.audio?.pause(); markPlay(); sync();
-    const ctl = record({ onLevel: v => { lvl.firstElementChild.style.width = Math.round(v * 100) + "%"; }, onSwitch: () => { msg.textContent = t("mic_switched"); } });
+    // 「준비 중」 → 마이크에서 실제 소리가 들어오기 시작하면 「녹음 중」(본부 10-03 — 그 전에 말하면 앞이 비어 버린다)
+    const ctl = record({
+      onLevel: v => { lvl.firstElementChild.style.width = Math.round(v * 100) + "%"; },
+      onSwitch: () => { btn.textContent = "… " + t("mic_opening"); lvl.hidden = true; msg.textContent = t("mic_switched"); },
+      onReady: () => { if (sp?.ctl !== ctl) return; btn.textContent = "■ " + t("btn_stop"); lvl.hidden = false; msg.textContent = t("listening"); },
+    });
     sp = { i, ctl, blob: sp?.blob };
-    btn.classList.add("on"); btn.textContent = "■ " + t("btn_stop"); lvl.hidden = false; msg.textContent = t("listening");
+    btn.classList.add("on"); btn.textContent = "… " + t("mic_opening"); lvl.hidden = true; msg.textContent = "";
     const r = await ctl.done;
     if (st.panel?.i !== i || sp?.ctl !== ctl) return; // 다른 데로 감
     sp.ctl = null; btn.classList.remove("on"); lvl.hidden = true;
