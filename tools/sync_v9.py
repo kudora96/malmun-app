@@ -22,6 +22,13 @@ def sync(ep):
                     os.makedirs(os.path.dirname(b), exist_ok=True); shutil.copy2(a, b); n += 1
                 else:
                     print("소리 없음:", rel)
+    # 말하기 본보기 = 문장만 읽은 소리(본부 10-03 · app.json 에 칸이 없어 이름 규칙으로) → audio.ko.sentence
+    for l in d["lines"]:
+        rel = f"새설명_소리_kr/{ep}_{l['n']:02d}_말해보세요_문장.mp3"
+        a = os.path.join(root, rel.replace("/", os.sep))
+        if os.path.exists(a):
+            b = os.path.join(out, rel.replace("/", os.sep)); shutil.copy2(a, b); n += 1
+            l.setdefault("audio", {}).setdefault("ko", {})["sentence"] = rel
     with open(os.path.join(APP, "data", ep, f"{ep}.v9.json"), "w", encoding="utf-8") as f:
         json.dump(d, f, ensure_ascii=False, indent=1)
     print(ep, len(d["lines"]), "줄 ·", n, "소리")
