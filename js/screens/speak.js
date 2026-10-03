@@ -51,8 +51,8 @@ const db = () => new Promise((res, rej) => {
   r.onupgradeneeded = () => r.result.createObjectStore("rec");
   r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
 });
-const recGet = async key => { try { const d = await db(); return await new Promise(res => { const q = d.transaction("rec").objectStore("rec").get(key); q.onsuccess = () => res(q.result || null); q.onerror = () => res(null); }); } catch { return null; } };
-const recPut = async (key, val) => { try { const d = await db(); await new Promise(res => { const tx = d.transaction("rec", "readwrite"); tx.objectStore("rec").put(val, key); tx.oncomplete = res; tx.onerror = res; }); } catch {} };
+export const recGet = async key => { try { const d = await db(); return await new Promise(res => { const q = d.transaction("rec").objectStore("rec").get(key); q.onsuccess = () => res(q.result || null); q.onerror = () => res(null); }); } catch { return null; } };
+export const recPut = async (key, val) => { try { const d = await db(); await new Promise(res => { const tx = d.transaction("rec", "readwrite"); tx.objectStore("rec").put(val, key); tx.oncomplete = res; tx.onerror = res; }); } catch {} };
 
 export default async function speak(app, ep, id, opts = {}) {
   const d = await episode(ep, lang);

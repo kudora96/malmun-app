@@ -17,7 +17,8 @@ import { paths } from "../paths.js";
 import { Sequence } from "../audio.js";
 import { I, progress, SPEAKER } from "../ui.js";
 import writeView from "./write.js";
-import speakView from "./speak.js";
+import speakView, { similarity, PASS, recGet, recPut } from "./speak.js";
+import { record, micWhy, canScore } from "../recorder.js";
 import { hold } from "../wake.js";
 
 const RATES = [1, 0.75, 0.5];
@@ -175,31 +176,38 @@ export default async function learn(app, ep, startId) {
   const ex = new Sequence(); // 설명 읽기(대사 → 설명 문단)
   const romOn = () => pref("malmun.rom") !== "0";
   st.panel = null;
-  // ── 새 설명(v9 시안 · 본부 10-03) — 설명 「소리 언어」와 「글 언어」를 따로 고른다(교차가 핵심 · 투덜이 철학)
-  // 화면에는 표시형(text)만 · 소리 = audio · 고른 조합은 편 전체에 적용되고 기억된다
+  // ── 새 설명(v9 시안 · 본부 10-03) — 설명 「소리 언어」와 「글 언어」를 따로(교차가 핵심 · 투덜이 철학) · 화면에는 표시형(text)만
+  // 소리 = 언어 이름이 붙은 ▶ 단추 둘(누른 언어를 기억 → 듣기 모드도 그 언어) · 글 = 설명 글 바로 위 작은 탭 · 처음엔 둘 다 학습자 언어
+  // 아이콘만 있는 단추 없음 · 안쪽 스크롤 없음(폰 375×812 한 화면) · 「이제 말해 보세요」는 카드 안에서 녹음→점수→내 목소리(카드를 떠나지 않음)
   const v9L = d.v9L, v9pref = () => { try { return { snd: "L", txt: "L", ...JSON.parse(pref("malmun.v9") || "{}") }; } catch { return { snd: "L", txt: "L" }; } };
+  const v9set = (k, v) => { const P = v9pref(); P[k] = v; pref("malmun.v9", JSON.stringify(P)); };
   const v9code = k => (k === "ko" ? "ko" : v9L);
+  const v9name = k => (k === "ko" ? "한국어" : langName(v9L));
   const v9src = (i, k, what) => { const a = L[i].v9?.audio?.[v9code(k)]?.[what]; return a ? paths.v9(ep, a) : null; };
   const bold = s => esc(s).replace(/&quot;([^&]*?)&quot;|"([^"]*?)"/g, (m, a, b) => `<b>"${a ?? b}"</b>`);
+  const sayKey = i => `${ep}/${ep}_${String(L[i].id).padStart(2, "0")}_say`; // 말하기 창의 같은 과제와 같은 칸(✓ 공유)
+  const mmss = x => (isFinite(x) ? `${Math.floor(x / 60)}:${String(Math.floor(x % 60)).padStart(2, "0")}` : "0:00");
   function v9HTML(i) {
-    const l = L[i], x = l.v9, P = v9pref(), tx = x.text?.[v9code(P.txt)] || x.text?.ko || {};
-    const seg = k => `<span class="seg">${["ko", "L"].map(v => `<button data-x="${k}" data-v="${v}" aria-pressed="${P[k] === v}">${esc(v === "ko" ? "한국어" : langName(v9L))}</button>`).join("")}</span>`;
-    // 한 화면에 다 들어가게(투덜이 10-03 「안쪽 스크롤창 절대 안 됨」) — 고르기·재생 단추 한 줄 · 대사는 아래 줄 목록에 있으니 카드엔 조각 칩만
-    const combo = t(`v9_mode_${P.snd === "ko" ? "k" : "L"}${P.txt === "ko" ? "k" : "L"}`);
+    const l = L[i], x = l.v9, P = v9pref(), tc = v9code(P.txt), tx = x.text?.[tc] || x.text?.ko || {};
+    const fx = x.formula_by?.[tc] || x.formula;
+    const playBtn = k => `<button class="pb" data-x="ex" data-v="${k}" aria-pressed="false">▶ ${esc(v9name(k))}</button>`;
     return `<div class="exv v9">
-      <div class="v9bar" title="${esc(combo)}"><span class="lab" aria-label="${esc(t("v9_snd"))}">🔊</span>${seg("snd")}<span class="lab" aria-label="${esc(t("v9_txt"))}">📖</span>${seg("txt")}<span class="grow"></span>
-        <button class="rb" data-x="ex" aria-label="${esc(t("v9_ex"))}">▶</button><button class="rb alt" data-x="other" aria-label="${esc(t("v9_other"))}" title="${esc(t("v9_other"))}">⇄</button></div>
+      <div class="v9bar">${playBtn("L")}${playBtn("ko")}</div>
       <div class="v9body">
-        ${x.pieces?.length || x.formula ? `<div class="chips">${(x.pieces || []).map(c => `<span class="chip"><b class="ko" lang="ko">${esc(c.ko)}</b> <i>${esc(c.gloss || "")}</i></span>`).join("")}${x.formula ? `<span class="fx" title="${esc(t("v9_formula"))}">= <b class="ko" lang="ko">${esc(x.formula)}</b></span>` : ""}</div>` : ""}
+        ${x.pieces?.length || fx ? `<div class="chips">${(x.pieces || []).map(c => `<span class="chip"><b class="ko" lang="ko">${esc(c.ko)}</b> <i>${esc(c.gloss || "")}</i></span>`).join("")}${fx ? `<span class="fx">= <b>${esc(fx)}</b></span>` : ""}</div>` : ""}
+        <div class="tabs" role="tablist">${["L", "ko"].map(v => `<button data-x="txt" data-v="${v}" role="tab" aria-selected="${P.txt === v}">${esc(v9name(v))}</button>`).join("")}</div>
         <p data-p="0">${bold(tx.ex || "")}</p>
-        ${l.say ? `<div class="sayb"><p data-p="1">${bold(tx.say || "")}</p><button class="rb" data-x="model" aria-label="${esc(t("model"))}">▶</button><button class="mic" data-x="speak" aria-label="${esc(t("speak_now"))}">🎤</button></div>` : ""}
+        ${l.say ? `<div class="sayb"><p data-p="1">${bold(tx.say || "")}</p>
+          <div class="sbtns"><button class="mic" data-x="rec">🎤 ${esc(t("speak_now"))}</button><button data-x="model">▶ ${esc(t("model"))}</button><button data-x="mine" disabled>▶ ${esc(t("my_voice"))}</button></div>
+          <div class="sline"><span class="lvl" hidden><i></i></span><span class="smsg" aria-live="polite"></span></div></div>` : ""}
       </div>
-      <div class="exprog"><i></i></div></div>`;
+      <div class="v9prog" data-off><span class="t0">0:00</span><div class="trk" aria-label="seek"><div class="rail"><i></i></div></div><span class="t1">0:00</span></div></div>`;
   }
-  // v9 설명 소리 차례: (대사) → 설명(고른 소리 언어)
-  const v9Items = (i, { line = true, k = v9pref().snd, what = "ex" } = {}) => [
+  // v9 설명 소리 차례: (대사) → 설명 → 「이제 말해 보세요」 — 고른(마지막에 누른) 소리 언어
+  const v9Items = (i, { line = true, k = v9pref().snd } = {}) => [
     ...(line && L[i].lineAudio ? [{ src: paths.audio(ep, L[i].lineAudio), p: -1 }] : []),
-    ...(v9src(i, k, what) ? [{ src: v9src(i, k, what), p: what === "say" ? 1 : 0 }] : []),
+    ...(v9src(i, k, "ex") ? [{ src: v9src(i, k, "ex"), p: 0 }] : []),
+    ...(v9src(i, k, "say") ? [{ src: v9src(i, k, "say"), p: 1 }] : []),
   ];
   function explainHTML(i) {
     if (L[i].v9) return v9HTML(i);
@@ -220,18 +228,19 @@ export default async function learn(app, ep, startId) {
     ...L[i].krAudio.map((f, p) => ({ src: paths.audio(ep, f), p })),
   ];
   ex.onstep = it => {
-    const ps = [...panel.querySelectorAll(".paras p[data-p]")];
+    const ps = [...panel.querySelectorAll(".paras p[data-p], .v9body p[data-p]")]; // v9 카드는 안쪽 스크롤이 없어 옮기지 않는다
     ps.forEach((el, k) => el.classList.toggle("cur", k === it.p));
-    ps[it.p]?.scrollIntoView({ block: "nearest", behavior: reduce ? "auto" : "smooth" });
+    if (!panel.querySelector(".v9")) ps[it.p]?.scrollIntoView({ block: "nearest", behavior: reduce ? "auto" : "smooth" });
     sync();
   };
   ex.ondone = () => {
-    panel.querySelectorAll(".v9body .rb[aria-pressed=true]").forEach(b => b.setAttribute("aria-pressed", "false"));
+    markPlay(); setTimeout(v9prog, 0);
     panel.querySelectorAll(".paras p.cur").forEach(el => el.classList.remove("cur"));
     if (st.rep && st.panel?.kind === "explain") st.gap = setTimeout(() => { st.gap = 0; if (st.rep && st.panel?.kind === "explain") ex.play(exItems(st.panel.i)); sync(); }, LOOP_GAP);
     sync();
   };
-  ex.a.addEventListener("timeupdate", () => { const a = ex.a, bar = panel.querySelector(".exprog i"); if (bar && a.duration) bar.style.width = (100 * a.currentTime) / a.duration + "%"; });
+  ex.a.addEventListener("timeupdate", () => { const a = ex.a, bar = panel.querySelector(".exprog i"); if (bar && a.duration) bar.style.width = (100 * a.currentTime) / a.duration + "%"; v9prog(); });
+  ["loadedmetadata", "pause", "play", "emptied"].forEach(n => ex.a.addEventListener(n, () => v9prog()));
   const markButtons = () => items.forEach((li, k) => li.querySelectorAll("[data-act=explain],[data-act=write],[data-act=speak]").forEach(b => b.setAttribute("aria-pressed", String(!!st.panel && k === st.panel.i && b.dataset.act === st.panel.kind))));
 
   async function openPanel(kind, i, { autoplay = false, task } = {}) {
@@ -243,7 +252,8 @@ export default async function learn(app, ep, startId) {
     markButtons();
     if (kind === "explain") {
       panel.innerHTML = explainHTML(i);
-      if (autoplay) ex.play(exItems(i));
+      if (L[i].v9) { mine.cleanup = spStop; spInit(i); }
+      if (autoplay) { ex.play(exItems(i)); if (L[i].v9) markPlay(v9pref().snd); }
     } else {
       const view = kind === "speak" ? speakView : writeView; // 줄을 다 쓰면(말하면) 다음 줄의 같은 메뉴로(W6 · S7)
       const cleanup = await view(panel, ep, L[i].id, { embedded: true, task, onNext: k => openPanel(kind, k) });
@@ -260,31 +270,95 @@ export default async function learn(app, ep, startId) {
     v.currentTime = L[st.cur].start;
     pad(); underVideo(items[st.cur]); sync();
   }
+  // 카드 안 말하기(녹음 → 점수 → 내 목소리) — js/recorder.js
+  let sp = null; // { i, ctl, blob, audio }
+  function spStop() { sp?.ctl?.stop(true); sp?.audio?.pause(); sp = null; }
+  async function spInit(i) { // 저장된 내 목소리(✓)가 있으면 바로 들을 수 있게
+    const saved = await recGet(sayKey(i));
+    if (st.panel?.i !== i || !saved?.blob) return;
+    sp = { i, blob: saved.blob };
+    const m = panel.querySelector(".sayb [data-x=mine]"); if (m) m.disabled = false;
+    const g = panel.querySelector(".sayb .smsg"); if (g) g.textContent = saved.score != null ? `${saved.score}% ✓` : "";
+  }
+  async function spRec(i, btn) {
+    const box = panel.querySelector(".sayb"), msg = box.querySelector(".smsg"), lvl = box.querySelector(".lvl"), mineB = box.querySelector("[data-x=mine]");
+    if (sp?.ctl) { sp.ctl.stop(); return; } // 녹음 중 다시 누름 = 멈춤(점수는 냄)
+    ex.stop(); sp?.audio?.pause(); markPlay(); sync();
+    const ctl = record({ onLevel: v => { lvl.firstElementChild.style.width = Math.round(v * 100) + "%"; }, onSwitch: () => { msg.textContent = t("mic_switched"); } });
+    sp = { i, ctl, blob: sp?.blob };
+    btn.classList.add("on"); btn.textContent = "■ " + t("btn_stop"); lvl.hidden = false; msg.textContent = t("listening");
+    const r = await ctl.done;
+    if (st.panel?.i !== i || sp?.ctl !== ctl) return; // 다른 데로 감
+    sp.ctl = null; btn.classList.remove("on"); lvl.hidden = true;
+    if (r.cancelled) { btn.textContent = "🎤 " + t("speak_now"); msg.textContent = ""; return; }
+    if (r.error) { btn.textContent = "🎤 " + t("speak_now"); msg.textContent = t(micWhy(r.error)); return; }
+    const sc = canScore() && r.heard.length ? Math.max(...r.heard.map(h => similarity(L[i].say.ko, h))) : null;
+    sp.blob = r.blob; mineB.disabled = false;
+    btn.textContent = "🎤 " + t(sc != null && sc >= PASS ? "speak_now" : "try_again");
+    msg.textContent = sc == null ? t("no_score") : `${sc}%${sc >= PASS ? " ✓" : ""} · ${t(sc >= 95 ? "score_5" : sc >= PASS ? "score_4" : sc >= 60 ? "score_3" : sc >= 40 ? "score_2" : "score_1")}`;
+    box.classList.toggle("pass", sc != null && sc >= PASS);
+    const old = await recGet(sayKey(i));
+    if (sc == null ? !(old?.score >= PASS) : sc >= PASS && sc >= (old?.score ?? 0)) recPut(sayKey(i), { blob: r.blob, score: sc, at: Date.now() });
+  }
+  const markPlay = (k = null) => panel.querySelectorAll(".v9bar .pb").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.v === k)));
   function v9Click(x) {
     const i = st.panel.i, k = x.dataset.x;
-    if (k === "snd" || k === "txt") { // 조합 바꾸기 — 편 전체 · 기억
-      const P = v9pref(); P[k] = x.dataset.v; pref("malmun.v9", JSON.stringify(P));
-      ex.stop(); clearTimeout(st.gap); st.gap = 0;
-      const sc = panel.querySelector(".v9body")?.scrollTop || 0;
-      panel.innerHTML = explainHTML(i); panel.querySelector(".v9body").scrollTop = sc;
-      return sync();
+    if (k === "txt") { // 글 언어 — 편 전체 · 기억 · 소리는 그대로 이어서
+      v9set("txt", x.dataset.v);
+      const pl = ex.playing, snd = panel.querySelector(".v9bar .pb[aria-pressed=true]")?.dataset.v;
+      const tc = v9code(x.dataset.v), tx = L[i].v9.text?.[tc] || L[i].v9.text?.ko || {}, fx = L[i].v9.formula_by?.[tc] || L[i].v9.formula;
+      panel.querySelectorAll(".tabs [data-x=txt]").forEach(b => b.setAttribute("aria-selected", String(b === x)));
+      const p0 = panel.querySelector('.v9body p[data-p="0"]'), p1 = panel.querySelector('.v9body p[data-p="1"]'), f = panel.querySelector(".v9body .fx b");
+      if (p0) p0.innerHTML = bold(tx.ex || ""); if (p1) p1.innerHTML = bold(tx.say || ""); if (f) f.textContent = fx || "";
+      if (pl && snd) markPlay(snd);
+      return;
     }
-    if (k === "speak") return openPanel("speak", i, { task: "say" }); // 「이제 말해 보세요」 → 말하기(그 문장 과제부터)
-    const was = x.getAttribute("aria-pressed") === "true";
-    ex.stop(); clearTimeout(st.gap); st.gap = 0;
-    panel.querySelectorAll(".rb").forEach(b => b.setAttribute("aria-pressed", "false"));
-    if (was) return sync(); // 같은 단추 다시 = 멈춤
-    const other = v9pref().snd === "ko" ? "L" : "ko";
-    const items = k === "ex" ? v9Items(i, { line: false }) : k === "other" ? v9Items(i, { line: false, k: other }) : v9Items(i, { line: false, what: "say" });
-    if (!items.length) return;
-    x.setAttribute("aria-pressed", "true");
-    ex.play(items);
-    sync();
+    if (k === "ex") { // ▶ 언어 — 그 언어로 설명 읽기 · 같은 단추 다시 = 멈춤/이어서 · 누른 언어를 기억(듣기 모드도)
+      const v = x.dataset.v, on = x.getAttribute("aria-pressed") === "true";
+      sp?.audio?.pause();
+      if (on && ex.playing) { ex.pause(); return sync(); }
+      if (on && ex.q.length) { ex.resume(); return sync(); }
+      v9set("snd", v); clearTimeout(st.gap); st.gap = 0;
+      const items = v9Items(i, { line: false, k: v }); if (!items.length) return;
+      markPlay(v); ex.play(items); return sync();
+    }
+    if (k === "rec") return spRec(i, x);
+    if (k === "model") { // 본보기 = 문장만 읽은 소리
+      if (sp?.ctl) return;
+      sp?.audio?.pause(); markPlay(); ex.play([{ src: L[i].say.src, p: 1 }]); return sync();
+    }
+    if (k === "mine") {
+      if (!sp?.blob || sp.ctl) return;
+      ex.stop(); markPlay(); sync();
+      sp.audio?.pause();
+      const a = (sp.audio = new Audio(URL.createObjectURL(sp.blob)));
+      a.onended = a.onerror = () => URL.revokeObjectURL(a.src);
+      a.play().catch(() => {});
+    }
   }
+  // 진행 막대 — 설명 소리를 누르거나 끌어서 옮긴다(손가락 영역 28px) · 설명 소리가 있을 때만 움직임
+  function v9prog() {
+    const bar = panel.querySelector(".v9prog"); if (!bar) return;
+    const a = ex.a, has = ex.q.length > 0 && isFinite(a.duration) && a.duration > 0;
+    bar.toggleAttribute("data-off", !has);
+    bar.querySelector(".rail i").style.width = has ? (100 * a.currentTime) / a.duration + "%" : "0";
+    bar.querySelector(".t0").textContent = mmss(has ? a.currentTime : 0);
+    bar.querySelector(".t1").textContent = mmss(has ? a.duration : 0);
+  }
+  panel.addEventListener("pointerdown", e => {
+    const trk = e.target.closest(".v9prog .trk"); if (!trk) return;
+    e.preventDefault(); e.stopPropagation();
+    const a = ex.a; if (!ex.q.length || !isFinite(a.duration)) return;
+    const seek = ev => { const r = trk.getBoundingClientRect(); a.currentTime = Math.max(0, Math.min(1, (ev.clientX - r.left) / r.width)) * a.duration; v9prog(); };
+    seek(e); trk.setPointerCapture?.(e.pointerId);
+    const mv = ev => seek(ev), up = () => { trk.removeEventListener("pointermove", mv); trk.removeEventListener("pointerup", up); trk.removeEventListener("pointercancel", up); };
+    trk.addEventListener("pointermove", mv); trk.addEventListener("pointerup", up); trk.addEventListener("pointercancel", up);
+  });
   // 위 창 누르기 = 멈춤/재생(설명) · 한글 대조·학습자 말 단추는 그대로
   panel.addEventListener("click", e => {
     if (st.panel?.kind !== "explain") return;
     const x = e.target.closest("[data-x]");
+    if (e.target.closest(".v9prog, .sayb")) { if (x) v9Click(x); return; } // 막대·말하기 칸은 눌러도 멈춤/재생 안 함
     if (x && st.panel.i != null && L[st.panel.i].v9) return v9Click(x);
     if (x) {
       const on = x.getAttribute("aria-pressed") !== "true"; x.setAttribute("aria-pressed", String(on));

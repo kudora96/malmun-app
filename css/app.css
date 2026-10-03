@@ -316,27 +316,39 @@ a{color:inherit;text-decoration:none}
 .speak .miclist button[aria-pressed=true]{border-color:var(--hi);color:var(--hi);font-weight:700}
 
 /* ── 새 설명(v9 시안) — 설명 소리·글 언어를 따로 고름 · 화면에는 표시형만 ──
-   안쪽 스크롤 없음: 카드는 제 높이만큼(투덜이 10-03) · 폰 375×812 에서 가장 긴 줄도 한 화면 */
+   안쪽 스크롤 없음: 카드는 제 높이만큼(투덜이 10-03) · 폰 375×812 에서 가장 긴 줄도 한 화면 · 단추는 전부 글자가 붙은 단추 */
 .learn .panel.explain.v9{height:auto}
 .exv.v9{height:auto;cursor:default}
-.v9bar{flex:none;display:flex;align-items:center;gap:5px;padding:6px 12px;border-bottom:1px solid var(--line)}
-.v9bar .lab{font-size:14px}
-.v9bar .grow{flex:1}
-.v9bar .seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-right:4px}
-.v9bar .seg button{padding:2px 7px;font-size:11.5px;background:var(--card)}
-.v9bar .seg button[aria-pressed=true]{background:var(--hi);color:#fff}
-.v9 .rb{width:30px;height:30px;border-radius:50%;background:var(--hi);color:#fff;font-size:12px;flex:none}
-.v9 .rb.alt{background:none;border:1px solid var(--hi);color:var(--hi)}
-.v9 .rb[aria-pressed=true]{background:var(--pink);border-color:var(--pink);color:#fff}
-.v9body{padding:7px 12px 9px;display:flex;flex-direction:column;gap:6px}
+.v9bar{flex:none;display:flex;gap:6px;padding:7px 12px 2px}
+.v9bar .pb{padding:5px 12px;border-radius:999px;border:1px solid var(--hi);color:var(--hi);font-size:13px;font-weight:700}
+.v9bar .pb[aria-pressed=true]{background:var(--hi);color:#fff}
+.v9body{padding:5px 12px 6px;display:flex;flex-direction:column;gap:5px}
 .v9body .chips{display:flex;flex-wrap:wrap;gap:3px 4px;line-height:1.35}
 .v9body .chip{background:var(--bubble);border-radius:6px;padding:1px 6px;font-size:11.5px}
 .v9body .chip b{font-size:12.5px}
 .v9body .chip i{font-style:normal;color:var(--mute)}
 .v9body .fx{font-size:11.5px;color:var(--mute);padding:1px 2px}
 .v9body .fx b{color:var(--ink)}
+.v9body .tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin-top:2px}
+.v9body .tabs button{padding:2px 10px;font-size:12px;color:var(--mute);border-bottom:2px solid transparent;margin-bottom:-1px}
+.v9body .tabs button[aria-selected=true]{color:var(--hi);border-bottom-color:var(--hi);font-weight:700}
 .v9body p{margin:0;font-size:13.5px;line-height:1.5}
 .v9body p.cur{background:color-mix(in srgb,var(--hi) 12%,transparent);border-radius:6px}
-.v9body .sayb{background:var(--bubble);border-radius:10px;padding:6px 8px;display:flex;align-items:center;gap:6px}
-.v9body .sayb p{flex:1;min-width:0}
-.v9body .sayb .mic{width:30px;height:30px;border-radius:50%;background:var(--ink);color:var(--bg);font-size:13px;flex:none}
+.v9body .sayb{background:var(--bubble);border-radius:10px;padding:6px 8px;display:flex;flex-direction:column;gap:5px}
+.v9body .sayb.pass{box-shadow:inset 0 0 0 2px var(--hi)}
+.v9body .sbtns{display:flex;flex-wrap:wrap;gap:5px}
+.v9body .sbtns button{padding:4px 10px;border-radius:999px;border:1px solid var(--line);background:var(--card);font-size:12.5px}
+.v9body .sbtns .mic{background:var(--ink);color:var(--bg);border-color:var(--ink);font-weight:700}
+.v9body .sbtns .mic.on{background:var(--pink);border-color:var(--pink);color:#fff}
+.v9body .sbtns button:disabled{opacity:.4}
+.v9body .sline{display:flex;align-items:center;gap:6px;min-height:16px}
+.v9body .sline .lvl{width:60px;height:6px;border-radius:3px;background:var(--line);overflow:hidden;flex:none}
+.v9body .sline .lvl i{display:block;height:100%;width:0;background:var(--pink)}
+.v9body .smsg{font-size:12px;color:var(--mute)}
+.v9prog{flex:none;display:flex;align-items:center;gap:8px;padding:0 12px 2px;font-size:11px;color:var(--mute);font-variant-numeric:tabular-nums}
+.v9prog .trk{flex:1;height:28px;display:flex;align-items:center;cursor:pointer;touch-action:none}
+.v9prog .rail{flex:1;height:5px;border-radius:3px;background:var(--line);position:relative}
+.v9prog .rail i{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:3px;background:var(--hi)}
+.v9prog .rail i::after{content:"";position:absolute;right:-7px;top:-5px;width:14px;height:14px;border-radius:50%;background:var(--hi)}
+.v9prog[data-off]{opacity:.4}
+.v9prog[data-off] .trk{cursor:default}

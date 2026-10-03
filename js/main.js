@@ -1,4 +1,4 @@
-import { detectLang, setLang } from "./i18n.js";
+import { detectLang, setLang, LANGS } from "./i18n.js";
 import welcome from "./screens/welcome.js";
 import list from "./screens/list.js";
 import learn from "./screens/learn.js";
@@ -28,7 +28,9 @@ export const go = hash => { location.hash = hash; };
 export const rerender = route;
 
 (async () => {
-  await setLang(detectLang().lang);
+  // ?lang=ne 처럼 주소로 학습자 언어를 정할 수 있다(미리보기 · 기억됨) — 아니면 자동(CLAUDE.md 언어 자동)
+  const q = new URLSearchParams(location.search).get("lang");
+  if (q && LANGS.some(l => l[0] === q)) await setLang(q, true); else await setLang(detectLang().lang);
   window.addEventListener("hashchange", route);
   route();
 })();

@@ -94,5 +94,6 @@
  "v9_mode_LL": "Listen and read in your language — start here",
  "v9_mode_kL": "Listen in Korean, check in your language — cross",
  "v9_mode_Lk": "Listen in your language, read in Korean — cross",
- "v9_mode_kk": "Korean only — like a Korean-Korean dictionary"
+ "v9_mode_kk": "Korean only — like a Korean-Korean dictionary",
+ "try_again": "Try again"
 }
