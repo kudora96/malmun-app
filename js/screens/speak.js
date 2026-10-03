@@ -102,11 +102,11 @@ export default async function speak(app, ep, id, opts = {}) {
     const sc = st.score ?? sv?.score ?? null;
     $(".sbar i").style.width = (sc ?? 0) + "%";
     $(".meter").classList.toggle("pass", sc != null && sc >= PASS);
-    $(".msg").textContent = st.rec ? t(st.switched ? "mic_switched" : "listening") : sc == null ? (mineBlob() ? t("no_score") : SR ? t("speak_hint") : t("speak_hint_noscore"))
+    $(".msg").textContent = st.rec ? t(!st.ready ? "mic_opening" : st.switched ? "mic_switched" : "listening") : sc == null ? (mineBlob() ? t("no_score") : SR ? t("speak_hint") : t("speak_hint_noscore"))
       : `${sc}%${sc >= PASS ? " ✓" : ""} · ${t(sc >= 95 ? "score_5" : sc >= PASS ? "score_4" : sc >= 60 ? "score_3" : sc >= 40 ? "score_2" : "score_1")}`; // 점수에 맞는 한마디
     $("[data-act=mine]").disabled = $("[data-act=both]").disabled = $("[data-act=save]").disabled = !mineBlob();
     $(".mic").classList.toggle("on", !!st.rec);
-    $(".mic .lab").textContent = st.rec ? t("btn_stop") : t("speak_now");
+    $(".mic .lab").textContent = st.rec ? (st.ready ? t("btn_stop") : "… " + t("mic_opening")) : t("speak_now"); // 준비 중 → 마이크에 실제 소리가 들어오면 녹음 중
     $("[data-act=model]").setAttribute("aria-pressed", String(st.model));
   }
   function stopSounds() { sfx.stopAll(); st.model = false; if (st.mine) { st.mine.pause(); st.mine = null; } }
@@ -135,6 +135,10 @@ export default async function speak(app, ep, id, opts = {}) {
   const dead = new Set();
   const devId = s => s?.getAudioTracks()[0]?.getSettings().deviceId || "";
   const closeMic = () => { st.stream?.getTracks().forEach(x => x.stop()); st.stream = null; };
+  // 마이크는 녹음할 때만 — 열려 있으면 블루투스가 통화 모드라 본보기·내 목소리까지 전화 음질(본부 10-03 · 설명 카드와 같은 규칙)
+  // 녹음 끝 3초 뒤 닫음(그 안에 다시 녹음하면 그대로) · 재생은 마이크부터 닫고 방금 열려 있었으면 0.4초 뒤(음악 모드로 돌아올 틈)
+  let micOff = 0;
+  const afterMic = fn => { clearTimeout(micOff); if (st.rec) return; const was = st.stream?.getAudioTracks()[0]?.readyState === "live"; closeMic(); was ? setTimeout(() => st.alive && fn(), 400) : fn(); };
   async function openMic() {
     if (st.stream?.getAudioTracks()[0]?.readyState === "live") return st.stream;
     st.stream = null;
@@ -165,7 +169,7 @@ export default async function speak(app, ep, id, opts = {}) {
     box.hidden = false;
   }
   async function startRec(switched) {
-    stopSounds();
+    stopSounds(); clearTimeout(micOff);
     st.switched = !!switched;
     $(".msg").textContent = t("mic_opening");
     try { await openMic(); }
@@ -176,7 +180,7 @@ export default async function speak(app, ep, id, opts = {}) {
     }
     if (!st.alive) return;
     const rec = new MediaRecorder(st.stream), chunks = [];
-    st.rec = rec; st.blob = null; st.score = null; heard = [];
+    st.rec = rec; st.ready = false; st.blob = null; st.score = null; heard = [];
     rec.ondataavailable = e => e.data.size && chunks.push(e.data);
     rec.onstop = () => finish(new Blob(chunks, { type: rec.mimeType || "audio/webm" }));
     rec.start();
@@ -200,7 +204,7 @@ export default async function speak(app, ep, id, opts = {}) {
       an.fftSize = 1024; src.connect(an);
       const buf = new Float32Array(an.fftSize); let spoke = false, quietAt = 0, peak = 0, kept = false, liveMs = 0, lastT = ctx.currentTime, lastAt = Date.now();
       const DEAD_MS = switched ? 2500 : 1500; // 마이크를 바꾼 직후에는 소리 장치가 자리 잡을 시간을 더 준다(블루투스가 통화 모드로 바뀌며 잠깐 끊긴다)
-      const lvl = $(".lvl"); lvl.hidden = false;
+      const lvl = $(".lvl"); lvl.hidden = true; // 실제 소리가 들어오면 보인다
       const timer = (meterTimer = setInterval(() => {
         // 소리 엔진이 실제로 돌아간 시간만 센다 — 엔진이 멈춰 있으면(새로 고친 직후 · 장치가 바뀌는 중) 산 마이크도 0 으로 보인다
         const now = Date.now(); if (ctx.state === "running" && ctx.currentTime > lastT) liveMs += now - lastAt; else if (ctx.state !== "running") ctx.resume().catch(() => {});
@@ -208,6 +212,7 @@ export default async function speak(app, ep, id, opts = {}) {
         an.getFloatTimeDomainData(buf);
         const rms = Math.sqrt(buf.reduce((s, v) => s + v * v, 0) / buf.length);
         peak = Math.max(peak, rms);
+        if (!st.ready && rms > 0 && st.rec === rec) { st.ready = true; lvl.hidden = false; paint(); }
         lvl.firstElementChild.style.width = Math.min(100, Math.round(rms * 500)) + "%"; // 들어오는 소리 크기
         // 바꿔서 연 마이크에 신호가 있으면(말하기 전이라도) 기억 — 다음에는 죽은 마이크를 다시 거치지 않는다
         if (st.switched && !kept && peak >= 0.0002 && liveMs > DEAD_MS) { kept = true; micPref(devId(st.stream) || (st.micReq !== true && st.micReq) || ""); }
@@ -227,6 +232,7 @@ export default async function speak(app, ep, id, opts = {}) {
     const lv = $(".lvl"); if (lv) lv.hidden = true;
     const rec = st.rec; if (!rec) return;
     st.rec = null;
+    clearTimeout(micOff); micOff = setTimeout(() => { if (!st.rec) closeMic(); }, 3000);
     if (discard) rec.onstop = null;
     try { sr?.stop(); } catch {}
     try { rec.state !== "inactive" && rec.stop(); } catch {}
@@ -254,7 +260,7 @@ export default async function speak(app, ep, id, opts = {}) {
       else $(".msg").textContent = `${st.score}% ✓ · ${t("line_done")}`; // 이 줄 끝 — 다음 줄로 넘어가지 않는다(다음 줄은 학습자가 고른다)
     }
   }
-  app.__sp = { toggle: () => (st.model ? (stopSounds(), paint()) : playModel()), busy: () => !!st.rec || st.model || sfx.playing(), _finish: finish, _state: st };
+  app.__sp = { toggle: () => (st.model ? (stopSounds(), paint()) : afterMic(playModel)), busy: () => !!st.rec || st.model || sfx.playing(), _finish: finish, _state: st };
 
   app.querySelector(".scr").onclick = async e => {
     if (!$(".helpbox").hidden) { $(".helpbox").hidden = true; if (e.target.closest("[data-act=help], .helpbox")) return; } // 풍선은 아무 데나 누르면 닫힘
@@ -280,10 +286,10 @@ export default async function speak(app, ep, id, opts = {}) {
       $(".msg").textContent = t("saved_file");
       return;
     }
-    if (a === "model") { stopRec(true); st.model ? (stopSounds(), paint()) : playModel(); }
+    if (a === "model") { stopRec(true); st.model ? (stopSounds(), paint()) : afterMic(playModel); }
     else if (a === "rec") st.rec ? stopRec() : startRec();
-    else if (a === "mine") { stopRec(true); playMine(); }
-    else if (a === "both") { stopRec(true); await playModel(); if (st.alive) await new Promise(r => setTimeout(r, 300)), playMine(); }
+    else if (a === "mine") { stopRec(true); afterMic(playMine); }
+    else if (a === "both") { stopRec(true); afterMic(async () => { await playModel(); if (st.alive) await new Promise(r => setTimeout(r, 300)), playMine(); }); }
   };
 
   paint();

@@ -27,6 +27,7 @@
     g.gain.value = dumb ? 0 : 0.3; o.connect(g); g.connect(dst); o.start();
     if (!dumb) window.__mic = { o, g, ctx };
     const tr = dst.stream.getAudioTracks()[0], gs = tr.getSettings.bind(tr); tr.getSettings = () => ({ ...gs(), deviceId: id === "기본" ? "bt" : id });
+    (window.__tracks ||= []).push(dst.stream.getAudioTracks()[0]);
     return dst.stream;
   };
   const speakFor = ms => { const m = window.__mic; if (m) { m.g.gain.value = 0.3; setTimeout(() => { m.g.gain.value = 0; }, ms); } };
@@ -79,7 +80,8 @@
   ok(/100%/.test($(".panel .msg").textContent) || /2\/5/.test($(".panel .segnav").innerText), "맞게 말함 → 100% ✓", $(".panel .msg").textContent);
   await W(1800);
   ok(/2\/5/.test($(".panel .segnav").innerText.replace(/\s/g, "")) && $(".panel .say").textContent.startsWith("경복궁에"), "통과 1.5초 뒤 다음 토막으로 자동", $(".panel .say").textContent);
-  ok(micAsked === 1, "마이크 허락은 처음 한 번만", String(micAsked));
+  await W(1600); const liveT = (window.__tracks || []).filter(x => x.readyState === "live").length;
+  ok(liveT === 0, "녹음이 끝나고 3초 뒤 마이크 닫힘(블루투스 통화 모드 풀기)", "열린 마이크 " + liveT);
   // 저장 확인: 앞 토막으로 돌아가면 ✓ + 내 목소리 켜짐
   $(".panel [data-seg='-1']").click(); await W(300);
   ok(/1\/5✓/.test($(".panel .segnav").innerText.replace(/\s/g, "")) && !$(".panel [data-act=mine]").disabled, "앞 토막으로 → ✓ 표시 · 저장된 내 목소리 들을 수 있음", $(".panel .segnav").innerText.replace(/\s/g, ""));
