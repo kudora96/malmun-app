@@ -184,16 +184,15 @@ export default async function learn(app, ep, startId) {
   function v9HTML(i) {
     const l = L[i], x = l.v9, P = v9pref(), tx = x.text?.[v9code(P.txt)] || x.text?.ko || {};
     const seg = k => `<span class="seg">${["ko", "L"].map(v => `<button data-x="${k}" data-v="${v}" aria-pressed="${P[k] === v}">${esc(v === "ko" ? "한국어" : langName(v9L))}</button>`).join("")}</span>`;
+    // 한 화면에 다 들어가게(투덜이 10-03 「안쪽 스크롤창 절대 안 됨」) — 고르기·재생 단추 한 줄 · 대사는 아래 줄 목록에 있으니 카드엔 조각 칩만
+    const combo = t(`v9_mode_${P.snd === "ko" ? "k" : "L"}${P.txt === "ko" ? "k" : "L"}`);
     return `<div class="exv v9">
-      <div class="v9bar"><b>${esc(t("v9_snd"))}</b>${seg("snd")}<b>${esc(t("v9_txt"))}</b>${seg("txt")}
-        <span class="combo">${esc(t(`v9_mode_${P.snd === "ko" ? "k" : "L"}${P.txt === "ko" ? "k" : "L"}`))}</span></div>
+      <div class="v9bar" title="${esc(combo)}"><span class="lab" aria-label="${esc(t("v9_snd"))}">🔊</span>${seg("snd")}<span class="lab" aria-label="${esc(t("v9_txt"))}">📖</span>${seg("txt")}<span class="grow"></span>
+        <button class="rb" data-x="ex" aria-label="${esc(t("v9_ex"))}">▶</button><button class="rb alt" data-x="other" aria-label="${esc(t("v9_other"))}" title="${esc(t("v9_other"))}">⇄</button></div>
       <div class="v9body">
-        <div class="q"><div class="kw ko" lang="ko">${esc(x.ko || l.ko)}</div>${x["sub_" + v9L] ? `<p class="tr">${esc(x["sub_" + v9L])}</p>` : ""}</div>
-        ${x.pieces?.length ? `<div class="chips">${x.pieces.map(c => `<span class="chip"><b class="ko" lang="ko">${esc(c.ko)}</b> <i>${esc(c.gloss || "")}</i></span>`).join("")}</div>` : ""}
-        ${x.formula ? `<div class="fx">${esc(t("v9_formula"))} · <b class="ko" lang="ko">${esc(x.formula)}</b></div>` : ""}
-        <div class="exh"><span>${esc(t("v9_ex"))}</span><button class="rb" data-x="ex" aria-label="${esc(t("v9_ex"))}">▶</button><button class="rb alt" data-x="other" aria-label="${esc(t("v9_other"))}" title="${esc(t("v9_other"))}">⇄</button></div>
+        ${x.pieces?.length || x.formula ? `<div class="chips">${(x.pieces || []).map(c => `<span class="chip"><b class="ko" lang="ko">${esc(c.ko)}</b> <i>${esc(c.gloss || "")}</i></span>`).join("")}${x.formula ? `<span class="fx" title="${esc(t("v9_formula"))}">= <b class="ko" lang="ko">${esc(x.formula)}</b></span>` : ""}</div>` : ""}
         <p data-p="0">${bold(tx.ex || "")}</p>
-        ${l.say ? `<div class="sayb"><p data-p="1">${bold(tx.say || "")}</p><div class="btns"><button class="rb" data-x="model" aria-label="${esc(t("model"))}">▶</button><button class="mic" data-x="speak">🎤 ${esc(t("speak_now"))}</button></div></div>` : ""}
+        ${l.say ? `<div class="sayb"><p data-p="1">${bold(tx.say || "")}</p><button class="rb" data-x="model" aria-label="${esc(t("model"))}">▶</button><button class="mic" data-x="speak" aria-label="${esc(t("speak_now"))}">🎤</button></div>` : ""}
       </div>
       <div class="exprog"><i></i></div></div>`;
   }
