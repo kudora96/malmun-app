@@ -34,6 +34,7 @@ async function openMic() {
   dead.clear();
   throw last || Object.assign(new Error("silent"), { name: "SilentError" });
 }
+export const micOpen = () => stream?.getAudioTracks()[0]?.readyState === "live";
 export function closeMic() { stream?.getTracks().forEach(x => x.stop()); stream = null; }
 // 안 될 때 까닭 → 글자 열쇠(lang/*.json)
 export const micWhy = e => (e?.name === "NotAllowedError" || e?.name === "SecurityError" ? "mic_denied" : e?.name === "NotFoundError" || e?.name === "OverconstrainedError" ? "mic_none" : e?.name === "SilentError" ? "mic_silent" : "mic_busy");

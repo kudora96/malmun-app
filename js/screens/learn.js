@@ -18,7 +18,7 @@ import { Sequence } from "../audio.js";
 import { I, progress, SPEAKER } from "../ui.js";
 import writeView from "./write.js";
 import speakView, { similarity, PASS, recGet, recPut } from "./speak.js";
-import { record, micWhy, canScore, warmMic, closeMic, trimSilence } from "../recorder.js";
+import { record, micWhy, canScore, closeMic, micOpen, trimSilence } from "../recorder.js";
 import { hold } from "../wake.js";
 
 const RATES = [1, 0.75, 0.5];
@@ -252,7 +252,7 @@ export default async function learn(app, ep, startId) {
     markButtons();
     if (kind === "explain") {
       panel.innerHTML = explainHTML(i);
-      if (L[i].v9) { mine.cleanup = spStop; spInit(i); if (L[i].say) warmMic(); } // 허락받은 마이크는 카드가 열릴 때 미리 열어 둔다(카드 안에서 다시 씀)
+      if (L[i].v9) { mine.cleanup = spStop; spInit(i); } // 마이크는 🎤 누를 때만 연다(열면 블루투스가 통화 모드로 바뀌어 설명 소리까지 전화 음질 — 본부 10-03)
       if (autoplay) { ex.play(exItems(i)); if (L[i].v9) markPlay(v9pref().snd); }
     } else {
       const view = kind === "speak" ? speakView : writeView; // 줄을 다 쓰면(말하면) 다음 줄의 같은 메뉴로(W6 · S7)
@@ -271,8 +271,8 @@ export default async function learn(app, ep, startId) {
     pad(); underVideo(items[st.cur]); sync();
   }
   // 카드 안 말하기(녹음 → 점수 → 내 목소리) — js/recorder.js
-  let sp = null; // { i, ctl, blob, audio }
-  function spStop() { sp?.ctl?.stop(true); sp?.audio?.pause(); sp = null; closeMic(); }
+  let sp = null, micOff = 0; // { i, ctl, blob, audio }
+  function spStop() { clearTimeout(micOff); sp?.ctl?.stop(true); sp?.audio?.pause(); sp = null; closeMic(); }
   async function spInit(i) { // 저장된 내 목소리(✓)가 있으면 바로 들을 수 있게
     const saved = await recGet(sayKey(i));
     if (st.panel?.i !== i || !saved?.blob) return;
@@ -284,6 +284,7 @@ export default async function learn(app, ep, startId) {
   async function spRec(i, btn) {
     const box = panel.querySelector(".sayb"), msg = box.querySelector(".smsg"), lvl = box.querySelector(".lvl"), mineB = box.querySelector("[data-x=mine]");
     if (sp?.ctl) { sp.ctl.stop(); return; } // 녹음 중 다시 누름 = 멈춤(점수는 냄)
+    clearTimeout(micOff);
     ex.stop(); sp?.audio?.pause(); markPlay(); sync();
     // 「준비 중」 → 마이크에서 실제 소리가 들어오기 시작하면 「녹음 중」(본부 10-03 — 그 전에 말하면 앞이 비어 버린다)
     const ctl = record({
@@ -296,6 +297,7 @@ export default async function learn(app, ep, startId) {
     const r = await ctl.done;
     if (st.panel?.i !== i || sp?.ctl !== ctl) return; // 다른 데로 감
     sp.ctl = null; btn.classList.remove("on"); lvl.hidden = true;
+    micOff = setTimeout(() => { if (!sp?.ctl) closeMic(); }, 3000); // 녹음이 끝나면 닫는다 — 3초 안에 [다시] 누르면 그 마이크를 그대로
     if (r.cancelled) { btn.textContent = "🎤 " + t("speak_now"); msg.textContent = ""; return; }
     if (r.error) { btn.textContent = "🎤 " + t("speak_now"); msg.textContent = t(micWhy(r.error)); return; }
     const sc = canScore() && r.heard.length ? Math.max(...r.heard.map(h => similarity(L[i].say.ko, h))) : null;
@@ -307,8 +309,11 @@ export default async function learn(app, ep, startId) {
     if (sc == null ? !(old?.score >= PASS) : sc >= PASS && sc >= (old?.score ?? 0)) recPut(sayKey(i), { blob: r.blob, score: sc, at: Date.now() });
   }
   const markPlay = (k = null) => panel.querySelectorAll(".v9bar .pb").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.v === k)));
+  // 재생 전에 마이크부터 닫는다 — 열려 있으면 블루투스가 통화 모드라 소리가 전화 음질(본부 10-03) · 방금 닫았으면 0.4초 뒤 재생(음악 모드로 돌아올 틈)
+  const afterMic = fn => { clearTimeout(micOff); if (sp?.ctl) return; const was = micOpen(); closeMic(); was ? setTimeout(fn, 400) : fn(); };
   function v9Click(x) {
     const i = st.panel.i, k = x.dataset.x;
+    if ((k === "ex" || k === "model" || k === "mine") && micOpen()) return afterMic(() => v9Click(x));
     if (k === "txt") { // 글 언어 — 편 전체 · 기억 · 소리는 그대로 이어서
       v9set("txt", x.dataset.v);
       const pl = ex.playing, snd = panel.querySelector(".v9bar .pb[aria-pressed=true]")?.dataset.v;
@@ -394,6 +399,7 @@ export default async function learn(app, ep, startId) {
     if (st.panel?.kind === "write") { panel.__wr?.toggle(); return; } // 쓰기 창: ▶ = 이 부분 듣기(W6)
     if (st.panel?.kind === "speak") { panel.__sp?.toggle(); return; } // 말하기 창: ▶ = 본보기(S2)
     if (st.panel?.kind === "explain") { // 설명 창: ▶ = 설명 읽기 멈춤/이어서
+      if (micOpen() && !sp?.ctl && !playing()) return afterMic(togglePlay); // 마이크 먼저 닫고(블루투스 통화 모드 풀기) 재생
       if (playing()) { clearTimeout(st.gap); st.gap = 0; ex.pause(); }
       else if (ex.q.length) ex.resume(); else ex.play(exItems(st.panel.i));
       return sync();
