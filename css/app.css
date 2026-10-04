@@ -361,3 +361,9 @@ a{color:inherit;text-decoration:none}
 /* 판 번호(구석에 작게) · 새 판 알림 띠 */
 .ver{margin:18px 16px 8px;font-size:10.5px;color:var(--mute);text-align:end;font-variant-numeric:tabular-nums}
 .newver{position:fixed;left:50%;transform:translateX(-50%);top:calc(8px + env(safe-area-inset-top,0px));z-index:50;padding:8px 14px;border-radius:999px;background:var(--ink);color:var(--bg);font-size:13px;font-weight:700;box-shadow:0 4px 12px rgba(0,0,0,.25)}
+
+/* 80% 넘으면 [저장] · 저장한 것은 「저장됨 ▶」(작게) */
+.speak .keeprow{display:flex;gap:6px;justify-content:center}
+.speak .keeprow button{font-size:12px;padding:3px 10px;border-radius:999px;border:1px solid var(--line)}
+.speak .keeprow [data-act=keep],.v9body .sbtns [data-x=keep]{background:var(--hi);border-color:var(--hi);color:#fff;font-weight:700}
+.v9body .sbtns [data-x=savedplay]{font-size:11.5px;color:var(--mute)}

@@ -13,13 +13,13 @@
 //     못 넘어도 막지 않는다([다음 ▶]) · 음성 인식이 안 되는 곳은 점수 없이 듣고 비교만(녹음은 저장)
 //  S6 녹음은 이 기기 안에만(IndexedDB) — 서버로 보내지 않는다
 //  S7 영상 창 안(embedded): 스크롤 없이 · 줄 이동·닫기는 학습 화면이 한다 · 줄 전체까지 통과하면 다음 줄 말하기로
-import { t, lang } from "../i18n.js?v=1004.2";
-import { esc } from "../text.js?v=1004.2";
-import { episode } from "../data.js?v=1004.2";
-import { paths } from "../paths.js?v=1004.2";
-import { audioCtx, hold } from "../wake.js?v=1004.2";
-import * as sfx from "../sfx.js?v=1004.2";
-import { findLead, playBlob, micCandidates, avoidBT, srWhy, probe, niceLabel } from "../recorder.js?v=1004.2";
+import { t, lang } from "../i18n.js?v=1004.4";
+import { esc } from "../text.js?v=1004.4";
+import { episode } from "../data.js?v=1004.4";
+import { paths } from "../paths.js?v=1004.4";
+import { audioCtx, hold } from "../wake.js?v=1004.4";
+import * as sfx from "../sfx.js?v=1004.4";
+import { findLead, playBlob, srWatch, logRec, dB, micCandidates, avoidBT, srWhy, probe, niceLabel } from "../recorder.js?v=1004.4";
 
 export const PASS = 80;
 const MAX_MS = 8000, QUIET_MS = 1000;
@@ -76,7 +76,7 @@ export default async function speak(app, ep, id, opts = {}) {
     <div class="miclist" hidden></div>
     <div class="helpbox" hidden>${[1, 2, 3, 4, 5].map(k => `<p>${esc(t("help_sp_" + k))}</p>`).join("")}<p class="x">${esc(t("help_close"))}</p></div>
     <div class="task"><div class="say ko" lang="ko"></div><div class="tr"></div></div>
-    <div class="meter"><div class="lvl" hidden><i></i></div><div class="sbar"><i></i><em style="left:${PASS}%"></em></div><div class="msg" aria-live="polite"></div><button class="micname" data-act="pick" hidden></button></div>
+    <div class="meter"><div class="lvl" hidden><i></i></div><div class="sbar"><i></i><em style="left:${PASS}%"></em></div><div class="msg" aria-live="polite"></div><div class="keeprow"><button data-act="keep" hidden>${esc(t("keep"))}</button><button data-act="savedplay" hidden>${esc(t("saved_play"))}</button></div><button class="micname" data-act="pick" hidden></button></div>
     <div class="sbtns">
       <button data-act="model">▶ ${esc(t("model"))}</button>
       <button class="mic" data-act="rec"><span class="dot"></span><span class="lab">${esc(t("speak_now"))}</span></button>
@@ -87,9 +87,10 @@ export default async function speak(app, ep, id, opts = {}) {
   const $ = s => app.querySelector(s);
   const cur = () => parts[st.i];
   // [내 목소리] = 이번에 통과한 녹음 또는 예전에 통과해 저장된 녹음만(못 넘은 녹음은 안 들려줌 — 투덜이 10-04) · 음성 인식이 없는 기기는 방금 녹음
-  const passed = () => (st.saved[cur().key]?.score >= PASS ? st.saved[cur().key] : null);
-  const mineBlob = () => st.blob || passed()?.blob || null;
-  const mineLead = () => (st.blob ? st.lead : passed()?.lead) || 0;
+  // [내 목소리] = 방금 녹음(잘됐든 못됐든 · 투덜이 10-04) · 80% 넘으면 [저장] 단추 → 눌러야 저장 · 저장한 것은 「저장됨 ▶」로 따로
+  const savedRec = () => st.saved[cur().key] || null;
+  const mineBlob = () => st.blob || null;
+  const mineLead = () => st.lead || 0;
 
   function paint() {
     const p = cur(), sv = st.saved[p.key];
@@ -105,9 +106,13 @@ export default async function speak(app, ep, id, opts = {}) {
     const sc = st.score ?? null; // 점수는 이번에 말한 뒤에만(열 때 예전 점수를 보이지 않음 — ✓ 는 토막 번호 옆에)
     $(".sbar i").style.width = (sc ?? 0) + "%";
     $(".meter").classList.toggle("pass", sc != null && sc >= PASS);
-    $(".msg").textContent = st.rec ? t(!st.ready ? "mic_opening" : st.switched ? "mic_switched" : "listening") : st.note ? t(st.note) : sc == null ? (SR ? t(mineBlob() ? "no_score" : "speak_hint") : t("speak_hint_noscore"))
+    // 점수는 언제나 % — 알아듣지 못했으면 「0% · 까닭」(투덜이 10-04)
+    $(".msg").textContent = st.rec ? t(!st.ready ? "mic_opening" : st.switched ? "mic_switched" : "listening") : st.kept ? `${sc}% ✓ · ${t(st.kept)}` : st.note ? `0% · ${t(st.note)}` : sc == null ? (SR ? t(mineBlob() ? "no_score" : "speak_hint") : t(mineBlob() ? "no_score" : "speak_hint_noscore"))
       : `${sc}%${sc >= PASS ? " ✓" : ""} · ${t(sc >= 95 ? "score_5" : sc >= PASS ? "score_4" : sc >= 60 ? "score_3" : sc >= 40 ? "score_2" : "score_1")}`; // 점수에 맞는 한마디
-    $("[data-act=mine]").disabled = $("[data-act=both]").disabled = $("[data-act=save]").disabled = !mineBlob();
+    $("[data-act=mine]").disabled = $("[data-act=both]").disabled = !mineBlob();
+    $("[data-act=save]").disabled = !(mineBlob() || savedRec()?.blob);
+    $("[data-act=keep]").hidden = !(sc != null && sc >= PASS && mineBlob() && !st.kept); // 80% 넘으면 [저장]
+    $("[data-act=savedplay]").hidden = !savedRec()?.blob;
     $(".mic").classList.toggle("on", !!st.rec);
     $(".mic .lab").textContent = st.rec ? (st.ready ? t("btn_stop") : "… " + t("mic_opening")) : t("speak_now"); // 준비 중 → 마이크에 실제 소리가 들어오면 녹음 중
     $("[data-act=model]").setAttribute("aria-pressed", String(st.model));
@@ -119,13 +124,13 @@ export default async function speak(app, ep, id, opts = {}) {
     if (!(p.src && (await sfx.play(p.src))) && lineSrc && p.src !== lineSrc && !p.task) await sfx.play(lineSrc);
     st.model = false; if (st.alive) paint();
   }
-  const playMine = async () => {
-    const b = mineBlob(); if (!b) return;
+  const playMine = async (rec = { blob: mineBlob(), lead: mineLead() }) => {
+    const b = rec?.blob; if (!b) return;
     stopSounds();
-    const h = (st.mine = playBlob(b, mineLead())); // 원본 그대로 · 말 시작 자리부터
+    const h = (st.mine = playBlob(b, rec.lead || 0)); // 원본 그대로 · 말 시작 자리부터
     await h.done; if (st.mine === h) st.mine = null;
   };
-  function go(i) { stopRec(true); stopSounds(); st.i = Math.max(0, Math.min(parts.length - 1, i)); st.blob = null; st.score = null; st.note = null; paint(); }
+  function go(i) { stopRec(true); stopSounds(); st.i = Math.max(0, Math.min(parts.length - 1, i)); st.blob = null; st.score = null; st.note = null; st.kept = null; paint(); }
 
   // ── 녹음 + 음성 인식(S3 · S5) ──
   let sr = null, srErr = null, heard = [], quietTimer = 0, maxTimer = 0, meterTimer = 0;
@@ -186,7 +191,8 @@ export default async function speak(app, ep, id, opts = {}) {
     }
     if (!st.alive) return;
     const rec = new MediaRecorder(st.stream), chunks = [];
-    st.rec = rec; st.ready = false; st.blob = null; st.score = null; st.note = null; heard = []; srErr = null;
+    st.diag = { t0: performance.now(), sr: [], track: false, peak: 0, mic: st.stream.getAudioTracks()[0]?.label || "" };
+    st.rec = rec; st.ready = false; st.score = null; st.note = null; st.kept = null; heard = []; srErr = null;
     rec.ondataavailable = e => e.data.size && chunks.push(e.data);
     rec.onstop = () => finish(new Blob(chunks, { type: rec.mimeType || "audio/webm" }));
     rec.start();
@@ -201,7 +207,8 @@ export default async function speak(app, ep, id, opts = {}) {
         };
         sr.onerror = e => { srErr = e.error || "error"; }; // 삼키지 않는다 — 점수가 안 나온 까닭을 알려 준다
         // 녹음하는 바로 그 마이크로 알아듣게 한다 — 그냥 start() 는 크롬 기본 마이크(소리 0 인 블루투스일 수 있다)를 듣는다
-        try { sr.start(st.stream.getAudioTracks()[0]); } catch { sr.start(); }
+        st.diag.sr = srWatch(sr, st.diag.t0);
+        try { sr.start(st.stream.getAudioTracks()[0]); st.diag.track = true; } catch { sr.start(); }
       } catch { sr = null; }
     }
     // 말이 끝나고 1초 조용하면 멈춤
@@ -217,7 +224,7 @@ export default async function speak(app, ep, id, opts = {}) {
         lastT = ctx.currentTime; lastAt = now;
         an.getFloatTimeDomainData(buf);
         const rms = Math.sqrt(buf.reduce((s, v) => s + v * v, 0) / buf.length);
-        peak = Math.max(peak, rms);
+        peak = Math.max(peak, rms); if (st.diag) st.diag.peak = Math.max(st.diag.peak, rms);
         if (!st.ready && rms > 0 && st.rec === rec) { st.ready = true; lvl.hidden = false; paint(); showMicName(); }
         lvl.firstElementChild.style.width = Math.min(100, Math.round(rms * 500)) + "%"; // 들어오는 소리 크기
         // 바꿔서 연 마이크에 신호가 있으면(말하기 전이라도) 기억 — 다음에는 죽은 마이크를 다시 거치지 않는다
@@ -246,28 +253,18 @@ export default async function speak(app, ep, id, opts = {}) {
   }
   async function finish(blob) {
     const lead = await findLead(blob); // 다시 굽지 않음 — 원본 그대로 + 말 시작 위치(본부 10-04 되돌림)
-    st.blob = null;
+    st.blob = blob; st.lead = lead; st.kept = null; // 방금 녹음 — 언제나 [내 목소리]로
     if (sr) { // 인식 결과가 조금 늦게 온다 — 그동안 「확인 중…」
       if (!heard.length) $(".msg").textContent = t("checking");
       for (let k = 0; k < 20 && !heard.length; k++) await new Promise(r => setTimeout(r, 100));
-      st.score = heard.length ? Math.max(...heard.map(h => similarity(cur().say, h))) : null; // 못 알아들었으면 0% 가 아니라 점수 없음
-      if (st.score == null) st.note = srWhy(srErr); // 까닭(마이크를 못 잡음 · 인터넷 · 허락 · 못 알아들음)
+      st.score = heard.length ? Math.max(...heard.map(h => similarity(cur().say, h))) : null;
+      if (st.score == null) { st.note = srWhy(srErr); st.score = 0; } // 못 알아들음 = 0% + 까닭 // 까닭(마이크를 못 잡음 · 인터넷 · 허락 · 못 알아들음)
     } else st.score = null;
     if (!st.alive) return;
     const p = cur(), old = st.saved[p.key];
-    // 저장: 80% 넘은 것(더 높은 점수로만 바꿈) · 점수를 못 재는 곳은 방금 것
-    if (st.score != null && st.score >= PASS) { st.blob = blob; st.lead = lead; } else if (!SR) { st.blob = blob; st.lead = lead; } // 통과한 것만 듣기(점수 못 매기는 기기는 방금 것)
-    if (st.score != null && st.score >= PASS && st.score >= (old?.score ?? 0)) { // 80% 넘어야만 저장(점수 없으면 절대 아님 — 본부 10-04)
-      st.saved[p.key] = { blob, lead, score: st.score, at: Date.now() };
-      recPut(`${ep}/${p.key}`, st.saved[p.key]);
-    }
+    if (st.diag) logRec({ where: "speak", line: line.id, part: p.key, want: p.say, mic: st.diag.mic, track: st.diag.track, sr: st.diag.sr, sec: Math.round(performance.now() - st.diag.t0) / 1000, lead: Math.round(lead * 100) / 100, maxDb: dB(st.diag.peak), heard: [...new Set(heard)], score: st.score }); // 진단(화면에 안 보임)
+    // 저장은 자동이 아님 — 80% 넘으면 [저장] 단추가 나오고 학습자가 누른다(투덜이 10-04) · 저절로 다음 토막으로 넘기지도 않는다(저장할 틈)
     paint();
-    if (st.score != null && st.score >= PASS) { // 통과 → 다음으로
-      await new Promise(r => setTimeout(r, 1500));
-      if (!st.alive || st.rec || cur() !== p) return;
-      if (st.i < parts.length - 1) go(st.i + 1);
-      else $(".msg").textContent = `${st.score}% ✓ · ${t("line_done")}`; // 이 줄 끝 — 다음 줄로 넘어가지 않는다(다음 줄은 학습자가 고른다)
-    }
   }
   app.__sp = { toggle: () => (st.model ? (stopSounds(), paint()) : afterMic(playModel)), busy: () => !!st.rec || st.model || sfx.playing(), _finish: finish, _state: st };
 
@@ -287,8 +284,16 @@ export default async function speak(app, ep, id, opts = {}) {
     const a = b.dataset.act;
     if (a === "pick") { stopRec(true); return showMics(); }
     if (a === "help") { stopRec(true); $(".miclist").hidden = true; $(".helpbox").hidden = false; return; }
-    if (a === "save") { // 내 녹음을 파일로
-      const bl = mineBlob(); if (!bl) return;
+    if (a === "keep") { // [저장] — 더 높거나 같은 점수면 바꿔 끼움
+      const p = cur(), old = st.saved[p.key];
+      if (!st.blob || !(st.score >= PASS)) return;
+      if (st.score >= (old?.score ?? 0)) { st.saved[p.key] = { blob: st.blob, lead: st.lead, score: st.score, at: Date.now() }; recPut(`${ep}/${p.key}`, st.saved[p.key]); st.kept = "kept"; }
+      else st.kept = "kept_better";
+      return paint();
+    }
+    if (a === "savedplay") { stopRec(true); afterMic(() => playMine(savedRec())); return; }
+    if (a === "save") { // 내 녹음을 파일로(방금 것 · 없으면 저장한 것)
+      const bl = mineBlob() || savedRec()?.blob; if (!bl) return;
       const u = URL.createObjectURL(bl), el = document.createElement("a");
       el.href = u; el.download = `malmun_${cur().key}.${/wav/.test(bl.type) ? "wav" : /mp4/.test(bl.type) ? "m4a" : /ogg/.test(bl.type) ? "ogg" : "webm"}`;
       document.body.append(el); el.click(); el.remove(); setTimeout(() => URL.revokeObjectURL(u), 5000);

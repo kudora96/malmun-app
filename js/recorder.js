@@ -3,7 +3,7 @@
 // 다음 마이크로 넘어가 다시 녹음 · 소리 들어온 마이크 기억(malmun.mic — 말하기 창과 같은 칸) · 인식은 녹음하는 그 마이크를 끝까지(continuous)
 // · 말이 끝나고 1초 조용하면 저절로 멈춤 · 길어도 8초.
 // TODO(앱 창): speak.js 의 같은 부분을 이 모듈로 합치기 — 지금은 말하기 창 점검(38)을 깨지 않으려고 따로 둠.
-import { audioCtx } from "./wake.js?v=1004.2";
+import { audioCtx } from "./wake.js?v=1004.4";
 
 const MAX_MS = 8000, QUIET_MS = 1000, DEAD = 0.0002;
 const getSR = () => window.SpeechRecognition || window.webkitSpeechRecognition; // 부를 때마다 찾는다(점검이 가짜로 바꿔 끼울 수 있게)
@@ -117,6 +117,23 @@ export function playBlob(blob, lead = 0) {
   }).catch(() => resolve());
   return { pause() { stopped = true; try { node?.stop(); } catch {} resolve(); }, done };
 }
+// ── 진단 기록(화면에 안 보임 · 본부 10-04) — 녹음이 끝날 때마다 localStorage malmun.lastrec 에 마지막 5개 ──
+// 음성 인식 이벤트 순서와 시각(ms) · 들은 글 · 점수 · 마이크 · 트랙 전달 여부 · 길이 · lead · 최대 소리 dB
+export function srWatch(sr, t0) {
+  const ev = [];
+  if (typeof sr.addEventListener !== "function") return ev; // 가짜 인식기(점검) 등
+  for (const n of ["start", "audiostart", "soundstart", "speechstart", "speechend", "soundend", "audioend", "result", "nomatch", "error", "end"])
+    sr.addEventListener(n, e => ev.push(`${n === "error" ? "error:" + (e.error || "?") : n}@${Math.round(performance.now() - t0)}`));
+  return ev;
+}
+export function logRec(entry) {
+  try {
+    const a = JSON.parse(localStorage.getItem("malmun.lastrec") || "[]");
+    a.push({ at: new Date().toISOString(), ...entry });
+    localStorage.setItem("malmun.lastrec", JSON.stringify(a.slice(-5)));
+  } catch {}
+}
+export const dB = x => (x > 0 ? Math.round(20 * Math.log10(x) * 10) / 10 : -120);
 // 마이크를 미리 열어 둔다 — 허락을 이미 받은 경우에만(처음 보는 사람에게 카드 열자마자 허락 창을 띄우지 않게)
 export async function warmMic() {
   try { if ((await navigator.permissions.query({ name: "microphone" })).state === "granted") await openMic(); } catch {}
@@ -138,7 +155,8 @@ export function record({ onLevel = () => {}, onSwitch = () => {}, onReady = () =
   })();
   function once(s, switched) {
     return new Promise(res => {
-      const rec = new MediaRecorder(s), chunks = [], heard = [];
+      const rec = new MediaRecorder(s), chunks = [], heard = [], t0 = performance.now();
+      let srEv = [], trackPassed = false, maxRms = 0;
       let sr = null, srErr = null, over = false, src = null, meter = 0, maxT = 0;
       rec.ondataavailable = e => e.data.size && chunks.push(e.data);
       rec.start();
@@ -152,7 +170,8 @@ export function record({ onLevel = () => {}, onSwitch = () => {}, onReady = () =
             if (rs.length > 1) heard.push(rs.map(r => r[0].transcript).join(" "));
           };
           sr.onerror = e => { srErr = e.error || "error"; }; // 삼키지 않는다 — 점수가 안 나온 까닭을 칸에 알려 준다
-          try { sr.start(s.getAudioTracks()[0]); } catch { sr.start(); }
+          srEv = srWatch(sr, t0);
+          try { sr.start(s.getAudioTracks()[0]); trackPassed = true; } catch { sr.start(); }
         } catch { sr = null; }
       }
       const finish = (extra = {}) => {
@@ -164,7 +183,8 @@ export function record({ onLevel = () => {}, onSwitch = () => {}, onReady = () =
         rec.onstop = async () => {
           if (sr && !extra.dead && !cancelled) for (let k = 0; k < 20 && !heard.length; k++) await new Promise(r => setTimeout(r, 100)); // 인식 결과는 조금 늦게 온다
           const raw = new Blob(chunks, { type: rec.mimeType || "audio/webm" });
-          res({ blob: raw, lead: extra.dead || cancelled ? 0 : await findLead(raw), heard, srErr, ...extra });
+          const lead = extra.dead || cancelled ? 0 : await findLead(raw);
+          res({ blob: raw, lead, heard, srErr, diag: { mic: s.getAudioTracks()[0]?.label || "", track: trackPassed, sr: srEv, sec: Math.round(performance.now() - t0) / 1000, lead: Math.round(lead * 100) / 100, maxDb: dB(maxRms), dead: !!extra.dead, cancelled }, ...extra });
         };
         try { rec.state !== "inactive" ? rec.stop() : rec.onstop(); } catch { rec.onstop(); }
       };
@@ -180,7 +200,7 @@ export function record({ onLevel = () => {}, onSwitch = () => {}, onReady = () =
           lastT = ctx.currentTime; lastAt = now;
           an.getFloatTimeDomainData(buf);
           const rms = Math.sqrt(buf.reduce((a, v) => a + v * v, 0) / buf.length);
-          peak = Math.max(peak, rms); onLevel(Math.min(1, rms * 5));
+          peak = Math.max(peak, rms); maxRms = Math.max(maxRms, rms); onLevel(Math.min(1, rms * 5));
           if (!ready && rms > 0) { ready = true; onReady(); } // 마이크에서 실제 소리(바닥 소음이라도)가 들어오기 시작함
           if ((rms > 0.02 || (switched && peak >= DEAD && liveMs > DEAD_MS)) && !kept) { kept = true; pref(devId(s) || (s.req !== true && s.req) || ""); }
           if (rms > 0.02) { spoke = true; quietAt = 0; } else if (spoke) { quietAt ||= now; if (now - quietAt > QUIET_MS) finish(); }

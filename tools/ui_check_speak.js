@@ -66,28 +66,32 @@
   await waitIdle();
   ok(!$(".panel .mic").classList.contains("on"), "말이 끝나고 조용하면 저절로 멈춤");
   ok(/50%/.test($(".panel .msg").textContent) && !$(".panel .meter").classList.contains("pass") && /1\/5/.test($(".panel .segnav").innerText.replace(/\s/g, "")), "다르게 말함 → 50% · 통과 아님 · 그 자리에 있음(막지 않음)", $(".panel .msg").textContent);
-  ok($(".panel [data-act=mine]").disabled && $(".panel [data-act=save]").disabled, "못 넘은 녹음은 안 들려줌 — [내 목소리]·[⬇] 꺼진 채(투덜이 10-04)");
+  ok(!$(".panel [data-act=mine]").disabled && $(".panel [data-act=keep]").hidden, "못 넘어도 방금 녹음은 [내 목소리]로 들림 · [저장] 없음(투덜이 10-04)");
   ok(window.__srCont === true, "음성 인식이 말을 끝까지 들음(짧은 말을 중간에 끊지 않음)");
   ok(window.__srTrack === "audio", "음성 인식이 녹음하는 그 마이크를 들음(크롬 기본 마이크가 아니라)", String(window.__srTrack));
   // 점수에 맞는 한마디 — 반쯤 맞음(50%)과 많이 틀림(40 미만)은 말이 다르다
   await say("안녕하세요"); await waitIdle(); const m3 = $(".panel .msg").textContent;
   await say("감사합니다"); await waitIdle(); const m1 = $(".panel .msg").textContent;
   ok(/^\d+% · /.test(m3) && /^\d+% · /.test(m1) && m3.replace(/^\d+%/, "") !== m1.replace(/^\d+%/, ""), "점수마다 한마디가 다름(아직 조금 부족해요 / 천천히 다시)", m3 + " ｜ " + m1);
-  // 맞게 말함 → 통과 · 저장 · 다음 토막
+  // 맞게 말함 → 100% ✓ + [저장] 단추(자동 저장 아님) → 누르면 저장 · 저절로 넘어가지 않음
   await say("어서 오세요"); await waitIdle();
-  ok(/100%/.test($(".panel .msg").textContent) || /2\/5/.test($(".panel .segnav").innerText), "맞게 말함 → 100% ✓", $(".panel .msg").textContent);
+  ok(/100% ✓/.test($(".panel .msg").textContent) && !$(".panel [data-act=keep]").hidden && !/✓/.test($(".panel .segnav").innerText), "맞게 말함 → 100% ✓ · [저장] 나옴 · 아직 저장 안 됨", $(".panel .msg").textContent);
   await W(1800);
-  ok(/2\/5/.test($(".panel .segnav").innerText.replace(/\s/g, "")) && $(".panel .say").textContent.startsWith("경복궁에"), "통과 1.5초 뒤 다음 토막으로 자동", $(".panel .say").textContent);
+  ok(/1\/5/.test($(".panel .segnav").innerText.replace(/\s/g, "")), "통과해도 저절로 다음 토막으로 안 넘어감(저장할 틈)", $(".panel .segnav").innerText.replace(/\s/g, ""));
+  $(".panel [data-act=keep]").click(); await W(400);
+  ok(/1\/5✓/.test($(".panel .segnav").innerText.replace(/\s/g, "")) && $(".panel [data-act=keep]").hidden && !$(".panel [data-act=savedplay]").hidden, "[저장] 누름 → ✓ · 「저장됨 ▶」 나옴", $(".panel .msg").textContent);
+  $(".panel [data-seg='1']").click(); await W(300);
+  ok(/2\/5/.test($(".panel .segnav").innerText.replace(/\s/g, "")) && $(".panel .say").textContent.startsWith("경복궁에"), "▶ 로 다음 토막", $(".panel .say").textContent);
   await W(1600); const liveT = (window.__tracks || []).filter(x => x.readyState === "live").length;
   ok(liveT === 0, "녹음이 끝나고 3초 뒤 마이크 닫힘(블루투스 통화 모드 풀기)", "열린 마이크 " + liveT);
   // 저장 확인: 앞 토막으로 돌아가면 ✓ + 내 목소리 켜짐
   $(".panel [data-seg='-1']").click(); await W(300);
-  ok(/1\/5✓/.test($(".panel .segnav").innerText.replace(/\s/g, "")) && !$(".panel [data-act=mine]").disabled, "앞 토막으로 → ✓ 표시 · 저장된 내 목소리 들을 수 있음", $(".panel .segnav").innerText.replace(/\s/g, ""));
+  ok(/1\/5✓/.test($(".panel .segnav").innerText.replace(/\s/g, "")) && !$(".panel [data-act=savedplay]").hidden && $(".panel [data-act=mine]").disabled, "앞 토막으로 → ✓ · 「저장됨 ▶」 · (방금 녹음 없음이라 [내 목소리] 꺼짐)", $(".panel .segnav").innerText.replace(/\s/g, ""));
   let dl = null; const oc = HTMLAnchorElement.prototype.click; HTMLAnchorElement.prototype.click = function () { if (this.download) dl = this.download + " " + this.href.slice(0, 5); else oc.call(this); };
   $(".panel [data-act=save]").click(); await W(200); HTMLAnchorElement.prototype.click = oc;
-  ok(/^malmun_L01-00-01_01_p01\.(webm|m4a|ogg) blob:$/.test(dl || ""), "[⬇] → 통과한 내 녹음을 원본(다시 굽지 않음) 파일로", String(dl));
-  const ml = (window.__mineLog ||= []).length; $(".panel [data-act=mine]").click(); for (let k = 0; k < 20 && window.__mineLog.length === ml; k++) await W(100); const me = window.__mineLog[window.__mineLog.length - 1];
-  ok(window.__mineLog.length > ml && me.lead >= 0, "[내 목소리] → 통과한 녹음을 말 시작 자리부터", me ? `lead ${me.lead.toFixed(2)}s / ${me.dur.toFixed(2)}s · ${me.rate}Hz` : "없음");
+  ok(/^malmun_L01-00-01_01_p01\.(webm|m4a|ogg) blob:$/.test(dl || ""), "[⬇] → 저장한 내 녹음을 원본(다시 굽지 않음) 파일로", String(dl));
+  const ml = (window.__mineLog ||= []).length; $(".panel [data-act=savedplay]").click(); for (let k = 0; k < 20 && window.__mineLog.length === ml; k++) await W(100); const me = window.__mineLog[window.__mineLog.length - 1];
+  ok(window.__mineLog.length > ml && me.lead >= 0, "「저장됨 ▶」 → 저장한 녹음을 말 시작 자리부터", me ? `lead ${me.lead.toFixed(2)}s / ${me.dur.toFixed(2)}s · ${me.rate}Hz` : "없음");
   ok(!/%/.test($(".panel .msg").textContent), "열 때(돌아왔을 때) 예전 점수는 안 보임 — ✓ 만", $(".panel .msg").textContent);
   // 녹음 중 다시 누르면 멈춤
   await say("어서 오세요", 5000); await W(600); $(".panel [data-act=rec]").click(); await W(1200);
@@ -98,17 +102,17 @@
   await open(1);
   ok(/✓/.test($(".panel .segnav").innerText), "다시 열어도 ✓ 와 저장된 녹음이 남아 있음", $(".panel .segnav").innerText.replace(/\s/g, ""));
   // 줄 전체까지 통과 → 다음 줄 말하기
-  for (const heard of ["어서 오세요", "경복궁에 온 걸", "환영해요", "어서 오세요 경복궁에 온 걸 환영해요", "한국에 온 걸 환영해요"]) {
-    if (!/^1 \//.test($(".panel .whead .sub").textContent)) break;
-    await say(heard); await waitIdle(); await W(1900);
+  for (const [k, heard] of ["어서 오세요", "경복궁에 온 걸", "환영해요", "어서 오세요 경복궁에 온 걸 환영해요", "한국에 온 걸 환영해요"].entries()) {
+    while (!new RegExp(`^${k + 1}/`).test($(".panel .segnav").innerText.replace(/\s/g, "").replace(/^◀/, ""))) { $(".panel [data-seg='1']").click(); await W(200); }
+    await say(heard); await waitIdle(); $(".panel [data-act=keep]").click(); await W(300);
   }
   await W(600);
-  ok(/^1 \//.test($(".panel .whead .sub")?.textContent || "") && /5\/5✓/.test($(".panel .segnav").innerText.replace(/\s/g, "")) && /100% ✓ · .+/.test($(".panel .msg").textContent), "줄 전체까지 통과 → 거기서 끝(다음 줄로 넘어가지 않음) · 「이 줄을 다 했어요」", $(".panel .whead .sub")?.textContent + " · " + $(".panel .msg").textContent);
+  ok(/^1 \//.test($(".panel .whead .sub")?.textContent || "") && /5\/5✓/.test($(".panel .segnav").innerText.replace(/\s/g, "")) && /100% ✓ · .+/.test($(".panel .msg").textContent), "줄 전체까지 통과·저장 → 그 줄에 그대로(다음 줄로 넘어가지 않음)", $(".panel .whead .sub")?.textContent + " · " + $(".panel .msg").textContent);
   // 점수가 안 나오면 절대 통과·저장 아님(본부 10-04) — 말하기 창
   await open(9);
   const settle = async () => { for (let k = 0; k < 40 && /Checking|확인 중|जाँच्दै/.test($(".panel .msg")?.textContent || ""); k++) await W(150); };
   window.__srNone = true; await say("아무 말"); await waitIdle(); await settle();
-  ok(/again|फेरि|다시/i.test($(".panel .msg").textContent) && !/%/.test($(".panel .msg").textContent) && !$(".panel .meter").classList.contains("pass") && !/✓/.test($(".panel .segnav").innerText), "말하기 창: 결과 없음 → 「잘 못 알아들었어요」 · 통과·✓·저장 아님", $(".panel .msg").textContent);
+  ok(/again|फेरि|다시/i.test($(".panel .msg").textContent) && /^0% · /.test($(".panel .msg").textContent) && $(".panel [data-act=keep]").hidden && !$(".panel .meter").classList.contains("pass") && !/✓/.test($(".panel .segnav").innerText), "말하기 창: 결과 없음 → 「0% · 잘 못 알아들었어요」 · 통과·✓·[저장] 아님", $(".panel .msg").textContent);
   window.__srNone = false; window.__srErr = "audio-capture"; await say("아무 말"); await waitIdle(); await settle();
   ok(/microphone|माइक्रोफोन|마이크/i.test($(".panel .msg").textContent) && !/✓/.test($(".panel .segnav").innerText), "말하기 창: audio-capture 오류 → 「음성 인식이 마이크를 못 잡았어요」", $(".panel .msg").textContent);
   window.__srErr = null;
@@ -117,11 +121,15 @@
   line(10).querySelector("[data-act=explain]").click(); await W(1200); document.querySelector("video").pause();
   const crec = async () => { $(".panel .sayb [data-x=rec]").click(); await W(400); speakFor(700); for (let k = 0; k < 60 && $(".panel .sayb [data-x=rec]").classList.contains("on"); k++) await W(150); await W(700); return $(".panel .sayb .smsg").textContent; };
   window.__srNone = true; let cm = await crec();
-  ok(/again|फेरि|다시/i.test(cm) && !/%|✓/.test(cm) && !$(".panel .sayb").classList.contains("pass"), "카드: 결과 없음 → 통과 아님 · ✓ 없음", cm);
+  ok(/again|फेरि|다시/i.test(cm) && /^0% · /.test(cm) && !/✓/.test(cm) && $(".panel .sayb [data-x=keep]").hidden && !$(".panel .sayb [data-x=mine]").disabled, "카드: 결과 없음 → 「0% · 다시」 · [저장] 없음 · 방금 녹음은 [내 목소리]로", cm);
   window.__srNone = false; window.__srErr = "audio-capture"; cm = await crec();
   ok(/microphone|माइक्रोफोन|마이크/i.test(cm) && !$(".panel .sayb").classList.contains("pass"), "카드: audio-capture → 마이크 안내", cm);
   window.__srErr = null; window.__heard = "감사합니다 여러분"; cm = await crec();
-  ok(/^\d+%/.test(cm) && !/✓/.test(cm) && !$(".panel .sayb").classList.contains("pass"), "카드: 엉뚱한 말 → 낮은 점수 · ✓ 없음", cm);
+  ok(/^\d+%/.test(cm) && !/✓/.test(cm) && $(".panel .sayb [data-x=keep]").hidden, "카드: 엉뚱한 말 → 낮은 점수 · ✓·[저장] 없음", cm);
+  window.__heard = $(".panel .sayb p").textContent.match(/"([^"]+)"/)[1]; cm = await crec();
+  ok(/^100% ✓/.test(cm) && !$(".panel .sayb [data-x=keep]").hidden, "카드: 맞게 말함 → 100% ✓ · [저장] 나옴(자동 저장 아님)", cm);
+  $(".panel .sayb [data-x=keep]").click(); await W(500);
+  ok(!$(".panel .sayb [data-x=savedplay]").hidden && $(".panel .sayb [data-x=keep]").hidden, "카드: [저장] → 「저장됨 ▶」", $(".panel .sayb .smsg").textContent);
   ok(!$(".panel .sayb .micname").hidden && /✓/.test($(".panel .sayb .micname").textContent), "카드: 🎤 아래 지금 마이크 이름 한 줄(눌러서 바꾸기)", $(".panel .sayb .micname").textContent);
   line(10).querySelector("[data-act=explain]").click(); await W(500);
   // 블루투스만 있는 기기 → 그 블루투스로라도 녹음(다른 게 없을 때만)

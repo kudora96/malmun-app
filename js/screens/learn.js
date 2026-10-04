@@ -10,16 +10,16 @@
 //  R7 영상은 늘 맨 위 · 지금 줄은 영상 바로 아래(앞 줄은 영상 뒤로) — 손으로 목록을 움직이면 4초 동안은 따라가지 않음
 //  R8 듣기 모드(대사→설명 · 설명만)도 R1~R6 그대로(영상 대신 소리 조각) · 모드를 바꾸면 멈춤(▶ 로 시작)
 //  R9 다시 들어오면 마지막 줄이 선택된 채 멈춰 있음
-import { t, lang, langName } from "../i18n.js?v=1004.2";
-import { esc, renderText, glossCards } from "../text.js?v=1004.2";
-import { episode } from "../data.js?v=1004.2";
-import { paths } from "../paths.js?v=1004.2";
-import { Sequence } from "../audio.js?v=1004.2";
-import { I, progress, SPEAKER } from "../ui.js?v=1004.2";
-import writeView from "./write.js?v=1004.2";
-import speakView, { similarity, PASS, recGet, recPut } from "./speak.js?v=1004.2";
-import { record, micWhy, srWhy, canScore, closeMic, micOpen, findLead, playBlob, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1004.2";
-import { hold } from "../wake.js?v=1004.2";
+import { t, lang, langName } from "../i18n.js?v=1004.4";
+import { esc, renderText, glossCards } from "../text.js?v=1004.4";
+import { episode } from "../data.js?v=1004.4";
+import { paths } from "../paths.js?v=1004.4";
+import { Sequence } from "../audio.js?v=1004.4";
+import { I, progress, SPEAKER } from "../ui.js?v=1004.4";
+import writeView from "./write.js?v=1004.4";
+import speakView, { similarity, PASS, recGet, recPut } from "./speak.js?v=1004.4";
+import { record, micWhy, srWhy, canScore, closeMic, micOpen, findLead, playBlob, logRec, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1004.4";
+import { hold } from "../wake.js?v=1004.4";
 
 const RATES = [1, 0.75, 0.5];
 const pref = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } };
@@ -198,7 +198,7 @@ export default async function learn(app, ep, startId) {
         <div class="tabs" role="tablist">${["L", "ko"].map(v => `<button data-x="txt" data-v="${v}" role="tab" aria-selected="${P.txt === v}">${esc(v9name(v))}</button>`).join("")}</div>
         <p data-p="0">${bold(tx.ex || "")}</p>
         ${l.say ? `<div class="sayb"><p data-p="1">${bold(tx.say || "")}</p>
-          <div class="sbtns"><button class="mic" data-x="rec">🎤 ${esc(t("speak_now"))}</button><button data-x="model">▶ ${esc(t("model"))}</button><button data-x="mine" disabled>▶ ${esc(t("my_voice"))}</button></div>
+          <div class="sbtns"><button class="mic" data-x="rec">🎤 ${esc(t("speak_now"))}</button><button data-x="model">▶ ${esc(t("model"))}</button><button data-x="mine" disabled>▶ ${esc(t("my_voice"))}</button><button data-x="keep" hidden>${esc(t("keep"))}</button><button data-x="savedplay" hidden>${esc(t("saved_play"))}</button></div>
           <div class="sline"><span class="lvl" hidden><i></i></span><span class="smsg" aria-live="polite"></span></div><div class="microw"><button class="micname" data-x="mics" hidden></button><select class="micsel" hidden></select></div></div>` : ""}
       </div>
       <div class="v9prog" data-off><span class="t0">0:00</span><div class="trk" aria-label="seek"><div class="rail"><i></i></div></div><span class="t1">0:00</span></div></div>`;
@@ -273,14 +273,13 @@ export default async function learn(app, ep, startId) {
   // 카드 안 말하기(녹음 → 점수 → 내 목소리) — js/recorder.js
   let sp = null, micOff = 0; // { i, ctl, blob, audio }
   function spStop() { clearTimeout(micOff); sp?.ctl?.stop(true); sp?.audio?.pause(); sp = null; closeMic(); }
-  // 통과(80% 이상)한 녹음이 있을 때만 [내 목소리]를 켠다 — 점수는 열 때 안 보이고 이번에 말한 뒤에만(투덜이 10-04)
+  // [내 목소리] = 방금 녹음(잘됐든 못됐든) · 80% 넘으면 [저장] → 눌러야 저장 · 저장한 것은 「저장됨 ▶」 · 열 때 예전 점수 안 보임(투덜이 10-04)
   async function spInit(i) {
     const saved = await recGet(sayKey(i));
-    if (st.panel?.i !== i || !saved?.blob || !(saved.score >= PASS)) return;
-    const lead = saved.lead ?? (await findLead(saved.blob));
+    if (st.panel?.i !== i || !saved?.blob) return;
+    sp = { i, saved: { blob: saved.blob, lead: saved.lead ?? (await findLead(saved.blob)), score: saved.score } };
     if (st.panel?.i !== i) return;
-    sp = { i, blob: saved.blob, lead };
-    const m = panel.querySelector(".sayb [data-x=mine]"); if (m) m.disabled = false;
+    const b = panel.querySelector(".sayb [data-x=savedplay]"); if (b) b.hidden = false;
   }
   async function spRec(i, btn) {
     const box = panel.querySelector(".sayb"), msg = box.querySelector(".smsg"), lvl = box.querySelector(".lvl"), mineB = box.querySelector("[data-x=mine]");
@@ -295,7 +294,8 @@ export default async function learn(app, ep, startId) {
       onReady: () => { if (sp?.ctl !== ctl) return; btn.textContent = "■ " + t("btn_stop"); lvl.hidden = false; msg.textContent = t("listening");
         const nb = box.querySelector(".micname"); if (nb && micLabel()) { nb.textContent = `🎤 ${micLabel()} ✓`; nb.hidden = false; } }, // 지금 쓰는 마이크 — 자동이 틀렸을 때만 눌러 바꿈
     });
-    sp = { i, ctl, blob: sp?.blob, lead: sp?.lead };
+    sp = { i, ctl, saved: sp?.saved, blob: sp?.blob, lead: sp?.lead };
+    box.querySelector("[data-x=keep]").hidden = true;
     btn.classList.add("on"); btn.textContent = "… " + t("mic_opening"); lvl.hidden = true; msg.textContent = "";
     const r = await ctl.done;
     if (st.panel?.i !== i || sp?.ctl !== ctl) return; // 다른 데로 감
@@ -304,21 +304,21 @@ export default async function learn(app, ep, startId) {
     if (r.cancelled) { btn.textContent = "🎤 " + t("speak_now"); msg.textContent = ""; return; }
     if (r.error) { btn.textContent = "🎤 " + t("speak_now"); msg.textContent = t(micWhy(r.error)); return; }
     const sc = canScore() && r.heard.length ? Math.max(...r.heard.map(h => similarity(L[i].say.ko, h))) : null;
-    if (sc != null && sc >= PASS) { sp.blob = r.blob; sp.lead = r.lead; } // 통과한 녹음만 [내 목소리]로(못 넘으면 꺼진 채 + 다시)
-    mineB.disabled = !sp.blob;
+    logRec({ where: "card", line: L[i].id, want: L[i].say.ko, ...r.diag, heard: [...new Set(r.heard)], score: sc }); // 진단(화면에 안 보임)
+    sp.blob = r.blob; sp.lead = r.lead; sp.score = sc; mineB.disabled = false; // 방금 녹음 — 언제나
     btn.textContent = "🎤 " + t(sc != null && sc >= PASS ? "speak_now" : "try_again");
     // 점수가 안 나오면 절대 통과·저장 아님(본부 10-04 — 엉뚱한 말도 그냥 넘어가던 것) · 왜 안 나왔는지 짧게
-    msg.textContent = sc == null ? t(canScore() ? srWhy(r.srErr) : "speak_hint_noscore") : `${sc}%${sc >= PASS ? " ✓" : ""} · ${t(sc >= 95 ? "score_5" : sc >= PASS ? "score_4" : sc >= 60 ? "score_3" : sc >= 40 ? "score_2" : "score_1")}`;
+    // 점수는 언제나 % — 못 알아들었으면 「0% · 까닭」 · 80% 넘으면 [저장]
+    box.querySelector("[data-x=keep]").hidden = !(sc != null && sc >= PASS);
+    msg.textContent = sc == null ? (canScore() ? `0% · ${t(srWhy(r.srErr))}` : t("speak_hint_noscore")) : `${sc}%${sc >= PASS ? " ✓" : ""} · ${t(sc >= 95 ? "score_5" : sc >= PASS ? "score_4" : sc >= 60 ? "score_3" : sc >= 40 ? "score_2" : "score_1")}`;
     box.classList.toggle("pass", sc != null && sc >= PASS);
-    const old = await recGet(sayKey(i));
-    if (sc != null && sc >= PASS && sc >= (old?.score ?? 0)) recPut(sayKey(i), { blob: r.blob, lead: r.lead, score: sc, at: Date.now() }); // 원본 그대로 + 말 시작 위치
   }
   const markPlay = (k = null) => panel.querySelectorAll(".v9bar .pb").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.v === k)));
   // 재생 전에 마이크부터 닫는다 — 열려 있으면 블루투스가 통화 모드라 소리가 전화 음질(본부 10-03) · 방금 닫았으면 0.4초 뒤 재생(음악 모드로 돌아올 틈)
   const afterMic = fn => { clearTimeout(micOff); if (sp?.ctl) return; const was = micOpen(); closeMic(); was ? setTimeout(fn, 400) : fn(); };
   function v9Click(x) {
     const i = st.panel.i, k = x.dataset.x;
-    if ((k === "ex" || k === "model" || k === "mine") && micOpen()) return afterMic(() => v9Click(x));
+    if ((k === "ex" || k === "model" || k === "mine" || k === "savedplay") && micOpen()) return afterMic(() => v9Click(x));
     if (k === "txt") { // 글 언어 — 편 전체 · 기억 · 소리는 그대로 이어서
       v9set("txt", x.dataset.v);
       const pl = ex.playing, snd = panel.querySelector(".v9bar .pb[aria-pressed=true]")?.dataset.v;
@@ -351,6 +351,22 @@ export default async function learn(app, ep, startId) {
     if (k === "model") { // 본보기 = 문장만 읽은 소리
       if (sp?.ctl) return;
       sp?.audio?.pause(); markPlay(); ex.play([{ src: L[i].say.src, p: 1 }]); return sync();
+    }
+    if (k === "keep") { // [저장] — 더 높거나 같은 점수면 바꿔 끼움(원본 그대로 + 말 시작 위치)
+      if (!sp?.blob || !(sp.score >= PASS)) return;
+      const msg = panel.querySelector(".sayb .smsg");
+      recGet(sayKey(i)).then(old => {
+        if (sp.score >= (old?.score ?? 0)) { recPut(sayKey(i), { blob: sp.blob, lead: sp.lead, score: sp.score, at: Date.now() }); sp.saved = { blob: sp.blob, lead: sp.lead, score: sp.score }; msg.textContent = `${sp.score}% ✓ · ${t("kept")}`; }
+        else msg.textContent = `${sp.score}% ✓ · ${t("kept_better")}`;
+        x.hidden = true; panel.querySelector(".sayb [data-x=savedplay]").hidden = false;
+      });
+      return;
+    }
+    if (k === "savedplay") {
+      if (!sp?.saved?.blob || sp.ctl) return;
+      ex.stop(); markPlay(); sync(); sp.audio?.pause();
+      sp.audio = playBlob(sp.saved.blob, sp.saved.lead || 0);
+      return;
     }
     if (k === "mine") {
       if (!sp?.blob || sp.ctl) return;
