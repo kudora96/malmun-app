@@ -390,3 +390,10 @@ a{color:inherit;text-decoration:none}
 .speak .whead{flex-wrap:wrap;row-gap:2px}
 .speak .whead .micpick{width:auto;padding:0 8px;font-size:12px}
 .speak .segnav button{width:auto;padding:0 6px;font-size:11.5px}
+
+/* 녹음 시간 막대(🎤 아래) — 남은 시간 20% 아래면 주황 */
+.tbar{position:relative;height:14px;border-radius:7px;background:var(--line);overflow:hidden}
+.tbar i{display:block;height:100%;width:0;background:var(--hi);opacity:.55;transition:width .1s linear}
+.tbar.low i{background:#e07b00;opacity:.85}
+.tbar .tt{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:10.5px;color:var(--ink);font-variant-numeric:tabular-nums}
+.speak .tbar{margin:2px 14px 0}

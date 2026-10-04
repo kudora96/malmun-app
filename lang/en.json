@@ -72,7 +72,7 @@
  "mic_chosen": "Microphone changed. Press Speak again.",
  "mic_switched": "That microphone was silent, so I switched to another one. Speak now.",
  "score_5": "Perfect! You sound just like the model.",
- "score_4": "Well done! You passed.",
+ "score_4": "Passed! ☆ Aim for ★ (95%).",
  "score_3": "Almost there. Try once more!",
  "score_2": "Not quite yet. Listen to the model again, then try.",
  "score_1": "Let's try again slowly. Listen to the model first.",
@@ -117,5 +117,8 @@
  "ep_missing": "That lesson wasn't found — here is the list.",
  "help_btn": "? Help",
  "prev_btn": "◀ Back",
- "next_btn": "Next ▶"
+ "next_btn": "Next ▶",
+ "why_time": "⏱ Time is up — try again",
+ "why_pause": "You stopped in the middle — say it all the way through",
+ "why_nospeech": "No voice was heard"
 }

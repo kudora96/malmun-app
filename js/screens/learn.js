@@ -10,20 +10,20 @@
 //  R7 영상은 늘 맨 위 · 지금 줄은 영상 바로 아래(앞 줄은 영상 뒤로) — 손으로 목록을 움직이면 4초 동안은 따라가지 않음
 //  R8 듣기 모드(대사→설명 · 설명만)도 R1~R6 그대로(영상 대신 소리 조각) · 모드를 바꾸면 멈춤(▶ 로 시작)
 //  R9 다시 들어오면 마지막 줄이 선택된 채 멈춰 있음
-import { t, lang, langName } from "../i18n.js?v=1004.25";
-import { esc, renderText, glossCards } from "../text.js?v=1004.25";
-import { episode } from "../data.js?v=1004.25";
-import { paths } from "../paths.js?v=1004.25";
-import { Sequence } from "../audio.js?v=1004.25";
-import { I, progress, SPEAKER } from "../ui.js?v=1004.25";
-import writeView from "./write.js?v=1004.25";
-import { diagEnv, keepDiag } from "../diag.js?v=1004.25";
-import { playMine as playMineRec } from "../playmine.js?v=1004.25";
-import { bestHeard, heardHTML } from "../heard.js?v=1004.25";
-import { recDel, downloadRec, askPersist } from "../recstore.js?v=1004.25";
-import speakView, { similarity, PASS, recGet, recPut } from "./speak.js?v=1004.25";
-import { record, micWhy, srWhy, canScore, closeMic, logRec, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1004.25";
-import { hold, quietWake } from "../wake.js?v=1004.25";
+import { t, lang, langName } from "../i18n.js?v=1004.26";
+import { esc, renderText, glossCards } from "../text.js?v=1004.26";
+import { episode } from "../data.js?v=1004.26";
+import { paths } from "../paths.js?v=1004.26";
+import { Sequence } from "../audio.js?v=1004.26";
+import { I, progress, SPEAKER } from "../ui.js?v=1004.26";
+import writeView from "./write.js?v=1004.26";
+import { diagEnv, keepDiag } from "../diag.js?v=1004.26";
+import { playMine as playMineRec } from "../playmine.js?v=1004.26";
+import { bestHeard, heardHTML } from "../heard.js?v=1004.26";
+import { recDel, downloadRec, askPersist } from "../recstore.js?v=1004.26";
+import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1004.26";
+import { record, micWhy, srWhy, canScore, closeMic, logRec, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1004.26";
+import { hold, quietWake } from "../wake.js?v=1004.26";
 
 const RATES = [1, 0.75, 0.5];
 const pref = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } };
@@ -203,7 +203,7 @@ export default async function learn(app, ep, startId) {
         <p data-p="0">${bold(tx.ex || "")}</p>
         ${l.say ? `<div class="sayb"><p data-p="1">${bold(tx.say || "")}</p>
           <div class="sbtns"><button class="mic" data-x="rec">🎤 ${esc(t("speak_now"))}</button><button data-x="model">▶ ${esc(t("model"))}</button><button data-x="mine" disabled>▶ ${esc(t("my_voice"))}</button><button data-x="keep" hidden>${esc(t("keep"))}</button><button data-x="savedplay" hidden>${esc(t("saved_play"))}</button><button data-x="savedl" class="small" hidden>⬇ ${esc(t("download"))}</button><button data-x="savedel" class="small" hidden>🗑 ${esc(t("del_one"))}</button></div>
-          <div class="sline"><span class="lvl" hidden><i></i></span><span class="smsg" aria-live="polite"></span></div><div class="heardline"></div><div class="microw"><button class="micname" data-x="mics" hidden></button><select class="micsel" hidden></select></div></div>` : ""}
+          <div class="sline"><span class="lvl" hidden><i></i></span><span class="smsg" aria-live="polite"></span></div><div class="tbar" hidden><i></i><span class="tt"></span></div><div class="heardline"></div><div class="microw"><button class="micname" data-x="mics" hidden></button><select class="micsel" hidden></select></div></div>` : ""}
       </div>
       <div class="v9prog" data-off><span class="t0">0:00</span><div class="trk" aria-label="seek"><div class="rail"><i></i></div></div><span class="t1">0:00</span></div></div>`;
   }
@@ -289,7 +289,7 @@ export default async function learn(app, ep, startId) {
     if (st.panel?.i !== i || !saved?.blob) return;
     sp = { i, saved: { blob: saved.blob, score: saved.score } };
     if (st.panel?.i !== i) return;
-    const b = panel.querySelector(".sayb [data-x=savedplay]"); if (b) { b.hidden = false; b.textContent = t("saved_play_n", { n: saved.score ?? "" }); } // 저장된 것도 점수
+    const b = panel.querySelector(".sayb [data-x=savedplay]"); if (b) { b.hidden = false; b.textContent = t("saved_play_n", { n: `${starOf(saved.score)} ${saved.score ?? ""}`.trim() }); } // 저장된 것도 점수
     panel.querySelectorAll(".sayb [data-x=savedl], .sayb [data-x=savedel]").forEach(x => { x.hidden = false; }); // 저장한 것 내려받기 · 지우기
   }
   async function spRec(i, btn) {
@@ -299,7 +299,10 @@ export default async function learn(app, ep, startId) {
     ex.stop(); clearTimeout(st.gap); st.gap = 0; st.exLoop = null; sp?.audio?.pause(); markPlay(); sync(); // 🎤 = 반복·재생 모두 멈춤
     // 「준비 중」 → 마이크에서 실제 소리가 들어오기 시작하면 「녹음 중」(본부 10-03 — 그 전에 말하면 앞이 비어 버린다)
     quietWake(true); // 녹음하는 동안 깨우기 소리 멈춤(에코 제거가 말을 끊지 않게)
+    const tb = box.querySelector(".tbar"), mm = ms => `${Math.floor(ms / 60000)}:${String(Math.floor(ms / 1000) % 60).padStart(2, "0")}`;
     const ctl = record({
+      maxMs: maxMsFor(L[i].say.ko), // 최대 길이 = max(8, 3 + 0.8 × 음절)초
+      onTick: (el, max) => { tb.hidden = false; tb.firstElementChild.style.width = Math.min(100, (100 * el) / max) + "%"; tb.classList.toggle("low", el > max * 0.8); tb.querySelector(".tt").textContent = `${mm(el)} / ${mm(max)}`; },
       onLevel: v => { lvl.firstElementChild.style.width = Math.round(v * 100) + "%"; },
       onStop: () => { if (sp?.ctl === ctl) { msg.textContent = t("checking"); lvl.hidden = true; } },
       onSwitch: () => { btn.textContent = "… " + t("mic_opening"); lvl.hidden = true; msg.textContent = t("mic_switched"); },
@@ -309,7 +312,7 @@ export default async function learn(app, ep, startId) {
     sp = { i, ctl, saved: sp?.saved, blob: sp?.blob };
     box.querySelector("[data-x=keep]").hidden = true; box.querySelector(".heardline").innerHTML = "";
     btn.classList.add("on"); btn.textContent = "… " + t("mic_opening"); lvl.hidden = true; msg.textContent = "";
-    const r = await ctl.done;
+    const r = await ctl.done; tb.hidden = true;
     quietWake(false);
     if (st.panel?.i !== i || sp?.ctl !== ctl) return; // 다른 데로 감
     sp.ctl = null; btn.classList.remove("on"); lvl.hidden = true;
@@ -325,7 +328,7 @@ export default async function learn(app, ep, startId) {
     // 점수가 안 나오면 절대 통과·저장 아님(본부 10-04 — 엉뚱한 말도 그냥 넘어가던 것) · 왜 안 나왔는지 짧게
     // 점수는 언제나 % — 못 알아들었으면 「0% · 까닭」 · 80% 넘으면 [저장]
     box.querySelector("[data-x=keep]").hidden = !(sc != null && sc >= PASS);
-    msg.textContent = sc == null ? (canScore() ? `0% · ${t(srWhy(r.srErr))}` : t("speak_hint_noscore")) : `${sc}%${sc >= PASS ? " ✓" : ""} · ${t(sc >= PASS ? "score_5" : sc >= 60 ? "score_3" : sc >= 40 ? "score_2" : "score_1")}`;
+    msg.textContent = sc == null ? (canScore() ? `0% · ${t(r.why === "nospeech" ? "why_nospeech" : srWhy(r.srErr))}` : t("speak_hint_noscore")) : scoreLine(sc, r.why, t); // 두 단계 통과 ☆/★ + 끝난 까닭
     box.classList.toggle("pass", sc != null && sc >= PASS);
     const bh = bestHeard(L[i].say.ko, r.heard); // 들린 말 — 점수를 낸 그 인식 결과 · 틀린 음절 빨간 밑줄 · 빠진 자리 _
     box.querySelector(".heardline").innerHTML = bh ? (({ html, ok }) => `<span class="lab">${esc(t("heard_label"))}:</span> <span class="ko" lang="ko">${html}</span>${ok ? " ✓" : ""}`)(heardHTML(L[i].say.ko, bh)) : "";
@@ -371,9 +374,9 @@ export default async function learn(app, ep, startId) {
       if (!sp?.blob || !(sp.score >= PASS)) return;
       const msg = panel.querySelector(".sayb .smsg");
       recGet(sayKey(i)).then(old => {
-        if (sp.score >= (old?.score ?? 0)) { recPut(sayKey(i), { blob: sp.blob, score: sp.score, at: Date.now() }); sp.saved = { blob: sp.blob, score: sp.score }; msg.textContent = `${sp.score}% ✓ · ${t("kept")}`; }
-        else msg.textContent = `${sp.score}% ✓ · ${t("kept_better")}`;
-        x.hidden = true; const sb = panel.querySelector(".sayb [data-x=savedplay]"); sb.hidden = false; sb.textContent = t("saved_play_n", { n: sp.saved?.score ?? sp.score });
+        if (sp.score >= (old?.score ?? 0)) { recPut(sayKey(i), { blob: sp.blob, score: sp.score, at: Date.now() }); sp.saved = { blob: sp.blob, score: sp.score }; msg.textContent = `${sp.score}% ✓ · ${starOf(sp.score)} ${t("kept")}`; }
+        else msg.textContent = `${sp.score}% ✓ · ${starOf(sp.score)} ${t("kept_better")}`;
+        x.hidden = true; const sb = panel.querySelector(".sayb [data-x=savedplay]"); sb.hidden = false; sb.textContent = t("saved_play_n", { n: `${starOf(sp.saved?.score ?? sp.score)} ${sp.saved?.score ?? sp.score}`.trim() });
         panel.querySelectorAll(".sayb [data-x=savedl], .sayb [data-x=savedel]").forEach(y => { y.hidden = false; }); askPersist(); // 처음 저장 때 오래 남게(조용히)
       });
       return;
