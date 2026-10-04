@@ -13,13 +13,13 @@
 //     못 넘어도 막지 않는다([다음 ▶]) · 음성 인식이 안 되는 곳은 점수 없이 듣고 비교만(녹음은 저장)
 //  S6 녹음은 이 기기 안에만(IndexedDB) — 서버로 보내지 않는다
 //  S7 영상 창 안(embedded): 스크롤 없이 · 줄 이동·닫기는 학습 화면이 한다 · 줄 전체까지 통과하면 다음 줄 말하기로
-import { t, lang } from "../i18n.js?v=1004.1";
-import { esc } from "../text.js?v=1004.1";
-import { episode } from "../data.js?v=1004.1";
-import { paths } from "../paths.js?v=1004.1";
-import { audioCtx, hold } from "../wake.js?v=1004.1";
-import * as sfx from "../sfx.js?v=1004.1";
-import { trimSilence, micCandidates, avoidBT, srWhy, probe, niceLabel } from "../recorder.js?v=1004.1";
+import { t, lang } from "../i18n.js?v=1004.2";
+import { esc } from "../text.js?v=1004.2";
+import { episode } from "../data.js?v=1004.2";
+import { paths } from "../paths.js?v=1004.2";
+import { audioCtx, hold } from "../wake.js?v=1004.2";
+import * as sfx from "../sfx.js?v=1004.2";
+import { findLead, playBlob, micCandidates, avoidBT, srWhy, probe, niceLabel } from "../recorder.js?v=1004.2";
 
 export const PASS = 80;
 const MAX_MS = 8000, QUIET_MS = 1000;
@@ -86,7 +86,10 @@ export default async function speak(app, ep, id, opts = {}) {
   </section>`;
   const $ = s => app.querySelector(s);
   const cur = () => parts[st.i];
-  const mineBlob = () => st.blob || st.saved[cur().key]?.blob || null;
+  // [내 목소리] = 이번에 통과한 녹음 또는 예전에 통과해 저장된 녹음만(못 넘은 녹음은 안 들려줌 — 투덜이 10-04) · 음성 인식이 없는 기기는 방금 녹음
+  const passed = () => (st.saved[cur().key]?.score >= PASS ? st.saved[cur().key] : null);
+  const mineBlob = () => st.blob || passed()?.blob || null;
+  const mineLead = () => (st.blob ? st.lead : passed()?.lead) || 0;
 
   function paint() {
     const p = cur(), sv = st.saved[p.key];
@@ -99,7 +102,7 @@ export default async function speak(app, ep, id, opts = {}) {
     if (task.scrollHeight > task.clientHeight + 1) tr.hidden = true; // 그래도 넘치면 번역 줄을 접는다(아래 말풍선에 있다)
     $(".segnav").innerHTML = parts.length > 1
       ? `<button data-seg="-1" ${st.i ? "" : "disabled"} aria-label="${esc(t("previous"))}">◀</button><span>${st.i + 1}/${parts.length}${sv?.score >= PASS ? " ✓" : ""}</span><button data-seg="1" ${st.i < parts.length - 1 ? "" : "disabled"} aria-label="${esc(t("next"))}">▶</button>` : "";
-    const sc = st.score ?? sv?.score ?? null;
+    const sc = st.score ?? null; // 점수는 이번에 말한 뒤에만(열 때 예전 점수를 보이지 않음 — ✓ 는 토막 번호 옆에)
     $(".sbar i").style.width = (sc ?? 0) + "%";
     $(".meter").classList.toggle("pass", sc != null && sc >= PASS);
     $(".msg").textContent = st.rec ? t(!st.ready ? "mic_opening" : st.switched ? "mic_switched" : "listening") : st.note ? t(st.note) : sc == null ? (SR ? t(mineBlob() ? "no_score" : "speak_hint") : t("speak_hint_noscore"))
@@ -116,13 +119,12 @@ export default async function speak(app, ep, id, opts = {}) {
     if (!(p.src && (await sfx.play(p.src))) && lineSrc && p.src !== lineSrc && !p.task) await sfx.play(lineSrc);
     st.model = false; if (st.alive) paint();
   }
-  const playMine = () => new Promise(res => {
-    const b = mineBlob(); if (!b) return res();
+  const playMine = async () => {
+    const b = mineBlob(); if (!b) return;
     stopSounds();
-    const a = (st.mine = new Audio(URL.createObjectURL(b)));
-    a.onended = a.onerror = () => { URL.revokeObjectURL(a.src); if (st.mine === a) st.mine = null; res(); };
-    a.play().catch(() => res());
-  });
+    const h = (st.mine = playBlob(b, mineLead())); // 원본 그대로 · 말 시작 자리부터
+    await h.done; if (st.mine === h) st.mine = null;
+  };
   function go(i) { stopRec(true); stopSounds(); st.i = Math.max(0, Math.min(parts.length - 1, i)); st.blob = null; st.score = null; st.note = null; paint(); }
 
   // ── 녹음 + 음성 인식(S3 · S5) ──
@@ -243,8 +245,8 @@ export default async function speak(app, ep, id, opts = {}) {
     paint();
   }
   async function finish(blob) {
-    blob = (await trimSilence(blob)).blob; // 앞뒤 무음 잘라내기(마이크가 열리는 동안의 빈 소리 — 본부 10-03)
-    st.blob = blob;
+    const lead = await findLead(blob); // 다시 굽지 않음 — 원본 그대로 + 말 시작 위치(본부 10-04 되돌림)
+    st.blob = null;
     if (sr) { // 인식 결과가 조금 늦게 온다 — 그동안 「확인 중…」
       if (!heard.length) $(".msg").textContent = t("checking");
       for (let k = 0; k < 20 && !heard.length; k++) await new Promise(r => setTimeout(r, 100));
@@ -254,8 +256,9 @@ export default async function speak(app, ep, id, opts = {}) {
     if (!st.alive) return;
     const p = cur(), old = st.saved[p.key];
     // 저장: 80% 넘은 것(더 높은 점수로만 바꿈) · 점수를 못 재는 곳은 방금 것
+    if (st.score != null && st.score >= PASS) { st.blob = blob; st.lead = lead; } else if (!SR) { st.blob = blob; st.lead = lead; } // 통과한 것만 듣기(점수 못 매기는 기기는 방금 것)
     if (st.score != null && st.score >= PASS && st.score >= (old?.score ?? 0)) { // 80% 넘어야만 저장(점수 없으면 절대 아님 — 본부 10-04)
-      st.saved[p.key] = { blob, score: st.score, at: Date.now() };
+      st.saved[p.key] = { blob, lead, score: st.score, at: Date.now() };
       recPut(`${ep}/${p.key}`, st.saved[p.key]);
     }
     paint();

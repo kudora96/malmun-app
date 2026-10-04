@@ -3,7 +3,7 @@
 // 다음 마이크로 넘어가 다시 녹음 · 소리 들어온 마이크 기억(malmun.mic — 말하기 창과 같은 칸) · 인식은 녹음하는 그 마이크를 끝까지(continuous)
 // · 말이 끝나고 1초 조용하면 저절로 멈춤 · 길어도 8초.
 // TODO(앱 창): speak.js 의 같은 부분을 이 모듈로 합치기 — 지금은 말하기 창 점검(38)을 깨지 않으려고 따로 둠.
-import { audioCtx } from "./wake.js?v=1004.1";
+import { audioCtx } from "./wake.js?v=1004.2";
 
 const MAX_MS = 8000, QUIET_MS = 1000, DEAD = 0.0002;
 const getSR = () => window.SpeechRecognition || window.webkitSpeechRecognition; // 부를 때마다 찾는다(점검이 가짜로 바꿔 끼울 수 있게)
@@ -91,28 +91,31 @@ export const micWhy = e => (e?.name === "NotAllowedError" || e?.name === "Securi
 
 // record() → { stop(discard), done: Promise<{ blob, heard[] } | { error } | { cancelled }> }
 // onLevel(0~1) = 들어오는 소리 크기 · onSwitch() = 소리 0 인 마이크를 버리고 다른 마이크로 다시 시작함
-// 앞뒤 무음 잘라내기(본부 10-03 실측: 투덜이 녹음 앞 2.9초가 마이크가 열리는 동안의 빈 소리 −74dB)
-// 말 시작 0.15초 전 ~ 끝 0.25초 뒤만 남겨 WAV 로 · 실패하면 원래 녹음 그대로. lead = 원래 녹음에서 말이 시작된 초
-export async function trimSilence(blob, { pre = 0.15, post = 0.25 } = {}) {
+// 말 시작 위치 찾기(본부 10-04 되돌림: 녹음을 WAV 로 다시 굽지 않는다 — 처음 잘 되던 판처럼 MediaRecorder 원본 그대로 저장)
+// 파일은 자르지 않고 「말 시작 0.15초 전」 초만 돌려준다 → 재생을 그 자리부터(앞 무음 = 마이크가 열리는 동안의 빈 소리 — 10-03)
+export async function findLead(blob, pre = 0.15) {
   try {
     const buf = await audioCtx().decodeAudioData(await blob.arrayBuffer());
-    const n = buf.length, sr = buf.sampleRate, win = Math.max(1, Math.round(sr * 0.02));
-    const d = new Float32Array(n);
-    for (let c = 0; c < buf.numberOfChannels; c++) { const x = buf.getChannelData(c); for (let i = 0; i < n; i++) d[i] += x[i] / buf.numberOfChannels; }
-    const rms = [];
-    for (let i = 0; i + win <= n; i += win) { let s = 0; for (let k = i; k < i + win; k++) s += d[k] * d[k]; rms.push(Math.sqrt(s / win)); }
-    const peak = Math.max(0, ...rms);
-    if (peak < 0.003) return { blob, lead: 0 }; // 말이 없음 — 그대로
-    const th = Math.max(0.006, peak * 0.08);
-    const a = rms.findIndex(v => v > th), b = rms.length - 1 - [...rms].reverse().findIndex(v => v > th);
-    const s0 = Math.max(0, Math.round(a * win - pre * sr)), s1 = Math.min(n, Math.round((b + 1) * win + post * sr));
-    const pcm = d.subarray(s0, s1), out = new DataView(new ArrayBuffer(44 + pcm.length * 2));
-    const w = (o, str) => [...str].forEach((ch, i) => out.setUint8(o + i, ch.charCodeAt(0)));
-    w(0, "RIFF"); out.setUint32(4, 36 + pcm.length * 2, true); w(8, "WAVE"); w(12, "fmt "); out.setUint32(16, 16, true); out.setUint16(20, 1, true); out.setUint16(22, 1, true);
-    out.setUint32(24, sr, true); out.setUint32(28, sr * 2, true); out.setUint16(32, 2, true); out.setUint16(34, 16, true); w(36, "data"); out.setUint32(40, pcm.length * 2, true);
-    for (let i = 0; i < pcm.length; i++) out.setInt16(44 + i * 2, Math.max(-1, Math.min(1, pcm[i])) * 0x7fff, true);
-    return { blob: new Blob([out], { type: "audio/wav" }), lead: (a * win) / sr, kept: (s1 - s0) / sr };
-  } catch { return { blob }; }
+    const d = buf.getChannelData(0), sr = buf.sampleRate, win = Math.max(1, Math.round(sr * 0.02)), rms = [];
+    for (let i = 0; i + win <= d.length; i += win) { let s = 0; for (let k = i; k < i + win; k++) s += d[k] * d[k]; rms.push(Math.sqrt(s / win)); }
+    const peak = Math.max(0, ...rms); if (peak < 0.003) return 0;
+    const th = Math.max(0.006, peak * 0.08), a = rms.findIndex(v => v > th);
+    return Math.max(0, (a * win) / sr - pre);
+  } catch { return 0; }
+}
+// 내 녹음 틀기 — 원본을 풀어 lead 초부터(webm 녹음은 <audio> 로는 자리 옮기기가 안 됨) · { pause(), done }
+export function playBlob(blob, lead = 0) {
+  const ctx = audioCtx(); let node = null, stopped = false, resolve;
+  const done = new Promise(r => (resolve = r));
+  blob.arrayBuffer().then(ab => ctx.decodeAudioData(ab)).then(buf => {
+    if (stopped) return resolve();
+    const g = ctx.createGain(); g.gain.value = window.__sfxVolume ?? 1;
+    node = ctx.createBufferSource(); node.buffer = buf; node.connect(g); g.connect(ctx.destination);
+    node.onended = () => resolve();
+    node.start(0, Math.min(Math.max(0, lead), Math.max(0, buf.duration - 0.05)));
+    (window.__mineLog ||= []).push({ lead, dur: buf.duration, rate: buf.sampleRate });
+  }).catch(() => resolve());
+  return { pause() { stopped = true; try { node?.stop(); } catch {} resolve(); }, done };
 }
 // 마이크를 미리 열어 둔다 — 허락을 이미 받은 경우에만(처음 보는 사람에게 카드 열자마자 허락 창을 띄우지 않게)
 export async function warmMic() {
@@ -161,7 +164,7 @@ export function record({ onLevel = () => {}, onSwitch = () => {}, onReady = () =
         rec.onstop = async () => {
           if (sr && !extra.dead && !cancelled) for (let k = 0; k < 20 && !heard.length; k++) await new Promise(r => setTimeout(r, 100)); // 인식 결과는 조금 늦게 온다
           const raw = new Blob(chunks, { type: rec.mimeType || "audio/webm" });
-          res({ ...(extra.dead || cancelled ? { blob: raw } : await trimSilence(raw)), heard, srErr, ...extra });
+          res({ blob: raw, lead: extra.dead || cancelled ? 0 : await findLead(raw), heard, srErr, ...extra });
         };
         try { rec.state !== "inactive" ? rec.stop() : rec.onstop(); } catch { rec.onstop(); }
       };

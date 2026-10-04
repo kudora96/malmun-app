@@ -10,16 +10,16 @@
 //  R7 영상은 늘 맨 위 · 지금 줄은 영상 바로 아래(앞 줄은 영상 뒤로) — 손으로 목록을 움직이면 4초 동안은 따라가지 않음
 //  R8 듣기 모드(대사→설명 · 설명만)도 R1~R6 그대로(영상 대신 소리 조각) · 모드를 바꾸면 멈춤(▶ 로 시작)
 //  R9 다시 들어오면 마지막 줄이 선택된 채 멈춰 있음
-import { t, lang, langName } from "../i18n.js?v=1004.1";
-import { esc, renderText, glossCards } from "../text.js?v=1004.1";
-import { episode } from "../data.js?v=1004.1";
-import { paths } from "../paths.js?v=1004.1";
-import { Sequence } from "../audio.js?v=1004.1";
-import { I, progress, SPEAKER } from "../ui.js?v=1004.1";
-import writeView from "./write.js?v=1004.1";
-import speakView, { similarity, PASS, recGet, recPut } from "./speak.js?v=1004.1";
-import { record, micWhy, srWhy, canScore, closeMic, micOpen, trimSilence, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1004.1";
-import { hold } from "../wake.js?v=1004.1";
+import { t, lang, langName } from "../i18n.js?v=1004.2";
+import { esc, renderText, glossCards } from "../text.js?v=1004.2";
+import { episode } from "../data.js?v=1004.2";
+import { paths } from "../paths.js?v=1004.2";
+import { Sequence } from "../audio.js?v=1004.2";
+import { I, progress, SPEAKER } from "../ui.js?v=1004.2";
+import writeView from "./write.js?v=1004.2";
+import speakView, { similarity, PASS, recGet, recPut } from "./speak.js?v=1004.2";
+import { record, micWhy, srWhy, canScore, closeMic, micOpen, findLead, playBlob, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1004.2";
+import { hold } from "../wake.js?v=1004.2";
 
 const RATES = [1, 0.75, 0.5];
 const pref = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } };
@@ -273,13 +273,14 @@ export default async function learn(app, ep, startId) {
   // 카드 안 말하기(녹음 → 점수 → 내 목소리) — js/recorder.js
   let sp = null, micOff = 0; // { i, ctl, blob, audio }
   function spStop() { clearTimeout(micOff); sp?.ctl?.stop(true); sp?.audio?.pause(); sp = null; closeMic(); }
-  async function spInit(i) { // 저장된 내 목소리(✓)가 있으면 바로 들을 수 있게
+  // 통과(80% 이상)한 녹음이 있을 때만 [내 목소리]를 켠다 — 점수는 열 때 안 보이고 이번에 말한 뒤에만(투덜이 10-04)
+  async function spInit(i) {
     const saved = await recGet(sayKey(i));
-    if (st.panel?.i !== i || !saved?.blob) return;
-    sp = { i, blob: (await trimSilence(saved.blob)).blob }; // 예전에 저장된 녹음도 앞뒤 무음을 잘라 들려준다(저장된 것은 그대로)
+    if (st.panel?.i !== i || !saved?.blob || !(saved.score >= PASS)) return;
+    const lead = saved.lead ?? (await findLead(saved.blob));
     if (st.panel?.i !== i) return;
+    sp = { i, blob: saved.blob, lead };
     const m = panel.querySelector(".sayb [data-x=mine]"); if (m) m.disabled = false;
-    const g = panel.querySelector(".sayb .smsg"); if (g) g.textContent = saved.score >= PASS ? `${saved.score}% ✓` : "";
   }
   async function spRec(i, btn) {
     const box = panel.querySelector(".sayb"), msg = box.querySelector(".smsg"), lvl = box.querySelector(".lvl"), mineB = box.querySelector("[data-x=mine]");
@@ -294,7 +295,7 @@ export default async function learn(app, ep, startId) {
       onReady: () => { if (sp?.ctl !== ctl) return; btn.textContent = "■ " + t("btn_stop"); lvl.hidden = false; msg.textContent = t("listening");
         const nb = box.querySelector(".micname"); if (nb && micLabel()) { nb.textContent = `🎤 ${micLabel()} ✓`; nb.hidden = false; } }, // 지금 쓰는 마이크 — 자동이 틀렸을 때만 눌러 바꿈
     });
-    sp = { i, ctl, blob: sp?.blob };
+    sp = { i, ctl, blob: sp?.blob, lead: sp?.lead };
     btn.classList.add("on"); btn.textContent = "… " + t("mic_opening"); lvl.hidden = true; msg.textContent = "";
     const r = await ctl.done;
     if (st.panel?.i !== i || sp?.ctl !== ctl) return; // 다른 데로 감
@@ -303,13 +304,14 @@ export default async function learn(app, ep, startId) {
     if (r.cancelled) { btn.textContent = "🎤 " + t("speak_now"); msg.textContent = ""; return; }
     if (r.error) { btn.textContent = "🎤 " + t("speak_now"); msg.textContent = t(micWhy(r.error)); return; }
     const sc = canScore() && r.heard.length ? Math.max(...r.heard.map(h => similarity(L[i].say.ko, h))) : null;
-    sp.blob = r.blob; mineB.disabled = false;
+    if (sc != null && sc >= PASS) { sp.blob = r.blob; sp.lead = r.lead; } // 통과한 녹음만 [내 목소리]로(못 넘으면 꺼진 채 + 다시)
+    mineB.disabled = !sp.blob;
     btn.textContent = "🎤 " + t(sc != null && sc >= PASS ? "speak_now" : "try_again");
     // 점수가 안 나오면 절대 통과·저장 아님(본부 10-04 — 엉뚱한 말도 그냥 넘어가던 것) · 왜 안 나왔는지 짧게
     msg.textContent = sc == null ? t(canScore() ? srWhy(r.srErr) : "speak_hint_noscore") : `${sc}%${sc >= PASS ? " ✓" : ""} · ${t(sc >= 95 ? "score_5" : sc >= PASS ? "score_4" : sc >= 60 ? "score_3" : sc >= 40 ? "score_2" : "score_1")}`;
     box.classList.toggle("pass", sc != null && sc >= PASS);
     const old = await recGet(sayKey(i));
-    if (sc != null && sc >= PASS && sc >= (old?.score ?? 0)) recPut(sayKey(i), { blob: r.blob, score: sc, at: Date.now() });
+    if (sc != null && sc >= PASS && sc >= (old?.score ?? 0)) recPut(sayKey(i), { blob: r.blob, lead: r.lead, score: sc, at: Date.now() }); // 원본 그대로 + 말 시작 위치
   }
   const markPlay = (k = null) => panel.querySelectorAll(".v9bar .pb").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.v === k)));
   // 재생 전에 마이크부터 닫는다 — 열려 있으면 블루투스가 통화 모드라 소리가 전화 음질(본부 10-03) · 방금 닫았으면 0.4초 뒤 재생(음악 모드로 돌아올 틈)
@@ -354,9 +356,7 @@ export default async function learn(app, ep, startId) {
       if (!sp?.blob || sp.ctl) return;
       ex.stop(); markPlay(); sync();
       sp.audio?.pause();
-      const a = (sp.audio = new Audio(URL.createObjectURL(sp.blob)));
-      a.onended = a.onerror = () => URL.revokeObjectURL(a.src);
-      a.play().catch(() => {});
+      sp.audio = playBlob(sp.blob, sp.lead || 0); // 말 시작 자리부터
     }
   }
   // 진행 막대 — 설명 소리를 누르거나 끌어서 옮긴다(손가락 영역 28px) · 설명 소리가 있을 때만 움직임

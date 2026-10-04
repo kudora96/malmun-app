@@ -66,13 +66,9 @@
   await waitIdle();
   ok(!$(".panel .mic").classList.contains("on"), "말이 끝나고 조용하면 저절로 멈춤");
   ok(/50%/.test($(".panel .msg").textContent) && !$(".panel .meter").classList.contains("pass") && /1\/5/.test($(".panel .segnav").innerText.replace(/\s/g, "")), "다르게 말함 → 50% · 통과 아님 · 그 자리에 있음(막지 않음)", $(".panel .msg").textContent);
-  ok(!$(".panel [data-act=mine]").disabled, "녹음 뒤 [내 목소리] 켜짐");
-  let dl = null; const oc = HTMLAnchorElement.prototype.click; HTMLAnchorElement.prototype.click = function () { if (this.download) dl = this.download + " " + this.href.slice(0, 5); else oc.call(this); };
-  $(".panel [data-act=save]").click(); await W(200); HTMLAnchorElement.prototype.click = oc;
-  ok(/^malmun_L01-00-01_01_p01\.(wav|webm|m4a|ogg) blob:$/.test(dl || ""), "[⬇] → 내 녹음을 파일로 내려받음", String(dl));
+  ok($(".panel [data-act=mine]").disabled && $(".panel [data-act=save]").disabled, "못 넘은 녹음은 안 들려줌 — [내 목소리]·[⬇] 꺼진 채(투덜이 10-04)");
   ok(window.__srCont === true, "음성 인식이 말을 끝까지 들음(짧은 말을 중간에 끊지 않음)");
   ok(window.__srTrack === "audio", "음성 인식이 녹음하는 그 마이크를 들음(크롬 기본 마이크가 아니라)", String(window.__srTrack));
-  const mp = mediaPlays.length; $(".panel [data-act=mine]").click(); await W(600); ok(mediaPlays.length > mp && mediaPlays[mediaPlays.length - 1] === "blob:", "[내 목소리] → 방금 녹음 재생");
   // 점수에 맞는 한마디 — 반쯤 맞음(50%)과 많이 틀림(40 미만)은 말이 다르다
   await say("안녕하세요"); await waitIdle(); const m3 = $(".panel .msg").textContent;
   await say("감사합니다"); await waitIdle(); const m1 = $(".panel .msg").textContent;
@@ -87,6 +83,12 @@
   // 저장 확인: 앞 토막으로 돌아가면 ✓ + 내 목소리 켜짐
   $(".panel [data-seg='-1']").click(); await W(300);
   ok(/1\/5✓/.test($(".panel .segnav").innerText.replace(/\s/g, "")) && !$(".panel [data-act=mine]").disabled, "앞 토막으로 → ✓ 표시 · 저장된 내 목소리 들을 수 있음", $(".panel .segnav").innerText.replace(/\s/g, ""));
+  let dl = null; const oc = HTMLAnchorElement.prototype.click; HTMLAnchorElement.prototype.click = function () { if (this.download) dl = this.download + " " + this.href.slice(0, 5); else oc.call(this); };
+  $(".panel [data-act=save]").click(); await W(200); HTMLAnchorElement.prototype.click = oc;
+  ok(/^malmun_L01-00-01_01_p01\.(webm|m4a|ogg) blob:$/.test(dl || ""), "[⬇] → 통과한 내 녹음을 원본(다시 굽지 않음) 파일로", String(dl));
+  const ml = (window.__mineLog ||= []).length; $(".panel [data-act=mine]").click(); for (let k = 0; k < 20 && window.__mineLog.length === ml; k++) await W(100); const me = window.__mineLog[window.__mineLog.length - 1];
+  ok(window.__mineLog.length > ml && me.lead >= 0, "[내 목소리] → 통과한 녹음을 말 시작 자리부터", me ? `lead ${me.lead.toFixed(2)}s / ${me.dur.toFixed(2)}s · ${me.rate}Hz` : "없음");
+  ok(!/%/.test($(".panel .msg").textContent), "열 때(돌아왔을 때) 예전 점수는 안 보임 — ✓ 만", $(".panel .msg").textContent);
   // 녹음 중 다시 누르면 멈춤
   await say("어서 오세요", 5000); await W(600); $(".panel [data-act=rec]").click(); await W(1200);
   ok(!$(".panel .mic").classList.contains("on"), "녹음 중 [말하기] 다시 → 멈춤"); await W(1800);
@@ -150,7 +152,7 @@
   await W(500); const swMsg = $(".panel .msg").textContent; speakFor(700); await W(300);
   ok($(".panel .mic").classList.contains("on") && asked.join(",") === "default,usb" && $(".panel .miclist").hidden, "소리 0 인 마이크 → 묻지 않고 다음 마이크로 넘어가 녹음 계속 · 블루투스는 맨 뒤라 안 거침", asked.join(" → ") + " · " + swMsg);
   await waitIdle();
-  ok(localStorage.getItem("malmun.mic") === "usb" && !$(".panel [data-act=mine]").disabled, "소리가 들어온 마이크를 기억 · 녹음됨", String(localStorage.getItem("malmun.mic")));
+  ok(localStorage.getItem("malmun.mic") === "usb", "소리가 들어온 마이크를 기억", String(localStorage.getItem("malmun.mic")));
   asked.length = 0; await say("아무 말"); await W(300);
   ok(asked.length === 0 || asked[0] === "usb", "다음 녹음은 바로 그 마이크로(다시 헤매지 않음)", asked.join(" → ") || "열린 마이크 그대로");
   await waitIdle();
