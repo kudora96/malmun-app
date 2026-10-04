@@ -13,14 +13,14 @@
 //     못 넘어도 막지 않는다([다음 ▶]) · 음성 인식이 안 되는 곳은 점수 없이 듣고 비교만(녹음은 저장)
 //  S6 녹음은 이 기기 안에만(IndexedDB) — 서버로 보내지 않는다
 //  S7 영상 창 안(embedded): 스크롤 없이 · 줄 이동·닫기는 학습 화면이 한다 · 줄 전체까지 통과하면 다음 줄 말하기로
-import { t, lang } from "../i18n.js?v=1004.10";
-import { esc } from "../text.js?v=1004.10";
-import { episode } from "../data.js?v=1004.10";
-import { paths } from "../paths.js?v=1004.10";
-import { audioCtx, hold } from "../wake.js?v=1004.10";
-import * as sfx from "../sfx.js?v=1004.10";
-import { diagEnv, keepDiag } from "../diag.js?v=1004.10";
-import { logRec, dB, srWhy, srWatch, niceLabel, ALIAS } from "../recorder.js?v=1004.10";
+import { t, lang } from "../i18n.js?v=1004.11";
+import { esc } from "../text.js?v=1004.11";
+import { episode } from "../data.js?v=1004.11";
+import { paths } from "../paths.js?v=1004.11";
+import { audioCtx, hold, quietWake } from "../wake.js?v=1004.11";
+import * as sfx from "../sfx.js?v=1004.11";
+import { diagEnv, keepDiag } from "../diag.js?v=1004.11";
+import { logRec, dB, srWhy, srWatch, niceLabel, ALIAS } from "../recorder.js?v=1004.11";
 
 export const PASS = 80;
 const MAX_MS = 8000, QUIET_MS = 1000;
@@ -93,6 +93,7 @@ export default async function speak(app, ep, id, opts = {}) {
   const mineBlob = () => st.blob || null;
 
   function paint() {
+    if (!st.rec && !st.starting) quietWake(false); // 녹음이 끝나면 깨우기 소리 다시
     const p = cur(), sv = st.saved[p.key];
     $(".say").textContent = p.text;
     $(".tr").textContent = p.whole ? line.tr || "" : "";
@@ -138,7 +139,9 @@ export default async function speak(app, ep, id, opts = {}) {
   // 마이크 열기 — 고른 마이크 → 기본 → 나머지 차례로(하나가 안 열려도 다음 것으로)
   // ◆ 윈도우 별칭 장치(default · communications)는 기억도 고르기도 안 함 — 통신 장치를 열면 윈도우가 다른 소리를 줄인다(10-04)
   const micPref = v => { try { if (v === undefined) { const p = localStorage.getItem("malmun.mic"); return p && !ALIAS(p) ? p : null; } if (v && !ALIAS(v)) localStorage.setItem("malmun.mic", v); else if (!v) localStorage.removeItem("malmun.mic"); } catch { return null; } };
-  const openOne = c => Promise.race([navigator.mediaDevices.getUserMedia({ audio: c }), new Promise((_, rej) => setTimeout(() => rej(Object.assign(new Error("timeout"), { name: "TimeoutError" })), 8000))]);
+  // 날소리로 녹음(본부 10-04) — 크롬 기본값(에코 제거·잡음 억제·자동 크기)이 말 도중 소리를 뚝뚝 끊었다 · 말하기 연습 녹음은 날소리가 맞다(녹음 중엔 앱이 소리를 안 틂)
+  const RAW = { echoCancellation: false, noiseSuppression: false, autoGainControl: false };
+  const openOne = c => Promise.race([navigator.mediaDevices.getUserMedia({ audio: { ...(c === true ? {} : c), ...RAW } }), new Promise((_, rej) => setTimeout(() => rej(Object.assign(new Error("timeout"), { name: "TimeoutError" })), 8000))]);
   // 크롬의 「기본」은 윈도우 기본 마이크가 아닐 수 있다(크롬이 따로 고른다 — 10-01 투덜이 PC: 소리가 0 인 블루투스가 잡힘).
   // 그래서 열어 보고 소리가 0 이면 그 마이크를 dead 에 적고 다음 마이크로 넘어간다 · 소리가 들어온 마이크는 기억한다.
   const dead = new Set();
@@ -295,7 +298,7 @@ export default async function speak(app, ep, id, opts = {}) {
       return;
     }
     if (a === "model") { stopRec(true); st.model ? (stopSounds(), paint()) : playModel(); }
-    else if (a === "rec") { if (st.starting) return; if (!st.rec) st.playingAtStart = sfx.playing() || st.model || !!st.mine; /* 진단 */ st.rec ? stopRec() : (st.starting = true, startRec().finally(() => { st.starting = false; })); } // 마이크를 여는 동안 또 눌러도 하나만(빠르게 여러 번 누름)
+    else if (a === "rec") { if (st.starting) return; if (!st.rec) { st.playingAtStart = sfx.playing() || st.model || !!st.mine; quietWake(true); } /* 진단 · 녹음하는 동안 깨우기 소리 멈춤 */ st.rec ? stopRec() : (st.starting = true, startRec().finally(() => { st.starting = false; if (!st.rec) quietWake(false); })); } // 마이크를 여는 동안 또 눌러도 하나만(빠르게 여러 번 누름)
     else if (a === "mine") { stopRec(true); playMine(); }
     else if (a === "both") { stopRec(true); await playModel(); if (st.alive) await new Promise(r => setTimeout(r, 300)), playMine(); }
   };
@@ -304,5 +307,5 @@ export default async function speak(app, ep, id, opts = {}) {
   try { if (!localStorage.getItem("malmun.sp.help")) { localStorage.setItem("malmun.sp.help", "1"); $(".helpbox").hidden = false; } } catch {} // 처음 한 번은 풍선이 저절로
   sfx.preload([lineSrc, ...parts.map(p => p.src)]);
   const release = hold();
-  return () => { st.alive = false; stopRec(true); stopSounds(); st.stream?.getTracks().forEach(x => x.stop()); release(); delete app.__sp; };
+  return () => { st.alive = false; stopRec(true); stopSounds(); st.stream?.getTracks().forEach(x => x.stop()); release(); quietWake(false); delete app.__sp; };
 }

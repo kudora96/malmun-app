@@ -10,17 +10,17 @@
 //  R7 영상은 늘 맨 위 · 지금 줄은 영상 바로 아래(앞 줄은 영상 뒤로) — 손으로 목록을 움직이면 4초 동안은 따라가지 않음
 //  R8 듣기 모드(대사→설명 · 설명만)도 R1~R6 그대로(영상 대신 소리 조각) · 모드를 바꾸면 멈춤(▶ 로 시작)
 //  R9 다시 들어오면 마지막 줄이 선택된 채 멈춰 있음
-import { t, lang, langName } from "../i18n.js?v=1004.10";
-import { esc, renderText, glossCards } from "../text.js?v=1004.10";
-import { episode } from "../data.js?v=1004.10";
-import { paths } from "../paths.js?v=1004.10";
-import { Sequence } from "../audio.js?v=1004.10";
-import { I, progress, SPEAKER } from "../ui.js?v=1004.10";
-import writeView from "./write.js?v=1004.10";
-import { diagEnv, keepDiag } from "../diag.js?v=1004.10";
-import speakView, { similarity, PASS, recGet, recPut } from "./speak.js?v=1004.10";
-import { record, micWhy, srWhy, canScore, closeMic, logRec, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1004.10";
-import { hold } from "../wake.js?v=1004.10";
+import { t, lang, langName } from "../i18n.js?v=1004.11";
+import { esc, renderText, glossCards } from "../text.js?v=1004.11";
+import { episode } from "../data.js?v=1004.11";
+import { paths } from "../paths.js?v=1004.11";
+import { Sequence } from "../audio.js?v=1004.11";
+import { I, progress, SPEAKER } from "../ui.js?v=1004.11";
+import writeView from "./write.js?v=1004.11";
+import { diagEnv, keepDiag } from "../diag.js?v=1004.11";
+import speakView, { similarity, PASS, recGet, recPut } from "./speak.js?v=1004.11";
+import { record, micWhy, srWhy, canScore, closeMic, logRec, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1004.11";
+import { hold, quietWake } from "../wake.js?v=1004.11";
 
 const RATES = [1, 0.75, 0.5];
 const pref = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } };
@@ -275,7 +275,7 @@ export default async function learn(app, ep, startId) {
   }
   // 카드 안 말하기(녹음 → 점수 → 내 목소리) — js/recorder.js
   let sp = null; // { i, ctl, blob, audio, saved }
-  function spStop() { sp?.ctl?.stop(true); sp?.audio?.pause(); sp = null; closeMic(); } // 카드를 닫을 때 마이크도 닫음(그때처럼 · 카드가 열려 있는 동안은 쥐고 있음)
+  function spStop() { quietWake(false); sp?.ctl?.stop(true); sp?.audio?.pause(); sp = null; closeMic(); } // 카드를 닫을 때 마이크도 닫음(그때처럼 · 카드가 열려 있는 동안은 쥐고 있음)
   const playRec = b => { // 1004.6 그대로 — <audio> · 처음부터 · 자리 옮기기 없음(webm 자리 옮기기가 소리를 깨뜨림 — 본부 10-04) · 한 번만
     ex.stop(); clearTimeout(st.gap); st.gap = 0; st.exLoop = null; sp.audio?.pause();
     const a = (sp.audio = new Audio(URL.createObjectURL(b))); a.onended = a.onerror = () => URL.revokeObjectURL(a.src); a.play().catch(() => {}); return a;
@@ -294,6 +294,7 @@ export default async function learn(app, ep, startId) {
     const playingAtStart = ex.playing || !!(sp?.audio && !sp.audio.paused) || !v.paused; // 진단: 녹음 시작 때 소리가 나오고 있었나
     ex.stop(); clearTimeout(st.gap); st.gap = 0; st.exLoop = null; sp?.audio?.pause(); markPlay(); sync(); // 🎤 = 반복·재생 모두 멈춤
     // 「준비 중」 → 마이크에서 실제 소리가 들어오기 시작하면 「녹음 중」(본부 10-03 — 그 전에 말하면 앞이 비어 버린다)
+    quietWake(true); // 녹음하는 동안 깨우기 소리 멈춤(에코 제거가 말을 끊지 않게)
     const ctl = record({
       onLevel: v => { lvl.firstElementChild.style.width = Math.round(v * 100) + "%"; },
       onStop: () => { if (sp?.ctl === ctl) { msg.textContent = t("checking"); lvl.hidden = true; } },
@@ -305,6 +306,7 @@ export default async function learn(app, ep, startId) {
     box.querySelector("[data-x=keep]").hidden = true;
     btn.classList.add("on"); btn.textContent = "… " + t("mic_opening"); lvl.hidden = true; msg.textContent = "";
     const r = await ctl.done;
+    quietWake(false);
     if (st.panel?.i !== i || sp?.ctl !== ctl) return; // 다른 데로 감
     sp.ctl = null; btn.classList.remove("on"); lvl.hidden = true;
     if (r.cancelled) { btn.textContent = "🎤 " + t("speak_now"); msg.textContent = ""; return; }
