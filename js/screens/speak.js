@@ -13,23 +13,23 @@
 //     못 넘어도 막지 않는다([다음 ▶]) · 음성 인식이 안 되는 곳은 점수 없이 듣고 비교만(녹음은 저장)
 //  S6 녹음은 이 기기 안에만(IndexedDB) — 서버로 보내지 않는다
 //  S7 영상 창 안(embedded): 스크롤 없이 · 줄 이동·닫기는 학습 화면이 한다 · 줄 전체까지 통과하면 다음 줄 말하기로
-import { t, lang } from "../i18n.js?v=1004.18";
-import { esc } from "../text.js?v=1004.18";
-import { episode } from "../data.js?v=1004.18";
-import { paths } from "../paths.js?v=1004.18";
-import { audioCtx, hold, quietWake } from "../wake.js?v=1004.18";
-import * as sfx from "../sfx.js?v=1004.18";
-import { diagEnv, keepDiag } from "../diag.js?v=1004.18";
-import { playMine as playMineRec } from "../playmine.js?v=1004.18";
-import { bestHeard, heardHTML } from "../heard.js?v=1004.18";
-import { recDel, downloadRec, askPersist } from "../recstore.js?v=1004.18";
-import { logRec, dB, srWhy, srWatch, niceLabel, ALIAS } from "../recorder.js?v=1004.18";
+import { t, lang } from "../i18n.js?v=1004.19";
+import { esc } from "../text.js?v=1004.19";
+import { episode } from "../data.js?v=1004.19";
+import { paths } from "../paths.js?v=1004.19";
+import { audioCtx, hold, quietWake } from "../wake.js?v=1004.19";
+import * as sfx from "../sfx.js?v=1004.19";
+import { diagEnv, keepDiag } from "../diag.js?v=1004.19";
+import { playMine as playMineRec } from "../playmine.js?v=1004.19";
+import { bestHeard, heardHTML } from "../heard.js?v=1004.19";
+import { recDel, downloadRec, askPersist } from "../recstore.js?v=1004.19";
+import { logRec, dB, srWhy, srWatch, niceLabel, ALIAS } from "../recorder.js?v=1004.19";
 
 export const PASS = 95; // 통과(✓ · [저장]) — 80 은 낮았다(「미국에 온 걸 환영해요」 88% 통과 — 본부 10-04 · 투덜이 승인)
 const MAX_MS = 8000, QUIET_MS = 1000;
 
 // ── 닮음 = 음절 정렬(js/score.js · 「들린 말」 빨간 표시와 같은 함수 — 본부 10-04) ──
-import { similarity } from "../score.js?v=1004.18";
+import { similarity } from "../score.js?v=1004.19";
 export { similarity };
 
 // ── 내 목소리 저장(S6) ──

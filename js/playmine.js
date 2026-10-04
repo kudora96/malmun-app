@@ -2,7 +2,7 @@
 // · <audio> 자리 옮기기(seek)는 쓰지 않는다(webm 을 찾아가며 소리가 깨졌다 — 1004.9)
 // · blob 을 decodeAudioData 로 풀어 AudioBufferSourceNode.start(0, lead) · 연결은 source → destination 직결(게인·필터 없음)
 //   lead = 말 시작 0.15초 전(같은 버퍼에서 잼) · 끝나면 멈춤 · 풀기 실패하면 <audio> 로 처음부터
-import { audioCtx } from "./wake.js?v=1004.18";
+import { audioCtx } from "./wake.js?v=1004.19";
 
 export function leadOf(buf, pre = 0.15) {
   const d = buf.getChannelData(0), sr = buf.sampleRate, win = Math.max(1, Math.round(sr * 0.02)), rms = [];
@@ -21,6 +21,7 @@ export function gainOf(buf, target = -16) {
   for (let i = 0; i + win <= d.length; i += win) { let s = 0; for (let k = i; k < i + win; k++) s += d[k] * d[k]; ms.push(s / win); }
   const top = Math.max(0, ...ms); if (!(top > 0) || !(peak > 0)) return 1;
   const sp = ms.filter(e => e > top * 0.05), rms = Math.sqrt(sp.reduce((a, e) => a + e, 0) / sp.length);
+  if (!(20 * Math.log10(rms) >= -45)) return 1; // 말이 없던 녹음(말소리 −45dB 아래 = 바탕 소리뿐)은 키우지 않음 — 「쉬—」 잡음만 커진다(본부 10-04)
   let g = Math.pow(10, (target - 20 * Math.log10(rms)) / 20);
   g = Math.min(g, 0.89 / peak);
   return Math.max(1, Math.min(16, g));
