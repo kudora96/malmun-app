@@ -4,13 +4,14 @@
   --bg:#eef2ec; --bg2:#e2e9e2; --card:#ffffff; --ink:#17302a; --mute:#5c726b; --line:rgba(23,48,42,.14);
   --hi:#a86a12; --hi-soft:rgba(168,106,18,.12); --pink:#c2524a; --blue:#2f6f9f; --wood:#8a6443;
   --on-hi:#ffffff; --bubble:#ffffff; --bubble-cur:#fff7e6;
+  --okc:#1b6b2e; --badc:#c62828; /* 들린 말: 맞음 초록 · 틀림 빨강 — 바탕과 대비 4.5:1 이상 */
   --f-ui:"Noto Sans KR","Noto Sans Devanagari","Noto Sans Bengali",system-ui,sans-serif;
   --f-hand:"Gaegu","Noto Sans KR",cursive;
   color-scheme:light;
 }
 @media (prefers-color-scheme: dark){
   :root{--bg:#1d3530;--bg2:#244039;--card:#2a4a42;--ink:#ecebe4;--mute:#9fb3ac;--line:rgba(236,235,228,.18);
-    --hi:#f2d27a;--hi-soft:rgba(242,210,122,.12);--pink:#f29c8f;--blue:#9cc9f0;--on-hi:#1d3530;--bubble:#244039;--bubble-cur:#2c4c44;color-scheme:dark}
+    --hi:#f2d27a;--hi-soft:rgba(242,210,122,.12);--pink:#f29c8f;--blue:#9cc9f0;--on-hi:#1d3530;--bubble:#244039;--bubble-cur:#2c4c44;--okc:#86d993;--badc:#ffa59c;color-scheme:dark}
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important} /* hidden 속성이 다른 display 규칙에 지지 않게(설명 창이 닫혀도 남던 버그) */
@@ -372,7 +373,8 @@ a{color:inherit;text-decoration:none}
 .heardline{font-size:12.5px;color:var(--ink);min-height:0;line-height:1.5}
 .heardline:empty{display:none}
 .heardline .lab{color:var(--mute);font-size:11.5px}
-.heardline mark{background:none;color:#d0312d;text-decoration:underline 2px;text-underline-offset:3px;font-weight:700}
+.heardline mark{background:none;color:var(--badc);text-decoration:underline 2px;text-underline-offset:3px;font-weight:700} /* 틀림 = 빨강 + 밑줄(색만으로 구별하지 않게) */
+.heardline b.ok{color:var(--okc);font-weight:700} /* 맞음 = 진한 초록 굵게 · 밑줄 없음 */
 .speak .heardline{text-align:center;padding:0 10px}
 
 /* 저장한 녹음 내려받기·지우기(작게) · 편 목록의 「이 편 녹음 모두 지우기」 */

@@ -144,6 +144,10 @@
   }
   window.__heard = "미국에 온 걸 환영해요"; cm = await crec();
   ok([...hl().querySelectorAll("mark.bad")].map(x => x.textContent).join("") === "미", "「미국에…」 빨간 밑줄은 「미」만", hl().textContent);
+  const okTxt = [...hl().querySelectorAll("b.ok")].map(x => x.textContent).join(""), okCol = getComputedStyle(hl().querySelector("b.ok")).color, badDeco = getComputedStyle(hl().querySelector("mark.bad")).textDecorationLine;
+  ok(okTxt === "국에온걸환영해요" && okCol !== getComputedStyle(hl()).color && /underline/.test(badDeco), "「미국에…」 맞은 음절 = 초록 굵게 · 「미」 = 빨강+밑줄", `초록 「${okTxt}」 ${okCol} · 밑줄 ${badDeco}`);
+  window.__heard = "한국에 온 걸 환영해요"; cm = await crec();
+  ok([...hl().querySelectorAll("b.ok")].map(x => x.textContent).join("") === "한국에온걸환영해요" && !hl().querySelector("mark") && /✓/.test(hl().textContent), "다 맞으면 전부 초록 + ✓", hl().textContent);
   window.__heard = "한국에 걸 환영해요"; cm = await crec();
   ok(!!hl().querySelector("mark.miss"), "「한국에 걸…」 빠진 자리 _", hl().textContent);
   window.__heard = "안녕하세요"; cm = await crec();
