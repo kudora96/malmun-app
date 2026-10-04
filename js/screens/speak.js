@@ -13,14 +13,14 @@
 //     못 넘어도 막지 않는다([다음 ▶]) · 음성 인식이 안 되는 곳은 점수 없이 듣고 비교만(녹음은 저장)
 //  S6 녹음은 이 기기 안에만(IndexedDB) — 서버로 보내지 않는다
 //  S7 영상 창 안(embedded): 스크롤 없이 · 줄 이동·닫기는 학습 화면이 한다 · 줄 전체까지 통과하면 다음 줄 말하기로
-import { t, lang } from "../i18n.js?v=1004.9";
-import { esc } from "../text.js?v=1004.9";
-import { episode } from "../data.js?v=1004.9";
-import { paths } from "../paths.js?v=1004.9";
-import { audioCtx, hold } from "../wake.js?v=1004.9";
-import * as sfx from "../sfx.js?v=1004.9";
-import { findLead, playAt } from "../lead.js?v=1004.9";
-import { logRec, dB, srWhy, srWatch, niceLabel, ALIAS } from "../recorder.js?v=1004.9";
+import { t, lang } from "../i18n.js?v=1004.10";
+import { esc } from "../text.js?v=1004.10";
+import { episode } from "../data.js?v=1004.10";
+import { paths } from "../paths.js?v=1004.10";
+import { audioCtx, hold } from "../wake.js?v=1004.10";
+import * as sfx from "../sfx.js?v=1004.10";
+import { diagEnv, keepDiag } from "../diag.js?v=1004.10";
+import { logRec, dB, srWhy, srWatch, niceLabel, ALIAS } from "../recorder.js?v=1004.10";
 
 export const PASS = 80;
 const MAX_MS = 8000, QUIET_MS = 1000;
@@ -124,12 +124,12 @@ export default async function speak(app, ep, id, opts = {}) {
     if (!(p.src && (await sfx.play(p.src))) && lineSrc && p.src !== lineSrc && !p.task) await sfx.play(lineSrc);
     st.model = false; if (st.alive) paint();
   }
-  const playMine = (rec = { blob: mineBlob(), lead: st.lead }) => new Promise(res => { // <audio> 그대로(원본) · 시작 위치만 말 시작 자리로(js/lead.js)
+  const playMine = (rec = { blob: mineBlob() }) => new Promise(res => { // 1004.6 그대로 — <audio> · 처음부터 · 자리 옮기기 없음(본부 10-04)
     const b = rec?.blob; if (!b) return res();
     stopSounds();
-    const a = (st.mine = playAt(b, rec.lead || 0));
-    const done = () => { if (st.mine === a) st.mine = null; res(); };
-    a.addEventListener("ended", done); a.addEventListener("error", done); a.addEventListener("pause", () => { if (!a.ended) done(); });
+    const a = (st.mine = new Audio(URL.createObjectURL(b)));
+    a.onended = a.onerror = () => { URL.revokeObjectURL(a.src); if (st.mine === a) st.mine = null; res(); };
+    a.play().catch(() => res());
   });
   function go(i) { stopRec(true); stopSounds(); st.i = Math.max(0, Math.min(parts.length - 1, i)); st.blob = null; st.score = null; st.note = null; st.kept = null; paint(); }
 
@@ -247,8 +247,7 @@ export default async function speak(app, ep, id, opts = {}) {
     paint();
   }
   async function finish(blob) {
-    st.blob = blob; st.kept = null; st.lead = 0;
-    findLead(blob).then(l => { if (st.blob === blob) st.lead = l; }); // 분석용 복사본으로 말 시작 자리만(재생엔 안 씀) // 방금 녹음(원본 그대로) — 언제나 [내 목소리]로 // 방금 녹음 — 언제나 [내 목소리]로
+    st.blob = blob; st.kept = null; // 방금 녹음(원본 그대로) — 언제나 [내 목소리]로
     if (sr) { // 인식 결과가 조금 늦게 온다 — 그동안 「확인 중…」
       if (!heard.length) $(".msg").textContent = t("checking");
       for (let k = 0; k < 20 && !heard.length; k++) await new Promise(r => setTimeout(r, 100));
@@ -257,7 +256,7 @@ export default async function speak(app, ep, id, opts = {}) {
     } else st.score = null;
     if (!st.alive) return;
     const p = cur(), old = st.saved[p.key];
-    if (st.diag) logRec({ where: "speak", line: line.id, part: p.key, want: p.say, mic: st.diag.mic, track: st.diag.track, sr: st.diag.sr, sec: Math.round(performance.now() - st.diag.t0) / 1000, maxDb: dB(st.diag.peak), heard: [...new Set(heard)], score: st.score }); // 진단(화면에 안 보임)
+    if (st.diag) { const env = await diagEnv(); logRec({ where: "speak", line: line.id, part: p.key, want: p.say, mic: st.diag.mic, track: st.diag.track, sr: st.diag.sr, sec: Math.round(performance.now() - st.diag.t0) / 1000, maxDb: dB(st.diag.peak), heard: [...new Set(heard)], score: st.score, ...env, playingAtStart: !!st.playingAtStart }); keepDiag(blob, { where: "speak", line: line.id, part: p.key, score: st.score, heard: [...new Set(heard)] }); } // 진단(화면에 안 보임) — 녹음 소리도 malmun_diag 에 마지막 3개
     // 저장은 자동이 아님 — 80% 넘으면 [저장] 단추가 나오고 학습자가 누른다(투덜이 10-04) · 저절로 다음 토막으로 넘기지도 않는다(저장할 틈)
     paint();
   }
@@ -282,7 +281,7 @@ export default async function speak(app, ep, id, opts = {}) {
     if (a === "keep") { // [저장] — 더 높거나 같은 점수면 바꿔 끼움
       const p = cur(), old = st.saved[p.key];
       if (!st.blob || !(st.score >= PASS)) return;
-      if (st.score >= (old?.score ?? 0)) { st.saved[p.key] = { blob: st.blob, lead: st.lead, score: st.score, at: Date.now() }; recPut(`${ep}/${p.key}`, st.saved[p.key]); st.kept = "kept"; }
+      if (st.score >= (old?.score ?? 0)) { st.saved[p.key] = { blob: st.blob, score: st.score, at: Date.now() }; recPut(`${ep}/${p.key}`, st.saved[p.key]); st.kept = "kept"; }
       else st.kept = "kept_better";
       return paint();
     }
@@ -296,7 +295,7 @@ export default async function speak(app, ep, id, opts = {}) {
       return;
     }
     if (a === "model") { stopRec(true); st.model ? (stopSounds(), paint()) : playModel(); }
-    else if (a === "rec") { if (st.starting) return; st.rec ? stopRec() : (st.starting = true, startRec().finally(() => { st.starting = false; })); } // 마이크를 여는 동안 또 눌러도 하나만(빠르게 여러 번 누름)
+    else if (a === "rec") { if (st.starting) return; if (!st.rec) st.playingAtStart = sfx.playing() || st.model || !!st.mine; /* 진단 */ st.rec ? stopRec() : (st.starting = true, startRec().finally(() => { st.starting = false; })); } // 마이크를 여는 동안 또 눌러도 하나만(빠르게 여러 번 누름)
     else if (a === "mine") { stopRec(true); playMine(); }
     else if (a === "both") { stopRec(true); await playModel(); if (st.alive) await new Promise(r => setTimeout(r, 300)), playMine(); }
   };

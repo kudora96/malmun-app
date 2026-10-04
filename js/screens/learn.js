@@ -10,17 +10,17 @@
 //  R7 영상은 늘 맨 위 · 지금 줄은 영상 바로 아래(앞 줄은 영상 뒤로) — 손으로 목록을 움직이면 4초 동안은 따라가지 않음
 //  R8 듣기 모드(대사→설명 · 설명만)도 R1~R6 그대로(영상 대신 소리 조각) · 모드를 바꾸면 멈춤(▶ 로 시작)
 //  R9 다시 들어오면 마지막 줄이 선택된 채 멈춰 있음
-import { t, lang, langName } from "../i18n.js?v=1004.9";
-import { esc, renderText, glossCards } from "../text.js?v=1004.9";
-import { episode } from "../data.js?v=1004.9";
-import { paths } from "../paths.js?v=1004.9";
-import { Sequence } from "../audio.js?v=1004.9";
-import { I, progress, SPEAKER } from "../ui.js?v=1004.9";
-import writeView from "./write.js?v=1004.9";
-import { findLead, playAt } from "../lead.js?v=1004.9";
-import speakView, { similarity, PASS, recGet, recPut } from "./speak.js?v=1004.9";
-import { record, micWhy, srWhy, canScore, closeMic, logRec, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1004.9";
-import { hold } from "../wake.js?v=1004.9";
+import { t, lang, langName } from "../i18n.js?v=1004.10";
+import { esc, renderText, glossCards } from "../text.js?v=1004.10";
+import { episode } from "../data.js?v=1004.10";
+import { paths } from "../paths.js?v=1004.10";
+import { Sequence } from "../audio.js?v=1004.10";
+import { I, progress, SPEAKER } from "../ui.js?v=1004.10";
+import writeView from "./write.js?v=1004.10";
+import { diagEnv, keepDiag } from "../diag.js?v=1004.10";
+import speakView, { similarity, PASS, recGet, recPut } from "./speak.js?v=1004.10";
+import { record, micWhy, srWhy, canScore, closeMic, logRec, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1004.10";
+import { hold } from "../wake.js?v=1004.10";
 
 const RATES = [1, 0.75, 0.5];
 const pref = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } };
@@ -276,18 +276,22 @@ export default async function learn(app, ep, startId) {
   // 카드 안 말하기(녹음 → 점수 → 내 목소리) — js/recorder.js
   let sp = null; // { i, ctl, blob, audio, saved }
   function spStop() { sp?.ctl?.stop(true); sp?.audio?.pause(); sp = null; closeMic(); } // 카드를 닫을 때 마이크도 닫음(그때처럼 · 카드가 열려 있는 동안은 쥐고 있음)
-  const playRec = (b, lead = 0) => { ex.stop(); clearTimeout(st.gap); st.gap = 0; st.exLoop = null; sp.audio?.pause(); return (sp.audio = playAt(b, lead)); }; // 한 번만(끝나면 멈춤) // <audio> 그대로(원본) · 시작 위치만 말 시작 자리로(js/lead.js) // 그때처럼 <audio> 로 처음부터
+  const playRec = b => { // 1004.6 그대로 — <audio> · 처음부터 · 자리 옮기기 없음(webm 자리 옮기기가 소리를 깨뜨림 — 본부 10-04) · 한 번만
+    ex.stop(); clearTimeout(st.gap); st.gap = 0; st.exLoop = null; sp.audio?.pause();
+    const a = (sp.audio = new Audio(URL.createObjectURL(b))); a.onended = a.onerror = () => URL.revokeObjectURL(a.src); a.play().catch(() => {}); return a;
+  };
   // [내 목소리] = 방금 녹음(잘됐든 못됐든) · 80% 넘으면 [저장] → 눌러야 저장 · 저장한 것은 「저장됨 ▶」 · 열 때 예전 점수 안 보임(투덜이 10-04)
   async function spInit(i) {
     const saved = await recGet(sayKey(i));
     if (st.panel?.i !== i || !saved?.blob) return;
-    sp = { i, saved: { blob: saved.blob, score: saved.score, lead: saved.lead || 0 } };
+    sp = { i, saved: { blob: saved.blob, score: saved.score } };
     if (st.panel?.i !== i) return;
     const b = panel.querySelector(".sayb [data-x=savedplay]"); if (b) b.hidden = false;
   }
   async function spRec(i, btn) {
     const box = panel.querySelector(".sayb"), msg = box.querySelector(".smsg"), lvl = box.querySelector(".lvl"), mineB = box.querySelector("[data-x=mine]");
     if (sp?.ctl) { sp.ctl.stop(); return; } // 녹음 중 다시 누름 = 멈춤(점수는 냄)
+    const playingAtStart = ex.playing || !!(sp?.audio && !sp.audio.paused) || !v.paused; // 진단: 녹음 시작 때 소리가 나오고 있었나
     ex.stop(); clearTimeout(st.gap); st.gap = 0; st.exLoop = null; sp?.audio?.pause(); markPlay(); sync(); // 🎤 = 반복·재생 모두 멈춤
     // 「준비 중」 → 마이크에서 실제 소리가 들어오기 시작하면 「녹음 중」(본부 10-03 — 그 전에 말하면 앞이 비어 버린다)
     const ctl = record({
@@ -306,9 +310,10 @@ export default async function learn(app, ep, startId) {
     if (r.cancelled) { btn.textContent = "🎤 " + t("speak_now"); msg.textContent = ""; return; }
     if (r.error) { btn.textContent = "🎤 " + t("speak_now"); msg.textContent = t(micWhy(r.error)); return; }
     const sc = canScore() && r.heard.length ? Math.max(...r.heard.map(h => similarity(L[i].say.ko, h))) : null;
-    logRec({ where: "card", line: L[i].id, want: L[i].say.ko, ...r.diag, heard: [...new Set(r.heard)], score: sc }); // 진단(화면에 안 보임)
-    sp.blob = r.blob; sp.score = sc; sp.lead = 0;
-    findLead(r.blob).then(l => { if (sp?.blob === r.blob) sp.lead = l; }); // 분석용 복사본으로 말 시작 자리만
+    const env = await diagEnv(); // 진단(화면에 안 보임) — 소리 엔진·🔁·녹음 시작 때 재생 중이었는지·출력 장치 + 녹음 소리 자체(malmun_diag · 마지막 3개)
+    logRec({ where: "card", line: L[i].id, want: L[i].say.ko, ...r.diag, heard: [...new Set(r.heard)], score: sc, ...env, playingAtStart });
+    keepDiag(r.blob, { where: "card", line: L[i].id, score: sc, heard: [...new Set(r.heard)] });
+    sp.blob = r.blob; sp.score = sc;
     mineB.disabled = false; // 방금 녹음 — 언제나
     btn.textContent = "🎤 " + t(sc != null && sc >= PASS ? "speak_now" : "try_again");
     // 점수가 안 나오면 절대 통과·저장 아님(본부 10-04 — 엉뚱한 말도 그냥 넘어가던 것) · 왜 안 나왔는지 짧게
@@ -358,7 +363,7 @@ export default async function learn(app, ep, startId) {
       if (!sp?.blob || !(sp.score >= PASS)) return;
       const msg = panel.querySelector(".sayb .smsg");
       recGet(sayKey(i)).then(old => {
-        if (sp.score >= (old?.score ?? 0)) { recPut(sayKey(i), { blob: sp.blob, lead: sp.lead, score: sp.score, at: Date.now() }); sp.saved = { blob: sp.blob, score: sp.score, lead: sp.lead }; msg.textContent = `${sp.score}% ✓ · ${t("kept")}`; }
+        if (sp.score >= (old?.score ?? 0)) { recPut(sayKey(i), { blob: sp.blob, score: sp.score, at: Date.now() }); sp.saved = { blob: sp.blob, score: sp.score }; msg.textContent = `${sp.score}% ✓ · ${t("kept")}`; }
         else msg.textContent = `${sp.score}% ✓ · ${t("kept_better")}`;
         x.hidden = true; panel.querySelector(".sayb [data-x=savedplay]").hidden = false;
       });
@@ -367,13 +372,13 @@ export default async function learn(app, ep, startId) {
     if (k === "savedplay") {
       if (!sp?.saved?.blob || sp.ctl) return;
       ex.stop(); markPlay(); sync(); sp.audio?.pause();
-      playRec(sp.saved.blob, sp.saved.lead);
+      playRec(sp.saved.blob);
       return;
     }
     if (k === "mine") {
       if (!sp?.blob || sp.ctl) return;
       ex.stop(); markPlay(); sync();
-      playRec(sp.blob, sp.lead);
+      playRec(sp.blob);
     }
   }
   // 진행 막대 — 설명 소리를 누르거나 끌어서 옮긴다(손가락 영역 28px) · 설명 소리가 있을 때만 움직임
