@@ -13,13 +13,13 @@
 //     못 넘어도 막지 않는다([다음 ▶]) · 음성 인식이 안 되는 곳은 점수 없이 듣고 비교만(녹음은 저장)
 //  S6 녹음은 이 기기 안에만(IndexedDB) — 서버로 보내지 않는다
 //  S7 영상 창 안(embedded): 스크롤 없이 · 줄 이동·닫기는 학습 화면이 한다 · 줄 전체까지 통과하면 다음 줄 말하기로
-import { t, lang } from "../i18n.js?v=1004.4";
-import { esc } from "../text.js?v=1004.4";
-import { episode } from "../data.js?v=1004.4";
-import { paths } from "../paths.js?v=1004.4";
-import { audioCtx, hold } from "../wake.js?v=1004.4";
-import * as sfx from "../sfx.js?v=1004.4";
-import { findLead, playBlob, srWatch, logRec, dB, micCandidates, avoidBT, srWhy, probe, niceLabel } from "../recorder.js?v=1004.4";
+import { t, lang } from "../i18n.js?v=1004.5";
+import { esc } from "../text.js?v=1004.5";
+import { episode } from "../data.js?v=1004.5";
+import { paths } from "../paths.js?v=1004.5";
+import { audioCtx, hold } from "../wake.js?v=1004.5";
+import * as sfx from "../sfx.js?v=1004.5";
+import { findLead, playBlob, listen, logRec, dB, micCandidates, avoidBT, srWhy, probe, niceLabel } from "../recorder.js?v=1004.5";
 
 export const PASS = 80;
 const MAX_MS = 8000, QUIET_MS = 1000;
@@ -196,21 +196,9 @@ export default async function speak(app, ep, id, opts = {}) {
     rec.ondataavailable = e => e.data.size && chunks.push(e.data);
     rec.onstop = () => finish(new Blob(chunks, { type: rec.mimeType || "audio/webm" }));
     rec.start();
-    if (SR) {
-      try {
-        // continuous + 중간 결과 — 그냥 두면 짧은 말을 「글자」에서 끊고 「예요」를 버린다(10-01 본보기 소리로 실측: 글자예요 → 글자 56%)
-        sr = new SR(); sr.lang = "ko-KR"; sr.continuous = true; sr.interimResults = true; sr.maxAlternatives = 3;
-        sr.onresult = e => {
-          const rs = Array.from(e.results, r => Array.from(r));
-          for (const r of rs) for (const alt of r) heard.push(alt.transcript);
-          if (rs.length > 1) heard.push(rs.map(r => r[0].transcript).join(" ")); // 여러 도막으로 나뉘어 온 말을 이어서도 본다
-        };
-        sr.onerror = e => { srErr = e.error || "error"; }; // 삼키지 않는다 — 점수가 안 나온 까닭을 알려 준다
-        // 녹음하는 바로 그 마이크로 알아듣게 한다 — 그냥 start() 는 크롬 기본 마이크(소리 0 인 블루투스일 수 있다)를 듣는다
-        st.diag.sr = srWatch(sr, st.diag.t0);
-        try { sr.start(st.stream.getAudioTracks()[0]); st.diag.track = true; } catch { sr.start(); }
-      } catch { sr = null; }
-    }
+    // 음성 인식: continuous + 중간 결과(짧은 말을 끊지 않게 — 10-01) · 녹음하는 그 트랙으로 · 녹음 끝까지 켜 둠(혼자 끝나면 다시 — 10-04)
+    sr = SR ? listen(st.stream.getAudioTracks()[0], { onText: x => heard.push(x), onErr: er => { srErr = er; }, t0: st.diag.t0, ev: st.diag.sr }) : null;
+    st.diag.track = !!sr?.track;
     // 말이 끝나고 1초 조용하면 멈춤
     try {
       const ctx = audioCtx(), src = ctx.createMediaStreamSource(st.stream), an = ctx.createAnalyser();

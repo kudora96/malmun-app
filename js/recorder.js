@@ -3,7 +3,7 @@
 // 다음 마이크로 넘어가 다시 녹음 · 소리 들어온 마이크 기억(malmun.mic — 말하기 창과 같은 칸) · 인식은 녹음하는 그 마이크를 끝까지(continuous)
 // · 말이 끝나고 1초 조용하면 저절로 멈춤 · 길어도 8초.
 // TODO(앱 창): speak.js 의 같은 부분을 이 모듈로 합치기 — 지금은 말하기 창 점검(38)을 깨지 않으려고 따로 둠.
-import { audioCtx } from "./wake.js?v=1004.4";
+import { audioCtx } from "./wake.js?v=1004.5";
 
 const MAX_MS = 8000, QUIET_MS = 1000, DEAD = 0.0002;
 const getSR = () => window.SpeechRecognition || window.webkitSpeechRecognition; // 부를 때마다 찾는다(점검이 가짜로 바꿔 끼울 수 있게)
@@ -119,12 +119,40 @@ export function playBlob(blob, lead = 0) {
 }
 // ── 진단 기록(화면에 안 보임 · 본부 10-04) — 녹음이 끝날 때마다 localStorage malmun.lastrec 에 마지막 5개 ──
 // 음성 인식 이벤트 순서와 시각(ms) · 들은 글 · 점수 · 마이크 · 트랙 전달 여부 · 길이 · lead · 최대 소리 dB
-export function srWatch(sr, t0) {
-  const ev = [];
+export function srWatch(sr, t0, ev = []) {
   if (typeof sr.addEventListener !== "function") return ev; // 가짜 인식기(점검) 등
   for (const n of ["start", "audiostart", "soundstart", "speechstart", "speechend", "soundend", "audioend", "result", "nomatch", "error", "end"])
     sr.addEventListener(n, e => ev.push(`${n === "error" ? "error:" + (e.error || "?") : n}@${Math.round(performance.now() - t0)}`));
   return ev;
+}
+// 녹음하는 동안 음성 인식을 계속 켜 둔다 — 크롬은 말이 없으면 2~3초 만에 혼자 끝낸다(본부 10-04 진단: audioend@2668 · end@2753)
+// → 머뭇거리다 3초 뒤에 말하면 바르게 말해도 0% 가 됐다. 녹음이 끝날 때까지 끝나면 같은 트랙으로 다시 켠다(들은 글은 이어서 모음)
+// · 1초 안에 또 끝나면 0.2초 쉬고 · 허락·마이크 오류면 다시 켜지 않음 · 진단에 restart@ms
+export function listen(track, { onText = () => {}, onErr = () => {}, t0 = performance.now(), ev = [] } = {}) {
+  const SR = getSR(); if (!SR) return null;
+  const h = { ev, track: false, on: true, sr: null, n: 0, stop() { h.on = false; try { h.sr?.stop(); } catch {} } };
+  let lastStart = 0;
+  const go = () => {
+    if (!h.on || h.n > 30) return;
+    let sr; try { sr = new SR(); } catch { return; }
+    sr.lang = "ko-KR"; sr.continuous = true; sr.interimResults = true; sr.maxAlternatives = 3;
+    sr.onresult = e => {
+      const rs = Array.from(e.results, r => Array.from(r));
+      for (const r of rs) for (const a of r) onText(a.transcript);
+      if (rs.length > 1) onText(rs.map(r => r[0].transcript).join(" ")); // 여러 도막으로 나뉘어 온 말을 이어서도 본다
+    };
+    sr.onerror = e => { const er = e.error || "error"; onErr(er); if (/not-allowed|audio-capture/.test(er)) h.on = false; };
+    sr.onend = () => {
+      if (!h.on || h.sr !== sr) return;
+      ev.push(`restart@${Math.round(performance.now() - t0)}`);
+      setTimeout(go, performance.now() - lastStart < 1000 ? 200 : 0);
+    };
+    srWatch(sr, t0, ev);
+    h.sr = sr; h.n++; lastStart = performance.now();
+    try { sr.start(track); h.track = true; } catch { try { sr.start(); } catch {} }
+  };
+  go();
+  return h;
 }
 export function logRec(entry) {
   try {
@@ -160,20 +188,8 @@ export function record({ onLevel = () => {}, onSwitch = () => {}, onReady = () =
       let sr = null, srErr = null, over = false, src = null, meter = 0, maxT = 0;
       rec.ondataavailable = e => e.data.size && chunks.push(e.data);
       rec.start();
-      const SR = getSR();
-      if (SR) {
-        try {
-          sr = new SR(); sr.lang = "ko-KR"; sr.continuous = true; sr.interimResults = true; sr.maxAlternatives = 3;
-          sr.onresult = e => {
-            const rs = Array.from(e.results, r => Array.from(r));
-            for (const r of rs) for (const a of r) heard.push(a.transcript);
-            if (rs.length > 1) heard.push(rs.map(r => r[0].transcript).join(" "));
-          };
-          sr.onerror = e => { srErr = e.error || "error"; }; // 삼키지 않는다 — 점수가 안 나온 까닭을 칸에 알려 준다
-          srEv = srWatch(sr, t0);
-          try { sr.start(s.getAudioTracks()[0]); trackPassed = true; } catch { sr.start(); }
-        } catch { sr = null; }
-      }
+      sr = listen(s.getAudioTracks()[0], { onText: x => heard.push(x), onErr: er => { srErr = er; }, t0, ev: srEv }); // 녹음 끝까지 켜 둠
+      trackPassed = !!sr?.track;
       const finish = (extra = {}) => {
         if (over) return; over = true;
         clearInterval(meter); clearTimeout(maxT); onLevel(0);

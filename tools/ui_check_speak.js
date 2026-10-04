@@ -36,6 +36,7 @@
   const fakeSR = class { start(tr) { window.__srTrack = tr?.kind || null; const h = window.__heard; window.__srCont = !!this.continuous;
     if (window.__srErr) { setTimeout(() => this.onerror?.({ error: window.__srErr }), 100); return; } // 진짜 크롬처럼: 인식이 마이크를 못 잡음
     if (window.__srNone) return; // 아무것도 못 알아들음
+    if (window.__srEnd) { window.__srEnd = false; setTimeout(() => this.onend?.(), 2700); return; } // 진짜 크롬처럼: 말이 없으면 2.7초 만에 혼자 끝남
     setTimeout(() => this.onresult?.({ results: [[{ transcript: h.slice(0, 2) }]] }), 250);
     setTimeout(() => this.onresult?.({ results: [[{ transcript: this.continuous ? h : h.slice(0, 2) }]] }), 500); } stop() {} };
   window.SpeechRecognition = fakeSR; window.webkitSpeechRecognition = fakeSR;
@@ -116,6 +117,11 @@
   window.__srNone = false; window.__srErr = "audio-capture"; await say("아무 말"); await waitIdle(); await settle();
   ok(/microphone|माइक्रोफोन|마이크/i.test($(".panel .msg").textContent) && !/✓/.test($(".panel .segnav").innerText), "말하기 창: audio-capture 오류 → 「음성 인식이 마이크를 못 잡았어요」", $(".panel .msg").textContent);
   window.__srErr = null;
+  // 머뭇거리다 3초 뒤에 말함 — 인식이 혼자 끝나도 다시 켜서 점수가 나와야 함(본부 10-04)
+  window.__srEnd = true; window.__heard = $(".panel .say").textContent.replace(/[.,!?]/g, "");
+  $(".panel [data-act=rec]").click(); await W(300); if (window.__mic) window.__mic.g.gain.value = 0.001; await W(3000); speakFor(700); await waitIdle(); await settle();
+  const lr = JSON.parse(localStorage.getItem("malmun.lastrec") || "[]").pop() || {};
+  ok(/^\d+%/.test($(".panel .msg").textContent) && !/^0%/.test($(".panel .msg").textContent), "머뭇거리다 3초 뒤 말해도 점수 나옴(인식이 혼자 끝나면 다시 켬 · 진단에 restart)", $(".panel .msg").textContent + " · " + (lr.sr || []).filter(x => /restart/.test(x)).join(","));
   // 설명 카드 안 「이제 말해 보세요」도 같게
   line(9).querySelector("[data-act=speak]").click(); await W(500);
   line(10).querySelector("[data-act=explain]").click(); await W(1200); document.querySelector("video").pause();
