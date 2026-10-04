@@ -1,6 +1,6 @@
 // 저장한 내 녹음 관리 — 지우기 · 이 편 모두 지우기 · 내려받기 · 오래 남게(본부 10-04 · 투덜이 승인)
-import { audioCtx } from "./wake.js?v=1004.19";
-import { leadOf, gainOf } from "./playmine.js?v=1004.19";
+import { audioCtx } from "./wake.js?v=1004.20";
+import { leadOf, gainOf, FADE } from "./playmine.js?v=1004.20";
 // 녹음·재생·점수 경로는 건드리지 않는다 — IndexedDB 「malmun」/rec(말하기 창 recGet·recPut 과 같은 곳)만 다룬다
 const open = () => new Promise((res, rej) => {
   const r = indexedDB.open("malmun", 1);
@@ -46,7 +46,8 @@ export function wavOf(buf, t0, t1, g = 1) {
   const w = (o, str) => [...str].forEach((c, i) => v.setUint8(o + i, c.charCodeAt(0)));
   w(0, "RIFF"); v.setUint32(4, 36 + pcm.length * 2, true); w(8, "WAVE"); w(12, "fmt "); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
   v.setUint32(24, sr, true); v.setUint32(28, sr * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true); w(36, "data"); v.setUint32(40, pcm.length * 2, true);
-  for (let i = 0; i < pcm.length; i++) { const x = Math.max(-1, Math.min(1, pcm[i] * g)); v.setInt16(44 + i * 2, Math.round(x < 0 ? x * 0x8000 : x * 0x7fff), true); }
+  const fade = Math.round(FADE * sr); // 재생과 같은 시작 15ms 페이드인
+  for (let i = 0; i < pcm.length; i++) { const x = Math.max(-1, Math.min(1, pcm[i] * g * (i < fade ? i / fade : 1))); v.setInt16(44 + i * 2, Math.round(x < 0 ? x * 0x8000 : x * 0x7fff), true); }
   return new Blob([v], { type: "audio/wav" });
 }
 export async function downloadRec(blob, name) {
