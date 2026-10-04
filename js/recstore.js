@@ -1,4 +1,6 @@
 // 저장한 내 녹음 관리 — 지우기 · 이 편 모두 지우기 · 내려받기 · 오래 남게(본부 10-04 · 투덜이 승인)
+import { audioCtx } from "./wake.js?v=1004.17";
+import { leadOf } from "./playmine.js?v=1004.17";
 // 녹음·재생·점수 경로는 건드리지 않는다 — IndexedDB 「malmun」/rec(말하기 창 recGet·recPut 과 같은 곳)만 다룬다
 const open = () => new Promise((res, rej) => {
   const r = indexedDB.open("malmun", 1);
@@ -21,13 +23,37 @@ export async function recCount(ep) {
   return n;
 }
 
-// 원본 blob 그대로 파일로(다시 굽지 않음) — 확장자는 그 형식대로(아이폰 녹음 = mp4)
+// 내려받기 — 말 앞뒤 빈 곳·잡소리를 잘라 WAV 로(본부 10-04: 「파일 앞에 뭔가 있고 주된 소리가 나중에 나온다」 · 앞 0.4초 웅 + 무음)
+// 저장한 blob·재생·녹음은 그대로 — 내려받는 파일만. 시작 = playmine.js 와 같은 leadOf(말 시작 0.15초 전) · 끝 = 같은 문턱의 말 끝 0.25초 뒤
+// 16bit PCM · 풀린 표본율 그대로 · 모노(첫 채널) · 소리 크기·필터 손대지 않음(자르기만) · 풀기 실패하면 원본 그대로
 const EXT = t => (/webm/.test(t) ? "webm" : /mp4|m4a|aac/.test(t) ? "mp4" : /ogg/.test(t) ? "ogg" : /wav/.test(t) ? "wav" : /mpeg/.test(t) ? "mp3" : "webm");
-export function downloadRec(blob, name) {
+const save = (blob, file) => {
   const u = URL.createObjectURL(blob), a = document.createElement("a");
-  a.href = u; a.download = `${name}.${EXT(blob.type || "")}`;
+  a.href = u; a.download = file;
   document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(u), 5000);
-  return a.download;
+  return file;
+};
+export function speechEnd(buf, post = 0.25) { // leadOf 와 같은 문턱(20ms 창 · max(0.006, 최대×0.08))
+  const d = buf.getChannelData(0), sr = buf.sampleRate, win = Math.max(1, Math.round(sr * 0.02)), rms = [];
+  for (let i = 0; i + win <= d.length; i += win) { let s = 0; for (let k = i; k < i + win; k++) s += d[k] * d[k]; rms.push(Math.sqrt(s / win)); }
+  const peak = Math.max(0, ...rms); if (peak < 0.003) return buf.duration;
+  const th = Math.max(0.006, peak * 0.08); let b = rms.length - 1; while (b > 0 && !(rms[b] > th)) b--;
+  return Math.min(buf.duration, ((b + 1) * win) / sr + post);
+}
+export function wavOf(buf, t0, t1) {
+  const sr = buf.sampleRate, s0 = Math.max(0, Math.round(t0 * sr)), s1 = Math.min(buf.length, Math.round(t1 * sr));
+  const pcm = buf.getChannelData(0).subarray(s0, s1), v = new DataView(new ArrayBuffer(44 + pcm.length * 2));
+  const w = (o, str) => [...str].forEach((c, i) => v.setUint8(o + i, c.charCodeAt(0)));
+  w(0, "RIFF"); v.setUint32(4, 36 + pcm.length * 2, true); w(8, "WAVE"); w(12, "fmt "); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+  v.setUint32(24, sr, true); v.setUint32(28, sr * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true); w(36, "data"); v.setUint32(40, pcm.length * 2, true);
+  for (let i = 0; i < pcm.length; i++) { const x = Math.max(-1, Math.min(1, pcm[i])); v.setInt16(44 + i * 2, Math.round(x < 0 ? x * 0x8000 : x * 0x7fff), true); }
+  return new Blob([v], { type: "audio/wav" });
+}
+export async function downloadRec(blob, name) {
+  try {
+    const buf = await audioCtx().decodeAudioData(await blob.slice(0).arrayBuffer());
+    return save(wavOf(buf, leadOf(buf), speechEnd(buf)), `${name}.wav`);
+  } catch { return save(blob, `${name}.${EXT(blob.type || "")}`); } // 풀기 실패 → 원본 그대로
 }
 
 // 처음 저장할 때 오래 남게 요청 — 묻는 창 없이 되는 브라우저에서만(파이어폭스는 창을 띄워서 건너뜀) · 실패해도 조용히 · 결과는 진단에만

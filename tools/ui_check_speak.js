@@ -92,8 +92,8 @@
   $(".panel [data-act=save]").click(); await W(200); HTMLAnchorElement.prototype.click = oc;
   ok(/^malmun_L01-00-01_01_p01\.(webm|m4a|ogg) blob:$/.test(dl || ""), "[⬇] → 저장한 내 녹음을 원본(다시 굽지 않음) 파일로", String(dl));
   let dl2 = null; const oc2 = HTMLAnchorElement.prototype.click; HTMLAnchorElement.prototype.click = function () { if (this.download) dl2 = this.download; else oc2.call(this); };
-  $(".panel [data-act=savedl]").click(); await W(200); HTMLAnchorElement.prototype.click = oc2;
-  ok(dl2 === "malmun_L01-00-01_01_p01_100.webm", "말하기 창: 저장한 녹음 [⬇ 내려받기] 이름에 점수", String(dl2));
+  $(".panel [data-act=savedl]").click(); await W(1200); HTMLAnchorElement.prototype.click = oc2;
+  ok(dl2 === "malmun_L01-00-01_01_p01_100.wav", "말하기 창: 저장한 녹음 [⬇ 내려받기] 이름에 점수", String(dl2));
   const ml0 = (window.__mineLog ||= []).length; $(".panel [data-act=savedplay]").click(); for (let k = 0; k < 20 && window.__mineLog.length === ml0; k++) await W(100);
   ok(window.__mineLog.length > ml0, "「저장됨 ▶」 → 저장한 녹음을 말 시작 자리부터(풀어서 직결 재생)", JSON.stringify(window.__mineLog[window.__mineLog.length - 1]));
   ok(!/%/.test($(".panel .msg").textContent), "열 때(돌아왔을 때) 예전 점수는 안 보임 — ✓ 만", $(".panel .msg").textContent);
@@ -156,8 +156,8 @@
   // 저장한 녹음 관리(카드) — 내려받기 = 원본 그대로 · 지우기 = 한 번 묻고 그 녹음만
   window.__heard = "한국에 온 걸 환영해요"; cm = await crec(); $(".panel .sayb [data-x=keep]").click(); await W(500);
   let dlc = null; const occ = HTMLAnchorElement.prototype.click; HTMLAnchorElement.prototype.click = function () { if (this.download) dlc = this.download; else occ.call(this); };
-  $(".panel .sayb [data-x=savedl]").click(); await W(200); HTMLAnchorElement.prototype.click = occ;
-  ok(dlc === "malmun_L01-00-01_01_say_100.webm" && /⬇ .+/.test($(".panel .sayb [data-x=savedl]").textContent), "카드: 저장한 녹음 [⬇ 내려받기] → 원본 그대로 파일(이름에 점수)", String(dlc));
+  $(".panel .sayb [data-x=savedl]").click(); await W(1200); HTMLAnchorElement.prototype.click = occ;
+  ok(dlc === "malmun_L01-00-01_01_say_100.wav" && /⬇ .+/.test($(".panel .sayb [data-x=savedl]").textContent), "카드: 저장한 녹음 [⬇ 내려받기] → 원본 그대로 파일(이름에 점수)", String(dlc));
   let asked2 = 0; const oconf = window.confirm; window.confirm = () => (asked2++, false);
   $(".panel .sayb [data-x=savedel]").click(); await W(200);
   const stay = !$(".panel .sayb [data-x=savedplay]").hidden;
