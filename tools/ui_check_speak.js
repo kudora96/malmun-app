@@ -65,7 +65,7 @@
   await say("안녕하세요"); ok(micAsked === 1 && $(".panel .mic").classList.contains("on"), "[말하기] → 마이크 허락 1번 · 녹음 중 표시");
   await waitIdle();
   ok(!$(".panel .mic").classList.contains("on"), "말이 끝나고 조용하면 저절로 멈춤");
-  ok(/50%/.test($(".panel .msg").textContent) && !$(".panel .meter").classList.contains("pass") && /1\/5/.test($(".panel .segnav").innerText.replace(/\s/g, "")), "다르게 말함 → 50% · 통과 아님 · 그 자리에 있음(막지 않음)", $(".panel .msg").textContent);
+  ok(/40%/.test($(".panel .msg").textContent) && !$(".panel .meter").classList.contains("pass") && /1\/5/.test($(".panel .segnav").innerText.replace(/\s/g, "")), "다르게 말함(안녕하세요 / 어서 오세요) → 40%(「세요」 두 음절만) · 통과 아님 · 그 자리에 있음(막지 않음)", $(".panel .msg").textContent);
   ok(!$(".panel [data-act=mine]").disabled && $(".panel [data-act=keep]").hidden, "못 넘어도 방금 녹음은 [내 목소리]로 들림 · [저장] 없음(투덜이 10-04)");
   ok(window.__lastC && window.__lastC.echoCancellation === false && window.__lastC.noiseSuppression === false && window.__lastC.autoGainControl === false, "마이크는 날소리로(에코 제거·잡음 억제·자동 크기 끔 — 말이 뚝뚝 끊기던 것)", JSON.stringify(window.__lastC));
   ok(window.__srCont === true, "음성 인식이 말을 끝까지 들음(짧은 말을 중간에 끊지 않음)");
@@ -136,12 +136,20 @@
   // 통과 = 95% 이상 · 들린 말 한 줄(틀린 음절 빨간 밑줄 · 빠진 자리 _) — 1번 줄 「한국에 온 걸 환영해요」(본부 10-04)
   line(1).querySelector("[data-act=explain]").click(); await W(1300); document.querySelector("video").pause();
   const hl = () => $(".panel .sayb .heardline");
+  // 음절 정렬 점수(본부 10-04 기대값 · 정정: 혼자 맞은 음절도 맞음) · 점수와 빨간 표시는 같은 정렬
+  for (const [h, want] of [["한국에 온 걸 환영해요", 100], ["미국에 온 걸 환영해요", 89], ["한국에 온 걸 환영해", 89], ["한국에 온 걸 환영합니다", 70], ["너 죽는다 환영 한", 22], ["안녕하세요", 11], ["한국에 걸 환영해요", 89]]) {
+    window.__heard = h; cm = await crec();
+    const got = +(cm.match(/^(\d+)%/) || [])[1], keepShown = !$(".panel .sayb [data-x=keep]").hidden, marks = [...hl().querySelectorAll("mark")].map(x => x.className + ":" + x.textContent).join(" ");
+    ok(got === want && keepShown === (want >= 95), `「${h}」 → ${want}%${want >= 95 ? " ✓ · [저장]" : " · 통과 아님"}`, `${got}% · ${hl().textContent}${marks ? " · 빨간 " + marks : ""}`);
+  }
   window.__heard = "미국에 온 걸 환영해요"; cm = await crec();
-  ok(/^8\d%/.test(cm) && !/✓/.test(cm) && $(".panel .sayb [data-x=keep]").hidden && [...hl().querySelectorAll("mark.bad")].map(x => x.textContent).join("") === "미", "「미국에…」 → 8n% · ✓·[저장] 없음(95 못 넘음) · 「미」 빨간 밑줄", cm + " | " + hl().textContent);
-  window.__heard = "한국에 온 걸 환영해요"; cm = await crec();
-  ok(/^100% ✓/.test(cm) && !$(".panel .sayb [data-x=keep]").hidden && !hl().querySelector("mark") && /✓/.test(hl().textContent), "「한국에 온 걸 환영해요」 → 100% ✓ · [저장] · 빨간 없음", cm + " | " + hl().textContent);
+  ok([...hl().querySelectorAll("mark.bad")].map(x => x.textContent).join("") === "미", "「미국에…」 빨간 밑줄은 「미」만", hl().textContent);
   window.__heard = "한국에 걸 환영해요"; cm = await crec();
-  ok(!!hl().querySelector("mark.miss") && !/^100/.test(cm), "「한국에 걸 환영해요」 → 빠진 자리 표시(_)", cm + " | " + hl().innerHTML.replace(/<[^>]+>/g, m => m.startsWith("<mark") ? "[" : m === "</mark>" ? "]" : ""));
+  ok(!!hl().querySelector("mark.miss"), "「한국에 걸…」 빠진 자리 _", hl().textContent);
+  window.__heard = "안녕하세요"; cm = await crec();
+  ok([...hl().querySelectorAll("mark.bad")].map(x => x.textContent).join("") === "안녕하세" && /요/.test(hl().textContent), "「안녕하세요」 → 빨간 「안녕하세」 · 「요」는 보통(한 글자라도 맞은 곳)", hl().textContent);
+  window.__heard = "너 죽는다 환영 한"; cm = await crec();
+  ok([...hl().querySelectorAll("mark.bad")].map(x => x.textContent).join("") === "너죽는다한", "「너 죽는다 환영 한」 → 「환영」만 보통 · 나머지 빨간", hl().textContent);
   line(1).querySelector("[data-act=explain]").click(); await W(500);
   // 🔁 켠 채로 카드 소리 — 본보기·내 목소리는 한 번만 · 설명 ▶ 는 반복 · 🎤 = 반복·재생 모두 멈춤(본부 10-04 「끝없이 되풀이」)
   const pl = []; const op3 = HTMLMediaElement.prototype.play; HTMLMediaElement.prototype.play = function () { pl.push({ el: this, src: decodeURIComponent(this.src) }); return op3.call(this); };

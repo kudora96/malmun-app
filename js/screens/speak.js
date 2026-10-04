@@ -13,41 +13,23 @@
 //     못 넘어도 막지 않는다([다음 ▶]) · 음성 인식이 안 되는 곳은 점수 없이 듣고 비교만(녹음은 저장)
 //  S6 녹음은 이 기기 안에만(IndexedDB) — 서버로 보내지 않는다
 //  S7 영상 창 안(embedded): 스크롤 없이 · 줄 이동·닫기는 학습 화면이 한다 · 줄 전체까지 통과하면 다음 줄 말하기로
-import { t, lang } from "../i18n.js?v=1004.13";
-import { esc } from "../text.js?v=1004.13";
-import { episode } from "../data.js?v=1004.13";
-import { paths } from "../paths.js?v=1004.13";
-import { audioCtx, hold, quietWake } from "../wake.js?v=1004.13";
-import * as sfx from "../sfx.js?v=1004.13";
-import { diagEnv, keepDiag } from "../diag.js?v=1004.13";
-import { playMine as playMineRec } from "../playmine.js?v=1004.13";
-import { bestHeard, heardHTML } from "../heard.js?v=1004.13";
-import { logRec, dB, srWhy, srWatch, niceLabel, ALIAS } from "../recorder.js?v=1004.13";
+import { t, lang } from "../i18n.js?v=1004.15";
+import { esc } from "../text.js?v=1004.15";
+import { episode } from "../data.js?v=1004.15";
+import { paths } from "../paths.js?v=1004.15";
+import { audioCtx, hold, quietWake } from "../wake.js?v=1004.15";
+import * as sfx from "../sfx.js?v=1004.15";
+import { diagEnv, keepDiag } from "../diag.js?v=1004.15";
+import { playMine as playMineRec } from "../playmine.js?v=1004.15";
+import { bestHeard, heardHTML } from "../heard.js?v=1004.15";
+import { logRec, dB, srWhy, srWatch, niceLabel, ALIAS } from "../recorder.js?v=1004.15";
 
 export const PASS = 95; // 통과(✓ · [저장]) — 80 은 낮았다(「미국에 온 걸 환영해요」 88% 통과 — 본부 10-04 · 투덜이 승인)
 const MAX_MS = 8000, QUIET_MS = 1000;
 
-// ── 닮음(자모 단위) ──
-const CHO = "ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ", JUNG = "ㅏㅐㅑㅒㅓㅔㅕㅖㅗㅘㅙㅚㅛㅜㅝㅞㅟㅠㅡㅢㅣ";
-const JONG = ["", "ㄱ", "ㄲ", "ㄳ", "ㄴ", "ㄵ", "ㄶ", "ㄷ", "ㄹ", "ㄺ", "ㄻ", "ㄼ", "ㄽ", "ㄾ", "ㄿ", "ㅀ", "ㅁ", "ㅂ", "ㅄ", "ㅅ", "ㅆ", "ㅇ", "ㅈ", "ㅊ", "ㅋ", "ㅌ", "ㅍ", "ㅎ"];
-const NUM = { "0": "영", "1": "일", "2": "이", "3": "삼", "4": "사", "5": "오", "6": "육", "7": "칠", "8": "팔", "9": "구" };
-export function jamoOf(text) {
-  let out = "";
-  for (const ch of String(text).replace(/500/g, "오백").replace(/[0-9]/g, d => NUM[d])) {
-    const c = ch.charCodeAt(0) - 0xac00;
-    if (c >= 0 && c <= 11171) out += CHO[Math.floor(c / 588)] + JUNG[Math.floor((c % 588) / 28)] + JONG[c % 28];
-  }
-  return out;
-}
-export function similarity(want, heard) {
-  const a = jamoOf(want), b = jamoOf(heard);
-  if (!a.length) return 0;
-  const d = Array.from({ length: a.length + 1 }, (_, i) => [i, ...Array(b.length).fill(0)]);
-  for (let j = 1; j <= b.length; j++) d[0][j] = j;
-  for (let i = 1; i <= a.length; i++) for (let j = 1; j <= b.length; j++)
-    d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
-  return Math.max(0, Math.round(100 * (1 - d[a.length][b.length] / Math.max(a.length, b.length))));
-}
+// ── 닮음 = 음절 정렬(js/score.js · 「들린 말」 빨간 표시와 같은 함수 — 본부 10-04) ──
+import { similarity } from "../score.js?v=1004.15";
+export { similarity };
 
 // ── 내 목소리 저장(S6) ──
 const db = () => new Promise((res, rej) => {
