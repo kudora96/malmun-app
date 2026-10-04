@@ -13,13 +13,13 @@
 //  W5 소리는 언제나 하나만 · 새 일을 하면 앞 소리는 멈춘다
 //  W6 영상 창 안(embedded): 창 안에서 스크롤 없이 다 보이게 — 긴 문장은 토막으로(◀ 1/3 ▶) ·
 //     토막을 다 쓰면 자동으로 다음 토막 · 줄을 다 쓰면 대사를 듣고 자동으로 다음 줄 쓰기 · 아래 ▶ = 이 부분 듣기
-import { t, lang } from "../i18n.js?v=1004.21";
-import { esc, glossCards, toJamo, compose, vowelLen, JAMO_AUDIO } from "../text.js?v=1004.21";
-import { episode, chars, charsF } from "../data.js?v=1004.21";
-import { paths } from "../paths.js?v=1004.21";
-import { I } from "../ui.js?v=1004.21";
-import { audioCtx, hold } from "../wake.js?v=1004.21";
-import * as sfx from "../sfx.js?v=1004.21";
+import { t, lang } from "../i18n.js?v=1004.22";
+import { esc, glossCards, toJamo, compose, vowelLen, JAMO_AUDIO } from "../text.js?v=1004.22";
+import { episode, chars, charsF } from "../data.js?v=1004.22";
+import { paths } from "../paths.js?v=1004.22";
+import { I } from "../ui.js?v=1004.22";
+import { audioCtx, hold } from "../wake.js?v=1004.22";
+import * as sfx from "../sfx.js?v=1004.22";
 
 const KEYS = [..."ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎㄲㄸㅃㅆㅉ"], VOW = [..."ㅏㅑㅓㅕㅗㅛㅜㅠㅡㅣ"];
 const GAP_NEXT = 600;     // 글자 소리 → 다음 글자 사이

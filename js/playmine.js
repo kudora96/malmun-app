@@ -2,10 +2,10 @@
 // · <audio> 자리 옮기기(seek)는 쓰지 않는다(webm 을 찾아가며 소리가 깨졌다 — 1004.9)
 // · blob 을 decodeAudioData 로 풀어 AudioBufferSourceNode.start(0, lead) · 연결은 source → destination 직결(게인·필터 없음)
 //   lead = 말 시작 0.15초 전(같은 버퍼에서 잼) · 끝나면 멈춤 · 풀기 실패하면 <audio> 로 처음부터
-import { audioCtx } from "./wake.js?v=1004.21";
+import { audioCtx } from "./wake.js?v=1004.22";
 
 // 시작 = 말 시작 0.08초 전(본부 10-04: 0.15 → 0.08 · 앞 잡소리가 끼지 않게)
-// 녹음 맨 앞(0.15초 안)에서 시작한 소리는 녹음 켜는 순간의 잡소리일 수 있다(앞 소리 꼬리·딸깍 — 투덜이 17:49 녹음: −42dB 잡소리 → −53~−65 틈 → −30 말) →
+// 첫 소리가 말보다 작고(최대에서 8dB 넘게 아래) 뒤에 조용한 틈이 있으면 녹음 켜는 순간의 잡소리일 수 있다(앞 소리 꼬리·딸깍 — 투덜이 17:49 녹음: −42dB 잡소리 → −53~−65 틈 → −30 말) →
 //   그 소리가 한 번 「조용함」(최대보다 20dB 아래 · 100ms 이상 이어짐)으로 떨어진 뒤의 첫 말 칸부터 · 조용한 틈이 없으면 그대로(바로 말함 = 0 근처)
 //   단 앞 소리가 말만큼 크면(최대에서 8dB 안) 진짜 첫 낱말로 보고 건너뛰지 않는다(바로 말하고 낱말 사이에 쉰 경우)
 export const FADE = 0.015; // 시작 15ms 페이드인(딸깍 방지 · 말 시작 0.08초 앞이라 본소리엔 안 닿음)
@@ -16,7 +16,7 @@ export function leadOf(buf, pre = 0.08) {
   if (peak < 0.003) return 0;
   const th = Math.max(0.006, peak * 0.08), quiet = peak * Math.pow(10, -20 / 20), loud = peak * Math.pow(10, -8 / 20), RUN = Math.ceil(0.1 / 0.02);
   let a = rms.findIndex(v => v > th);
-  if (a >= 0 && a * win / sr < 0.15) { // 맨 앞에서 시작한 소리 → 조용한 틈(100ms+) 뒤의 말
+  if (a >= 0) { // 첫 소리 → 조용한 틈(100ms+) 뒤의 말(시각 조건 없음 — 투덜이 17:49: 첫 소리 칸이 0.16초라 0.15초 조건에 걸렸다)
     let run = 0, after = -1, head = 0;
     for (let k = a; k < rms.length; k++) { run = rms[k] < quiet ? run + 1 : 0; if (!run) head = Math.max(head, rms[k]); if (run >= RUN) { after = k + 1; break; } }
     if (head >= loud) after = -1; // 앞 소리가 말만큼 큼 = 진짜 첫 낱말
