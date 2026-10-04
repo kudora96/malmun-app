@@ -114,5 +114,8 @@
  "del_all": "Delete all my recordings in this episode",
  "del_all_q": "Delete all your recordings in this episode?",
  "deleted": "Deleted.",
- "ep_missing": "That lesson wasn't found — here is the list."
+ "ep_missing": "That lesson wasn't found — here is the list.",
+ "help_btn": "? Help",
+ "prev_btn": "◀ Back",
+ "next_btn": "Next ▶"
 }

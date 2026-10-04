@@ -383,3 +383,8 @@ a{color:inherit;text-decoration:none}
 
 /* 짧은 안내(없는 편 등) */
 .toast{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:60;max-width:calc(100% - 32px);padding:8px 14px;border-radius:10px;background:var(--ink);color:var(--bg);font-size:13px;box-shadow:0 4px 12px rgba(0,0,0,.25)}
+
+/* 말하기 창 머리줄 — 글자 붙은 단추(? 사용법 · ◀ 앞 · 다음 ▶) · 좁으면 줄바꿈 */
+.speak .whead{flex-wrap:wrap;row-gap:2px}
+.speak .whead .micpick{width:auto;padding:0 8px;font-size:12px}
+.speak .segnav button{width:auto;padding:0 6px;font-size:11.5px}

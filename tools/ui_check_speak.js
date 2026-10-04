@@ -53,7 +53,7 @@
   $(".panel .task").click(); await W(100);
   ok(hbShown && hb.hidden, "처음 열면 사용법 풍선이 저절로 · 아무 데나 누르면 닫힘");
   $(".panel [data-act=help]").click(); await W(100); const hb2 = !hb.hidden; $(".panel [data-act=help]").click(); await W(100);
-  ok(hb2 && hb.hidden && $(".panel [data-act=save]").disabled, "[?] → 풍선 열림 · 다시 → 닫힘 · 녹음 전에는 [⬇] 꺼져 있음");
+  ok(hb2 && hb.hidden && !$(".panel .whead [data-act=save]") && !$(".panel .whead [data-act=pick]") && /\S\s*\S/.test($(".panel [data-act=help]").textContent.trim()), "[? 사용법] → 풍선 열림 · 다시 → 닫힘 · 위 줄에 옛 ⬇·🎤 단추 없음", $(".panel .whead").innerText.replace(/\s+/g, " "));
   const sp = $(".panel .speak"), p = $(".panel").getBoundingClientRect(), btn = $(".panel .sbtns").getBoundingClientRect();
   ok($("#vwrap").offsetHeight === 0 && sp && sp.scrollHeight - sp.clientHeight <= 1 && btn.bottom <= p.bottom + 1, "말하기가 영상 창 자리에 · 창 안 스크롤 없음");
   ok($(".panel .say").textContent === "어서 오세요." && /1\/5/.test($(".panel .segnav").innerText.replace(/\s/g, "")), "과제 = 첫 토막 「어서 오세요.」 · 1/5(토막 3 + 줄 전체 + 말해 보기)", $(".panel .say").textContent + " " + $(".panel .segnav").innerText.replace(/\s/g, ""));
@@ -88,9 +88,6 @@
   // 저장 확인: 앞 토막으로 돌아가면 ✓ + 내 목소리 켜짐
   $(".panel [data-seg='-1']").click(); await W(300);
   ok(/1\/5✓/.test($(".panel .segnav").innerText.replace(/\s/g, "")) && !$(".panel [data-act=savedplay]").hidden && $(".panel [data-act=mine]").disabled, "앞 토막으로 → ✓ · 「저장됨 ▶」 · (방금 녹음 없음이라 [내 목소리] 꺼짐)", $(".panel .segnav").innerText.replace(/\s/g, ""));
-  let dl = null; const oc = HTMLAnchorElement.prototype.click; HTMLAnchorElement.prototype.click = function () { if (this.download) dl = this.download + " " + this.href.slice(0, 5); else oc.call(this); };
-  $(".panel [data-act=save]").click(); await W(200); HTMLAnchorElement.prototype.click = oc;
-  ok(/^malmun_L01-00-01_01_p01\.(webm|m4a|ogg) blob:$/.test(dl || ""), "[⬇] → 저장한 내 녹음을 원본(다시 굽지 않음) 파일로", String(dl));
   let dl2 = null; const oc2 = HTMLAnchorElement.prototype.click; HTMLAnchorElement.prototype.click = function () { if (this.download) dl2 = this.download; else oc2.call(this); };
   $(".panel [data-act=savedl]").click(); await W(1200); HTMLAnchorElement.prototype.click = oc2;
   ok(dl2 === "malmun_L01-00-01_01_p01_100.wav", "말하기 창: 저장한 녹음 [⬇ 내려받기] 이름에 점수", String(dl2));
@@ -107,7 +104,7 @@
   ok(/✓/.test($(".panel .segnav").innerText), "다시 열어도 ✓ 와 저장된 녹음이 남아 있음", $(".panel .segnav").innerText.replace(/\s/g, ""));
   // 줄 전체까지 통과 → 다음 줄 말하기
   for (const [k, heard] of ["어서 오세요", "경복궁에 온 걸", "환영해요", "어서 오세요 경복궁에 온 걸 환영해요", "한국에 온 걸 환영해요"].entries()) {
-    while (!new RegExp(`^${k + 1}/`).test($(".panel .segnav").innerText.replace(/\s/g, "").replace(/^◀/, ""))) { $(".panel [data-seg='1']").click(); await W(200); }
+    while (+((($(".panel .segnav").innerText.replace(/\s/g, "").match(/(\d+)\/5/)) || [])[1]) !== k + 1) { $(".panel [data-seg='1']").click(); await W(200); }
     await say(heard); await waitIdle(); $(".panel [data-act=keep]").click(); await W(300);
   }
   await W(600);
@@ -242,8 +239,27 @@
   $(".panel [data-act=rec]").click(); await W(500);
   ok(!$(".panel .mic").classList.contains("on") && asked.length === 1 && $(".panel .msg").textContent.length > 20, "마이크 허락 안 함 → 한 번만 묻고 이유를 알려 줌", $(".panel .msg").textContent);
   window.__micDeny = false; try { localStorage.removeItem("malmun.mic"); } catch {}
+  // 말하기 창 = 카드와 같은 기준(본부 10-04) — 1번 줄 5토막 각각 맞음/틀림/빠짐
+  window.SpeechRecognition = fakeSR; window.webkitSpeechRecognition = fakeSR; // 앞의 「인식 없는 기기」 시험에서 지운 것 되살림
+  await open(1); while (!/(^|\D)1\/5/.test($(".panel .segnav").innerText.replace(/\s/g, ""))) { $(".panel [data-seg='-1']").click(); await W(150); }
+  const settle2 = async () => { for (let k = 0; k < 40 && /Checking|확인 중|जाँच्दै/.test($(".panel .msg")?.textContent || ""); k++) await W(150); };
+  const syl = x => [...x].filter(c => /[가-힣]/.test(c));
+  let bad5 = [];
+  for (let k = 0; k < 5; k++) {
+    if (k) { $(".panel [data-seg='1']").click(); await W(250); }
+    const txt = $(".panel .say").textContent, S = syl(txt);
+    const forms = [["맞음", txt, m => /^100% ✓/.test(m) && !$(".panel [data-act=keep]").hidden],
+      ["틀림", txt.replace(S[0], S[0] === "미" ? "비" : "미"), m => !/✓/.test(m) && $(".panel [data-act=keep]").hidden && !!$(".panel .heardline mark.bad")],
+      ["빠짐", txt.replace(S[1] || S[0], ""), m => !/^100/.test(m) && $(".panel [data-act=keep]").hidden && !!$(".panel .heardline mark.miss")]];
+    for (const [nm, h, chk] of forms) { await say(h); await waitIdle(); await settle2(); const m = $(".panel .msg").textContent; if (!chk(m)) bad5.push(`${k + 1}토막 ${nm}: ${m} | ${$(".panel .heardline").textContent}`); }
+  }
+  ok(!bad5.length, "말하기 창 1번 줄 5토막 × 맞음(100% ✓·[저장])/틀림(빨간 밑줄·저장 없음)/빠짐(_·저장 없음)", bad5.join(" ; ") || "15/15");
+  window.__srNone = true; await say("아무 말"); await waitIdle(); await settle2(); window.__srNone = false;
+  ok(/^0% · /.test($(".panel .msg").textContent) && $(".panel [data-act=keep]").hidden && ![...document.querySelectorAll(".panel button")].some(b => !b.hidden && /^⬇$/.test(b.textContent.trim())), "0% 녹음 뒤 저장할 길 없음([저장] 없음 · 옛 ⬇ 없음)", $(".panel .msg").textContent);
+  ok(![...document.querySelectorAll(".panel button")].filter(b => !b.hidden && b.offsetParent).some(b => !/[\p{L}]/u.test(b.textContent)), "말하기 창: 아이콘만 단추 없음", [...document.querySelectorAll(".panel button")].filter(b => !b.hidden && b.offsetParent).map(b => b.textContent.trim()).join(" | "));
+  const spx = $(".panel .speak"); ok(spx.scrollHeight - spx.clientHeight <= 1, "말하기 창: 들린 말·저장 줄이 떠도 창 안 스크롤 없음", spx.scrollHeight + "/" + spx.clientHeight);
   // 말하기 창 [🗑 지우기] — 1번 줄 1토막(저장돼 있음)
-  await open(1); while (!/^◀?1\//.test($(".panel .segnav").innerText.replace(/\s/g, ""))) { $(".panel [data-seg='-1']").click(); await W(150); }
+  await open(1); while (!/(^|\D)1\/5/.test($(".panel .segnav").innerText.replace(/\s/g, ""))) { $(".panel [data-seg='-1']").click(); await W(150); }
   const oc3 = window.confirm; window.confirm = () => true;
   const hadTick = /1\/5✓/.test($(".panel .segnav").innerText.replace(/\s/g, ""));
   $(".panel [data-act=savedel]").click(); await W(400);

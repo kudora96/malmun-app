@@ -13,23 +13,23 @@
 //     못 넘어도 막지 않는다([다음 ▶]) · 음성 인식이 안 되는 곳은 점수 없이 듣고 비교만(녹음은 저장)
 //  S6 녹음은 이 기기 안에만(IndexedDB) — 서버로 보내지 않는다
 //  S7 영상 창 안(embedded): 스크롤 없이 · 줄 이동·닫기는 학습 화면이 한다 · 줄 전체까지 통과하면 다음 줄 말하기로
-import { t, lang } from "../i18n.js?v=1004.23";
-import { esc } from "../text.js?v=1004.23";
-import { episode } from "../data.js?v=1004.23";
-import { paths } from "../paths.js?v=1004.23";
-import { audioCtx, hold, quietWake } from "../wake.js?v=1004.23";
-import * as sfx from "../sfx.js?v=1004.23";
-import { diagEnv, keepDiag } from "../diag.js?v=1004.23";
-import { playMine as playMineRec } from "../playmine.js?v=1004.23";
-import { bestHeard, heardHTML } from "../heard.js?v=1004.23";
-import { recDel, downloadRec, askPersist } from "../recstore.js?v=1004.23";
-import { logRec, dB, srWhy, srWatch, niceLabel, ALIAS } from "../recorder.js?v=1004.23";
+import { t, lang } from "../i18n.js?v=1004.24";
+import { esc } from "../text.js?v=1004.24";
+import { episode } from "../data.js?v=1004.24";
+import { paths } from "../paths.js?v=1004.24";
+import { audioCtx, hold, quietWake } from "../wake.js?v=1004.24";
+import * as sfx from "../sfx.js?v=1004.24";
+import { diagEnv, keepDiag } from "../diag.js?v=1004.24";
+import { playMine as playMineRec } from "../playmine.js?v=1004.24";
+import { bestHeard, heardHTML } from "../heard.js?v=1004.24";
+import { recDel, downloadRec, askPersist } from "../recstore.js?v=1004.24";
+import { logRec, dB, srWhy, srWatch, niceLabel, ALIAS } from "../recorder.js?v=1004.24";
 
 export const PASS = 95; // 통과(✓ · [저장]) — 80 은 낮았다(「미국에 온 걸 환영해요」 88% 통과 — 본부 10-04 · 투덜이 승인)
 const MAX_MS = 8000, QUIET_MS = 1000;
 
 // ── 닮음 = 음절 정렬(js/score.js · 「들린 말」 빨간 표시와 같은 함수 — 본부 10-04) ──
-import { similarity } from "../score.js?v=1004.23";
+import { similarity } from "../score.js?v=1004.24";
 export { similarity };
 
 // ── 내 목소리 저장(S6) ──
@@ -58,7 +58,7 @@ export default async function speak(app, ep, id, opts = {}) {
 
   app.innerHTML = `<section class="scr speak ${opts.embedded ? "embedded" : ""}">
     <div class="whead"><b>${esc(t("speak"))}</b><span class="sub">${li + 1} / ${d.lines.length} · <span class="ko" lang="ko">${esc(line.speaker)}</span></span>
-      <button class="micpick" data-act="help" aria-label="${esc(t("help"))}">?</button><button class="micpick" data-act="save" aria-label="${esc(t("save_rec"))}" title="${esc(t("save_rec"))}" disabled>⬇</button><button class="micpick" data-act="pick" aria-label="${esc(t("mic_pick"))}">🎤</button><span class="segnav"></span></div>
+      <button class="micpick" data-act="help" aria-label="${esc(t("help"))}">${esc(t("help_btn"))}</button><span class="segnav"></span></div>
     <div class="miclist" hidden></div>
     <div class="helpbox" hidden>${[1, 2, 3, 4, 5].map(k => `<p>${esc(t("help_sp_" + k))}</p>`).join("")}<p class="x">${esc(t("help_close"))}</p></div>
     <div class="task"><div class="say ko" lang="ko"></div><div class="tr"></div></div>
@@ -88,7 +88,7 @@ export default async function speak(app, ep, id, opts = {}) {
     for (let fs = 26; task.scrollHeight > task.clientHeight + 1 && fs >= 15; fs -= 1) say.style.fontSize = fs + "px";
     if (task.scrollHeight > task.clientHeight + 1) tr.hidden = true; // 그래도 넘치면 번역 줄을 접는다(아래 말풍선에 있다)
     $(".segnav").innerHTML = parts.length > 1
-      ? `<button data-seg="-1" ${st.i ? "" : "disabled"} aria-label="${esc(t("previous"))}">◀</button><span>${st.i + 1}/${parts.length}${sv?.score >= PASS ? " ✓" : ""}</span><button data-seg="1" ${st.i < parts.length - 1 ? "" : "disabled"} aria-label="${esc(t("next"))}">▶</button>` : "";
+      ? `<button data-seg="-1" ${st.i ? "" : "disabled"} aria-label="${esc(t("previous"))}">${esc(t("prev_btn"))}</button><span>${st.i + 1}/${parts.length}${sv?.score >= PASS ? " ✓" : ""}</span><button data-seg="1" ${st.i < parts.length - 1 ? "" : "disabled"} aria-label="${esc(t("next"))}">${esc(t("next_btn"))}</button>` : "";
     const sc = st.score ?? null; // 점수는 이번에 말한 뒤에만(열 때 예전 점수를 보이지 않음 — ✓ 는 토막 번호 옆에)
     $(".sbar i").style.width = (sc ?? 0) + "%";
     $(".meter").classList.toggle("pass", sc != null && sc >= PASS);
@@ -96,13 +96,12 @@ export default async function speak(app, ep, id, opts = {}) {
     $(".msg").textContent = st.rec ? t(!st.ready ? "mic_opening" : st.switched ? "mic_switched" : "listening") : st.kept ? `${sc}% ✓ · ${t(st.kept)}` : st.note ? `0% · ${t(st.note)}` : sc == null ? (SR ? t(mineBlob() ? "no_score" : "speak_hint") : t(mineBlob() ? "no_score" : "speak_hint_noscore"))
       : `${sc}%${sc >= PASS ? " ✓" : ""} · ${t(sc >= PASS ? "score_5" : sc >= 60 ? "score_3" : sc >= 40 ? "score_2" : "score_1")}`; // 점수에 맞는 한마디
     $("[data-act=mine]").disabled = $("[data-act=both]").disabled = !mineBlob();
-    $("[data-act=save]").disabled = !(mineBlob() || savedRec()?.blob);
     $("[data-act=keep]").hidden = !(sc != null && sc >= PASS && mineBlob() && !st.kept); // 80% 넘으면 [저장]
     $("[data-act=savedplay]").hidden = $("[data-act=savedl]").hidden = $("[data-act=savedel]").hidden = !savedRec()?.blob;
     if (savedRec()?.blob) $("[data-act=savedplay]").textContent = t("saved_play_n", { n: savedRec().score ?? "" }); // 저장된 것도 점수 보이게
     $(".heardline").innerHTML = !st.rec && st.heardHTML ? st.heardHTML : ""; // 들린 말(틀린 음절 빨간 밑줄 · 빠진 자리 _)
     $(".mic").classList.toggle("on", !!st.rec);
-    $(".mic .lab").textContent = st.rec ? (st.ready ? t("btn_stop") : "… " + t("mic_opening")) : t("speak_now"); // 준비 중 → 마이크에 실제 소리가 들어오면 녹음 중
+    $(".mic .lab").textContent = st.rec ? (st.ready ? t("btn_stop") : "… " + t("mic_opening")) : "🎤 " + t("speak_now"); // 준비 중 → 마이크에 실제 소리가 들어오면 녹음 중 · 카드처럼 「🎤 बोल्नुहोस्」
     $("[data-act=model]").setAttribute("aria-pressed", String(st.model));
   }
   function stopSounds() { sfx.stopAll(); st.model = false; if (st.mine) { st.mine.pause(); st.mine = null; } }
@@ -283,14 +282,6 @@ export default async function speak(app, ep, id, opts = {}) {
       return;
     }
     if (a === "savedplay") { stopRec(true); playMine(savedRec()); return; }
-    if (a === "save") { // 내 녹음을 파일로(방금 것 · 없으면 저장한 것)
-      const bl = mineBlob() || savedRec()?.blob; if (!bl) return;
-      const u = URL.createObjectURL(bl), el = document.createElement("a");
-      el.href = u; el.download = `malmun_${cur().key}.${/wav/.test(bl.type) ? "wav" : /mp4/.test(bl.type) ? "m4a" : /ogg/.test(bl.type) ? "ogg" : "webm"}`;
-      document.body.append(el); el.click(); el.remove(); setTimeout(() => URL.revokeObjectURL(u), 5000);
-      $(".msg").textContent = t("saved_file");
-      return;
-    }
     if (a === "model") { stopRec(true); st.model ? (stopSounds(), paint()) : playModel(); }
     else if (a === "rec") { if (st.starting) return; if (!st.rec) { st.playingAtStart = sfx.playing() || st.model || !!st.mine; st.heardHTML = ""; quietWake(true); } /* 진단 · 녹음하는 동안 깨우기 소리 멈춤 */ st.rec ? stopRec() : (st.starting = true, startRec().finally(() => { st.starting = false; if (!st.rec) quietWake(false); })); } // 마이크를 여는 동안 또 눌러도 하나만(빠르게 여러 번 누름)
     else if (a === "mine") { stopRec(true); playMine(); }
