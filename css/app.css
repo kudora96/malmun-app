@@ -325,7 +325,7 @@ a{color:inherit;text-decoration:none}
 .v9body{padding:5px 12px 6px;display:flex;flex-direction:column;gap:5px}
 .v9body .chips{display:flex;flex-wrap:wrap;gap:3px 4px;line-height:1.35}
 .v9body .chip{background:var(--bubble);border-radius:6px;padding:1px 6px;font-size:11.5px}
-.v9body .chip b{font-size:12.5px}
+.v9body .chip b{font-size:12.5px;white-space:nowrap} /* 「읽을 수」처럼 띄어 쓴 조각도 한 덩어리로 */
 .v9body .chip i{font-style:normal;color:var(--mute)}
 .v9body .fx{font-size:11.5px;color:var(--mute);padding:1px 2px}
 .v9body .fx b{color:var(--ink)}

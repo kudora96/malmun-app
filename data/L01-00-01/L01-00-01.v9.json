@@ -15,27 +15,39 @@
    "pieces": [
     {
      "ko": "어서",
-     "gloss": "eo-seo, छिटो"
+     "gloss": "eo-seo, छिटो",
+     "rom": "eo-seo",
+     "mean": "छिटो"
     },
     {
      "ko": "오세요",
-     "gloss": "o-se-yo, आउनुहोस्"
+     "gloss": "o-se-yo, आउनुहोस्",
+     "rom": "o-se-yo",
+     "mean": "आउनुहोस्"
     },
     {
      "ko": "경복궁에",
-     "gloss": "gyeong-bog-gung-e, ग्योङबोकगुङ दरबारमा"
+     "gloss": "gyeong-bog-gung-e, ग्योङबोकगुङ दरबारमा",
+     "rom": "gyeong-bog-gung-e",
+     "mean": "ग्योङबोकगुङ दरबारमा"
     },
     {
      "ko": "온",
-     "gloss": "on, आएको"
+     "gloss": "on, आएको",
+     "rom": "on",
+     "mean": "आएको"
     },
     {
      "ko": "걸",
-     "gloss": "geol"
+     "gloss": "geol, कुरा",
+     "rom": "geol",
+     "mean": "कुरा"
     },
     {
      "ko": "환영해요",
-     "gloss": "hwan-yeong-hae-yo, स्वागत गर्छु"
+     "gloss": "hwan-yeong-hae-yo, स्वागत गर्छु",
+     "rom": "hwan-yeong-hae-yo",
+     "mean": "स्वागत गर्छु"
     }
    ],
    "formula": "장소 + 에 + 와요",
@@ -73,19 +85,27 @@
    "pieces": [
     {
      "ko": "선생님",
-     "gloss": "seon-saeng-nim, शिक्षक"
+     "gloss": "seon-saeng-nim, शिक्षक",
+     "rom": "seon-saeng-nim",
+     "mean": "शिक्षक"
     },
     {
      "ko": "저",
-     "gloss": "jeo, म"
+     "gloss": "jeo, म",
+     "rom": "jeo",
+     "mean": "म"
     },
     {
      "ko": "글자",
-     "gloss": "geul-ja, अक्षर"
+     "gloss": "geul-ja, अक्षर",
+     "rom": "geul-ja",
+     "mean": "अक्षर"
     },
     {
      "ko": "만들었어요",
-     "gloss": "man-deul-eoss-eo-yo, बनाएँ"
+     "gloss": "man-deul-eoss-eo-yo, बनाएँ",
+     "rom": "man-deul-eoss-eo-yo",
+     "mean": "बनाएँ"
     }
    ],
    "formula": "만들 + 었어요",
@@ -123,15 +143,21 @@
    "pieces": [
     {
      "ko": "글자요",
-     "gloss": "geul-ja-yo, अक्षर"
+     "gloss": "geul-ja-yo, अक्षर",
+     "rom": "geul-ja-yo",
+     "mean": "अक्षर"
     },
     {
-     "ko": "…이건",
-     "gloss": "i-geon, यो चाहिँ"
+     "ko": "이건",
+     "gloss": "i-geon, यो चाहिँ",
+     "rom": "i-geon",
+     "mean": "यो चाहिँ"
     },
     {
      "ko": "그림이에요",
-     "gloss": "geu-rim-i-e-yo, चित्र हो"
+     "gloss": "geu-rim-i-e-yo, चित्र हो",
+     "rom": "geu-rim-i-e-yo",
+     "mean": "चित्र हो"
     }
    ],
    "formula": "낱말 + 이에요 / 예요",
@@ -169,15 +195,21 @@
    "pieces": [
     {
      "ko": "글자",
-     "gloss": "geul-ja, अक्षर"
+     "gloss": "geul-ja, अक्षर",
+     "rom": "geul-ja",
+     "mean": "अक्षर"
     },
     {
      "ko": "아니에요",
-     "gloss": "a-ni-e-yo, होइन"
+     "gloss": "a-ni-e-yo, होइन",
+     "rom": "a-ni-e-yo",
+     "mean": "होइन"
     },
     {
      "ko": "왜요",
-     "gloss": "wae-yo, किन"
+     "gloss": "wae-yo, किन",
+     "rom": "wae-yo",
+     "mean": "किन"
     }
    ],
    "formula": "낱말 + 아니에요",
@@ -215,31 +247,45 @@
    "pieces": [
     {
      "ko": "글자는",
-     "gloss": "geul-ja-neun, अक्षर"
+     "gloss": "geul-ja-neun, अक्षर",
+     "rom": "geul-ja-neun",
+     "mean": "अक्षर"
     },
     {
      "ko": "약속이에요",
-     "gloss": "yag-sog-i-e-yo, सहमति हो"
+     "gloss": "yag-sog-i-e-yo, सहमति हो",
+     "rom": "yag-sog-i-e-yo",
+     "mean": "सहमति हो"
     },
     {
      "ko": "다",
-     "gloss": "da, सबै"
+     "gloss": "da, सबै",
+     "rom": "da",
+     "mean": "सबै"
     },
     {
      "ko": "같이",
-     "gloss": "gat-i, मिलेर"
+     "gloss": "gat-i, मिलेर",
+     "rom": "gat-i",
+     "mean": "मिलेर"
     },
     {
-     "ko": "수",
-     "gloss": "ilg-eul su, पढ्न"
+     "ko": "읽을 수",
+     "gloss": "ilg-eul su, पढ्न",
+     "rom": "ilg-eul su",
+     "mean": "पढ्न"
     },
     {
      "ko": "있어야",
-     "gloss": "iss-eo-ya, सक्नुपर्छ"
+     "gloss": "iss-eo-ya, सके मात्र",
+     "rom": "iss-eo-ya",
+     "mean": "सके मात्र"
     },
     {
      "ko": "글자예요",
-     "gloss": "geul-ja-ye-yo, अक्षर हो"
+     "gloss": "geul-ja-ye-yo, अक्षर हो",
+     "rom": "geul-ja-ye-yo",
+     "mean": "अक्षर हो"
     }
    ],
    "formula": "낱말 + 은 / 는",
@@ -277,27 +323,39 @@
    "pieces": [
     {
      "ko": "아",
-     "gloss": "a"
+     "gloss": "a, ओहो",
+     "rom": "a",
+     "mean": "ओहो"
     },
     {
      "ko": "저",
-     "gloss": "jeo, म"
+     "gloss": "jeo, म",
+     "rom": "jeo",
+     "mean": "म"
     },
     {
      "ko": "혼자",
-     "gloss": "hon-ja, एक्लै"
+     "gloss": "hon-ja, एक्लै",
+     "rom": "hon-ja",
+     "mean": "एक्लै"
     },
     {
      "ko": "알면",
-     "gloss": "al-myeon, थाहा भए"
+     "gloss": "al-myeon, थाहा भए",
+     "rom": "al-myeon",
+     "mean": "थाहा भए"
     },
     {
      "ko": "글자가",
-     "gloss": "geul-ja-ga, अक्षर"
+     "gloss": "geul-ja-ga, अक्षर",
+     "rom": "geul-ja-ga",
+     "mean": "अक्षर"
     },
     {
      "ko": "아니구나",
-     "gloss": "a-ni-gu-na, होइन रहेछ"
+     "gloss": "a-ni-gu-na, होइन रहेछ",
+     "rom": "a-ni-gu-na",
+     "mean": "होइन रहेछ"
     }
    ],
    "formula": "말끝 -구나",
@@ -335,23 +393,33 @@
    "pieces": [
     {
      "ko": "그럼",
-     "gloss": "geu-reom, त्यसो भए"
+     "gloss": "geu-reom, त्यसो भए",
+     "rom": "geu-reom",
+     "mean": "त्यसो भए"
     },
     {
      "ko": "그",
-     "gloss": "geu, त्यो"
+     "gloss": "geu, त्यो",
+     "rom": "geu",
+     "mean": "त्यो"
     },
     {
      "ko": "약속은",
-     "gloss": "yag-sog-eun, सहमति"
+     "gloss": "yag-sog-eun, सहमति",
+     "rom": "yag-sog-eun",
+     "mean": "सहमति"
     },
     {
      "ko": "누가",
-     "gloss": "nu-ga, कसले"
+     "gloss": "nu-ga, कसले",
+     "rom": "nu-ga",
+     "mean": "कसले"
     },
     {
      "ko": "정했어요",
-     "gloss": "jeong-haess-eo-yo, तय गर्नुभयो"
+     "gloss": "jeong-haess-eo-yo, तय गर्नुभयो",
+     "rom": "jeong-haess-eo-yo",
+     "mean": "तय गर्नुभयो"
     }
    ],
    "formula": "누가 + 했어요?",
@@ -389,55 +457,81 @@
    "pieces": [
     {
      "ko": "세종대왕이요",
-     "gloss": "Se-jong-dae-wang-i-yo, सेजोङ महाराज"
+     "gloss": "se-jong-dae-wang-i-yo, सेजोङ महाराज",
+     "rom": "se-jong-dae-wang-i-yo",
+     "mean": "सेजोङ महाराज"
     },
     {
      "ko": "오백",
-     "gloss": "o-baeg, पाँच सय"
+     "gloss": "o-baeg, पाँच सय",
+     "rom": "o-baeg",
+     "mean": "पाँच सय"
     },
     {
      "ko": "년",
-     "gloss": "nyeon, वर्ष"
+     "gloss": "nyeon, वर्ष",
+     "rom": "nyeon",
+     "mean": "वर्ष"
     },
     {
      "ko": "전에",
-     "gloss": "jeon-e, अघि"
+     "gloss": "jeon-e, अघि",
+     "rom": "jeon-e",
+     "mean": "अघि"
     },
     {
      "ko": "왕이",
-     "gloss": "wang-i, राजा"
+     "gloss": "wang-i, राजा",
+     "rom": "wang-i",
+     "mean": "राजा"
     },
     {
      "ko": "직접",
-     "gloss": "jig-jeob, आफैँ"
+     "gloss": "jig-jeob, आफैँ",
+     "rom": "jig-jeob",
+     "mean": "आफैँ"
     },
     {
      "ko": "만들었어요",
-     "gloss": "man-deul-eoss-eo-yo, बनाउनुभयो"
+     "gloss": "man-deul-eoss-eo-yo, बनाउनुभयो",
+     "rom": "man-deul-eoss-eo-yo",
+     "mean": "बनाउनुभयो"
     },
     {
      "ko": "그때",
-     "gloss": "geu-ttae, त्यस बेला"
+     "gloss": "geu-ttae, त्यस बेला",
+     "rom": "geu-ttae",
+     "mean": "त्यस बेला"
     },
     {
      "ko": "백성들은",
-     "gloss": "baeg-seong-deul-eun, जनता"
+     "gloss": "baeg-seong-deul-eun, जनता",
+     "rom": "baeg-seong-deul-eun",
+     "mean": "जनता"
     },
     {
      "ko": "글자를",
-     "gloss": "geul-ja-reul, अक्षर"
+     "gloss": "geul-ja-reul, अक्षर",
+     "rom": "geul-ja-reul",
+     "mean": "अक्षर"
     },
     {
      "ko": "몰랐거든요",
-     "gloss": "mol-rass-geo-deun-yo, थाहा थिएन"
+     "gloss": "mol-rass-geo-deun-yo, थाहा थिएन",
+     "rom": "mol-rass-geo-deun-yo",
+     "mean": "थाहा थिएन"
     },
     {
      "ko": "너무",
-     "gloss": "neo-mu, धेरै"
+     "gloss": "neo-mu, धेरै",
+     "rom": "neo-mu",
+     "mean": "धेरै"
     },
     {
      "ko": "어려웠어요",
-     "gloss": "eo-ryeo-woss-eo-yo, गाह्रो थियो"
+     "gloss": "eo-ryeo-woss-eo-yo, गाह्रो थियो",
+     "rom": "eo-ryeo-woss-eo-yo",
+     "mean": "गाह्रो थियो"
     }
    ],
    "formula": "낱말 + 을 / 를 + 움직임 말",
@@ -475,19 +569,27 @@
    "pieces": [
     {
      "ko": "와",
-     "gloss": "wa"
+     "gloss": "wa, वाह",
+     "rom": "wa",
+     "mean": "वाह"
     },
     {
      "ko": "그럼",
-     "gloss": "geu-reom, त्यसो भए"
+     "gloss": "geu-reom, त्यसो भए",
+     "rom": "geu-reom",
+     "mean": "त्यसो भए"
     },
     {
      "ko": "다들",
-     "gloss": "da-deul, सबै जना"
+     "gloss": "da-deul, सबै जना",
+     "rom": "da-deul",
+     "mean": "सबै जना"
     },
     {
      "ko": "좋아했겠네요",
-     "gloss": "joh-a-haess-gess-ne-yo, खुसी भए होलान्"
+     "gloss": "joh-a-haess-gess-ne-yo, खुसी भए होलान्",
+     "rom": "joh-a-haess-gess-ne-yo",
+     "mean": "खुसी भए होलान्"
     }
    ],
    "formula": "",
@@ -525,15 +627,21 @@
    "pieces": [
     {
      "ko": "아니에요",
-     "gloss": "a-ni-e-yo, होइन"
+     "gloss": "a-ni-e-yo, होइन",
+     "rom": "a-ni-e-yo",
+     "mean": "होइन"
     },
     {
      "ko": "신하들이",
-     "gloss": "sin-ha-deul-i, भारदारहरू"
+     "gloss": "sin-ha-deul-i, भारदारहरू",
+     "rom": "sin-ha-deul-i",
+     "mean": "भारदारहरू"
     },
     {
      "ko": "반대했어요",
-     "gloss": "ban-dae-haess-eo-yo, विरोध गरे"
+     "gloss": "ban-dae-haess-eo-yo, विरोध गरे",
+     "rom": "ban-dae-haess-eo-yo",
+     "mean": "विरोध गरे"
     }
    ],
    "formula": "낱말 + 이 / 가",
@@ -571,11 +679,15 @@
    "pieces": [
     {
      "ko": "신하들이요",
-     "gloss": "sin-ha-deul-i-yo, भारदारहरू"
+     "gloss": "sin-ha-deul-i-yo, भारदारहरू",
+     "rom": "sin-ha-deul-i-yo",
+     "mean": "भारदारहरू"
     },
     {
      "ko": "왜요",
-     "gloss": "wae-yo, किन"
+     "gloss": "wae-yo, किन",
+     "rom": "wae-yo",
+     "mean": "किन"
     }
    ],
    "formula": "낱말 + 요 / 이요",
@@ -613,27 +725,39 @@
    "pieces": [
     {
      "ko": "그때는",
-     "gloss": "geu-ttae-neun, त्यस बेला"
+     "gloss": "geu-ttae-neun, त्यस बेला",
+     "rom": "geu-ttae-neun",
+     "mean": "त्यस बेला"
     },
     {
      "ko": "글자를",
-     "gloss": "geul-ja-reul, अक्षर"
+     "gloss": "geul-ja-reul, अक्षर",
+     "rom": "geul-ja-reul",
+     "mean": "अक्षर"
     },
     {
      "ko": "아는",
-     "gloss": "a-neun, जान्ने"
+     "gloss": "a-neun, जान्ने",
+     "rom": "a-neun",
+     "mean": "जान्ने"
     },
     {
      "ko": "사람만",
-     "gloss": "sa-ram-man, मानिस मात्र"
+     "gloss": "sa-ram-man, मानिस मात्र",
+     "rom": "sa-ram-man",
+     "mean": "मानिस मात्र"
     },
     {
      "ko": "힘이",
-     "gloss": "him-i, शक्ति"
+     "gloss": "him-i, शक्ति",
+     "rom": "him-i",
+     "mean": "शक्ति"
     },
     {
      "ko": "있었거든요",
-     "gloss": "iss-eoss-geo-deun-yo, थियो"
+     "gloss": "iss-eoss-geo-deun-yo, थियो",
+     "rom": "iss-eoss-geo-deun-yo",
+     "mean": "थियो"
     }
    ],
    "formula": "낱말 + 만",
@@ -671,23 +795,33 @@
    "pieces": [
     {
      "ko": "그럼",
-     "gloss": "geu-reom, त्यसो भए"
+     "gloss": "geu-reom, त्यसो भए",
+     "rom": "geu-reom",
+     "mean": "त्यसो भए"
     },
     {
      "ko": "우리는요",
-     "gloss": "u-ri-neun-yo, हामी चाहिँ"
+     "gloss": "u-ri-neun-yo, हामी चाहिँ",
+     "rom": "u-ri-neun-yo",
+     "mean": "हामी चाहिँ"
     },
     {
      "ko": "우리도",
-     "gloss": "u-ri-do, हामी पनि"
+     "gloss": "u-ri-do, हामी पनि",
+     "rom": "u-ri-do",
+     "mean": "हामी पनि"
     },
     {
-     "ko": "수",
-     "gloss": "ilg-eul su, पढ्न"
+     "ko": "읽을 수",
+     "gloss": "ilg-eul su, पढ्न",
+     "rom": "ilg-eul su",
+     "mean": "पढ्न"
     },
     {
      "ko": "있어요",
-     "gloss": "iss-eo-yo, सक्छौँ"
+     "gloss": "iss-eo-yo, सक्छौँ",
+     "rom": "iss-eo-yo",
+     "mean": "सक्छौँ"
     }
    ],
    "formula": "낱말 + 도 · 읽 + 을 수 있어요",
@@ -725,31 +859,51 @@
    "pieces": [
     {
      "ko": "자",
-     "gloss": "ja, ल"
+     "gloss": "ja, ल",
+     "rom": "ja",
+     "mean": "ल"
     },
     {
      "ko": "여기",
-     "gloss": "yeo-gi, यहाँ"
+     "gloss": "yeo-gi, यहाँ",
+     "rom": "yeo-gi",
+     "mean": "यहाँ"
     },
     {
      "ko": "보세요",
-     "gloss": "bo-se-yo, हेर्नुहोस्"
+     "gloss": "bo-se-yo, हेर्नुहोस्",
+     "rom": "bo-se-yo",
+     "mean": "हेर्नुहोस्"
     },
     {
      "ko": "이게",
-     "gloss": "i-ge, यो"
+     "gloss": "i-ge, यो",
+     "rom": "i-ge",
+     "mean": "यो"
     },
     {
      "ko": "그",
-     "gloss": "geu, त्यो"
+     "gloss": "geu, त्यो",
+     "rom": "geu",
+     "mean": "त्यो"
     },
     {
      "ko": "글자예요",
-     "gloss": "geul-ja-ye-yo, अक्षर हो"
+     "gloss": "geul-ja-ye-yo, अक्षर हो",
+     "rom": "geul-ja-ye-yo",
+     "mean": "अक्षर हो"
     },
     {
-     "ko": "「아」예요",
-     "gloss": "ye-yo, हो"
+     "ko": "아",
+     "gloss": "a, \"아\" अक्षर",
+     "rom": "a",
+     "mean": "\"아\" अक्षर"
+    },
+    {
+     "ko": "예요",
+     "gloss": "ye-yo, हो",
+     "rom": "ye-yo",
+     "mean": "हो"
     }
    ],
    "formula": "움직임 말 + 세요 / 으세요",
@@ -787,55 +941,81 @@
    "pieces": [
     {
      "ko": "그게",
-     "gloss": "geu-ge, त्यो"
+     "gloss": "geu-ge, त्यो",
+     "rom": "geu-ge",
+     "mean": "त्यो"
     },
     {
      "ko": "세종대왕이",
-     "gloss": "Se-jong-dae-wang-i, सेजोङ महाराजले"
+     "gloss": "se-jong-dae-wang-i, सेजोङ महाराजले",
+     "rom": "se-jong-dae-wang-i",
+     "mean": "सेजोङ महाराजले"
     },
     {
      "ko": "하고",
-     "gloss": "ha-go, गर्न"
+     "gloss": "ha-go, गर्न",
+     "rom": "ha-go",
+     "mean": "गर्न"
     },
     {
      "ko": "싶었던",
-     "gloss": "sip-eoss-deon, चाहनुभएको"
+     "gloss": "sip-eoss-deon, चाहनुभएको",
+     "rom": "sip-eoss-deon",
+     "mean": "चाहनुभएको"
     },
     {
      "ko": "거구나",
-     "gloss": "geo-gu-na, कुरा रहेछ"
+     "gloss": "geo-gu-na, कुरा रहेछ",
+     "rom": "geo-gu-na",
+     "mean": "कुरा रहेछ"
     },
     {
      "ko": "누구나",
-     "gloss": "nu-gu-na, जो कोही"
+     "gloss": "nu-gu-na, जो कोही",
+     "rom": "nu-gu-na",
+     "mean": "जो कोही"
     },
     {
      "ko": "쉽게",
-     "gloss": "swib-ge, सजिलै"
+     "gloss": "swib-ge, सजिलै",
+     "rom": "swib-ge",
+     "mean": "सजिलै"
     },
     {
      "ko": "읽는",
-     "gloss": "ilg-neun, पढ्ने"
+     "gloss": "ilg-neun, पढ्ने",
+     "rom": "ilg-neun",
+     "mean": "पढ्ने"
     },
     {
      "ko": "글자요",
-     "gloss": "geul-ja-yo, अक्षर"
+     "gloss": "geul-ja-yo, अक्षर",
+     "rom": "geul-ja-yo",
+     "mean": "अक्षर"
     },
     {
      "ko": "그",
-     "gloss": "geu, त्यो"
+     "gloss": "geu, त्यो",
+     "rom": "geu",
+     "mean": "त्यो"
     },
     {
      "ko": "누구나가",
-     "gloss": "nu-gu-na-ga, जो कोही"
+     "gloss": "nu-gu-na-ga, जो कोही",
+     "rom": "nu-gu-na-ga",
+     "mean": "जो कोही"
     },
     {
      "ko": "지금",
-     "gloss": "ji-geum, अहिले"
+     "gloss": "ji-geum, अहिले",
+     "rom": "ji-geum",
+     "mean": "अहिले"
     },
     {
      "ko": "우리예요",
-     "gloss": "u-ri-ye-yo, हामी हौँ"
+     "gloss": "u-ri-ye-yo, हामी हौँ",
+     "rom": "u-ri-ye-yo",
+     "mean": "हामी हौँ"
     }
    ],
    "formula": "움직임 말 + 고 싶어요",
