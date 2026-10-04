@@ -133,6 +133,16 @@
   ok(!$(".panel .sayb [data-x=savedplay]").hidden && $(".panel .sayb [data-x=keep]").hidden, "카드: [저장] → 「저장됨 ▶」", $(".panel .sayb .smsg").textContent);
   ok(!$(".panel .sayb .micname").hidden && /✓/.test($(".panel .sayb .micname").textContent), "카드: 🎤 아래 지금 마이크 이름 한 줄(눌러서 바꾸기)", $(".panel .sayb .micname").textContent);
   line(10).querySelector("[data-act=explain]").click(); await W(500);
+  // 통과 = 95% 이상 · 들린 말 한 줄(틀린 음절 빨간 밑줄 · 빠진 자리 _) — 1번 줄 「한국에 온 걸 환영해요」(본부 10-04)
+  line(1).querySelector("[data-act=explain]").click(); await W(1300); document.querySelector("video").pause();
+  const hl = () => $(".panel .sayb .heardline");
+  window.__heard = "미국에 온 걸 환영해요"; cm = await crec();
+  ok(/^8\d%/.test(cm) && !/✓/.test(cm) && $(".panel .sayb [data-x=keep]").hidden && [...hl().querySelectorAll("mark.bad")].map(x => x.textContent).join("") === "미", "「미국에…」 → 8n% · ✓·[저장] 없음(95 못 넘음) · 「미」 빨간 밑줄", cm + " | " + hl().textContent);
+  window.__heard = "한국에 온 걸 환영해요"; cm = await crec();
+  ok(/^100% ✓/.test(cm) && !$(".panel .sayb [data-x=keep]").hidden && !hl().querySelector("mark") && /✓/.test(hl().textContent), "「한국에 온 걸 환영해요」 → 100% ✓ · [저장] · 빨간 없음", cm + " | " + hl().textContent);
+  window.__heard = "한국에 걸 환영해요"; cm = await crec();
+  ok(!!hl().querySelector("mark.miss") && !/^100/.test(cm), "「한국에 걸 환영해요」 → 빠진 자리 표시(_)", cm + " | " + hl().innerHTML.replace(/<[^>]+>/g, m => m.startsWith("<mark") ? "[" : m === "</mark>" ? "]" : ""));
+  line(1).querySelector("[data-act=explain]").click(); await W(500);
   // 🔁 켠 채로 카드 소리 — 본보기·내 목소리는 한 번만 · 설명 ▶ 는 반복 · 🎤 = 반복·재생 모두 멈춤(본부 10-04 「끝없이 되풀이」)
   const pl = []; const op3 = HTMLMediaElement.prototype.play; HTMLMediaElement.prototype.play = function () { pl.push({ el: this, src: decodeURIComponent(this.src) }); return op3.call(this); };
   const toEnd = async el => { for (let k = 0; k < 30 && !isFinite(el.duration); k++) await W(100); if (isFinite(el.duration)) el.currentTime = Math.max(0, el.duration - 0.05); };

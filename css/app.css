@@ -367,3 +367,10 @@ a{color:inherit;text-decoration:none}
 .speak .keeprow button{font-size:12px;padding:3px 10px;border-radius:999px;border:1px solid var(--line)}
 .speak .keeprow [data-act=keep],.v9body .sbtns [data-x=keep]{background:var(--hi);border-color:var(--hi);color:#fff;font-weight:700}
 .v9body .sbtns [data-x=savedplay]{font-size:11.5px;color:var(--mute)}
+
+/* 들린 말 — 틀린 음절 빨간 밑줄 · 빠진 자리 빨간 _ (색만으로 구별하지 않게 밑줄도) */
+.heardline{font-size:12.5px;color:var(--ink);min-height:0;line-height:1.5}
+.heardline:empty{display:none}
+.heardline .lab{color:var(--mute);font-size:11.5px}
+.heardline mark{background:none;color:#d0312d;text-decoration:underline 2px;text-underline-offset:3px;font-weight:700}
+.speak .heardline{text-align:center;padding:0 10px}

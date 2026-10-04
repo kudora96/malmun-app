@@ -105,5 +105,7 @@
  "keep": "저장",
  "saved_play": "저장됨 ▶",
  "kept": "저장했어요.",
- "kept_better": "저장된 게 점수가 더 높아서 그대로 뒀어요."
+ "kept_better": "저장된 게 점수가 더 높아서 그대로 뒀어요.",
+ "heard_label": "들린 말",
+ "saved_play_n": "저장됨 {n}% ▶"
 }

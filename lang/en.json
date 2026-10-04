@@ -105,5 +105,7 @@
  "keep": "Save",
  "saved_play": "Saved ▶",
  "kept": "Saved.",
- "kept_better": "Your saved one scored higher — kept it."
+ "kept_better": "Your saved one scored higher — kept it.",
+ "heard_label": "Heard",
+ "saved_play_n": "Saved {n}% ▶"
 }
