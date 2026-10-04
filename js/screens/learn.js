@@ -10,16 +10,16 @@
 //  R7 영상은 늘 맨 위 · 지금 줄은 영상 바로 아래(앞 줄은 영상 뒤로) — 손으로 목록을 움직이면 4초 동안은 따라가지 않음
 //  R8 듣기 모드(대사→설명 · 설명만)도 R1~R6 그대로(영상 대신 소리 조각) · 모드를 바꾸면 멈춤(▶ 로 시작)
 //  R9 다시 들어오면 마지막 줄이 선택된 채 멈춰 있음
-import { t, lang, langName } from "../i18n.js";
-import { esc, renderText, glossCards } from "../text.js";
-import { episode } from "../data.js";
-import { paths } from "../paths.js";
-import { Sequence } from "../audio.js";
-import { I, progress, SPEAKER } from "../ui.js";
-import writeView from "./write.js";
-import speakView, { similarity, PASS, recGet, recPut } from "./speak.js";
-import { record, micWhy, srWhy, canScore, closeMic, micOpen, trimSilence, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js";
-import { hold } from "../wake.js";
+import { t, lang, langName } from "../i18n.js?v=1004.1";
+import { esc, renderText, glossCards } from "../text.js?v=1004.1";
+import { episode } from "../data.js?v=1004.1";
+import { paths } from "../paths.js?v=1004.1";
+import { Sequence } from "../audio.js?v=1004.1";
+import { I, progress, SPEAKER } from "../ui.js?v=1004.1";
+import writeView from "./write.js?v=1004.1";
+import speakView, { similarity, PASS, recGet, recPut } from "./speak.js?v=1004.1";
+import { record, micWhy, srWhy, canScore, closeMic, micOpen, trimSilence, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1004.1";
+import { hold } from "../wake.js?v=1004.1";
 
 const RATES = [1, 0.75, 0.5];
 const pref = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } };

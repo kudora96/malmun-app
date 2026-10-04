@@ -13,13 +13,13 @@
 //     못 넘어도 막지 않는다([다음 ▶]) · 음성 인식이 안 되는 곳은 점수 없이 듣고 비교만(녹음은 저장)
 //  S6 녹음은 이 기기 안에만(IndexedDB) — 서버로 보내지 않는다
 //  S7 영상 창 안(embedded): 스크롤 없이 · 줄 이동·닫기는 학습 화면이 한다 · 줄 전체까지 통과하면 다음 줄 말하기로
-import { t, lang } from "../i18n.js";
-import { esc } from "../text.js";
-import { episode } from "../data.js";
-import { paths } from "../paths.js";
-import { audioCtx, hold } from "../wake.js";
-import * as sfx from "../sfx.js";
-import { trimSilence, micCandidates, avoidBT, srWhy, probe, niceLabel } from "../recorder.js";
+import { t, lang } from "../i18n.js?v=1004.1";
+import { esc } from "../text.js?v=1004.1";
+import { episode } from "../data.js?v=1004.1";
+import { paths } from "../paths.js?v=1004.1";
+import { audioCtx, hold } from "../wake.js?v=1004.1";
+import * as sfx from "../sfx.js?v=1004.1";
+import { trimSilence, micCandidates, avoidBT, srWhy, probe, niceLabel } from "../recorder.js?v=1004.1";
 
 export const PASS = 80;
 const MAX_MS = 8000, QUIET_MS = 1000;

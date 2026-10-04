@@ -100,5 +100,6 @@
  "sr_audio": "Speech recognition couldn't use the microphone. Choose another microphone (🎤).",
  "sr_network": "An internet connection is needed for scoring.",
  "sr_denied": "Speech recognition is blocked. Allow the microphone in the browser.",
- "checking": "Checking…"
+ "checking": "Checking…",
+ "new_version": "New version — tap to refresh"
 }

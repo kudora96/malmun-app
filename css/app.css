@@ -357,3 +357,7 @@ a{color:inherit;text-decoration:none}
 .v9body .microw{display:flex}
 .v9body .micname,.speak .micname{font-size:11px;color:var(--mute);background:none;border:0;padding:0;text-align:start;text-decoration:underline dotted;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .v9body .micsel{font-size:12px;max-width:100%}
+
+/* 판 번호(구석에 작게) · 새 판 알림 띠 */
+.ver{margin:18px 16px 8px;font-size:10.5px;color:var(--mute);text-align:end;font-variant-numeric:tabular-nums}
+.newver{position:fixed;left:50%;transform:translateX(-50%);top:calc(8px + env(safe-area-inset-top,0px));z-index:50;padding:8px 14px;border-radius:999px;background:var(--ink);color:var(--bg);font-size:13px;font-weight:700;box-shadow:0 4px 12px rgba(0,0,0,.25)}

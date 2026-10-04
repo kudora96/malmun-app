@@ -1,3 +1,4 @@
+import { VERSION } from "./version.js?v=1004.1";
 // 학습자 언어 — 고르게 하지 않는다(CLAUDE.md).
 // ① 저장된 선택 ② 폰 언어가 22개 중 하나 ③ 폰 시간대로 나라 짐작 ④ 영어
 export const LANGS = [
@@ -50,7 +51,7 @@ export let lang = "en";
 export async function setLang(code, remember = false) {
   lang = code;
   if (remember) store(false, code);
-  const load = c => fetch(`lang/${c}.json`).then(r => (r.ok ? r.json() : {})).catch(() => ({}));
+  const load = c => fetch(`lang/${c}.json?v=${VERSION}`).then(r => (r.ok ? r.json() : {})).catch(() => ({}));
   [fallback, strings] = await Promise.all([load("en"), code === "en" ? Promise.resolve({}) : load(code)]);
   document.documentElement.lang = code;
   document.documentElement.dir = RTL.has(code) ? "rtl" : "ltr";

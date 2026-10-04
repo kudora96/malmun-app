@@ -1,10 +1,11 @@
-import { detectLang, setLang, LANGS } from "./i18n.js";
-import welcome from "./screens/welcome.js";
-import list from "./screens/list.js";
-import learn from "./screens/learn.js";
-import explain from "./screens/explain.js";
-import write from "./screens/write.js";
-import speak from "./screens/speak.js";
+import { detectLang, setLang, LANGS, t } from "./i18n.js?v=1004.1";
+import { VERSION } from "./version.js?v=1004.1";
+import welcome from "./screens/welcome.js?v=1004.1";
+import list from "./screens/list.js?v=1004.1";
+import learn from "./screens/learn.js?v=1004.1";
+import explain from "./screens/explain.js?v=1004.1";
+import write from "./screens/write.js?v=1004.1";
+import speak from "./screens/speak.js?v=1004.1";
 
 const app = document.getElementById("app");
 const routes = { "": welcome, list, learn, explain, write, speak };
@@ -26,6 +27,26 @@ async function route() {
 
 export const go = hash => { location.hash = hash; };
 export const rerender = route;
+
+// 새 판 알림 — 열어 둔 탭이 옛 코드를 계속 쓰지 않게(본부 10-04) · 화면이 다시 보일 때와 10분마다 version.json 을 본다
+let newShown = false;
+async function checkNew() {
+  if (newShown) return;
+  try {
+    const v = (await (await fetch("version.json?t=" + Date.now(), { cache: "no-store" })).json()).v;
+    if (v && v !== VERSION) {
+      newShown = true;
+      const b = document.createElement("button");
+      b.className = "newver"; b.textContent = "↻ " + t("new_version");
+      b.onclick = () => location.reload();
+      document.body.append(b);
+    }
+  } catch {}
+}
+document.addEventListener("visibilitychange", () => document.visibilityState === "visible" && checkNew());
+setInterval(checkNew, 10 * 60 * 1000);
+document.documentElement.dataset.v = VERSION;
+console.info("말문 판", VERSION);
 
 (async () => {
   // ?lang=ne 처럼 주소로 학습자 언어를 정할 수 있다(미리보기 · 기억됨) — 아니면 자동(CLAUDE.md 언어 자동)

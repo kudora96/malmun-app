@@ -1,5 +1,6 @@
-import { t, lang, langName, LANGS, setLang } from "./i18n.js";
-import { esc } from "./text.js";
+import { t, lang, langName, LANGS, setLang } from "./i18n.js?v=1004.1";
+import { VERSION } from "./version.js?v=1004.1";
+import { esc } from "./text.js?v=1004.1";
 
 const svg = (d, fill) => `<svg class="ico" viewBox="0 0 24 24" ${fill ? 'fill="currentColor"' : 'fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"'} aria-hidden="true">${d}</svg>`;
 export const I = {
@@ -19,7 +20,7 @@ export function openLangSheet(onPick) {
   root.innerHTML = `<div class="sheet-dim" data-close></div>
     <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-h"><span class="grab"></span>
     <h2 id="sheet-h">${esc(t("lang_title"))}</h2><p>${esc(t("lang_hint"))}</p>
-    <ul>${LANGS.map(([c, n]) => `<li><button data-lang="${c}" aria-current="${c === lang}" lang="${c}">${esc(n)}</button></li>`).join("")}</ul></div>`;
+    <ul>${LANGS.map(([c, n]) => `<li><button data-lang="${c}" aria-current="${c === lang}" lang="${c}">${esc(n)}</button></li>`).join("")}</ul><p class="ver">v${esc(VERSION)}</p></div>`;
   const close = () => { root.innerHTML = ""; document.removeEventListener("keydown", key); };
   const key = e => { if (e.key === "Escape") close(); };
   document.addEventListener("keydown", key);

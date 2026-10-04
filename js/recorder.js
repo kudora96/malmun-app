@@ -3,7 +3,7 @@
 // 다음 마이크로 넘어가 다시 녹음 · 소리 들어온 마이크 기억(malmun.mic — 말하기 창과 같은 칸) · 인식은 녹음하는 그 마이크를 끝까지(continuous)
 // · 말이 끝나고 1초 조용하면 저절로 멈춤 · 길어도 8초.
 // TODO(앱 창): speak.js 의 같은 부분을 이 모듈로 합치기 — 지금은 말하기 창 점검(38)을 깨지 않으려고 따로 둠.
-import { audioCtx } from "./wake.js";
+import { audioCtx } from "./wake.js?v=1004.1";
 
 const MAX_MS = 8000, QUIET_MS = 1000, DEAD = 0.0002;
 const getSR = () => window.SpeechRecognition || window.webkitSpeechRecognition; // 부를 때마다 찾는다(점검이 가짜로 바꿔 끼울 수 있게)
