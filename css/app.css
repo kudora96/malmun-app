@@ -311,7 +311,9 @@ a{color:inherit;text-decoration:none}
 .speak .helpbox p.x{background:none;color:var(--mute);font-size:11.5px;text-align:center;padding:0}
 /* 목록은 창 위에 덮어 띄운다 — 밀어내면 창 안에 스크롤이 생긴다(S7) */
 .speak{position:relative}
-.speak .miclist{position:absolute;inset:40px 0 0 0;z-index:2;display:grid;align-content:start;gap:4px;padding:6px 14px 10px;background:var(--bg);overflow:auto}
+/* 마이크 목록 = 아래쪽 작은 펼침(과제 화면을 가리지 않음) */
+.speak .miclist{position:absolute;left:12px;right:12px;bottom:64px;z-index:3;display:grid;align-content:start;gap:4px;padding:8px 10px;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,.18);max-height:55%;overflow:auto}
+.speak .miclist .mclose{justify-self:end;border:0;padding:2px 6px;font-size:12px;color:var(--mute)}
 .speak .miclist p{font-size:12.5px;color:var(--mute);margin:0 0 2px}
 .speak .miclist button{text-align:start;padding:8px 10px;border-radius:8px;border:1px solid var(--line);font-size:12.5px}
 .speak .miclist button[aria-pressed=true]{border-color:var(--hi);color:var(--hi);font-weight:700}
@@ -397,3 +399,7 @@ a{color:inherit;text-decoration:none}
 .tbar.low i{background:#e07b00;opacity:.85}
 .tbar .tt{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:10.5px;color:var(--ink);font-variant-numeric:tabular-nums}
 .speak .tbar{margin:2px 14px 0}
+
+/* ✕ 닫기(글자 같이) — 말하기 창 머리줄 · 설명 카드 위 줄 */
+.speak .whead .closex{margin-left:4px}
+.v9bar .closex{margin-left:auto;border-color:var(--line);color:var(--mute);font-weight:500}

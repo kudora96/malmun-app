@@ -10,20 +10,20 @@
 //  R7 영상은 늘 맨 위 · 지금 줄은 영상 바로 아래(앞 줄은 영상 뒤로) — 손으로 목록을 움직이면 4초 동안은 따라가지 않음
 //  R8 듣기 모드(대사→설명 · 설명만)도 R1~R6 그대로(영상 대신 소리 조각) · 모드를 바꾸면 멈춤(▶ 로 시작)
 //  R9 다시 들어오면 마지막 줄이 선택된 채 멈춰 있음
-import { t, lang, langName } from "../i18n.js?v=1004.26";
-import { esc, renderText, glossCards } from "../text.js?v=1004.26";
-import { episode } from "../data.js?v=1004.26";
-import { paths } from "../paths.js?v=1004.26";
-import { Sequence } from "../audio.js?v=1004.26";
-import { I, progress, SPEAKER } from "../ui.js?v=1004.26";
-import writeView from "./write.js?v=1004.26";
-import { diagEnv, keepDiag } from "../diag.js?v=1004.26";
-import { playMine as playMineRec } from "../playmine.js?v=1004.26";
-import { bestHeard, heardHTML } from "../heard.js?v=1004.26";
-import { recDel, downloadRec, askPersist } from "../recstore.js?v=1004.26";
-import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1004.26";
-import { record, micWhy, srWhy, canScore, closeMic, logRec, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1004.26";
-import { hold, quietWake } from "../wake.js?v=1004.26";
+import { t, lang, langName } from "../i18n.js?v=1004.28";
+import { esc, renderText, glossCards } from "../text.js?v=1004.28";
+import { episode } from "../data.js?v=1004.28";
+import { paths } from "../paths.js?v=1004.28";
+import { Sequence } from "../audio.js?v=1004.28";
+import { I, progress, SPEAKER } from "../ui.js?v=1004.28";
+import writeView from "./write.js?v=1004.28";
+import { diagEnv, keepDiag } from "../diag.js?v=1004.28";
+import { playMine as playMineRec } from "../playmine.js?v=1004.28";
+import { bestHeard, heardHTML } from "../heard.js?v=1004.28";
+import { recDel, downloadRec, askPersist } from "../recstore.js?v=1004.28";
+import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1004.28";
+import { record, micWhy, srWhy, canScore, closeMic, logRec, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1004.28";
+import { hold, quietWake } from "../wake.js?v=1004.28";
 
 const RATES = [1, 0.75, 0.5];
 const pref = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } };
@@ -196,7 +196,7 @@ export default async function learn(app, ep, startId) {
     const fx = x.formula_by?.[tc] || x.formula;
     const playBtn = k => `<button class="pb" data-x="ex" data-v="${k}" aria-pressed="false">▶ ${esc(v9name(k))}</button>`;
     return `<div class="exv v9">
-      <div class="v9bar">${playBtn("L")}${playBtn("ko")}</div>
+      <div class="v9bar">${playBtn("L")}${playBtn("ko")}<button class="pb closex" data-x="close">${esc(t("close_btn"))}</button></div>
       <div class="v9body">
         ${x.pieces?.length || fx ? `<div class="chips">${(x.pieces || []).map(c => `<span class="chip"><b class="ko" lang="ko">${esc(c.ko)}</b> <i>${esc(c.gloss || "")}</i></span>`).join("")}${fx ? `<span class="fx">= <b>${esc(fx)}</b></span>` : ""}</div>` : ""}
         <div class="tabs" role="tablist">${["L", "ko"].map(v => `<button data-x="txt" data-v="${v}" role="tab" aria-selected="${P.txt === v}">${esc(v9name(v))}</button>`).join("")}</div>
@@ -249,7 +249,18 @@ export default async function learn(app, ep, startId) {
   ["loadedmetadata", "pause", "play", "emptied"].forEach(n => ex.a.addEventListener(n, () => v9prog()));
   const markButtons = () => items.forEach((li, k) => li.querySelectorAll("[data-act=explain],[data-act=write],[data-act=speak]").forEach(b => b.setAttribute("aria-pressed", String(!!st.panel && k === st.panel.i && b.dataset.act === st.panel.kind))));
 
+  // 휴대폰 뒤로 가기 — 펼침(마이크 목록) → 창 → 영상 순서로 닫힘(본부 10-04) · 같은 주소에 한 칸씩 쌓고 닫을 때 그 칸을 걷어 낸다
+  const nav = { n: 0, skip: 0 };
+  const navPush = () => { history.pushState({ malmun: ++nav.n }, ""); };
+  const navPop = () => { if (history.state?.malmun) { nav.skip++; history.back(); } };
+  const onPop = () => {
+    if (nav.skip) { nav.skip--; return; }
+    if (panel.__sp?.closeList?.()) return; // 마이크 목록부터
+    if (st.panel) closePanel(true);
+  };
+  addEventListener("popstate", onPop);
   async function openPanel(kind, i, { autoplay = false, task } = {}) {
+    if (!st.panel) navPush(); // 처음 열 때만 한 칸
     i = Math.max(0, Math.min(L.length - 1, i));
     stopAll(); ex.stop(); st.once = false; select(i, { scroll: false });
     st.panel?.cleanup?.();
@@ -262,14 +273,15 @@ export default async function learn(app, ep, startId) {
       if (autoplay) { ex.play((st.exLoop = exItems(i))); if (L[i].v9) markPlay(v9pref().snd); }
     } else {
       const view = kind === "speak" ? speakView : writeView; // 줄을 다 쓰면(말하면) 다음 줄의 같은 메뉴로(W6 · S7)
-      const cleanup = await view(panel, ep, L[i].id, { embedded: true, task, onNext: k => openPanel(kind, k) });
+      const cleanup = await view(panel, ep, L[i].id, { embedded: true, task, onNext: k => openPanel(kind, k), onClose: () => closePanel(), navPush, navPop });
       if (st.panel !== mine) return cleanup?.();
       mine.cleanup = cleanup;
     }
     pad(); underVideo(items[i]); sync();
   }
-  function closePanel() {
+  function closePanel(fromNav) {
     if (!st.panel) return;
+    if (!fromNav) navPop(); // 단추로 닫으면 쌓아 둔 뒤로 가기 칸도 걷어 냄
     st.panel.cleanup?.(); ex.stop(); clearTimeout(st.gap); st.gap = 0; st.panel = null;
     panel.hidden = true; panel.innerHTML = ""; vwrap.hidden = false;
     markButtons();
@@ -356,6 +368,7 @@ export default async function learn(app, ep, startId) {
       markPlay(v); ex.play((st.exLoop = items)); return sync();
     }
     if (k === "rec") return spRec(i, x);
+    if (k === "close") return closePanel(); // ✕ 닫기 — 녹음 중이면 버리고 영상으로
     if (k === "mics") { // 마이크 목록(카드 안 작은 고르기) — 고르면 기억하고 다음 녹음부터
       const sel = panel.querySelector(".sayb .micsel");
       listMics().then(ds => {
@@ -539,5 +552,5 @@ export default async function learn(app, ep, startId) {
   v.addEventListener("loadedmetadata", () => { if (v.paused && !st.once) v.currentTime = L[st.cur].start; }, { once: true });
   sync();
   const release = hold(); // 소리 장치 깨워 두기(첫소리 먹힘 방지)
-  return () => { clearTimeout(st.animEnd); release(); st.panel?.cleanup?.(); ex.stop(); removeEventListener("resize", pad); clearInterval(timer); clearTimeout(st.gap); document.removeEventListener("keydown", onKey); seq.stop(); v.pause(); v.removeAttribute("src"); v.load(); };
+  return () => { removeEventListener("popstate", onPop); clearTimeout(st.animEnd); release(); st.panel?.cleanup?.(); ex.stop(); removeEventListener("resize", pad); clearInterval(timer); clearTimeout(st.gap); document.removeEventListener("keydown", onKey); seq.stop(); v.pause(); v.removeAttribute("src"); v.load(); };
 }

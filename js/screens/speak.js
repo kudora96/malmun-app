@@ -13,17 +13,17 @@
 //     못 넘어도 막지 않는다([다음 ▶]) · 음성 인식이 안 되는 곳은 점수 없이 듣고 비교만(녹음은 저장)
 //  S6 녹음은 이 기기 안에만(IndexedDB) — 서버로 보내지 않는다
 //  S7 영상 창 안(embedded): 스크롤 없이 · 줄 이동·닫기는 학습 화면이 한다 · 줄 전체까지 통과하면 다음 줄 말하기로
-import { t, lang } from "../i18n.js?v=1004.26";
-import { esc } from "../text.js?v=1004.26";
-import { episode } from "../data.js?v=1004.26";
-import { paths } from "../paths.js?v=1004.26";
-import { audioCtx, hold, quietWake } from "../wake.js?v=1004.26";
-import * as sfx from "../sfx.js?v=1004.26";
-import { diagEnv, keepDiag } from "../diag.js?v=1004.26";
-import { playMine as playMineRec } from "../playmine.js?v=1004.26";
-import { bestHeard, heardHTML } from "../heard.js?v=1004.26";
-import { recDel, downloadRec, askPersist } from "../recstore.js?v=1004.26";
-import { logRec, dB, srWhy, srWatch, niceLabel, ALIAS } from "../recorder.js?v=1004.26";
+import { t, lang } from "../i18n.js?v=1004.28";
+import { esc } from "../text.js?v=1004.28";
+import { episode } from "../data.js?v=1004.28";
+import { paths } from "../paths.js?v=1004.28";
+import { audioCtx, hold, quietWake } from "../wake.js?v=1004.28";
+import * as sfx from "../sfx.js?v=1004.28";
+import { diagEnv, keepDiag } from "../diag.js?v=1004.28";
+import { playMine as playMineRec } from "../playmine.js?v=1004.28";
+import { bestHeard, heardHTML } from "../heard.js?v=1004.28";
+import { recDel, downloadRec, askPersist } from "../recstore.js?v=1004.28";
+import { logRec, dB, srWhy, srWatch, niceLabel, ALIAS } from "../recorder.js?v=1004.28";
 
 // 통과 두 단계(본부 10-04 · 투덜이 「원어민은 되지만 외국인은 100% 어렵다」): 80↑ = ☆ 통과(✓ · [저장]) · 95↑ = ★ 완벽
 export const PASS = 80, PERFECT = 95;
@@ -35,7 +35,7 @@ const QUIET_MS = 2000, START_MS = 6000;
 export const maxMsFor = say => Math.max(8000, (3 + 0.8 * [...String(say || "")].filter(c => /[가-힣]/.test(c)).length) * 1000);
 
 // ── 닮음 = 음절 정렬(js/score.js · 「들린 말」 빨간 표시와 같은 함수 — 본부 10-04) ──
-import { similarity } from "../score.js?v=1004.26";
+import { similarity } from "../score.js?v=1004.28";
 export { similarity };
 
 // ── 내 목소리 저장(S6) ──
@@ -64,7 +64,7 @@ export default async function speak(app, ep, id, opts = {}) {
 
   app.innerHTML = `<section class="scr speak ${opts.embedded ? "embedded" : ""}">
     <div class="whead"><b>${esc(t("speak"))}</b><span class="sub">${li + 1} / ${d.lines.length} · <span class="ko" lang="ko">${esc(line.speaker)}</span></span>
-      <button class="micpick" data-act="help" aria-label="${esc(t("help"))}">${esc(t("help_btn"))}</button><span class="segnav"></span></div>
+      <button class="micpick" data-act="help" aria-label="${esc(t("help"))}">${esc(t("help_btn"))}</button><span class="segnav"></span><button class="micpick closex" data-act="close">${esc(t("close_btn"))}</button></div>
     <div class="miclist" hidden></div>
     <div class="helpbox" hidden>${[1, 2, 3, 4, 5].map(k => `<p>${esc(t("help_sp_" + k))}</p>`).join("")}<p class="x">${esc(t("help_close"))}</p></div>
     <div class="task"><div class="say ko" lang="ko"></div><div class="tr"></div></div>
@@ -164,9 +164,13 @@ export default async function speak(app, ep, id, opts = {}) {
     if (!box.hidden && !note) { box.hidden = true; return; }
     let devs = [];
     try { devs = (await navigator.mediaDevices.enumerateDevices()).filter(x => x.kind === "audioinput" && x.deviceId && !ALIAS(x.deviceId)); } catch {}
-    box.innerHTML = (note ? `<p>${esc(note)}</p>` : "") + (devs.length ? devs.map((d, k) => `<button data-mic="${esc(d.deviceId)}" aria-pressed="${[micPref(), devId(st.stream)].includes(d.deviceId)}">${esc(niceLabel(d.label) || t("mic_pick") + " " + (k + 1))}</button>`).join("") : `<p>${esc(t("mic_none"))}</p>`);
-    box.hidden = false;
+    // 작은 펼침 — 맨 위 「✕ 닫기」 · 지금 마이크에 ✓ · 하나 고르면 닫힘 · 바깥 누르기·Esc·뒤로 가기로도 닫힘(본부 10-04)
+    box.innerHTML = `<button class="mclose" data-act="micclose">${esc(t("close_list"))}</button>` + (note ? `<p>${esc(note)}</p>` : "") + (devs.length ? devs.map((d, k) => { const on = [micPref(), devId(st.stream)].includes(d.deviceId); return `<button data-mic="${esc(d.deviceId)}" aria-pressed="${on}">${on ? "✓ " : ""}${esc(niceLabel(d.label) || t("mic_pick") + " " + (k + 1))}</button>`; }).join("") : `<p>${esc(t("mic_none"))}</p>`);
+    if (box.hidden) { box.hidden = false; opts.navPush?.("mics"); }
   }
+  function closeMics(fromNav) { const box = $(".miclist"); if (!box || box.hidden) return false; box.hidden = true; if (!fromNav) opts.navPop?.(); return true; }
+  const onEsc = e => { if (e.key === "Escape" && closeMics()) e.stopPropagation(); };
+  document.addEventListener("keydown", onEsc, true);
   // ◆ 지금 쓰는 마이크 이름 한 줄(자동이 틀렸을 때만 눌러서 바꿈)
   function showMicName() { const b = $(".micname"), l = niceLabel(st.stream?.getAudioTracks()[0]?.label); if (b && l) { b.textContent = `🎤 ${l} ✓`; b.hidden = false; } }
   // 녹음 시간 막대(🎤 아래) — 차오름 + 「0:04 / 0:12」 · 남은 시간 20% 아래면 주황
@@ -271,24 +275,27 @@ export default async function speak(app, ep, id, opts = {}) {
     // 저장은 자동이 아님 — 80% 넘으면 [저장] 단추가 나오고 학습자가 누른다(투덜이 10-04) · 저절로 다음 토막으로 넘기지도 않는다(저장할 틈)
     paint();
   }
-  app.__sp = { toggle: () => (st.model ? (stopSounds(), paint()) : playModel()), busy: () => !!st.rec || st.model || sfx.playing(), _finish: finish, _state: st };
+  app.__sp = { closeList: () => closeMics(true), toggle: () => (st.model ? (stopSounds(), paint()) : playModel()), busy: () => !!st.rec || st.model || sfx.playing(), _finish: finish, _state: st };
 
   app.querySelector(".scr").onclick = async e => {
     if (!$(".helpbox").hidden) { $(".helpbox").hidden = true; if (e.target.closest("[data-act=help], .helpbox")) return; } // 풍선은 아무 데나 누르면 닫힘
+    if (!$(".miclist").hidden && !e.target.closest(".miclist, [data-act=pick]")) { closeMics(); return; } // 마이크 목록 바깥 누르기 = 닫기
     const sg = e.target.closest("[data-seg]");
     if (sg) return go(st.i + +sg.dataset.seg);
     const mc = e.target.closest("[data-mic]");
     if (mc) { // 마이크 고르기 → 기억하고 다음 녹음부터 그 마이크
       micPref(mc.dataset.mic); dead.clear();
       stopRec(true); closeMic();
-      $(".miclist").hidden = true; $(".msg").textContent = t("mic_chosen");
+      closeMics(); $(".msg").textContent = t("mic_chosen");
       return;
     }
     const b = e.target.closest("[data-act]");
     if (!b || b.disabled) return;
     const a = b.dataset.act;
-    if (a === "pick") { stopRec(true); return showMics(); }
-    if (a === "help") { stopRec(true); $(".miclist").hidden = true; $(".helpbox").hidden = false; return; }
+    if (a === "pick") { stopRec(true); if (closeMics()) return; return showMics(); }
+    if (a === "micclose") { closeMics(); return; }
+    if (a === "close") { stopRec(true); closeMics(); if (opts.onClose) opts.onClose(); else location.hash = `#/learn/${ep}/${line.id}`; return; } // ✕ 닫기 — 녹음 중이면 버리고
+    if (a === "help") { stopRec(true); closeMics(); $(".helpbox").hidden = false; return; }
     if (a === "keep") { // [저장] — 더 높거나 같은 점수면 바꿔 끼움
       const p = cur(), old = st.saved[p.key];
       if (!st.blob || !(st.score >= PASS)) return;
@@ -313,5 +320,5 @@ export default async function speak(app, ep, id, opts = {}) {
   try { if (!localStorage.getItem("malmun.sp.help")) { localStorage.setItem("malmun.sp.help", "1"); $(".helpbox").hidden = false; } } catch {} // 처음 한 번은 풍선이 저절로
   sfx.preload([lineSrc, ...parts.map(p => p.src)]);
   const release = hold();
-  return () => { st.alive = false; stopRec(true); stopSounds(); st.stream?.getTracks().forEach(x => x.stop()); release(); quietWake(false); delete app.__sp; };
+  return () => { st.alive = false; stopRec(true); stopSounds(); st.stream?.getTracks().forEach(x => x.stop()); release(); quietWake(false); document.removeEventListener("keydown", onEsc, true); delete app.__sp; };
 }

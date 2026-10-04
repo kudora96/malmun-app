@@ -120,5 +120,7 @@
  "next_btn": "Next ▶",
  "why_time": "⏱ Time is up — try again",
  "why_pause": "You stopped in the middle — say it all the way through",
- "why_nospeech": "No voice was heard"
+ "why_nospeech": "No voice was heard",
+ "close_btn": "✕ Close",
+ "close_list": "✕ Close"
 }

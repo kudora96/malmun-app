@@ -1,11 +1,11 @@
-import { detectLang, setLang, LANGS, t } from "./i18n.js?v=1004.26";
-import { VERSION } from "./version.js?v=1004.26";
-import welcome from "./screens/welcome.js?v=1004.26";
-import list from "./screens/list.js?v=1004.26";
-import learn from "./screens/learn.js?v=1004.26";
-import explain from "./screens/explain.js?v=1004.26";
-import write from "./screens/write.js?v=1004.26";
-import speak from "./screens/speak.js?v=1004.26";
+import { detectLang, setLang, LANGS, t } from "./i18n.js?v=1004.28";
+import { VERSION } from "./version.js?v=1004.28";
+import welcome from "./screens/welcome.js?v=1004.28";
+import list from "./screens/list.js?v=1004.28";
+import learn from "./screens/learn.js?v=1004.28";
+import explain from "./screens/explain.js?v=1004.28";
+import write from "./screens/write.js?v=1004.28";
+import speak from "./screens/speak.js?v=1004.28";
 
 const app = document.getElementById("app");
 const routes = { "": welcome, list, learn, explain, write, speak };
@@ -58,6 +58,7 @@ async function checkNew() {
 }
 document.addEventListener("visibilitychange", () => document.visibilityState === "visible" && checkNew());
 setInterval(checkNew, 10 * 60 * 1000);
+try { history.scrollRestoration = "manual"; } catch {} // 창을 닫을 때 걷어 내는 뒤로 가기 칸이 화면 위치를 되돌리지 않게(지금 줄은 앱이 맞춤)
 document.documentElement.dataset.v = VERSION;
 console.info("말문 판", VERSION);
 

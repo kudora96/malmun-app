@@ -227,7 +227,7 @@
   $(".panel [data-act=rec]").click();
   for (let k = 0; k < 120 && $(".panel .miclist").hidden; k++) await W(100);
   await W(300);
-  ok(!$(".panel .mic").classList.contains("on") && $(".panel .miclist").querySelectorAll("button").length === 2 && $(".panel .miclist p") && $(".panel [data-act=mine]").disabled, "전부 소리 0 → 멈추고 알림 + 마이크 목록(별칭 default 는 목록에 없음)", $(".panel .msg").textContent);
+  ok(!$(".panel .mic").classList.contains("on") && $(".panel .miclist").querySelectorAll("[data-mic]").length === 2 && !!$(".panel .miclist [data-act=micclose]") && $(".panel .miclist p") && $(".panel [data-act=mine]").disabled, "전부 소리 0 → 멈추고 알림 + 마이크 목록(별칭 default 는 목록에 없음)", $(".panel .msg").textContent);
   const sp2 = $(".panel .speak"); ok(sp2.scrollHeight - sp2.clientHeight <= 1, "마이크 목록이 떠도 창 안 스크롤 없음", sp2.scrollHeight + "/" + sp2.clientHeight);
   window.__silentIds = []; asked.length = 0;
   $(".panel [data-mic=usb]").click(); await W(200);
@@ -289,6 +289,27 @@
   const dg2 = await new Promise(res => { const q = indexedDB.open("malmun_diag", 1); q.onupgradeneeded = () => q.result.createObjectStore("diag"); q.onsuccess = () => { const g = q.result.transaction("diag").objectStore("diag").getAll(); g.onsuccess = () => { q.result.close(); res(g.result); }; }; });
   const lastB = dg2[dg2.length - 1]?.blob; let rate = 0; try { const ac2 = new AudioContext(); rate = (await ac2.decodeAudioData(await lastB.arrayBuffer())).sampleRate; ac2.close(); } catch {}
   ok(/^audio\/webm;codecs=opus$/.test(lastB?.type || "") && rate > 0, "녹음 형식 그대로(MediaRecorder webm/opus · 다시 굽지 않음)", (lastB?.type || "") + " · 풀린 표본율 " + rate);
+  // 닫기 · 마이크 목록 펼침 · 뒤로 가기(본부 10-04)
+  await open(2); await say("아무 말"); await waitIdle(); await settle2();
+  $(".panel .micname").click(); await W(400);
+  const ml = $(".panel .miclist"), task = $(".panel .say");
+  ok(!ml.hidden && task.offsetHeight > 0 && !!ml.querySelector("[data-act=micclose]") && /✓/.test(ml.textContent), "마이크 줄 → 작은 펼침(과제 그대로 보임 · 맨 위 ✕ 닫기 · 지금 마이크 ✓)", ml.innerText.replace(/\s+/g, " "));
+  ml.querySelector("[data-act=micclose]").click(); await W(300);
+  ok(ml.hidden && $(".panel .speak"), "펼침 [✕ 닫기] → 목록만 닫히고 말하기 창 그대로");
+  $(".panel .micname").click(); await W(400); document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true })); await W(300);
+  ok(ml.hidden && $(".panel .speak"), "Esc → 목록 닫힘");
+  $(".panel .micname").click(); await W(400); $(".panel .say").click(); await W(300);
+  ok(ml.hidden && $(".panel .speak"), "바깥 누르기 → 목록 닫힘");
+  $(".panel .micname").click(); await W(400); history.back(); await W(600);
+  const afterBack1 = ml.hidden && !!$(".panel .speak");
+  history.back(); await W(800);
+  ok(afterBack1 && $(".panel").offsetHeight === 0 && $("#vwrap").offsetHeight > 0, "뒤로 가기 → 목록 먼저 닫히고 → 다음 뒤로 가기에 말하기 창 닫혀 영상으로", `목록 닫힘 ${afterBack1} · 영상 ${$("#vwrap").offsetHeight > 0}`);
+  await open(2); $(".panel [data-act=rec]").click(); await W(500);
+  $(".panel [data-act=close]").click(); await W(600);
+  ok($(".panel").offsetHeight === 0 && $("#vwrap").offsetHeight > 0 && /✕/.test($(".panel [data-act=close]")?.textContent || "✕"), "[✕ 닫기] → 녹음 중이어도 버리고 영상으로", "");
+  line(4).querySelector("[data-act=explain]").click(); await W(1200); document.querySelector("video").pause();
+  $(".panel .v9bar [data-x=close]").click(); await W(600);
+  ok($(".panel").offsetHeight === 0 && $("#vwrap").offsetHeight > 0, "설명 카드 [✕ 닫기] → 영상으로");
   // 말하기 창 [🗑 지우기] — 1번 줄 1토막(저장돼 있음)
   await open(1); while (!/(^|\D)1\/5/.test($(".panel .segnav").innerText.replace(/\s/g, ""))) { $(".panel [data-seg='-1']").click(); await W(150); }
   const oc3 = window.confirm; window.confirm = () => true;
