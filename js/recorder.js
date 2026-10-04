@@ -44,7 +44,9 @@ export async function probe(s, ms = 1200) {
     return false;
   } catch { return null; } finally { try { src?.disconnect(); } catch {} }
 }
-export const micLabel = () => stream?.getAudioTracks()[0]?.label || "";
+// 장치 이름에서 학습자에게 소음인 것 빼기 — 끝의 「(1b3f:2008)」 장치 번호 · 「2- 」 같은 앞번호(본부 10-04)
+export const niceLabel = l => String(l || "").replace(/\s*\([0-9a-f]{4}:[0-9a-f]{4}\)\s*$/i, "").replace(/(^|\()\s*\d+-\s*/g, "$1").trim();
+export const micLabel = () => niceLabel(stream?.getAudioTracks()[0]?.label);
 export async function listMics() { try { return (await navigator.mediaDevices.enumerateDevices()).filter(x => x.kind === "audioinput" && x.deviceId); } catch { return []; } }
 export function chooseMic(id) { pref(id || ""); dead.clear(); closeMic(); }
 // 크롬이 고른 마이크(true)가 블루투스인데 다른 마이크가 있으면 → 닫고 그쪽을 먼저(허락 전에는 이름을 몰라 이렇게 뒤에서 거른다)

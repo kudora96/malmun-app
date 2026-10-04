@@ -19,7 +19,7 @@ import { episode } from "../data.js";
 import { paths } from "../paths.js";
 import { audioCtx, hold } from "../wake.js";
 import * as sfx from "../sfx.js";
-import { trimSilence, micCandidates, avoidBT, srWhy, probe } from "../recorder.js";
+import { trimSilence, micCandidates, avoidBT, srWhy, probe, niceLabel } from "../recorder.js";
 
 export const PASS = 80;
 const MAX_MS = 8000, QUIET_MS = 1000;
@@ -167,11 +167,11 @@ export default async function speak(app, ep, id, opts = {}) {
     if (!box.hidden && !note) { box.hidden = true; return; }
     let devs = [];
     try { devs = (await navigator.mediaDevices.enumerateDevices()).filter(x => x.kind === "audioinput" && x.deviceId); } catch {}
-    box.innerHTML = (note ? `<p>${esc(note)}</p>` : "") + (devs.length ? devs.map((d, k) => `<button data-mic="${esc(d.deviceId)}" aria-pressed="${[micPref(), devId(st.stream)].includes(d.deviceId)}">${esc(d.label || t("mic_pick") + " " + (k + 1))}</button>`).join("") : `<p>${esc(t("mic_none"))}</p>`);
+    box.innerHTML = (note ? `<p>${esc(note)}</p>` : "") + (devs.length ? devs.map((d, k) => `<button data-mic="${esc(d.deviceId)}" aria-pressed="${[micPref(), devId(st.stream)].includes(d.deviceId)}">${esc(niceLabel(d.label) || t("mic_pick") + " " + (k + 1))}</button>`).join("") : `<p>${esc(t("mic_none"))}</p>`);
     box.hidden = false;
   }
   // 지금 쓰는 마이크 이름 한 줄(🎤 아래) — 자동이 틀렸을 때만 눌러서 바꾼다(설정 화면으로 보내지 않음)
-  function showMicName() { const b = $(".micname"), l = st.stream?.getAudioTracks()[0]?.label; if (b && l) { b.textContent = `🎤 ${l} ✓`; b.hidden = false; } }
+  function showMicName() { const b = $(".micname"), l = niceLabel(st.stream?.getAudioTracks()[0]?.label); if (b && l) { b.textContent = `🎤 ${l} ✓`; b.hidden = false; } }
   async function startRec(switched) {
     stopSounds(); clearTimeout(micOff);
     st.switched = !!switched;

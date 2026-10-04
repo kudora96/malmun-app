@@ -18,7 +18,7 @@ import { Sequence } from "../audio.js";
 import { I, progress, SPEAKER } from "../ui.js";
 import writeView from "./write.js";
 import speakView, { similarity, PASS, recGet, recPut } from "./speak.js";
-import { record, micWhy, srWhy, canScore, closeMic, micOpen, trimSilence, micLabel, listMics, chooseMic } from "../recorder.js";
+import { record, micWhy, srWhy, canScore, closeMic, micOpen, trimSilence, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js";
 import { hold } from "../wake.js";
 
 const RATES = [1, 0.75, 0.5];
@@ -340,7 +340,7 @@ export default async function learn(app, ep, startId) {
     if (k === "mics") { // 마이크 목록(카드 안 작은 고르기) — 고르면 기억하고 다음 녹음부터
       const sel = panel.querySelector(".sayb .micsel");
       listMics().then(ds => {
-        sel.innerHTML = ds.map(d => `<option value="${esc(d.deviceId)}" ${d.label === micLabel() ? "selected" : ""}>${esc(d.label || d.deviceId)}</option>`).join("");
+        sel.innerHTML = ds.map(d => `<option value="${esc(d.deviceId)}" ${niceLabel(d.label) === micLabel() ? "selected" : ""}>${esc(niceLabel(d.label) || d.deviceId)}</option>`).join("");
         sel.hidden = false; x.hidden = true;
         sel.onchange = () => { chooseMic(sel.value); x.textContent = `🎤 ${sel.selectedOptions[0]?.textContent || ""}`; x.hidden = false; sel.hidden = true; };
       });
