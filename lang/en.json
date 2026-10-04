@@ -113,5 +113,6 @@
  "del_one_q": "Delete this recording?",
  "del_all": "Delete all my recordings in this episode",
  "del_all_q": "Delete all your recordings in this episode?",
- "deleted": "Deleted."
+ "deleted": "Deleted.",
+ "ep_missing": "That lesson wasn't found — here is the list."
 }

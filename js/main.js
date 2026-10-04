@@ -1,25 +1,38 @@
-import { detectLang, setLang, LANGS, t } from "./i18n.js?v=1004.22";
-import { VERSION } from "./version.js?v=1004.22";
-import welcome from "./screens/welcome.js?v=1004.22";
-import list from "./screens/list.js?v=1004.22";
-import learn from "./screens/learn.js?v=1004.22";
-import explain from "./screens/explain.js?v=1004.22";
-import write from "./screens/write.js?v=1004.22";
-import speak from "./screens/speak.js?v=1004.22";
+import { detectLang, setLang, LANGS, t } from "./i18n.js?v=1004.23";
+import { VERSION } from "./version.js?v=1004.23";
+import welcome from "./screens/welcome.js?v=1004.23";
+import list from "./screens/list.js?v=1004.23";
+import learn from "./screens/learn.js?v=1004.23";
+import explain from "./screens/explain.js?v=1004.23";
+import write from "./screens/write.js?v=1004.23";
+import speak from "./screens/speak.js?v=1004.23";
 
 const app = document.getElementById("app");
 const routes = { "": welcome, list, learn, explain, write, speak };
 let cleanup = null;
 
+// 주소에서 편 ID·줄 번호 다듬기 — 복사할 때 뒤에 붙은 「 (설명」·따옴표·괄호를 잘라 낸다(본부 10-04: 「L01-00-01 (」로 읽혀 오류)
+const EP_ROUTES = new Set(["learn", "explain", "write", "speak"]);
+const dec = x => { try { return decodeURIComponent(x); } catch { return x; } };
+const cleanId = x => dec(x).split(/[\s()"'「」『』\[\]<>]/)[0].replace(/[^A-Za-z0-9-]/g, "").toUpperCase();
+const toast = msg => { const d = Object.assign(document.createElement("div"), { className: "toast", textContent: msg }); document.body.append(d); setTimeout(() => d.remove(), 3500); };
+
 async function route() {
-  const [name = "", ...args] = location.hash.replace(/^#\/?/, "").split("/").filter(Boolean);
+  let [name = "", ...args] = location.hash.replace(/^#\/?/, "").split("/").filter(Boolean);
+  name = dec(name).replace(/[^a-z]/gi, "").toLowerCase();
+  if (EP_ROUTES.has(name) && args.length) {
+    const clean = [cleanId(args[0]), ...args.slice(1).map(x => dec(x).split(/[^A-Za-z0-9]/)[0]).filter(Boolean)];
+    if (clean.join("/") !== args.map(dec).join("/")) { history.replaceState(null, "", "#/" + [name, ...clean].join("/")); args = clean; } // 주소창도 깨끗하게
+    else args = clean;
+  } else args = args.map(dec);
   cleanup?.(); cleanup = null;
   document.getElementById("sheet-root").innerHTML = "";
   const screen = routes[name] || welcome;
   try {
-    cleanup = (await screen(app, ...args.map(decodeURIComponent))) || null;
+    cleanup = (await screen(app, ...args)) || null;
   } catch (e) {
     console.error(e);
+    if (EP_ROUTES.has(name)) { toast(t("ep_missing")); location.hash = "#/list"; return; } // 없는 편 → 오류 글 대신 목록으로
     app.innerHTML = `<div class="empty">${String(e.message || e)}</div>`;
   }
   window.scrollTo(0, 0);
