@@ -10,19 +10,20 @@
 //  R7 영상은 늘 맨 위 · 지금 줄은 영상 바로 아래(앞 줄은 영상 뒤로) — 손으로 목록을 움직이면 4초 동안은 따라가지 않음
 //  R8 듣기 모드(대사→설명 · 설명만)도 R1~R6 그대로(영상 대신 소리 조각) · 모드를 바꾸면 멈춤(▶ 로 시작)
 //  R9 다시 들어오면 마지막 줄이 선택된 채 멈춰 있음
-import { t, lang, langName } from "../i18n.js?v=1004.15";
-import { esc, renderText, glossCards } from "../text.js?v=1004.15";
-import { episode } from "../data.js?v=1004.15";
-import { paths } from "../paths.js?v=1004.15";
-import { Sequence } from "../audio.js?v=1004.15";
-import { I, progress, SPEAKER } from "../ui.js?v=1004.15";
-import writeView from "./write.js?v=1004.15";
-import { diagEnv, keepDiag } from "../diag.js?v=1004.15";
-import { playMine as playMineRec } from "../playmine.js?v=1004.15";
-import { bestHeard, heardHTML } from "../heard.js?v=1004.15";
-import speakView, { similarity, PASS, recGet, recPut } from "./speak.js?v=1004.15";
-import { record, micWhy, srWhy, canScore, closeMic, logRec, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1004.15";
-import { hold, quietWake } from "../wake.js?v=1004.15";
+import { t, lang, langName } from "../i18n.js?v=1004.16";
+import { esc, renderText, glossCards } from "../text.js?v=1004.16";
+import { episode } from "../data.js?v=1004.16";
+import { paths } from "../paths.js?v=1004.16";
+import { Sequence } from "../audio.js?v=1004.16";
+import { I, progress, SPEAKER } from "../ui.js?v=1004.16";
+import writeView from "./write.js?v=1004.16";
+import { diagEnv, keepDiag } from "../diag.js?v=1004.16";
+import { playMine as playMineRec } from "../playmine.js?v=1004.16";
+import { bestHeard, heardHTML } from "../heard.js?v=1004.16";
+import { recDel, downloadRec, askPersist } from "../recstore.js?v=1004.16";
+import speakView, { similarity, PASS, recGet, recPut } from "./speak.js?v=1004.16";
+import { record, micWhy, srWhy, canScore, closeMic, logRec, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1004.16";
+import { hold, quietWake } from "../wake.js?v=1004.16";
 
 const RATES = [1, 0.75, 0.5];
 const pref = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } };
@@ -201,7 +202,7 @@ export default async function learn(app, ep, startId) {
         <div class="tabs" role="tablist">${["L", "ko"].map(v => `<button data-x="txt" data-v="${v}" role="tab" aria-selected="${P.txt === v}">${esc(v9name(v))}</button>`).join("")}</div>
         <p data-p="0">${bold(tx.ex || "")}</p>
         ${l.say ? `<div class="sayb"><p data-p="1">${bold(tx.say || "")}</p>
-          <div class="sbtns"><button class="mic" data-x="rec">🎤 ${esc(t("speak_now"))}</button><button data-x="model">▶ ${esc(t("model"))}</button><button data-x="mine" disabled>▶ ${esc(t("my_voice"))}</button><button data-x="keep" hidden>${esc(t("keep"))}</button><button data-x="savedplay" hidden>${esc(t("saved_play"))}</button></div>
+          <div class="sbtns"><button class="mic" data-x="rec">🎤 ${esc(t("speak_now"))}</button><button data-x="model">▶ ${esc(t("model"))}</button><button data-x="mine" disabled>▶ ${esc(t("my_voice"))}</button><button data-x="keep" hidden>${esc(t("keep"))}</button><button data-x="savedplay" hidden>${esc(t("saved_play"))}</button><button data-x="savedl" class="small" hidden>⬇ ${esc(t("download"))}</button><button data-x="savedel" class="small" hidden>🗑 ${esc(t("del_one"))}</button></div>
           <div class="sline"><span class="lvl" hidden><i></i></span><span class="smsg" aria-live="polite"></span></div><div class="heardline"></div><div class="microw"><button class="micname" data-x="mics" hidden></button><select class="micsel" hidden></select></div></div>` : ""}
       </div>
       <div class="v9prog" data-off><span class="t0">0:00</span><div class="trk" aria-label="seek"><div class="rail"><i></i></div></div><span class="t1">0:00</span></div></div>`;
@@ -289,6 +290,7 @@ export default async function learn(app, ep, startId) {
     sp = { i, saved: { blob: saved.blob, score: saved.score } };
     if (st.panel?.i !== i) return;
     const b = panel.querySelector(".sayb [data-x=savedplay]"); if (b) { b.hidden = false; b.textContent = t("saved_play_n", { n: saved.score ?? "" }); } // 저장된 것도 점수
+    panel.querySelectorAll(".sayb [data-x=savedl], .sayb [data-x=savedel]").forEach(x => { x.hidden = false; }); // 저장한 것 내려받기 · 지우기
   }
   async function spRec(i, btn) {
     const box = panel.querySelector(".sayb"), msg = box.querySelector(".smsg"), lvl = box.querySelector(".lvl"), mineB = box.querySelector("[data-x=mine]");
@@ -372,7 +374,16 @@ export default async function learn(app, ep, startId) {
         if (sp.score >= (old?.score ?? 0)) { recPut(sayKey(i), { blob: sp.blob, score: sp.score, at: Date.now() }); sp.saved = { blob: sp.blob, score: sp.score }; msg.textContent = `${sp.score}% ✓ · ${t("kept")}`; }
         else msg.textContent = `${sp.score}% ✓ · ${t("kept_better")}`;
         x.hidden = true; const sb = panel.querySelector(".sayb [data-x=savedplay]"); sb.hidden = false; sb.textContent = t("saved_play_n", { n: sp.saved?.score ?? sp.score });
+        panel.querySelectorAll(".sayb [data-x=savedl], .sayb [data-x=savedel]").forEach(y => { y.hidden = false; }); askPersist(); // 처음 저장 때 오래 남게(조용히)
       });
+      return;
+    }
+    if (k === "savedl") { if (sp?.saved?.blob) downloadRec(sp.saved.blob, `malmun_${sayKey(i).split("/")[1]}_${sp.saved.score ?? ""}`); return; } // 원본 그대로 파일로
+    if (k === "savedel") { // 이 녹음만 지우기 — 한 번 묻고
+      if (!sp?.saved || !confirm(t("del_one_q"))) return;
+      recDel(sayKey(i)); sp.audio?.pause(); sp.saved = null;
+      panel.querySelectorAll(".sayb [data-x=savedplay], .sayb [data-x=savedl], .sayb [data-x=savedel]").forEach(y => { y.hidden = true; });
+      panel.querySelector(".sayb .smsg").textContent = t("deleted");
       return;
     }
     if (k === "savedplay") {

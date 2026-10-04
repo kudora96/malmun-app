@@ -1,9 +1,10 @@
-import { t } from "../i18n.js?v=1004.15";
-import { esc } from "../text.js?v=1004.15";
-import { catalog } from "../data.js?v=1004.15";
-import { langChip, openLangSheet, progress } from "../ui.js?v=1004.15";
-import { rerender } from "../main.js?v=1004.15";
-import { VERSION } from "../version.js?v=1004.15";
+import { t } from "../i18n.js?v=1004.16";
+import { esc } from "../text.js?v=1004.16";
+import { catalog } from "../data.js?v=1004.16";
+import { langChip, openLangSheet, progress } from "../ui.js?v=1004.16";
+import { rerender } from "../main.js?v=1004.16";
+import { VERSION } from "../version.js?v=1004.16";
+import { recCount, recDelEpisode } from "../recstore.js?v=1004.16";
 
 const mmss = s => `${Math.floor(s / 60)}:${String(Math.round(s % 60)).padStart(2, "0")}`;
 
@@ -24,7 +25,14 @@ export default async function list(app, unit = "L01-00") {
       const inner = `<span class="n">${esc(e.id.slice(-2))}</span><span class="ko" lang="ko">${esc(e.title)}</span><span class="st">${e.ready ? "" : esc(t("soon"))}</span>`;
       return `<li>${e.ready ? `<a href="#/learn/${e.id}">${inner}</a>` : `<div class="soon">${inner}</div>`}</li>`;
     }).join("")}</ol>
+    ${first ? `<p class="delall"><button data-ep="${esc(first.id)}" hidden>🗑 ${esc(t("del_all"))}</button></p>` : ""}
     <p class="ver">v${esc(VERSION)}</p>
   </section>`;
   app.querySelector("[data-act=lang]").onclick = () => openLangSheet(rerender);
+  // 이 편 녹음 모두 지우기(녹음이 있을 때만 보임 · 한 번 묻고 · 진단 녹음도 같이)
+  const da = app.querySelector(".delall button");
+  if (da) {
+    recCount(da.dataset.ep).then(n => { da.hidden = !n; });
+    da.onclick = async () => { if (!confirm(t("del_all_q"))) return; await recDelEpisode(da.dataset.ep); da.hidden = true; da.parentElement.append(Object.assign(document.createElement("span"), { textContent: " " + t("deleted") })); };
+  }
 }

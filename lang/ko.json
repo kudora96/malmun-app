@@ -107,5 +107,11 @@
  "kept": "저장했어요.",
  "kept_better": "저장된 게 점수가 더 높아서 그대로 뒀어요.",
  "heard_label": "들린 말",
- "saved_play_n": "저장됨 {n}% ▶"
+ "saved_play_n": "저장됨 {n}% ▶",
+ "download": "내려받기",
+ "del_one": "지우기",
+ "del_one_q": "이 녹음을 지울까요?",
+ "del_all": "이 편 녹음 모두 지우기",
+ "del_all_q": "이 편의 내 녹음을 모두 지울까요?",
+ "deleted": "지웠어요."
 }

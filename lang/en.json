@@ -107,5 +107,11 @@
  "kept": "Saved.",
  "kept_better": "Your saved one scored higher — kept it.",
  "heard_label": "Heard",
- "saved_play_n": "Saved {n}% ▶"
+ "saved_play_n": "Saved {n}% ▶",
+ "download": "Download",
+ "del_one": "Delete",
+ "del_one_q": "Delete this recording?",
+ "del_all": "Delete all my recordings in this episode",
+ "del_all_q": "Delete all your recordings in this episode?",
+ "deleted": "Deleted."
 }
