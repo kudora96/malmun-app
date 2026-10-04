@@ -13,17 +13,17 @@
 //     못 넘어도 막지 않는다([다음 ▶]) · 음성 인식이 안 되는 곳은 점수 없이 듣고 비교만(녹음은 저장)
 //  S6 녹음은 이 기기 안에만(IndexedDB) — 서버로 보내지 않는다
 //  S7 영상 창 안(embedded): 스크롤 없이 · 줄 이동·닫기는 학습 화면이 한다 · 줄 전체까지 통과하면 다음 줄 말하기로
-import { t, lang } from "../i18n.js?v=1004.28";
-import { esc } from "../text.js?v=1004.28";
-import { episode } from "../data.js?v=1004.28";
-import { paths } from "../paths.js?v=1004.28";
-import { audioCtx, hold, quietWake } from "../wake.js?v=1004.28";
-import * as sfx from "../sfx.js?v=1004.28";
-import { diagEnv, keepDiag } from "../diag.js?v=1004.28";
-import { playMine as playMineRec } from "../playmine.js?v=1004.28";
-import { bestHeard, heardHTML } from "../heard.js?v=1004.28";
-import { recDel, downloadRec, askPersist } from "../recstore.js?v=1004.28";
-import { logRec, dB, srWhy, srWatch, niceLabel, ALIAS } from "../recorder.js?v=1004.28";
+import { t, lang } from "../i18n.js?v=1004.31";
+import { esc } from "../text.js?v=1004.31";
+import { episode } from "../data.js?v=1004.31";
+import { paths } from "../paths.js?v=1004.31";
+import { audioCtx, hold, quietWake } from "../wake.js?v=1004.31";
+import * as sfx from "../sfx.js?v=1004.31";
+import { diagEnv, keepDiag } from "../diag.js?v=1004.31";
+import { playMine as playMineRec } from "../playmine.js?v=1004.31";
+import { bestHeard, heardHTML } from "../heard.js?v=1004.31";
+import { recDel, downloadRec, askPersist } from "../recstore.js?v=1004.31";
+import { logRec, dB, srWhy, srWatch, niceLabel, ALIAS } from "../recorder.js?v=1004.31";
 
 // 통과 두 단계(본부 10-04 · 투덜이 「원어민은 되지만 외국인은 100% 어렵다」): 80↑ = ☆ 통과(✓ · [저장]) · 95↑ = ★ 완벽
 export const PASS = 80, PERFECT = 95;
@@ -35,17 +35,20 @@ const QUIET_MS = 2000, START_MS = 6000;
 export const maxMsFor = say => Math.max(8000, (3 + 0.8 * [...String(say || "")].filter(c => /[가-힣]/.test(c)).length) * 1000);
 
 // ── 닮음 = 음절 정렬(js/score.js · 「들린 말」 빨간 표시와 같은 함수 — 본부 10-04) ──
-import { similarity } from "../score.js?v=1004.28";
+import { similarity } from "../score.js?v=1004.31";
 export { similarity };
 
 // ── 내 목소리 저장(S6) ──
 const db = () => new Promise((res, rej) => {
   const r = indexedDB.open("malmun", 1);
   r.onupgradeneeded = () => r.result.createObjectStore("rec");
-  r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+  r.onsuccess = () => { const d = r.result; d.onversionchange = () => d.close(); res(d); }; r.onerror = () => rej(r.error); // 지우기·판 올림이 오면 바로 놓아 줌 — 안 놓으면 그 뒤 여는 것이 모두 멈춤(본부 10-04 빈 말하기 창)
 });
-export const recGet = async key => { try { const d = await db(); return await new Promise(res => { const q = d.transaction("rec").objectStore("rec").get(key); q.onsuccess = () => res(q.result || null); q.onerror = () => res(null); }); } catch { return null; } };
-export const recPut = async (key, val) => { try { const d = await db(); await new Promise(res => { const tx = d.transaction("rec", "readwrite"); tx.objectStore("rec").put(val, key); tx.oncomplete = res; tx.onerror = res; }); } catch {} };
+// 저장소가 막히거나 늦어도(허락 묻는 중 · 사생활 창 · 미리보기 창) 화면을 붙잡지 않게 — 1.5초 안에 못 읽으면 「저장 없음」으로(본부 10-04: 빈 말하기 창)
+const late = (p, ms = 1500) => Promise.race([p, new Promise(r => setTimeout(() => r(null), ms))]);
+export const recGet = key => late(recGet0(key));
+const recGet0 = async key => { try { const d = await db(); return await new Promise(res => { const q = d.transaction("rec").objectStore("rec").get(key); q.onsuccess = () => { d.close(); res(q.result || null); }; q.onerror = () => { d.close(); res(null); }; }); } catch { return null; } };
+export const recPut = async (key, val) => { try { const d = await db(); await new Promise(res => { const tx = d.transaction("rec", "readwrite"); tx.objectStore("rec").put(val, key); tx.oncomplete = tx.onerror = () => { d.close(); res(); }; }); } catch {} };
 
 export default async function speak(app, ep, id, opts = {}) {
   const d = await episode(ep, lang);
@@ -60,7 +63,7 @@ export default async function speak(app, ep, id, opts = {}) {
   if (opts.task === "say" && line.say) parts.startAt = parts.length - 1; // 설명의 「이제 말해 보세요」에서 들어오면 그 과제부터
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   const st = { i: parts.startAt || 0, rec: null, stream: null, blob: null, score: null, saved: {}, busy: false, model: false, alive: true, mine: null };
-  for (const p of parts) st.saved[p.key] = await recGet(`${ep}/${p.key}`);
+  const savedReady = Promise.all(parts.map(async p => { st.saved[p.key] = await recGet(`${ep}/${p.key}`); })); // 기다리지 않고 먼저 그린다 — 다 읽으면 다시 그림
 
   app.innerHTML = `<section class="scr speak ${opts.embedded ? "embedded" : ""}">
     <div class="whead"><b>${esc(t("speak"))}</b><span class="sub">${li + 1} / ${d.lines.length} · <span class="ko" lang="ko">${esc(line.speaker)}</span></span>
@@ -99,7 +102,7 @@ export default async function speak(app, ep, id, opts = {}) {
     $(".sbar i").style.width = (sc ?? 0) + "%";
     $(".meter").classList.toggle("pass", sc != null && sc >= PASS);
     // 점수는 언제나 % — 알아듣지 못했으면 「0% · 까닭」(투덜이 10-04)
-    $(".msg").textContent = st.rec ? t(!st.ready ? "mic_opening" : st.switched ? "mic_switched" : "listening") : st.kept ? `${sc}% ✓ · ${starOf(sc)} ${t(st.kept)}` : st.note ? `0% · ${t(st.whyEnd === "nospeech" ? "why_nospeech" : st.note)}` : sc == null ? (SR ? t(mineBlob() ? "no_score" : "speak_hint") : t(mineBlob() ? "no_score" : "speak_hint_noscore"))
+    $(".msg").textContent = st.rec ? t(!st.ready ? "mic_opening" : st.switched ? "mic_switched" : "listening") : st.kept ? `${sc}% ✓ · ${starOf(sc)} ${t(st.kept)}` : st.note ? `0% · ${t(st.whyEnd === "nospeech" ? "why_nospeech" : st.note)}` : st.micErr && sc == null && !mineBlob() ? st.micErr : sc == null ? (SR ? t(mineBlob() ? "no_score" : "speak_hint") : t(mineBlob() ? "no_score" : "speak_hint_noscore"))
       : scoreLine(sc, st.whyEnd, t); // 점수에 맞는 한마디 + 끝난 까닭
     $("[data-act=mine]").disabled = $("[data-act=both]").disabled = !mineBlob();
     $("[data-act=keep]").hidden = !(sc != null && sc >= PASS && mineBlob() && !st.kept); // 80% 넘으면 [저장]
@@ -184,10 +187,11 @@ export default async function speak(app, ep, id, opts = {}) {
     stopSounds();
     st.switched = !!switched;
     $(".msg").textContent = t("mic_opening");
-    try { await openMic(); }
+    try { await openMic(); st.micErr = ""; }
     catch (e) {
-      if (e.name === "SilentError") { dead.clear(); $(".msg").textContent = t("mic_silent"); showMics(t("mic_silent")); }
-      else $(".msg").textContent = micWhy(e);
+      // 거절·막힘 안내는 다시 그려도 남게 st.micErr 에 붙듦(본부 10-04 · 창은 그대로 · 본보기 듣기는 됨)
+      if (e.name === "SilentError") { dead.clear(); $(".msg").textContent = st.micErr = t("mic_silent"); showMics(t("mic_silent")); }
+      else $(".msg").textContent = st.micErr = micWhy(e);
       return;
     }
     if (!st.alive) return;
@@ -317,6 +321,7 @@ export default async function speak(app, ep, id, opts = {}) {
   };
 
   paint();
+  savedReady.then(() => { if (st.alive) paint(); }); // 저장된 ✓·「저장됨 ▶」은 읽히는 대로
   try { if (!localStorage.getItem("malmun.sp.help")) { localStorage.setItem("malmun.sp.help", "1"); $(".helpbox").hidden = false; } } catch {} // 처음 한 번은 풍선이 저절로
   sfx.preload([lineSrc, ...parts.map(p => p.src)]);
   const release = hold();

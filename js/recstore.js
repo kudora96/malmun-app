@@ -1,11 +1,11 @@
 // 저장한 내 녹음 관리 — 지우기 · 이 편 모두 지우기 · 내려받기 · 오래 남게(본부 10-04 · 투덜이 승인)
-import { audioCtx } from "./wake.js?v=1004.28";
-import { leadOf, gainOf, FADE } from "./playmine.js?v=1004.28";
+import { audioCtx } from "./wake.js?v=1004.31";
+import { leadOf, gainOf, FADE } from "./playmine.js?v=1004.31";
 // 녹음·재생·점수 경로는 건드리지 않는다 — IndexedDB 「malmun」/rec(말하기 창 recGet·recPut 과 같은 곳)만 다룬다
 const open = () => new Promise((res, rej) => {
   const r = indexedDB.open("malmun", 1);
   r.onupgradeneeded = () => r.result.createObjectStore("rec");
-  r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+  r.onsuccess = () => { const d = r.result; d.onversionchange = () => d.close(); res(d); }; r.onerror = () => rej(r.error); // 지우기·판 올림이 오면 바로 놓아 줌 — 안 놓으면 그 뒤 여는 것이 모두 멈춤(본부 10-04 빈 말하기 창)
 });
 const tx = (fn) => open().then(d => new Promise(res => { const t = d.transaction("rec", "readwrite"); fn(t.objectStore("rec")); t.oncomplete = t.onerror = () => { d.close(); res(); }; })).catch(() => {});
 
