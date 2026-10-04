@@ -18,7 +18,7 @@ import { Sequence } from "../audio.js";
 import { I, progress, SPEAKER } from "../ui.js";
 import writeView from "./write.js";
 import speakView, { similarity, PASS, recGet, recPut } from "./speak.js";
-import { record, micWhy, canScore, closeMic, micOpen, trimSilence } from "../recorder.js";
+import { record, micWhy, srWhy, canScore, closeMic, micOpen, trimSilence, micLabel, listMics, chooseMic } from "../recorder.js";
 import { hold } from "../wake.js";
 
 const RATES = [1, 0.75, 0.5];
@@ -199,7 +199,7 @@ export default async function learn(app, ep, startId) {
         <p data-p="0">${bold(tx.ex || "")}</p>
         ${l.say ? `<div class="sayb"><p data-p="1">${bold(tx.say || "")}</p>
           <div class="sbtns"><button class="mic" data-x="rec">🎤 ${esc(t("speak_now"))}</button><button data-x="model">▶ ${esc(t("model"))}</button><button data-x="mine" disabled>▶ ${esc(t("my_voice"))}</button></div>
-          <div class="sline"><span class="lvl" hidden><i></i></span><span class="smsg" aria-live="polite"></span></div></div>` : ""}
+          <div class="sline"><span class="lvl" hidden><i></i></span><span class="smsg" aria-live="polite"></span></div><div class="microw"><button class="micname" data-x="mics" hidden></button><select class="micsel" hidden></select></div></div>` : ""}
       </div>
       <div class="v9prog" data-off><span class="t0">0:00</span><div class="trk" aria-label="seek"><div class="rail"><i></i></div></div><span class="t1">0:00</span></div></div>`;
   }
@@ -252,7 +252,7 @@ export default async function learn(app, ep, startId) {
     markButtons();
     if (kind === "explain") {
       panel.innerHTML = explainHTML(i);
-      if (L[i].v9) { mine.cleanup = spStop; spInit(i); } // 마이크는 🎤 누를 때만 연다(열면 블루투스가 통화 모드로 바뀌어 설명 소리까지 전화 음질 — 본부 10-03)
+      if (L[i].v9) { mine.cleanup = spStop; spInit(i); if (!canScore()) { const g = panel.querySelector(".sayb .smsg"); if (g) g.textContent = t("speak_hint_noscore"); } } // 마이크는 🎤 누를 때만 연다(열면 블루투스가 통화 모드로 바뀌어 설명 소리까지 전화 음질 — 본부 10-03)
       if (autoplay) { ex.play(exItems(i)); if (L[i].v9) markPlay(v9pref().snd); }
     } else {
       const view = kind === "speak" ? speakView : writeView; // 줄을 다 쓰면(말하면) 다음 줄의 같은 메뉴로(W6 · S7)
@@ -279,7 +279,7 @@ export default async function learn(app, ep, startId) {
     sp = { i, blob: (await trimSilence(saved.blob)).blob }; // 예전에 저장된 녹음도 앞뒤 무음을 잘라 들려준다(저장된 것은 그대로)
     if (st.panel?.i !== i) return;
     const m = panel.querySelector(".sayb [data-x=mine]"); if (m) m.disabled = false;
-    const g = panel.querySelector(".sayb .smsg"); if (g) g.textContent = saved.score != null ? `${saved.score}% ✓` : "";
+    const g = panel.querySelector(".sayb .smsg"); if (g) g.textContent = saved.score >= PASS ? `${saved.score}% ✓` : "";
   }
   async function spRec(i, btn) {
     const box = panel.querySelector(".sayb"), msg = box.querySelector(".smsg"), lvl = box.querySelector(".lvl"), mineB = box.querySelector("[data-x=mine]");
@@ -289,8 +289,10 @@ export default async function learn(app, ep, startId) {
     // 「준비 중」 → 마이크에서 실제 소리가 들어오기 시작하면 「녹음 중」(본부 10-03 — 그 전에 말하면 앞이 비어 버린다)
     const ctl = record({
       onLevel: v => { lvl.firstElementChild.style.width = Math.round(v * 100) + "%"; },
+      onStop: () => { if (sp?.ctl === ctl) { msg.textContent = t("checking"); lvl.hidden = true; } },
       onSwitch: () => { btn.textContent = "… " + t("mic_opening"); lvl.hidden = true; msg.textContent = t("mic_switched"); },
-      onReady: () => { if (sp?.ctl !== ctl) return; btn.textContent = "■ " + t("btn_stop"); lvl.hidden = false; msg.textContent = t("listening"); },
+      onReady: () => { if (sp?.ctl !== ctl) return; btn.textContent = "■ " + t("btn_stop"); lvl.hidden = false; msg.textContent = t("listening");
+        const nb = box.querySelector(".micname"); if (nb && micLabel()) { nb.textContent = `🎤 ${micLabel()} ✓`; nb.hidden = false; } }, // 지금 쓰는 마이크 — 자동이 틀렸을 때만 눌러 바꿈
     });
     sp = { i, ctl, blob: sp?.blob };
     btn.classList.add("on"); btn.textContent = "… " + t("mic_opening"); lvl.hidden = true; msg.textContent = "";
@@ -303,10 +305,11 @@ export default async function learn(app, ep, startId) {
     const sc = canScore() && r.heard.length ? Math.max(...r.heard.map(h => similarity(L[i].say.ko, h))) : null;
     sp.blob = r.blob; mineB.disabled = false;
     btn.textContent = "🎤 " + t(sc != null && sc >= PASS ? "speak_now" : "try_again");
-    msg.textContent = sc == null ? t("no_score") : `${sc}%${sc >= PASS ? " ✓" : ""} · ${t(sc >= 95 ? "score_5" : sc >= PASS ? "score_4" : sc >= 60 ? "score_3" : sc >= 40 ? "score_2" : "score_1")}`;
+    // 점수가 안 나오면 절대 통과·저장 아님(본부 10-04 — 엉뚱한 말도 그냥 넘어가던 것) · 왜 안 나왔는지 짧게
+    msg.textContent = sc == null ? t(canScore() ? srWhy(r.srErr) : "speak_hint_noscore") : `${sc}%${sc >= PASS ? " ✓" : ""} · ${t(sc >= 95 ? "score_5" : sc >= PASS ? "score_4" : sc >= 60 ? "score_3" : sc >= 40 ? "score_2" : "score_1")}`;
     box.classList.toggle("pass", sc != null && sc >= PASS);
     const old = await recGet(sayKey(i));
-    if (sc == null ? !(old?.score >= PASS) : sc >= PASS && sc >= (old?.score ?? 0)) recPut(sayKey(i), { blob: r.blob, score: sc, at: Date.now() });
+    if (sc != null && sc >= PASS && sc >= (old?.score ?? 0)) recPut(sayKey(i), { blob: r.blob, score: sc, at: Date.now() });
   }
   const markPlay = (k = null) => panel.querySelectorAll(".v9bar .pb").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.v === k)));
   // 재생 전에 마이크부터 닫는다 — 열려 있으면 블루투스가 통화 모드라 소리가 전화 음질(본부 10-03) · 방금 닫았으면 0.4초 뒤 재생(음악 모드로 돌아올 틈)
@@ -334,6 +337,15 @@ export default async function learn(app, ep, startId) {
       markPlay(v); ex.play(items); return sync();
     }
     if (k === "rec") return spRec(i, x);
+    if (k === "mics") { // 마이크 목록(카드 안 작은 고르기) — 고르면 기억하고 다음 녹음부터
+      const sel = panel.querySelector(".sayb .micsel");
+      listMics().then(ds => {
+        sel.innerHTML = ds.map(d => `<option value="${esc(d.deviceId)}" ${d.label === micLabel() ? "selected" : ""}>${esc(d.label || d.deviceId)}</option>`).join("");
+        sel.hidden = false; x.hidden = true;
+        sel.onchange = () => { chooseMic(sel.value); x.textContent = `🎤 ${sel.selectedOptions[0]?.textContent || ""}`; x.hidden = false; sel.hidden = true; };
+      });
+      return;
+    }
     if (k === "model") { // 본보기 = 문장만 읽은 소리
       if (sp?.ctl) return;
       sp?.audio?.pause(); markPlay(); ex.play([{ src: L[i].say.src, p: 1 }]); return sync();

@@ -19,7 +19,7 @@ import { episode } from "../data.js";
 import { paths } from "../paths.js";
 import { audioCtx, hold } from "../wake.js";
 import * as sfx from "../sfx.js";
-import { trimSilence } from "../recorder.js";
+import { trimSilence, micCandidates, avoidBT, srWhy, probe } from "../recorder.js";
 
 export const PASS = 80;
 const MAX_MS = 8000, QUIET_MS = 1000;
@@ -76,7 +76,7 @@ export default async function speak(app, ep, id, opts = {}) {
     <div class="miclist" hidden></div>
     <div class="helpbox" hidden>${[1, 2, 3, 4, 5].map(k => `<p>${esc(t("help_sp_" + k))}</p>`).join("")}<p class="x">${esc(t("help_close"))}</p></div>
     <div class="task"><div class="say ko" lang="ko"></div><div class="tr"></div></div>
-    <div class="meter"><div class="lvl" hidden><i></i></div><div class="sbar"><i></i><em style="left:${PASS}%"></em></div><div class="msg" aria-live="polite"></div></div>
+    <div class="meter"><div class="lvl" hidden><i></i></div><div class="sbar"><i></i><em style="left:${PASS}%"></em></div><div class="msg" aria-live="polite"></div><button class="micname" data-act="pick" hidden></button></div>
     <div class="sbtns">
       <button data-act="model">▶ ${esc(t("model"))}</button>
       <button class="mic" data-act="rec"><span class="dot"></span><span class="lab">${esc(t("speak_now"))}</span></button>
@@ -102,7 +102,7 @@ export default async function speak(app, ep, id, opts = {}) {
     const sc = st.score ?? sv?.score ?? null;
     $(".sbar i").style.width = (sc ?? 0) + "%";
     $(".meter").classList.toggle("pass", sc != null && sc >= PASS);
-    $(".msg").textContent = st.rec ? t(!st.ready ? "mic_opening" : st.switched ? "mic_switched" : "listening") : sc == null ? (mineBlob() ? t("no_score") : SR ? t("speak_hint") : t("speak_hint_noscore"))
+    $(".msg").textContent = st.rec ? t(!st.ready ? "mic_opening" : st.switched ? "mic_switched" : "listening") : st.note ? t(st.note) : sc == null ? (SR ? t(mineBlob() ? "no_score" : "speak_hint") : t("speak_hint_noscore"))
       : `${sc}%${sc >= PASS ? " ✓" : ""} · ${t(sc >= 95 ? "score_5" : sc >= PASS ? "score_4" : sc >= 60 ? "score_3" : sc >= 40 ? "score_2" : "score_1")}`; // 점수에 맞는 한마디
     $("[data-act=mine]").disabled = $("[data-act=both]").disabled = $("[data-act=save]").disabled = !mineBlob();
     $(".mic").classList.toggle("on", !!st.rec);
@@ -123,10 +123,10 @@ export default async function speak(app, ep, id, opts = {}) {
     a.onended = a.onerror = () => { URL.revokeObjectURL(a.src); if (st.mine === a) st.mine = null; res(); };
     a.play().catch(() => res());
   });
-  function go(i) { stopRec(true); stopSounds(); st.i = Math.max(0, Math.min(parts.length - 1, i)); st.blob = null; st.score = null; paint(); }
+  function go(i) { stopRec(true); stopSounds(); st.i = Math.max(0, Math.min(parts.length - 1, i)); st.blob = null; st.score = null; st.note = null; paint(); }
 
   // ── 녹음 + 음성 인식(S3 · S5) ──
-  let sr = null, heard = [], quietTimer = 0, maxTimer = 0, meterTimer = 0;
+  let sr = null, srErr = null, heard = [], quietTimer = 0, maxTimer = 0, meterTimer = 0;
   // 마이크 열기 — 고른 마이크 → 기본 → 나머지 차례로(하나가 안 열려도 다음 것으로)
   const micPref = v => { try { if (v === undefined) return localStorage.getItem("malmun.mic"); v ? localStorage.setItem("malmun.mic", v) : localStorage.removeItem("malmun.mic"); } catch { return null; } };
   const openOne = c => Promise.race([navigator.mediaDevices.getUserMedia({ audio: c }), new Promise((_, rej) => setTimeout(() => rej(Object.assign(new Error("timeout"), { name: "TimeoutError" })), 8000))]);
@@ -142,14 +142,16 @@ export default async function speak(app, ep, id, opts = {}) {
   async function openMic() {
     if (st.stream?.getAudioTracks()[0]?.readyState === "live") return st.stream;
     st.stream = null;
-    let last = null, devs = [];
-    try { devs = (await navigator.mediaDevices.enumerateDevices()).filter(x => x.kind === "audioinput" && x.deviceId).map(x => x.deviceId); } catch {}
-    const tries = [...new Set([micPref() || true, true, ...devs])];
-    for (const c of tries) {
+    let last = null;
+    const tries = (await micCandidates(micPref())).list; // 블루투스 마이크는 맨 뒤(통화 모드 · 음성 인식 못 잡음 — 본부 10-04)
+    for (let k = 0; k < tries.length; k++) {
+      const c = tries[k];
       if (dead.has(c)) continue;
       try {
         const s = await openOne(c === true ? true : { deviceId: { exact: c } });
         if (dead.has(devId(s))) { s.getTracks().forEach(x => x.stop()); continue; } // 이름만 다른 같은 마이크
+        if (await avoidBT(s, c, tries, k, id => dead.has(id))) continue;
+        if ((await probe(s)) === false) { dead.add(c); if (devId(s)) dead.add(devId(s)); s.getTracks().forEach(x => x.stop()); continue; } // 신호 0 → 다음 후보(학습자에게 고르게 하지 않음)
         st.micReq = c;
         return (st.stream = s);
       } catch (e) {
@@ -168,6 +170,8 @@ export default async function speak(app, ep, id, opts = {}) {
     box.innerHTML = (note ? `<p>${esc(note)}</p>` : "") + (devs.length ? devs.map((d, k) => `<button data-mic="${esc(d.deviceId)}" aria-pressed="${[micPref(), devId(st.stream)].includes(d.deviceId)}">${esc(d.label || t("mic_pick") + " " + (k + 1))}</button>`).join("") : `<p>${esc(t("mic_none"))}</p>`);
     box.hidden = false;
   }
+  // 지금 쓰는 마이크 이름 한 줄(🎤 아래) — 자동이 틀렸을 때만 눌러서 바꾼다(설정 화면으로 보내지 않음)
+  function showMicName() { const b = $(".micname"), l = st.stream?.getAudioTracks()[0]?.label; if (b && l) { b.textContent = `🎤 ${l} ✓`; b.hidden = false; } }
   async function startRec(switched) {
     stopSounds(); clearTimeout(micOff);
     st.switched = !!switched;
@@ -180,7 +184,7 @@ export default async function speak(app, ep, id, opts = {}) {
     }
     if (!st.alive) return;
     const rec = new MediaRecorder(st.stream), chunks = [];
-    st.rec = rec; st.ready = false; st.blob = null; st.score = null; heard = [];
+    st.rec = rec; st.ready = false; st.blob = null; st.score = null; st.note = null; heard = []; srErr = null;
     rec.ondataavailable = e => e.data.size && chunks.push(e.data);
     rec.onstop = () => finish(new Blob(chunks, { type: rec.mimeType || "audio/webm" }));
     rec.start();
@@ -193,7 +197,7 @@ export default async function speak(app, ep, id, opts = {}) {
           for (const r of rs) for (const alt of r) heard.push(alt.transcript);
           if (rs.length > 1) heard.push(rs.map(r => r[0].transcript).join(" ")); // 여러 도막으로 나뉘어 온 말을 이어서도 본다
         };
-        sr.onerror = () => {};
+        sr.onerror = e => { srErr = e.error || "error"; }; // 삼키지 않는다 — 점수가 안 나온 까닭을 알려 준다
         // 녹음하는 바로 그 마이크로 알아듣게 한다 — 그냥 start() 는 크롬 기본 마이크(소리 0 인 블루투스일 수 있다)를 듣는다
         try { sr.start(st.stream.getAudioTracks()[0]); } catch { sr.start(); }
       } catch { sr = null; }
@@ -212,7 +216,7 @@ export default async function speak(app, ep, id, opts = {}) {
         an.getFloatTimeDomainData(buf);
         const rms = Math.sqrt(buf.reduce((s, v) => s + v * v, 0) / buf.length);
         peak = Math.max(peak, rms);
-        if (!st.ready && rms > 0 && st.rec === rec) { st.ready = true; lvl.hidden = false; paint(); }
+        if (!st.ready && rms > 0 && st.rec === rec) { st.ready = true; lvl.hidden = false; paint(); showMicName(); }
         lvl.firstElementChild.style.width = Math.min(100, Math.round(rms * 500)) + "%"; // 들어오는 소리 크기
         // 바꿔서 연 마이크에 신호가 있으면(말하기 전이라도) 기억 — 다음에는 죽은 마이크를 다시 거치지 않는다
         if (st.switched && !kept && peak >= 0.0002 && liveMs > DEAD_MS) { kept = true; micPref(devId(st.stream) || (st.micReq !== true && st.micReq) || ""); }
@@ -241,14 +245,16 @@ export default async function speak(app, ep, id, opts = {}) {
   async function finish(blob) {
     blob = (await trimSilence(blob)).blob; // 앞뒤 무음 잘라내기(마이크가 열리는 동안의 빈 소리 — 본부 10-03)
     st.blob = blob;
-    if (sr) { // 인식 결과가 조금 늦게 온다
+    if (sr) { // 인식 결과가 조금 늦게 온다 — 그동안 「확인 중…」
+      if (!heard.length) $(".msg").textContent = t("checking");
       for (let k = 0; k < 20 && !heard.length; k++) await new Promise(r => setTimeout(r, 100));
       st.score = heard.length ? Math.max(...heard.map(h => similarity(cur().say, h))) : null; // 못 알아들었으면 0% 가 아니라 점수 없음
+      if (st.score == null) st.note = srWhy(srErr); // 까닭(마이크를 못 잡음 · 인터넷 · 허락 · 못 알아들음)
     } else st.score = null;
     if (!st.alive) return;
     const p = cur(), old = st.saved[p.key];
     // 저장: 80% 넘은 것(더 높은 점수로만 바꿈) · 점수를 못 재는 곳은 방금 것
-    if (st.score == null ? !(old?.score >= PASS) : st.score >= PASS && st.score >= (old?.score ?? 0)) {
+    if (st.score != null && st.score >= PASS && st.score >= (old?.score ?? 0)) { // 80% 넘어야만 저장(점수 없으면 절대 아님 — 본부 10-04)
       st.saved[p.key] = { blob, score: st.score, at: Date.now() };
       recPut(`${ep}/${p.key}`, st.saved[p.key]);
     }

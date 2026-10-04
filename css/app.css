@@ -352,3 +352,8 @@ a{color:inherit;text-decoration:none}
 .v9prog .rail i::after{content:"";position:absolute;right:-7px;top:-5px;width:14px;height:14px;border-radius:50%;background:var(--hi)}
 .v9prog[data-off]{opacity:.4}
 .v9prog[data-off] .trk{cursor:default}
+
+/* 지금 쓰는 마이크 이름 한 줄 — 눌러서 바꾸기(자동이 틀렸을 때만) */
+.v9body .microw{display:flex}
+.v9body .micname,.speak .micname{font-size:11px;color:var(--mute);background:none;border:0;padding:0;text-align:start;text-decoration:underline dotted;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.v9body .micsel{font-size:12px;max-width:100%}

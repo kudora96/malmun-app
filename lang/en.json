@@ -58,7 +58,7 @@
  "compare": "Compare",
  "listening": "Listening… speak now",
  "speak_hint": "Listen to the model, then press Speak and say it.",
- "speak_hint_noscore": "Listen to the model, record yourself, and compare.",
+ "speak_hint_noscore": "This browser can't give a score (Chrome recommended). You can still record and compare.",
  "no_score": "Recorded. Listen and compare with the model.",
  "score_pass": "Great!",
  "score_try": "Try once more, or move on.",
@@ -95,5 +95,10 @@
  "v9_mode_kL": "Listen in Korean, check in your language — cross",
  "v9_mode_Lk": "Listen in your language, read in Korean — cross",
  "v9_mode_kk": "Korean only — like a Korean-Korean dictionary",
- "try_again": "Try again"
+ "try_again": "Try again",
+ "sr_none": "I couldn't hear that clearly — please say it again.",
+ "sr_audio": "Speech recognition couldn't use the microphone. Choose another microphone (🎤).",
+ "sr_network": "An internet connection is needed for scoring.",
+ "sr_denied": "Speech recognition is blocked. Allow the microphone in the browser.",
+ "checking": "Checking…"
 }

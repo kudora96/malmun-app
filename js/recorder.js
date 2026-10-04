@@ -14,16 +14,62 @@ let stream = null;
 const devId = s => s?.getAudioTracks()[0]?.getSettings().deviceId || "";
 const openOne = c => Promise.race([navigator.mediaDevices.getUserMedia({ audio: c }), new Promise((_, rej) => setTimeout(() => rej(Object.assign(new Error("timeout"), { name: "TimeoutError" })), 8000))]);
 
+// 블루투스 마이크는 맨 뒤로 — 열면 이어폰이 통화 모드가 되고 크롬 음성 인식이 못 잡는다(본부 10-04 투덜이 크롬: audio-capture 오류)
+// 크롬 사이트 설정이 블루투스를 기본으로 줘도 USB·내장 마이크가 있으면 그걸 먼저 · 블루투스밖에 없을 때만 블루투스
+export const isBT = label => /bluetooth|블루투스|hands-?free|headset|수화기|헤드셋|airpods|buds/i.test(label || "");
+export async function micCandidates(prefId) {
+  let devs = [];
+  try { devs = (await navigator.mediaDevices.enumerateDevices()).filter(x => x.kind === "audioinput" && x.deviceId); } catch {}
+  // 「기본값 - …」「커뮤니케이션 - …」은 실제 장치의 별명 — 같은 groupId 의 실제 장치가 있으면 빼고 실제 장치로(투덜이 PC: 둘 다 USB)
+  const alias = d => (d.deviceId === "default" || d.deviceId === "communications") && devs.some(x => x !== d && x.groupId && x.groupId === d.groupId && x.deviceId !== "default" && x.deviceId !== "communications");
+  devs = devs.filter(d => !alias(d));
+  const ok = devs.filter(d => !isBT(d.label)).map(d => d.deviceId), bt = devs.filter(d => isBT(d.label)).map(d => d.deviceId);
+  return { list: [...new Set([...(prefId ? [prefId] : []), ...ok, true, ...bt])], ok };
+}
+// 연 마이크에 실제 신호가 오는지 본다(최대 1.2초 · 첫 샘플이 0 이 아니면 바로 끝) — true 옴 · false 완전 0(죽은 마이크) · null 모름(소리 엔진이 멈춤)
+// 완전한 0 만 죽은 것으로 본다 — 조용한 방의 산 마이크는 바닥 소음이 있다. 실제 걸린 시간은 소리 엔진 시계(currentTime)로 잰다(뒤 탭 타이머 느려짐 무관)
+export async function probe(s, ms = 1200) {
+  let src = null;
+  try {
+    const ctx = audioCtx();
+    if (ctx.state !== "running") { await ctx.resume().catch(() => {}); if (ctx.state !== "running") return null; }
+    src = ctx.createMediaStreamSource(s); const an = ctx.createAnalyser(); an.fftSize = 512; src.connect(an);
+    const buf = new Float32Array(512), t0 = ctx.currentTime, w0 = Date.now();
+    while (ctx.currentTime - t0 < ms / 1000) {
+      await new Promise(r => setTimeout(r, 40));
+      an.getFloatTimeDomainData(buf);
+      if (buf.some(v => v !== 0)) return true;
+      if (Date.now() - w0 > ms * 6) return null; // 소리 엔진이 안 감
+    }
+    return false;
+  } catch { return null; } finally { try { src?.disconnect(); } catch {} }
+}
+export const micLabel = () => stream?.getAudioTracks()[0]?.label || "";
+export async function listMics() { try { return (await navigator.mediaDevices.enumerateDevices()).filter(x => x.kind === "audioinput" && x.deviceId); } catch { return []; } }
+export function chooseMic(id) { pref(id || ""); dead.clear(); closeMic(); }
+// 크롬이 고른 마이크(true)가 블루투스인데 다른 마이크가 있으면 → 닫고 그쪽을 먼저(허락 전에는 이름을 몰라 이렇게 뒤에서 거른다)
+export async function avoidBT(s, c, tries, k, isDead) {
+  if (c !== true || !isBT(s.getAudioTracks()[0]?.label)) return false;
+  const { ok } = await micCandidates();
+  const left = ok.filter(id => !tries.slice(0, k).includes(id) && !isDead(id));
+  if (!left.length) return false;
+  s.getTracks().forEach(x => x.stop());
+  tries.splice(k + 1, 0, ...left);
+  return true;
+}
 async function openMic() {
   if (stream?.getAudioTracks()[0]?.readyState === "live") return stream;
   stream = null;
-  let last = null, devs = [];
-  try { devs = (await navigator.mediaDevices.enumerateDevices()).filter(x => x.kind === "audioinput" && x.deviceId).map(x => x.deviceId); } catch {}
-  for (const c of [...new Set([pref() || true, true, ...devs])]) {
+  let last = null;
+  const tries = (await micCandidates(pref())).list;
+  for (let k = 0; k < tries.length; k++) {
+    const c = tries[k];
     if (dead.has(c)) continue;
     try {
       const s = await openOne(c === true ? true : { deviceId: { exact: c } });
       if (dead.has(devId(s))) { s.getTracks().forEach(x => x.stop()); continue; }
+      if (await avoidBT(s, c, tries, k, id => dead.has(id))) continue;
+      if ((await probe(s)) === false) { dead.add(c); if (devId(s)) dead.add(devId(s)); s.getTracks().forEach(x => x.stop()); continue; } // 신호 0 → 다음 후보
       s.req = c;
       return (stream = s);
     } catch (e) {
@@ -36,6 +82,8 @@ async function openMic() {
 }
 export const micOpen = () => stream?.getAudioTracks()[0]?.readyState === "live";
 export function closeMic() { stream?.getTracks().forEach(x => x.stop()); stream = null; }
+// 음성 인식이 아무것도 못 알아들었을 때 까닭 → 글자 열쇠(점수 없음 = 통과·저장 아님)
+export const srWhy = err => ({ "audio-capture": "sr_audio", network: "sr_network", "not-allowed": "sr_denied", "service-not-allowed": "sr_denied" })[err] || "sr_none";
 // 안 될 때 까닭 → 글자 열쇠(lang/*.json)
 export const micWhy = e => (e?.name === "NotAllowedError" || e?.name === "SecurityError" ? "mic_denied" : e?.name === "NotFoundError" || e?.name === "OverconstrainedError" ? "mic_none" : e?.name === "SilentError" ? "mic_silent" : "mic_busy");
 
@@ -69,7 +117,7 @@ export async function warmMic() {
   try { if ((await navigator.permissions.query({ name: "microphone" })).state === "granted") await openMic(); } catch {}
 }
 
-export function record({ onLevel = () => {}, onSwitch = () => {}, onReady = () => {} } = {}) {
+export function record({ onLevel = () => {}, onSwitch = () => {}, onReady = () => {}, onStop = () => {} } = {}) {
   let stopNow = () => {}, cancelled = false;
   const ctl = { stop: discard => { if (discard) cancelled = true; stopNow(); } };
   ctl.done = (async () => {
@@ -86,7 +134,7 @@ export function record({ onLevel = () => {}, onSwitch = () => {}, onReady = () =
   function once(s, switched) {
     return new Promise(res => {
       const rec = new MediaRecorder(s), chunks = [], heard = [];
-      let sr = null, over = false, src = null, meter = 0, maxT = 0;
+      let sr = null, srErr = null, over = false, src = null, meter = 0, maxT = 0;
       rec.ondataavailable = e => e.data.size && chunks.push(e.data);
       rec.start();
       const SR = getSR();
@@ -98,19 +146,20 @@ export function record({ onLevel = () => {}, onSwitch = () => {}, onReady = () =
             for (const r of rs) for (const a of r) heard.push(a.transcript);
             if (rs.length > 1) heard.push(rs.map(r => r[0].transcript).join(" "));
           };
-          sr.onerror = () => {};
+          sr.onerror = e => { srErr = e.error || "error"; }; // 삼키지 않는다 — 점수가 안 나온 까닭을 칸에 알려 준다
           try { sr.start(s.getAudioTracks()[0]); } catch { sr.start(); }
         } catch { sr = null; }
       }
       const finish = (extra = {}) => {
         if (over) return; over = true;
         clearInterval(meter); clearTimeout(maxT); onLevel(0);
+        if (!extra.dead && !cancelled) onStop(); // 녹음 끝 — 인식 결과를 기다리는 동안 「확인 중…」
         try { src?.disconnect(); } catch {}
         try { sr?.stop(); } catch {}
         rec.onstop = async () => {
           if (sr && !extra.dead && !cancelled) for (let k = 0; k < 20 && !heard.length; k++) await new Promise(r => setTimeout(r, 100)); // 인식 결과는 조금 늦게 온다
           const raw = new Blob(chunks, { type: rec.mimeType || "audio/webm" });
-          res({ ...(extra.dead || cancelled ? { blob: raw } : await trimSilence(raw)), heard, ...extra });
+          res({ ...(extra.dead || cancelled ? { blob: raw } : await trimSilence(raw)), heard, srErr, ...extra });
         };
         try { rec.state !== "inactive" ? rec.stop() : rec.onstop(); } catch { rec.onstop(); }
       };

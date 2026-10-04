@@ -34,6 +34,8 @@
   // 가짜 음성 인식
   // 가짜 인식 = 진짜처럼 중간 결과(앞 두 글자)를 먼저 주고 끝 결과를 준다 · continuous 가 아니면 진짜처럼 앞 두 글자에서 끊어 버린다
   const fakeSR = class { start(tr) { window.__srTrack = tr?.kind || null; const h = window.__heard; window.__srCont = !!this.continuous;
+    if (window.__srErr) { setTimeout(() => this.onerror?.({ error: window.__srErr }), 100); return; } // 진짜 크롬처럼: 인식이 마이크를 못 잡음
+    if (window.__srNone) return; // 아무것도 못 알아들음
     setTimeout(() => this.onresult?.({ results: [[{ transcript: h.slice(0, 2) }]] }), 250);
     setTimeout(() => this.onresult?.({ results: [[{ transcript: this.continuous ? h : h.slice(0, 2) }]] }), 500); } stop() {} };
   window.SpeechRecognition = fakeSR; window.webkitSpeechRecognition = fakeSR;
@@ -100,6 +102,32 @@
   }
   await W(600);
   ok(/^1 \//.test($(".panel .whead .sub")?.textContent || "") && /5\/5✓/.test($(".panel .segnav").innerText.replace(/\s/g, "")) && /100% ✓ · .+/.test($(".panel .msg").textContent), "줄 전체까지 통과 → 거기서 끝(다음 줄로 넘어가지 않음) · 「이 줄을 다 했어요」", $(".panel .whead .sub")?.textContent + " · " + $(".panel .msg").textContent);
+  // 점수가 안 나오면 절대 통과·저장 아님(본부 10-04) — 말하기 창
+  await open(9);
+  const settle = async () => { for (let k = 0; k < 40 && /Checking|확인 중|जाँच्दै/.test($(".panel .msg")?.textContent || ""); k++) await W(150); };
+  window.__srNone = true; await say("아무 말"); await waitIdle(); await settle();
+  ok(/again|फेरि|다시/i.test($(".panel .msg").textContent) && !/%/.test($(".panel .msg").textContent) && !$(".panel .meter").classList.contains("pass") && !/✓/.test($(".panel .segnav").innerText), "말하기 창: 결과 없음 → 「잘 못 알아들었어요」 · 통과·✓·저장 아님", $(".panel .msg").textContent);
+  window.__srNone = false; window.__srErr = "audio-capture"; await say("아무 말"); await waitIdle(); await settle();
+  ok(/microphone|माइक्रोफोन|마이크/i.test($(".panel .msg").textContent) && !/✓/.test($(".panel .segnav").innerText), "말하기 창: audio-capture 오류 → 「음성 인식이 마이크를 못 잡았어요」", $(".panel .msg").textContent);
+  window.__srErr = null;
+  // 설명 카드 안 「이제 말해 보세요」도 같게
+  line(9).querySelector("[data-act=speak]").click(); await W(500);
+  line(10).querySelector("[data-act=explain]").click(); await W(1200); document.querySelector("video").pause();
+  const crec = async () => { $(".panel .sayb [data-x=rec]").click(); await W(400); speakFor(700); for (let k = 0; k < 60 && $(".panel .sayb [data-x=rec]").classList.contains("on"); k++) await W(150); await W(700); return $(".panel .sayb .smsg").textContent; };
+  window.__srNone = true; let cm = await crec();
+  ok(/again|फेरि|다시/i.test(cm) && !/%|✓/.test(cm) && !$(".panel .sayb").classList.contains("pass"), "카드: 결과 없음 → 통과 아님 · ✓ 없음", cm);
+  window.__srNone = false; window.__srErr = "audio-capture"; cm = await crec();
+  ok(/microphone|माइक्रोफोन|마이크/i.test(cm) && !$(".panel .sayb").classList.contains("pass"), "카드: audio-capture → 마이크 안내", cm);
+  window.__srErr = null; window.__heard = "감사합니다 여러분"; cm = await crec();
+  ok(/^\d+%/.test(cm) && !/✓/.test(cm) && !$(".panel .sayb").classList.contains("pass"), "카드: 엉뚱한 말 → 낮은 점수 · ✓ 없음", cm);
+  ok(!$(".panel .sayb .micname").hidden && /✓/.test($(".panel .sayb .micname").textContent), "카드: 🎤 아래 지금 마이크 이름 한 줄(눌러서 바꾸기)", $(".panel .sayb .micname").textContent);
+  line(10).querySelector("[data-act=explain]").click(); await W(500);
+  // 블루투스만 있는 기기 → 그 블루투스로라도 녹음(다른 게 없을 때만)
+  const ed = navigator.mediaDevices.enumerateDevices; navigator.mediaDevices.enumerateDevices = async () => [{ kind: "audioinput", deviceId: "bt", label: "시험 블루투스 Hands-Free" }];
+  try { localStorage.removeItem("malmun.mic"); } catch {} asked.length = 0;
+  await open(11); await say("아무 말"); await W(300);
+  ok($(".panel .mic").classList.contains("on") && asked.length >= 1, "블루투스만 있으면 그것으로 녹음", asked.join(" → "));
+  await waitIdle(); navigator.mediaDevices.enumerateDevices = ed;
   // 음성 인식이 없는 기기 → 점수 없이 녹음·비교
   delete window.SpeechRecognition; delete window.webkitSpeechRecognition;
   await open(4);
@@ -110,7 +138,7 @@
   try { localStorage.removeItem("malmun.mic"); } catch {}
   await open(5); window.__micFail = 2; asked.length = 0;
   await say("아무 말"); await W(300);
-  ok($(".panel .mic").classList.contains("on") && asked.join(",") === "기본,default,bt", "마이크 둘이 안 열림 → 다음 마이크로 자동으로 → 녹음 시작", asked.join(" → "));
+  ok($(".panel .mic").classList.contains("on") && asked.join(",") === "default,usb,기본", "마이크 둘이 안 열림 → 다음 마이크로 자동으로 → 녹음 시작", asked.join(" → "));
   ok(!$(".panel .lvl").hidden && parseFloat($(".panel .lvl i").style.width) > 20, "녹음 중 소리 크기 막대가 움직임", $(".panel .lvl i").style.width);
   await waitIdle();
   ok($(".panel .lvl").hidden, "녹음이 끝나면 소리 크기 막대 사라짐");
@@ -120,7 +148,7 @@
   $(".panel [data-act=rec]").click();
   for (let k = 0; k < 80 && asked[asked.length - 1] !== "usb"; k++) await W(100);
   await W(500); const swMsg = $(".panel .msg").textContent; speakFor(700); await W(300);
-  ok($(".panel .mic").classList.contains("on") && asked.join(",") === "기본,default,usb" && $(".panel .miclist").hidden, "소리 0 인 마이크 → 묻지 않고 다음 마이크로 넘어가 녹음 계속(같은 블루투스는 다시 안 열어 봄)", asked.join(" → ") + " · " + swMsg);
+  ok($(".panel .mic").classList.contains("on") && asked.join(",") === "default,usb" && $(".panel .miclist").hidden, "소리 0 인 마이크 → 묻지 않고 다음 마이크로 넘어가 녹음 계속 · 블루투스는 맨 뒤라 안 거침", asked.join(" → ") + " · " + swMsg);
   await waitIdle();
   ok(localStorage.getItem("malmun.mic") === "usb" && !$(".panel [data-act=mine]").disabled, "소리가 들어온 마이크를 기억 · 녹음됨", String(localStorage.getItem("malmun.mic")));
   asked.length = 0; await say("아무 말"); await W(300);
