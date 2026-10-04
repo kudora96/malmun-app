@@ -91,8 +91,8 @@
   let dl = null; const oc = HTMLAnchorElement.prototype.click; HTMLAnchorElement.prototype.click = function () { if (this.download) dl = this.download + " " + this.href.slice(0, 5); else oc.call(this); };
   $(".panel [data-act=save]").click(); await W(200); HTMLAnchorElement.prototype.click = oc;
   ok(/^malmun_L01-00-01_01_p01\.(webm|m4a|ogg) blob:$/.test(dl || ""), "[⬇] → 저장한 내 녹음을 원본(다시 굽지 않음) 파일로", String(dl));
-  const mp0 = mediaPlays.length; $(".panel [data-act=savedplay]").click(); await W(600);
-  ok(mediaPlays.length > mp0 && mediaPlays[mediaPlays.length - 1] === "blob:", "「저장됨 ▶」 → 저장한 녹음을 <audio> 로(10-01 판처럼)");
+  const ml0 = (window.__mineLog ||= []).length; $(".panel [data-act=savedplay]").click(); for (let k = 0; k < 20 && window.__mineLog.length === ml0; k++) await W(100);
+  ok(window.__mineLog.length > ml0, "「저장됨 ▶」 → 저장한 녹음을 말 시작 자리부터(풀어서 직결 재생)", JSON.stringify(window.__mineLog[window.__mineLog.length - 1]));
   ok(!/%/.test($(".panel .msg").textContent), "열 때(돌아왔을 때) 예전 점수는 안 보임 — ✓ 만", $(".panel .msg").textContent);
   // 녹음 중 다시 누르면 멈춤
   await say("어서 오세요", 5000); await W(600); $(".panel [data-act=rec]").click(); await W(1200);
@@ -151,8 +151,8 @@
   $(".panel .sayb [data-x=rec]").click(); await W(400); const n0 = pl.length; await W(1500);
   ok(pl.length === n0 && pl.filter(x => !/\.mp4/.test(x.src)).every(x => x.el.paused || /^blob:/.test(x.src)) && document.querySelector("video").paused, "🎤 → 설명 소리·반복 모두 멈춤", `그 뒤 새로 튼 소리 ${pl.length - n0}`);
   speakFor(700); for (let k = 0; k < 60 && $(".panel .sayb [data-x=rec]").classList.contains("on"); k++) await W(150); await W(900);
-  pl.length = 0; $(".panel .sayb [data-x=mine]").click(); await W(300); if (pl[0]) await toEnd(pl[pl.length - 1].el); await W(2000);
-  ok(pl.filter(x => /^blob:/.test(x.src)).length === 1, "🔁 켠 채 [내 목소리] → 한 번만", `내 목소리 ${pl.filter(x => /^blob:/.test(x.src)).length}번`);
+  const ml1 = (window.__mineLog ||= []).length; $(".panel .sayb [data-x=mine]").click(); await W(4500); // 끝날 때까지(녹음 길이) 기다려도 다시 안 나와야 함
+  ok(window.__mineLog.length - ml1 === 1, "🔁 켠 채 [내 목소리] → 한 번만", `내 목소리 ${window.__mineLog.length - ml1}번`);
   $(".ctrl [data-act=rep]").click(); await W(200); HTMLMediaElement.prototype.play = op3;
   line(12).querySelector("[data-act=explain]").click(); await W(500);
   // 블루투스만 있는 기기 → 그 블루투스로라도 녹음(다른 게 없을 때만)

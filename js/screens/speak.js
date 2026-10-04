@@ -13,14 +13,15 @@
 //     못 넘어도 막지 않는다([다음 ▶]) · 음성 인식이 안 되는 곳은 점수 없이 듣고 비교만(녹음은 저장)
 //  S6 녹음은 이 기기 안에만(IndexedDB) — 서버로 보내지 않는다
 //  S7 영상 창 안(embedded): 스크롤 없이 · 줄 이동·닫기는 학습 화면이 한다 · 줄 전체까지 통과하면 다음 줄 말하기로
-import { t, lang } from "../i18n.js?v=1004.11";
-import { esc } from "../text.js?v=1004.11";
-import { episode } from "../data.js?v=1004.11";
-import { paths } from "../paths.js?v=1004.11";
-import { audioCtx, hold, quietWake } from "../wake.js?v=1004.11";
-import * as sfx from "../sfx.js?v=1004.11";
-import { diagEnv, keepDiag } from "../diag.js?v=1004.11";
-import { logRec, dB, srWhy, srWatch, niceLabel, ALIAS } from "../recorder.js?v=1004.11";
+import { t, lang } from "../i18n.js?v=1004.12";
+import { esc } from "../text.js?v=1004.12";
+import { episode } from "../data.js?v=1004.12";
+import { paths } from "../paths.js?v=1004.12";
+import { audioCtx, hold, quietWake } from "../wake.js?v=1004.12";
+import * as sfx from "../sfx.js?v=1004.12";
+import { diagEnv, keepDiag } from "../diag.js?v=1004.12";
+import { playMine as playMineRec } from "../playmine.js?v=1004.12";
+import { logRec, dB, srWhy, srWatch, niceLabel, ALIAS } from "../recorder.js?v=1004.12";
 
 export const PASS = 80;
 const MAX_MS = 8000, QUIET_MS = 1000;
@@ -125,13 +126,12 @@ export default async function speak(app, ep, id, opts = {}) {
     if (!(p.src && (await sfx.play(p.src))) && lineSrc && p.src !== lineSrc && !p.task) await sfx.play(lineSrc);
     st.model = false; if (st.alive) paint();
   }
-  const playMine = (rec = { blob: mineBlob() }) => new Promise(res => { // 1004.6 그대로 — <audio> · 처음부터 · 자리 옮기기 없음(본부 10-04)
-    const b = rec?.blob; if (!b) return res();
+  const playMine = async (rec = { blob: mineBlob() }) => { // 말 시작 자리부터 — 풀어서 그 자리부터 직결 재생(js/playmine.js · <audio> 자리 옮기기 안 씀)
+    const b = rec?.blob; if (!b) return;
     stopSounds();
-    const a = (st.mine = new Audio(URL.createObjectURL(b)));
-    a.onended = a.onerror = () => { URL.revokeObjectURL(a.src); if (st.mine === a) st.mine = null; res(); };
-    a.play().catch(() => res());
-  });
+    const h = (st.mine = playMineRec(b));
+    await h.done; if (st.mine === h) st.mine = null;
+  };
   function go(i) { stopRec(true); stopSounds(); st.i = Math.max(0, Math.min(parts.length - 1, i)); st.blob = null; st.score = null; st.note = null; st.kept = null; paint(); }
 
   // ── 녹음 + 음성 인식(S3 · S5) ── 10-04 되돌림: 10-01 잘 되던 판(a9e13f9) 그대로 · 남긴 차이는 「◆」 표시(본부 10-04)

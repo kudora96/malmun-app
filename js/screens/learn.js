@@ -10,17 +10,18 @@
 //  R7 영상은 늘 맨 위 · 지금 줄은 영상 바로 아래(앞 줄은 영상 뒤로) — 손으로 목록을 움직이면 4초 동안은 따라가지 않음
 //  R8 듣기 모드(대사→설명 · 설명만)도 R1~R6 그대로(영상 대신 소리 조각) · 모드를 바꾸면 멈춤(▶ 로 시작)
 //  R9 다시 들어오면 마지막 줄이 선택된 채 멈춰 있음
-import { t, lang, langName } from "../i18n.js?v=1004.11";
-import { esc, renderText, glossCards } from "../text.js?v=1004.11";
-import { episode } from "../data.js?v=1004.11";
-import { paths } from "../paths.js?v=1004.11";
-import { Sequence } from "../audio.js?v=1004.11";
-import { I, progress, SPEAKER } from "../ui.js?v=1004.11";
-import writeView from "./write.js?v=1004.11";
-import { diagEnv, keepDiag } from "../diag.js?v=1004.11";
-import speakView, { similarity, PASS, recGet, recPut } from "./speak.js?v=1004.11";
-import { record, micWhy, srWhy, canScore, closeMic, logRec, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1004.11";
-import { hold, quietWake } from "../wake.js?v=1004.11";
+import { t, lang, langName } from "../i18n.js?v=1004.12";
+import { esc, renderText, glossCards } from "../text.js?v=1004.12";
+import { episode } from "../data.js?v=1004.12";
+import { paths } from "../paths.js?v=1004.12";
+import { Sequence } from "../audio.js?v=1004.12";
+import { I, progress, SPEAKER } from "../ui.js?v=1004.12";
+import writeView from "./write.js?v=1004.12";
+import { diagEnv, keepDiag } from "../diag.js?v=1004.12";
+import { playMine as playMineRec } from "../playmine.js?v=1004.12";
+import speakView, { similarity, PASS, recGet, recPut } from "./speak.js?v=1004.12";
+import { record, micWhy, srWhy, canScore, closeMic, logRec, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1004.12";
+import { hold, quietWake } from "../wake.js?v=1004.12";
 
 const RATES = [1, 0.75, 0.5];
 const pref = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } };
@@ -276,9 +277,9 @@ export default async function learn(app, ep, startId) {
   // 카드 안 말하기(녹음 → 점수 → 내 목소리) — js/recorder.js
   let sp = null; // { i, ctl, blob, audio, saved }
   function spStop() { quietWake(false); sp?.ctl?.stop(true); sp?.audio?.pause(); sp = null; closeMic(); } // 카드를 닫을 때 마이크도 닫음(그때처럼 · 카드가 열려 있는 동안은 쥐고 있음)
-  const playRec = b => { // 1004.6 그대로 — <audio> · 처음부터 · 자리 옮기기 없음(webm 자리 옮기기가 소리를 깨뜨림 — 본부 10-04) · 한 번만
+  const playRec = b => { // 말 시작 자리부터 — 풀어서 그 자리부터 직결 재생(js/playmine.js · <audio> 자리 옮기기 안 씀) · 한 번만
     ex.stop(); clearTimeout(st.gap); st.gap = 0; st.exLoop = null; sp.audio?.pause();
-    const a = (sp.audio = new Audio(URL.createObjectURL(b))); a.onended = a.onerror = () => URL.revokeObjectURL(a.src); a.play().catch(() => {}); return a;
+    return (sp.audio = playMineRec(b));
   };
   // [내 목소리] = 방금 녹음(잘됐든 못됐든) · 80% 넘으면 [저장] → 눌러야 저장 · 저장한 것은 「저장됨 ▶」 · 열 때 예전 점수 안 보임(투덜이 10-04)
   async function spInit(i) {
