@@ -5,7 +5,7 @@
 //   · 마이크는 카드가 열려 있는 동안 쥐고 있다가 카드를 닫을 때 닫음(그때처럼)
 // 그때와 다른 점(본부 10-04 「남긴 차이」): ① 윈도우 별칭 장치 「default」「communications」는 절대 안 고름(통신 장치를 열면 윈도우가 다른 소리를 줄임)
 //   ② 「준비 중 → 녹음 중」 표시(첫 소리가 들어오면) ③ 인식 오류 까닭을 돌려줌(onerror 를 삼키지 않음) ④ 진단 기록(이벤트만 듣고 소리 경로는 안 건드림)
-import { audioCtx } from "./wake.js?v=1004.6";
+import { audioCtx } from "./wake.js?v=1004.9";
 
 const MAX_MS = 8000, QUIET_MS = 1000;
 const getSR = () => window.SpeechRecognition || window.webkitSpeechRecognition; // 부를 때마다 찾는다(점검이 가짜로 바꿔 끼울 수 있게)

@@ -132,6 +132,28 @@
   ok(!$(".panel .sayb [data-x=savedplay]").hidden && $(".panel .sayb [data-x=keep]").hidden, "카드: [저장] → 「저장됨 ▶」", $(".panel .sayb .smsg").textContent);
   ok(!$(".panel .sayb .micname").hidden && /✓/.test($(".panel .sayb .micname").textContent), "카드: 🎤 아래 지금 마이크 이름 한 줄(눌러서 바꾸기)", $(".panel .sayb .micname").textContent);
   line(10).querySelector("[data-act=explain]").click(); await W(500);
+  // 🔁 켠 채로 카드 소리 — 본보기·내 목소리는 한 번만 · 설명 ▶ 는 반복 · 🎤 = 반복·재생 모두 멈춤(본부 10-04 「끝없이 되풀이」)
+  const pl = []; const op3 = HTMLMediaElement.prototype.play; HTMLMediaElement.prototype.play = function () { pl.push({ el: this, src: decodeURIComponent(this.src) }); return op3.call(this); };
+  const toEnd = async el => { for (let k = 0; k < 30 && !isFinite(el.duration); k++) await W(100); if (isFinite(el.duration)) el.currentTime = Math.max(0, el.duration - 0.05); };
+  line(12).querySelector("[data-act=explain]").click(); await W(1300); document.querySelector("video").pause();
+  if (!document.querySelector(".panel").classList.contains("paused")) { $(".ctrl [data-act=play]").click(); await W(300); } // 열 때 저절로 읽는 설명은 멈추고 시작
+  if ($(".ctrl [data-act=rep]").getAttribute("aria-pressed") !== "true") { $(".ctrl [data-act=rep]").click(); await W(200); }
+  const repOn = $(".ctrl [data-act=rep]").getAttribute("aria-pressed") === "true";
+  pl.length = 0; $(".panel .sayb [data-x=model]").click(); await W(300); await toEnd(pl.filter(x => /문장/.test(x.src)).pop().el); const after = pl.length; await W(2000);
+  const nModel = pl.filter(x => /문장/.test(x.src)).length, nEx1 = pl.slice(after).filter(x => /설명|문장/.test(x.src)).length; // 본보기가 끝난 뒤 새로 나온 소리
+  ok(repOn && nModel === 1 && nEx1 === 0, "🔁 켠 채 [본보기] → 한 번만(설명을 다시 틀지 않음)", `본보기 ${nModel}번 · 끝난 뒤 또 나온 소리 ${nEx1}번`);
+  pl.length = 0; $(".panel .v9bar [data-x=ex]").click(); await W(300);
+  for (let k = 0; k < 2; k++) { await toEnd(pl[pl.length - 1].el); await W(900); }
+  for (let k = 0; k < 2; k++) { await toEnd(pl[pl.length - 1].el); await W(900); }
+  const nEx = pl.filter(x => /설명/.test(x.src)).length;
+  ok(nEx >= 2, "🔁 켠 채 설명 ▶ → 반복", `설명 ${nEx}번`);
+  $(".panel .sayb [data-x=rec]").click(); await W(400); const n0 = pl.length; await W(1500);
+  ok(pl.length === n0 && pl.filter(x => !/\.mp4/.test(x.src)).every(x => x.el.paused || /^blob:/.test(x.src)) && document.querySelector("video").paused, "🎤 → 설명 소리·반복 모두 멈춤", `그 뒤 새로 튼 소리 ${pl.length - n0}`);
+  speakFor(700); for (let k = 0; k < 60 && $(".panel .sayb [data-x=rec]").classList.contains("on"); k++) await W(150); await W(900);
+  pl.length = 0; $(".panel .sayb [data-x=mine]").click(); await W(300); if (pl[0]) await toEnd(pl[pl.length - 1].el); await W(2000);
+  ok(pl.filter(x => /^blob:/.test(x.src)).length === 1, "🔁 켠 채 [내 목소리] → 한 번만", `내 목소리 ${pl.filter(x => /^blob:/.test(x.src)).length}번`);
+  $(".ctrl [data-act=rep]").click(); await W(200); HTMLMediaElement.prototype.play = op3;
+  line(12).querySelector("[data-act=explain]").click(); await W(500);
   // 블루투스만 있는 기기 → 그 블루투스로라도 녹음(다른 게 없을 때만)
   const ed = navigator.mediaDevices.enumerateDevices; navigator.mediaDevices.enumerateDevices = async () => [{ kind: "audioinput", deviceId: "bt", label: "시험 블루투스 Hands-Free" }];
   try { localStorage.removeItem("malmun.mic"); } catch {} asked.length = 0;
