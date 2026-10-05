@@ -10,21 +10,21 @@
 //  R7 영상은 늘 맨 위 · 지금 줄은 영상 바로 아래(앞 줄은 영상 뒤로) — 손으로 목록을 움직이면 4초 동안은 따라가지 않음
 //  R8 듣기 모드(대사→설명 · 설명만)도 R1~R6 그대로(영상 대신 소리 조각) · 모드를 바꾸면 멈춤(▶ 로 시작)
 //  R9 다시 들어오면 마지막 줄이 선택된 채 멈춰 있음
-import { t, lang, langName } from "../i18n.js?v=1005.24";
-import { esc, renderText, glossCards, sayParts } from "../text.js?v=1005.24";
-import { episode } from "../data.js?v=1005.24";
-import { paths } from "../paths.js?v=1005.24";
-import { Sequence } from "../audio.js?v=1005.24";
-import { I, progress, SPEAKER } from "../ui.js?v=1005.24";
-import writeView from "./write.js?v=1005.24";
-import { diagEnv, keepDiag } from "../diag.js?v=1005.24";
-import { playMine as playMineRec } from "../playmine.js?v=1005.24";
-import { bestHeard, heardHTML } from "../heard.js?v=1005.24";
-import { recDel, downloadRec, askPersist } from "../recstore.js?v=1005.24";
-import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1005.24";
-import { scoreFx, stopFx } from "../scorefx.js?v=1005.24"; // 점수별 효과(본부 10-05)
-import { record, micWhy, srWhy, canScore, closeMic, logRec, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1005.24";
-import { hold, quietWake } from "../wake.js?v=1005.24";
+import { t, lang, langName } from "../i18n.js?v=1005.25";
+import { esc, renderText, glossCards, sayParts } from "../text.js?v=1005.25";
+import { episode } from "../data.js?v=1005.25";
+import { paths } from "../paths.js?v=1005.25";
+import { Sequence } from "../audio.js?v=1005.25";
+import { I, progress, SPEAKER } from "../ui.js?v=1005.25";
+import writeView from "./write.js?v=1005.25";
+import { diagEnv, keepDiag } from "../diag.js?v=1005.25";
+import { playMine as playMineRec } from "../playmine.js?v=1005.25";
+import { bestHeard, heardHTML } from "../heard.js?v=1005.25";
+import { recDel, downloadRec, askPersist } from "../recstore.js?v=1005.25";
+import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1005.25";
+import { scoreFx, stopFx } from "../scorefx.js?v=1005.25"; // 점수별 효과(본부 10-05)
+import { record, micWhy, srWhy, canScore, closeMic, logRec, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1005.25";
+import { hold, quietWake } from "../wake.js?v=1005.25";
 
 const RATES = [1, 0.75, 0.5];
 const pref = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } };
@@ -99,6 +99,7 @@ export default async function learn(app, ep, startId) {
     cancelAnimationFrame(st.anim); clearTimeout(st.animEnd);
     if (reduce || document.hidden) return scrollTo(0, to);
     // 화면 그리기 박자가 멈춰도(가려진 창 · 느린 폰) 제자리에 가 있게 — 움직임이 끝날 시각에 한 번 더 맞춘다
+    st.animUntil = performance.now() + SCROLL_MS + 120; // 움직이는 동안은 지킴이가 끼어들지 않게
     st.animEnd = setTimeout(() => { cancelAnimationFrame(st.anim); if (Math.abs(scrollY - to) > 2) scrollTo(0, to); }, SCROLL_MS + 80);
     const from = scrollY, t0 = performance.now();
     const step = now => { const k = Math.min(1, (now - t0) / SCROLL_MS); scrollTo(0, from + (to - from) * (1 - (1 - k) ** 3)); if (k < 1) st.anim = requestAnimationFrame(step); };
@@ -634,7 +635,10 @@ export default async function learn(app, ep, startId) {
   //  설명 카드가 열려 있으면 [▶ 전체 영상] = 카드 닫고 그 줄부터 영상을 끝까지 · 영상이 보이면 [설명] = 지금 줄 설명 카드
   function flip() {
     app.querySelector(".modetip").hidden = true;
-    if (st.panel?.kind === "explain") { const i = st.panel.i; closePanel(); if (st.mode !== "video") setMode("video"); playFrom(i); return; }
+    if (st.panel?.kind === "explain") { // 카드가 접히며 목록이 위로 당겨지므로 자리를 다시 본다(본부 10-05 — 지금 줄이 아래 막대 뒤로 가던 것)
+      const i = st.panel.i; closePanel(); if (st.mode !== "video") setMode("video"); playFrom(i);
+      [500, 1200].forEach(ms => setTimeout(() => keepVisible(st.cur), ms)); return;
+    }
     openPanel("explain", st.panel?.i ?? st.cur, { autoplay: true });
   }
   function flipLabel() { const b = app.querySelector(".ctrl [data-act=flip]"), on = st.panel?.kind === "explain", txt = on ? `▶ ${t("full_video")}` : t("explain"); if (b && b.textContent !== txt) b.textContent = txt; }
@@ -649,7 +653,9 @@ export default async function learn(app, ep, startId) {
     seekEl.querySelector(".t0").textContent = mmss(has ? a.currentTime : 0);
     seekEl.querySelector(".t1").textContent = mmss(has ? a.duration : 0);
   }
-  const seekTimer = setInterval(seekPaint, 250);
+  // 지킴이 — 영상이 나오는 동안 지금 줄이 아래 막대 뒤나 영상 뒤로 가 있으면 제자리로(손 스크롤 4초 규칙 · 움직이는 중엔 쉼)
+  const watch = () => { if (!st.panel && !v.paused && performance.now() > (st.animUntil || 0)) keepVisible(st.cur); };
+  const seekTimer = setInterval(() => { seekPaint(); watch(); }, 250);
   seekEl.addEventListener("pointerdown", e => {
     const trk = e.target.closest(".trk"); if (!trk) return;
     const a = seekSrc(); if (!a || !isFinite(a.duration)) return;
