@@ -130,5 +130,9 @@
  "saved_title": "저장한 녹음",
  "dl_short": "파일",
  "del_short": "지우기",
- "keep_short": "저장"
+ "keep_short": "저장",
+ "v9_listen": "듣기",
+ "v9_read": "읽기",
+ "close_word": "닫기",
+ "v9_tip": "▶ = 듣는 언어 · 탭 = 읽는 언어"
 }

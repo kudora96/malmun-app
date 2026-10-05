@@ -10,21 +10,21 @@
 //  R7 영상은 늘 맨 위 · 지금 줄은 영상 바로 아래(앞 줄은 영상 뒤로) — 손으로 목록을 움직이면 4초 동안은 따라가지 않음
 //  R8 듣기 모드(대사→설명 · 설명만)도 R1~R6 그대로(영상 대신 소리 조각) · 모드를 바꾸면 멈춤(▶ 로 시작)
 //  R9 다시 들어오면 마지막 줄이 선택된 채 멈춰 있음
-import { t, lang, langName } from "../i18n.js?v=1005.10";
-import { esc, renderText, glossCards } from "../text.js?v=1005.10";
-import { episode } from "../data.js?v=1005.10";
-import { paths } from "../paths.js?v=1005.10";
-import { Sequence } from "../audio.js?v=1005.10";
-import { I, progress, SPEAKER } from "../ui.js?v=1005.10";
-import writeView from "./write.js?v=1005.10";
-import { diagEnv, keepDiag } from "../diag.js?v=1005.10";
-import { playMine as playMineRec } from "../playmine.js?v=1005.10";
-import { bestHeard, heardHTML } from "../heard.js?v=1005.10";
-import { recDel, downloadRec, askPersist } from "../recstore.js?v=1005.10";
-import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1005.10";
-import { scoreFx, stopFx } from "../scorefx.js?v=1005.10"; // 점수별 효과(본부 10-05)
-import { record, micWhy, srWhy, canScore, closeMic, logRec, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1005.10";
-import { hold, quietWake } from "../wake.js?v=1005.10";
+import { t, lang, langName } from "../i18n.js?v=1005.11";
+import { esc, renderText, glossCards } from "../text.js?v=1005.11";
+import { episode } from "../data.js?v=1005.11";
+import { paths } from "../paths.js?v=1005.11";
+import { Sequence } from "../audio.js?v=1005.11";
+import { I, progress, SPEAKER } from "../ui.js?v=1005.11";
+import writeView from "./write.js?v=1005.11";
+import { diagEnv, keepDiag } from "../diag.js?v=1005.11";
+import { playMine as playMineRec } from "../playmine.js?v=1005.11";
+import { bestHeard, heardHTML } from "../heard.js?v=1005.11";
+import { recDel, downloadRec, askPersist } from "../recstore.js?v=1005.11";
+import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1005.11";
+import { scoreFx, stopFx } from "../scorefx.js?v=1005.11"; // 점수별 효과(본부 10-05)
+import { record, micWhy, srWhy, canScore, closeMic, logRec, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1005.11";
+import { hold, quietWake } from "../wake.js?v=1005.11";
 
 const RATES = [1, 0.75, 0.5];
 const pref = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } };
@@ -119,6 +119,7 @@ export default async function learn(app, ep, startId) {
     app.querySelector("#vwrap").classList.toggle("paused", !playing());
     app.querySelector(".panel").classList.toggle("paused", !playing());
     items.forEach((li, k) => li.classList.toggle("onceplay", st.once && k === st.cur && playing()));
+    app.querySelectorAll(".v9bar .pb[data-x=ex]").forEach(b => { const on = b.getAttribute("aria-pressed") === "true" && ex.playing; b.classList.toggle("playing", on); b.querySelector(".ic").textContent = on ? "■" : "▶"; }); // 나오는 동안 ■ + 은은한 깜빡
   };
   function stopAll() {
     clearTimeout(st.gap); st.gap = 0;
@@ -195,12 +196,14 @@ export default async function learn(app, ep, startId) {
   function v9HTML(i) {
     const l = L[i], x = l.v9, P = v9pref(), tc = v9code(P.txt), tx = x.text?.[tc] || x.text?.ko || {};
     const fx = x.formula_by?.[tc] || x.formula;
-    const playBtn = k => `<button class="pb" data-x="ex" data-v="${k}" aria-pressed="false">▶ ${esc(v9name(k))}</button>`;
+    const playBtn = k => `<button class="pb" data-x="ex" data-v="${k}" aria-pressed="false"><span class="ic" aria-hidden="true">▶</span> ${esc(v9name(k))}</button>`;
+    // 맨 위 한 줄(본부 10-05 투덜이 승인): 「듣기」 동그란 재생 묶음 · 「읽기」 탭 묶음 · ✕ — 이름표 = 학습자 언어 + (한국어)
+    const lab = (key, ko) => `<span class="glab">${esc(t(key))}${lang === "ko" ? "" : ` <small lang="ko">(${ko})</small>`}</span>`;
     return `<div class="exv v9">
-      <div class="v9bar">${playBtn("L")}${playBtn("ko")}<button class="pb closex" data-x="close">${esc(t("close_btn"))}</button></div>
+      <div class="v9bar">${lab("v9_listen", "듣기")}<span class="seg snd">${playBtn("L")}${playBtn("ko")}</span>${lab("v9_read", "읽기")}<span class="seg txt" role="tablist">${["L", "ko"].map(v => `<button data-x="txt" data-v="${v}" role="tab" aria-selected="${P.txt === v}">${esc(v9name(v))}</button>`).join("")}</span><button class="pb closex" data-x="close" title="${esc(t("close_word"))}" aria-label="${esc(t("close_word"))}"><span class="cx">✕</span><span class="cw"> ${esc(t("close_word"))}</span></button></div>
+      <div class="v9tip" hidden>${esc(t("v9_tip"))}</div>
       <div class="v9body">
         ${x.pieces?.length || fx ? `<div class="chips">${(x.pieces || []).map(c => `<span class="chip"><b class="ko" lang="ko">${esc(c.ko)}</b> <i>${esc(c.gloss || "")}</i></span>`).join("")}${fx ? `<span class="fx">= <b>${esc(fx)}</b></span>` : ""}</div>` : ""}
-        <div class="tabs" role="tablist">${["L", "ko"].map(v => `<button data-x="txt" data-v="${v}" role="tab" aria-selected="${P.txt === v}">${esc(v9name(v))}</button>`).join("")}</div>
         <p data-p="0">${bold(tx.ex || "")}</p>
         ${l.say ? `<div class="sayb"><p data-p="1">${bold(tx.say || "")}</p>
           <div class="sbtns"><button class="mic" data-x="rec">🎤 ${esc(t("speak_now"))}</button><button data-x="model">▶ ${esc(t("model"))}</button><button data-x="mine" disabled>▶ ${esc(t("my_voice"))}</button><button data-x="keep" title="${esc(t("keep"))}" hidden>${esc(t("keep_short"))}</button><button data-x="savedplay" title="${esc(t("saved_title"))}" hidden>${esc(t("saved_play"))}</button><span class="mini"><button data-x="savedl" class="small" title="${esc(t("download"))}" hidden>⬇ ${esc(t("dl_short"))}</button><button data-x="savedel" class="small" title="${esc(t("del_one"))}" hidden>🗑 ${esc(t("del_short"))}</button></span></div>
@@ -270,6 +273,7 @@ export default async function learn(app, ep, startId) {
     markButtons();
     if (kind === "explain") {
       panel.innerHTML = explainHTML(i);
+      if (L[i].v9) v9Fit(); // 한 줄에 안 들어가면 (한국어) 괄호 → ✕ 글자 순서로 뺌
       if (L[i].v9) { mine.cleanup = spStop; spInit(i); if (!canScore()) { const g = panel.querySelector(".sayb .smsg"); if (g) g.textContent = t("speak_hint_noscore"); } } // 마이크는 🎤 누를 때만 연다(열면 블루투스가 통화 모드로 바뀌어 설명 소리까지 전화 음질 — 본부 10-03)
       if (autoplay) { ex.play((st.exLoop = exItems(i))); if (L[i].v9) markPlay(v9pref().snd); }
     } else {
@@ -347,14 +351,23 @@ export default async function learn(app, ep, startId) {
     const bh = bestHeard(L[i].say.ko, r.heard); // 들린 말 — 점수를 낸 그 인식 결과 · 틀린 음절 빨간 밑줄 · 빠진 자리 _
     box.querySelector(".heardline").innerHTML = bh ? (({ html, ok }) => `<span class="lab">${esc(t("heard_label"))}:</span> <span class="ko" lang="ko">${html}</span>${ok ? " ✓" : ""}`)(heardHTML(L[i].say.ko, bh)) : "";
   }
-  const markPlay = (k = null) => panel.querySelectorAll(".v9bar .pb").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.v === k)));
+  // 맨 위 한 줄 맞추기 + 처음 한 번 말풍선(▶ = 듣는 언어 · 탭 = 읽는 언어 · 3초 · 다시 안 뜸)
+  function v9Fit() {
+    const bar = panel.querySelector(".v9bar"); if (!bar) return;
+    const over = () => bar.scrollWidth > bar.clientWidth + 1;
+    bar.classList.remove("nok", "nocw");
+    if (over()) bar.classList.add("nok");
+    if (over()) bar.classList.add("nocw");
+    if (pref("malmun.v9tip") !== "1") { const tip = panel.querySelector(".v9tip"); pref("malmun.v9tip", "1"); tip.hidden = false; setTimeout(() => { tip.hidden = true; }, 3000); }
+  }
+  const markPlay = (k = null) => panel.querySelectorAll(".v9bar .pb[data-x=ex]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.v === k)));
   function v9Click(x) {
     const i = st.panel.i, k = x.dataset.x;
     if (k === "txt") { // 글 언어 — 편 전체 · 기억 · 소리는 그대로 이어서
       v9set("txt", x.dataset.v);
       const pl = ex.playing, snd = panel.querySelector(".v9bar .pb[aria-pressed=true]")?.dataset.v;
       const tc = v9code(x.dataset.v), tx = L[i].v9.text?.[tc] || L[i].v9.text?.ko || {}, fx = L[i].v9.formula_by?.[tc] || L[i].v9.formula;
-      panel.querySelectorAll(".tabs [data-x=txt]").forEach(b => b.setAttribute("aria-selected", String(b === x)));
+      panel.querySelectorAll(".v9bar [data-x=txt]").forEach(b => b.setAttribute("aria-selected", String(b === x)));
       const p0 = panel.querySelector('.v9body p[data-p="0"]'), p1 = panel.querySelector('.v9body p[data-p="1"]'), f = panel.querySelector(".v9body .fx b");
       if (p0) p0.innerHTML = bold(tx.ex || ""); if (p1) p1.innerHTML = bold(tx.say || ""); if (f) f.textContent = fx || "";
       if (pl && snd) markPlay(snd);

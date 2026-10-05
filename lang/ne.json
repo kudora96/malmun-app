@@ -131,5 +131,9 @@
  "saved_title": "सेभ गरिएको",
  "dl_short": "फाइल",
  "del_short": "मेटाउ",
- "keep_short": "सेभ"
+ "keep_short": "सेभ",
+ "v9_listen": "सुन्ने",
+ "v9_read": "पढ्ने",
+ "close_word": "बन्द",
+ "v9_tip": "▶ = सुन्ने भाषा · ट्याब = पढ्ने भाषा"
 }

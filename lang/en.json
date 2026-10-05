@@ -130,5 +130,9 @@
  "saved_title": "Saved recording",
  "dl_short": "File",
  "del_short": "Delete",
- "keep_short": "Save"
+ "keep_short": "Save",
+ "v9_listen": "Listen",
+ "v9_read": "Read",
+ "close_word": "Close",
+ "v9_tip": "▶ = listening language · tab = reading language"
 }
