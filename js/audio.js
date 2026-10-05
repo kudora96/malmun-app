@@ -14,6 +14,7 @@ export class Sequence {
       const it = this.q[this.i];
       this.onstep?.(it, this.i);
       this.a.src = it.src; this.a.playbackRate = this.rate;
+      if (it.at) { this.a.currentTime = it.at; this.a.addEventListener("loadedmetadata", () => { if (this.a.currentTime < it.at - 0.2) this.a.currentTime = it.at; }, { once: true }); } // 그 문장부터(설명 언어 바꿔 이어 읽기)
       this.a.play().catch(() => this.next());
       const nx = this.q[this.i + 1];
       if (nx) { const p = new Audio(); p.preload = "auto"; p.src = nx.src; }

@@ -4,7 +4,7 @@
   --bg:#eef2ec; --bg2:#e2e9e2; --card:#ffffff; --ink:#17302a; --mute:#5c726b; --line:rgba(23,48,42,.14);
   --hi:#a86a12; --hi-soft:rgba(168,106,18,.12); --pink:#c2524a; --blue:#2f6f9f; --wood:#8a6443;
   --on-hi:#ffffff; --bubble:#ffffff; --bubble-cur:#fff7e6;
-  --star:#d99a00; /* 점수 효과 별(본부 10-05) */
+  --star:#d99a00; --sent:#ffe58a; /* 읽는 문장 불(본부 10-05) */ /* 점수 효과 별(본부 10-05) */
   --okc:#1b6b2e; --badc:#c62828; /* 들린 말: 맞음 초록 · 틀림 빨강 — 바탕과 대비 4.5:1 이상 */
   --f-ui:"Noto Sans KR","Noto Sans Devanagari","Noto Sans Bengali",system-ui,sans-serif;
   --f-hand:"Gaegu","Noto Sans KR",cursive;
@@ -12,7 +12,7 @@
 }
 @media (prefers-color-scheme: dark){
   :root{--bg:#1d3530;--bg2:#244039;--card:#2a4a42;--ink:#ecebe4;--mute:#9fb3ac;--line:rgba(236,235,228,.18);
-    --hi:#f2d27a;--hi-soft:rgba(242,210,122,.12);--pink:#f29c8f;--blue:#9cc9f0;--on-hi:#1d3530;--bubble:#244039;--bubble-cur:#2c4c44;--okc:#86d993;--badc:#ffa59c;--star:#ffd34d;color-scheme:dark}
+    --hi:#f2d27a;--hi-soft:rgba(242,210,122,.12);--pink:#f29c8f;--blue:#9cc9f0;--on-hi:#1d3530;--bubble:#244039;--bubble-cur:#2c4c44;--okc:#86d993;--badc:#ffa59c;--star:#ffd34d;--sent:rgba(242,210,122,.30);color-scheme:dark}
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important} /* hidden 속성이 다른 display 규칙에 지지 않게(설명 창이 닫혀도 남던 버그) */
@@ -463,3 +463,14 @@ a{color:inherit;text-decoration:none}
 .v9tip{position:absolute;left:12px;right:12px;top:40px;z-index:5;padding:6px 10px;border-radius:10px;background:var(--ink);color:var(--bg);font-size:12px;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,.2);pointer-events:none}
 @media (prefers-reduced-motion:reduce){.v9bar .pb.playing{animation:none}}
 .exv.v9{position:relative}
+
+/* 설명 카드 개편(본부 10-05) — 문장 불 켜기 · 누르면 말풍선 · 로마자 켜기/끄기 */
+.v9body .sn{border-radius:4px;cursor:pointer;transition:background-color .25s;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.v9body .sn.cur{background:var(--sent)}
+.v9body .gw{text-decoration:underline dotted;text-underline-offset:3px;cursor:pointer}
+.v9pop{position:absolute;z-index:6;max-width:calc(100% - 12px);padding:6px 10px;border-radius:10px;background:var(--ink);color:var(--bg);font-size:13px;line-height:1.45;box-shadow:0 4px 14px rgba(0,0,0,.22);white-space:normal}
+.v9pop .rom{opacity:.75;font-size:12px}
+.norom .chip .rom,.norom .v9pop .rom{display:none}
+.v9bar .romb{flex:none;padding:3px 8px;font-size:11.5px;border:1px solid var(--line);border-radius:999px;color:var(--mute)}
+.v9bar .romb[aria-pressed=true]{border-color:var(--hi);color:var(--hi);background:var(--hi-soft);font-weight:700}
+@media (prefers-reduced-motion:reduce){.v9body .sn{transition:none}}
