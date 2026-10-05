@@ -10,21 +10,21 @@
 //  R7 영상은 늘 맨 위 · 지금 줄은 영상 바로 아래(앞 줄은 영상 뒤로) — 손으로 목록을 움직이면 4초 동안은 따라가지 않음
 //  R8 듣기 모드(대사→설명 · 설명만)도 R1~R6 그대로(영상 대신 소리 조각) · 모드를 바꾸면 멈춤(▶ 로 시작)
 //  R9 다시 들어오면 마지막 줄이 선택된 채 멈춰 있음
-import { t, lang, langName } from "../i18n.js?v=1005.14";
-import { esc, renderText, glossCards, sayParts } from "../text.js?v=1005.14";
-import { episode } from "../data.js?v=1005.14";
-import { paths } from "../paths.js?v=1005.14";
-import { Sequence } from "../audio.js?v=1005.14";
-import { I, progress, SPEAKER } from "../ui.js?v=1005.14";
-import writeView from "./write.js?v=1005.14";
-import { diagEnv, keepDiag } from "../diag.js?v=1005.14";
-import { playMine as playMineRec } from "../playmine.js?v=1005.14";
-import { bestHeard, heardHTML } from "../heard.js?v=1005.14";
-import { recDel, downloadRec, askPersist } from "../recstore.js?v=1005.14";
-import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1005.14";
-import { scoreFx, stopFx } from "../scorefx.js?v=1005.14"; // 점수별 효과(본부 10-05)
-import { record, micWhy, srWhy, canScore, closeMic, logRec, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1005.14";
-import { hold, quietWake } from "../wake.js?v=1005.14";
+import { t, lang, langName } from "../i18n.js?v=1005.16";
+import { esc, renderText, glossCards, sayParts } from "../text.js?v=1005.16";
+import { episode } from "../data.js?v=1005.16";
+import { paths } from "../paths.js?v=1005.16";
+import { Sequence } from "../audio.js?v=1005.16";
+import { I, progress, SPEAKER } from "../ui.js?v=1005.16";
+import writeView from "./write.js?v=1005.16";
+import { diagEnv, keepDiag } from "../diag.js?v=1005.16";
+import { playMine as playMineRec } from "../playmine.js?v=1005.16";
+import { bestHeard, heardHTML } from "../heard.js?v=1005.16";
+import { recDel, downloadRec, askPersist } from "../recstore.js?v=1005.16";
+import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1005.16";
+import { scoreFx, stopFx } from "../scorefx.js?v=1005.16"; // 점수별 효과(본부 10-05)
+import { record, micWhy, srWhy, canScore, closeMic, logRec, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1005.16";
+import { hold, quietWake } from "../wake.js?v=1005.16";
 
 const RATES = [1, 0.75, 0.5];
 const pref = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } };
@@ -236,7 +236,16 @@ export default async function learn(app, ep, startId) {
   function v9Hl() { // 읽는 문장 불 켜기(재생 시각 따라 · 멈추면 그대로) — 카드 · 듣기 모드 줄 밑 글(본부 10-05 같은 모양)
     if (st.panel?.kind === "explain" && L[st.panel.i]?.v9 && ex.playing) {
       const it = ex.q[ex.i];
-      if (it) { const k = it.p === 0 ? sentAt(st.panel.i, it.lang, ex.a.currentTime) : -1; panel.querySelectorAll(".v9body .sn").forEach(el => el.classList.toggle("cur", +el.dataset.s === k)); if (k >= 0) setPair(panel.querySelector(".v9body"), st.panel.i, it.lang, k); }
+      if (it) {
+        const k = it.p === 0 ? sentAt(st.panel.i, it.lang, ex.a.currentTime) : -1;
+        panel.querySelectorAll(".v9body .sn").forEach(el => el.classList.toggle("cur", +el.dataset.s === k));
+        // 「이제 말해 보세요」 소리 = 그 칸 안내·한국어 문장에 불 + 짝 줄도 그 말 · [▶ नमुना](문장만 · 언어 없음) = 한국어 문장에만(본부 10-05)
+        const say = it.p === 1, intro = say && !!it.lang;
+        panel.querySelector(".v9body .sayp .sayin")?.classList.toggle("cur", intro);
+        panel.querySelector(".v9body .sayp .saybig")?.classList.toggle("cur", say);
+        if (k >= 0) setPair(panel.querySelector(".v9body"), st.panel.i, it.lang, k);
+        else if (intro) setPair(panel.querySelector(".v9body"), st.panel.i, it.lang, "say");
+      }
     }
     if (seq.playing) {
       const it = seq.q[seq.i];
@@ -252,10 +261,13 @@ export default async function learn(app, ep, startId) {
     return `<p class="pairln" data-k="${k}"${o === "ko" ? ' lang="ko"' : ""}><span class="arr" aria-hidden="true">↳</span> ${bold(s[o] || "")}</p>`;
   }
   function setPair(root, i, code, k) {
-    const p = root?.querySelector(".pairln"); if (!p || (+p.dataset.k === k && p.dataset.c === code)) return;
-    const s = L[i].v9?.sent?.[k]; if (!s) return;
-    const o = otherOf(code); p.dataset.k = k; p.dataset.c = code; o === "ko" ? p.setAttribute("lang", "ko") : p.removeAttribute("lang");
-    p.innerHTML = `<span class="arr" aria-hidden="true">↳</span> ${bold(s[o] || "")}`;
+    const p = root?.querySelector(".pairln"); if (!p || (p.dataset.k === String(k) && p.dataset.c === code)) return;
+    const o = otherOf(code);
+    let txt; // k = 문장 번호 · "say" = 「이제 말해 보세요」 칸(다른 언어 안내 + 한국어 문장)
+    if (k === "say") { const a = sayParts(L[i].v9?.text?.[o]?.say); if (!a) return; txt = `${a.intro} "${a.ko}"`; }
+    else { const s = L[i].v9?.sent?.[k]; if (!s) return; txt = s[o] || ""; }
+    p.dataset.k = k; p.dataset.c = code; o === "ko" ? p.setAttribute("lang", "ko") : p.removeAttribute("lang");
+    p.innerHTML = `<span class="arr" aria-hidden="true">↳</span> ${bold(txt)}`;
   }
   // 문장 누르기 = 그 문장부터 재생(본부 10-05 — 문장 말풍선 없앰)
   function playFromSent(el) {
