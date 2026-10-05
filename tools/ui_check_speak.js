@@ -128,7 +128,7 @@
   ok(/microphone|माइक्रोफोन|마이크/i.test(cm) && !$(".panel .sayb").classList.contains("pass"), "카드: audio-capture → 마이크 안내", cm);
   window.__srErr = null; window.__heard = "감사합니다 여러분"; cm = await crec();
   ok(/^\d+%/.test(cm) && !/✓/.test(cm) && $(".panel .sayb [data-x=keep]").hidden, "카드: 엉뚱한 말 → 낮은 점수 · ✓·[저장] 없음", cm);
-  window.__heard = $(".panel .sayb p").textContent.match(/"([^"]+)"/)[1]; cm = await crec();
+  window.__heard = $(".panel .sayb .saybig")?.textContent || $(".panel .sayb p").textContent.match(/"([^"]+)"/)[1]; cm = await crec(); // 말해 보세요 칸 = 한국어 문장 크게(본부 10-05)
   ok(/^100% ✓/.test(cm) && !$(".panel .sayb [data-x=keep]").hidden, "카드: 맞게 말함 → 100% ✓ · [저장] 나옴(자동 저장 아님)", cm);
   $(".panel .sayb [data-x=keep]").click(); await W(500);
   ok(!$(".panel .sayb [data-x=savedplay]").hidden && $(".panel .sayb [data-x=keep]").hidden, "카드: [저장] → 「저장됨 ▶」", $(".panel .sayb .smsg").textContent);

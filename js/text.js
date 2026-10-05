@@ -60,3 +60,6 @@ export function vowelLen(ch) {
 }
 
 export const JAMO_AUDIO = { "ㄱ": "giyeok", "ㄲ": "ssang_giyeok", "ㄴ": "nieun", "ㄷ": "digeut", "ㄸ": "ssang_digeut", "ㄹ": "rieul", "ㅁ": "mieum", "ㅂ": "bieup", "ㅃ": "ssang_bieup", "ㅅ": "siot", "ㅆ": "ssang_siot", "ㅇ": "ieung", "ㅈ": "jieut", "ㅉ": "ssang_jieut", "ㅊ": "chieut", "ㅋ": "kieuk", "ㅌ": "tieut", "ㅍ": "pieup", "ㅎ": "hieut", "ㅏ": "a", "ㅐ": "ae", "ㅑ": "ya", "ㅒ": "yae", "ㅓ": "eo", "ㅔ": "e", "ㅕ": "yeo", "ㅖ": "ye", "ㅗ": "o", "ㅘ": "wa", "ㅙ": "wae", "ㅚ": "oe", "ㅛ": "yo", "ㅜ": "u", "ㅝ": "wo", "ㅞ": "we", "ㅟ": "wi", "ㅠ": "yu", "ㅡ": "eu", "ㅢ": "ui", "ㅣ": "i" };
+
+// 「이제 말해 보세요」 글 나누기(본부 10-05) — 「안내 "한국어" (로마자, 뜻)」 → { intro, ko, rom, mean } · 괄호 없는 꼴도 받음
+export const sayParts = s => { const m = String(s || "").match(/^(.*?)\s*"([^"]+)"\s*(?:\(([^,()]*),\s*([^()]*)\))?\s*[।.]?\s*$/); return m ? { intro: m[1].trim(), ko: m[2], rom: (m[3] || "").trim(), mean: (m[4] || "").trim() } : null; };

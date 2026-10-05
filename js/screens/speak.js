@@ -13,17 +13,17 @@
 //     못 넘어도 막지 않는다([다음 ▶]) · 음성 인식이 안 되는 곳은 점수 없이 듣고 비교만(녹음은 저장)
 //  S6 녹음은 이 기기 안에만(IndexedDB) — 서버로 보내지 않는다
 //  S7 영상 창 안(embedded): 스크롤 없이 · 줄 이동·닫기는 학습 화면이 한다 · 줄 전체까지 통과하면 다음 줄 말하기로
-import { t, lang } from "../i18n.js?v=1005.12";
-import { esc } from "../text.js?v=1005.12";
-import { episode } from "../data.js?v=1005.12";
-import { paths } from "../paths.js?v=1005.12";
-import { audioCtx, hold, quietWake } from "../wake.js?v=1005.12";
-import * as sfx from "../sfx.js?v=1005.12";
-import { diagEnv, keepDiag } from "../diag.js?v=1005.12";
-import { playMine as playMineRec } from "../playmine.js?v=1005.12";
-import { bestHeard, heardHTML } from "../heard.js?v=1005.12";
-import { recDel, downloadRec, askPersist } from "../recstore.js?v=1005.12";
-import { logRec, dB, srWhy, srWatch, niceLabel, ALIAS } from "../recorder.js?v=1005.12";
+import { t, lang } from "../i18n.js?v=1005.13";
+import { esc, sayParts } from "../text.js?v=1005.13";
+import { episode } from "../data.js?v=1005.13";
+import { paths } from "../paths.js?v=1005.13";
+import { audioCtx, hold, quietWake } from "../wake.js?v=1005.13";
+import * as sfx from "../sfx.js?v=1005.13";
+import { diagEnv, keepDiag } from "../diag.js?v=1005.13";
+import { playMine as playMineRec } from "../playmine.js?v=1005.13";
+import { bestHeard, heardHTML } from "../heard.js?v=1005.13";
+import { recDel, downloadRec, askPersist } from "../recstore.js?v=1005.13";
+import { logRec, dB, srWhy, srWatch, niceLabel, ALIAS } from "../recorder.js?v=1005.13";
 
 // 통과 두 단계(본부 10-04 · 투덜이 「원어민은 되지만 외국인은 100% 어렵다」): 80↑ = ☆ 통과(✓ · [저장]) · 95↑ = ★ 완벽
 export const PASS = 80, PERFECT = 95;
@@ -35,8 +35,8 @@ const QUIET_MS = 2000, START_MS = 6000;
 export const maxMsFor = say => Math.max(8000, (3 + 0.8 * [...String(say || "")].filter(c => /[가-힣]/.test(c)).length) * 1000);
 
 // ── 닮음 = 음절 정렬(js/score.js · 「들린 말」 빨간 표시와 같은 함수 — 본부 10-04) ──
-import { similarity } from "../score.js?v=1005.12";
-import { scoreFx } from "../scorefx.js?v=1005.12"; // 점수별 효과(본부 10-05)
+import { similarity } from "../score.js?v=1005.13";
+import { scoreFx } from "../scorefx.js?v=1005.13"; // 점수별 효과(본부 10-05)
 export { similarity };
 
 // ── 내 목소리 저장(S6) ──
@@ -91,7 +91,9 @@ export default async function speak(app, ep, id, opts = {}) {
     if (!st.rec && !st.starting) quietWake(false); // 녹음이 끝나면 깨우기 소리 다시
     const p = cur(), sv = st.saved[p.key];
     $(".say").textContent = p.text;
-    $(".tr").textContent = p.whole ? line.tr || "" : "";
+    // 「말해 보기」 과제 = 카드와 같게 로마자(작게 · 로마자 꺼지면 숨김) + 뜻(학습자 언어) — 괄호 없음(본부 10-05)
+    const sp = p.task ? sayParts(line.v9?.text?.[lang]?.say) : null, romOn = (() => { try { return localStorage.getItem("malmun.rom") !== "0"; } catch { return true; } })();
+    $(".tr").innerHTML = p.whole ? esc(line.tr || "") : sp ? `${romOn && sp.rom ? `<span class="trrom">${esc(sp.rom)}</span>` : ""}${esc(sp.mean)}` : "";
     // 긴 과제(줄 전체)는 창 안에 들어갈 때까지 글자를 줄인다 — 스크롤 없이(S7)
     const say = $(".say"), task = $(".task"), tr = $(".tr");
     say.style.fontSize = ""; tr.hidden = false;

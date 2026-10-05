@@ -10,21 +10,21 @@
 //  R7 영상은 늘 맨 위 · 지금 줄은 영상 바로 아래(앞 줄은 영상 뒤로) — 손으로 목록을 움직이면 4초 동안은 따라가지 않음
 //  R8 듣기 모드(대사→설명 · 설명만)도 R1~R6 그대로(영상 대신 소리 조각) · 모드를 바꾸면 멈춤(▶ 로 시작)
 //  R9 다시 들어오면 마지막 줄이 선택된 채 멈춰 있음
-import { t, lang, langName } from "../i18n.js?v=1005.12";
-import { esc, renderText, glossCards } from "../text.js?v=1005.12";
-import { episode } from "../data.js?v=1005.12";
-import { paths } from "../paths.js?v=1005.12";
-import { Sequence } from "../audio.js?v=1005.12";
-import { I, progress, SPEAKER } from "../ui.js?v=1005.12";
-import writeView from "./write.js?v=1005.12";
-import { diagEnv, keepDiag } from "../diag.js?v=1005.12";
-import { playMine as playMineRec } from "../playmine.js?v=1005.12";
-import { bestHeard, heardHTML } from "../heard.js?v=1005.12";
-import { recDel, downloadRec, askPersist } from "../recstore.js?v=1005.12";
-import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1005.12";
-import { scoreFx, stopFx } from "../scorefx.js?v=1005.12"; // 점수별 효과(본부 10-05)
-import { record, micWhy, srWhy, canScore, closeMic, logRec, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1005.12";
-import { hold, quietWake } from "../wake.js?v=1005.12";
+import { t, lang, langName } from "../i18n.js?v=1005.13";
+import { esc, renderText, glossCards, sayParts } from "../text.js?v=1005.13";
+import { episode } from "../data.js?v=1005.13";
+import { paths } from "../paths.js?v=1005.13";
+import { Sequence } from "../audio.js?v=1005.13";
+import { I, progress, SPEAKER } from "../ui.js?v=1005.13";
+import writeView from "./write.js?v=1005.13";
+import { diagEnv, keepDiag } from "../diag.js?v=1005.13";
+import { playMine as playMineRec } from "../playmine.js?v=1005.13";
+import { bestHeard, heardHTML } from "../heard.js?v=1005.13";
+import { recDel, downloadRec, askPersist } from "../recstore.js?v=1005.13";
+import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1005.13";
+import { scoreFx, stopFx } from "../scorefx.js?v=1005.13"; // 점수별 효과(본부 10-05)
+import { record, micWhy, srWhy, canScore, closeMic, logRec, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1005.13";
+import { hold, quietWake } from "../wake.js?v=1005.13";
 
 const RATES = [1, 0.75, 0.5];
 const pref = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } };
@@ -166,7 +166,7 @@ export default async function learn(app, ep, startId) {
     v.currentTime = L[it.i].start;
     const box = items[it.i].querySelector(".expl");
     const vx = L[it.i].v9;
-    if (it.p >= 0 && vx) { box.innerHTML = `<p>${bold((vx.text?.[v9code(v9pref().txt)] || vx.text?.ko || {}).ex || "")}</p>`; box.classList.add("on"); }
+    if (it.p >= 0 && vx) { box.innerHTML = `<p>${v9Sent(it.i, it.lang || v9code(v9pref().snd))}</p>`; box.classList.add("on"); } // 카드와 같은 모양(문장 span · 괄호 없음 · 누르면 말풍선)
     else if (it.p >= 0) { box.innerHTML = renderText(L[it.i].krParas[it.p] || ""); box.classList.add("on"); }
     else box.classList.remove("on");
     sync();
@@ -206,7 +206,7 @@ export default async function learn(app, ep, startId) {
       <div class="v9body">
         ${x.pieces?.length || fx ? `<div class="chips">${(x.pieces || []).map(c => `<span class="chip"><b class="ko" lang="ko">${esc(c.ko)}</b> <i>${c.rom != null ? `<span class="rom">${esc(c.rom)}${c.mean ? ", " : ""}</span>${esc(c.mean || "")}` : esc(c.gloss || "")}</i></span>`).join("")}${fx ? `<span class="fx">= <b>${esc(fx)}</b></span>` : ""}</div>` : ""}
         <p data-p="0">${v9Sent(i, code)}</p>
-        ${l.say ? `<div class="sayb"><p data-p="1">${bold((x.text?.[code] || tx).say || "")}</p>
+        ${l.say ? `<div class="sayb"><p data-p="1" class="sayp">${sayHTML(i, code)}</p>
           <div class="sbtns"><button class="mic" data-x="rec">🎤 ${esc(t("speak_now"))}</button><button data-x="model">▶ ${esc(t("model"))}</button><button data-x="mine" disabled>▶ ${esc(t("my_voice"))}</button><button data-x="keep" title="${esc(t("keep"))}" hidden>${esc(t("keep_short"))}</button><button data-x="savedplay" title="${esc(t("saved_title"))}" hidden>${esc(t("saved_play"))}</button><span class="mini"><button data-x="savedl" class="small" title="${esc(t("download"))}" hidden>⬇ ${esc(t("dl_short"))}</button><button data-x="savedel" class="small" title="${esc(t("del_one"))}" hidden>🗑 ${esc(t("del_short"))}</button></span></div>
           <div class="sline"><span class="lvl" hidden><i></i></span><span class="smsg" aria-live="polite"></span><span class="fx" aria-hidden="true"></span></div><div class="tbar" hidden><i></i><span class="tt"></span></div><div class="heardline"></div><div class="microw"><button class="micname" data-x="mics" hidden></button><select class="micsel" hidden></select></div></div>` : ""}
       </div>
@@ -223,20 +223,32 @@ export default async function learn(app, ep, startId) {
   function v9Sent(i, code) {
     const x = L[i].v9, sn = x.sent;
     if (!sn?.length) return bold((x.text?.[code] || x.text?.ko || {}).ex || "");
-    return sn.map((s, k) => `<span class="sn" data-x="sn" data-s="${k}"${code === "ko" ? ' lang="ko"' : ""}>${qWords(i, s[code] || "")}</span>`).join(" ");
+    return sn.map((s, k) => `<span class="sn" data-x="sn" data-s="${k}" data-i="${i}" data-c="${code}"${code === "ko" ? ' lang="ko"' : ""}>${qWords(i, s[code] || "")}</span>`).join(" ");
+  }
+  // 「이제 말해 보세요」 칸(본부 10-05) — 첫 줄 = 안내(듣기 언어) · 한국어 문장 크게 · 로마자(작게 · 로마자 꺼지면 숨김) · 뜻(작게 · 학습자 언어 항상) · 괄호 없음
+  function sayHTML(i, code) {
+    const x = L[i].v9, a = sayParts(x.text?.[code]?.say), b = sayParts(x.text?.[v9L]?.say) || a;
+    if (!a) return bold((x.text?.[code] || x.text?.ko || {}).say || "");
+    return `<span class="sayin"${code === "ko" ? ' lang="ko"' : ""}>${esc(a.intro)}</span><span class="saybig" lang="ko">${esc(a.ko)}</span>${b?.rom ? `<span class="sayrom rom">${esc(b.rom)}</span>` : ""}${b?.mean ? `<span class="saymean">${esc(b.mean)}</span>` : ""}`;
   }
   // 지금 문장 번호 = 재생 시각이 들어간 sent 칸
   const sentAt = (i, code, tm) => { const sn = L[i].v9?.sent || []; let k = 0; sn.forEach((s, j) => { if ((s[`${code}_s`] ?? 0) <= tm + 0.05) k = j; }); return k; };
-  function v9Hl() { // 읽는 문장 불 켜기(재생 시각 따라 · 멈추면 그대로)
-    if (!st.panel || st.panel.kind !== "explain" || !L[st.panel.i]?.v9 || !ex.playing) return;
-    const it = ex.q[ex.i]; if (!it) return;
-    const k = it.p === 0 ? sentAt(st.panel.i, it.lang, ex.a.currentTime) : -1;
-    panel.querySelectorAll(".v9body .sn").forEach(el => el.classList.toggle("cur", +el.dataset.s === k));
+  function v9Hl() { // 읽는 문장 불 켜기(재생 시각 따라 · 멈추면 그대로) — 카드 · 듣기 모드 줄 밑 글(본부 10-05 같은 모양)
+    if (st.panel?.kind === "explain" && L[st.panel.i]?.v9 && ex.playing) {
+      const it = ex.q[ex.i];
+      if (it) { const k = it.p === 0 ? sentAt(st.panel.i, it.lang, ex.a.currentTime) : -1; panel.querySelectorAll(".v9body .sn").forEach(el => el.classList.toggle("cur", +el.dataset.s === k)); }
+    }
+    if (seq.playing) {
+      const it = seq.q[seq.i];
+      if (it?.lang && it.p === 0) { const k = sentAt(it.i, it.lang, seq.a.currentTime); items[it.i]?.querySelectorAll(".expl .sn").forEach(el => el.classList.toggle("cur", +el.dataset.s === k)); }
+    }
   }
   const hlTimer = setInterval(v9Hl, 100);
   // 말풍선(하나만 · 바깥 누르면 닫힘)
   function v9Pop(el, html) {
-    const pop = panel.querySelector(".v9pop"), box = panel.querySelector(".exv.v9"); if (!pop || !box) return;
+    const box = el.closest(".exv.v9, .expl"); if (!box) return;
+    let pop = box.querySelector(":scope > .v9pop"); if (!pop) { pop = Object.assign(document.createElement("div"), { className: "v9pop", hidden: true }); box.append(pop); }
+    app.querySelectorAll(".v9pop").forEach(p => { if (p !== pop) { p.hidden = true; p.__for = null; } }); // 하나만
     if (!html) { pop.hidden = true; return; }
     if (!pop.hidden && pop.__for === el) { pop.hidden = true; pop.__for = null; return; } // 같은 것 다시 = 닫기
     pop.innerHTML = html; pop.hidden = false; pop.__for = el;
@@ -245,25 +257,26 @@ export default async function learn(app, ep, startId) {
     let top = last.bottom - b.top + 4; if (top + h > box.clientHeight - 4) top = Math.max(2, first.top - b.top - h - 4);
     pop.style.top = top + "px"; pop.style.left = Math.max(6, Math.min(b.width - w - 6, last.left - b.left)) + "px";
   }
-  const hidePop = () => { const p = panel.querySelector(".v9pop"); if (p) { p.hidden = true; p.__for = null; } };
+  const hidePop = () => app.querySelectorAll(".v9pop").forEach(p => { p.hidden = true; p.__for = null; });
   function popFor(el) {
-    const i = st.panel.i, x = L[i].v9;
+    const sn = el.closest(".sn"), i = sn ? +sn.dataset.i : st.panel.i, x = L[i].v9;
     if (el.dataset.x === "gw") { const w = el.dataset.g, g = x.gloss?.[w] || {}; return `<b lang="ko">${esc(w)}</b>${g.rom ? ` <span class="rom">${esc(g.rom)}</span>` : ""}${g.ne ? ` · ${esc(g.ne)}` : ""}`; }
     const s = x.sent?.[+el.dataset.s]; if (!s) return "";
-    const other = v9code(v9pref().snd) === "ko" ? v9L : "ko";
+    const other = (sn?.dataset.c || v9code(v9pref().snd)) === "ko" ? v9L : "ko";
     return `<span${other === "ko" ? ' lang="ko"' : ""}>${qWords(i, s[other] || "")}</span>`;
   }
   const onDocDown = e => { if (!e.target.closest(".v9pop, [data-x=sn], [data-x=gw]")) hidePop(); };
   document.addEventListener("pointerdown", onDocDown, true);
-  const onHover = e => { if (e.pointerType !== "mouse") return; const el = e.target.closest("[data-x=gw], [data-x=sn]"); if (!el || !panel.contains(el)) return; const pop = panel.querySelector(".v9pop"); if (pop?.__for === el && !pop.hidden) return; if (pop) pop.__for = null; v9Pop(el, popFor(el)); };
+  const onHover = e => { if (e.pointerType !== "mouse") return; const el = e.target.closest("[data-x=gw], [data-x=sn]"); if (!el || !app.contains(el)) return; const pop = el.closest(".exv.v9, .expl")?.querySelector(":scope > .v9pop"); if (pop?.__for === el && !pop.hidden) return; if (pop) pop.__for = null; v9Pop(el, popFor(el)); };
   const onLeave = e => { if (e.pointerType !== "mouse") return; const el = e.target.closest("[data-x=gw], [data-x=sn]"); if (el && !el.contains(e.relatedTarget) && !e.relatedTarget?.closest?.(".v9pop")) hidePop(); };
-  panel.addEventListener("pointerover", onHover); panel.addEventListener("pointerout", onLeave);
+  app.addEventListener("pointerover", onHover); app.addEventListener("pointerout", onLeave);
+  app.classList.toggle("norom", !romOn()); // 로마자 꺼짐 = 카드·줄 밑 글 모두
   // 듣는 언어 = 글 언어(읽기 탭 없음) — 글·말해 보세요 줄을 그 언어로 다시 그림
   function v9Text(i, k) {
     const code = v9code(k), tx = L[i].v9.text?.[code] || L[i].v9.text?.ko || {};
     const p0 = panel.querySelector('.v9body p[data-p="0"]'), p1 = panel.querySelector('.v9body p[data-p="1"]'), f = panel.querySelector(".v9body .chips .fx b");
     const fx = L[i].v9.formula_by?.[code] || L[i].v9.formula;
-    if (p0) p0.innerHTML = v9Sent(i, code); if (p1) p1.innerHTML = bold(tx.say || ""); if (f) f.textContent = fx || "";
+    if (p0) p0.innerHTML = v9Sent(i, code); if (p1) p1.innerHTML = sayHTML(i, code); if (f) f.textContent = fx || "";
     hidePop();
   }
   function explainHTML(i) {
@@ -442,7 +455,7 @@ export default async function learn(app, ep, startId) {
       ex.play(items); return sync();
     }
     if (k === "sn" || k === "gw") return v9Pop(x, popFor(x)); // 문장 = 다른 언어 짝 · 따옴표 낱말 = 로마자·뜻
-    if (k === "v9rom") { const on = x.getAttribute("aria-pressed") !== "true"; x.setAttribute("aria-pressed", String(on)); pref("malmun.rom", on ? "1" : "0"); panel.querySelector(".exv").classList.toggle("norom", !on); hidePop(); return; } // 로마자 켜기/끄기(기억)
+    if (k === "v9rom") { const on = x.getAttribute("aria-pressed") !== "true"; x.setAttribute("aria-pressed", String(on)); pref("malmun.rom", on ? "1" : "0"); panel.querySelector(".exv").classList.toggle("norom", !on); app.classList.toggle("norom", !on); hidePop(); return; } // 로마자 켜기/끄기(기억)
     if (k === "rec") return spRec(i, x);
     if (k === "close") return closePanel(); // ✕ 닫기 — 녹음 중이면 버리고 영상으로
     if (k === "mics") { // 마이크 목록(카드 안 작은 고르기) — 고르면 기억하고 다음 녹음부터
@@ -580,6 +593,7 @@ export default async function learn(app, ep, startId) {
   app.querySelector(".mode").onclick = e => { const b = e.target.closest("[data-mode]"); if (b) setMode(b.dataset.mode); };
   app.querySelector(".lines").onclick = e => {
     if (e.target.closest("a")) return;
+    const sx = e.target.closest(".expl [data-x=gw], .expl [data-x=sn]"); if (sx) return v9Pop(sx, popFor(sx)); // 듣기 모드 설명 글 — 다른 언어 짝 · 낱말 뜻
     const li = e.target.closest(".line");
     if (!li) return;
     const i = +li.dataset.i, m = e.target.closest("[data-act=explain],[data-act=write],[data-act=speak]");
