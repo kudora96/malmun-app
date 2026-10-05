@@ -135,5 +135,12 @@
  "v9_read": "Read",
  "close_word": "Close",
  "v9_tip": "▶ = listening language · below: other language",
- "v9_rom": "Roman"
+ "v9_rom": "Roman",
+ "mode_video_s": "Video",
+ "mode_full_s": "Line+Explain",
+ "mode_explain_s": "Explain only",
+ "mode_video_d": "watch from the start",
+ "mode_full_d": "hear a line, then its explanation",
+ "mode_explain_d": "hear only the explanations in a row",
+ "mode_tip": "Choose how to listen here"
 }

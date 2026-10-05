@@ -135,5 +135,12 @@
  "v9_read": "읽기",
  "close_word": "닫기",
  "v9_tip": "▶ = 듣는 언어 · 아래 = 다른 언어",
- "v9_rom": "로마자"
+ "v9_rom": "로마자",
+ "mode_video_s": "영상",
+ "mode_full_s": "대사+설명",
+ "mode_explain_s": "설명만",
+ "mode_video_d": "처음부터 보기",
+ "mode_full_d": "한 줄 듣고 그 설명",
+ "mode_explain_d": "설명만 이어 듣기",
+ "mode_tip": "여기서 듣는 방법을 고르세요"
 }

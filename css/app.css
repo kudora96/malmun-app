@@ -500,3 +500,22 @@ a{color:inherit;text-decoration:none}
 .v9body .pairln,.line .expl .pairln{font-size:13.5px;line-height:1.5}
 /* 설명 본문·짝 줄 15px(본부 10-05 — 폰 읽기 글 15~17px · 네팔 글자 촘촘) · 카드 안 스크롤 없음 그대로(카드가 길어지면 페이지가 스크롤) */
 .v9body p[data-p="0"],.line .expl>p:first-child,.v9body .pairln,.line .expl .pairln{font-size:15px;line-height:22px}
+
+/* 학습 화면 정리(본부 10-05) — 듣는 방법 = 아래 막대 · 막대 낮게(손가락 44px 지킴) · 「말해 보세요」 칸 단추 아래 빈 곳 없음 · 맨 위 「n/N」 */
+.learn .ctrl{padding:5px 6px calc(7px + env(safe-area-inset-bottom,0px));justify-content:space-between;gap:2px}
+.learn .ctrl .iconbtn{width:44px;height:44px}
+.learn .ctrl .play{width:48px;height:48px}
+.learn .ctrl .spd{min-width:40px;height:44px}
+.learn .ctrl .modeb{flex:none;max-width:112px;height:44px;padding:0 8px;border:1px solid var(--line);border-radius:999px;font-size:12px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.learn .ctrl .modeb[aria-expanded=true]{border-color:var(--hi);color:var(--hi)}
+.learn .modemenu{position:absolute;right:8px;bottom:calc(100% + 6px);display:grid;gap:2px;min-width:230px;max-width:calc(100vw - 16px);padding:6px;border-radius:12px;background:var(--card);border:1px solid var(--line);box-shadow:0 6px 18px rgba(0,0,0,.2)}
+.learn .modemenu button{text-align:left;padding:8px 10px 8px 26px;border-radius:8px;font-size:13px;color:var(--mute);position:relative;min-height:44px}
+.learn .modemenu button b{color:var(--ink)}
+.learn .modemenu button[aria-pressed=true]{background:var(--hi-soft)}
+.learn .modemenu button[aria-pressed=true]::before{content:"✓";position:absolute;left:9px;color:var(--hi);font-weight:700}
+.learn .modetip{position:absolute;right:8px;bottom:calc(100% + 6px);padding:6px 10px;border-radius:10px;background:var(--ink);color:var(--bg);font-size:12px;pointer-events:none;box-shadow:0 4px 12px rgba(0,0,0,.2)}
+.learn .modetip::after{content:"";position:absolute;right:28px;top:100%;border:6px solid transparent;border-top-color:var(--ink)}
+.v9bar .snum{flex:none;font-size:11px;color:var(--mute);font-variant-numeric:tabular-nums}
+.v9body .sayb .sline:has(.lvl[hidden]):has(.smsg:empty){display:none}
+.v9body .sayb .heardline:empty{display:none}
+.v9body .sayb .microw:not(:has(:not([hidden]))){display:none}
