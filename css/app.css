@@ -529,3 +529,19 @@ a{color:inherit;text-decoration:none}
 .learn .seek .rail i::after{content:"";position:absolute;right:-7px;top:-5px;width:14px;height:14px;border-radius:50%;background:#f2d27a;box-shadow:0 1px 3px rgba(0,0,0,.35)}
 .learn .seek[data-off] .trk{cursor:default}
 .learn .seek[data-off] .rail i::after,.learn .seek[data-off] span{visibility:hidden}
+
+/* 쓰기(본부 10-06) — 겹모음 줄(11개 · 한 줄) · 위 글자 줄 = 누를 수 있는 단추 모양 + 🔊 + 처음 한 번 말풍선·반짝 */
+.write .kb .kb2{grid-column:1/-1;display:grid;grid-template-columns:repeat(11,1fr);gap:inherit;min-height:0}
+.write .kb .kb2 button{min-height:28px;height:auto;font-size:clamp(12px,2.1dvh,16px);padding:0}
+.write .segrow{position:relative}
+.write .sent{align-items:center}
+.write .sent .spk{font-size:13px;opacity:.7;margin-right:-6px}
+.write .sent .c{border:1px solid var(--line);border-radius:7px;background:var(--card);box-shadow:0 2px 0 var(--line);padding:0 4px;margin:0 1px 2px}
+.write .sent .c:active{transform:translateY(2px);box-shadow:none}
+.write .sent .w{display:inline-flex;gap:2px}
+.write .sent.flash .c{animation:wflash .9s ease-in-out 2}
+@keyframes wflash{50%{background:var(--hi-soft);border-color:var(--hi)}}
+.write .wtip{position:absolute;left:16px;top:100%;z-index:5;margin-top:-4px;padding:6px 10px;border-radius:10px;background:var(--ink);color:var(--bg);font-size:12px;box-shadow:0 4px 12px rgba(0,0,0,.2);pointer-events:none}
+.write .wtip::before{content:"";position:absolute;left:18px;bottom:100%;border:6px solid transparent;border-bottom-color:var(--ink)}
+@media (prefers-reduced-motion:reduce){.write .sent.flash .c{animation:none}}
+.learn .seek[data-off] .rail{visibility:hidden} /* 쓰기·말하기 창 = 갈색 줄만 */

@@ -99,6 +99,27 @@
   ok(/^9 \//.test($(".panel .whead .sub")?.textContent || ""), "8번 마지막 토막 끝 → 대사 → 9번 줄 쓰기로 자동", $(".panel .whead .sub")?.textContent);
   line(9).querySelector("[data-act=write]").click(); await W(400);
   ok($("#vwrap").offsetHeight > 0 && $(".panel").offsetHeight === 0, "쓰기 단추 다시 → 영상");
+  // 겹모음 한 칸(본부 10-06) — 14번 「이게」: 게 = 칸 2개 · ㅔ 한 번 / ㅓ+ㅣ 두 번 둘 다 맞음 · 자동 완성 소리 ㄱ→ㅔ
+  line(14).querySelector(".kotext").click(); await W(800); if ($(".panel").hidden || !$(".panel .sent")) { line(14).querySelector("[data-act=write]").click(); await W(1300); }
+  for (let k = 0; k < 6 && !/^🔊?이게/.test($(".panel .sent").textContent.replace(/\s/g, "")); k++) { $(".panel [data-seg='1']").click(); await W(250); }
+  const segAt = $(".panel .segnav").innerText.replace(/\s/g, "");
+  const reSeg = async () => { $(".panel [data-seg='-1']").click(); await W(200); $(".panel [data-seg='1']").click(); await W(250); };
+  const tgt = () => $(".panel .target")?.textContent, slots = () => document.querySelectorAll(".panel .slot").length, typed = () => $(".panel .typed")?.textContent;
+  key("ㅇ"); await idle(); key("ㅣ"); await idle();
+  const geSlots = slots(), geT = tgt();
+  key("ㄱ"); await idle(); key("ㅔ"); await idle(4000);
+  const oneKey = tgt();
+  await reSeg(); key("ㅇ"); await idle(); key("ㅣ"); await idle(); key("ㄱ"); await idle(); key("ㅓ"); await idle();
+  const midTyped = typed(), midSlots = slots(), midT = tgt();
+  key("ㅣ"); await idle(4000);
+  const twoKeys = tgt();
+  ok(geT === "게" && geSlots === 2 && oneKey === "그" && midT === "게" && midTyped === "거" && midSlots === 2 && twoKeys === "그",
+    "게 = 칸 2개 · [ㅔ] 한 번으로도 · [ㅓ][ㅣ] 두 번으로도 맞음(중간 모양 「거」)", `${segAt} · 칸 ${geSlots} · ㅔ→${oneKey} · ㅓ 뒤 「${midTyped}」 · ㅓㅣ→${twoKeys}`);
+  await reSeg(); at = log.length; $(".panel [data-act=auto]").click(); await idle(20000); await W(300);
+  const jam = log.slice(at).filter(e => e.ev === "시작").map(e => e.name.split("/").pop().replace(/\.mp3$/, ""));
+  const gi = jam.indexOf("j_giyeok");
+  ok(gi >= 0 && jam[gi + 1] === "j_e" && !jam.includes("j_eo"), "자동 완성 「게」 = ㄱ(기역) → ㅔ(에) 소리 차례 · ㅓ 소리 없음", jam.slice(0, 8).join(" → "));
+  f = fits(); ok(f.scroll <= 1 && f.inside && document.querySelectorAll(".panel .kb2 button").length === 11, "겹모음 줄 11개 넣어도 창 안 스크롤 없음 · 자판이 창 안", `넘침 ${f.scroll}px`);
   } catch (e) { res.push("✗ 점검 도중 오류: " + e.message); }
   const out = res.join("\n"); console.log(out); return out;
 })();

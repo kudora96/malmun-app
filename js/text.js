@@ -40,6 +40,15 @@ export function toJamo(ch) {
   return [...expand(CHO[Math.floor(c / 588)] + JUNG[Math.floor((c % 588) / 28)] + JONG[c % 28])];
 }
 
+// 쓰기 칸 나누기(본부 10-06 투덜이) — 겹모음은 한 칸(게 = ㄱ·ㅔ · 소리도 ㅔ) · 겹받침은 둘로(지금대로)
+export function toJamoW(ch) {
+  const c = ch.charCodeAt(0) - 0xac00;
+  if (c < 0 || c > 11171) return null;
+  return [CHO[Math.floor(c / 588)], JUNG[Math.floor((c % 588) / 28)], ...expand(JONG[c % 28])];
+}
+// 낱자 하나 → 기본 낱자들(ㅔ → ㅓㅣ · ㄱ → ㄱ) — 겹모음을 ㅓ+ㅣ 로 쳐도 받기 · 모양 만들기(compose)용
+export const jamoParts = j => [...expand(j)];
+
 // 친 낱자들 → 지금까지 모양(부분 음절). 정답 순서대로만 들어오므로 모음 길이는 정답 기준으로 준다.
 export function compose(keys, vowelLen) {
   const s = keys.join("");

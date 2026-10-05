@@ -13,15 +13,16 @@
 //  W5 소리는 언제나 하나만 · 새 일을 하면 앞 소리는 멈춘다
 //  W6 영상 창 안(embedded): 창 안에서 스크롤 없이 다 보이게 — 긴 문장은 토막으로(◀ 1/3 ▶) ·
 //     토막을 다 쓰면 자동으로 다음 토막 · 줄을 다 쓰면 대사를 듣고 자동으로 다음 줄 쓰기 · 아래 ▶ = 이 부분 듣기
-import { t, lang } from "../i18n.js?v=1005.26";
-import { esc, glossCards, toJamo, compose, vowelLen, JAMO_AUDIO } from "../text.js?v=1005.26";
-import { episode, chars, charsF } from "../data.js?v=1005.26";
-import { paths } from "../paths.js?v=1005.26";
-import { I } from "../ui.js?v=1005.26";
-import { audioCtx, hold } from "../wake.js?v=1005.26";
-import * as sfx from "../sfx.js?v=1005.26";
+import { t, lang } from "../i18n.js?v=1006.2";
+import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO } from "../text.js?v=1006.2";
+import { episode, chars, charsF } from "../data.js?v=1006.2";
+import { paths } from "../paths.js?v=1006.2";
+import { I } from "../ui.js?v=1006.2";
+import { audioCtx, hold } from "../wake.js?v=1006.2";
+import * as sfx from "../sfx.js?v=1006.2";
 
 const KEYS = [..."ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎㄲㄸㅃㅆㅉ"], VOW = [..."ㅏㅑㅓㅕㅗㅛㅜㅠㅡㅣ"];
+const VOW2 = [..."ㅐㅒㅔㅖㅘㅙㅚㅝㅞㅟㅢ"]; // 겹모음 줄(본부 10-06) — 칸 하나 · ㅓ+ㅣ 처럼 나눠 쳐도 받음
 const GAP_NEXT = 600;     // 글자 소리 → 다음 글자 사이
 
 // ── 소리(W5) — 한 번에 하나 · 차례 재생 · 취소 ── 짧은 소리는 전부 미리 풀어 둔 버퍼로(js/sfx.js)
@@ -86,7 +87,7 @@ export default async function write(app, ep, id, opts = {}) {
     const text = raw.replace(/[^가-힣]/g, "");
     const card = cards.find(c => c.ko.replace(/[^가-힣]/g, "") === text);
     const tm = line.words?.[wi]?.w === raw ? line.words[wi] : null; // 대사 원음 안 이 낱말의 시각
-    return { raw, text, tm, rom: card?.rom || "", mean: card?.mean || "", end: /[.?!…]$/.test(raw), chars: [...text].map(ch => ({ ch, jamo: toJamo(ch), file: charSrc(ch) })) };
+    return { raw, text, tm, rom: card?.rom || "", mean: card?.mean || "", end: /[.?!…]$/.test(raw), chars: [...text].map(ch => ({ ch, jamo: toJamoW(ch), file: charSrc(ch) })) };
   });
   // 토막(W6) = units.json 고정 목록(없으면 같은 규칙으로 여기서 나눔: 문장 끝 · 8글자 · 기대는 말에서 안 끊음)
   const U = line.units;
@@ -101,7 +102,7 @@ export default async function write(app, ep, id, opts = {}) {
     if (w.end) { segs.push(cur); cur = []; n = 0; }
   }
   if (cur.length) segs.push(cur);
-  const st = { s: 0, w: 0, c: 0, k: 0, typed: [], busy: false, loopAt: null, sent: false, alive: true, auto: false };
+  const st = { s: 0, w: 0, c: 0, k: 0, typed: [], part: "", busy: false, loopAt: null, sent: false, alive: true, auto: false };
   const lineSrc = line.lineAudio ? paths.audio(ep, line.lineAudio) : null;
   hush();
 
@@ -110,7 +111,7 @@ export default async function write(app, ep, id, opts = {}) {
       ? `<div class="whead"><b>${esc(t("write"))}</b><span class="sub">${li + 1} / ${d.lines.length} · <span class="ko" lang="ko">${esc(line.speaker)}</span></span><span class="loopnote" aria-live="polite"></span></div>`
       : `<div class="bar"><a class="iconbtn" href="#/learn/${ep}/${line.id}" aria-label="${esc(t("back"))}">${I.back}</a>
       <div class="grow"><div class="t">${esc(t("write"))}</div><div class="sub">${li + 1} / ${d.lines.length} · <span class="ko" lang="ko">${esc(line.speaker)}</span></div></div></div><div class="loopnote" aria-live="polite"></div>`}
-    <div class="segrow"><div class="sent" lang="ko"></div><div class="segnav"></div></div>
+    <div class="segrow"><div class="sent" lang="ko"></div><div class="segnav"></div><div class="wtip" hidden>${esc(t("w_tip"))}</div></div>
     <div class="work"></div>
     <div class="wbtns"><button data-act="word">${esc(t("listen_word"))}</button><button data-act="sent">${esc(t("listen_part"))}</button><button data-act="auto">${esc(t("autofill"))}</button></div>
   </section>`;
@@ -118,7 +119,7 @@ export default async function write(app, ep, id, opts = {}) {
   const $ = s => app.querySelector(s);
   const note = $(".loopnote"), work = $(".work"), sentEl = $(".sent"), segnav = $(".segnav");
   const words = () => segs[st.s] || [];
-  const setNote = () => { note.textContent = st.loopAt ? t("loop_on", { c: st.loopAt.ch }) : t("loop_hint"); };
+  const setNote = () => { note.textContent = st.loopAt ? t("loop_on", { c: st.loopAt.ch }) : ""; }; // 처음 안내는 말풍선(본부 10-06)
   const markSent = () => $("[data-act=sent]").setAttribute("aria-pressed", String(st.sent));
   function stopLoop() { if (!st.loopAt) return; st.loopAt = null; hush(); paintSent(); setNote(); }
   function resetSounds() { stopLoop(); hush(); st.sent = false; markSent(); }
@@ -143,7 +144,7 @@ export default async function write(app, ep, id, opts = {}) {
   app.__wr = { toggle: toggleSentence, busy: () => st.busy || st.sent || st.auto || sfx.playing() }; // busy = 점검 도구가 소리 끝을 기다릴 때
 
   function paintSent() {
-    sentEl.innerHTML = words().map((w, wi) => `<span class="w ${wi === st.w ? "on" : ""}">${w.chars.map((c, ci) =>
+    sentEl.innerHTML = `<span class="spk" aria-hidden="true">🔊</span>` + words().map((w, wi) => `<span class="w ${wi === st.w ? "on" : ""}">${w.chars.map((c, ci) =>
       `<button class="c ko ${c.file ? "" : "noaudio"} ${wi < st.w || (wi === st.w && ci < st.c) ? "done" : ""} ${st.loopAt && st.loopAt.w === wi && st.loopAt.c === ci ? "loop" : ""}" data-w="${wi}" data-c="${ci}" ${c.file ? "" : 'aria-disabled="true"'}>${esc(c.ch)}</button>`).join("")}</span>`).join("");
     // 그래도 넘치면(아주 긴 낱말) 글자를 조금씩 줄여 한 줄에 맞춘다
     sentEl.style.fontSize = "";
@@ -160,20 +161,20 @@ export default async function write(app, ep, id, opts = {}) {
       return;
     }
     const w = words()[st.w], c = w.chars[st.c], jam = c.jamo;
-    work.innerHTML = `<div class="stage"><div class="box"><span class="target ko" lang="ko">${esc(c.ch)}</span><span class="typed ko" lang="ko">${esc(compose(st.typed, vowelLen(c.ch)))}</span></div>
+    work.innerHTML = `<div class="stage"><div class="box"><span class="target ko" lang="ko">${esc(c.ch)}</span><span class="typed ko" lang="ko">${esc(compose([...st.typed, st.part].flatMap(jamoParts), vowelLen(c.ch)))}</span></div>
       <div class="info"><div class="word ko" lang="ko">${w.chars.map((x, i) => `<button class="wc ${i === st.c ? "now" : ""}" data-wc="${i}" ${x.file ? "" : "disabled"}>${esc(x.ch)}</button>`).join("")}${w.rom ? ` <span class="rom">${esc(w.rom)}</span>` : ""}</div>
       ${w.mean ? `<div class="mean tr">${esc(w.mean)}</div>` : ""}
       <div class="slots">${jam.map((j, i) => `<span class="slot ${i < st.k ? "filled" : i === st.k ? "current" : ""}">${i <= st.k ? esc(j) : ""}</span>`).join("")}</div></div></div>
-      <div class="kb" lang="ko">${KEYS.map((j, i) => `<button class="${i >= 14 ? "dbl" : ""}" data-j="${j}">${j}</button>`).join("")}<span></span>${VOW.map(j => `<button class="v" data-j="${j}">${j}</button>`).join("")}</div>`;
+      <div class="kb" lang="ko">${KEYS.map((j, i) => `<button class="${i >= 14 ? "dbl" : ""}" data-j="${j}">${j}</button>`).join("")}<span></span>${VOW.map(j => `<button class="v" data-j="${j}">${j}</button>`).join("")}<div class="kb2">${VOW2.map(j => `<button class="v" data-j="${j}">${j}</button>`).join("")}</div></div>`;
   }
-  function goSeg(s) { st.auto = false; markAuto(); resetSounds(); st.busy = false; Object.assign(st, { s, w: 0, c: 0, k: 0, typed: [] }); render(); }
+  function goSeg(s) { st.auto = false; markAuto(); resetSounds(); st.busy = false; Object.assign(st, { s, w: 0, c: 0, k: 0, typed: [], part: "" }); render(); }
 
   async function finishChar(j, c) { // W3
     st.busy = true;
     work.querySelector(".box")?.classList.add("ok");
     const ok = await run(["ok", jamoSrc(j), GAP_NEXT]);
     if (!ok || !st.alive) { st.busy = false; return; }
-    st.busy = false; st.c++; st.k = 0; st.typed = [];
+    st.busy = false; st.c++; st.k = 0; st.typed = []; st.part = "";
     const w = words()[st.w];
     if (st.c >= w.chars.length) { st.w++; st.c = 0; }
     if (st.w >= words().length) { // 토막 끝 → 다음 토막(자동)
@@ -210,14 +211,21 @@ export default async function write(app, ep, id, opts = {}) {
     if (st.busy || st.s >= segs.length) return;
     stopLoop(); st.sent = false; markSent();
     const c = words()[st.w].chars[st.c];
-    const voiceSrc = jamoSrc(j);
-    if (c.jamo[st.k] !== j) {
+    let voiceSrc = jamoSrc(j);
+    const need = c.jamo[st.k], needX = jamoParts(need).join("");
+    if (need !== j && needX.length > 1) { // 겹모음을 나눠 침(ㅓ 다음 ㅣ = ㅔ) — 앞부분이면 받아 두고, 다 맞으면 그 겹모음으로
+      const tryX = st.part + jamoParts(j).join("");
+      if (tryX === needX) { j = need; voiceSrc = jamoSrc(need); }
+      else if (needX.startsWith(tryX)) { st.part = tryX; render(); st.busy = true; await run(["ok", voiceSrc]); st.busy = false; return; }
+    }
+    if (need !== j) {
+      st.part = "";
       const s = work.querySelector(".slot.current"); s?.classList.remove("shake"); void s?.offsetWidth; s?.classList.add("shake");
       const k = work.querySelector(`[data-j="${j}"]`); k?.classList.add("wrong"); setTimeout(() => k?.classList.remove("wrong"), 500);
       st.busy = true; await run(["bad", voiceSrc]); st.busy = false;
       return;
     }
-    st.typed.push(j); st.k++;
+    st.typed.push(j); st.k++; st.part = "";
     render();
     if (st.k >= c.jamo.length) return finishChar(j, c);
     st.busy = true; await run(["ok", voiceSrc]); st.busy = false;
@@ -261,9 +269,10 @@ export default async function write(app, ep, id, opts = {}) {
   };
 
   setNote(); render();
+  try { if (localStorage.getItem("malmun.wtip") !== "1") { localStorage.setItem("malmun.wtip", "1"); const tip = $(".wtip"); tip.hidden = false; sentEl.classList.add("flash"); setTimeout(() => { tip.hidden = true; sentEl.classList.remove("flash"); }, 3500); } } catch {}
   const release = hold();
   // 이 줄에서 쓸 소리를 미리 받아 풀어 둔다(대사 · 낱말·토막 · 글자 · 자판 자모) — 누르는 순간 바로 나오게
   sfx.preload([lineSrc, ...allWords.map(w => unitSrc(w.unit)), ...segs.map(g => unitSrc(g.unit)),
-    ...allWords.flatMap(w => w.chars.map(c => c.file)), ...[...KEYS, ...VOW].map(jamoSrc)]);
+    ...allWords.flatMap(w => w.chars.map(c => c.file)), ...[...KEYS, ...VOW, ...VOW2].map(jamoSrc)]);
   return () => { release(); st.alive = false; hush(); delete app.__wr; };
 }
