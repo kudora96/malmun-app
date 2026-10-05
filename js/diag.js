@@ -2,7 +2,7 @@
 // · 녹음이 끝날 때마다 그 녹음 소리(blob)를 점수와 상관없이 IndexedDB 「malmun_diag」/diag 에 마지막 3개만(키 = at)
 // · 그때의 환경: 소리 엔진 샘플레이트·상태 · 🔁 켜짐 · 녹음 시작 때 소리가 나오고 있었는지 · 출력 장치 이름
 // 녹음 경로(recorder.js 의 record · speak.js 의 녹음 블록)는 건드리지 않는다 — 끝난 뒤 받은 것만 적는다.
-import { audioCtx } from "./wake.js?v=1005.23";
+import { audioCtx } from "./wake.js?v=1005.24";
 
 export async function diagEnv() {
   let out = "";

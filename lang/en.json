@@ -145,5 +145,7 @@
  "mode_tip": "Choose how to listen here",
  "mode_video_go": "Video — watching from here",
  "mode_full_go": "Line+Explain — a line, then its explanation",
- "mode_explain_go": "Explain only — explanations in a row"
+ "mode_explain_go": "Explain only — explanations in a row",
+ "full_video": "Full video",
+ "flip_tip": "Tap: explanation ↔ full video"
 }

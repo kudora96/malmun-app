@@ -145,5 +145,7 @@
  "mode_tip": "여기서 듣는 방법을 고르세요",
  "mode_video_go": "영상 — 이어서 보기",
  "mode_full_go": "대사+설명 — 한 줄, 그리고 설명",
- "mode_explain_go": "설명만 — 설명만 이어서"
+ "mode_explain_go": "설명만 — 설명만 이어서",
+ "full_video": "전체 영상",
+ "flip_tip": "누르면 설명 ↔ 전체 영상"
 }
