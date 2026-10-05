@@ -122,5 +122,8 @@
  "why_pause": "You stopped in the middle — say it all the way through",
  "why_nospeech": "No voice was heard",
  "close_btn": "✕ Close",
- "close_list": "✕ Close"
+ "close_list": "✕ Close",
+ "fx_perfect": "Perfect!",
+ "fx_pass": "Pass!",
+ "fx_miss": "Again!"
 }

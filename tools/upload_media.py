@@ -6,7 +6,7 @@
   jamo/{name}.mp3           ← 옛 앱 audio/jamo
 
 이미 같은 크기로 올라가 있으면 건너뛴다. 8개씩 동시에 올린다.
-실행: python tools/upload_media.py L01-00-01 [--chars] [--jamo] [--letters] [--charsf]   (먼저 npx wrangler login)
+실행: python tools/upload_media.py L01-00-01 [--chars] [--jamo] [--letters] [--charsf] [--sfx]   (먼저 npx wrangler login)
 """
 import json, os, subprocess, sys, urllib.request
 from concurrent.futures import ThreadPoolExecutor
@@ -73,10 +73,16 @@ def chars_f():
     return [(f"chars_f/{f}", os.path.join(d, f), "audio/mpeg") for f in sorted(set(m.values()))]
 
 
+def sfx():
+    """점수 효과음(투덜이가 귀로 고름 · 본부 10-05) → sfx/score_*.mp3"""
+    d = os.path.join(MALMUN, "02_assets", "sfx")
+    return [(f"sfx/{f}", os.path.join(d, f), "audio/mpeg") for f in sorted(os.listdir(d)) if f.startswith("score_") and f.endswith(".mp3")]
+
+
 if __name__ == "__main__":
     jobs = []
     for a in sys.argv[1:]:
-        jobs += chars() if a == "--chars" else jamo() if a == "--jamo" else letters() if a == "--letters" else chars_f() if a == "--charsf" else episode(a)
+        jobs += chars() if a == "--chars" else jamo() if a == "--jamo" else letters() if a == "--letters" else chars_f() if a == "--charsf" else sfx() if a == "--sfx" else episode(a)
     bad = 0
     with ThreadPoolExecutor(8) as ex:
         for line in ex.map(put, jobs):

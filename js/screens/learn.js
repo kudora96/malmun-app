@@ -10,20 +10,21 @@
 //  R7 영상은 늘 맨 위 · 지금 줄은 영상 바로 아래(앞 줄은 영상 뒤로) — 손으로 목록을 움직이면 4초 동안은 따라가지 않음
 //  R8 듣기 모드(대사→설명 · 설명만)도 R1~R6 그대로(영상 대신 소리 조각) · 모드를 바꾸면 멈춤(▶ 로 시작)
 //  R9 다시 들어오면 마지막 줄이 선택된 채 멈춰 있음
-import { t, lang, langName } from "../i18n.js?v=1004.31";
-import { esc, renderText, glossCards } from "../text.js?v=1004.31";
-import { episode } from "../data.js?v=1004.31";
-import { paths } from "../paths.js?v=1004.31";
-import { Sequence } from "../audio.js?v=1004.31";
-import { I, progress, SPEAKER } from "../ui.js?v=1004.31";
-import writeView from "./write.js?v=1004.31";
-import { diagEnv, keepDiag } from "../diag.js?v=1004.31";
-import { playMine as playMineRec } from "../playmine.js?v=1004.31";
-import { bestHeard, heardHTML } from "../heard.js?v=1004.31";
-import { recDel, downloadRec, askPersist } from "../recstore.js?v=1004.31";
-import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1004.31";
-import { record, micWhy, srWhy, canScore, closeMic, logRec, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1004.31";
-import { hold, quietWake } from "../wake.js?v=1004.31";
+import { t, lang, langName } from "../i18n.js?v=1005.3";
+import { esc, renderText, glossCards } from "../text.js?v=1005.3";
+import { episode } from "../data.js?v=1005.3";
+import { paths } from "../paths.js?v=1005.3";
+import { Sequence } from "../audio.js?v=1005.3";
+import { I, progress, SPEAKER } from "../ui.js?v=1005.3";
+import writeView from "./write.js?v=1005.3";
+import { diagEnv, keepDiag } from "../diag.js?v=1005.3";
+import { playMine as playMineRec } from "../playmine.js?v=1005.3";
+import { bestHeard, heardHTML } from "../heard.js?v=1005.3";
+import { recDel, downloadRec, askPersist } from "../recstore.js?v=1005.3";
+import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1005.3";
+import { scoreFx, stopFx } from "../scorefx.js?v=1005.3"; // 점수별 효과(본부 10-05)
+import { record, micWhy, srWhy, canScore, closeMic, logRec, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1005.3";
+import { hold, quietWake } from "../wake.js?v=1005.3";
 
 const RATES = [1, 0.75, 0.5];
 const pref = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } };
@@ -203,7 +204,7 @@ export default async function learn(app, ep, startId) {
         <p data-p="0">${bold(tx.ex || "")}</p>
         ${l.say ? `<div class="sayb"><p data-p="1">${bold(tx.say || "")}</p>
           <div class="sbtns"><button class="mic" data-x="rec">🎤 ${esc(t("speak_now"))}</button><button data-x="model">▶ ${esc(t("model"))}</button><button data-x="mine" disabled>▶ ${esc(t("my_voice"))}</button><button data-x="keep" hidden>${esc(t("keep"))}</button><button data-x="savedplay" hidden>${esc(t("saved_play"))}</button><button data-x="savedl" class="small" hidden>⬇ ${esc(t("download"))}</button><button data-x="savedel" class="small" hidden>🗑 ${esc(t("del_one"))}</button></div>
-          <div class="sline"><span class="lvl" hidden><i></i></span><span class="smsg" aria-live="polite"></span></div><div class="tbar" hidden><i></i><span class="tt"></span></div><div class="heardline"></div><div class="microw"><button class="micname" data-x="mics" hidden></button><select class="micsel" hidden></select></div></div>` : ""}
+          <div class="sline"><span class="lvl" hidden><i></i></span><span class="smsg" aria-live="polite"></span><span class="fx" aria-hidden="true"></span></div><div class="tbar" hidden><i></i><span class="tt"></span></div><div class="heardline"></div><div class="microw"><button class="micname" data-x="mics" hidden></button><select class="micsel" hidden></select></div></div>` : ""}
       </div>
       <div class="v9prog" data-off><span class="t0">0:00</span><div class="trk" aria-label="seek"><div class="rail"><i></i></div></div><span class="t1">0:00</span></div></div>`;
   }
@@ -308,7 +309,7 @@ export default async function learn(app, ep, startId) {
     const box = panel.querySelector(".sayb"), msg = box.querySelector(".smsg"), lvl = box.querySelector(".lvl"), mineB = box.querySelector("[data-x=mine]");
     if (sp?.ctl) { sp.ctl.stop(); return; } // 녹음 중 다시 누름 = 멈춤(점수는 냄)
     const playingAtStart = ex.playing || !!(sp?.audio && !sp.audio.paused) || !v.paused; // 진단: 녹음 시작 때 소리가 나오고 있었나
-    ex.stop(); clearTimeout(st.gap); st.gap = 0; st.exLoop = null; sp?.audio?.pause(); markPlay(); sync(); // 🎤 = 반복·재생 모두 멈춤
+    ex.stop(); clearTimeout(st.gap); st.gap = 0; st.exLoop = null; sp?.audio?.pause(); stopFx(); scoreFx(box.querySelector(".fx"), null); markPlay(); sync(); // 🎤 = 반복·재생·효과음 모두 멈춤
     // 「준비 중」 → 마이크에서 실제 소리가 들어오기 시작하면 「녹음 중」(본부 10-03 — 그 전에 말하면 앞이 비어 버린다)
     quietWake(true); // 녹음하는 동안 깨우기 소리 멈춤(에코 제거가 말을 끊지 않게)
     const tb = box.querySelector(".tbar"), mm = ms => `${Math.floor(ms / 60000)}:${String(Math.floor(ms / 1000) % 60).padStart(2, "0")}`;
@@ -342,6 +343,7 @@ export default async function learn(app, ep, startId) {
     box.querySelector("[data-x=keep]").hidden = !(sc != null && sc >= PASS);
     msg.textContent = sc == null ? (canScore() ? `0% · ${t(r.why === "nospeech" ? "why_nospeech" : srWhy(r.srErr))}` : t("speak_hint_noscore")) : scoreLine(sc, r.why, t); // 두 단계 통과 ☆/★ + 끝난 까닭
     box.classList.toggle("pass", sc != null && sc >= PASS);
+    scoreFx(box.querySelector(".fx"), sc, { busy: () => !!sp?.ctl }); // 점수가 뜨는 순간 효과 한 번 · 말소리 없음(점수 없음)은 효과 없음
     const bh = bestHeard(L[i].say.ko, r.heard); // 들린 말 — 점수를 낸 그 인식 결과 · 틀린 음절 빨간 밑줄 · 빠진 자리 _
     box.querySelector(".heardline").innerHTML = bh ? (({ html, ok }) => `<span class="lab">${esc(t("heard_label"))}:</span> <span class="ko" lang="ko">${html}</span>${ok ? " ✓" : ""}`)(heardHTML(L[i].say.ko, bh)) : "";
   }

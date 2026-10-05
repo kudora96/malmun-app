@@ -13,17 +13,17 @@
 //     못 넘어도 막지 않는다([다음 ▶]) · 음성 인식이 안 되는 곳은 점수 없이 듣고 비교만(녹음은 저장)
 //  S6 녹음은 이 기기 안에만(IndexedDB) — 서버로 보내지 않는다
 //  S7 영상 창 안(embedded): 스크롤 없이 · 줄 이동·닫기는 학습 화면이 한다 · 줄 전체까지 통과하면 다음 줄 말하기로
-import { t, lang } from "../i18n.js?v=1004.31";
-import { esc } from "../text.js?v=1004.31";
-import { episode } from "../data.js?v=1004.31";
-import { paths } from "../paths.js?v=1004.31";
-import { audioCtx, hold, quietWake } from "../wake.js?v=1004.31";
-import * as sfx from "../sfx.js?v=1004.31";
-import { diagEnv, keepDiag } from "../diag.js?v=1004.31";
-import { playMine as playMineRec } from "../playmine.js?v=1004.31";
-import { bestHeard, heardHTML } from "../heard.js?v=1004.31";
-import { recDel, downloadRec, askPersist } from "../recstore.js?v=1004.31";
-import { logRec, dB, srWhy, srWatch, niceLabel, ALIAS } from "../recorder.js?v=1004.31";
+import { t, lang } from "../i18n.js?v=1005.3";
+import { esc } from "../text.js?v=1005.3";
+import { episode } from "../data.js?v=1005.3";
+import { paths } from "../paths.js?v=1005.3";
+import { audioCtx, hold, quietWake } from "../wake.js?v=1005.3";
+import * as sfx from "../sfx.js?v=1005.3";
+import { diagEnv, keepDiag } from "../diag.js?v=1005.3";
+import { playMine as playMineRec } from "../playmine.js?v=1005.3";
+import { bestHeard, heardHTML } from "../heard.js?v=1005.3";
+import { recDel, downloadRec, askPersist } from "../recstore.js?v=1005.3";
+import { logRec, dB, srWhy, srWatch, niceLabel, ALIAS } from "../recorder.js?v=1005.3";
 
 // 통과 두 단계(본부 10-04 · 투덜이 「원어민은 되지만 외국인은 100% 어렵다」): 80↑ = ☆ 통과(✓ · [저장]) · 95↑ = ★ 완벽
 export const PASS = 80, PERFECT = 95;
@@ -35,7 +35,8 @@ const QUIET_MS = 2000, START_MS = 6000;
 export const maxMsFor = say => Math.max(8000, (3 + 0.8 * [...String(say || "")].filter(c => /[가-힣]/.test(c)).length) * 1000);
 
 // ── 닮음 = 음절 정렬(js/score.js · 「들린 말」 빨간 표시와 같은 함수 — 본부 10-04) ──
-import { similarity } from "../score.js?v=1004.31";
+import { similarity } from "../score.js?v=1005.3";
+import { scoreFx } from "../scorefx.js?v=1005.3"; // 점수별 효과(본부 10-05)
 export { similarity };
 
 // ── 내 목소리 저장(S6) ──
@@ -71,7 +72,7 @@ export default async function speak(app, ep, id, opts = {}) {
     <div class="miclist" hidden></div>
     <div class="helpbox" hidden>${[1, 2, 3, 4, 5].map(k => `<p>${esc(t("help_sp_" + k))}</p>`).join("")}<p class="x">${esc(t("help_close"))}</p></div>
     <div class="task"><div class="say ko" lang="ko"></div><div class="tr"></div></div>
-    <div class="meter"><div class="lvl" hidden><i></i></div><div class="sbar"><i></i><em style="left:${PASS}%"></em></div><div class="tbar" hidden><i></i><span class="tt"></span></div><div class="msg" aria-live="polite"></div><div class="heardline"></div><div class="keeprow"><button data-act="keep" hidden>${esc(t("keep"))}</button><button data-act="savedplay" hidden>${esc(t("saved_play"))}</button><button data-act="savedl" hidden>⬇ ${esc(t("download"))}</button><button data-act="savedel" hidden>🗑 ${esc(t("del_one"))}</button></div><button class="micname" data-act="pick" hidden></button></div>
+    <div class="meter"><div class="lvl" hidden><i></i></div><div class="sbar"><i></i><em style="left:${PASS}%"></em></div><div class="tbar" hidden><i></i><span class="tt"></span></div><div class="msgw"><div class="msg" aria-live="polite"></div><span class="fx" aria-hidden="true"></span></div><div class="heardline"></div><div class="keeprow"><button data-act="keep" hidden>${esc(t("keep"))}</button><button data-act="savedplay" hidden>${esc(t("saved_play"))}</button><button data-act="savedl" hidden>⬇ ${esc(t("download"))}</button><button data-act="savedel" hidden>🗑 ${esc(t("del_one"))}</button></div><button class="micname" data-act="pick" hidden></button></div>
     <div class="sbtns">
       <button data-act="model">▶ ${esc(t("model"))}</button>
       <button class="mic" data-act="rec"><span class="dot"></span><span class="lab">${esc(t("speak_now"))}</span></button>
@@ -126,7 +127,7 @@ export default async function speak(app, ep, id, opts = {}) {
     const h = (st.mine = playMineRec(b));
     await h.done; if (st.mine === h) st.mine = null;
   };
-  function go(i) { stopRec(true); stopSounds(); st.i = Math.max(0, Math.min(parts.length - 1, i)); st.blob = null; st.score = null; st.note = null; st.kept = null; st.heardHTML = ""; paint(); }
+  function go(i) { stopRec(true); stopSounds(); st.i = Math.max(0, Math.min(parts.length - 1, i)); st.blob = null; st.score = null; st.note = null; st.kept = null; st.heardHTML = ""; scoreFx($(".fx"), null); paint(); }
 
   // ── 녹음 + 음성 인식(S3 · S5) ── 10-04 되돌림: 10-01 잘 되던 판(a9e13f9) 그대로 · 남긴 차이는 「◆」 표시(본부 10-04)
   let sr = null, srErr = null, heard = [], quietTimer = 0, maxTimer = 0, meterTimer = 0;
@@ -196,7 +197,7 @@ export default async function speak(app, ep, id, opts = {}) {
     }
     if (!st.alive) return;
     const rec = new MediaRecorder(st.stream), chunks = [];
-    st.rec = rec; st.ready = false; st.score = null; st.note = null; st.kept = null; heard = []; srErr = null;
+    scoreFx($(".fx"), null); st.rec = rec; st.ready = false; st.score = null; st.note = null; st.kept = null; heard = []; srErr = null;
     st.diag = { t0: performance.now(), sr: [], track: false, peak: 0, mic: st.stream.getAudioTracks()[0]?.label || "" }; // ◆ 진단
     rec.ondataavailable = e => e.data.size && chunks.push(e.data);
     rec.onstop = () => finish(new Blob(chunks, { type: rec.mimeType || "audio/webm" }));
@@ -278,6 +279,7 @@ export default async function speak(app, ep, id, opts = {}) {
     if (st.diag) { const env = await diagEnv(); logRec({ where: "speak", line: line.id, part: p.key, want: p.say, mic: st.diag.mic, track: st.diag.track, sr: st.diag.sr, sec: Math.round(performance.now() - st.diag.t0) / 1000, maxDb: dB(st.diag.peak), heard: [...new Set(heard)], score: st.score, ...env, playingAtStart: !!st.playingAtStart }); keepDiag(blob, { where: "speak", line: line.id, part: p.key, score: st.score, heard: [...new Set(heard)] }); } // 진단(화면에 안 보임) — 녹음 소리도 malmun_diag 에 마지막 3개
     // 저장은 자동이 아님 — 80% 넘으면 [저장] 단추가 나오고 학습자가 누른다(투덜이 10-04) · 저절로 다음 토막으로 넘기지도 않는다(저장할 틈)
     paint();
+    if (sr && heard.length) scoreFx($(".fx"), st.score, { busy: () => !!st.rec }); // 점수가 뜨는 순간 효과 한 번 · 말소리 없음(못 알아들음)은 효과 없음
   }
   app.__sp = { closeList: () => closeMics(true), toggle: () => (st.model ? (stopSounds(), paint()) : playModel()), busy: () => !!st.rec || st.model || sfx.playing(), _finish: finish, _state: st };
 

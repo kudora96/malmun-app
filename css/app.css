@@ -4,6 +4,7 @@
   --bg:#eef2ec; --bg2:#e2e9e2; --card:#ffffff; --ink:#17302a; --mute:#5c726b; --line:rgba(23,48,42,.14);
   --hi:#a86a12; --hi-soft:rgba(168,106,18,.12); --pink:#c2524a; --blue:#2f6f9f; --wood:#8a6443;
   --on-hi:#ffffff; --bubble:#ffffff; --bubble-cur:#fff7e6;
+  --star:#d99a00; /* 점수 효과 별(본부 10-05) */
   --okc:#1b6b2e; --badc:#c62828; /* 들린 말: 맞음 초록 · 틀림 빨강 — 바탕과 대비 4.5:1 이상 */
   --f-ui:"Noto Sans KR","Noto Sans Devanagari","Noto Sans Bengali",system-ui,sans-serif;
   --f-hand:"Gaegu","Noto Sans KR",cursive;
@@ -11,7 +12,7 @@
 }
 @media (prefers-color-scheme: dark){
   :root{--bg:#1d3530;--bg2:#244039;--card:#2a4a42;--ink:#ecebe4;--mute:#9fb3ac;--line:rgba(236,235,228,.18);
-    --hi:#f2d27a;--hi-soft:rgba(242,210,122,.12);--pink:#f29c8f;--blue:#9cc9f0;--on-hi:#1d3530;--bubble:#244039;--bubble-cur:#2c4c44;--okc:#86d993;--badc:#ffa59c;color-scheme:dark}
+    --hi:#f2d27a;--hi-soft:rgba(242,210,122,.12);--pink:#f29c8f;--blue:#9cc9f0;--on-hi:#1d3530;--bubble:#244039;--bubble-cur:#2c4c44;--okc:#86d993;--badc:#ffa59c;--star:#ffd34d;color-scheme:dark}
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important} /* hidden 속성이 다른 display 규칙에 지지 않게(설명 창이 닫혀도 남던 버그) */
@@ -403,3 +404,24 @@ a{color:inherit;text-decoration:none}
 /* ✕ 닫기(글자 같이) — 말하기 창 머리줄 · 설명 카드 위 줄 */
 .speak .whead .closex{margin-left:4px}
 .v9bar .closex{margin-left:auto;border-color:var(--line);color:var(--mute);font-weight:500}
+
+/* 점수별 효과(본부 10-05) — 점수 줄 위에 겹쳐 떴다 사라짐(자리를 차지하지 않음 · 크기·스크롤 그대로) */
+.speak .msgw,.v9body .sline{position:relative}
+.fx{position:absolute;right:6px;bottom:100%;display:none;align-items:center;gap:3px;pointer-events:none;z-index:4;font-size:12px;font-weight:700;white-space:nowrap;color:var(--hi)}
+.fx.on{display:inline-flex}
+.fx b{font-size:18px;line-height:1;color:var(--star)}
+.fx.perfect b{font-size:28px;animation:fxBurst .8s ease-out both}
+.fx.great b{font-size:22px;animation:fxPop .45s cubic-bezier(.3,1.6,.5,1) both}
+.fx.pass b{animation:fxPop .45s ease-out both}
+.fx.miss{color:var(--badc);animation:fxShake .4s ease-in-out}
+.fx.miss b{font-size:15px;color:var(--badc)}
+.fx.on{animation-name:fxOut;animation-duration:.3s;animation-delay:1.1s;animation-fill-mode:forwards}
+.fx.perfect.on{animation-delay:1.5s}
+.fx.miss.on{animation:fxShake .4s ease-in-out,fxOut .3s 1.1s forwards}
+.fx i{position:absolute;left:10px;top:50%;width:5px;height:5px;margin:-2.5px;border-radius:50%;background:var(--star);opacity:0;animation:fxSpark .8s ease-out both;transform:rotate(var(--a)) translateX(0)}
+@keyframes fxBurst{0%{transform:scale(.2);opacity:0}45%{transform:scale(1.35);opacity:1}100%{transform:scale(1)}}
+@keyframes fxPop{0%{transform:translateY(6px) scale(.4);opacity:0}100%{transform:none;opacity:1}}
+@keyframes fxShake{0%,100%{transform:translateX(0)}20%{transform:translateX(-4px)}40%{transform:translateX(4px)}60%{transform:translateX(-3px)}80%{transform:translateX(2px)}}
+@keyframes fxSpark{0%{opacity:1;transform:rotate(var(--a)) translateX(0)}100%{opacity:0;transform:rotate(var(--a)) translateX(26px)}}
+@keyframes fxOut{to{opacity:0}}
+@media (prefers-reduced-motion:reduce){.fx,.fx b,.fx.on,.fx.miss.on{animation:none!important}.fx i{display:none}}

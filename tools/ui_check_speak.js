@@ -323,6 +323,29 @@
   const cnt = await new Promise(res => { const q = indexedDB.open("malmun", 1); q.onsuccess = () => { const g = q.result.transaction("rec").objectStore("rec").getAllKeys(); g.onsuccess = () => { q.result.close(); res(g.result.filter(k => String(k).startsWith("L01-00-01/")).length); }; }; });
   ok(shown && cnt === 0 && da.hidden, "편 목록 「이 편 녹음 모두 지우기」 → 그 편 녹음 0", `보임 ${shown} · 남은 ${cnt}`);
   location.hash = "#/learn/L01-00-01"; await W(1500);
+  // 점수별 효과(본부 10-05) — 100 perfect · 95~99 great · 80~94 pass · 80 아래 miss · 말소리 없음 = 효과 없음 · 소리 media/sfx/score_*.mp3 · 크기·스크롤 그대로
+  const fxSeen = [], fxSize = [], fxGet = [];
+  const fxBox = el => (el.closest(".speak") ? [$(".panel").offsetHeight, $(".panel .speak").scrollHeight - $(".panel .speak").clientHeight].join("/") : String(el.closest(".panel").offsetHeight));
+  const mo = new MutationObserver(ms => ms.forEach(m => { const el = m.target; if (el.classList?.contains("fx") && el.classList.contains("on")) { const k = [...el.classList].filter(c => c !== "fx" && c !== "on").join(""); if (fxSeen[fxSeen.length - 1] !== k) { fxSeen.push(k); fxSize.push(fxBox(el)); } } }));
+  mo.observe(document.body, { subtree: true, attributes: true, attributeFilter: ["class"] });
+  const of = window.fetch; window.fetch = (u, ...a) => { if (/score_/.test(String(u))) fxGet.push(String(u).match(/score_\w+/)[0]); return of(u, ...a); };
+  const fxLog0 = (window.__sfxLog || []).length, fxPlayed = () => (window.__sfxLog || []).slice(fxLog0).filter(e => e.ev === "시작" && /score_/.test(e.name)).map(e => e.name.match(/score_\w+/)[0]);
+  await open(1); while (!/(^|\D)1\/5/.test($(".panel .segnav").innerText.replace(/\s/g, ""))) { $(".panel [data-seg='-1']").click(); await W(150); }
+  const fxRun = async h => { fxSeen.length = 0; fxSize.length = 0; if (h == null) window.__srNone = true; await say(h ?? "아무 말"); await waitIdle(); await settle2(); window.__srNone = false; const after = fxBox($(".panel .speak .fx")); await W(1900); return [fxSeen.join(","), fxSize.every(x => x === after) && fxBox($(".panel .speak .fx")) === after ? "" : `크기 ${fxSize}→${after}`].join(""); };
+  const fxA = await fxRun("어서 오세요"), fxB = await fxRun("어서 오세"), fxC = await fxRun("너 죽는다"), fxD = await fxRun(null);
+  ok(fxA === "perfect" && fxB === "pass" && fxC === "miss" && fxD === "", "말하기 창 효과: 100% = perfect · 80% = pass · 0%(말은 들림) = miss · 말소리 없음 = 없음 · 창 크기·스크롤 그대로", `${fxA}|${fxB}|${fxC}|${fxD || "없음"}`);
+  const fxPl = fxPlayed();
+  ok(["score_perfect", "score_pass", "score_miss"].every(n => fxPl.includes(n)) && fxPl.length === 3, "효과음 score_perfect/pass/miss 가 점수 뜰 때 한 번씩(말소리 없음은 소리 없음)", `남 ${fxPl}`);
+  line(1).querySelector("[data-act=explain]").click(); await W(800);
+  const crun = async h => { fxSeen.length = 0; fxSize.length = 0; if (h == null) window.__srNone = true; else window.__heard = h; await crec(); window.__srNone = false; const after = fxBox($(".panel .sayb .fx")); await W(1900); return fxSeen.join(",") + (fxSize.every(x => x === after) && fxBox($(".panel .sayb .fx")) === after ? "" : ` 크기 ${fxSize}→${after}`); };
+  const cA = await crun("한국에 온 걸 환영해요"), cB = await crun("너 죽는다"), cC = await crun(null);
+  ok(cA === "perfect" && cB === "miss" && cC === "", "카드 효과: 100% = perfect · 엉뚱한 말 = miss · 말소리 없음 = 없음 · 카드 크기 그대로(효과가 떠 있을 때 = 사라진 뒤)", `${cA}|${cB}|${cC || "없음"}`);
+  // 🎤 누르면 울리던 효과음도 바로 멈춤(녹음에 안 섞임)
+  window.__heard = "한국에 온 걸 환영해요"; await crec(); await W(250); const fxN0 = window.__sfxLog.length;
+  $(".panel .sayb [data-x=rec]").click(); await W(300); const fxCut = window.__sfxLog.slice(fxN0).some(e => e.ev === "멈춤" && /score_perfect/.test(e.name));
+  speakFor(700); for (let k = 0; k < 60 && $(".panel .sayb [data-x=rec]").classList.contains("on"); k++) await W(150); await W(2300);
+  ok(fxCut, "카드: 효과음(2초 perfect) 중 🎤 → 효과음 바로 멈춤");
+  window.fetch = of; mo.disconnect();
   window.__mic?.ctx.close();
   } catch (e) { res.push("✗ 점검 도중 오류: " + e.message); }
   const out = res.join("\n"); console.log(out); return out;

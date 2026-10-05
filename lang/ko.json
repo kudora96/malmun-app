@@ -122,5 +122,8 @@
  "why_pause": "중간에 멈췄어요 — 끝까지 이어서 말해 보세요",
  "why_nospeech": "목소리가 안 들렸어요",
  "close_btn": "✕ 닫기",
- "close_list": "✕ 닫기"
+ "close_list": "✕ 닫기",
+ "fx_perfect": "완벽!",
+ "fx_pass": "통과!",
+ "fx_miss": "다시!"
 }
