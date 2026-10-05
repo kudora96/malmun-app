@@ -29,6 +29,17 @@ def sync(ep):
         if os.path.exists(a):
             b = os.path.join(out, rel.replace("/", os.sep)); shutil.copy2(a, b); n += 1
             l.setdefault("audio", {}).setdefault("ko", {})["sentence"] = rel
+    # 「이제 말해 보세요」 머리말 — 모든 줄 공통 · 언어마다 하나(본부 10-05 · 문장과 나눠 0.6초 쉼)
+    heads = {}
+    for code in ["ko"] + [c for c in d.get("langs", []) if c != "ko"]:
+        tag = "kr" if code == "ko" else code
+        rel = f"새설명_소리_{tag}/말해보세요_머리_{tag}.mp3"
+        a = os.path.join(root, rel.replace("/", os.sep))
+        if os.path.exists(a):
+            b = os.path.join(out, rel.replace("/", os.sep)); os.makedirs(os.path.dirname(b), exist_ok=True); shutil.copy2(a, b); n += 1
+            heads[code] = rel
+    if heads:
+        d["say_head"] = heads
     with open(os.path.join(APP, "data", ep, f"{ep}.v9.json"), "w", encoding="utf-8") as f:
         json.dump(d, f, ensure_ascii=False, indent=1)
     print(ep, len(d["lines"]), "줄 ·", n, "소리")

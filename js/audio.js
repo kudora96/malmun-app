@@ -19,7 +19,7 @@ export class Sequence {
       const nx = this.q[this.i + 1];
       if (nx) { const p = new Audio(); p.preload = "auto"; p.src = nx.src; }
     };
-    if (this.i === 0) go(); else this.timer = setTimeout(go, GAP_MS);
+    if (this.i === 0) go(); else this.timer = setTimeout(go, this.q[this.i].gap ?? GAP_MS); // 조각마다 앞 쉼을 따로 줄 수 있음(말해 보세요 머리말 → 0.6초 → 문장)
   }
   pause() { this.on = false; clearTimeout(this.timer); this.a.pause(); }
   resume() { if (!this.q.length) return; this.on = true; if (this.a.src && !this.a.ended && this.a.currentTime > 0) this.a.play(); else { this.i--; this.next(); } }

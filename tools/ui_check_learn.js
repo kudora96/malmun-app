@@ -56,6 +56,17 @@
   await tap(4, "explain", 1200); check("반복 중 설명");
   await tap(4, "explain"); check("반복 중 설명 닫기");
   await bar("rep", 300); document.querySelector("video").pause();
+  // 영상 모드로 돌아오면 줄 밑 설명 글·짝 줄·불이 남지 않음(본부 10-05 투덜이 버그) — 방법 바꾸기·카드 열고 닫기·▶ 섞어 누르기
+  const exLeft = () => [...document.querySelectorAll(".line .expl")].filter(e => e.classList.contains("on") || e.textContent.trim()).length;
+  const pick = async (m, w = 900) => { $(".ctrl [data-act=modes]").click(); await W(80); $(`.modemenu [data-mode=${m}]`).click(); await W(w); };
+  const left = [];
+  await pick("explain"); const shownEx = exLeft() > 0;
+  await pick("video"); left.push(exLeft());
+  await pick("full", 1500); await tap(5, "explain", 900); await tap(5, "explain", 500); await bar("play", 900); await pick("video"); left.push(exLeft());
+  await pick("explain"); await bar("play", 400); await tap(6, "explain", 900); await pick("video"); left.push(exLeft());
+  await pick("explain"); await bar("play", 400); document.querySelector("video").click(); await W(500); $("[data-mode=video]").click(); await W(500); left.push(exLeft());
+  document.querySelector("video").pause(); await W(300);
+  res.push(`${shownEx && left.every(x => x === 0) ? "✓" : "✗"} 영상 모드로 돌아오면 줄 밑 설명 글 없음(방법 바꾸기·카드·▶ 섞어) · 설명만 때 보임 ${shownEx} · 남은 것 ${left.join("/")}`);
   const out = res.join("\n");
   console.log(out);
   return out;
