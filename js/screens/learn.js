@@ -10,21 +10,21 @@
 //  R7 영상은 늘 맨 위 · 지금 줄은 영상 바로 아래(앞 줄은 영상 뒤로) — 손으로 목록을 움직이면 4초 동안은 따라가지 않음
 //  R8 듣기 모드(대사→설명 · 설명만)도 R1~R6 그대로(영상 대신 소리 조각) · 모드를 바꾸면 멈춤(▶ 로 시작)
 //  R9 다시 들어오면 마지막 줄이 선택된 채 멈춰 있음
-import { t, lang, langName } from "../i18n.js?v=1005.18";
-import { esc, renderText, glossCards, sayParts } from "../text.js?v=1005.18";
-import { episode } from "../data.js?v=1005.18";
-import { paths } from "../paths.js?v=1005.18";
-import { Sequence } from "../audio.js?v=1005.18";
-import { I, progress, SPEAKER } from "../ui.js?v=1005.18";
-import writeView from "./write.js?v=1005.18";
-import { diagEnv, keepDiag } from "../diag.js?v=1005.18";
-import { playMine as playMineRec } from "../playmine.js?v=1005.18";
-import { bestHeard, heardHTML } from "../heard.js?v=1005.18";
-import { recDel, downloadRec, askPersist } from "../recstore.js?v=1005.18";
-import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1005.18";
-import { scoreFx, stopFx } from "../scorefx.js?v=1005.18"; // 점수별 효과(본부 10-05)
-import { record, micWhy, srWhy, canScore, closeMic, logRec, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1005.18";
-import { hold, quietWake } from "../wake.js?v=1005.18";
+import { t, lang, langName } from "../i18n.js?v=1005.19";
+import { esc, renderText, glossCards, sayParts } from "../text.js?v=1005.19";
+import { episode } from "../data.js?v=1005.19";
+import { paths } from "../paths.js?v=1005.19";
+import { Sequence } from "../audio.js?v=1005.19";
+import { I, progress, SPEAKER } from "../ui.js?v=1005.19";
+import writeView from "./write.js?v=1005.19";
+import { diagEnv, keepDiag } from "../diag.js?v=1005.19";
+import { playMine as playMineRec } from "../playmine.js?v=1005.19";
+import { bestHeard, heardHTML } from "../heard.js?v=1005.19";
+import { recDel, downloadRec, askPersist } from "../recstore.js?v=1005.19";
+import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1005.19";
+import { scoreFx, stopFx } from "../scorefx.js?v=1005.19"; // 점수별 효과(본부 10-05)
+import { record, micWhy, srWhy, canScore, closeMic, logRec, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1005.19";
+import { hold, quietWake } from "../wake.js?v=1005.19";
 
 const RATES = [1, 0.75, 0.5];
 const pref = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } };

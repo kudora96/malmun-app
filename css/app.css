@@ -498,3 +498,5 @@ a{color:inherit;text-decoration:none}
 .v9body .sayp .sayin.cur,.v9body .sayp .saybig.cur{background:var(--sent)}
 /* 짝 줄 글씨 키움(본부 10-05 투덜이 「작아 보인다」) — 설명 본문과 같은 크기 13.5px · 줄 간격도 본문과 같게 */
 .v9body .pairln,.line .expl .pairln{font-size:13.5px;line-height:1.5}
+/* 설명 본문·짝 줄 15px(본부 10-05 — 폰 읽기 글 15~17px · 네팔 글자 촘촘) · 카드 안 스크롤 없음 그대로(카드가 길어지면 페이지가 스크롤) */
+.v9body p[data-p="0"],.line .expl>p:first-child,.v9body .pairln,.line .expl .pairln{font-size:15px;line-height:22px}
