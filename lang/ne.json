@@ -126,5 +126,10 @@
  "close_list": "✕ बन्द गर्नुहोस्",
  "fx_perfect": "पूर्ण!",
  "fx_pass": "पास!",
- "fx_miss": "फेरि!"
+ "fx_miss": "फेरि!",
+ "saved_short": "{n}% ▶",
+ "saved_title": "सेभ गरिएको",
+ "dl_short": "फाइल",
+ "del_short": "मेटाउ",
+ "keep_short": "सेभ"
 }

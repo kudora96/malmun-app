@@ -125,5 +125,10 @@
  "close_list": "✕ Close",
  "fx_perfect": "Perfect!",
  "fx_pass": "Pass!",
- "fx_miss": "Again!"
+ "fx_miss": "Again!",
+ "saved_short": "{n}% ▶",
+ "saved_title": "Saved recording",
+ "dl_short": "File",
+ "del_short": "Delete",
+ "keep_short": "Save"
 }

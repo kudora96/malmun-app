@@ -13,17 +13,17 @@
 //     못 넘어도 막지 않는다([다음 ▶]) · 음성 인식이 안 되는 곳은 점수 없이 듣고 비교만(녹음은 저장)
 //  S6 녹음은 이 기기 안에만(IndexedDB) — 서버로 보내지 않는다
 //  S7 영상 창 안(embedded): 스크롤 없이 · 줄 이동·닫기는 학습 화면이 한다 · 줄 전체까지 통과하면 다음 줄 말하기로
-import { t, lang } from "../i18n.js?v=1005.4";
-import { esc } from "../text.js?v=1005.4";
-import { episode } from "../data.js?v=1005.4";
-import { paths } from "../paths.js?v=1005.4";
-import { audioCtx, hold, quietWake } from "../wake.js?v=1005.4";
-import * as sfx from "../sfx.js?v=1005.4";
-import { diagEnv, keepDiag } from "../diag.js?v=1005.4";
-import { playMine as playMineRec } from "../playmine.js?v=1005.4";
-import { bestHeard, heardHTML } from "../heard.js?v=1005.4";
-import { recDel, downloadRec, askPersist } from "../recstore.js?v=1005.4";
-import { logRec, dB, srWhy, srWatch, niceLabel, ALIAS } from "../recorder.js?v=1005.4";
+import { t, lang } from "../i18n.js?v=1005.9";
+import { esc } from "../text.js?v=1005.9";
+import { episode } from "../data.js?v=1005.9";
+import { paths } from "../paths.js?v=1005.9";
+import { audioCtx, hold, quietWake } from "../wake.js?v=1005.9";
+import * as sfx from "../sfx.js?v=1005.9";
+import { diagEnv, keepDiag } from "../diag.js?v=1005.9";
+import { playMine as playMineRec } from "../playmine.js?v=1005.9";
+import { bestHeard, heardHTML } from "../heard.js?v=1005.9";
+import { recDel, downloadRec, askPersist } from "../recstore.js?v=1005.9";
+import { logRec, dB, srWhy, srWatch, niceLabel, ALIAS } from "../recorder.js?v=1005.9";
 
 // 통과 두 단계(본부 10-04 · 투덜이 「원어민은 되지만 외국인은 100% 어렵다」): 80↑ = ☆ 통과(✓ · [저장]) · 95↑ = ★ 완벽
 export const PASS = 80, PERFECT = 95;
@@ -35,8 +35,8 @@ const QUIET_MS = 2000, START_MS = 6000;
 export const maxMsFor = say => Math.max(8000, (3 + 0.8 * [...String(say || "")].filter(c => /[가-힣]/.test(c)).length) * 1000);
 
 // ── 닮음 = 음절 정렬(js/score.js · 「들린 말」 빨간 표시와 같은 함수 — 본부 10-04) ──
-import { similarity } from "../score.js?v=1005.4";
-import { scoreFx } from "../scorefx.js?v=1005.4"; // 점수별 효과(본부 10-05)
+import { similarity } from "../score.js?v=1005.9";
+import { scoreFx } from "../scorefx.js?v=1005.9"; // 점수별 효과(본부 10-05)
 export { similarity };
 
 // ── 내 목소리 저장(S6) ──
@@ -72,7 +72,7 @@ export default async function speak(app, ep, id, opts = {}) {
     <div class="miclist" hidden></div>
     <div class="helpbox" hidden>${[1, 2, 3, 4, 5].map(k => `<p>${esc(t("help_sp_" + k))}</p>`).join("")}<p class="x">${esc(t("help_close"))}</p></div>
     <div class="task"><div class="say ko" lang="ko"></div><div class="tr"></div></div>
-    <div class="meter"><div class="lvl" hidden><i></i></div><div class="sbar"><i></i><em style="left:${PASS}%"></em></div><div class="tbar" hidden><i></i><span class="tt"></span></div><div class="msgw"><div class="msg" aria-live="polite"></div><span class="fx" aria-hidden="true"></span></div><div class="heardline"></div><div class="keeprow"><button data-act="keep" hidden>${esc(t("keep"))}</button><button data-act="savedplay" hidden>${esc(t("saved_play"))}</button><button data-act="savedl" hidden>⬇ ${esc(t("download"))}</button><button data-act="savedel" hidden>🗑 ${esc(t("del_one"))}</button></div><button class="micname" data-act="pick" hidden></button></div>
+    <div class="meter"><div class="lvl" hidden><i></i></div><div class="sbar"><i></i><em style="left:${PASS}%"></em></div><div class="tbar" hidden><i></i><span class="tt"></span></div><div class="msgw"><div class="msg" aria-live="polite"></div><span class="fx" aria-hidden="true"></span></div><div class="heardline"></div><div class="keeprow"><button data-act="keep" title="${esc(t("keep"))}" hidden>${esc(t("keep_short"))}</button><button data-act="savedplay" title="${esc(t("saved_title"))}" hidden>${esc(t("saved_play"))}</button><span class="mini"><button data-act="savedl" title="${esc(t("download"))}" hidden>⬇ ${esc(t("dl_short"))}</button><button data-act="savedel" title="${esc(t("del_one"))}" hidden>🗑 ${esc(t("del_short"))}</button></span></div><button class="micname" data-act="pick" hidden></button></div>
     <div class="sbtns">
       <button data-act="model">▶ ${esc(t("model"))}</button>
       <button class="mic" data-act="rec"><span class="dot"></span><span class="lab">${esc(t("speak_now"))}</span></button>
@@ -108,7 +108,7 @@ export default async function speak(app, ep, id, opts = {}) {
     $("[data-act=mine]").disabled = $("[data-act=both]").disabled = !mineBlob();
     $("[data-act=keep]").hidden = !(sc != null && sc >= PASS && mineBlob() && !st.kept); // 80% 넘으면 [저장]
     $("[data-act=savedplay]").hidden = $("[data-act=savedl]").hidden = $("[data-act=savedel]").hidden = !savedRec()?.blob;
-    if (savedRec()?.blob) $("[data-act=savedplay]").textContent = t("saved_play_n", { n: `${starOf(savedRec().score)} ${savedRec().score ?? ""}`.trim() }); // 저장된 것도 점수 보이게
+    if (savedRec()?.blob) $("[data-act=savedplay]").textContent = t("saved_short", { n: `${starOf(savedRec().score)} ${savedRec().score ?? ""}`.trim() }); // 저장된 것도 점수 보이게
     $(".heardline").innerHTML = !st.rec && st.heardHTML ? st.heardHTML : ""; // 들린 말(틀린 음절 빨간 밑줄 · 빠진 자리 _)
     $(".mic").classList.toggle("on", !!st.rec);
     $(".mic .lab").textContent = st.rec ? (st.ready ? t("btn_stop") : "… " + t("mic_opening")) : "🎤 " + t("speak_now"); // 준비 중 → 마이크에 실제 소리가 들어오면 녹음 중 · 카드처럼 「🎤 बोल्नुहोस्」

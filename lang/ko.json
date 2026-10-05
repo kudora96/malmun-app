@@ -125,5 +125,10 @@
  "close_list": "✕ 닫기",
  "fx_perfect": "완벽!",
  "fx_pass": "통과!",
- "fx_miss": "다시!"
+ "fx_miss": "다시!",
+ "saved_short": "{n}% ▶",
+ "saved_title": "저장한 녹음",
+ "dl_short": "파일",
+ "del_short": "지우기",
+ "keep_short": "저장"
 }

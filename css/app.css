@@ -425,3 +425,21 @@ a{color:inherit;text-decoration:none}
 @keyframes fxSpark{0%{opacity:1;transform:rotate(var(--a)) translateX(0)}100%{opacity:0;transform:rotate(var(--a)) translateX(26px)}}
 @keyframes fxOut{to{opacity:0}}
 @media (prefers-reduced-motion:reduce){.fx,.fx b,.fx.on,.fx.miss.on{animation:none!important}.fx i{display:none}}
+
+/* 「이제 말해 보세요」 단추 한 줄(본부 10-05 · 375 폭) — 글씨·여백 줄임 · 저장됨 = 「★ 100% ▶」 · ⬇·🗑 짧은 글 */
+.v9body .sbtns{flex-wrap:nowrap;gap:4px}
+.v9body .sbtns button{padding:4px 8px;font-size:12px;white-space:nowrap;flex:none}
+.v9body .sbtns button.small,.v9body .sbtns [data-x=savedplay]{padding:3px 6px;font-size:11px}
+.speak .keeprow{flex-wrap:nowrap}
+.speak .keeprow button{white-space:nowrap}
+/* ⬇·🗑 = 저장됨 단추 옆 위아래 작은 묶음(한 줄에 들어가게) */
+.v9body .sbtns button{padding:4px 6px}
+.v9body .sbtns .mini,.speak .keeprow .mini{display:inline-flex;flex-direction:column;gap:1px;flex:none}
+.v9body .sbtns .mini button,.speak .keeprow .mini button{padding:0 6px;font-size:10.5px;line-height:1.35;border-radius:6px}
+.v9body .sbtns .mini:not(:has(button:not([hidden]))),.speak .keeprow .mini:not(:has(button:not([hidden]))){display:none}
+.v9body .sbtns{gap:3px}
+.v9body .sbtns button{padding:4px 5px;font-size:11.5px}
+.v9body .sbtns [data-x=savedplay]{padding:3px 5px}
+/* 새 녹음 [सेभ] 이 떠 있는 동안 = 옛 저장본의 ⬇·🗑 묶음은 잠깐 숨김(한 줄 유지 · 저장/다음 녹음 뒤 다시 보임) */
+.v9body .sbtns:has([data-x=keep]:not([hidden])) .mini,.speak .keeprow:has([data-act=keep]:not([hidden])) .mini{display:none}
+.v9body .sbtns{gap:2px}
