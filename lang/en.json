@@ -119,7 +119,6 @@
  "prev_btn": "◀ Back",
  "next_btn": "Next ▶",
  "why_time": "⏱ Time is up — try again",
- "why_pause": "You stopped in the middle — say it all the way through",
  "why_nospeech": "No voice was heard",
  "close_btn": "✕ Close",
  "close_list": "✕ Close",
@@ -148,5 +147,13 @@
  "mode_explain_go": "Explain only — explanations in a row",
  "full_video": "Full video",
  "flip_tip": "Tap: explanation ↔ full video",
- "w_tip": "Tap a letter — you hear it"
+ "w_tip": "Tap a letter — you hear it",
+ "why_tail": "The end wasn’t heard: {tail} — say it all the way through",
+ "why_other": "It sounded like something else — listen to the model {say} and repeat it",
+ "why_heard_as": "{w} sounded like {h}",
+ "why_missing": "{w} wasn’t heard",
+ "why_redo": "say {ws} again.",
+ "why_rest_ok": "The rest was right.",
+ "why_many": "{ws} and more are different — listen to the model and try again",
+ "why_polish": "just polish {ws}"
 }

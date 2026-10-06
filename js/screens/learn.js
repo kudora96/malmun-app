@@ -10,21 +10,21 @@
 //  R7 영상은 늘 맨 위 · 지금 줄은 영상 바로 아래(앞 줄은 영상 뒤로) — 손으로 목록을 움직이면 4초 동안은 따라가지 않음
 //  R8 듣기 모드(대사→설명 · 설명만)도 R1~R6 그대로(영상 대신 소리 조각) · 모드를 바꾸면 멈춤(▶ 로 시작)
 //  R9 다시 들어오면 마지막 줄이 선택된 채 멈춰 있음
-import { t, lang, langName } from "../i18n.js?v=1006.14";
-import { esc, renderText, glossCards, sayParts } from "../text.js?v=1006.14";
-import { episode } from "../data.js?v=1006.14";
-import { paths } from "../paths.js?v=1006.14";
-import { Sequence } from "../audio.js?v=1006.14";
-import { I, progress, SPEAKER } from "../ui.js?v=1006.14";
-import writeView from "./write.js?v=1006.14";
-import { diagEnv, keepDiag } from "../diag.js?v=1006.14";
-import { playMine as playMineRec } from "../playmine.js?v=1006.14";
-import { bestHeard, heardHTML } from "../heard.js?v=1006.14";
-import { recDel, downloadRec, askPersist } from "../recstore.js?v=1006.14";
-import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1006.14";
-import { scoreFx, stopFx } from "../scorefx.js?v=1006.14"; // 점수별 효과(본부 10-05)
-import { record, micWhy, srWhy, canScore, closeMic, logRec, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1006.14";
-import { hold, quietWake } from "../wake.js?v=1006.14";
+import { t, lang, langName } from "../i18n.js?v=1006.16";
+import { esc, renderText, glossCards, sayParts } from "../text.js?v=1006.16";
+import { episode } from "../data.js?v=1006.16";
+import { paths } from "../paths.js?v=1006.16";
+import { Sequence } from "../audio.js?v=1006.16";
+import { I, progress, SPEAKER } from "../ui.js?v=1006.16";
+import writeView from "./write.js?v=1006.16";
+import { diagEnv, keepDiag } from "../diag.js?v=1006.16";
+import { playMine as playMineRec } from "../playmine.js?v=1006.16";
+import { bestHeard, heardHTML, endHint } from "../heard.js?v=1006.16";
+import { recDel, downloadRec, askPersist } from "../recstore.js?v=1006.16";
+import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1006.16";
+import { scoreFx, stopFx } from "../scorefx.js?v=1006.16"; // 점수별 효과(본부 10-05)
+import { record, micWhy, srWhy, canScore, closeMic, logRec, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1006.16";
+import { hold, quietWake } from "../wake.js?v=1006.16";
 
 const RATES = [1, 0.75, 0.5];
 const pref = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } };
@@ -468,7 +468,7 @@ export default async function learn(app, ep, startId) {
     // 점수가 안 나오면 절대 통과·저장 아님(본부 10-04 — 엉뚱한 말도 그냥 넘어가던 것) · 왜 안 나왔는지 짧게
     // 점수는 언제나 % — 못 알아들었으면 「0% · 까닭」 · 80% 넘으면 [저장]
     box.querySelector("[data-x=keep]").hidden = !(sc != null && sc >= PASS);
-    msg.textContent = sc == null ? (canScore() ? `0% · ${t(r.why === "nospeech" ? "why_nospeech" : srWhy(r.srErr))}` : t("speak_hint_noscore")) : scoreLine(sc, r.why, t); // 두 단계 통과 ☆/★ + 끝난 까닭
+    msg.textContent = sc == null ? (canScore() ? `0% · ${t(r.why === "nospeech" ? "why_nospeech" : srWhy(r.srErr))}` : t("speak_hint_noscore")) : scoreLine(sc, r.why, t, (h => h && { ...h, say: L[i].say.ko, rom: Object.fromEntries([...(L[i].v9?.pieces || []).map(p => [p.ko, p.rom]), ...Object.entries(L[i].v9?.gloss || {}).map(([k, g]) => [k, g.rom])].filter(([k, r]) => k && r)) })(endHint(L[i].say.ko, r.heard))); // 두 단계 통과 ☆/★ + 끝난 까닭
     box.classList.toggle("pass", sc != null && sc >= PASS);
     scoreFx(box.querySelector(".fx"), sc, { busy: () => !!sp?.ctl }); // 점수가 뜨는 순간 효과 한 번 · 말소리 없음(점수 없음)은 효과 없음
     const bh = bestHeard(L[i].say.ko, r.heard); // 들린 말 — 점수를 낸 그 인식 결과 · 틀린 음절 빨간 밑줄 · 빠진 자리 _

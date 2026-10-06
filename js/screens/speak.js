@@ -13,30 +13,45 @@
 //     못 넘어도 막지 않는다([다음 ▶]) · 음성 인식이 안 되는 곳은 점수 없이 듣고 비교만(녹음은 저장)
 //  S6 녹음은 이 기기 안에만(IndexedDB) — 서버로 보내지 않는다
 //  S7 영상 창 안(embedded): 스크롤 없이 · 줄 이동·닫기는 학습 화면이 한다 · 줄 전체까지 통과하면 다음 줄 말하기로
-import { t, lang } from "../i18n.js?v=1006.14";
-import { esc, sayParts } from "../text.js?v=1006.14";
-import { episode } from "../data.js?v=1006.14";
-import { paths } from "../paths.js?v=1006.14";
-import { audioCtx, hold, quietWake } from "../wake.js?v=1006.14";
-import * as sfx from "../sfx.js?v=1006.14";
-import { diagEnv, keepDiag } from "../diag.js?v=1006.14";
-import { playMine as playMineRec } from "../playmine.js?v=1006.14";
-import { bestHeard, heardHTML } from "../heard.js?v=1006.14";
-import { recDel, downloadRec, askPersist } from "../recstore.js?v=1006.14";
-import { logRec, dB, srWhy, srWatch, niceLabel, ALIAS } from "../recorder.js?v=1006.14";
+import { t, lang } from "../i18n.js?v=1006.16";
+import { esc, sayParts } from "../text.js?v=1006.16";
+import { episode } from "../data.js?v=1006.16";
+import { paths } from "../paths.js?v=1006.16";
+import { audioCtx, hold, quietWake } from "../wake.js?v=1006.16";
+import * as sfx from "../sfx.js?v=1006.16";
+import { diagEnv, keepDiag } from "../diag.js?v=1006.16";
+import { playMine as playMineRec } from "../playmine.js?v=1006.16";
+import { bestHeard, heardHTML, endHint } from "../heard.js?v=1006.16";
+import { recDel, downloadRec, askPersist } from "../recstore.js?v=1006.16";
+import { logRec, dB, srWhy, srWatch, niceLabel, ALIAS } from "../recorder.js?v=1006.16";
 
 // 통과 두 단계(본부 10-04 · 투덜이 「원어민은 되지만 외국인은 100% 어렵다」): 80↑ = ☆ 통과(✓ · [저장]) · 95↑ = ★ 완벽
 export const PASS = 80, PERFECT = 95;
 export const starOf = sc => (sc >= PERFECT ? "★" : sc >= PASS ? "☆" : "");
 // 점수 한 줄 + 끝난 까닭(시간 다 됨 · 6초 말 없음 · 못 넘었는데 2초 쉼으로 끝남 — ■ 누름은 안내 없음)
-export const scoreLine = (sc, why, t) => `${sc}%${sc >= PASS ? " ✓" : ""} · ${starOf(sc) ? starOf(sc) + " " : ""}${t(sc >= PERFECT ? "score_5" : sc >= PASS ? "score_4" : sc >= 60 ? "score_3" : sc >= 40 ? "score_2" : "score_1")}${why === "time" ? " · " + t("why_time") : why === "pause" && sc < PASS ? " · " + t("why_pause") : ""}`;
+// 끝난 까닭(본부 10-06): ⏱ 시간 다 됨은 그대로 · 2초 쉼(pause)은 문구에 안 씀 — 대신 들은 내용(hint = heard.js endHint)으로
+export const scoreLine = (sc, why, t, hint) => `${sc}%${sc >= PASS ? " ✓" : ""} · ${starOf(sc) ? starOf(sc) + " " : ""}${t(sc >= PERFECT ? "score_5" : sc >= PASS ? "score_4" : sc >= 60 ? "score_3" : sc >= 40 ? "score_2" : "score_1")}${why === "time" ? " · " + t("why_time") : (h => (h ? " · " + h : ""))(hintText(sc, t, hint))}`;
+// 틀린 곳을 글로(본부 10-06 투덜이 결정) — 낱말은 한글 그대로 「」 · 로마자 켜짐이면 괄호에(있는 낱말만) · 2개까지 · 통과면 짧게
+const romOn = () => { try { return localStorage.getItem("malmun.rom") !== "0"; } catch { return true; } };
+export function hintText(sc, t, hint) {
+  if (!hint) return "";
+  const q = w => `「${w}」${romOn() && hint.rom?.[w] ? `(${hint.rom[w]})` : ""}`;
+  if (hint.kind === "tail") return sc < PASS && hint.tail ? t("why_tail", { tail: q(hint.tail) }) : "";
+  if (hint.kind === "other") return sc < PASS ? t("why_other", { say: `「${hint.say || ""}」` }) : "";
+  if (hint.kind !== "words") return "";
+  const ws = hint.words, list = ws.slice(0, 2).map(x => q(x.w)).join("·");
+  if (sc >= PASS) return t("why_polish", { ws: list });
+  if (ws.length > 2) return t("why_many", { ws: list });
+  const parts = ws.map(x => (x.h ? t("why_heard_as", { w: q(x.w), h: `「${x.h}」` }) : t("why_missing", { w: q(x.w) })));
+  return `${parts.join(" · ")} — ${t("why_redo", { ws: list })}${hint.restOk ? " " + t("why_rest_ok") : ""}`;
+}
 // 시간 규칙(본부 10-04 · 투덜이 승인): 말 사이 쉼 2초 · 🎤 뒤 6초 안에 말 없으면 끝 · 최대 길이 = max(8, 3 + 0.8 × 음절)초
 const QUIET_MS = 2000, START_MS = 6000;
 export const maxMsFor = say => Math.max(8000, (3 + 0.8 * [...String(say || "")].filter(c => /[가-힣]/.test(c)).length) * 1000);
 
 // ── 닮음 = 음절 정렬(js/score.js · 「들린 말」 빨간 표시와 같은 함수 — 본부 10-04) ──
-import { similarity } from "../score.js?v=1006.14";
-import { scoreFx } from "../scorefx.js?v=1006.14"; // 점수별 효과(본부 10-05)
+import { similarity } from "../score.js?v=1006.16";
+import { scoreFx } from "../scorefx.js?v=1006.16"; // 점수별 효과(본부 10-05)
 export { similarity };
 
 // ── 내 목소리 저장(S6) ──
@@ -56,6 +71,7 @@ export default async function speak(app, ep, id, opts = {}) {
   const li = Math.max(0, d.lines.findIndex(l => String(l.id) === String(id)));
   const line = d.lines[li];
   const lineSrc = line.lineAudio ? paths.audio(ep, line.lineAudio) : null;
+  const romMap = Object.fromEntries([...(line.v9?.pieces || []).map(p => [p.ko, p.rom]), ...Object.entries(line.v9?.gloss || {}).map(([k, g]) => [k, g.rom])].filter(([k, r]) => k && r)); // 틀린 낱말 옆 로마자(있는 것만)
   const parts = (line.units?.parts || []).map(p => ({ key: p.id, text: p.text, say: p.say, src: paths.unit(ep, p.id) }));
   if (parts.length !== 1) parts.push({ key: `${ep}_${String(line.id).padStart(2, "0")}_line`, text: line.ko, say: line.ko, src: lineSrc, whole: true });
   else Object.assign(parts[0], { whole: true });
@@ -106,7 +122,7 @@ export default async function speak(app, ep, id, opts = {}) {
     $(".meter").classList.toggle("pass", sc != null && sc >= PASS);
     // 점수는 언제나 % — 알아듣지 못했으면 「0% · 까닭」(투덜이 10-04)
     $(".msg").textContent = st.rec ? t(!st.ready ? "mic_opening" : st.switched ? "mic_switched" : "listening") : st.kept ? `${sc}% ✓ · ${starOf(sc)} ${t(st.kept)}` : st.note ? `0% · ${t(st.whyEnd === "nospeech" ? "why_nospeech" : st.note)}` : st.micErr && sc == null && !mineBlob() ? st.micErr : sc == null ? (SR ? t(mineBlob() ? "no_score" : "speak_hint") : t(mineBlob() ? "no_score" : "speak_hint_noscore"))
-      : scoreLine(sc, st.whyEnd, t); // 점수에 맞는 한마디 + 끝난 까닭
+      : scoreLine(sc, st.whyEnd, t, st.hint); // 점수에 맞는 한마디 + 끝난 까닭·틀린 곳(들은 내용으로)
     $("[data-act=mine]").disabled = $("[data-act=both]").disabled = !mineBlob();
     $("[data-act=keep]").hidden = !(sc != null && sc >= PASS && mineBlob() && !st.kept); // 80% 넘으면 [저장]
     $("[data-act=savedplay]").hidden = $("[data-act=savedl]").hidden = $("[data-act=savedel]").hidden = !savedRec()?.blob;
@@ -267,12 +283,13 @@ export default async function speak(app, ep, id, opts = {}) {
   }
   async function finish(blob) {
     st.whyEnd = st.why; const tb = $(".tbar"); if (tb) tb.hidden = true;
-    st.blob = blob; st.kept = null; // 방금 녹음(원본 그대로) — 언제나 [내 목소리]로
+    st.blob = blob; st.kept = null; st.hint = null; // 방금 녹음(원본 그대로) — 언제나 [내 목소리]로
     if (sr) { // 인식 결과가 조금 늦게 온다 — 그동안 「확인 중…」
       if (!heard.length) $(".msg").textContent = t("checking");
       for (let k = 0; k < 20 && !heard.length; k++) await new Promise(r => setTimeout(r, 100));
       st.score = heard.length ? Math.max(...heard.map(h => similarity(cur().say, h))) : null;
       if (st.score == null) { st.note = srWhy(srErr); st.score = 0; } // 못 알아들음 = 0% + 까닭
+      st.hint = (h => h && { ...h, say: cur().say, rom: romMap })(endHint(cur().say, heard)); // 끝난 까닭·틀린 곳 문구용(들은 내용) — 점수는 그대로
       const bh = bestHeard(cur().say, heard); // 점수를 낸 그 들은 말 → 본보기와 견줘 보여 줌
       st.heardHTML = bh ? (({ html, ok }) => `<span class="lab">${esc(t("heard_label"))}:</span> <span class="ko" lang="ko">${html}</span>${ok ? " ✓" : ""}`)(heardHTML(cur().say, bh)) : ""; // 까닭(마이크를 못 잡음 · 인터넷 · 허락 · 못 알아들음)
     } else st.score = null;

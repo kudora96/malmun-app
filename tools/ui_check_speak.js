@@ -265,8 +265,14 @@
   const spx = $(".panel .speak"); ok(spx.scrollHeight - spx.clientHeight <= 1, "말하기 창: 들린 말·저장 줄이 떠도 창 안 스크롤 없음", spx.scrollHeight + "/" + spx.clientHeight);
   // 시간 규칙(본부 10-04): 쉼 2초 · 🎤 뒤 6초 · 최대 길이 · 인식 다시 켜기 · 두 단계 통과
   const { scoreLine, maxMsFor } = await import("./js/screens/speak.js?v=" + document.documentElement.dataset.v);
-  const tt = x => (x === "why_time" ? "TIME" : x === "why_pause" ? "PAUSE" : x);
-  ok(/☆/.test(scoreLine(82, "pause", tt)) && !/PAUSE/.test(scoreLine(82, "pause", tt)) && /★/.test(scoreLine(96, "stop", tt)) && /PAUSE/.test(scoreLine(60, "pause", tt)) && /TIME/.test(scoreLine(82, "time", tt)) && !/[☆★]/.test(scoreLine(79, "stop", tt)), "두 단계: 82% → ☆ · 96% → ★ · 79% → 없음 · 쉼 안내는 못 넘었을 때만 · 시간 다 됨 안내", [scoreLine(82, "pause", tt), scoreLine(96, "stop", tt), scoreLine(60, "pause", tt)].join(" ｜ "));
+  const tt = x => ({ why_time: "TIME", why_tail: "TAIL", why_other: "OTHER", why_polish: "POLISH" })[x] || x;
+  ok(/☆/.test(scoreLine(82, "pause", tt)) && /★/.test(scoreLine(96, "stop", tt)) && !/[☆★]/.test(scoreLine(79, "stop", tt)) && /TIME/.test(scoreLine(82, "time", tt)) && !/why_pause|PAUSE/.test(scoreLine(60, "pause", tt)) && /TAIL/.test(scoreLine(57, "pause", tt, { kind: "tail", tail: "싶어요" })) && /OTHER/.test(scoreLine(0, "pause", tt, { kind: "other", say: "x" })) && /POLISH/.test(scoreLine(85, "pause", tt, { kind: "words", words: [{ w: "싶어요", h: "시퍼요" }] })), "두 단계: 82% → ☆ · 96% → ★ · 79% → 없음 · 쉼(2초)은 문구에 안 씀 · 시간 다 됨 · 들은 내용 안내(뒤 빠짐·다른 말·통과+틀림)", [scoreLine(57, "pause", tt, { kind: "tail", tail: "싶어요" }), scoreLine(60, "pause", tt)].join(" / "));
+  // 끝남 문구 = 들은 내용으로(본부 10-06 투덜이) — 다른 말 · 앞부분만 · 바뀜 · 빠짐 · 두 곳 넘게 · 통과+틀림
+  { const { endHint } = await import("./js/heard.js?v=" + document.documentElement.dataset.v), { hintText } = await import("./js/screens/speak.js?v=" + document.documentElement.dataset.v), { t: T } = await import("./js/i18n.js?v=" + document.documentElement.dataset.v);
+    const Wd = "저도 읽고 싶어요", say = (h, s) => hintText(s, T, (x => x && { ...x, say: Wd })(endHint(Wd, [h])));
+    const c = { other: say("안녕하세요", 0), tail: say("저도 읽고", 57), as: say("저도 읽고 시퍼요", 71), miss: say("저도 싶어요", 71), many: say("저두 익고 시퍼요", 43), pass: say("저도 읽고 시퍼요", 85) };
+    ok(/「저도 읽고 싶어요」/.test(c.other) && /「싶어요」/.test(c.tail) && /「싶어요」.*「시퍼요」/.test(c.as) && !/「저도」|「읽고」/.test(c.as.split("—")[0]) && /「읽고」/.test(c.miss) && /「저도」·「읽고」/.test(c.many) && /「싶어요」/.test(c.pass) && c.pass.length < c.as.length,
+      "끝남 문구: 다른 말 · 앞부분만(빠진 「싶어요」) · 「싶어요」→「시퍼요」 · 「읽고」 빠짐 · 두 곳 넘게 · 통과+틀림(짧게)", Object.values(c).join(" ‖ ")); }
   ok(maxMsFor("어서 오세요.") === 8000 && maxMsFor("세종대왕이요. 오백 년 전에 왕이 직접 만들었어요. 그때 백성들은 글자를 몰랐거든요. 너무 어려웠어요.") >= 28000, "최대 길이 = max(8, 3 + 0.8×음절)초", maxMsFor("세종대왕이요. 오백 년 전에 왕이 직접 만들었어요. 그때 백성들은 글자를 몰랐거든요. 너무 어려웠어요.") + "ms");
   await open(3); window.__heard = $(".panel .say").textContent;
   // 말 사이 1.5초 쉼 → 안 끊김
@@ -277,7 +283,7 @@
   // 2.5초 쉼 → 끊김 + (못 넘었으면) 쉼 안내
   window.__heard = "가나다"; $(".panel [data-act=rec]").click(); await W(300); window.__mic.g.gain.value = 0.3; await W(500); window.__mic.g.gain.value = 0.001; await W(2600);
   const cut = !$(".panel .mic").classList.contains("on"); await waitIdle(); await settle2();
-  ok(cut && /stopped in the middle|बीचमा|중간에/.test($(".panel .msg").textContent), "2.5초 쉼 → 끊김 + 「중간에 멈췄어요」(못 넘었을 때)", $(".panel .msg").textContent);
+  ok(cut && /something else|अर्कै|다른 말/.test($(".panel .msg").textContent) && !/stopped in the middle|बीचमा|중간에/.test($(".panel .msg").textContent), "2.5초 쉼 → 끊김 · 문구는 시간 대신 들은 내용(「가나다」 = 다른 말로 들렸어요)", $(".panel .msg").textContent);
   // 🎤 뒤 6초 말 없음 → 끝 + 「목소리가 안 들렸어요」
   window.__srNone = true; $(".panel [data-act=rec]").click(); await W(300); window.__mic.g.gain.value = 0.001; await W(6600); await waitIdle(); await settle2(); window.__srNone = false;
   ok(/No voice|आवाज सुनिएन|목소리가 안/.test($(".panel .msg").textContent), "🎤 뒤 6초 말 없음 → 끝 + 「목소리가 안 들렸어요」", $(".panel .msg").textContent);
