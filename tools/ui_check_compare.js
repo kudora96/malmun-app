@@ -42,6 +42,19 @@
     b.disabled = false; b.click(); await W(1500);
     ok(window.__cmp.extra.map(x => x.ch).join("") === "그럼" && p.querySelectorAll(".crow.y .csyl .add").length === 2 && window.__cmp.marks.every(x => x === "ok"), "덧붙은 소리 = 회색 작은 칸(「그」「럼」) · 나머지 맞음", window.__cmp.extra.map(x => x.ch).join(""));
     b.click(); await W(200);
+    // 그림·재생 한 기준(본부 10-06) — 앞 1초 잡음(부스럭) + 말 → 내 목소리 줄 x=0 = lead · 음절 칸 누르면 그 칸 밑 파형 구간이 그대로 나옴
+    { const { wavOf } = await import(`/js/recstore.js?v=${v}`), ctx = new OfflineAudioContext(1, 44100, 44100);
+      const m = await ctx.decodeAudioData(await (await fetch("/media/audio/L01-00-01/units/L01-00-01_13_p02.mp3")).arrayBuffer()), d = m.getChannelData(0), sr = m.sampleRate;
+      const pre = Math.round(sr * 1), nb = ctx.createBuffer(1, pre + d.length, sr), x = nb.getChannelData(0);
+      for (let i = 0; i < pre; i++) x[i] = (Math.random() * 2 - 1) * 0.004; x.set(d, pre);
+      S.blob = wavOf(nb, 0, nb.duration, 1); S.heardHTML = `<span class="lab">x:</span> <span class="ko">${heardHTML(want, want).html}</span>`;
+      b.disabled = false; b.click(); await W(2500);
+      const c2 = window.__cmp, cells = [...p.querySelectorAll(".crow.y .csyl button")];
+      const posOk = cells.every((el, k) => Math.abs(parseFloat(el.style.left) - (100 * (c2.ysyl[k].s - c2.yLead)) / c2.span) < 0.5);
+      cells[3].click(); await W(300);
+      const lp = c2.lastPlay, yd = c2.ybuf.getChannelData(0), ysr = c2.ybuf.sampleRate, rms = (a, z) => { let q = 0; for (let i = Math.round(a * ysr); i < Math.round(z * ysr); i++) q += yd[i] * yd[i]; return Math.sqrt(q / Math.max(1, Math.round((z - a) * ysr))); };
+      ok(c2.yLead > 0.9 && posOk && lp?.ri === 1 && Math.abs(lp.from - (c2.ysyl[3].s - 0.03)) < 0.005 && rms(c2.ysyl[3].s, c2.ysyl[3].e) > 5 * rms(0.2, 0.8), "앞 1초 잡음 녹음: x=0 = lead · 칸 자리 = (s−lead)/전체 · 「읽」 칸 누름 = 그 칸 구간(말소리 있음)", `lead ${c2.yLead.toFixed(2)} · 칸 ${c2.ysyl[3].s.toFixed(2)}~${c2.ysyl[3].e.toFixed(2)} · 튼 곳 ${lp?.from.toFixed(2)}`);
+      b.click(); await W(200); }
   } catch (e) { res.push("✗ 점검 도중 오류: " + e.message); }
   const out = `${innerWidth}x${innerHeight}\n` + res.join("\n"); console.log(out); return out;
 })();

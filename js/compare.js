@@ -5,12 +5,12 @@
 //  · 재생: 본보기 → 0.4초 → 내 목소리 · 재생 위치 세로 막대 + 지금 음절 강조 · 파형·음절 칸을 누르면 그 줄 그 음절부터
 //  녹음·점수 계산·[내 목소리] 재생(playmine.js playMine)은 그대로 — 여기는 그리기·DTW·비교 화면 안 재생만
 //  (본보기는 sfx.play 그대로 · 내 목소리는 playmine 과 같은 방식: decodeAudioData → BufferSource.start(t, offset) → Gain)
-import { esc } from "./text.js?v=1006.68";
-import { align } from "./score.js?v=1006.68";
-import { audioCtx } from "./wake.js?v=1006.68";
-import { leadOf, gainOf, FADE, FADE_OUT, voicedEnd } from "./playmine.js?v=1006.68";
-import { speechEnd } from "./recstore.js?v=1006.68";
-import * as sfx from "./sfx.js?v=1006.68";
+import { esc } from "./text.js?v=1006.69";
+import { align } from "./score.js?v=1006.69";
+import { audioCtx } from "./wake.js?v=1006.69";
+import { leadOf, gainOf, FADE, FADE_OUT, voicedEnd } from "./playmine.js?v=1006.69";
+import { speechEnd } from "./recstore.js?v=1006.69";
+import * as sfx from "./sfx.js?v=1006.69";
 
 const FR = 0.02; // 특징 칸 20ms
 const alignCache = new Map();
@@ -87,23 +87,23 @@ export async function openCompare(host, o) {
   const extras = (syl, lead) => extra.map(x => { const at = x.after >= 0 ? syl[x.after].e : syl[0].s, [a0, a1] = x.after >= 0 ? [at - 0.03, at + 0.05] : [Math.max(lead, at - 0.08), at]; return `<span class="add" style="${pos(a0, a1, lead)}">${esc(x.ch)}</span>`; }).join("");
   const row = (cls, lab, syl, lead) => `<div class="crow ${cls}"><div class="clab">${esc(lab)}</div><div class="cwave"><canvas></canvas><i class="cbar" hidden></i></div><div class="csyl ko" lang="ko">${syl.map((x, k) => cell(x, k, lead, cls === "y")).join("")}${cls === "y" ? extras(syl, lead) : ""}</div></div>`;
   const ticks = []; for (let s = 0; s <= span + 1e-6; s += span > 3 ? 1 : 0.5) ticks.push(`<span style="left:${(100 * s) / span}%">${s.toFixed(1)}</span>`);
-  host.innerHTML = `<div class="cmpw">${row("m", t("model"), msyl, mLead)}${row("y", t("my_voice"), ysyl, yLead)}<div class="cruler">${ticks.join("")}</div></div>`;
+  host.innerHTML = `<div class="cmpw">${row("m", t("model"), msyl, mLead)}${row("y", t("my_voice"), ysyl, yLead)}<div class="cruler">${ticks.join("")}</div><button class="craw" data-raw title="lead ${yLead.toFixed(2)} · end ${yStop.toFixed(2)} · ${ybuf.duration.toFixed(2)}s">⬇ ${esc(t("raw_dl"))}</button></div>`;
   const rows = [...host.querySelectorAll(".crow")];
   // 음절 글자 = 두 줄 모두 한 크기(본부 10-06 투덜이) · 칸이 글보다 좁으면 글을 칸 가운데 위·아래 두 층으로 번갈아(가는 선으로 칸과 이음) — 겹치지 않게
   const tight = () => host.querySelectorAll(".csyl").forEach(row => { let n = 0; row.querySelectorAll("button").forEach(b => { b.classList.remove("up", "dn", "narrow"); const tx = b.querySelector(".tx"); if (tx && tx.offsetWidth > b.clientWidth - 2) { b.classList.add("narrow", n++ % 2 ? "dn" : "up"); } else n = 0; }); });
   tight();
   // 파형 — 20ms 보다 잘게(가로 픽셀마다 최대 크기) · 내 목소리는 gainOf 크기로
-  const draw = (cv, buf, lead, g) => {
+  const draw = (cv, buf, lead, g, stop = Infinity) => { // stop 뒤(말 끝 뒤 잡음)는 그리지 않음
     const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1, W2 = Math.max(1, Math.round(r.width * dpr)), H2 = Math.max(1, Math.round(r.height * dpr));
     cv.width = W2; cv.height = H2; const c = cv.getContext("2d"), d = buf.getChannelData(0), sr = buf.sampleRate;
     c.fillStyle = getComputedStyle(cv).color; c.clearRect(0, 0, W2, H2);
     for (let x = 0; x < W2; x++) {
       const a = Math.round((lead + (span * x) / W2) * sr), b = Math.round((lead + (span * (x + 1)) / W2) * sr); let pk = 0;
-      for (let i = Math.max(0, a); i < Math.min(d.length, b); i++) pk = Math.max(pk, Math.abs(d[i]));
+      for (let i = Math.max(0, a); i < Math.min(d.length, b, Math.round(stop * sr)); i++) pk = Math.max(pk, Math.abs(d[i]));
       const h = Math.max(1, Math.min(1, pk * g) * H2 * 0.95); c.fillRect(x, (H2 - h) / 2, 1, h);
     }
   };
-  const paintWaves = () => { draw(rows[0].querySelector("canvas"), mbuf, mLead, 1); draw(rows[1].querySelector("canvas"), ybuf, yLead, yGain); };
+  const paintWaves = () => { draw(rows[0].querySelector("canvas"), mbuf, mLead, 1, mStop); draw(rows[1].querySelector("canvas"), ybuf, yLead, yGain, yStop); }; // 내 목소리 = [lead, end] 안만(앞·뒤 자른 그대로)
   paintWaves();
   const ro = new ResizeObserver(() => { paintWaves(); tight(); }); ro.observe(host);
   // 재생 — 본보기 = sfx.play(같은 버퍼 · offset) · 내 목소리 = BufferSource.start(t, offset) + Gain(playmine 과 같은 방식)
@@ -121,6 +121,7 @@ export async function openCompare(host, o) {
   };
   const playRow = (ri, from, to) => new Promise(res => { // to = 끝(없으면 말 끝까지) — 음절 칸을 누르면 그 음절만(앞뒤 0.03초)
     if (!st.alive) return res(false);
+    if (window.__cmp) window.__cmp.lastPlay = { ri, from, to }; // 점검 도구용(그림 칸과 트는 구간이 같은 기준인지)
     host.classList.add("playing");
     if (ri === 0) {
       const t0 = ctx.currentTime + 0.01;
@@ -143,6 +144,11 @@ export async function openCompare(host, o) {
     await playRow(1, yLead); host.classList.remove("playing");
   };
   host.onclick = e => { // 음절 칸 · 파형 누르기 = 그 줄 그 자리부터
+    if (e.target.closest("[data-raw]")) { // 진단(본부 10-06): 내 녹음 원본 그대로(webm · 자르기·크기 맞춤 없음) 내려받기 — 실제 녹음에서 앞·뒤 자르기가 왜 안 먹는지 본부가 직접 봄
+      const u = URL.createObjectURL(o.blob), a = document.createElement("a"), ext = (o.blob.type.match(/audio\/(\w+)/) || [, "webm"])[1];
+      a.href = u; a.download = `malmun_raw_${o.key}_${new Date().toISOString().replace(/[:.]/g, "-")}.${ext}`; document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(u), 5000);
+      return;
+    }
     const r = e.target.closest(".crow"); if (!r) return;
     const ri = rows.indexOf(r), lead = ri ? yLead : mLead, syl = ri ? ysyl : msyl;
     let from = lead, to;
@@ -152,6 +158,6 @@ export async function openCompare(host, o) {
     stopPlay(); playRow(ri, Math.max(0, from), to).then(() => host.classList.remove("playing"));
   };
   playBoth();
-  window.__cmp = { msyl, ysyl, marks, heardCh, extra, span, mLead, yLead, playBoth, playRow }; // 점검 도구용
+  window.__cmp = { msyl, ysyl, marks, heardCh, extra, span, mLead, yLead, yStop, ybuf, playBoth, playRow }; // 점검 도구용
   return { close() { st.alive = false; stopPlay(); ro.disconnect(); host.onclick = null; host.innerHTML = ""; }, replay: playBoth };
 }

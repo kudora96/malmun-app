@@ -156,5 +156,6 @@
  "why_rest_ok": "The rest was right.",
  "why_many": "{ws} and more are different — listen to the model and try again",
  "why_polish": "just polish {ws}",
- "cmp_none": "Nothing to compare yet — record first."
+ "cmp_none": "Nothing to compare yet — record first.",
+ "raw_dl": "Original"
 }
