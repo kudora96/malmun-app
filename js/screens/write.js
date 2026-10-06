@@ -13,13 +13,13 @@
 //  W5 소리는 언제나 하나만 · 새 일을 하면 앞 소리는 멈춘다
 //  W6 영상 창 안(embedded): 창 안에서 스크롤 없이 다 보이게 — 긴 문장은 토막으로(◀ 1/3 ▶) ·
 //     토막을 다 쓰면 자동으로 다음 토막 · 줄을 다 쓰면 대사를 듣고 자동으로 다음 줄 쓰기 · 아래 ▶ = 이 부분 듣기
-import { t, lang } from "../i18n.js?v=1006.2";
-import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO } from "../text.js?v=1006.2";
-import { episode, chars, charsF } from "../data.js?v=1006.2";
-import { paths } from "../paths.js?v=1006.2";
-import { I } from "../ui.js?v=1006.2";
-import { audioCtx, hold } from "../wake.js?v=1006.2";
-import * as sfx from "../sfx.js?v=1006.2";
+import { t, lang } from "../i18n.js?v=1006.4";
+import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO } from "../text.js?v=1006.4";
+import { episode, chars, charsF } from "../data.js?v=1006.4";
+import { paths } from "../paths.js?v=1006.4";
+import { I } from "../ui.js?v=1006.4";
+import { audioCtx, hold } from "../wake.js?v=1006.4";
+import * as sfx from "../sfx.js?v=1006.4";
 
 const KEYS = [..."ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎㄲㄸㅃㅆㅉ"], VOW = [..."ㅏㅑㅓㅕㅗㅛㅜㅠㅡㅣ"];
 const VOW2 = [..."ㅐㅒㅔㅖㅘㅙㅚㅝㅞㅟㅢ"]; // 겹모음 줄(본부 10-06) — 칸 하나 · ㅓ+ㅣ 처럼 나눠 쳐도 받음
@@ -76,7 +76,7 @@ async function run(steps) {
 }
 
 export default async function write(app, ep, id, opts = {}) {
-  const [d, idx, cf] = await Promise.all([episode(ep, lang), chars(), charsF()]);
+  const [d, idx, cf] = await Promise.all([episode(ep, lang), chars(), charsF(ep)]);
   // 글자·자모 소리: 공용 아나운서(chars_f) 먼저 · 없으면 지금 글자 소리 · 자모는 옛 jamo 이름
   const charSrc = ch => (cf[ch] ? paths.charF(cf[ch]) : idx[ch] ? paths.char(idx[ch]) : null);
   const jamoSrc = j => (cf[j] ? paths.charF(cf[j]) : JAMO_AUDIO[j] ? paths.jamo(JAMO_AUDIO[j]) : null);
@@ -144,8 +144,8 @@ export default async function write(app, ep, id, opts = {}) {
   app.__wr = { toggle: toggleSentence, busy: () => st.busy || st.sent || st.auto || sfx.playing() }; // busy = 점검 도구가 소리 끝을 기다릴 때
 
   function paintSent() {
-    sentEl.innerHTML = `<span class="spk" aria-hidden="true">🔊</span>` + words().map((w, wi) => `<span class="w ${wi === st.w ? "on" : ""}">${w.chars.map((c, ci) =>
-      `<button class="c ko ${c.file ? "" : "noaudio"} ${wi < st.w || (wi === st.w && ci < st.c) ? "done" : ""} ${st.loopAt && st.loopAt.w === wi && st.loopAt.c === ci ? "loop" : ""}" data-w="${wi}" data-c="${ci}" ${c.file ? "" : 'aria-disabled="true"'}>${esc(c.ch)}</button>`).join("")}</span>`).join("");
+    sentEl.innerHTML = `<svg class="spk" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M4 9v6h4l5 4V5L8 9H4z"/><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M16 8.5a5 5 0 0 1 0 7M18.8 6a8.5 8.5 0 0 1 0 12"/></svg>` + words().map((w, wi) => `<span class="w ${wi === st.w ? "on" : ""}">${w.chars.map((c, ci) =>
+      `<button class="c ko ${c.file ? "" : "noaudio"} ${wi < st.w || (wi === st.w && ci < st.c) ? "done" : ""} ${st.loopAt && st.loopAt.w === wi && st.loopAt.c === ci ? "loop" : ""} ${wi === st.w && ci === st.c && st.s < segs.length ? "now" : ""}" data-w="${wi}" data-c="${ci}" ${c.file ? "" : 'aria-disabled="true"'}>${esc(c.ch)}</button>`).join("")}</span>`).join("");
     // 그래도 넘치면(아주 긴 낱말) 글자를 조금씩 줄여 한 줄에 맞춘다
     sentEl.style.fontSize = "";
     for (let fs = 22; sentEl.scrollWidth > sentEl.clientWidth + 1 && fs >= 14; fs -= 2) sentEl.querySelectorAll(".c").forEach(c => { c.style.fontSize = fs + "px"; });
@@ -195,18 +195,20 @@ export default async function write(app, ep, id, opts = {}) {
   }
   // 자동 완성(W4) — 지금 토막의 남은 글자를 한 자모씩(손으로 칠 때와 같은 소리·쉼) · 토막이 끝나면 멈춤
   const markAuto = () => { const b = $("[data-act=auto]"); b.setAttribute("aria-pressed", String(!!st.auto)); b.textContent = st.auto ? "⏹ " + t("btn_stop") : t("autofill"); };
+  const flashKey = j => { const k = work.querySelector(`[data-j="${j}"]`); if (!k) return; k.classList.remove("right"); void k.offsetWidth; k.classList.add("right"); setTimeout(() => k.classList.remove("right"), 400); };
   async function autoPart() {
     resetSounds(); st.auto = true; markAuto();
     const part = st.s;
     while (st.auto && st.alive && st.s === part && st.s < segs.length) {
       const c = words()[st.w].chars[st.c], j = c.jamo[st.k];
-      st.typed.push(j); st.k++; render();
+      st.typed.push(j); st.k++; render(); flashKey(j);
       if (st.k >= c.jamo.length) await finishChar(j, c);
       else { st.busy = true; await run(["ok", jamoSrc(j), 150]); st.busy = false; }
     }
     st.auto = false; if (st.alive) markAuto();
   }
   async function press(j) { // W2
+    const key0 = j; // 실제로 누른 자판(겹모음을 나눠 쳐 완성하면 j 는 겹모음으로 바뀜)
     if (st.auto) { st.auto = false; markAuto(); return; } // 자동 완성 중 자판 = 멈춤
     if (st.busy || st.s >= segs.length) return;
     stopLoop(); st.sent = false; markSent();
@@ -216,7 +218,7 @@ export default async function write(app, ep, id, opts = {}) {
     if (need !== j && needX.length > 1) { // 겹모음을 나눠 침(ㅓ 다음 ㅣ = ㅔ) — 앞부분이면 받아 두고, 다 맞으면 그 겹모음으로
       const tryX = st.part + jamoParts(j).join("");
       if (tryX === needX) { j = need; voiceSrc = jamoSrc(need); }
-      else if (needX.startsWith(tryX)) { st.part = tryX; render(); st.busy = true; await run(["ok", voiceSrc]); st.busy = false; return; }
+      else if (needX.startsWith(tryX)) { st.part = tryX; render(); flashKey(j); st.busy = true; await run(["ok", voiceSrc]); st.busy = false; return; }
     }
     if (need !== j) {
       st.part = "";
@@ -226,7 +228,7 @@ export default async function write(app, ep, id, opts = {}) {
       return;
     }
     st.typed.push(j); st.k++; st.part = "";
-    render();
+    render(); flashKey(key0); // 실제로 누른 자판만 초록
     if (st.k >= c.jamo.length) return finishChar(j, c);
     st.busy = true; await run(["ok", voiceSrc]); st.busy = false;
   }

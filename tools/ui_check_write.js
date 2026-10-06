@@ -101,7 +101,9 @@
   ok($("#vwrap").offsetHeight > 0 && $(".panel").offsetHeight === 0, "쓰기 단추 다시 → 영상");
   // 겹모음 한 칸(본부 10-06) — 14번 「이게」: 게 = 칸 2개 · ㅔ 한 번 / ㅓ+ㅣ 두 번 둘 다 맞음 · 자동 완성 소리 ㄱ→ㅔ
   line(14).querySelector(".kotext").click(); await W(800); if ($(".panel").hidden || !$(".panel .sent")) { line(14).querySelector("[data-act=write]").click(); await W(1300); }
-  for (let k = 0; k < 6 && !/^🔊?이게/.test($(".panel .sent").textContent.replace(/\s/g, "")); k++) { $(".panel [data-seg='1']").click(); await W(250); }
+  for (let k = 0; k < 30 && !/^14 \//.test($(".panel .whead .sub")?.textContent || ""); k++) await W(100); // 14번 쓰기 창이 다 열릴 때까지
+  for (let k = 0; k < 4 && !/(^|\D)1\//.test($(".panel .segnav").innerText.replace(/\s/g, "")); k++) { $(".panel [data-seg='-1']").click(); await W(200); }
+  for (let k = 0; k < 6 && !/^이게/.test($(".panel .sent").textContent.replace(/\s/g, "")); k++) { $(".panel [data-seg='1']").click(); await W(250); }
   const segAt = $(".panel .segnav").innerText.replace(/\s/g, "");
   const reSeg = async () => { $(".panel [data-seg='-1']").click(); await W(200); $(".panel [data-seg='1']").click(); await W(250); };
   const tgt = () => $(".panel .target")?.textContent, slots = () => document.querySelectorAll(".panel .slot").length, typed = () => $(".panel .typed")?.textContent;

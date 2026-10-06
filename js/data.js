@@ -1,6 +1,6 @@
 // 편 불러오기 — 공통 + KR층 + 학습자 언어층을 sub_id 로 조인(app_build_spec §3-4)
-import { paths } from "./paths.js?v=1006.2";
-import { VERSION } from "./version.js?v=1006.2";
+import { paths } from "./paths.js?v=1006.4";
+import { VERSION } from "./version.js?v=1006.4";
 
 const cache = new Map();
 // 앱 판 번호를 붙여 받는다 — 새 판이면 옛 데이터를 쓰지 않게(tools/bump_version.py)
@@ -19,9 +19,13 @@ export async function chars() {
 
 let charsFIndex;
 // 공용 아나운서 글자·자모 소리 {글자 또는 자모: 파일명}(본부 · 05_audio/_chars_f/chars_f.json → tools/build_chars_index.py 가 data/ 로)
-export async function charsF() {
+// 10-06: 자모 40개(공통) + 그 편 글자만(data/{편}/{편}.chars_f.json) — 11,172자 전부를 받지 않게
+const charsFEp = new Map();
+export async function charsF(ep) {
   if (!charsFIndex) charsFIndex = getJSON("data/chars_f.json").catch(() => ({}));
-  return charsFIndex;
+  if (ep && !charsFEp.has(ep)) charsFEp.set(ep, getJSON(paths.data(ep, ".chars_f")).catch(() => ({})));
+  const [j, e] = await Promise.all([charsFIndex, ep ? charsFEp.get(ep) : {}]);
+  return { ...j, ...e };
 }
 
 export async function episode(ep, lang) {

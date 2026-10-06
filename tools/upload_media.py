@@ -70,6 +70,10 @@ def chars_f():
     """공용 아나운서 글자·자모 소리 → chars_f/{파일}"""
     d = os.path.join(MALMUN, "05_audio", "_chars_f")
     m = json.load(open(os.path.join(APP, "data", "chars_f.json"), encoding="utf-8")) if os.path.exists(os.path.join(APP, "data", "chars_f.json")) else {}
+    for ep in os.listdir(os.path.join(APP, "data")):  # 10-06: 편마다 그 편 글자만(data/{편}/{편}.chars_f.json)
+        pf = os.path.join(APP, "data", ep, f"{ep}.chars_f.json")
+        if os.path.exists(pf):
+            m.update(json.load(open(pf, encoding="utf-8")))
     return [(f"chars_f/{f}", os.path.join(d, f), "audio/mpeg") for f in sorted(set(m.values()))]
 
 

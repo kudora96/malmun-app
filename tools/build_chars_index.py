@@ -64,19 +64,41 @@ def build():
 
 
 def build_f():
-    """공용 아나운서 글자·자모 소리(본부 · 05_audio/_chars_f) → data/chars_f.json + 로컬 media/chars_f/ 복사"""
+    """공용 아나운서 글자·자모 소리(본부 · 05_audio/_chars_f) → 앱
+    10-06: chars_f 가 11,172자 전부가 되어(json 247KB) 통째로 받지 않는다
+      · data/chars_f.json = 자모 40개만(모든 편 공통 · 작게)
+      · data/{편}/{편}.chars_f.json = 그 편 대사에 나오는 글자만
+      · 로컬 media/chars_f/ 에는 자모 + 편 글자 파일만 복사(바뀐 것만)"""
     src = os.path.join(MALMUN, "05_audio", "_chars_f")
     j = os.path.join(src, "chars_f.json")
     if not os.path.exists(j):
         print("chars_f 아직 없음"); return
-    m = {k: v for k, v in json.load(open(j, encoding="utf-8")).items() if os.path.exists(os.path.join(src, v))}
+    full = {k: v for k, v in json.load(open(j, encoding="utf-8")).items() if os.path.exists(os.path.join(src, v))}
+    jamo = {k: v for k, v in full.items() if "\u3131" <= k <= "\u318e"}
     with open(os.path.join(APP, "data", "chars_f.json"), "w", encoding="utf-8") as f:
-        json.dump(m, f, ensure_ascii=False, indent=0)
+        json.dump(jamo, f, ensure_ascii=False, indent=0)
+    need = set(jamo.values()); eps = 0
+    for ep in sorted(os.listdir(os.path.join(APP, "data"))):
+        base = os.path.join(APP, "data", ep, f"{ep}.json")
+        if not os.path.exists(base):
+            continue
+        subs = json.load(open(base, encoding="utf-8")).get("subtitles", [])
+        hang = {c for s in subs for c in s.get("ko", "") if "가" <= c <= "힣"}
+        m = {c: full[c] for c in sorted(hang) if c in full}
+        with open(os.path.join(APP, "data", ep, f"{ep}.chars_f.json"), "w", encoding="utf-8") as f:
+            json.dump(m, f, ensure_ascii=False, indent=0)
+        need |= set(m.values()); eps += 1
+        miss = sorted(hang - set(m))
+        if miss:
+            print(ep, "chars_f 에 없는 글자:", "".join(miss))
     local = os.path.join(APP, "media", "chars_f")
     os.makedirs(local, exist_ok=True)
-    for v in set(m.values()):
-        shutil.copy2(os.path.join(src, v), os.path.join(local, v))
-    print(len(m), "공용 아나운서 글자·자모")
+    n = 0
+    for v in need:
+        a, b = os.path.join(src, v), os.path.join(local, v)
+        if not os.path.exists(b) or os.path.getsize(a) != os.path.getsize(b) or os.path.getmtime(b) < os.path.getmtime(a):
+            shutil.copy2(a, b); n += 1
+    print(len(jamo), "자모 ·", eps, "편 ·", len(need), "파일(새로 복사", n, ") · 전체 chars_f", len(full))
 
 
 if __name__ == "__main__":

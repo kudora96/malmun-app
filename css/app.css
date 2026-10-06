@@ -5,14 +5,14 @@
   --hi:#a86a12; --hi-soft:rgba(168,106,18,.12); --pink:#c2524a; --blue:#2f6f9f; --wood:#8a6443;
   --on-hi:#ffffff; --bubble:#ffffff; --bubble-cur:#fff7e6;
   --star:#d99a00; --sent:#ffe58a; /* 읽는 문장 불(본부 10-05) */ /* 점수 효과 별(본부 10-05) */
-  --okc:#1b6b2e; --badc:#c62828; /* 들린 말: 맞음 초록 · 틀림 빨강 — 바탕과 대비 4.5:1 이상 */
+  --okc:#1b6b2e; --badc:#c62828; --okbg:rgba(27,107,46,.13); /* 들린 말: 맞음 초록 · 틀림 빨강 — 바탕과 대비 4.5:1 이상 */
   --f-ui:"Noto Sans KR","Noto Sans Devanagari","Noto Sans Bengali",system-ui,sans-serif;
   --f-hand:"Gaegu","Noto Sans KR",cursive;
   color-scheme:light;
 }
 @media (prefers-color-scheme: dark){
   :root{--bg:#1d3530;--bg2:#244039;--card:#2a4a42;--ink:#ecebe4;--mute:#9fb3ac;--line:rgba(236,235,228,.18);
-    --hi:#f2d27a;--hi-soft:rgba(242,210,122,.12);--pink:#f29c8f;--blue:#9cc9f0;--on-hi:#1d3530;--bubble:#244039;--bubble-cur:#2c4c44;--okc:#86d993;--badc:#ffa59c;--star:#ffd34d;--sent:rgba(242,210,122,.30);color-scheme:dark}
+    --hi:#f2d27a;--hi-soft:rgba(242,210,122,.12);--pink:#f29c8f;--blue:#9cc9f0;--on-hi:#1d3530;--bubble:#244039;--bubble-cur:#2c4c44;--okc:#86d993;--badc:#ffa59c;--okbg:rgba(134,217,147,.18);--star:#ffd34d;--sent:rgba(242,210,122,.30);color-scheme:dark}
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important} /* hidden 속성이 다른 display 규칙에 지지 않게(설명 창이 닫혀도 남던 버그) */
@@ -545,3 +545,19 @@ a{color:inherit;text-decoration:none}
 .write .wtip::before{content:"";position:absolute;left:18px;bottom:100%;border:6px solid transparent;border-bottom-color:var(--ink)}
 @media (prefers-reduced-motion:reduce){.write .sent.flash .c{animation:none}}
 .learn .seek[data-off] .rail{visibility:hidden} /* 쓰기·말하기 창 = 갈색 줄만 */
+
+/* 쓰기 색 = 맞게 한 것에만(본부 10-06 투덜이 「누르지 않은 것엔 색 칠하지 말고 맞게 누른 걸 칠해야 내가 한 느낌」) */
+.write .kb button.v{color:inherit}
+.write .kb button.dbl{background:var(--bubble)}
+.write .kb button.right{background:var(--okbg);color:var(--okc);box-shadow:inset 0 0 0 2px var(--okc)}
+.write .kb button{transition:background-color .15s}
+.write .slot.filled{background:var(--okbg);border-color:var(--okc);color:var(--okc)}
+.write .sent .c.done{color:var(--okc);font-weight:800}
+.write .sent .c.now{border:2px solid var(--hi)}
+.write .w.on{border-bottom:0}
+.write .sent .w.on .c:not(.now){border-color:var(--mute)}
+.write .sent .spk{width:27px;height:27px;flex:none;color:var(--ink);opacity:1;margin-right:-4px;font-size:inherit}
+/* 지금 낱말 글자도 누를 수 있는 단추 모양(위 글자 줄과 같게) · 지금 쓰는 글자 = 주황 테두리 */
+.write .info .word .wc{border:1px solid var(--line);border-radius:7px;background:var(--card);box-shadow:0 2px 0 var(--line);padding:0 4px;margin:0 1px 2px}
+.write .info .word .wc:active{transform:translateY(2px);box-shadow:none}
+.write .info .word .wc.now{color:var(--ink);border:2px solid var(--hi)}
