@@ -10,21 +10,21 @@
 //  R7 영상은 늘 맨 위 · 지금 줄은 영상 바로 아래(앞 줄은 영상 뒤로) — 손으로 목록을 움직이면 4초 동안은 따라가지 않음
 //  R8 듣기 모드(대사→설명 · 설명만)도 R1~R6 그대로(영상 대신 소리 조각) · 모드를 바꾸면 멈춤(▶ 로 시작)
 //  R9 다시 들어오면 마지막 줄이 선택된 채 멈춰 있음
-import { t, lang, langName } from "../i18n.js?v=1006.28";
-import { esc, renderText, glossCards, sayParts } from "../text.js?v=1006.28";
-import { episode } from "../data.js?v=1006.28";
-import { paths } from "../paths.js?v=1006.28";
-import { Sequence } from "../audio.js?v=1006.28";
-import { I, progress, SPEAKER } from "../ui.js?v=1006.28";
-import writeView from "./write.js?v=1006.28";
-import { diagEnv, keepDiag } from "../diag.js?v=1006.28";
-import { playMine as playMineRec } from "../playmine.js?v=1006.28";
-import { bestHeard, heardHTML, endHint } from "../heard.js?v=1006.28";
-import { recDel, downloadRec, askPersist } from "../recstore.js?v=1006.28";
-import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1006.28";
-import { scoreFx, stopFx } from "../scorefx.js?v=1006.28"; // 점수별 효과(본부 10-05)
-import { record, micWhy, srWhy, canScore, closeMic, logRec, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1006.28";
-import { hold, quietWake } from "../wake.js?v=1006.28";
+import { t, lang, langName } from "../i18n.js?v=1006.29";
+import { esc, renderText, glossCards, sayParts } from "../text.js?v=1006.29";
+import { episode } from "../data.js?v=1006.29";
+import { paths } from "../paths.js?v=1006.29";
+import { Sequence } from "../audio.js?v=1006.29";
+import { I, progress, SPEAKER } from "../ui.js?v=1006.29";
+import writeView from "./write.js?v=1006.29";
+import { diagEnv, keepDiag } from "../diag.js?v=1006.29";
+import { playMine as playMineRec } from "../playmine.js?v=1006.29";
+import { bestHeard, heardHTML, endHint } from "../heard.js?v=1006.29";
+import { recDel, downloadRec, askPersist } from "../recstore.js?v=1006.29";
+import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1006.29";
+import { scoreFx, stopFx } from "../scorefx.js?v=1006.29"; // 점수별 효과(본부 10-05)
+import { record, micWhy, srWhy, canScore, closeMic, logRec, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1006.29";
+import { hold, quietWake } from "../wake.js?v=1006.29";
 
 const RATES = [1, 0.75, 0.5];
 const pref = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } };
@@ -125,7 +125,7 @@ export default async function learn(app, ep, startId) {
     pad(); fitCard(i);
     const r = el.getBoundingClientRect(), top = stick.getBoundingClientRect().bottom, bot = ctrlBar.getBoundingClientRect().top;
     const fits = r.height <= bot - top;
-    if (r.top < top - 1 || (fits ? r.bottom > bot + 1 : r.top > top + 12)) underVideo(el);
+    if (st.panel?.kind === "write" ? Math.abs(r.top - top - 10) > 14 : r.top < top - 1 || (fits ? r.bottom > bot + 1 : r.top > top + 12)) underVideo(el); // 쓰기 중 = 언제나 쓰기 창 바로 아래
   }
   new ResizeObserver(() => pad()).observe(stick); // 위 창(영상·카드) 높이가 바뀌면 목록 아래 여백도 다시
   addEventListener("resize", pad); pad();
@@ -669,7 +669,13 @@ export default async function learn(app, ep, startId) {
     seekEl.querySelector(".t1").textContent = mmss(has ? a.duration : 0);
   }
   // 지킴이 — 영상이 나오는 동안 지금 줄이 아래 막대 뒤나 영상 뒤로 가 있으면 제자리로(손 스크롤 4초 규칙 · 움직이는 중엔 쉼)
-  const watch = () => { if (!st.panel && !v.paused && performance.now() > (st.animUntil || 0)) keepVisible(st.cur); };
+  // 쓰기 중엔 무엇을 눌러도(◀▶·자동·글자·자판 · 창 크기 바뀜) 지금 줄 카드를 쓰기 창 바로 아래 제자리에(본부 10-06 — 15번 ◀ → 자동에서 카드가 밖으로 밀림)
+  const pinned = () => { const el = items[st.cur]; return !el || Math.abs(el.getBoundingClientRect().top - stick.getBoundingClientRect().bottom - 10) <= 14; };
+  const watch = () => {
+    if (performance.now() <= (st.animUntil || 0)) return;
+    if (st.panel?.kind === "write") { if (Date.now() - st.handScroll > 1500 && !pinned()) keepVisible(st.cur, { force: true }); return; }
+    if (!st.panel && !v.paused) keepVisible(st.cur);
+  };
   const seekTimer = setInterval(() => { seekPaint(); watch(); }, 250);
   seekEl.addEventListener("pointerdown", e => {
     const trk = e.target.closest(".trk"); if (!trk) return;

@@ -658,3 +658,5 @@ a{color:inherit;text-decoration:none}
 @media (max-height:720px){.learn .panel.write{height:min(500px,calc(100dvh - 98px - clamp(120px,26dvh,210px)))}}
 .write.embedded .stage{height:calc(clamp(56px,10dvh,84px) + 6px)} /* 글자 상자 테두리까지(잘림 없게) */
 @media (max-height:720px){.write.embedded .segrow{height:44px}}
+/* 눌린 단추(자동 완성 도는 중 = 멈춤 · 들려주는 중) — 흰 바탕에 흰 글로 빈칸이 되지 않게(본부 10-06) */
+.write .stage .wbtns button[aria-pressed=true],.write.embedded .stage .wbtns button[aria-pressed=true]{background:var(--hi);color:var(--on-hi);border-color:var(--hi);box-shadow:none}
