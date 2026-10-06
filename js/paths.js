@@ -18,5 +18,5 @@ export const paths = {
   // 새 설명(v9) 시안 소리 — tools/sync_v9.py 가 로컬 media/v9 에만 복사(아직 R2 에 없음 · 「올려」 전)
   v9: (ep, rel) => `${MEDIA}/v9/${ep}/${rel.split("/").map(encodeURIComponent).join("/")}`,
   sfx: name => `${MEDIA}/sfx/${name}.mp3?v=1`, // 점수 효과음(본부 10-05 · 다시 맞추면 v 올림)
-  charF: file => `${MEDIA}/chars_f/${file}?v=4`, // 공용 아나운서 글자·자모 소리(본부 05_audio/_chars_f) · v4 = 말 시작 0.03초 전부터(본부 10-06 · 투덜이 「딱 좋아」)
+  charF: file => `${MEDIA}/chars_f/${file}?v=5`, // 공용 아나운서 글자·자모 소리(본부 05_audio/_chars_f) · v4 = 말 시작 0.03초 전부터(본부 10-06 · 투덜이 「딱 좋아」)
 };
