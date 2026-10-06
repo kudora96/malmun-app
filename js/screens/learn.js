@@ -10,21 +10,21 @@
 //  R7 영상은 늘 맨 위 · 지금 줄은 영상 바로 아래(앞 줄은 영상 뒤로) — 손으로 목록을 움직이면 4초 동안은 따라가지 않음
 //  R8 듣기 모드(대사→설명 · 설명만)도 R1~R6 그대로(영상 대신 소리 조각) · 모드를 바꾸면 멈춤(▶ 로 시작)
 //  R9 다시 들어오면 마지막 줄이 선택된 채 멈춰 있음
-import { t, lang, langName } from "../i18n.js?v=1006.78";
-import { esc, renderText, glossCards, sayParts } from "../text.js?v=1006.78";
-import { episode } from "../data.js?v=1006.78";
-import { paths } from "../paths.js?v=1006.78";
-import { Sequence } from "../audio.js?v=1006.78";
-import { I, progress, SPEAKER } from "../ui.js?v=1006.78";
-import writeView from "./write.js?v=1006.78";
-import { diagEnv, keepDiag } from "../diag.js?v=1006.78";
-import { playMine as playMineRec } from "../playmine.js?v=1006.78";
-import { bestHeard, heardHTML, endHint } from "../heard.js?v=1006.78";
-import { recDel, downloadRec, askPersist } from "../recstore.js?v=1006.78";
-import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1006.78";
-import { scoreFx, stopFx } from "../scorefx.js?v=1006.78"; // 점수별 효과(본부 10-05)
-import { record, micWhy, srWhy, canScore, closeMic, logRec, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1006.78";
-import { hold, quietWake } from "../wake.js?v=1006.78";
+import { t, lang, langName } from "../i18n.js?v=1006.79";
+import { esc, renderText, glossCards, sayParts } from "../text.js?v=1006.79";
+import { episode } from "../data.js?v=1006.79";
+import { paths } from "../paths.js?v=1006.79";
+import { Sequence } from "../audio.js?v=1006.79";
+import { I, progress, SPEAKER } from "../ui.js?v=1006.79";
+import writeView from "./write.js?v=1006.79";
+import { diagEnv, keepDiag } from "../diag.js?v=1006.79";
+import { playMine as playMineRec } from "../playmine.js?v=1006.79";
+import { bestHeard, heardHTML, endHint } from "../heard.js?v=1006.79";
+import { recDel, downloadRec, askPersist } from "../recstore.js?v=1006.79";
+import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1006.79";
+import { scoreFx, stopFx } from "../scorefx.js?v=1006.79"; // 점수별 효과(본부 10-05)
+import { record, micWhy, srWhy, canScore, closeMic, logRec, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1006.79";
+import { hold, quietWake } from "../wake.js?v=1006.79";
 
 const RATES = [1, 0.75, 0.5];
 const pref = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } };
@@ -605,13 +605,13 @@ export default async function learn(app, ep, startId) {
     if (k === "savedplay") {
       if (!sp?.saved?.blob || sp.ctl) return;
       ex.stop(); markPlay(); sync(); sp.audio?.pause();
-      playRec(sp.saved.blob);
+      playRec(sp.saved.blob); sp.audioKey = "savedplay";
       return;
     }
     if (k === "mine") {
       if (!sp?.blob || sp.ctl) return;
       ex.stop(); markPlay(); sync();
-      playRec(sp.blob);
+      playRec(sp.blob); sp.audioKey = "mine";
     }
   }
   // (설명 진행 막대·끌어 옮기기는 없앰 — 본부 10-05 · 이동은 문장 누르기 · 맨 위 줄 「n/N」)
@@ -715,6 +715,13 @@ export default async function learn(app, ep, startId) {
     if (st.panel) { if (Date.now() - st.handScroll > 1500 && !pinned()) keepVisible(st.cur, { force: true }); return; } // 설명·쓰기·말하기 창 모두(한 틀)
     if (!st.panel && !v.paused) keepVisible(st.cur);
   };
+  // 설명 창 말해 보기 칸도 「재생 중 = 칠」(투덜이 10-06) — ▶ 본보기 · ▶ 내 목소리 · 저장본 ★ ▶ · 표시만
+  const litT = setInterval(() => {
+    const box = st.panel?.kind === "explain" && panel.querySelector(".sayb"); if (!box) return;
+    const mineOn = !!(sp?.audio && !sp.audio.paused), src = ex.playing && !ex.a.paused && ex.q?.[ex.i]?.src;
+    const on = { model: !!src && src === L[st.panel.i]?.say?.src, mine: mineOn && sp.audioKey !== "savedplay", savedplay: mineOn && sp.audioKey === "savedplay" };
+    for (const k in on) box.querySelector(`[data-x=${k}]`)?.classList.toggle("playing", !!on[k]);
+  }, 100);
   const seekTimer = setInterval(() => { seekPaint(); watch(); }, 250);
   seekEl.addEventListener("pointerdown", e => {
     const trk = e.target.closest(".trk"); if (!trk) return;
@@ -781,5 +788,5 @@ export default async function learn(app, ep, startId) {
   v.addEventListener("loadedmetadata", () => { if (v.paused && !st.once) v.currentTime = L[st.cur].start; }, { once: true });
   sync();
   const release = hold(); // 소리 장치 깨워 두기(첫소리 먹힘 방지)
-  return () => { clearInterval(seekTimer); clearInterval(hlTimer); document.removeEventListener("pointerdown", onDocDown, true); removeEventListener("popstate", onPop); clearTimeout(st.animEnd); release(); st.panel?.cleanup?.(); ex.stop(); removeEventListener("resize", pad); removeEventListener("resize", onFit); clearInterval(timer); clearTimeout(st.gap); document.removeEventListener("keydown", onKey); seq.stop(); v.pause(); v.removeAttribute("src"); v.load(); };
+  return () => { clearInterval(litT); clearInterval(seekTimer); clearInterval(hlTimer); document.removeEventListener("pointerdown", onDocDown, true); removeEventListener("popstate", onPop); clearTimeout(st.animEnd); release(); st.panel?.cleanup?.(); ex.stop(); removeEventListener("resize", pad); removeEventListener("resize", onFit); clearInterval(timer); clearTimeout(st.gap); document.removeEventListener("keydown", onKey); seq.stop(); v.pause(); v.removeAttribute("src"); v.load(); };
 }

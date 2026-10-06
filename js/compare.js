@@ -5,12 +5,12 @@
 //  · 재생: 본보기 → 0.4초 → 내 목소리 · 재생 위치 세로 막대 + 지금 음절 강조 · 파형·음절 칸을 누르면 그 줄 그 음절부터
 //  녹음·점수 계산·[내 목소리] 재생(playmine.js playMine)은 그대로 — 여기는 그리기·DTW·비교 화면 안 재생만
 //  (본보기는 sfx.play 그대로 · 내 목소리는 playmine 과 같은 방식: decodeAudioData → BufferSource.start(t, offset) → Gain)
-import { esc } from "./text.js?v=1006.78";
-import { align } from "./score.js?v=1006.78";
-import { audioCtx } from "./wake.js?v=1006.78";
-import { leadOf, gainOf, FADE, FADE_OUT, voicedEnd } from "./playmine.js?v=1006.78";
-import { speechEnd, wavOf } from "./recstore.js?v=1006.78";
-import * as sfx from "./sfx.js?v=1006.78";
+import { esc } from "./text.js?v=1006.79";
+import { align } from "./score.js?v=1006.79";
+import { audioCtx } from "./wake.js?v=1006.79";
+import { leadOf, gainOf, FADE, FADE_OUT, voicedEnd } from "./playmine.js?v=1006.79";
+import { speechEnd, wavOf } from "./recstore.js?v=1006.79";
+import * as sfx from "./sfx.js?v=1006.79";
 
 const FR = 0.02; // 특징 칸 20ms
 const alignCache = new Map();
