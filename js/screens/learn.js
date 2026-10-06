@@ -10,21 +10,21 @@
 //  R7 영상은 늘 맨 위 · 지금 줄은 영상 바로 아래(앞 줄은 영상 뒤로) — 손으로 목록을 움직이면 4초 동안은 따라가지 않음
 //  R8 듣기 모드(대사→설명 · 설명만)도 R1~R6 그대로(영상 대신 소리 조각) · 모드를 바꾸면 멈춤(▶ 로 시작)
 //  R9 다시 들어오면 마지막 줄이 선택된 채 멈춰 있음
-import { t, lang, langName } from "../i18n.js?v=1006.53";
-import { esc, renderText, glossCards, sayParts } from "../text.js?v=1006.53";
-import { episode } from "../data.js?v=1006.53";
-import { paths } from "../paths.js?v=1006.53";
-import { Sequence } from "../audio.js?v=1006.53";
-import { I, progress, SPEAKER } from "../ui.js?v=1006.53";
-import writeView from "./write.js?v=1006.53";
-import { diagEnv, keepDiag } from "../diag.js?v=1006.53";
-import { playMine as playMineRec } from "../playmine.js?v=1006.53";
-import { bestHeard, heardHTML, endHint } from "../heard.js?v=1006.53";
-import { recDel, downloadRec, askPersist } from "../recstore.js?v=1006.53";
-import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1006.53";
-import { scoreFx, stopFx } from "../scorefx.js?v=1006.53"; // 점수별 효과(본부 10-05)
-import { record, micWhy, srWhy, canScore, closeMic, logRec, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1006.53";
-import { hold, quietWake } from "../wake.js?v=1006.53";
+import { t, lang, langName } from "../i18n.js?v=1006.54";
+import { esc, renderText, glossCards, sayParts } from "../text.js?v=1006.54";
+import { episode } from "../data.js?v=1006.54";
+import { paths } from "../paths.js?v=1006.54";
+import { Sequence } from "../audio.js?v=1006.54";
+import { I, progress, SPEAKER } from "../ui.js?v=1006.54";
+import writeView from "./write.js?v=1006.54";
+import { diagEnv, keepDiag } from "../diag.js?v=1006.54";
+import { playMine as playMineRec } from "../playmine.js?v=1006.54";
+import { bestHeard, heardHTML, endHint } from "../heard.js?v=1006.54";
+import { recDel, downloadRec, askPersist } from "../recstore.js?v=1006.54";
+import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1006.54";
+import { scoreFx, stopFx } from "../scorefx.js?v=1006.54"; // 점수별 효과(본부 10-05)
+import { record, micWhy, srWhy, canScore, closeMic, logRec, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1006.54";
+import { hold, quietWake } from "../wake.js?v=1006.54";
 
 const RATES = [1, 0.75, 0.5];
 const pref = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } };
@@ -96,10 +96,10 @@ export default async function learn(app, ep, startId) {
   }
   // 지금 줄 = 영상(+모드 줄) 바로 아래 · 앞 줄들은 영상 뒤로 올라간다
   const stick = app.querySelector(".stick"), list = app.querySelector(".lines");
-  function underVideo(el) {
+  function underVideo(el, instant = false) {
     const to = Math.max(0, Math.min(el.getBoundingClientRect().top + scrollY - stick.offsetHeight - 10, document.documentElement.scrollHeight - innerHeight));
     cancelAnimationFrame(st.anim); clearTimeout(st.animEnd);
-    if (reduce || document.hidden) return scrollTo(0, to);
+    if (instant || reduce || document.hidden) return scrollTo(0, to);
     // 화면 그리기 박자가 멈춰도(가려진 창 · 느린 폰) 제자리에 가 있게 — 움직임이 끝날 시각에 한 번 더 맞춘다
     st.animUntil = performance.now() + SCROLL_MS + 120; // 움직이는 동안은 지킴이가 끼어들지 않게
     st.animEnd = setTimeout(() => { cancelAnimationFrame(st.anim); if (Math.abs(scrollY - to) > 2) scrollTo(0, to); }, SCROLL_MS + 80);
@@ -770,11 +770,14 @@ export default async function learn(app, ep, startId) {
   // R9 — 마지막 줄(또는 쓰기·설명에서 돌아온 줄)에서 멈춘 채 시작
   if (startId) { const k = L.findIndex(l => String(l.id) === String(startId)); if (k >= 0) st.cur = k; }
   ready = true; // 이제 카드 맞춤(fitCard)이 쓰는 막대·창이 다 있음
-  select(st.cur, { scroll: st.cur > 0, force: true });
+  try { history.scrollRestoration = "manual"; } catch {} // 새로 열 때 브라우저가 옛 스크롤 자리로 되돌리지 않게(본부 10-06 — 처음 몇 초 7·8번 카드가 보임)
+  select(st.cur, { scroll: false });
+  pad(); fitCard(st.cur); if (st.cur > 0) underVideo(items[st.cur], true); // 첫 프레임부터 제자리(움직임 없이 바로)
   // 글꼴·영상 크기가 다 잡힌 뒤 한 번 더(처음 열 때 지금 줄이 영상 아래로 안 오던 문제) — 그사이 손으로 움직였으면 하지 않음
-  const settle = () => { if (st.cur > 0 && Date.now() - st.handScroll > 4000 && !playing()) underVideo(items[st.cur]); };
+  const settle = () => { if (st.cur > 0 && Date.now() - st.handScroll > 4000 && !playing() && !st.panel) { pad(); fitCard(st.cur); underVideo(items[st.cur], true); } };
   document.fonts?.ready.then(() => setTimeout(settle, 50));
-  setTimeout(settle, 600);
+  [100, 300, 600, 1200, 2500].forEach(ms => setTimeout(settle, ms)); // 글꼴·영상·그림이 늦게 와 줄 높이가 바뀌어도 바로 제자리
+  v.addEventListener("loadedmetadata", settle, { once: true });
   v.addEventListener("loadedmetadata", () => { if (v.paused && !st.once) v.currentTime = L[st.cur].start; }, { once: true });
   sync();
   const release = hold(); // 소리 장치 깨워 두기(첫소리 먹힘 방지)
