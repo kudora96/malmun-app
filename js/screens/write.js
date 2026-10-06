@@ -13,13 +13,13 @@
 //  W5 소리는 언제나 하나만 · 새 일을 하면 앞 소리는 멈춘다
 //  W6 영상 창 안(embedded): 창 안에서 스크롤 없이 다 보이게 — 긴 문장은 토막으로(◀ 1/3 ▶) ·
 //     토막을 다 쓰면 자동으로 다음 토막 · 줄을 다 쓰면 대사를 듣고 자동으로 다음 줄 쓰기 · 아래 ▶ = 이 부분 듣기
-import { t, lang } from "../i18n.js?v=1006.24";
-import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO } from "../text.js?v=1006.24";
-import { episode, chars, charsF } from "../data.js?v=1006.24";
-import { paths } from "../paths.js?v=1006.24";
-import { I } from "../ui.js?v=1006.24";
-import { audioCtx, hold } from "../wake.js?v=1006.24";
-import * as sfx from "../sfx.js?v=1006.24";
+import { t, lang } from "../i18n.js?v=1006.28";
+import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO } from "../text.js?v=1006.28";
+import { episode, chars, charsF } from "../data.js?v=1006.28";
+import { paths } from "../paths.js?v=1006.28";
+import { I } from "../ui.js?v=1006.28";
+import { audioCtx, hold } from "../wake.js?v=1006.28";
+import * as sfx from "../sfx.js?v=1006.28";
 
 const KEYS = [..."ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎㄲㄸㅃㅆㅉ"], VOW = [..."ㅏㅑㅓㅕㅗㅛㅜㅠㅡㅣ"];
 const VOW2 = [..."ㅐㅒㅔㅖㅘㅙㅚㅝㅞㅟㅢ"]; // 겹모음 줄(본부 10-06) — 칸 하나 · ㅓ+ㅣ 처럼 나눠 쳐도 받음
@@ -87,7 +87,8 @@ export default async function write(app, ep, id, opts = {}) {
   const cards = glossCards(line.glossLine);
   const allWords = line.ko.split(/\s+/).filter(w => /[가-힣]/.test(w)).map((raw, wi) => {
     const text = raw.replace(/[^가-힣]/g, "");
-    const card = cards.find(c => c.ko.replace(/[^가-힣]/g, "") === text);
+    const pc = (line.v9?.pieces || []).find(p => String(p.ko).replace(/[^가-힣]/g, "") === text); // 10-06: 고유명사 = 한글 그대로(「"세종대왕" ले」)
+    const card = pc ? { rom: pc.rom || "", mean: pc.mean || "" } : cards.find(c => c.ko.replace(/[^가-힣]/g, "") === text);
     const tm = line.words?.[wi]?.w === raw ? line.words[wi] : null; // 대사 원음 안 이 낱말의 시각
     return { raw, text, tm, rom: card?.rom || "", mean: card?.mean || "", end: /[.?!…]$/.test(raw), chars: [...text].map(ch => ({ ch, jamo: toJamoW(ch), file: charSrc(ch) })) };
   });
@@ -172,9 +173,9 @@ export default async function write(app, ep, id, opts = {}) {
     const stg = work.querySelector(".stage"), row = stg?.querySelector(".slotrow"); if (!row) return;
     row.append(wb); stg.classList.add("btns-in");
     const sl = row.querySelector(".slots"), bs = [...wb.querySelectorAll("button")];
-    const wrapped = () => wb.getBoundingClientRect().top > sl.getBoundingClientRect().bottom - 4 || bs.some(b => Math.abs(b.getBoundingClientRect().top - bs[0].getBoundingClientRect().top) > 2);
+    const wrapped = () => row.scrollWidth > row.clientWidth + 1 || bs.some(b => Math.abs(b.getBoundingClientRect().top - bs[0].getBoundingClientRect().top) > 2);
     stg.classList.remove("c1", "c2", "c3", "c4");
-    for (const c of ["c1", "c2", "c3"]) { if (!wrapped()) break; stg.classList.add(c); }
+    for (const c of ["c1", "c2", "c3", "c4"]) { if (!wrapped()) break; stg.classList.add(c); } // 줄은 꺾지 않음(글자 칸 높이 고정 · 10-06)
   }
   // 낱말 칸 글자 단추 = 한 줄 · 넘치면 글자 크기·안쪽 여백을 같이 줄임(위 글자 줄과 같은 방식) · 로마자는 아래 줄 따로
   function fitWord() {
@@ -286,10 +287,7 @@ export default async function write(app, ep, id, opts = {}) {
       if (!c.file) { note.textContent = t("no_char_audio", { c: c.ch }); return; }
       if (st.busy) return;
       st.sent = false; markSent();
-      if (st.loopAt && st.loopAt.w === w && st.loopAt.c === ci) return stopLoop();
-      st.loopAt = { w, c: ci, ch: c.ch };
-      startLoop(c.file);
-      paintSent(); setNote();
+      stopLoop(); cb.blur(); run([c.file]); // 10-06 투덜이: 한 번만(되풀이 없앰) · 누른 뒤 표시 안 남김
       return;
     }
     const b = e.target.closest("[data-act]");

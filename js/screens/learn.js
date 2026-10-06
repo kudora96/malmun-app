@@ -10,21 +10,21 @@
 //  R7 영상은 늘 맨 위 · 지금 줄은 영상 바로 아래(앞 줄은 영상 뒤로) — 손으로 목록을 움직이면 4초 동안은 따라가지 않음
 //  R8 듣기 모드(대사→설명 · 설명만)도 R1~R6 그대로(영상 대신 소리 조각) · 모드를 바꾸면 멈춤(▶ 로 시작)
 //  R9 다시 들어오면 마지막 줄이 선택된 채 멈춰 있음
-import { t, lang, langName } from "../i18n.js?v=1006.24";
-import { esc, renderText, glossCards, sayParts } from "../text.js?v=1006.24";
-import { episode } from "../data.js?v=1006.24";
-import { paths } from "../paths.js?v=1006.24";
-import { Sequence } from "../audio.js?v=1006.24";
-import { I, progress, SPEAKER } from "../ui.js?v=1006.24";
-import writeView from "./write.js?v=1006.24";
-import { diagEnv, keepDiag } from "../diag.js?v=1006.24";
-import { playMine as playMineRec } from "../playmine.js?v=1006.24";
-import { bestHeard, heardHTML, endHint } from "../heard.js?v=1006.24";
-import { recDel, downloadRec, askPersist } from "../recstore.js?v=1006.24";
-import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1006.24";
-import { scoreFx, stopFx } from "../scorefx.js?v=1006.24"; // 점수별 효과(본부 10-05)
-import { record, micWhy, srWhy, canScore, closeMic, logRec, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1006.24";
-import { hold, quietWake } from "../wake.js?v=1006.24";
+import { t, lang, langName } from "../i18n.js?v=1006.28";
+import { esc, renderText, glossCards, sayParts } from "../text.js?v=1006.28";
+import { episode } from "../data.js?v=1006.28";
+import { paths } from "../paths.js?v=1006.28";
+import { Sequence } from "../audio.js?v=1006.28";
+import { I, progress, SPEAKER } from "../ui.js?v=1006.28";
+import writeView from "./write.js?v=1006.28";
+import { diagEnv, keepDiag } from "../diag.js?v=1006.28";
+import { playMine as playMineRec } from "../playmine.js?v=1006.28";
+import { bestHeard, heardHTML, endHint } from "../heard.js?v=1006.28";
+import { recDel, downloadRec, askPersist } from "../recstore.js?v=1006.28";
+import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1006.28";
+import { scoreFx, stopFx } from "../scorefx.js?v=1006.28"; // 점수별 효과(본부 10-05)
+import { record, micWhy, srWhy, canScore, closeMic, logRec, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1006.28";
+import { hold, quietWake } from "../wake.js?v=1006.28";
 
 const RATES = [1, 0.75, 0.5];
 const pref = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } };
@@ -110,9 +110,19 @@ export default async function learn(app, ep, startId) {
   const pad = () => { list.style.paddingBottom = Math.max(ctrlBar.offsetHeight + 24, innerHeight - stick.offsetHeight - 40) + "px"; }; // 맨 끝 줄도 아래 막대 위로 다 보이게
   // 지금 줄이 위 창과 아래 막대 사이에 다 보이지 않으면 그 자리로(손으로 스크롤 중이면 4초 기다림 — handScroll 그대로)
   // 기준(본부 10-05): 줄 카드 전체(아래끝 포함)가 영상 아래~막대 위에 보일 것 · 아니면 카드 위끝을 영상 바로 아래로(카드가 그 사이보다 길어도 위끝 맞춤)
+  // 쓰기 창이 열려 있으면 지금 자막 카드(글 전부 + 아래 메뉴 줄)가 쓰기 창과 아래 막대 사이에 다 들어가게 — 길면 카드 안 글을 줄임(10-06 본부·투덜이)
+  function fitCard(i) {
+    items.forEach(li => { li.classList.remove("fitc"); li.style.removeProperty("--kf"); li.style.removeProperty("--tf"); });
+    const el = items[i]; if (!el || st.panel?.kind !== "write") return;
+    const avail = ctrlBar.getBoundingClientRect().top - stick.getBoundingClientRect().bottom - 14;
+    const ko = el.querySelector(".kotext"), tr = el.querySelector(".tr");
+    let kf = parseFloat(getComputedStyle(ko).fontSize), tf = tr ? parseFloat(getComputedStyle(tr).fontSize) : 0;
+    el.classList.add("fitc");
+    for (let k = 0; k < 16 && el.offsetHeight > avail && kf > 11; k++) { kf -= 1; tf = Math.max(10, tf - 0.7); el.style.setProperty("--kf", kf + "px"); el.style.setProperty("--tf", tf + "px"); }
+  }
   function keepVisible(i, { force = false } = {}) {
     const el = items[i]; if (!el || (!force && Date.now() - st.handScroll <= 4000)) return;
-    pad();
+    pad(); fitCard(i);
     const r = el.getBoundingClientRect(), top = stick.getBoundingClientRect().bottom, bot = ctrlBar.getBoundingClientRect().top;
     const fits = r.height <= bot - top;
     if (r.top < top - 1 || (fits ? r.bottom > bot + 1 : r.top > top + 12)) underVideo(el);
@@ -403,7 +413,7 @@ export default async function learn(app, ep, startId) {
       const cleanup = await view(panel, ep, L[i].id, { embedded: true, task, onNext: k => openPanel(kind, k), onClose: () => closePanel(), navPush, navPop });
       if (st.panel !== mine) return cleanup?.();
       mine.cleanup = cleanup;
-      setTimeout(() => keepVisible(i), 60);
+      setTimeout(() => { fitCard(i); keepVisible(i); }, 60); // 쓰기 창이면 자막 카드 글을 그 자리에 맞춤(손 스크롤 중이어도)
     }
     pad(); underVideo(items[i]); sync();
   }
@@ -411,7 +421,7 @@ export default async function learn(app, ep, startId) {
     if (!st.panel) return;
     if (!fromNav) navPop(); // 단추로 닫으면 쌓아 둔 뒤로 가기 칸도 걷어 냄
     st.panel.cleanup?.(); ex.stop(); clearTimeout(st.gap); st.gap = 0; st.panel = null;
-    panel.hidden = true; panel.innerHTML = ""; vwrap.hidden = false;
+    panel.hidden = true; panel.innerHTML = ""; vwrap.hidden = false; fitCard(-1); // 줄인 자막 카드 글 원래대로
     markButtons();
     v.currentTime = L[st.cur].start;
     pad(); underVideo(items[st.cur]); sync();

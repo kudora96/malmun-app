@@ -631,3 +631,30 @@ a{color:inherit;text-decoration:none}
 .write .stage.c3 .slot{width:26px;height:30px;font-size:15px}
 .write .stage.c3 .slotrow{gap:4px 8px}
 .write .stage.c3 .slots{gap:4px}
+
+/* 쓰기 화면 크기 = 「화면 크기」로만(10-06 투덜이 「줄마다 일정」) — 줄 길이·낱말 길이로 바뀌지 않게
+   · 쓰기 창 높이 = 화면 − 아래 막대 − 자막 카드 자리(화면 높이의 22% · 110~160px) · 최대 500px
+   · 위 글자 줄·글자 칸 높이 고정 → 자판 키 크기가 줄마다 같음 · 자막 카드는 그 자리에 맞춰 글을 줄임 */
+.learn .panel.write{height:min(500px,calc(100dvh - 72px - clamp(110px,22dvh,160px)))}
+@media (max-height:720px){.learn .panel.write{height:min(500px,calc(100dvh - 72px - clamp(110px,22dvh,160px)))}}
+.write.embedded .segrow{height:50px;flex:none;align-items:center;box-sizing:border-box}
+.write.embedded .stage{height:clamp(56px,10dvh,84px);overflow:hidden}
+.write .info .slotrow{flex-wrap:nowrap;overflow:hidden}
+.write .stage.c4 .slotrow .wbtns button{max-width:54px;font-size:9.5px;padding:2px 4px}
+.write .stage.c4 .slot{width:22px;height:28px;font-size:13px}
+.write .sent .c:focus{outline:none}
+.write .sent .c:focus-visible{outline:2px solid var(--hi)}
+.line.fitc .kotext{font-size:var(--kf,inherit)}
+.line.fitc .tr{font-size:var(--tf,inherit)}
+/* (고침) 쓰기 창 높이 = 화면 − 아래 막대(60) − 진행 막대(26) − 틈(12) − 자막 카드 자리(화면 28% · 120~210px) · 최대 500px
+   · 자막 카드는 쓰기 중 여백·메뉴 단추를 조금 줄이고, 그래도 길면 글자를 줄임(fitCard) */
+.learn .panel.write{height:min(500px,calc(100dvh - 98px - clamp(120px,28dvh,210px)))}
+@media (max-height:720px){.learn .panel.write{height:min(500px,calc(100dvh - 98px - clamp(120px,28dvh,210px)))}}
+.line.fitc{padding-top:6px;padding-bottom:6px}
+.line.fitc .acts{margin-top:4px;gap:4px}
+.line.fitc .acts button{padding-top:4px;padding-bottom:4px;font-size:11.5px}
+.write .kb .kr,.write .kb .kr button,.write.embedded .kb .kr button{min-height:30px}
+.learn .panel.write{height:min(500px,calc(100dvh - 98px - clamp(120px,26dvh,210px)))} /* 자막 카드 자리 26% — 660×560 에서도 자판 다섯 줄 · 카드는 fitCard 가 글 줄여 맞춤 */
+@media (max-height:720px){.learn .panel.write{height:min(500px,calc(100dvh - 98px - clamp(120px,26dvh,210px)))}}
+.write.embedded .stage{height:calc(clamp(56px,10dvh,84px) + 6px)} /* 글자 상자 테두리까지(잘림 없게) */
+@media (max-height:720px){.write.embedded .segrow{height:44px}}

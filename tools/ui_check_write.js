@@ -51,9 +51,9 @@
   ok($(".panel .target")?.textContent === "요", "소리 도중 빠르게 5번(ㅓ ㅇ ㅗ ㅅ ㅔ) → 5번 다 처리 · 「서」「오」「세」 완성 → 다음 「요」", `지금 ${$(".panel .target")?.textContent}`);
   // 되돌려 앞 토막 처음부터(뒤 점검이 「서」 기준) — 토막 ▶ ◀
   $(".panel [data-seg='1']").click(); await W(200); $(".panel [data-seg='-1']").click(); await W(300); key("ㅇ"); await idle(); key("ㅓ"); await idle(4000);
-  // 글자 반복
+  // 위 글자 줄 글자 누르기 = 그 글자 소리 한 번(되풀이 없음 · 눌린 표시 안 남김 · 10-06 투덜이)
   const ch = [...document.querySelectorAll(".panel .sent .c")].find(c => c.textContent === "오" && !c.classList.contains("noaudio"));
-  if (ch) { ch.click(); await W(300); const c2 = [...document.querySelectorAll(".panel .sent .c")].find(c => c.textContent === "오"); ok(c2.classList.contains("loop"), "「오」 누름 → 반복"); c2.click(); await W(200); ok(![...document.querySelectorAll(".panel .sent .c.loop")].length, "다시 → 멈춤"); }
+  if (ch) { const at0 = log.length; ch.click(); await W(2600); const c2 = [...document.querySelectorAll(".panel .sent .c")].find(c => c.textContent === "오"); const st = log.slice(at0).filter(e => e.ev === "시작").length; ok(st === 1 && !c2.classList.contains("loop") && document.activeElement !== c2, "「오」 누름 → 소리 한 번 · 되풀이 없음 · 표시 안 남음", `시작 ${st}번`); }
   // 단어 듣기 · 문장 듣기 · 아래 ▶
   // 단어 듣기 · 이 부분 듣기 = 본부가 일레븐랩스로 따로 만든 소리(units/{id}.mp3) — 끝까지 다 나오고, 줄 전체(_sub_t1)는 안 나옴
   const units = await (await fetch("data/L01-00-01/L01-00-01.units.json", { cache: "no-store" })).json();
