@@ -13,17 +13,18 @@
 //     못 넘어도 막지 않는다([다음 ▶]) · 음성 인식이 안 되는 곳은 점수 없이 듣고 비교만(녹음은 저장)
 //  S6 녹음은 이 기기 안에만(IndexedDB) — 서버로 보내지 않는다
 //  S7 영상 창 안(embedded): 스크롤 없이 · 줄 이동·닫기는 학습 화면이 한다 · 줄 전체까지 통과하면 다음 줄 말하기로
-import { t, lang } from "../i18n.js?v=1006.54";
-import { esc, sayParts } from "../text.js?v=1006.54";
-import { episode } from "../data.js?v=1006.54";
-import { paths } from "../paths.js?v=1006.54";
-import { audioCtx, hold, quietWake } from "../wake.js?v=1006.54";
-import * as sfx from "../sfx.js?v=1006.54";
-import { diagEnv, keepDiag } from "../diag.js?v=1006.54";
-import { playMine as playMineRec } from "../playmine.js?v=1006.54";
-import { bestHeard, heardHTML, endHint } from "../heard.js?v=1006.54";
-import { recDel, downloadRec, askPersist } from "../recstore.js?v=1006.54";
-import { logRec, dB, srWhy, srWatch, niceLabel, ALIAS } from "../recorder.js?v=1006.54";
+import { t, lang } from "../i18n.js?v=1006.56";
+import { esc, sayParts } from "../text.js?v=1006.56";
+import { episode } from "../data.js?v=1006.56";
+import { paths } from "../paths.js?v=1006.56";
+import { audioCtx, hold, quietWake } from "../wake.js?v=1006.56";
+import * as sfx from "../sfx.js?v=1006.56";
+import { diagEnv, keepDiag } from "../diag.js?v=1006.56";
+import { playMine as playMineRec } from "../playmine.js?v=1006.56";
+import { bestHeard, heardHTML, endHint } from "../heard.js?v=1006.56";
+import { openCompare } from "../compare.js?v=1006.56";
+import { recDel, downloadRec, askPersist } from "../recstore.js?v=1006.56";
+import { logRec, dB, srWhy, srWatch, niceLabel, ALIAS } from "../recorder.js?v=1006.56";
 
 // 통과 두 단계(본부 10-04 · 투덜이 「원어민은 되지만 외국인은 100% 어렵다」): 80↑ = ☆ 통과(✓ · [저장]) · 95↑ = ★ 완벽
 export const PASS = 80, PERFECT = 95;
@@ -50,8 +51,8 @@ const QUIET_MS = 2000, START_MS = 6000;
 export const maxMsFor = say => Math.max(8000, (3 + 0.8 * [...String(say || "")].filter(c => /[가-힣]/.test(c)).length) * 1000);
 
 // ── 닮음 = 음절 정렬(js/score.js · 「들린 말」 빨간 표시와 같은 함수 — 본부 10-04) ──
-import { similarity } from "../score.js?v=1006.54";
-import { scoreFx } from "../scorefx.js?v=1006.54"; // 점수별 효과(본부 10-05)
+import { similarity } from "../score.js?v=1006.56";
+import { scoreFx } from "../scorefx.js?v=1006.56"; // 점수별 효과(본부 10-05)
 export { similarity };
 
 // ── 내 목소리 저장(S6) ──
@@ -89,6 +90,7 @@ export default async function speak(app, ep, id, opts = {}) {
     <div class="helpbox" hidden>${[1, 2, 3, 4, 5].map(k => `<p>${esc(t("help_sp_" + k))}</p>`).join("")}<p class="x">${esc(t("help_close"))}</p></div>
     <div class="task"><div class="say ko" lang="ko"></div><div class="tr"></div></div>
     <div class="meter"><div class="lvl" hidden><i></i></div><div class="sbar"><i></i><em style="left:${PASS}%"></em></div><div class="tbar" hidden><i></i><span class="tt"></span></div><div class="msgw"><div class="msg" aria-live="polite"></div><span class="fx" aria-hidden="true"></span></div><div class="heardline"></div><div class="keeprow"><button data-act="keep" title="${esc(t("keep"))}" hidden>${esc(t("keep_short"))}</button><button data-act="savedplay" title="${esc(t("saved_title"))}" hidden>${esc(t("saved_play"))}</button><span class="mini"><button data-act="savedl" title="${esc(t("download"))}" hidden>⬇ ${esc(t("dl_short"))}</button><button data-act="savedel" title="${esc(t("del_one"))}" hidden>🗑 ${esc(t("del_short"))}</button></span></div><button class="micname" data-act="pick" hidden></button></div>
+    <div class="cmp" hidden></div>
     <div class="sbtns">
       <button data-act="model">▶ ${esc(t("model"))}</button>
       <button class="mic" data-act="rec"><span class="dot"></span><span class="lab">${esc(t("speak_now"))}</span></button>
@@ -98,6 +100,18 @@ export default async function speak(app, ep, id, opts = {}) {
   </section>`;
   const $ = s => app.querySelector(s);
   const cur = () => parts[st.i];
+  // [तुलना] = 비교 화면(파형 두 줄 + 음절 칸 · js/compare.js) — 다시 누르면 원래 말하기 화면 · 토막을 바꾸거나 🎤 를 누르면 닫음
+  let cmp = null;
+  const closeCmp = () => { cmp?.close(); cmp = null; $(".cmp").hidden = true; app.querySelector(".scr").classList.remove("cmpon"); $("[data-act=both]").setAttribute("aria-pressed", "false"); };
+  const heardOf = () => { const x = document.createElement("div"); x.innerHTML = st.heardHTML || ""; x.querySelectorAll(".lab, mark.miss").forEach(e => e.remove()); return (x.querySelector(".ko")?.textContent || "").trim(); };
+  async function openCmp() {
+    stopSounds(); closeCmp();
+    const p = cur(), b = mineBlob(); if (!b || !p.src) return;
+    app.querySelector(".scr").classList.add("cmpon"); $(".cmp").hidden = false; $("[data-act=both]").setAttribute("aria-pressed", "true");
+    const c = await openCompare($(".cmp"), { ep, key: p.key, url: p.src, text: p.say || p.text, blob: b, heard: heardOf(), t });
+    if (!$(".scr").classList.contains("cmpon")) return c.close();
+    cmp = c;
+  }
   // [내 목소리] = 이번에 통과한 녹음 또는 예전에 통과해 저장된 녹음만(못 넘은 녹음은 안 들려줌 — 투덜이 10-04) · 음성 인식이 없는 기기는 방금 녹음
   // [내 목소리] = 방금 녹음(잘됐든 못됐든 · 투덜이 10-04) · 80% 넘으면 [저장] 단추 → 눌러야 저장 · 저장한 것은 「저장됨 ▶」로 따로
   const savedRec = () => st.saved[cur().key] || null;
@@ -145,7 +159,7 @@ export default async function speak(app, ep, id, opts = {}) {
     const h = (st.mine = playMineRec(b));
     await h.done; if (st.mine === h) st.mine = null;
   };
-  function go(i) { stopRec(true); stopSounds(); st.i = Math.max(0, Math.min(parts.length - 1, i)); st.blob = null; st.score = null; st.note = null; st.kept = null; st.heardHTML = ""; scoreFx($(".fx"), null); paint(); }
+  function go(i) { closeCmp(); stopRec(true); stopSounds(); st.i = Math.max(0, Math.min(parts.length - 1, i)); st.blob = null; st.score = null; st.note = null; st.kept = null; st.heardHTML = ""; scoreFx($(".fx"), null); paint(); }
 
   // ── 녹음 + 음성 인식(S3 · S5) ── 10-04 되돌림: 10-01 잘 되던 판(a9e13f9) 그대로 · 남긴 차이는 「◆」 표시(본부 10-04)
   let sr = null, srErr = null, heard = [], quietTimer = 0, maxTimer = 0, meterTimer = 0;
@@ -336,9 +350,9 @@ export default async function speak(app, ep, id, opts = {}) {
     }
     if (a === "savedplay") { stopRec(true); playMine(savedRec()); return; }
     if (a === "model") { stopRec(true); st.model ? (stopSounds(), paint()) : playModel(); }
-    else if (a === "rec") { if (st.starting) return; if (!st.rec) { st.playingAtStart = sfx.playing() || st.model || !!st.mine; st.heardHTML = ""; quietWake(true); } /* 진단 · 녹음하는 동안 깨우기 소리 멈춤 */ st.rec ? stopRec() : (st.starting = true, startRec().finally(() => { st.starting = false; if (!st.rec) quietWake(false); })); } // 마이크를 여는 동안 또 눌러도 하나만(빠르게 여러 번 누름)
+    else if (a === "rec") { if (st.starting) return; closeCmp(); if (!st.rec) { st.playingAtStart = sfx.playing() || st.model || !!st.mine; st.heardHTML = ""; quietWake(true); } /* 진단 · 녹음하는 동안 깨우기 소리 멈춤 */ st.rec ? stopRec() : (st.starting = true, startRec().finally(() => { st.starting = false; if (!st.rec) quietWake(false); })); } // 마이크를 여는 동안 또 눌러도 하나만(빠르게 여러 번 누름)
     else if (a === "mine") { stopRec(true); playMine(); }
-    else if (a === "both") { stopRec(true); await playModel(); if (st.alive) await new Promise(r => setTimeout(r, 300)), playMine(); }
+    else if (a === "both") { stopRec(true); cmp || $(".scr").classList.contains("cmpon") ? (stopSounds(), closeCmp()) : openCmp(); }
   };
 
   paint();
@@ -346,5 +360,5 @@ export default async function speak(app, ep, id, opts = {}) {
   try { if (!localStorage.getItem("malmun.sp.help")) { localStorage.setItem("malmun.sp.help", "1"); $(".helpbox").hidden = false; } } catch {} // 처음 한 번은 풍선이 저절로
   sfx.preload([lineSrc, ...parts.map(p => p.src)]);
   const release = hold();
-  return () => { st.alive = false; stopRec(true); stopSounds(); st.stream?.getTracks().forEach(x => x.stop()); release(); quietWake(false); document.removeEventListener("keydown", onEsc, true); delete app.__sp; };
+  return () => { st.alive = false; closeCmp(); stopRec(true); stopSounds(); st.stream?.getTracks().forEach(x => x.stop()); release(); quietWake(false); document.removeEventListener("keydown", onEsc, true); delete app.__sp; };
 }

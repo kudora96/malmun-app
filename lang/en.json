@@ -155,5 +155,6 @@
  "why_redo": "say {ws} again.",
  "why_rest_ok": "The rest was right.",
  "why_many": "{ws} and more are different — listen to the model and try again",
- "why_polish": "just polish {ws}"
+ "why_polish": "just polish {ws}",
+ "cmp_none": "Nothing to compare yet — record first."
 }

@@ -705,3 +705,27 @@ a{color:inherit;text-decoration:none}
 .learn .vsub b{font-size:20px;line-height:1.35;font-weight:700;color:var(--ink);overflow-wrap:anywhere}
 .learn .vsub .rom{font-size:12px;color:var(--mute)}
 .learn .vsub .tr{font-size:13px;line-height:1.4;color:var(--ink);opacity:.75}
+/* 말하기 「तुलना」 비교 화면(본부 10-06) — 말하기 위 칸 자리에 파형 두 줄(본보기 · 내 목소리) + 음절 칸 + 시간 눈금 · 칸 크기는 그대로 */
+.speak.cmpon .task,.speak.cmpon .meter{display:none}
+.speak .cmp{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:center;padding:4px 14px}
+.cmpw{display:grid;gap:8px}
+.cmpmsg{text-align:center;color:var(--mute);font-size:13px;margin:0}
+.crow{display:grid;gap:3px}
+.crow .clab{font-size:11px;color:var(--mute)}
+.crow.on .clab{color:var(--hi);font-weight:700}
+.crow .cwave{position:relative;height:clamp(34px,7dvh,56px);border-radius:6px;background:var(--bubble);cursor:pointer}
+.crow .cwave canvas{position:absolute;inset:0;width:100%;height:100%;color:var(--mute)}
+.crow.y .cwave canvas{color:var(--hi)}
+.crow .cbar{position:absolute;top:-2px;bottom:-2px;width:2px;margin-left:-1px;background:var(--pink);border-radius:1px;pointer-events:none}
+.crow .csyl{position:relative;height:clamp(22px,4.2dvh,30px)}
+.crow .csyl button{position:absolute;top:0;bottom:0;min-width:0;padding:0;border:0;border-left:1px solid var(--line);background:none;font-size:clamp(12px,2.2dvh,16px);font-weight:700;color:var(--ink);overflow:hidden;white-space:nowrap;cursor:pointer}
+.crow .csyl button.ok{color:var(--okc)}
+.crow .csyl button.bad{color:var(--badc);text-decoration:underline 2px;text-underline-offset:3px}
+.crow .csyl button.miss{color:var(--badc);opacity:.55;text-decoration:underline dotted 2px}
+.crow .csyl button.now{background:var(--hi-soft);border-radius:4px}
+.cruler{position:relative;height:14px;font-size:10px;color:var(--mute);font-variant-numeric:tabular-nums}
+.cruler span{position:absolute;transform:translateX(-50%)}
+.cruler span:first-child{transform:none}
+.speak .sbtns [data-act=both][aria-pressed=true]{background:var(--hi);color:var(--on-hi);border-color:var(--hi)}
+.crow .csyl button.tight{overflow:visible;font-size:clamp(11px,1.9dvh,14px);z-index:1}
+.crow .csyl button{text-align:center}
