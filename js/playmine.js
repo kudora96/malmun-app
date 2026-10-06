@@ -2,7 +2,7 @@
 // · <audio> 자리 옮기기(seek)는 쓰지 않는다(webm 을 찾아가며 소리가 깨졌다 — 1004.9)
 // · blob 을 decodeAudioData 로 풀어 AudioBufferSourceNode.start(0, lead) · 연결은 source → destination 직결(게인·필터 없음)
 //   lead = 말 시작 0.15초 전(같은 버퍼에서 잼) · 끝나면 멈춤 · 풀기 실패하면 <audio> 로 처음부터
-import { audioCtx } from "./wake.js?v=1006.74";
+import { audioCtx } from "./wake.js?v=1006.78";
 
 // 시작 = 말 시작 0.08초 전(본부 10-04: 0.15 → 0.08 · 앞 잡소리가 끼지 않게)
 // 첫 소리가 말보다 작고(최대에서 8dB 넘게 아래) 뒤에 조용한 틈이 있으면 녹음 켜는 순간의 잡소리일 수 있다(앞 소리 꼬리·딸깍 — 투덜이 17:49 녹음: −42dB 잡소리 → −53~−65 틈 → −30 말) →
@@ -16,7 +16,18 @@ export const FADE = 0.015; // 시작 15ms 페이드인(딸깍 방지 · 말 시�
 //   찾는 자리 = 옛 방식(아래 leadOld — 앞 잡소리 뒤 조용한 틈)이 건너뛴 자리부터(앞 소리 꼬리처럼 주기 있는 잡소리도 그대로 거름)
 //   늘리는 칸 = 문턱의 절반 넘고(ㅎ·ㅅ 처럼 작은 첫 소리) 목소리 칸 크기(중앙값)보다 작을 때만 — 그보다 크면 잡음으로 보고 멈춤(말만큼 큰 부스럭) · 목소리 칸을 못 찾으면 아래 옛 방식 그대로
 //   재생 방식·크기(gainOf)·녹음은 그대로 — 시작 숫자만
-export function voicedOnset(buf, from = 0, floor = from) {
+// 목소리 칸 덩어리(본부 10-06 투덜이 실제 녹음 r2 — 말 끝 0.8초 뒤 말만큼 큰 손 잡음이 자기상관 0.5 를 넘어 「목소리」로 잡힘)
+//   조용한 틈(목소리 칸 없음) 0.35초 넘게로 나눔 → [{ a, b, v }] (첫·끝 칸 · 목소리 칸 수)
+const GAP = Math.round(0.35 / 0.02);
+function clustersOf(n, voiced, f0 = 0) {
+  const out = []; let cur = null, gap = 0;
+  for (let f = f0; f < n; f++) {
+    if (voiced(f)) { if (!cur || gap > GAP) { cur = { a: f, b: f, v: 0 }; out.push(cur); } cur.b = f; cur.v++; gap = 0; }
+    else gap++;
+  }
+  return out;
+}
+export function voicedOnset(buf, from = 0, floor = from, ref = 0) {
   const d = buf.getChannelData(0), sr = buf.sampleRate, win = Math.max(1, Math.round(sr * 0.02)), n = Math.floor(d.length / win);
   if (n < 3) return -1;
   const rms = new Float32Array(n);
@@ -36,20 +47,25 @@ export function voicedOnset(buf, from = 0, floor = from) {
     }
     return best >= 0.5;
   };
+  const memo = new Int8Array(n).fill(-1), vz = f => (memo[f] < 0 ? (memo[f] = voiced(f) ? 1 : 0) : memo[f]) === 1;
+  // 첫 덩어리가 짧고(목소리 0.12초 미만 · 본보기 길이를 알면 0.25초 미만이고 나머지가 본보기 말의 0.6배 넘음) 뒤에 0.35초 넘는 틈 = 앞 잡음 → 버리고 다음 덩어리부터
+  const cl = clustersOf(n, vz, Math.floor((from * sr) / win));
+  let dropped = false;
+  while (cl.length > 1 && (ref > 0 ? cl[0].v * 0.02 < 0.25 && (cl[cl.length - 1].b - cl[1].a) * 0.02 > 0.6 * ref : cl[0].v * 0.02 < 0.12)) { cl.shift(); dropped = true; }
   let on = -1, run = 0;
-  for (let f = Math.floor((from * sr) / win); f < n; f++) { if (voiced(f)) { if (++run >= 3) { on = f - 2; break; } } else run = 0; }
+  for (let f = cl.length ? cl[0].a : Math.floor((from * sr) / win); f < n; f++) { if (vz(f)) { if (++run >= 3) { on = f - 2; break; } } else run = 0; }
   if (on < 0) return -1;
   const vs = [...rms.slice(on, Math.min(n, on + 10))].sort((a, b) => a - b), vlev = vs[vs.length >> 1], noisy = vlev, soft = Math.min(th * 0.5, vlev * 0.03); // 작은 첫 소리 문턱 = 목소리 크기 기준(−30dB) — 큰 툭 때문에 전체 문턱이 올라가도 ㅈ·ㅅ 살림
   let a = on;
-  const f0 = Math.floor((floor * sr) / win); // 앞으로 늘리는 한계 = 옛 방식이 잡소리를 건너뛴 자리(건너뛰지 않았으면 0)
+  const f0 = Math.max(Math.floor((floor * sr) / win), dropped ? cl[0].a - 13 : 0); // 앞 덩어리를 버렸으면 그 덩어리 쪽으로는 안 늘림 // 앞으로 늘리는 한계 = 옛 방식이 잡소리를 건너뛴 자리(건너뛰지 않았으면 0)
   for (let f = on - 1; f >= f0 && on - f <= 12 && rms[f] > soft && rms[f] < noisy; f--) a = f; // 12칸 = 0.24초
-  if (on - a >= 12 && a - 1 >= f0 && rms[a - 1] > soft) a = on; // 0.24초 넘게 끊김 없이 이어진 앞소리 = 첫 자음이 아니라 부스럭(진짜 ㅅ·ㅊ 은 짧고 앞이 조용함) → 늘리지 않음
+  if (on - a >= 12 && a - 1 >= f0 && rms[a - 1] > soft) a = Math.max(f0, on - 3); // 0.24초 넘게 끊김 없이 이어진 앞소리 = 첫 자음이 아니라 부스럭(진짜 ㅅ·ㅊ 은 짧고 앞이 조용함) → 목소리 앞 60ms 만 남김(ㅎ·ㅅ 자리)
   return (a * win) / sr;
 }
 // 말 끝(투덜이 10-06 「앞은 잘 잘려서 좋은데 뒤에 잡음은 남아 있어 — 뒤에도 똑같이」 · 투덜이 허락)
 //   끝 = 마지막 「목소리 칸」(시작과 같은 자기상관 판정 · 3칸 이상 이어진 것) → 뒤로 문턱 절반 넘고 · 목소리 칸 크기보다 작고 · 영교차가 낮은(콧소리·ㄹ·「요」 꼬리) 칸만 이어서 늘림(최대 0.3초)
 //   조용한 칸이나 쉬— 하는 잡음(영교차 높음 · 받침 끝소리엔 없음)·「툭」(목소리보다 큼)을 만나면 멈춤 → + post(0.12초) · 못 찾으면 녹음 끝(그대로)
-export function voicedEnd(buf, post = 0.12) {
+export function voicedEnd(buf, post = 0.12, ref = 0) { // ref = 본보기 말 길이(초 · 알면 — 비교 화면)
   const d = buf.getChannelData(0), sr = buf.sampleRate, win = Math.max(1, Math.round(sr * 0.02)), n = Math.floor(d.length / win);
   if (n < 3) return buf.duration;
   const rms = new Float32Array(n), zc = new Float32Array(n);
@@ -69,17 +85,24 @@ export function voicedEnd(buf, post = 0.12) {
     }
     return best >= 0.5;
   };
+  const memo = new Int8Array(n).fill(-1), vz = f => (memo[f] < 0 ? (memo[f] = voiced(f) ? 1 : 0) : memo[f]) === 1;
+  // 마지막 덩어리가 짧고(목소리 0.25초 미만) 앞 덩어리들의 말이 이미 본보기 말의 0.6배 넘으면(본보기 길이를 모르면 짧기만 보고) = 끝 잡음 → 버림(끝에서부터 되풀이)
+  // 끝 찾기의 「목소리」 = 자기상관 + 가장 큰 말소리에서 18dB 안(r2: 말 뒤 숨·잡음 칸이 −15~−25dB 로 자기상관만 넘던 것 걸러냄 · 작은 받침 꼬리는 아래 늘리기가 살림)
+  const strong = peak * Math.pow(10, -18 / 20), vS = f => rms[f] > strong && vz(f);
+  const cl = clustersOf(n, vS);
+  while (cl.length > 1 && cl[cl.length - 1].v * 0.02 < 0.25 && (!(ref > 0) || (cl[cl.length - 2].b - cl[0].a) * 0.02 > 0.6 * ref)) cl.pop();
   let last = -1;
-  for (let f = n - 1; f >= 2; f--) if (voiced(f) && voiced(f - 1) && voiced(f - 2)) { last = f; break; } // 3칸(60ms) 이어진 목소리 — 짧은 「툭」은 안 걸림
+  const top = cl.length ? cl[cl.length - 1].b : n - 1;
+  for (let f = top; f >= 2; f--) if (vS(f) && vS(f - 1) && vS(f - 2)) { last = f; break; } // 3칸(60ms) 이어진 목소리 — 짧은 「툭」은 안 걸림
   if (last < 0) return buf.duration;
   const vs = [...rms.slice(Math.max(0, last - 9), last + 1)].sort((a, b) => a - b), vlev = vs[vs.length >> 1], soft = Math.min(th * 0.5, vlev * 0.03), zmax = 4000 / sr; // 영교차 초당 4000번 아래(콧소리·모음 꼬리) — 쉬— 잡음은 그보다 훨씬 많음
   let b = last;
   for (let f = last + 1; f < n && f - last <= 15 && rms[f] > soft && rms[f] < vlev && zc[f] < zmax; f++) b = f; // 15칸 = 0.3초
   return Math.min(buf.duration, ((b + 1) * win) / sr + post);
 }
-export function leadOf(buf, pre = 0.08) {
+export function leadOf(buf, pre = 0.08, ref = 0) { // ref = 본보기 말 길이(초 · 알면)
   const old = leadOld(buf, 0), first = leadOld(buf, 0, false); // 옛 방식(앞 잡소리 → 조용한 틈 → 말)으로 먼저 건너뛴 자리부터 · first = 건너뛰기 없이 첫 소리
-  const v = voicedOnset(buf, old, old > first + 1e-9 ? old : 0);
+  const v = voicedOnset(buf, old, old > first + 1e-9 ? old : 0, ref);
   return Math.max(0, (v >= 0 ? v : old) - pre);
 }
 function leadOld(buf, pre = 0.08, skip = true) {

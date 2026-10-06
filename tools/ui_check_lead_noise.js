@@ -37,6 +37,17 @@
     endCheck(`ⓔ2 말 끝에 바로 부스럭 0.4초 · ${it.text}`, cat(sp, rustle(rmsS), zeros(0.3)), eT, eT + 0.06 + 0.2);
     endCheck(`ⓔ3 잡음 없음(끝 안 잘림) · ${it.text}`, cat(d, zeros(0.3)), eT);
   }
+  // 투덜이 실제 녹음(13번 2/4 「우리도 읽을 수 있어요」 · tools/_rec — 깃에 안 올림) — r1 그대로 · r2 끝 뒤 말만큼 큰 손 잡음 빠짐(본보기 길이 알 때·모를 때)
+  { const A = al.items["L01-00-01_13_p02"].syl, ref = A[A.length - 1].e - A[0].s;
+    for (const [f, lo, hi, e0, e1] of [["r1", 1.74, 1.94, 3.3, 3.6], ["r2", 1.54, 1.74, 3.15, 3.45]]) {
+      const r = await fetch(`/tools/_rec/${f}.webm`); if (!r.ok) { res.push(`· ${f}.webm 없음(건너뜀)`); continue; }
+      const b2 = await new OfflineAudioContext(1, 48000, 48000).decodeAudioData(await r.arrayBuffer());
+      for (const rf of [ref, 0]) { const l = leadOf(b2, 0.08, rf) + 0.08, e = voicedEnd(b2, 0.12, rf), ok = l >= lo && l <= hi && e >= e0 && e <= e1;
+        res.push(`${ok ? "✓" : "✗"} 실제 녹음 ${f}(본보기 길이 ${rf ? "앎" : "모름"}) → 말 시작 ${l.toFixed(2)}(기대 ${lo + 0.1}) · 끝 ${e.toFixed(2)}(기대 ${e0}~${e1})`); }
+    }
+    // 말 사이 긴 쉼이 있는 본보기(「그럼 우리는요? … 우리도 읽을 수 있어요?」) — 끝 안 잘림
+    const { it, d } = await load("L01-00-01_13_line"), eT = it.syl[it.syl.length - 1].e, rf2 = eT - it.syl[0].s;
+    for (const rf of [rf2, 0]) endCheck(`ⓔ4 긴 쉼 있는 줄(본보기 길이 ${rf ? "앎" : "모름"}) · ${it.text}`, cat(d, zeros(0.3)), eT); }
   const bad = res.filter(x => x.startsWith("✗")).length, out = `${bad ? "✗" : "✓"} 앞·뒤 잡음 자르기 ${res.length - bad}/${res.length}\n` + res.join("\n");
   console.log(out); return out;
 })();
