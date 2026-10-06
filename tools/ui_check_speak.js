@@ -1,6 +1,7 @@
 // 말하기 전수 점검(S1~S7) — #/learn/{편} 을 연 채로 실행. 마이크와 음성 인식은 가짜로 바꿔 앱 동작만 본다
 // (가짜 마이크 = 0.8초 동안 삑 소리 뒤 조용 → 「말이 끝나고 1초 조용하면 멈춤」을 확인 · 가짜 인식 = 정해 준 글자를 돌려줌)
 (async () => {
+  window.__noRhythm = true; // 가짜 마이크(삑 소리)로는 리듬을 잴 수 없음 — 글자 점수·화면 흐름만 봄(리듬은 tools/ui_check_rhythm.js)
   const res = [];
   try {
   const W = ms => new Promise(s => setTimeout(s, ms));
@@ -354,5 +355,5 @@
   window.fetch = of; mo.disconnect();
   window.__mic?.ctx.close();
   } catch (e) { res.push("✗ 점검 도중 오류: " + e.message); }
-  const out = res.join("\n"); console.log(out); return out;
+  const out = res.join("\n"); console.log(out); window.__noRhythm = false; return out;
 })();

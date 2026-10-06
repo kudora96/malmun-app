@@ -5,51 +5,13 @@
 //  · 재생: 본보기 → 0.4초 → 내 목소리 · 재생 위치 세로 막대 + 지금 음절 강조 · 파형·음절 칸을 누르면 그 줄 그 음절부터
 //  녹음·점수 계산·[내 목소리] 재생(playmine.js playMine)은 그대로 — 여기는 그리기·DTW·비교 화면 안 재생만
 //  (본보기는 sfx.play 그대로 · 내 목소리는 playmine 과 같은 방식: decodeAudioData → BufferSource.start(t, offset) → Gain)
-import { esc } from "./text.js?v=1006.81";
-import { align } from "./score.js?v=1006.81";
-import { audioCtx } from "./wake.js?v=1006.81";
-import { leadOf, gainOf, FADE, FADE_OUT, voicedEnd } from "./playmine.js?v=1006.81";
-import { speechEnd, wavOf } from "./recstore.js?v=1006.81";
-import * as sfx from "./sfx.js?v=1006.81";
-
-const FR = 0.02; // 특징 칸 20ms
-const alignCache = new Map();
-export const loadAlign = ep => { if (!alignCache.has(ep)) alignCache.set(ep, fetch(`data/${ep}/${ep}.align.json?v=${document.documentElement.dataset.v || ""}`).then(r => (r.ok ? r.json() : null)).catch(() => null)); return alignCache.get(ep); };
-const isSyl = ch => /[\p{L}\p{N}]/u.test(ch);
-
-// 20ms 칸 특징 — [로그 에너지, 고역(차분) 로그 에너지, 영교차율, 로그 에너지 변화] · 신호마다 평균 0 · 분산 1 로 맞춤
-function feats(d, sr, t0, t1) {
-  const w = Math.max(1, Math.round(sr * FR)), a = Math.max(0, Math.round(t0 * sr)), b = Math.min(d.length, Math.round(t1 * sr)), F = [];
-  for (let i = a; i + w <= b; i += w) {
-    let e = 0, h = 0, z = 0;
-    for (let k = i; k < i + w; k++) { e += d[k] * d[k]; const df = k > 0 ? d[k] - d[k - 1] : 0; h += df * df; if (k > i && (d[k] >= 0) !== (d[k - 1] >= 0)) z++; }
-    F.push([Math.log(e / w + 1e-9), Math.log(h / w + 1e-9), z / w]);
-  }
-  F.forEach((f, k) => f.push(k ? f[0] - F[k - 1][0] : 0));
-  for (let j = 0; j < 4; j++) {
-    const m = F.reduce((s, f) => s + f[j], 0) / Math.max(1, F.length), sd = Math.sqrt(F.reduce((s, f) => s + (f[j] - m) ** 2, 0) / Math.max(1, F.length)) || 1;
-    F.forEach(f => { f[j] = (f[j] - m) / sd; });
-  }
-  return F;
-}
-// DTW → 본보기 칸 k 에 맞는 내 칸(처음 맞은 것)
-function dtwMap(A, B) {
-  const n = A.length, m = B.length; if (!n || !m) return A.map(() => 0);
-  const D = new Float32Array((n + 1) * (m + 1)).fill(Infinity), at = (i, j) => i * (m + 1) + j;
-  D[0] = 0;
-  for (let i = 1; i <= n; i++) for (let j = 1; j <= m; j++) {
-    const a = A[i - 1], b = B[j - 1]; let c = 0; for (let q = 0; q < 4; q++) c += (a[q] - b[q]) ** 2;
-    D[at(i, j)] = Math.sqrt(c) + Math.min(D[at(i - 1, j - 1)], D[at(i - 1, j)], D[at(i, j - 1)]);
-  }
-  const map = new Array(n).fill(-1); let i = n, j = m;
-  while (i > 0 && j > 0) {
-    map[i - 1] = j - 1;
-    const d = D[at(i - 1, j - 1)], u = D[at(i - 1, j)], l = D[at(i, j - 1)];
-    if (d <= u && d <= l) { i--; j--; } else if (u <= l) i--; else j--;
-  }
-  for (let k = 0; k < n; k++) if (map[k] < 0) map[k] = k ? map[k - 1] : 0;
-  return map;
-}
+import { prepare, rhythmScore, loadAlign, isSyl } from "./rhythm.js?v=1006.88";
+import { esc } from "./text.js?v=1006.88";
+import { align } from "./score.js?v=1006.88";
+import { audioCtx } from "./wake.js?v=1006.88";
+import { leadOf, gainOf, FADE, FADE_OUT, voicedEnd } from "./playmine.js?v=1006.88";
+import { speechEnd, wavOf } from "./recstore.js?v=1006.88";
+import * as sfx from "./sfx.js?v=1006.88";
 
 // host 안에 그린다 → { close() } · o = { ep, key, url(본보기), text(본보기 글), blob(내 녹음), heard(들은 말 글자 · 없으면 색 없음), t(문구) }
 export async function openCompare(host, o) {
@@ -59,16 +21,9 @@ export async function openCompare(host, o) {
   if (!st.alive) return { close() {} };
   if (!mbuf || !ybuf) { host.innerHTML = `<div class="cmpw"><p class="cmpmsg">${esc(t("cmp_none"))}</p></div>`; return { close() { st.alive = false; } }; }
   // 본보기 음절(정렬 파일 · 없으면 말 구간을 고르게 나눈 임시 칸)
-  const W = [...String(o.text)].filter(isSyl);
-  let msyl = al?.items?.[o.key]?.syl;
-  const mLead0 = msyl?.length ? msyl[0].s : leadOf(mbuf, 0), mEnd = msyl?.length ? msyl[msyl.length - 1].e : speechEnd(mbuf, 0);
-  if (!msyl?.length || msyl.length !== W.length) msyl = W.map((ch, k) => ({ ch, s: mLead0 + ((mEnd - mLead0) * k) / W.length, e: mLead0 + ((mEnd - mLead0) * (k + 1)) / W.length }));
-  const mLead = Math.max(0, mLead0 - 0.08), mStop = Math.min(mbuf.duration, mEnd + 0.15);
-  const ref = Math.max(0, mEnd - mLead0), yLead = leadOf(ybuf, 0.08, ref), yStop = Math.max(yLead + 0.1, voicedEnd(ybuf, 0.12, ref)), yGain = gainOf(ybuf); // 끝 = 말 끝(뒤 잡음 빼기 · [내 목소리]와 같은 함수)
-  // 내 목소리 음절 = DTW 로 본보기 경계를 옮김
-  const A = feats(mbuf.getChannelData(0), mbuf.sampleRate, mLead, mStop), B = feats(ybuf.getChannelData(0), ybuf.sampleRate, yLead, yStop), map = dtwMap(A, B);
-  const toY = s => { const k = Math.max(0, Math.min(A.length - 1, Math.round((s - mLead) / FR))); return yLead + (map[k] ?? 0) * FR; };
-  const ysyl = msyl.map((x, k) => ({ ch: x.ch, s: toY(x.s), e: k < msyl.length - 1 ? toY(msyl[k + 1].s) : Math.min(yStop, toY(x.e) + 0.02) }));
+  // 음절 칸 = 리듬 점수와 같은 함수(js/rhythm.js prepare) · 본보기 = align.json · 내 목소리 = DTW
+  const { W, msyl, ysyl, mLead, mStop, mEnd, mLead0, ref, yLead, yStop } = prepare({ al, key: o.key, text: o.text, mbuf, ybuf }), yGain = gainOf(ybuf);
+  const rh = rhythmScore({ msyl, ysyl, mbuf, ybuf }); // 리듬이 가장 많이 깎인 음절 = 두 줄 그 칸에 주황 테두리
   // 맞음/틀림 — 점수와 같은 정렬(본보기 음절마다 m 맞음 · s 바뀜 · d 빠짐)
   // 내 목소리 칸에는 「들은 글자」(본부 10-06): 바뀜 = 큰 빨강 들은 글자 + 위 작게 흐린 본보기 글자 · 빠짐 = 흐린 점선 칸 · 덧붙은 소리 = 회색 작은 칸(앞 음절 끝에)
   let marks = W.map(() => ""), heardCh = W.map(() => null), extra = [];
@@ -83,7 +38,7 @@ export async function openCompare(host, o) {
   }
   const span = Math.max(mStop - mLead, yStop - yLead, 0.5);
   const pos = (s, e, lead) => `left:${(100 * (s - lead)) / span}%;width:${(100 * Math.max(0.02, e - s)) / span}%`;
-  const cell = (x, k, lead, mine) => `<button data-k="${k}" class="${marks[k]}" style="${pos(x.s, x.e, lead)}"><span class="tx">${mine && marks[k] === "bad" && heardCh[k] ? `<small class="want">${esc(x.ch)}</small><span class="got">${esc(heardCh[k])}</span>` : esc(x.ch)}</span></button>`;
+  const cell = (x, k, lead, mine) => `<button data-k="${k}" class="${marks[k]}${rh.worst && rh.worst.k === k && rh.R < 0.9 ? " rworst" : ""}" style="${pos(x.s, x.e, lead)}"><span class="tx">${mine && marks[k] === "bad" && heardCh[k] ? `<small class="want">${esc(x.ch)}</small><span class="got">${esc(heardCh[k])}</span>` : esc(x.ch)}</span></button>`;
   const extras = (syl, lead) => extra.map(x => { const at = x.after >= 0 ? syl[x.after].e : syl[0].s, [a0, a1] = x.after >= 0 ? [at - 0.03, at + 0.05] : [Math.max(lead, at - 0.08), at]; return `<span class="add" style="${pos(a0, a1, lead)}">${esc(x.ch)}</span>`; }).join("");
   const row = (cls, lab, syl, lead) => `<div class="crow ${cls}"><div class="clab">${esc(lab)}</div><div class="cwave"><canvas></canvas><i class="cbar" hidden></i></div><div class="csyl ko" lang="ko">${syl.map((x, k) => cell(x, k, lead, cls === "y")).join("")}${cls === "y" ? extras(syl, lead) : ""}</div></div>`;
   const ticks = []; for (let s = 0; s <= span + 1e-6; s += span > 3 ? 1 : 0.5) ticks.push(`<span style="left:${(100 * s) / span}%">${s.toFixed(1)}</span>`);
@@ -182,6 +137,6 @@ export async function openCompare(host, o) {
     stopPlay(); playRow(ri, Math.max(0, from), to).then(() => host.classList.remove("playing"));
   };
   playBoth();
-  window.__cmp = { st, msyl, ysyl, marks, heardCh, extra, span, mLead, yLead, yStop, ybuf, playBoth, playRow }; // 점검 도구용
+  window.__cmp = { st, rh, msyl, ysyl, marks, heardCh, extra, span, mLead, yLead, yStop, ybuf, playBoth, playRow }; // 점검 도구용
   return { close() { st.alive = false; stopPlay(); if (st.wavUrl) URL.revokeObjectURL(st.wavUrl); ro.disconnect(); host.onclick = null; host.innerHTML = ""; }, replay: playBoth };
 }

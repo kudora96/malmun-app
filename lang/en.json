@@ -157,5 +157,10 @@
  "why_many": "{ws} and more are different — listen to the model and try again",
  "why_polish": "just polish {ws}",
  "cmp_none": "Nothing to compare yet — record first.",
- "raw_dl": "Original"
+ "raw_dl": "Original",
+ "rhythm_line": "letters {l}% · rhythm {r}%",
+ "rhy_long": "{s} is longer than the model",
+ "rhy_short": "{s} is shorter than the model",
+ "rhy_pause": "paused at {s}",
+ "rhy_speed": "speed is very different from the model"
 }
