@@ -13,13 +13,13 @@
 //  W5 소리는 언제나 하나만 · 새 일을 하면 앞 소리는 멈춘다
 //  W6 영상 창 안(embedded): 창 안에서 스크롤 없이 다 보이게 — 긴 문장은 토막으로(◀ 1/3 ▶) ·
 //     토막을 다 쓰면 자동으로 다음 토막 · 줄을 다 쓰면 대사를 듣고 자동으로 다음 줄 쓰기 · 아래 ▶ = 이 부분 듣기
-import { t, lang } from "../i18n.js?v=1006.4";
-import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO } from "../text.js?v=1006.4";
-import { episode, chars, charsF } from "../data.js?v=1006.4";
-import { paths } from "../paths.js?v=1006.4";
-import { I } from "../ui.js?v=1006.4";
-import { audioCtx, hold } from "../wake.js?v=1006.4";
-import * as sfx from "../sfx.js?v=1006.4";
+import { t, lang } from "../i18n.js?v=1006.7";
+import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO } from "../text.js?v=1006.7";
+import { episode, chars, charsF } from "../data.js?v=1006.7";
+import { paths } from "../paths.js?v=1006.7";
+import { I } from "../ui.js?v=1006.7";
+import { audioCtx, hold } from "../wake.js?v=1006.7";
+import * as sfx from "../sfx.js?v=1006.7";
 
 const KEYS = [..."ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎㄲㄸㅃㅆㅉ"], VOW = [..."ㅏㅑㅓㅕㅗㅛㅜㅠㅡㅣ"];
 const VOW2 = [..."ㅐㅒㅔㅖㅘㅙㅚㅝㅞㅟㅢ"]; // 겹모음 줄(본부 10-06) — 칸 하나 · ㅓ+ㅣ 처럼 나눠 쳐도 받음
@@ -146,13 +146,24 @@ export default async function write(app, ep, id, opts = {}) {
   function paintSent() {
     sentEl.innerHTML = `<svg class="spk" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M4 9v6h4l5 4V5L8 9H4z"/><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M16 8.5a5 5 0 0 1 0 7M18.8 6a8.5 8.5 0 0 1 0 12"/></svg>` + words().map((w, wi) => `<span class="w ${wi === st.w ? "on" : ""}">${w.chars.map((c, ci) =>
       `<button class="c ko ${c.file ? "" : "noaudio"} ${wi < st.w || (wi === st.w && ci < st.c) ? "done" : ""} ${st.loopAt && st.loopAt.w === wi && st.loopAt.c === ci ? "loop" : ""} ${wi === st.w && ci === st.c && st.s < segs.length ? "now" : ""}" data-w="${wi}" data-c="${ci}" ${c.file ? "" : 'aria-disabled="true"'}>${esc(c.ch)}</button>`).join("")}</span>`).join("");
-    // 그래도 넘치면(아주 긴 낱말) 글자를 조금씩 줄여 한 줄에 맞춘다
-    sentEl.style.fontSize = "";
-    for (let fs = 22; sentEl.scrollWidth > sentEl.clientWidth + 1 && fs >= 14; fs -= 2) sentEl.querySelectorAll(".c").forEach(c => { c.style.fontSize = fs + "px"; });
     segnav.innerHTML = segs.length > 1
       ? `<button data-seg="-1" ${st.s ? "" : "disabled"} aria-label="${esc(t("previous"))}">◀</button><span>${st.s + 1}/${segs.length}</span><button data-seg="1" ${st.s < segs.length - 1 ? "" : "disabled"} aria-label="${esc(t("next"))}">▶</button>`
       : "";
+    fitSent(); // ◀ n/N ▶ 까지 그린 뒤에 잰다(그 전엔 줄이 더 넓게 잡힘)
   }
+  // 위 글자 줄 = 한 줄에(본부 10-06 — 단추 테두리까지 잰 폭 · ◀ 1/3 ▶ 와 안 겹치게) · 넘치면 글자 크기·안쪽 여백·낱말 사이를 같이 줄임 · 🔊 는 그대로
+  //  창이 아직 그려지기 전이면 폭이 0 이라 못 잰다 → 그려진 뒤·크기가 바뀔 때 다시
+  function fitSent() {
+    const cs = [...sentEl.querySelectorAll(".c")]; if (!cs.length || !sentEl.clientWidth) return;
+    cs.forEach(c => { c.style.fontSize = ""; c.style.padding = ""; }); sentEl.style.columnGap = "";
+    sentEl.querySelectorAll(".w").forEach(w => { w.style.gap = ""; });
+    const over = () => sentEl.scrollWidth > sentEl.clientWidth + 1;
+    for (let fs = parseFloat(getComputedStyle(cs[0]).fontSize) - 1; over() && fs >= 12; fs -= 1) {
+      cs.forEach(c => { c.style.fontSize = fs + "px"; c.style.padding = fs < 21 ? "0 2px" : ""; });
+      sentEl.style.columnGap = fs < 21 ? "6px" : ""; if (fs < 17) sentEl.querySelectorAll(".w").forEach(w => { w.style.gap = "1px"; });
+    }
+  }
+  let fitQ = 0; new ResizeObserver(() => { clearTimeout(fitQ); fitQ = setTimeout(fitSent, 30); }).observe(sentEl);
   function render() {
     paintSent();
     if (st.s >= segs.length) {
