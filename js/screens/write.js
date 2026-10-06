@@ -13,13 +13,13 @@
 //  W5 소리는 언제나 하나만 · 새 일을 하면 앞 소리는 멈춘다
 //  W6 영상 창 안(embedded): 창 안에서 스크롤 없이 다 보이게 — 긴 문장은 토막으로(◀ 1/3 ▶) ·
 //     토막을 다 쓰면 자동으로 다음 토막 · 줄을 다 쓰면 대사를 듣고 자동으로 다음 줄 쓰기 · 아래 ▶ = 이 부분 듣기
-import { t, lang } from "../i18n.js?v=1006.16";
-import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO } from "../text.js?v=1006.16";
-import { episode, chars, charsF } from "../data.js?v=1006.16";
-import { paths } from "../paths.js?v=1006.16";
-import { I } from "../ui.js?v=1006.16";
-import { audioCtx, hold } from "../wake.js?v=1006.16";
-import * as sfx from "../sfx.js?v=1006.16";
+import { t, lang } from "../i18n.js?v=1006.19";
+import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO } from "../text.js?v=1006.19";
+import { episode, chars, charsF } from "../data.js?v=1006.19";
+import { paths } from "../paths.js?v=1006.19";
+import { I } from "../ui.js?v=1006.19";
+import { audioCtx, hold } from "../wake.js?v=1006.19";
+import * as sfx from "../sfx.js?v=1006.19";
 
 const KEYS = [..."ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎㄲㄸㅃㅆㅉ"], VOW = [..."ㅏㅑㅓㅕㅗㅛㅜㅠㅡㅣ"];
 const VOW2 = [..."ㅐㅒㅔㅖㅘㅙㅚㅝㅞㅟㅢ"]; // 겹모음 줄(본부 10-06) — 칸 하나 · ㅓ+ㅣ 처럼 나눠 쳐도 받음
@@ -183,8 +183,7 @@ export default async function write(app, ep, id, opts = {}) {
     }
     const w = words()[st.w], c = w.chars[st.c], jam = c.jamo;
     work.innerHTML = `<div class="stage"><div class="box"><span class="target ko" lang="ko">${esc(c.ch)}</span><span class="typed ko" lang="ko">${esc(compose([...st.typed, st.part].flatMap(jamoParts), vowelLen(c.ch)))}</span></div>
-      <div class="info"><div class="word ko" lang="ko">${w.chars.map((x, i) => `<button class="wc ${i === st.c ? "now" : ""}" data-wc="${i}" ${x.file ? "" : "disabled"}>${esc(x.ch)}</button>`).join("")}</div>${w.rom ? `<div class="rom">${esc(w.rom)}</div>` : ""}
-      ${w.mean ? `<div class="mean tr">${esc(w.mean)}</div>` : ""}
+      <div class="info"><div class="word ko" lang="ko">${w.chars.map((x, i) => `<button class="wc ${i === st.c ? "now" : ""}" data-wc="${i}" ${x.file ? "" : "disabled"}>${esc(x.ch)}</button>`).join("")}</div>${w.rom || w.mean ? `<div class="sub2">${w.rom ? `<span class="rom">${esc(w.rom)}</span>` : ""}${w.mean ? `<span class="mean tr">${esc(w.mean)}</span>` : ""}</div>` : ""}
       <div class="slots">${jam.map((j, i) => `<span class="slot ${i < st.k ? "filled" : i === st.k ? "current" : ""}">${i <= st.k ? esc(j) : ""}</span>`).join("")}</div></div></div>
       <div class="kb" lang="ko">${KB_ROWS.map(r => `<div class="kr">${r.map(j => `<button data-j="${j}">${j}</button>`).join("")}</div>`).join("")}</div>`;
     work.querySelector(".stage").append(wb);
