@@ -581,3 +581,5 @@ a{color:inherit;text-decoration:none}
 .write .stage .wbtns button,.write.embedded .stage .wbtns button{flex:none;width:104px;min-height:34px;padding:4px 6px;font-size:11.5px;line-height:1.25;border:1px solid var(--line);border-radius:8px;background:var(--card);box-shadow:0 2px 0 var(--line);white-space:normal}
 .write .stage .wbtns button:active{transform:translateY(2px);box-shadow:none}
 .learn .panel.write{height:clamp(330px,70dvh,500px)} /* 10-06: 세 단추를 위로 올린 만큼 · 작은 폰(667)에서도 자판 40px 다섯 줄이 창 안에 */
+.write .info .word{display:flex;flex-wrap:nowrap;overflow:hidden;min-width:0} /* 10-06: 낱말 글자 = 한 줄(넘치면 fitWord 가 줄임) */
+.write .info > .rom{font-size:11px;color:var(--mute);font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
