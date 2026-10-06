@@ -28,7 +28,8 @@
     const p = $(".panel").getBoundingClientRect(), wr = $(".panel .write");
     const keys = [...document.querySelectorAll(".panel .kb button")], btns = $(".panel .wbtns").getBoundingClientRect();
     const lastKey = keys.length ? keys[keys.length - 1].getBoundingClientRect() : { bottom: 0 };
-    return { scroll: wr.scrollHeight - wr.clientHeight, inside: btns.bottom <= p.bottom + 1 && lastKey.bottom <= btns.top + 1, sentOverflow: $(".panel .sent").scrollWidth - $(".panel .sent").clientWidth };
+    const kbTop = $(".panel .kb")?.getBoundingClientRect().top ?? 0; // 10-06: 세 단추는 위 글자 칸 오른쪽 — 자판보다 위에 있어야(겹침 0)
+    return { scroll: wr.scrollHeight - wr.clientHeight, inside: lastKey.bottom <= p.bottom + 1 && btns.bottom <= kbTop + 1, sentOverflow: $(".panel .sent").scrollWidth - $(".panel .sent").clientWidth };
   };
   const desc = from => log.slice(from).map(e => `${e.ev}${e.name ? "(" + e.name.split("/").pop() + ")" : ""}`).join(" → ");
 

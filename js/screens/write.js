@@ -13,13 +13,13 @@
 //  W5 소리는 언제나 하나만 · 새 일을 하면 앞 소리는 멈춘다
 //  W6 영상 창 안(embedded): 창 안에서 스크롤 없이 다 보이게 — 긴 문장은 토막으로(◀ 1/3 ▶) ·
 //     토막을 다 쓰면 자동으로 다음 토막 · 줄을 다 쓰면 대사를 듣고 자동으로 다음 줄 쓰기 · 아래 ▶ = 이 부분 듣기
-import { t, lang } from "../i18n.js?v=1006.10";
-import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO } from "../text.js?v=1006.10";
-import { episode, chars, charsF } from "../data.js?v=1006.10";
-import { paths } from "../paths.js?v=1006.10";
-import { I } from "../ui.js?v=1006.10";
-import { audioCtx, hold } from "../wake.js?v=1006.10";
-import * as sfx from "../sfx.js?v=1006.10";
+import { t, lang } from "../i18n.js?v=1006.13";
+import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO } from "../text.js?v=1006.13";
+import { episode, chars, charsF } from "../data.js?v=1006.13";
+import { paths } from "../paths.js?v=1006.13";
+import { I } from "../ui.js?v=1006.13";
+import { audioCtx, hold } from "../wake.js?v=1006.13";
+import * as sfx from "../sfx.js?v=1006.13";
 
 const KEYS = [..."ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎㄲㄸㅃㅆㅉ"], VOW = [..."ㅏㅑㅓㅕㅗㅛㅜㅠㅡㅣ"];
 const VOW2 = [..."ㅐㅒㅔㅖㅘㅙㅚㅝㅞㅟㅢ"]; // 겹모음 줄(본부 10-06) — 칸 하나 · ㅓ+ㅣ 처럼 나눠 쳐도 받음
@@ -122,7 +122,9 @@ export default async function write(app, ep, id, opts = {}) {
   const note = $(".loopnote"), work = $(".work"), sentEl = $(".sent"), segnav = $(".segnav");
   const words = () => segs[st.s] || [];
   const setNote = () => { note.textContent = st.loopAt ? t("loop_on", { c: st.loopAt.ch }) : ""; }; // 처음 안내는 말풍선(본부 10-06)
-  const markSent = () => $("[data-act=sent]").setAttribute("aria-pressed", String(st.sent));
+  // 단어 듣기·이 부분 듣기·자동 완성 = 위 글자 칸 오른쪽에 세로로(본부 10-06 투덜이 — 아래 줄이 자판 마지막 줄과 겹침) · 그릴 때마다 그 자리로 옮김
+  const wb = $(".wbtns");
+  const markSent = () => wb.querySelector("[data-act=sent]").setAttribute("aria-pressed", String(st.sent));
   function stopLoop() { if (!st.loopAt) return; st.loopAt = null; hush(); paintSent(); setNote(); }
   function resetSounds() { stopLoop(); hush(); st.sent = false; markSent(); }
 
@@ -171,7 +173,7 @@ export default async function write(app, ep, id, opts = {}) {
     if (st.s >= segs.length) {
       work.innerHTML = `<div class="done-card"><span class="big ko" lang="ko">${esc(line.ko)}</span>${line.tr ? `<span class="tr">${esc(line.tr)}</span>` : ""}
         <span>${esc(t("sentence_done"))}</span><button class="chip" data-act="retry">${esc(t("retry_writing"))}</button></div>`;
-      return;
+      wb.remove(); return;
     }
     const w = words()[st.w], c = w.chars[st.c], jam = c.jamo;
     work.innerHTML = `<div class="stage"><div class="box"><span class="target ko" lang="ko">${esc(c.ch)}</span><span class="typed ko" lang="ko">${esc(compose([...st.typed, st.part].flatMap(jamoParts), vowelLen(c.ch)))}</span></div>
@@ -179,6 +181,7 @@ export default async function write(app, ep, id, opts = {}) {
       ${w.mean ? `<div class="mean tr">${esc(w.mean)}</div>` : ""}
       <div class="slots">${jam.map((j, i) => `<span class="slot ${i < st.k ? "filled" : i === st.k ? "current" : ""}">${i <= st.k ? esc(j) : ""}</span>`).join("")}</div></div></div>
       <div class="kb" lang="ko">${KB_ROWS.map(r => `<div class="kr">${r.map(j => `<button data-j="${j}">${j}</button>`).join("")}</div>`).join("")}</div>`;
+    work.querySelector(".stage").append(wb);
   }
   function goSeg(s) { st.auto = false; markAuto(); resetSounds(); st.busy = false; Object.assign(st, { s, w: 0, c: 0, k: 0, typed: [], part: "", done: false, queue: [] }); render(); }
 
@@ -209,7 +212,7 @@ export default async function write(app, ep, id, opts = {}) {
     }
   }
   // 자동 완성(W4) — 지금 토막의 남은 글자를 한 자모씩(손으로 칠 때와 같은 소리·쉼) · 토막이 끝나면 멈춤
-  const markAuto = () => { const b = $("[data-act=auto]"); b.setAttribute("aria-pressed", String(!!st.auto)); b.textContent = st.auto ? "⏹ " + t("btn_stop") : t("autofill"); };
+  const markAuto = () => { const b = wb.querySelector("[data-act=auto]"); b.setAttribute("aria-pressed", String(!!st.auto)); b.textContent = st.auto ? "⏹ " + t("btn_stop") : t("autofill"); };
   const flashKey = j => { const k = work.querySelector(`[data-j="${j}"]`); if (!k) return; k.classList.remove("right"); void k.offsetWidth; k.classList.add("right"); setTimeout(() => k.classList.remove("right"), 400); };
   async function autoPart() {
     resetSounds(); st.auto = true; markAuto();
