@@ -763,3 +763,33 @@ a{color:inherit;text-decoration:none}
 .speak .sbtns button.playing,.v9body .sayb .sbtns button.playing{background:var(--hi);color:var(--on-hi);border-color:var(--hi)}
 .speak .sbtns button:focus:not(:focus-visible),.v9body .sayb .sbtns button:focus:not(:focus-visible){outline:none}
 .speak .sbtns [data-act=model][aria-pressed=true]:not(.playing){background:var(--hi);color:var(--on-hi)}
+/* 누르면 소리 나는 것·토글은 단추 모양(투덜이 10-06 「그래야 누르고 싶어진다」) — 테두리 · 약한 그림자 · 누를 때 눌림 · 글자만 있는 클릭 요소 0
+   (설명 본문 문장은 단추가 너무 많아지므로 문장 앞 작은 ▶ 단추로) */
+.v9body .snp,.line .expl .snp{display:inline-grid;place-items:center;width:18px;height:18px;margin:0 3px 0 1px;padding:0;vertical-align:-3px;border:1px solid var(--line);border-radius:5px;background:var(--card);box-shadow:0 1px 0 var(--line);color:var(--hi);font-size:9px;line-height:1;cursor:pointer}
+.v9body .snp:active,.line .expl .snp:active{transform:translateY(1px);box-shadow:none}
+.v9body .gw,.line .expl .gw{text-decoration:none;padding:0 4px;margin:0 1px;border:1px solid var(--line);border-radius:5px;background:var(--card);box-shadow:0 1px 0 var(--line);-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.v9body .gw:active,.line .expl .gw:active{transform:translateY(1px);box-shadow:none}
+.v9bar .pb{box-shadow:0 1px 0 var(--line);background:var(--card)}
+.v9bar .pb[aria-pressed=true]{background:var(--hi)}
+.v9bar .pb:active{transform:translateY(1px);box-shadow:none}
+.learn .ctrl .iconbtn,.learn .ctrl .spd{border:1px solid var(--line);background:var(--card);box-shadow:0 1px 0 var(--line)}
+.learn .ctrl .iconbtn[aria-pressed=true]{background:var(--hi-soft);border-color:var(--hi)}
+.learn .ctrl .iconbtn:active,.learn .ctrl .spd:active{transform:translateY(1px);box-shadow:none}
+.speak .cmp .crow .csyl button{border:1px solid var(--line);border-radius:6px;background:var(--card);box-shadow:0 1px 0 var(--line)}
+.speak .cmp .crow .csyl button:active{transform:translateY(1px);box-shadow:none}
+.speak .cmp .crow .csyl button .tx{background:transparent}
+.speak .cmp .crow .csyl button.narrow .tx{background:var(--card);border:1px solid var(--line);border-radius:4px;box-shadow:0 1px 0 var(--line)}
+.cmpw .craw{border:1px solid var(--line);background:var(--card);box-shadow:0 1px 0 var(--line);color:var(--ink)}
+.cmpw .craw:active,.cmpw .cslow:active{transform:translateY(1px);box-shadow:none}
+/* 비교 화면이 작은 폰(375×667)에서도 단추 줄 위에 다 들어가게 — 파형·간격을 줄임(음절 줄 40px · 글자 14px 세 층 0/13/26) */
+.speak .cmp{padding:2px 14px;justify-content:flex-start}
+.cmpw{gap:3px}
+.crow{gap:1px}
+.crow .clab{font-size:10px;line-height:1.2}
+.crow .cwave{height:clamp(24px,5dvh,56px)}
+.speak .cmp .crow .csyl,.speak .cmp .crow.y .csyl{height:40px}
+.speak .cmp .crow .csyl button{font-size:14px}
+.speak .cmp .crow .csyl button .tx{line-height:1}
+.speak .cmp .crow .csyl button .got{font-size:14px}
+.cruler{height:12px}
+.cmpw .cfoot{margin-top:0}

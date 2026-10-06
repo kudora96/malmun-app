@@ -22,7 +22,8 @@
     const hd = p.querySelector(".whead"), ys = [...hd.children].filter(x => x.offsetParent).map(x => Math.round(x.getBoundingClientRect().top + x.getBoundingClientRect().height / 2));
     ok(Math.max(...ys) - Math.min(...ys) <= 6 && hd.scrollWidth <= hd.clientWidth + 1, "말하기 머리 줄 한 줄(✕ 가 둘째 줄로 안 떨어짐)", hd.className + " · 높이 " + hd.offsetHeight);
     const sb = p.querySelector(".sbtns").getBoundingClientRect(), pr = p.getBoundingClientRect();
-    ok(p.scrollHeight - p.clientHeight <= 0 && sb.bottom <= pr.bottom + 1 && !p.querySelector(".cmp").hidden, "위 칸 안(스크롤 0 · 단추 줄 보임)", `${p.scrollHeight - p.clientHeight}px`);
+    const cmpB = Math.max(...[...p.querySelectorAll(".cmp .cmpw > *")].map(x => x.getBoundingClientRect().bottom)), cmpT = Math.min(...[...p.querySelectorAll(".cmp .cmpw > *")].map(x => x.getBoundingClientRect().top)), hdB = p.querySelector(".whead").getBoundingClientRect().bottom;
+    ok(p.scrollHeight - p.clientHeight <= 0 && sb.bottom <= pr.bottom + 1 && !p.querySelector(".cmp").hidden && cmpB <= sb.top + 1 && cmpT >= hdB - 1, "위 칸 안(스크롤 0 · 비교 내용이 머리 줄과 단추 줄 사이 · 안 겹침)", `${p.scrollHeight - p.clientHeight}px · 비교 ${Math.round(cmpT)}~${Math.round(cmpB)} · 머리 ${Math.round(hdB)} · 단추 ${Math.round(sb.top)}`);
     // 음절 글자 = 한 크기 · 같은 층끼리 안 겹침(좁은 칸은 위·아래 번갈아)
     const sizes = new Set([...p.querySelectorAll(".csyl button .tx")].map(x => getComputedStyle(x.querySelector(".got") || x).fontSize));
     let overlap = 0; p.querySelectorAll(".csyl").forEach(row => { const tx = [...row.querySelectorAll("button .tx")].map(x => x.getBoundingClientRect()); for (let i = 0; i < tx.length; i++) for (let j = i + 1; j < tx.length; j++) { const a = tx[i], c = tx[j]; if (a.right > c.left + 2 && c.right > a.left + 2 && a.bottom > c.top + 2 && c.bottom > a.top + 2) overlap++; } });

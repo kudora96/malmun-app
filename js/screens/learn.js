@@ -10,21 +10,21 @@
 //  R7 영상은 늘 맨 위 · 지금 줄은 영상 바로 아래(앞 줄은 영상 뒤로) — 손으로 목록을 움직이면 4초 동안은 따라가지 않음
 //  R8 듣기 모드(대사→설명 · 설명만)도 R1~R6 그대로(영상 대신 소리 조각) · 모드를 바꾸면 멈춤(▶ 로 시작)
 //  R9 다시 들어오면 마지막 줄이 선택된 채 멈춰 있음
-import { t, lang, langName } from "../i18n.js?v=1006.79";
-import { esc, renderText, glossCards, sayParts } from "../text.js?v=1006.79";
-import { episode } from "../data.js?v=1006.79";
-import { paths } from "../paths.js?v=1006.79";
-import { Sequence } from "../audio.js?v=1006.79";
-import { I, progress, SPEAKER } from "../ui.js?v=1006.79";
-import writeView from "./write.js?v=1006.79";
-import { diagEnv, keepDiag } from "../diag.js?v=1006.79";
-import { playMine as playMineRec } from "../playmine.js?v=1006.79";
-import { bestHeard, heardHTML, endHint } from "../heard.js?v=1006.79";
-import { recDel, downloadRec, askPersist } from "../recstore.js?v=1006.79";
-import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1006.79";
-import { scoreFx, stopFx } from "../scorefx.js?v=1006.79"; // 점수별 효과(본부 10-05)
-import { record, micWhy, srWhy, canScore, closeMic, logRec, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1006.79";
-import { hold, quietWake } from "../wake.js?v=1006.79";
+import { t, lang, langName } from "../i18n.js?v=1006.81";
+import { esc, renderText, glossCards, sayParts } from "../text.js?v=1006.81";
+import { episode } from "../data.js?v=1006.81";
+import { paths } from "../paths.js?v=1006.81";
+import { Sequence } from "../audio.js?v=1006.81";
+import { I, progress, SPEAKER } from "../ui.js?v=1006.81";
+import writeView from "./write.js?v=1006.81";
+import { diagEnv, keepDiag } from "../diag.js?v=1006.81";
+import { playMine as playMineRec } from "../playmine.js?v=1006.81";
+import { bestHeard, heardHTML, endHint } from "../heard.js?v=1006.81";
+import { recDel, downloadRec, askPersist } from "../recstore.js?v=1006.81";
+import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1006.81";
+import { scoreFx, stopFx } from "../scorefx.js?v=1006.81"; // 점수별 효과(본부 10-05)
+import { record, micWhy, srWhy, canScore, closeMic, logRec, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1006.81";
+import { hold, quietWake } from "../wake.js?v=1006.81";
 
 const RATES = [1, 0.75, 0.5];
 const pref = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } };
@@ -289,7 +289,7 @@ export default async function learn(app, ep, startId) {
   function v9Sent(i, code) {
     const x = L[i].v9, sn = x.sent;
     if (!sn?.length) return bold((x.text?.[code] || x.text?.ko || {}).ex || "");
-    return sn.map((s, k) => `<span class="sn" data-x="sn" data-s="${k}" data-i="${i}" data-c="${code}"${code === "ko" ? ' lang="ko"' : ""}>${qWords(i, s[code] || "")}</span>`).join(" ");
+    return sn.map((s, k) => `<button class="snp" data-x="sn" data-s="${k}" data-i="${i}" data-c="${code}" aria-label="▶ ${k + 1}">▶</button><span class="sn" data-x="sn" data-s="${k}" data-i="${i}" data-c="${code}"${code === "ko" ? ' lang="ko"' : ""}>${qWords(i, s[code] || "")}</span>`).join(" ");
   }
   // 「이제 말해 보세요」 칸(본부 10-05) — 첫 줄 = 안내(듣기 언어) · 한국어 문장 크게 · 로마자(작게 · 로마자 꺼지면 숨김) · 뜻(작게 · 학습자 언어 항상) · 괄호 없음
   function sayHTML(i, code) {
