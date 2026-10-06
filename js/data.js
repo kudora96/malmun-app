@@ -1,6 +1,6 @@
 // 편 불러오기 — 공통 + KR층 + 학습자 언어층을 sub_id 로 조인(app_build_spec §3-4)
-import { paths } from "./paths.js?v=1006.29";
-import { VERSION } from "./version.js?v=1006.29";
+import { paths } from "./paths.js?v=1006.49";
+import { VERSION } from "./version.js?v=1006.49";
 
 const cache = new Map();
 // 앱 판 번호를 붙여 받는다 — 새 판이면 옛 데이터를 쓰지 않게(tools/bump_version.py)
@@ -68,7 +68,7 @@ export async function episode(ep, lang) {
       };
     });
     return {
-      id: ep, title: base.title, lang: tr ? lang : null,
+      id: ep, title: base.title, title_t: tr?.title_t || "", lang: tr ? lang : null, // title_t = 학습자 언어 편 제목(영상 창 제목 줄)
       v9head: v9?.say_head || null, // 「이제 말해 보세요」 머리말 소리(언어마다 하나 · 모든 줄 공통)
       v9L: v9langs.includes(lang) ? lang : v9langs[0] || null, // v9 「학습자 언어」 — 그 언어 자료가 없으면 있는 언어(지금은 ne 뿐)
       characters: (base.characters || []).map(c => ({ ...c, bio: bios.get(c.id) || "" })),

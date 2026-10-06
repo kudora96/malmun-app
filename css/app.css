@@ -660,3 +660,40 @@ a{color:inherit;text-decoration:none}
 @media (max-height:720px){.write.embedded .segrow{height:44px}}
 /* 눌린 단추(자동 완성 도는 중 = 멈춤 · 들려주는 중) — 흰 바탕에 흰 글로 빈칸이 되지 않게(본부 10-06) */
 .write .stage .wbtns button[aria-pressed=true],.write.embedded .stage .wbtns button[aria-pressed=true]{background:var(--hi);color:var(--on-hi);border-color:var(--hi);box-shadow:none}
+/* 네 창 한 틀(본부 10-06 투덜이 「창마다 틀이 달라 흔들림 · 영상이 위에 딱 붙어 답답」)
+   · 위 여백 = 12px(+폰 안전 영역) — 네 창 같음
+   · 위 칸(영상·설명·쓰기·말하기) 높이 = 화면 크기로만: 화면 − 아래 막대·갈색 막대(98) − 위 여백 − 자막 카드 자리(26% · 120~210px) · 최대 500px
+   · 갈색 막대 = 위 칸 바로 아래(네 창 같은 y) · 자막 카드 = 그 아래 같은 자리(learn.js fitCard 가 네 창 모두 같은 글 크기로)
+   · 칸 안 내용은 칸 안에서 맞춤(영상 = 가운데 · 설명·말하기 = learn.js fitPanel · 쓰기 = write.js) */
+.learn{--toppad:calc(env(safe-area-inset-top,0px) + 12px);--slot:min(500px,calc(100dvh - 98px - var(--toppad) - clamp(120px,26dvh,210px)))}
+.learn .stick{padding-top:var(--toppad)}
+.learn .stick .vstage{height:var(--slot)}
+/* 영상 창 = 제목 줄(설명·쓰기·말하기 창 제목 줄과 같은 자리) + 영상(남는 자리에 16:9 로 가운데 · 전체 화면 단추는 영상 안 오른쪽 아래) */
+.learn .stick .vstage>.vmain{height:100%;display:flex;flex-direction:column}
+.learn .stick .vstage>.vmain[hidden]{display:none}
+.learn .vtitle{display:flex;align-items:flex-start;gap:8px;padding:6px 14px 4px;flex:none;min-width:0}
+.learn .vtitle .tt{display:grid;min-width:0;flex:1}
+.learn .vtitle b{font-size:18px;line-height:1.3;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.learn .vtitle .sub{font-size:12px;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.learn .vtitle .n{font-size:12px;color:var(--mute);white-space:nowrap;padding-top:5px;font-variant-numeric:tabular-nums}
+.learn .varea{flex:1;min-height:0;container-type:size;display:grid;place-items:center}
+.learn .varea>#vwrap{position:relative;width:min(100cqw,100cqh * 16 / 9);aspect-ratio:16/9;height:auto;background:#000}
+.learn .varea>#vwrap video{width:100%;height:100%;max-height:none;aspect-ratio:auto;object-fit:contain}
+.learn .varea>#vwrap:fullscreen{width:100%;height:100%;aspect-ratio:auto}
+.learn .stick .vstage>.panel.explain,.learn .stick .vstage>.panel.explain.v9,.learn .stick .vstage>.panel.speak,.learn .stick .vstage>.panel.write{height:100%}
+.learn .stick .vstage>.panel.explain,.learn .stick .vstage>.panel.speak{overflow:auto}
+.learn .stick .vstage>.panel.speak .speak{min-height:100%;display:flex;flex-direction:column;justify-content:space-evenly}
+.learn .stick .vstage>.panel.write{padding-bottom:6px;box-sizing:border-box} /* 자판 맨 아래 줄과 갈색 막대 사이 틈 */
+/* 낮은 창(660×560 등): 쓰기 자판 다섯 줄이 위 칸 안에 다 들어가게 — 위 여백 6px · 자판 아래 틈 없음 · 자막 카드 자리 24% (네 창 같은 값 그대로) */
+@media (max-height:620px){
+  .learn{--toppad:calc(env(safe-area-inset-top,0px) + 6px);--slot:min(500px,calc(100dvh - 98px - var(--toppad) - clamp(110px,24dvh,210px)))}
+  .learn .stick .vstage>.panel.write{padding-bottom:0}
+}
+/* 설명 창 「이제 말해 보세요」 = 말해 보기 전에도 결과 세 줄 자리를 늘 보임(투덜이 10-06 — 칸 높이가 말하기 전후로 같게)
+   점수 줄 「— %」 · 들은 말 「सुनिएको: —」 · 마이크 줄 = 흐린 글 · 「सेभ」 자리 = 통과 전엔 흐린 자리(누를 수 없는 글 — 진짜 단추는 통과 뒤에만) */
+.sayb .smsg:empty::before,.sayb .heardline:empty::before{content:attr(data-empty);opacity:.45}
+.sayb .microw:not(:has(>:not([hidden])))::before{content:attr(data-empty);opacity:.45;font-size:12px;line-height:17px;height:17px}
+.sayb .sbtns:has([data-x=keep][hidden]):not(:has([data-x=savedplay]:not([hidden])))::after{content:attr(data-keep);display:inline-flex;align-items:center;padding:2px 10px;border:1px dashed var(--line);border-radius:999px;font-size:12px;opacity:.45;align-self:stretch}
+.v9body .sayb .sline:has(.lvl[hidden]):has(.smsg:empty){display:flex}
+.v9body .sayb .heardline:empty{display:block}
+.v9body .sayb .microw:not(:has(:not([hidden]))){display:flex}
