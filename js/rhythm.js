@@ -5,10 +5,10 @@
 //      − 0.05 (말 전체 길이가 본보기의 0.6배 아래 · 1.8배 위)
 //  · 최종 점수 = 글자 점수(score.js) × f(R): R ≥ 0.90 → 1 · 0.5 ≤ R < 0.9 → 0.90 + 0.10 × (R − 0.5)/0.4 · R < 0.5 → 0.88
 //  녹음·재생은 그대로 — 받은 녹음(blob)을 풀어 재기만
-import { audioCtx } from "./wake.js?v=1006.88";
-import { leadOf, voicedEnd } from "./playmine.js?v=1006.88";
-import { speechEnd } from "./recstore.js?v=1006.88";
-import * as sfx from "./sfx.js?v=1006.88";
+import { audioCtx } from "./wake.js?v=1006.89";
+import { leadOf, voicedEnd } from "./playmine.js?v=1006.89";
+import { speechEnd } from "./recstore.js?v=1006.89";
+import * as sfx from "./sfx.js?v=1006.89";
 
 export const FR = 0.02; // 특징 칸 20ms
 const alignCache = new Map();
@@ -123,7 +123,8 @@ export function rhythmScore({ msyl, ysyl, mbuf, ybuf }) {
   return { R: Math.max(0, Math.min(1, R)), worst, p, q };
 }
 export const rhythmFactor = R => (R >= 0.9 ? 1 : R >= 0.5 ? 0.9 + (0.1 * (R - 0.5)) / 0.4 : 0.88);
-export const withRhythm = (letter, R) => (letter == null || R == null ? letter : Math.round(letter * rhythmFactor(R)));
+// 내림(본부 10-06 — 반올림이면 리듬 89%(R 0.894)인데 100점이 나옴) · 100점 = 글자 100 그리고 R ≥ 0.9 일 때만
+export const withRhythm = (letter, R) => (letter == null || R == null ? letter : Math.floor(letter * rhythmFactor(R) + 1e-9));
 
 // 점수 낼 때 — 정렬 파일·본보기 소리·내 녹음 → { R, worst } · 못 재면 null(그땐 글자 점수 그대로)
 export async function rhythmOf({ ep, key, url, text, blob }) {
@@ -138,4 +139,4 @@ export async function rhythmOf({ ep, key, url, text, blob }) {
 }
 
 // 결과 줄 근거 — 「글자 100% · 리듬 78%」 + 리듬이 90% 아래면 가장 많이 깎인 곳 한 곳
-export const rhyText = (h, t) => `${t("rhythm_line", { l: h.L, r: Math.round(h.R * 100) })}${h.R < 0.9 && h.worst ? " · " + t("rhy_" + h.worst.kind, { s: `「${h.worst.ch}」` }) : ""}`;
+export const rhyText = (h, t) => `${t("rhythm_line", { l: h.L, r: Math.floor(h.R * 100 + 1e-9) })}${h.R < 0.9 && h.worst ? " · " + t("rhy_" + h.worst.kind, { s: `「${h.worst.ch}」` }) : ""}`;

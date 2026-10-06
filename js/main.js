@@ -1,11 +1,11 @@
-import { detectLang, setLang, LANGS, t } from "./i18n.js?v=1006.88";
-import { VERSION } from "./version.js?v=1006.88";
-import welcome from "./screens/welcome.js?v=1006.88";
-import list from "./screens/list.js?v=1006.88";
-import learn from "./screens/learn.js?v=1006.88";
-import explain from "./screens/explain.js?v=1006.88";
-import write from "./screens/write.js?v=1006.88";
-import speak from "./screens/speak.js?v=1006.88";
+import { detectLang, setLang, LANGS, t } from "./i18n.js?v=1006.89";
+import { VERSION } from "./version.js?v=1006.89";
+import welcome from "./screens/welcome.js?v=1006.89";
+import list from "./screens/list.js?v=1006.89";
+import learn from "./screens/learn.js?v=1006.89";
+import explain from "./screens/explain.js?v=1006.89";
+import write from "./screens/write.js?v=1006.89";
+import speak from "./screens/speak.js?v=1006.89";
 
 const app = document.getElementById("app");
 const routes = { "": welcome, list, learn, explain, write, speak };
