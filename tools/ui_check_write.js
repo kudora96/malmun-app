@@ -51,9 +51,6 @@
   ok($(".panel .target")?.textContent === "요", "소리 도중 빠르게 5번(ㅓ ㅇ ㅗ ㅅ ㅔ) → 5번 다 처리 · 「서」「오」「세」 완성 → 다음 「요」", `지금 ${$(".panel .target")?.textContent}`);
   // 되돌려 앞 토막 처음부터(뒤 점검이 「서」 기준) — 토막 ▶ ◀
   $(".panel [data-seg='1']").click(); await W(200); $(".panel [data-seg='-1']").click(); await W(300); key("ㅇ"); await idle(); key("ㅓ"); await idle(4000);
-  // 낱말 칸의 글자 하나 소리(W4)
-  at = log.length; [...document.querySelectorAll(".panel .info .wc")][1]?.click(); await idle();
-  ok(log.slice(at).filter(e => e.ev === "시작").length === 1 && /uC11C|seo/.test(desc(at)), "낱말 칸 「서」 누름 → 「서」 글자 소리 하나", desc(at));
   // 글자 반복
   const ch = [...document.querySelectorAll(".panel .sent .c")].find(c => c.textContent === "오" && !c.classList.contains("noaudio"));
   if (ch) { ch.click(); await W(300); const c2 = [...document.querySelectorAll(".panel .sent .c")].find(c => c.textContent === "오"); ok(c2.classList.contains("loop"), "「오」 누름 → 반복"); c2.click(); await W(200); ok(![...document.querySelectorAll(".panel .sent .c.loop")].length, "다시 → 멈춤"); }

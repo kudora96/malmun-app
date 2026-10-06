@@ -13,13 +13,13 @@
 //  W5 소리는 언제나 하나만 · 새 일을 하면 앞 소리는 멈춘다
 //  W6 영상 창 안(embedded): 창 안에서 스크롤 없이 다 보이게 — 긴 문장은 토막으로(◀ 1/3 ▶) ·
 //     토막을 다 쓰면 자동으로 다음 토막 · 줄을 다 쓰면 대사를 듣고 자동으로 다음 줄 쓰기 · 아래 ▶ = 이 부분 듣기
-import { t, lang } from "../i18n.js?v=1006.20";
-import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO } from "../text.js?v=1006.20";
-import { episode, chars, charsF } from "../data.js?v=1006.20";
-import { paths } from "../paths.js?v=1006.20";
-import { I } from "../ui.js?v=1006.20";
-import { audioCtx, hold } from "../wake.js?v=1006.20";
-import * as sfx from "../sfx.js?v=1006.20";
+import { t, lang } from "../i18n.js?v=1006.24";
+import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO } from "../text.js?v=1006.24";
+import { episode, chars, charsF } from "../data.js?v=1006.24";
+import { paths } from "../paths.js?v=1006.24";
+import { I } from "../ui.js?v=1006.24";
+import { audioCtx, hold } from "../wake.js?v=1006.24";
+import * as sfx from "../sfx.js?v=1006.24";
 
 const KEYS = [..."ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎㄲㄸㅃㅆㅉ"], VOW = [..."ㅏㅑㅓㅕㅗㅛㅜㅠㅡㅣ"];
 const VOW2 = [..."ㅐㅒㅔㅖㅘㅙㅚㅝㅞㅟㅢ"]; // 겹모음 줄(본부 10-06) — 칸 하나 · ㅓ+ㅣ 처럼 나눠 쳐도 받음
@@ -167,13 +167,22 @@ export default async function write(app, ep, id, opts = {}) {
       sentEl.style.columnGap = fs < 21 ? "6px" : ""; if (fs < 17) sentEl.querySelectorAll(".w").forEach(w => { w.style.gap = "1px"; });
     }
   }
+  // 세 단추 자리(10-06 투덜이 「게 옆으로 가로로」) — 넓은 쓰기 창(440px↑) = 낱말 단추 바로 옆(모자라면 그 아래 줄로 꺾임) · 좁은 창(폰) = 글자 칸 아래 한 줄
+  function placeBtns() { // 세 단추 = 자모 칸(ㄱ □) 오른쪽 같은 줄(투덜이 10-06 「여기다 · 그럼 더 많이 줄어」) — 글자 칸이 두 줄(로마자·뜻 / 자모 칸+단추)로 · 안 들어가면 단추 글 작게 → 두 줄로 좁게 → 자모 칸 작게 · 그래도 안 되면 아래 줄
+    const stg = work.querySelector(".stage"), row = stg?.querySelector(".slotrow"); if (!row) return;
+    row.append(wb); stg.classList.add("btns-in");
+    const sl = row.querySelector(".slots"), bs = [...wb.querySelectorAll("button")];
+    const wrapped = () => wb.getBoundingClientRect().top > sl.getBoundingClientRect().bottom - 4 || bs.some(b => Math.abs(b.getBoundingClientRect().top - bs[0].getBoundingClientRect().top) > 2);
+    stg.classList.remove("c1", "c2", "c3", "c4");
+    for (const c of ["c1", "c2", "c3"]) { if (!wrapped()) break; stg.classList.add(c); }
+  }
   // 낱말 칸 글자 단추 = 한 줄 · 넘치면 글자 크기·안쪽 여백을 같이 줄임(위 글자 줄과 같은 방식) · 로마자는 아래 줄 따로
   function fitWord() {
     const row = work.querySelector(".info .word"); if (!row || !row.clientWidth) return;
     const bs = [...row.querySelectorAll(".wc")]; bs.forEach(b => { b.style.fontSize = ""; b.style.padding = ""; });
     for (let fs = parseFloat(getComputedStyle(bs[0] || row).fontSize) - 1; row.scrollWidth > row.clientWidth + 1 && fs >= 11; fs -= 1) bs.forEach(b => { b.style.fontSize = fs + "px"; b.style.padding = fs < 16 ? "0 2px" : ""; });
   }
-  let fitQ = 0; new ResizeObserver(() => { clearTimeout(fitQ); fitQ = setTimeout(fitSent, 30); }).observe(sentEl);
+  let fitQ = 0; new ResizeObserver(() => { clearTimeout(fitQ); fitQ = setTimeout(() => { fitSent(); placeBtns(); fitWord(); }, 30); }).observe(sentEl);
   function render() {
     paintSent();
     if (st.s >= segs.length) {
@@ -183,10 +192,10 @@ export default async function write(app, ep, id, opts = {}) {
     }
     const w = words()[st.w], c = w.chars[st.c], jam = c.jamo;
     work.innerHTML = `<div class="stage"><div class="box"><span class="target ko" lang="ko">${esc(c.ch)}</span><span class="typed ko" lang="ko">${esc(compose([...st.typed, st.part].flatMap(jamoParts), vowelLen(c.ch)))}</span></div>
-      <div class="info"><div class="word ko" lang="ko">${w.chars.map((x, i) => `<button class="wc ${i === st.c ? "now" : ""}" data-wc="${i}" ${x.file ? "" : "disabled"}>${esc(x.ch)}</button>`).join("")}</div>${w.rom || w.mean ? `<div class="sub2">${w.rom ? `<span class="rom">${esc(w.rom)}</span>` : ""}${w.mean ? `<span class="mean tr">${esc(w.mean)}</span>` : ""}</div>` : ""}
-      <div class="slots">${jam.map((j, i) => `<span class="slot ${i < st.k ? "filled" : i === st.k ? "current" : ""}">${i <= st.k ? esc(j) : ""}</span>`).join("")}</div></div></div>
+      <div class="info">${w.rom || w.mean ? `<div class="sub2">${w.rom ? `<span class="rom">${esc(w.rom)}</span>` : ""}${w.mean ? `<span class="mean tr">${esc(w.mean)}</span>` : ""}</div>` : ""}
+      <div class="slotrow"><div class="slots">${jam.map((j, i) => `<span class="slot ${i < st.k ? "filled" : i === st.k ? "current" : ""}">${i <= st.k ? esc(j) : ""}</span>`).join("")}</div></div></div></div>
       <div class="kb" lang="ko">${KB_ROWS.map(r => `<div class="kr">${r.map(j => `<button data-j="${j}">${j}</button>`).join("")}</div>`).join("")}</div>`;
-    work.querySelector(".stage").append(wb);
+    fitWord(); placeBtns();
     fitWord(); setTimeout(fitWord, 30); // 낱말 글자 단추 = 한 줄(본부 10-06 — 세 단추 때문에 좁아져 꺾이던 것)
   }
   function goSeg(s) { st.auto = false; markAuto(); resetSounds(); st.busy = false; Object.assign(st, { s, w: 0, c: 0, k: 0, typed: [], part: "", done: false, queue: [] }); render(); }
