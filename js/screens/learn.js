@@ -10,21 +10,21 @@
 //  R7 영상은 늘 맨 위 · 지금 줄은 영상 바로 아래(앞 줄은 영상 뒤로) — 손으로 목록을 움직이면 4초 동안은 따라가지 않음
 //  R8 듣기 모드(대사→설명 · 설명만)도 R1~R6 그대로(영상 대신 소리 조각) · 모드를 바꾸면 멈춤(▶ 로 시작)
 //  R9 다시 들어오면 마지막 줄이 선택된 채 멈춰 있음
-import { t, lang, langName } from "../i18n.js?v=1006.49";
-import { esc, renderText, glossCards, sayParts } from "../text.js?v=1006.49";
-import { episode } from "../data.js?v=1006.49";
-import { paths } from "../paths.js?v=1006.49";
-import { Sequence } from "../audio.js?v=1006.49";
-import { I, progress, SPEAKER } from "../ui.js?v=1006.49";
-import writeView from "./write.js?v=1006.49";
-import { diagEnv, keepDiag } from "../diag.js?v=1006.49";
-import { playMine as playMineRec } from "../playmine.js?v=1006.49";
-import { bestHeard, heardHTML, endHint } from "../heard.js?v=1006.49";
-import { recDel, downloadRec, askPersist } from "../recstore.js?v=1006.49";
-import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1006.49";
-import { scoreFx, stopFx } from "../scorefx.js?v=1006.49"; // 점수별 효과(본부 10-05)
-import { record, micWhy, srWhy, canScore, closeMic, logRec, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1006.49";
-import { hold, quietWake } from "../wake.js?v=1006.49";
+import { t, lang, langName } from "../i18n.js?v=1006.53";
+import { esc, renderText, glossCards, sayParts } from "../text.js?v=1006.53";
+import { episode } from "../data.js?v=1006.53";
+import { paths } from "../paths.js?v=1006.53";
+import { Sequence } from "../audio.js?v=1006.53";
+import { I, progress, SPEAKER } from "../ui.js?v=1006.53";
+import writeView from "./write.js?v=1006.53";
+import { diagEnv, keepDiag } from "../diag.js?v=1006.53";
+import { playMine as playMineRec } from "../playmine.js?v=1006.53";
+import { bestHeard, heardHTML, endHint } from "../heard.js?v=1006.53";
+import { recDel, downloadRec, askPersist } from "../recstore.js?v=1006.53";
+import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1006.53";
+import { scoreFx, stopFx } from "../scorefx.js?v=1006.53"; // 점수별 효과(본부 10-05)
+import { record, micWhy, srWhy, canScore, closeMic, logRec, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1006.53";
+import { hold, quietWake } from "../wake.js?v=1006.53";
 
 const RATES = [1, 0.75, 0.5];
 const pref = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } };
@@ -49,7 +49,7 @@ export default async function learn(app, ep, startId) {
     <div class="varea"><div class="video" id="vwrap"><video playsinline preload="metadata" poster="${paths.poster(ep)}" src="${paths.video(ep)}"></video>
       <span class="vplay" aria-hidden="true">${I.play}</span>
       <div class="cap" aria-live="polite"></div>
-      <button class="vfs" data-act="fs" aria-label="${esc(t("fullscreen"))}">${FS}</button></div></div></div>
+      <button class="vfs" data-act="fs" aria-label="${esc(t("fullscreen"))}">${FS}</button></div></div><div class="vsub" hidden aria-hidden="true"><div class="in"></div></div></div>
     <div class="panel" hidden></div>
     </div>
     <div class="seek" data-off><span class="t0">0:00</span><div class="trk" aria-label="seek"><div class="rail"><i></i></div></div><span class="t1">0:00</span></div>
@@ -86,7 +86,7 @@ export default async function learn(app, ep, startId) {
       items[st.cur]?.querySelector(".expl").classList.remove("on");
       st.cur = i;
     }
-    items[i].classList.add("cur"); app.querySelector(".vtitle .n").textContent = `${i + 1} / ${L.length}`; if (ready) fitCard(i); // 카드 글 크기 = 네 창 같게
+    items[i].classList.add("cur"); app.querySelector(".vtitle .n").textContent = `${i + 1} / ${L.length}`; if (ready) vsubFill(i); if (ready) fitCard(i); // 카드 글 크기 = 네 창 같게
     items.forEach((li, k) => li.classList.toggle("past", k < i));
     // 전체 화면(화면만 보기)에서도 자막은 보여야 한다 — 영상 아래쪽에 지금 줄
     app.querySelector(".cap").innerHTML = `<span class="ko" lang="ko">${esc(L[i].ko)}</span>${L[i].tr ? `<span class="tr">${esc(L[i].tr)}</span>` : ""}`;
@@ -122,6 +122,21 @@ export default async function learn(app, ep, startId) {
     el.classList.add("fitc");
     for (let k = 0; k < 16 && el.offsetHeight > avail && kf > 11; k++) { kf -= 1; tf = Math.max(10, tf - 0.7); el.style.setProperty("--kf", kf + "px"); el.style.setProperty("--tf", tf + "px"); }
   }
+  // 영상 창 = 제목 줄 바로 밑에 영상(위 정렬) · 남는 자리(폰)에 지금 대사를 영화 자막처럼 크게(투덜이 10-06 ㅇ) — 화자(작게) · 한국어(굵게) · 로마자(켜짐이면 작게) · 학습자 언어
+  //   글 크기 = 그 자리를 채우는 가장 큰 크기(넘치면 줄임 · 스크롤 0) · 대사가 바뀔 때와 창 크기가 바뀔 때만 다시 맞춤 · 자리가 70px 안 되면(넓고 낮은 창) 자막 줄 없음
+  function vsubFill(i) {
+    const vm = app.querySelector(".vmain"), box = app.querySelector(".vsub"), inn = box.querySelector(".in"), ttl = app.querySelector(".vtitle");
+    if (vm.hidden) return;
+    const free = Math.floor(vm.clientHeight - ttl.offsetHeight - (vm.clientWidth * 9) / 16);
+    if (free < 70) { box.hidden = true; box.style.removeProperty("height"); return; }
+    box.hidden = false; box.style.height = free + "px";
+    const l = L[i], rom = romOn() ? (l.v9?.pieces || []).map(p => p.rom).filter(Boolean).join(" ") : "";
+    inn.innerHTML = `<span class="who ko" lang="ko">${esc(l.speaker)}</span><b class="ko" lang="ko">${esc(l.ko)}</b>${rom ? `<span class="rom">${esc(rom)}</span>` : ""}${l.tr ? `<span class="tr">${esc(l.tr)}</span>` : ""}`;
+    const fits = z => { inn.style.zoom = String(z); return box.scrollHeight <= box.clientHeight && inn.getBoundingClientRect().height <= box.clientHeight; };
+    let lo = 0.6, hi = 1.8;
+    if (fits(hi)) lo = hi; else for (let k = 0; k < 8; k++) { const m = (lo + hi) / 2; if (fits(m)) lo = m; else hi = m; }
+    inn.style.zoom = (Math.floor(lo * 100) / 100).toFixed(2);
+  }
   // 위 칸 안 내용 = 그 칸 안에서 맞춤(설명·말하기 — 칸 크기는 그대로 · 넘치면 안 내용만 작게 · 쓰기는 write.js 가 스스로 맞춤)
   function fitPanel() {
     const kind = st.panel?.kind; if (kind !== "explain" && kind !== "speak") return;
@@ -150,7 +165,7 @@ export default async function learn(app, ep, startId) {
     const h = [...panel.children].filter(c => !c.classList.contains("vplay")).reduce((a, c) => a + c.offsetHeight, 0);
     if (Math.abs(h - (st.fitH || 0)) > 2 || panel.scrollHeight > panel.clientHeight) fitPanel();
   }, 120); }).observe(app.querySelector(".panel"), { subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: ["hidden", "class", "aria-pressed"] });
-  const onFit = () => { fitPanel(); fitCard(st.cur); clearTimeout(st.fitT); st.fitT = setTimeout(() => keepVisible(st.cur), 120); }; // 창 크기가 바뀌면(브라우저가 스크롤을 옮겨도) 지금 줄 카드를 제자리로 — 손 스크롤 중이면 그대로
+  const onFit = () => { fitPanel(); vsubFill(st.cur); fitCard(st.cur); clearTimeout(st.fitT); st.fitT = setTimeout(() => keepVisible(st.cur), 120); }; // 창 크기가 바뀌면(브라우저가 스크롤을 옮겨도) 지금 줄 카드를 제자리로 — 손 스크롤 중이면 그대로
   addEventListener("resize", onFit);
   addEventListener("resize", pad); pad();
   ["touchmove", "wheel"].forEach(e => window.addEventListener(e, () => { st.handScroll = Date.now(); }, { passive: true }));
@@ -445,7 +460,7 @@ export default async function learn(app, ep, startId) {
     if (!st.panel) return;
     if (!fromNav) navPop(); // 단추로 닫으면 쌓아 둔 뒤로 가기 칸도 걷어 냄
     st.panel.cleanup?.(); ex.stop(); clearTimeout(st.gap); st.gap = 0; st.panel = null;
-    panel.hidden = true; panel.innerHTML = ""; vwrap.hidden = false; fitCard(st.cur); // 영상 창도 같은 카드 자리
+    panel.hidden = true; panel.innerHTML = ""; vwrap.hidden = false; vsubFill(st.cur); fitCard(st.cur); // 영상 창도 같은 카드 자리
     markButtons();
     v.currentTime = L[st.cur].start;
     pad(); underVideo(items[st.cur]); sync();

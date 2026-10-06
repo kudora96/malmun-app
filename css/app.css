@@ -697,3 +697,11 @@ a{color:inherit;text-decoration:none}
 .v9body .sayb .sline:has(.lvl[hidden]):has(.smsg:empty){display:flex}
 .v9body .sayb .heardline:empty{display:block}
 .v9body .sayb .microw:not(:has(:not([hidden]))){display:flex}
+/* 영상 창 큰 자막(투덜이 10-06) — 영상은 제목 줄 바로 밑(위 정렬) · 아래 남는 자리에 지금 대사 · 글 크기는 learn.js vsubFill 이 자리에 맞춤 */
+.learn .varea{place-items:start center}
+.learn .vsub{flex:none;overflow:hidden;display:flex;align-items:center;justify-content:center;padding:0 16px;box-sizing:border-box}
+.learn .vsub .in{display:grid;gap:4px;text-align:center;width:100%;min-width:0}
+.learn .vsub .who{font-size:12px;color:var(--mute)}
+.learn .vsub b{font-size:20px;line-height:1.35;font-weight:700;color:var(--ink);overflow-wrap:anywhere}
+.learn .vsub .rom{font-size:12px;color:var(--mute)}
+.learn .vsub .tr{font-size:13px;line-height:1.4;color:var(--ink);opacity:.75}
