@@ -10,21 +10,21 @@
 //  R7 영상은 늘 맨 위 · 지금 줄은 영상 바로 아래(앞 줄은 영상 뒤로) — 손으로 목록을 움직이면 4초 동안은 따라가지 않음
 //  R8 듣기 모드(대사→설명 · 설명만)도 R1~R6 그대로(영상 대신 소리 조각) · 모드를 바꾸면 멈춤(▶ 로 시작)
 //  R9 다시 들어오면 마지막 줄이 선택된 채 멈춰 있음
-import { t, lang, langName } from "../i18n.js?v=1006.59";
-import { esc, renderText, glossCards, sayParts } from "../text.js?v=1006.59";
-import { episode } from "../data.js?v=1006.59";
-import { paths } from "../paths.js?v=1006.59";
-import { Sequence } from "../audio.js?v=1006.59";
-import { I, progress, SPEAKER } from "../ui.js?v=1006.59";
-import writeView from "./write.js?v=1006.59";
-import { diagEnv, keepDiag } from "../diag.js?v=1006.59";
-import { playMine as playMineRec } from "../playmine.js?v=1006.59";
-import { bestHeard, heardHTML, endHint } from "../heard.js?v=1006.59";
-import { recDel, downloadRec, askPersist } from "../recstore.js?v=1006.59";
-import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1006.59";
-import { scoreFx, stopFx } from "../scorefx.js?v=1006.59"; // 점수별 효과(본부 10-05)
-import { record, micWhy, srWhy, canScore, closeMic, logRec, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1006.59";
-import { hold, quietWake } from "../wake.js?v=1006.59";
+import { t, lang, langName } from "../i18n.js?v=1006.64";
+import { esc, renderText, glossCards, sayParts } from "../text.js?v=1006.64";
+import { episode } from "../data.js?v=1006.64";
+import { paths } from "../paths.js?v=1006.64";
+import { Sequence } from "../audio.js?v=1006.64";
+import { I, progress, SPEAKER } from "../ui.js?v=1006.64";
+import writeView from "./write.js?v=1006.64";
+import { diagEnv, keepDiag } from "../diag.js?v=1006.64";
+import { playMine as playMineRec } from "../playmine.js?v=1006.64";
+import { bestHeard, heardHTML, endHint } from "../heard.js?v=1006.64";
+import { recDel, downloadRec, askPersist } from "../recstore.js?v=1006.64";
+import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1006.64";
+import { scoreFx, stopFx } from "../scorefx.js?v=1006.64"; // 점수별 효과(본부 10-05)
+import { record, micWhy, srWhy, canScore, closeMic, logRec, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1006.64";
+import { hold, quietWake } from "../wake.js?v=1006.64";
 
 const RATES = [1, 0.75, 0.5];
 const pref = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } };
@@ -439,11 +439,11 @@ export default async function learn(app, ep, startId) {
     stopAll(); ex.stop(); st.once = false; select(i, { scroll: false });
     st.panel?.cleanup?.();
     const mine = (st.panel = { kind, i });
-    vwrap.hidden = true; panel.hidden = false; panel.className = `panel ${kind}${kind === "explain" && L[i].v9 ? " v9" : ""}`;
+    vwrap.hidden = true; panel.hidden = false; panel.className = `panel ${kind}${kind === "explain" && L[i].v9 ? " v9" : ""}${" fitting"}`; if (kind !== "explain") panel.innerHTML = ""; // 앞 창 내용이 새 창 크기로 잠깐 넘쳐 보이지 않게 setTimeout(() => st.panel === mine && panel.classList.remove("fitting"), 1500); // 글 크기 맞출 때까지 안 보이게(늦어도 1.5초 뒤엔 보임)
     markButtons();
     if (kind === "explain") {
       panel.innerHTML = explainHTML(i);
-      if (L[i].v9) v9Fit(); fitPanel(); setTimeout(fitPanel, 300); document.fonts?.ready.then(() => st.panel === mine && fitPanel()); // 글꼴이 늦게 와도 다시 맞춤 // 한 줄에 안 들어가면 (한국어) 괄호 → ✕ 글자 순서로 뺌
+      if (L[i].v9) v9Fit(); fitPanel(); panel.classList.remove("fitting"); setTimeout(fitPanel, 300); document.fonts?.ready.then(() => st.panel === mine && fitPanel()); // 글꼴이 늦게 와도 다시 맞춤 // 한 줄에 안 들어가면 (한국어) 괄호 → ✕ 글자 순서로 뺌
       if (L[i].v9) { mine.cleanup = spStop; spInit(i); if (!canScore()) { const g = panel.querySelector(".sayb .smsg"); if (g) g.textContent = t("speak_hint_noscore"); } } // 마이크는 🎤 누를 때만 연다(열면 블루투스가 통화 모드로 바뀌어 설명 소리까지 전화 음질 — 본부 10-03)
       if (autoplay) { ex.play((st.exLoop = exItems(i))); if (L[i].v9) markPlay(v9pref().snd); }
       setTimeout(() => keepVisible(i), 60); // 카드가 길어도 그 줄이 아래 막대에 가리지 않게
@@ -451,7 +451,7 @@ export default async function learn(app, ep, startId) {
       const view = kind === "speak" ? speakView : writeView; // 줄을 다 쓰면(말하면) 다음 줄의 같은 메뉴로(W6 · S7)
       const cleanup = await view(panel, ep, L[i].id, { embedded: true, task, onNext: k => openPanel(kind, k), onClose: () => closePanel(), navPush, navPop });
       if (st.panel !== mine) return cleanup?.();
-      mine.cleanup = cleanup; fitPanel(); setTimeout(() => st.panel === mine && fitPanel(), 300);
+      mine.cleanup = cleanup; fitPanel(); panel.classList.remove("fitting"); setTimeout(() => st.panel === mine && fitPanel(), 300);
       setTimeout(() => { fitCard(i); keepVisible(i); }, 60); // 쓰기 창이면 자막 카드 글을 그 자리에 맞춤(손 스크롤 중이어도)
     }
     pad(); underVideo(items[i]); sync();
@@ -566,7 +566,7 @@ export default async function learn(app, ep, startId) {
     }
     if (k === "gw") { const sn = x.closest(".sn"), h = popFor(x); if (sn) playFromSent(sn); return h ? v9Pop(x, h) : hidePop(); } // 따옴표 낱말 = 그 문장부터 재생 + 뜻이 있으면 작은 말풍선(본부 10-05)
     if (k === "sn") { hidePop(); return playFromSent(x); } // 문장 = 그 문장부터 재생
-    if (k === "v9rom") { const on = x.getAttribute("aria-pressed") !== "true"; x.setAttribute("aria-pressed", String(on)); pref("malmun.rom", on ? "1" : "0"); panel.querySelector(".exv").classList.toggle("norom", !on); app.classList.toggle("norom", !on); hidePop(); return; } // 로마자 켜기/끄기(기억)
+    if (k === "v9rom") { const on = x.getAttribute("aria-pressed") !== "true"; x.setAttribute("aria-pressed", String(on)); pref("malmun.rom", on ? "1" : "0"); panel.querySelector(".exv").classList.toggle("norom", !on); app.classList.toggle("norom", !on); hidePop(); fitPanel(); return; } // 로마자 켜기/끄기(기억) · 그 순간 글 크기 다시 맞춤(넘친 첫 그림이 보이지 않게)
     if (k === "rec") return spRec(i, x);
     if (k === "close") return closePanel(); // ✕ 닫기 — 녹음 중이면 버리고 영상으로
     if (k === "mics") { // 마이크 목록(카드 안 작은 고르기) — 고르면 기억하고 다음 녹음부터

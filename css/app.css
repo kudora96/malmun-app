@@ -681,7 +681,9 @@ a{color:inherit;text-decoration:none}
 .learn .varea>#vwrap video{width:100%;height:100%;max-height:none;aspect-ratio:auto;object-fit:contain}
 .learn .varea>#vwrap:fullscreen{width:100%;height:100%;aspect-ratio:auto}
 .learn .stick .vstage>.panel.explain,.learn .stick .vstage>.panel.explain.v9,.learn .stick .vstage>.panel.speak,.learn .stick .vstage>.panel.write{height:100%}
-.learn .stick .vstage>.panel.explain,.learn .stick .vstage>.panel.speak{overflow:auto}
+.learn .stick .vstage>.panel.explain,.learn .stick .vstage>.panel.speak{overflow:hidden} /* 스크롤바 0(투덜이 10-06 「보였다 없어지는 게 꽤 있다」) — 넘침은 fitPanel 이 글 크기로 해결 */
+.learn .stick .vstage>.panel .paras{overflow:hidden}
+.learn .stick .vstage>.panel.fitting{visibility:hidden} /* 맞추기 전 첫 그림은 안 보이게 */
 .learn .stick .vstage>.panel.speak .speak{min-height:100%;display:flex;flex-direction:column;justify-content:space-evenly}
 .learn .stick .vstage>.panel.write{padding-bottom:6px;box-sizing:border-box} /* 자판 맨 아래 줄과 갈색 막대 사이 틈 */
 /* 낮은 창(660×560 등): 쓰기 자판 다섯 줄이 위 칸 안에 다 들어가게 — 위 여백 6px · 자판 아래 틈 없음 · 자막 카드 자리 24% (네 창 같은 값 그대로) */
@@ -742,3 +744,14 @@ a{color:inherit;text-decoration:none}
 .crow .csyl button .want{position:absolute;top:0;left:0;right:0;font-size:10px;line-height:1;font-weight:400;color:var(--mute);text-decoration:none}
 .crow .csyl button .got{display:block;padding-top:9px;color:var(--badc)}
 .crow .csyl .add{position:absolute;top:2px;height:16px;display:grid;place-items:center;font-size:10px;color:var(--mute);background:var(--bubble);border-radius:4px;opacity:.85;pointer-events:none}
+/* 비교 음절 글자 한 크기 · 좁은 칸은 위·아래 두 층(본부 10-06) — 글은 칸 가운데에 떠 있고 칸 너비와 상관없이 보임 */
+.speak .cmp .crow .csyl{height:40px}
+.speak .cmp .crow .csyl button{overflow:visible;font-size:15px;font-weight:700}
+.speak .cmp .crow .csyl button .tx{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);white-space:nowrap;line-height:1.1;display:grid;justify-items:center;padding:0 1px;background:var(--bg);border-radius:3px}
+.speak .cmp .crow .csyl button.up .tx{top:0;transform:translate(-50%,0)}
+.speak .cmp .crow .csyl button.dn .tx{top:auto;bottom:0;transform:translate(-50%,0)}
+.speak .cmp .crow .csyl button.narrow::after{content:"";position:absolute;left:50%;top:30%;bottom:30%;width:1px;background:var(--line)}
+.speak .cmp .crow .csyl button .want{position:static;font-size:9px;line-height:1}
+.speak .cmp .crow .csyl button .got{display:block;padding-top:0;font-size:15px}
+.speak .cmp .crow .csyl button.now .tx{background:var(--hi-soft)}
+.speak .cmp .crow .csyl button.tight{font-size:15px}

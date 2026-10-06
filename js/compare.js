@@ -5,12 +5,12 @@
 //  · 재생: 본보기 → 0.4초 → 내 목소리 · 재생 위치 세로 막대 + 지금 음절 강조 · 파형·음절 칸을 누르면 그 줄 그 음절부터
 //  녹음·점수 계산·[내 목소리] 재생(playmine.js playMine)은 그대로 — 여기는 그리기·DTW·비교 화면 안 재생만
 //  (본보기는 sfx.play 그대로 · 내 목소리는 playmine 과 같은 방식: decodeAudioData → BufferSource.start(t, offset) → Gain)
-import { esc } from "./text.js?v=1006.59";
-import { align } from "./score.js?v=1006.59";
-import { audioCtx } from "./wake.js?v=1006.59";
-import { leadOf, gainOf, FADE } from "./playmine.js?v=1006.59";
-import { speechEnd } from "./recstore.js?v=1006.59";
-import * as sfx from "./sfx.js?v=1006.59";
+import { esc } from "./text.js?v=1006.64";
+import { align } from "./score.js?v=1006.64";
+import { audioCtx } from "./wake.js?v=1006.64";
+import { leadOf, gainOf, FADE } from "./playmine.js?v=1006.64";
+import { speechEnd } from "./recstore.js?v=1006.64";
+import * as sfx from "./sfx.js?v=1006.64";
 
 const FR = 0.02; // 특징 칸 20ms
 const alignCache = new Map();
@@ -83,13 +83,14 @@ export async function openCompare(host, o) {
   }
   const span = Math.max(mStop - mLead, yStop - yLead, 0.5);
   const pos = (s, e, lead) => `left:${(100 * (s - lead)) / span}%;width:${(100 * Math.max(0.02, e - s)) / span}%`;
-  const cell = (x, k, lead, mine) => `<button data-k="${k}" class="${marks[k]}" style="${pos(x.s, x.e, lead)}">${mine && marks[k] === "bad" && heardCh[k] ? `<small class="want">${esc(x.ch)}</small><span class="got">${esc(heardCh[k])}</span>` : esc(x.ch)}</button>`;
+  const cell = (x, k, lead, mine) => `<button data-k="${k}" class="${marks[k]}" style="${pos(x.s, x.e, lead)}"><span class="tx">${mine && marks[k] === "bad" && heardCh[k] ? `<small class="want">${esc(x.ch)}</small><span class="got">${esc(heardCh[k])}</span>` : esc(x.ch)}</span></button>`;
   const extras = (syl, lead) => extra.map(x => { const at = x.after >= 0 ? syl[x.after].e : syl[0].s, [a0, a1] = x.after >= 0 ? [at - 0.03, at + 0.05] : [Math.max(lead, at - 0.08), at]; return `<span class="add" style="${pos(a0, a1, lead)}">${esc(x.ch)}</span>`; }).join("");
   const row = (cls, lab, syl, lead) => `<div class="crow ${cls}"><div class="clab">${esc(lab)}</div><div class="cwave"><canvas></canvas><i class="cbar" hidden></i></div><div class="csyl ko" lang="ko">${syl.map((x, k) => cell(x, k, lead, cls === "y")).join("")}${cls === "y" ? extras(syl, lead) : ""}</div></div>`;
   const ticks = []; for (let s = 0; s <= span + 1e-6; s += span > 3 ? 1 : 0.5) ticks.push(`<span style="left:${(100 * s) / span}%">${s.toFixed(1)}</span>`);
   host.innerHTML = `<div class="cmpw">${row("m", t("model"), msyl, mLead)}${row("y", t("my_voice"), ysyl, yLead)}<div class="cruler">${ticks.join("")}</div></div>`;
   const rows = [...host.querySelectorAll(".crow")];
-  const tight = () => host.querySelectorAll(".csyl button").forEach(b => b.classList.toggle("tight", b.offsetWidth < 16)); // 좁은 음절 칸 = 글자를 칸 밖까지 보이게(잘리지 않게)
+  // 음절 글자 = 두 줄 모두 한 크기(본부 10-06 투덜이) · 칸이 글보다 좁으면 글을 칸 가운데 위·아래 두 층으로 번갈아(가는 선으로 칸과 이음) — 겹치지 않게
+  const tight = () => host.querySelectorAll(".csyl").forEach(row => { let n = 0; row.querySelectorAll("button").forEach(b => { b.classList.remove("up", "dn", "narrow"); const tx = b.querySelector(".tx"); if (tx && tx.offsetWidth > b.clientWidth - 2) { b.classList.add("narrow", n++ % 2 ? "dn" : "up"); } else n = 0; }); });
   tight();
   // 파형 — 20ms 보다 잘게(가로 픽셀마다 최대 크기) · 내 목소리는 gainOf 크기로
   const draw = (cv, buf, lead, g) => {
@@ -118,19 +119,19 @@ export async function openCompare(host, o) {
     };
     step();
   };
-  const playRow = (ri, from) => new Promise(res => {
+  const playRow = (ri, from, to) => new Promise(res => { // to = 끝(없으면 말 끝까지) — 음절 칸을 누르면 그 음절만(앞뒤 0.03초)
     if (!st.alive) return res(false);
     host.classList.add("playing");
     if (ri === 0) {
       const t0 = ctx.currentTime + 0.01;
       follow(0, mLead, msyl, from, t0);
-      sfx.play(o.url, { offset: from, dur: Math.max(0.05, mStop - from), fade: 0.01 }).then(() => { cancelAnimationFrame(st.raf); rows[0].classList.remove("on"); rows[0].querySelector(".cbar").hidden = true; res(true); });
+      sfx.play(o.url, { offset: from, dur: Math.max(0.05, (to ?? mStop) - from), fade: 0.01 }).then(() => { cancelAnimationFrame(st.raf); rows[0].classList.remove("on"); rows[0].querySelector(".cbar").hidden = true; res(true); });
     } else {
       const src = ctx.createBufferSource(), g = ctx.createGain(), G = yGain * (window.__sfxVolume ?? 1), t0 = ctx.currentTime + 0.01;
       src.buffer = ybuf; g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(G, t0 + FADE);
       src.connect(g); g.connect(ctx.destination); st.src = src;
       src.onended = () => { if (st.src === src) st.src = null; cancelAnimationFrame(st.raf); rows[1].classList.remove("on"); rows[1].querySelector(".cbar").hidden = true; res(true); };
-      src.start(t0, from, Math.max(0.05, yStop - from));
+      src.start(t0, from, Math.max(0.05, (to ?? yStop) - from));
       follow(1, yLead, ysyl, from, t0);
     }
   });
@@ -143,13 +144,13 @@ export async function openCompare(host, o) {
   host.onclick = e => { // 음절 칸 · 파형 누르기 = 그 줄 그 자리부터
     const r = e.target.closest(".crow"); if (!r) return;
     const ri = rows.indexOf(r), lead = ri ? yLead : mLead, syl = ri ? ysyl : msyl;
-    let from = lead;
+    let from = lead, to;
     const b = e.target.closest(".csyl button");
-    if (b) from = syl[+b.dataset.k].s;
+    if (b) { const x = syl[+b.dataset.k]; from = Math.max(0, x.s - 0.03); to = x.e + 0.03; } // 그 음절만
     else { const w = r.querySelector(".cwave").getBoundingClientRect(); from = lead + (span * Math.max(0, Math.min(1, (e.clientX - w.left) / w.width))); const k = syl.findIndex(x => from < x.e); if (k >= 0) from = Math.min(from, syl[k].s); }
-    stopPlay(); playRow(ri, Math.max(0, from)).then(() => host.classList.remove("playing"));
+    stopPlay(); playRow(ri, Math.max(0, from), to).then(() => host.classList.remove("playing"));
   };
   playBoth();
-  window.__cmp = { msyl, ysyl, marks, heardCh, extra, span, mLead, yLead, playBoth }; // 점검 도구용
+  window.__cmp = { msyl, ysyl, marks, heardCh, extra, span, mLead, yLead, playBoth, playRow }; // 점검 도구용
   return { close() { st.alive = false; stopPlay(); ro.disconnect(); host.onclick = null; host.innerHTML = ""; }, replay: playBoth };
 }

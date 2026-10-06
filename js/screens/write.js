@@ -13,13 +13,13 @@
 //  W5 소리는 언제나 하나만 · 새 일을 하면 앞 소리는 멈춘다
 //  W6 영상 창 안(embedded): 창 안에서 스크롤 없이 다 보이게 — 긴 문장은 토막으로(◀ 1/3 ▶) ·
 //     토막을 다 쓰면 자동으로 다음 토막 · 줄을 다 쓰면 대사를 듣고 자동으로 다음 줄 쓰기 · 아래 ▶ = 이 부분 듣기
-import { t, lang } from "../i18n.js?v=1006.59";
-import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO } from "../text.js?v=1006.59";
-import { episode, chars, charsF } from "../data.js?v=1006.59";
-import { paths } from "../paths.js?v=1006.59";
-import { I } from "../ui.js?v=1006.59";
-import { audioCtx, hold } from "../wake.js?v=1006.59";
-import * as sfx from "../sfx.js?v=1006.59";
+import { t, lang } from "../i18n.js?v=1006.64";
+import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO } from "../text.js?v=1006.64";
+import { episode, chars, charsF } from "../data.js?v=1006.64";
+import { paths } from "../paths.js?v=1006.64";
+import { I } from "../ui.js?v=1006.64";
+import { audioCtx, hold } from "../wake.js?v=1006.64";
+import * as sfx from "../sfx.js?v=1006.64";
 
 const KEYS = [..."ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎㄲㄸㅃㅆㅉ"], VOW = [..."ㅏㅑㅓㅕㅗㅛㅜㅠㅡㅣ"];
 const VOW2 = [..."ㅐㅒㅔㅖㅘㅙㅚㅝㅞㅟㅢ"]; // 겹모음 줄(본부 10-06) — 칸 하나 · ㅓ+ㅣ 처럼 나눠 쳐도 받음
@@ -234,6 +234,7 @@ export default async function write(app, ep, id, opts = {}) {
     resetSounds(); st.auto = true; markAuto();
     const part = st.s;
     while (st.auto && st.alive && st.s === part && st.s < segs.length) {
+      if (st.jumpTo) { Object.assign(st, { w: st.jumpTo.w, c: st.jumpTo.c, k: 0, typed: [], part: "", done: false, queue: [], busy: false }); st.jumpTo = null; render(); } // 위 글자 줄에서 고른 글자부터 이어서
       const c = words()[st.w].chars[st.c], j = c.jamo[st.k];
       st.typed.push(j); st.k++; render(); flashKey(j);
       if (st.k >= c.jamo.length) await finishChar(j, c);
@@ -284,6 +285,7 @@ export default async function write(app, ep, id, opts = {}) {
     const cb = e.target.closest(".sent .c");
     if (cb) { // W1
       const w = +cb.dataset.w, ci = +cb.dataset.c, c = words()[w].chars[ci];
+      if (st.auto) { st.jumpTo = { w, c: ci }; cb.blur(); hush(); Object.assign(st, { w, c: ci, k: 0, typed: [], part: "", done: false, queue: [] }); render(); return; } // 자동 완성 중 위 글자 누름 = 그 글자로 옮겨 거기부터 자동 이어서(본부 10-06 투덜이) · 앞 글자는 초록 · 지금 테두리 · 뒤는 기본
       if (!c.file) { note.textContent = t("no_char_audio", { c: c.ch }); return; }
       if (st.busy) return;
       st.sent = false; markSent();

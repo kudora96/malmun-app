@@ -23,8 +23,14 @@
     ok(Math.max(...ys) - Math.min(...ys) <= 6 && hd.scrollWidth <= hd.clientWidth + 1, "말하기 머리 줄 한 줄(✕ 가 둘째 줄로 안 떨어짐)", hd.className + " · 높이 " + hd.offsetHeight);
     const sb = p.querySelector(".sbtns").getBoundingClientRect(), pr = p.getBoundingClientRect();
     ok(p.scrollHeight - p.clientHeight <= 0 && sb.bottom <= pr.bottom + 1 && !p.querySelector(".cmp").hidden, "위 칸 안(스크롤 0 · 단추 줄 보임)", `${p.scrollHeight - p.clientHeight}px`);
-    const cut = [...p.querySelectorAll(".csyl button")].filter(x => x.scrollWidth > x.clientWidth + 1 && !x.classList.contains("tight")).length;
-    ok(cut === 0, "음절 글자 잘림 없음", `${cut}`);
+    // 음절 글자 = 한 크기 · 같은 층끼리 안 겹침(좁은 칸은 위·아래 번갈아)
+    const sizes = new Set([...p.querySelectorAll(".csyl button .tx")].map(x => getComputedStyle(x.querySelector(".got") || x).fontSize));
+    let overlap = 0; p.querySelectorAll(".csyl").forEach(row => { const tx = [...row.querySelectorAll("button .tx")].map(x => x.getBoundingClientRect()); for (let i = 0; i < tx.length; i++) for (let j = i + 1; j < tx.length; j++) { const a = tx[i], c = tx[j]; if (a.right > c.left + 1 && c.right > a.left + 1 && a.bottom > c.top + 1 && c.bottom > a.top + 1) overlap++; } });
+    ok(sizes.size === 1 && overlap === 0, "음절 글자 한 크기 · 겹침 0(좁은 칸은 위·아래 두 층)", `${[...sizes].join(",")} · 겹침 ${overlap} · 좁은 칸 ${p.querySelectorAll(".csyl button.narrow").length}`);
+    // 음절 누르기 = 그 음절만(앞뒤 0.03초)
+    const log0 = (window.__sfxLog = []).length; p.querySelector(".crow.m .csyl button[data-k='3']").click(); await W(1500);
+    const st = window.__sfxLog.find(x => x.ev === "시작"), en = window.__sfxLog.find(x => x.ev === "끝" || x.ev === "멈춤"), s3 = c.msyl[3];
+    ok(st && en && Math.abs(en.pos - (s3.e + 0.03)) < 0.08, "음절 칸 누름 = 그 음절만(「읽」 s−0.03 ~ e+0.03)", en ? `끝 ${en.pos.toFixed(2)} · 기대 ${(s3.e + 0.03).toFixed(2)}` : "기록 없음");
     b.click(); await W(300);
     ok(p.querySelector(".cmp").hidden && !p.querySelector(".task").offsetParent === false && b.getAttribute("aria-pressed") === "false", "다시 누름 → 원래 말하기 화면");
     b.click(); await W(1200); p.querySelectorAll(".segnav button")[0].click(); await W(400);
