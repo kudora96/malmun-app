@@ -5,12 +5,12 @@
 //  · 재생: 본보기 → 0.4초 → 내 목소리 · 재생 위치 세로 막대 + 지금 음절 강조 · 파형·음절 칸을 누르면 그 줄 그 음절부터
 //  녹음·점수 계산·[내 목소리] 재생(playmine.js playMine)은 그대로 — 여기는 그리기·DTW·비교 화면 안 재생만
 //  (본보기는 sfx.play 그대로 · 내 목소리는 playmine 과 같은 방식: decodeAudioData → BufferSource.start(t, offset) → Gain)
-import { esc } from "./text.js?v=1006.69";
-import { align } from "./score.js?v=1006.69";
-import { audioCtx } from "./wake.js?v=1006.69";
-import { leadOf, gainOf, FADE, FADE_OUT, voicedEnd } from "./playmine.js?v=1006.69";
-import { speechEnd } from "./recstore.js?v=1006.69";
-import * as sfx from "./sfx.js?v=1006.69";
+import { esc } from "./text.js?v=1006.74";
+import { align } from "./score.js?v=1006.74";
+import { audioCtx } from "./wake.js?v=1006.74";
+import { leadOf, gainOf, FADE, FADE_OUT, voicedEnd } from "./playmine.js?v=1006.74";
+import { speechEnd, wavOf } from "./recstore.js?v=1006.74";
+import * as sfx from "./sfx.js?v=1006.74";
 
 const FR = 0.02; // 특징 칸 20ms
 const alignCache = new Map();
@@ -87,11 +87,22 @@ export async function openCompare(host, o) {
   const extras = (syl, lead) => extra.map(x => { const at = x.after >= 0 ? syl[x.after].e : syl[0].s, [a0, a1] = x.after >= 0 ? [at - 0.03, at + 0.05] : [Math.max(lead, at - 0.08), at]; return `<span class="add" style="${pos(a0, a1, lead)}">${esc(x.ch)}</span>`; }).join("");
   const row = (cls, lab, syl, lead) => `<div class="crow ${cls}"><div class="clab">${esc(lab)}</div><div class="cwave"><canvas></canvas><i class="cbar" hidden></i></div><div class="csyl ko" lang="ko">${syl.map((x, k) => cell(x, k, lead, cls === "y")).join("")}${cls === "y" ? extras(syl, lead) : ""}</div></div>`;
   const ticks = []; for (let s = 0; s <= span + 1e-6; s += span > 3 ? 1 : 0.5) ticks.push(`<span style="left:${(100 * s) / span}%">${s.toFixed(1)}</span>`);
-  host.innerHTML = `<div class="cmpw">${row("m", t("model"), msyl, mLead)}${row("y", t("my_voice"), ysyl, yLead)}<div class="cruler">${ticks.join("")}</div><button class="craw" data-raw title="lead ${yLead.toFixed(2)} · end ${yStop.toFixed(2)} · ${ybuf.duration.toFixed(2)}s">⬇ ${esc(t("raw_dl"))}</button></div>`;
+  host.innerHTML = `<div class="cmpw">${row("m", t("model"), msyl, mLead)}${row("y", t("my_voice"), ysyl, yLead)}<div class="cruler">${ticks.join("")}</div><div class="cfoot"><button class="cslow" data-slow aria-pressed="false">0.75×</button><button class="craw" data-raw title="lead ${yLead.toFixed(2)} · end ${yStop.toFixed(2)} · ${ybuf.duration.toFixed(2)}s">⬇ ${esc(t("raw_dl"))}</button></div></div>`;
   const rows = [...host.querySelectorAll(".crow")];
   // 음절 글자 = 두 줄 모두 한 크기(본부 10-06 투덜이) · 칸이 글보다 좁으면 글을 칸 가운데 위·아래 두 층으로 번갈아(가는 선으로 칸과 이음) — 겹치지 않게
-  const tight = () => host.querySelectorAll(".csyl").forEach(row => { let n = 0; row.querySelectorAll("button").forEach(b => { b.classList.remove("up", "dn", "narrow"); const tx = b.querySelector(".tx"); if (tx && tx.offsetWidth > b.clientWidth - 2) { b.classList.add("narrow", n++ % 2 ? "dn" : "up"); } else n = 0; }); });
-  tight();
+  const tight = () => host.querySelectorAll(".csyl").forEach(row => { // 차례대로 놓되 가운데 → 위 → 아래 중 이미 놓인 글자와 안 겹치는 첫 자리(실제 크기로 잼)
+    const placed = [], hit = (a, b) => a.right > b.left + 2 && b.right > a.left + 2 && a.bottom > b.top + 2 && b.bottom > a.top + 2; // 2px 닿는 것까지는 겹침 아님
+    row.querySelectorAll("button").forEach(b => {
+      const tx = b.querySelector(".tx"); if (!tx) return;
+      b.classList.remove("up", "dn", "narrow"); const narrow = tx.offsetWidth > b.clientWidth - 2;
+      let best = null;
+      for (const c of ["", "up", "dn"]) { b.classList.remove("up", "dn"); if (c) b.classList.add(c); const r = tx.getBoundingClientRect(); if (!placed.some(p => hit(r, p))) { best = c; break; } }
+      b.classList.remove("up", "dn"); if (best === null) best = "up"; if (best) b.classList.add(best);
+      if (narrow || best) b.classList.add("narrow");
+      placed.push(tx.getBoundingClientRect());
+    });
+  });
+  tight(); document.fonts?.ready.then(() => st.alive && tight()); setTimeout(() => st.alive && tight(), 120); // 글꼴이 늦게 와 글자 폭이 바뀌어도 다시
   // 파형 — 20ms 보다 잘게(가로 픽셀마다 최대 크기) · 내 목소리는 gainOf 크기로
   const draw = (cv, buf, lead, g, stop = Infinity) => { // stop 뒤(말 끝 뒤 잡음)는 그리지 않음
     const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1, W2 = Math.max(1, Math.round(r.width * dpr)), H2 = Math.max(1, Math.round(r.height * dpr));
@@ -107,12 +118,12 @@ export async function openCompare(host, o) {
   paintWaves();
   const ro = new ResizeObserver(() => { paintWaves(); tight(); }); ro.observe(host);
   // 재생 — 본보기 = sfx.play(같은 버퍼 · offset) · 내 목소리 = BufferSource.start(t, offset) + Gain(playmine 과 같은 방식)
-  const stopPlay = () => { cancelAnimationFrame(st.raf); clearTimeout(st.timer); sfx.stopAll(); try { st.src?.stop(); } catch {} st.src = null; rows.forEach(r => { r.querySelector(".cbar").hidden = true; r.querySelectorAll(".csyl button").forEach(b => b.classList.remove("now")); r.classList.remove("on"); }); host.classList.remove("playing"); };
-  const follow = (ri, lead, syl, from, t0) => { // 재생 위치 막대 + 지금 음절
+  const stopPlay = () => { cancelAnimationFrame(st.raf); clearTimeout(st.timer); sfx.stopAll(); try { st.src?.stop(); } catch {} st.src = null; if (st.el) { st.el.onended = st.el.ontimeupdate = null; st.el.pause(); st.elDone?.(); st.el = null; } rows.forEach(r => { r.querySelector(".cbar").hidden = true; r.querySelectorAll(".csyl button").forEach(b => b.classList.remove("now")); r.classList.remove("on"); }); host.classList.remove("playing"); };
+  const follow = (ri, lead, syl, from, t0, posOf) => { // 재생 위치 막대 + 지금 음절 · posOf = 느리게(<audio>)일 때 지금 자리
     const r = rows[ri], bar = r.querySelector(".cbar"), bs = [...r.querySelectorAll(".csyl button")];
     r.classList.add("on"); bar.hidden = false;
     const step = () => {
-      const pos = from + Math.max(0, ctx.currentTime - t0);
+      const pos = posOf ? posOf() : from + Math.max(0, ctx.currentTime - t0);
       bar.style.left = `${Math.min(100, (100 * (pos - lead)) / span)}%`;
       bs.forEach((b, k) => b.classList.toggle("now", pos >= syl[k].s && pos < syl[k].e));
       if (st.alive) st.raf = requestAnimationFrame(step);
@@ -123,6 +134,17 @@ export async function openCompare(host, o) {
     if (!st.alive) return res(false);
     if (window.__cmp) window.__cmp.lastPlay = { ri, from, to }; // 점검 도구용(그림 칸과 트는 구간이 같은 기준인지)
     host.classList.add("playing");
+    if (st.slow) { // 0.75× 느리게(투덜이 10-06 허락) — 비교 화면 안에서만 · 음높이 그대로(<audio>.preservesPitch) · 본보기 = 그 mp3 · 내 목소리 = WAV(내려받기와 같은 함수 · gainOf 크기)
+      const url = ri ? (st.wavUrl ||= URL.createObjectURL(wavOf(ybuf, 0, ybuf.duration, yGain))) : o.url, end = to ?? (ri ? yStop : mStop);
+      const el = (st.el = new Audio(url)); el.preservesPitch = el.mozPreservesPitch = el.webkitPreservesPitch = true; el.playbackRate = 0.75; el.volume = Math.min(1, window.__sfxVolume ?? 1);
+      const done = () => { if (st.el === el) { st.el = null; el.pause(); } st.elDone = null; cancelAnimationFrame(st.raf); rows[ri].classList.remove("on"); rows[ri].querySelector(".cbar").hidden = true; res(true); };
+      st.elDone = done;
+      el.ontimeupdate = () => { if (el.currentTime >= end) done(); };
+      el.onended = done;
+      const go = () => { el.currentTime = from; el.play().then(() => follow(ri, ri ? yLead : mLead, ri ? ysyl : msyl, from, 0, () => { if (el.currentTime >= end) done(); return el.currentTime; })).catch(done); };
+      el.readyState >= 1 ? go() : el.addEventListener("loadedmetadata", go, { once: true });
+      return;
+    }
     if (ri === 0) {
       const t0 = ctx.currentTime + 0.01;
       follow(0, mLead, msyl, from, t0);
@@ -144,6 +166,8 @@ export async function openCompare(host, o) {
     await playRow(1, yLead); host.classList.remove("playing");
   };
   host.onclick = e => { // 음절 칸 · 파형 누르기 = 그 줄 그 자리부터
+    const sl = e.target.closest("[data-slow]");
+    if (sl) { st.slow = !st.slow; sl.setAttribute("aria-pressed", String(st.slow)); stopPlay(); return; } // 0.75× 켜고 끄기(다음 재생부터)
     if (e.target.closest("[data-raw]")) { // 진단(본부 10-06): 내 녹음 원본 그대로(webm · 자르기·크기 맞춤 없음) 내려받기 — 실제 녹음에서 앞·뒤 자르기가 왜 안 먹는지 본부가 직접 봄
       const u = URL.createObjectURL(o.blob), a = document.createElement("a"), ext = (o.blob.type.match(/audio\/(\w+)/) || [, "webm"])[1];
       a.href = u; a.download = `malmun_raw_${o.key}_${new Date().toISOString().replace(/[:.]/g, "-")}.${ext}`; document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(u), 5000);
@@ -158,6 +182,6 @@ export async function openCompare(host, o) {
     stopPlay(); playRow(ri, Math.max(0, from), to).then(() => host.classList.remove("playing"));
   };
   playBoth();
-  window.__cmp = { msyl, ysyl, marks, heardCh, extra, span, mLead, yLead, yStop, ybuf, playBoth, playRow }; // 점검 도구용
-  return { close() { st.alive = false; stopPlay(); ro.disconnect(); host.onclick = null; host.innerHTML = ""; }, replay: playBoth };
+  window.__cmp = { st, msyl, ysyl, marks, heardCh, extra, span, mLead, yLead, yStop, ybuf, playBoth, playRow }; // 점검 도구용
+  return { close() { st.alive = false; stopPlay(); if (st.wavUrl) URL.revokeObjectURL(st.wavUrl); ro.disconnect(); host.onclick = null; host.innerHTML = ""; }, replay: playBoth };
 }

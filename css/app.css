@@ -740,12 +740,12 @@ a{color:inherit;text-decoration:none}
 .speak .whead.h2 .spk{display:none}
 .speak .whead > *{flex:none}
 /* 비교 화면 내 목소리 = 들은 글자(본부 10-06) — 바뀐 칸: 위 작게 흐린 본보기 · 아래 크게 빨강 들은 글자 · 덧붙은 소리: 회색 작은 칸 */
-.speak .cmp .crow.y .csyl{height:clamp(30px,5.6dvh,40px)}
+.speak .cmp .crow.y .csyl{height:46px}
 .crow .csyl button .want{position:absolute;top:0;left:0;right:0;font-size:10px;line-height:1;font-weight:400;color:var(--mute);text-decoration:none}
 .crow .csyl button .got{display:block;padding-top:9px;color:var(--badc)}
 .crow .csyl .add{position:absolute;top:2px;height:16px;display:grid;place-items:center;font-size:10px;color:var(--mute);background:var(--bubble);border-radius:4px;opacity:.85;pointer-events:none}
 /* 비교 음절 글자 한 크기 · 좁은 칸은 위·아래 두 층(본부 10-06) — 글은 칸 가운데에 떠 있고 칸 너비와 상관없이 보임 */
-.speak .cmp .crow .csyl{height:40px}
+.speak .cmp .crow .csyl{height:46px} /* 글자 세 층(위 0~16 · 가운데 15~31 · 아래 30~46)이 서로 안 겹치게 */
 .speak .cmp .crow .csyl button{overflow:visible;font-size:15px;font-weight:700}
 .speak .cmp .crow .csyl button .tx{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);white-space:nowrap;line-height:1.1;display:grid;justify-items:center;padding:0 1px;background:var(--bg);border-radius:3px}
 .speak .cmp .crow .csyl button.up .tx{top:0;transform:translate(-50%,0)}
@@ -755,4 +755,7 @@ a{color:inherit;text-decoration:none}
 .speak .cmp .crow .csyl button .got{display:block;padding-top:0;font-size:15px}
 .speak .cmp .crow .csyl button.now .tx{background:var(--hi-soft)}
 .speak .cmp .crow .csyl button.tight{font-size:15px}
-.cmpw .craw{justify-self:end;margin-top:-18px;padding:1px 8px;border:1px dashed var(--line);border-radius:999px;background:none;font-size:10px;color:var(--mute)}
+.cmpw .craw{padding:1px 8px;border:1px dashed var(--line);border-radius:999px;background:none;font-size:10px;color:var(--mute)}
+.cmpw .cfoot{display:flex;justify-content:space-between;align-items:center;margin-top:-2px}
+.cmpw .cslow{padding:1px 10px;border:1px solid var(--line);border-radius:999px;background:var(--card);box-shadow:0 1px 0 var(--line);font-size:11px;font-weight:700;color:var(--ink)}
+.cmpw .cslow[aria-pressed=true]{background:var(--hi);color:var(--on-hi);border-color:var(--hi)}
