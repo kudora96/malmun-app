@@ -562,3 +562,15 @@ a{color:inherit;text-decoration:none}
 .write .info .word .wc:active{transform:translateY(2px);box-shadow:none}
 .write .info .word .wc.now{color:var(--ink);border:2px solid var(--hi)}
 .write .segrow .sent{min-width:0;flex:1 1 auto;overflow:hidden} /* 위 글자 줄 폭 = ◀ n/N ▶ 앞까지 — 넘치면 글자를 줄여 맞춤(fitSent) */
+
+/* 쓰기 자판 = 한 모양·한 격자(본부 10-06) — 다섯 줄 · 칸 너비 = 10칸 줄 기준 · 모자란 줄은 가운데 · 높이 40px 이상 */
+.write .kb{display:flex;flex-direction:column;gap:4px}
+.write.embedded .kb{display:flex;flex-direction:column;gap:4px}
+.write .kb .kr{flex:1;min-height:40px;display:grid;grid-template-columns:repeat(var(--n,10),calc((100% - 9*4px)/10));justify-content:center;gap:4px}
+.write .kb .kr:nth-child(2){--n:9}
+.write .kb .kr:nth-child(4){--n:6}
+.write .kb .kr:nth-child(5){--n:5}
+.write .kb .kr button,.write.embedded .kb .kr button{height:auto;min-height:40px;padding:0;border:1px solid var(--line);border-radius:8px;background:var(--card);box-shadow:0 2px 0 var(--line);color:var(--ink);font-size:clamp(15px,2.4dvh,19px);font-weight:600;transition:background-color .15s,transform .06s}
+.write .kb .kr button:active,.write .kb .kr button.pr{transform:translateY(2px);box-shadow:none;background:var(--hi-soft)}
+.write .kb .kr button.right{background:var(--okbg);color:var(--okc);box-shadow:inset 0 0 0 2px var(--okc)}
+.write .kb .kr button.wrong{background:var(--pink);color:#fff}

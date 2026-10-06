@@ -1,4 +1,4 @@
-import { VERSION } from "./version.js?v=1006.7";
+import { VERSION } from "./version.js?v=1006.9";
 // 학습자 언어 — 고르게 하지 않는다(CLAUDE.md).
 // ① 저장된 선택 ② 폰 언어가 22개 중 하나 ③ 폰 시간대로 나라 짐작 ④ 영어
 export const LANGS = [

@@ -40,9 +40,16 @@
   ok(/^효과음 → 시작\(j_giyeok\.mp3\)/.test(desc(at)) && $(".panel .slot.current")?.classList.contains("shake"), "ㄱ 틀림 → 뿅뿅(귀여운 틀림 소리) → 그래도 ㄱ 소리 · 흔들림", desc(at));
   at = log.length; key("ㅓ"); await W(150); key("ㅅ"); await idle();
   const ev = log.slice(at);
-  ok(/^효과음 → 시작\(j_eo\.mp3\) → 끝\(j_eo\.mp3\)$/.test(desc(at)), "ㅓ 완성 → 딩동 → ㅓ 소리 · 글자를 읽어 주는 소리 없음(W3)", desc(at));
-  ok(!ev.some(e => e.name.includes("siot")), "소리 나는 중 누른 ㅅ 은 무시");
+  ok(/^효과음 → 시작\(j_eo\.mp3\) → 끝\(j_eo\.mp3\)/.test(desc(at)) && !ev.some(e => /uC5B4|eo_char/.test(e.name)), "ㅓ 완성 → 딩동 → ㅓ 소리 · 글자를 읽어 주는 소리 없음(W3)", desc(at));
+  // 누르면 언제나 받기(본부 10-06) — 글자 완성 축하 중 누른 ㅅ 은 기억했다가 다음 글자 「서」로 넘어가자마자 처리
+  const iEo = ev.findIndex(e => e.ev === "끝" && /j_eo/.test(e.name)), iS = ev.findIndex(e => e.ev === "시작" && /j_siot/.test(e.name));
+  ok(iS > iEo && iEo >= 0 && $(".panel .target")?.textContent === "서" && document.querySelectorAll(".panel .slot.filled").length === 1, "글자 완성 축하 중 누른 ㅅ → 다음 글자 「서」 첫 칸으로 이어짐", desc(at));
   ok($(".panel .target")?.textContent === "서", "다음 글자 「서」");
+  // 빠르게 연달아(소리 도중 5번) — ㅓ(서 끝) ㅇ ㅗ(오 끝) ㅅ ㅔ → 5번 모두 처리 → 「세」까지 다 침 · 다음 「요」
+  key("ㅓ"); await W(60); key("ㅇ"); await W(60); key("ㅗ"); await W(60); key("ㅅ"); await W(60); key("ㅔ"); await idle(9000); await W(300); await idle(6000);
+  ok($(".panel .target")?.textContent === "요", "소리 도중 빠르게 5번(ㅓ ㅇ ㅗ ㅅ ㅔ) → 5번 다 처리 · 「서」「오」「세」 완성 → 다음 「요」", `지금 ${$(".panel .target")?.textContent}`);
+  // 되돌려 앞 토막 처음부터(뒤 점검이 「서」 기준) — 토막 ▶ ◀
+  $(".panel [data-seg='1']").click(); await W(200); $(".panel [data-seg='-1']").click(); await W(300); key("ㅇ"); await idle(); key("ㅓ"); await idle(4000);
   // 낱말 칸의 글자 하나 소리(W4)
   at = log.length; [...document.querySelectorAll(".panel .info .wc")][1]?.click(); await idle();
   ok(log.slice(at).filter(e => e.ev === "시작").length === 1 && /uC11C|seo/.test(desc(at)), "낱말 칸 「서」 누름 → 「서」 글자 소리 하나", desc(at));
@@ -121,7 +128,7 @@
   const jam = log.slice(at).filter(e => e.ev === "시작").map(e => e.name.split("/").pop().replace(/\.mp3$/, ""));
   const gi = jam.indexOf("j_giyeok");
   ok(gi >= 0 && jam[gi + 1] === "j_e" && !jam.includes("j_eo"), "자동 완성 「게」 = ㄱ(기역) → ㅔ(에) 소리 차례 · ㅓ 소리 없음", jam.slice(0, 8).join(" → "));
-  f = fits(); ok(f.scroll <= 1 && f.inside && document.querySelectorAll(".panel .kb2 button").length === 11, "겹모음 줄 11개 넣어도 창 안 스크롤 없음 · 자판이 창 안", `넘침 ${f.scroll}px`);
+  f = fits(); ok(f.scroll <= 1 && f.inside && document.querySelectorAll(".panel .kb .kr:nth-child(4) button, .panel .kb .kr:nth-child(5) button").length === 11, "겹모음 줄 11개 넣어도 창 안 스크롤 없음 · 자판이 창 안", `넘침 ${f.scroll}px`);
   } catch (e) { res.push("✗ 점검 도중 오류: " + e.message); }
   const out = res.join("\n"); console.log(out); return out;
 })();

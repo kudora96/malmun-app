@@ -13,16 +13,18 @@
 //  W5 소리는 언제나 하나만 · 새 일을 하면 앞 소리는 멈춘다
 //  W6 영상 창 안(embedded): 창 안에서 스크롤 없이 다 보이게 — 긴 문장은 토막으로(◀ 1/3 ▶) ·
 //     토막을 다 쓰면 자동으로 다음 토막 · 줄을 다 쓰면 대사를 듣고 자동으로 다음 줄 쓰기 · 아래 ▶ = 이 부분 듣기
-import { t, lang } from "../i18n.js?v=1006.7";
-import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO } from "../text.js?v=1006.7";
-import { episode, chars, charsF } from "../data.js?v=1006.7";
-import { paths } from "../paths.js?v=1006.7";
-import { I } from "../ui.js?v=1006.7";
-import { audioCtx, hold } from "../wake.js?v=1006.7";
-import * as sfx from "../sfx.js?v=1006.7";
+import { t, lang } from "../i18n.js?v=1006.9";
+import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO } from "../text.js?v=1006.9";
+import { episode, chars, charsF } from "../data.js?v=1006.9";
+import { paths } from "../paths.js?v=1006.9";
+import { I } from "../ui.js?v=1006.9";
+import { audioCtx, hold } from "../wake.js?v=1006.9";
+import * as sfx from "../sfx.js?v=1006.9";
 
 const KEYS = [..."ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎㄲㄸㅃㅆㅉ"], VOW = [..."ㅏㅑㅓㅕㅗㅛㅜㅠㅡㅣ"];
 const VOW2 = [..."ㅐㅒㅔㅖㅘㅙㅚㅝㅞㅟㅢ"]; // 겹모음 줄(본부 10-06) — 칸 하나 · ㅓ+ㅣ 처럼 나눠 쳐도 받음
+// 자판 줄(본부 10-06 투덜이 「단추가 제각각」) — 모든 단추 같은 모양·같은 너비(10칸 줄 기준) · 칸이 모자란 줄은 가운데
+const KB_ROWS = [KEYS.slice(0, 10), KEYS.slice(10), VOW, VOW2.slice(0, 6), VOW2.slice(6)];
 const GAP_NEXT = 600;     // 글자 소리 → 다음 글자 사이
 
 // ── 소리(W5) — 한 번에 하나 · 차례 재생 · 취소 ── 짧은 소리는 전부 미리 풀어 둔 버퍼로(js/sfx.js)
@@ -102,7 +104,7 @@ export default async function write(app, ep, id, opts = {}) {
     if (w.end) { segs.push(cur); cur = []; n = 0; }
   }
   if (cur.length) segs.push(cur);
-  const st = { s: 0, w: 0, c: 0, k: 0, typed: [], part: "", busy: false, loopAt: null, sent: false, alive: true, auto: false };
+  const st = { s: 0, w: 0, c: 0, k: 0, typed: [], part: "", busy: false, done: false, queue: [], loopAt: null, sent: false, alive: true, auto: false };
   const lineSrc = line.lineAudio ? paths.audio(ep, line.lineAudio) : null;
   hush();
 
@@ -141,7 +143,7 @@ export default async function write(app, ep, id, opts = {}) {
     stopLoop(); st.sent = true; markSent();
     run([partStep()]).then(() => { st.sent = false; markSent(); });
   }
-  app.__wr = { toggle: toggleSentence, busy: () => st.busy || st.sent || st.auto || sfx.playing() }; // busy = 점검 도구가 소리 끝을 기다릴 때
+  app.__wr = { toggle: toggleSentence, busy: () => st.busy || st.done || st.queue.length > 0 || st.sent || st.auto || sfx.playing() }; // busy = 점검 도구가 소리 끝을 기다릴 때
 
   function paintSent() {
     sentEl.innerHTML = `<svg class="spk" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M4 9v6h4l5 4V5L8 9H4z"/><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M16 8.5a5 5 0 0 1 0 7M18.8 6a8.5 8.5 0 0 1 0 12"/></svg>` + words().map((w, wi) => `<span class="w ${wi === st.w ? "on" : ""}">${w.chars.map((c, ci) =>
@@ -176,23 +178,25 @@ export default async function write(app, ep, id, opts = {}) {
       <div class="info"><div class="word ko" lang="ko">${w.chars.map((x, i) => `<button class="wc ${i === st.c ? "now" : ""}" data-wc="${i}" ${x.file ? "" : "disabled"}>${esc(x.ch)}</button>`).join("")}${w.rom ? ` <span class="rom">${esc(w.rom)}</span>` : ""}</div>
       ${w.mean ? `<div class="mean tr">${esc(w.mean)}</div>` : ""}
       <div class="slots">${jam.map((j, i) => `<span class="slot ${i < st.k ? "filled" : i === st.k ? "current" : ""}">${i <= st.k ? esc(j) : ""}</span>`).join("")}</div></div></div>
-      <div class="kb" lang="ko">${KEYS.map((j, i) => `<button class="${i >= 14 ? "dbl" : ""}" data-j="${j}">${j}</button>`).join("")}<span></span>${VOW.map(j => `<button class="v" data-j="${j}">${j}</button>`).join("")}<div class="kb2">${VOW2.map(j => `<button class="v" data-j="${j}">${j}</button>`).join("")}</div></div>`;
+      <div class="kb" lang="ko">${KB_ROWS.map(r => `<div class="kr">${r.map(j => `<button data-j="${j}">${j}</button>`).join("")}</div>`).join("")}</div>`;
   }
-  function goSeg(s) { st.auto = false; markAuto(); resetSounds(); st.busy = false; Object.assign(st, { s, w: 0, c: 0, k: 0, typed: [], part: "" }); render(); }
+  function goSeg(s) { st.auto = false; markAuto(); resetSounds(); st.busy = false; Object.assign(st, { s, w: 0, c: 0, k: 0, typed: [], part: "", done: false, queue: [] }); render(); }
 
   async function finishChar(j, c) { // W3
-    st.busy = true;
+    st.busy = true; st.done = true;
     work.querySelector(".box")?.classList.add("ok");
     const ok = await run(["ok", jamoSrc(j), GAP_NEXT]);
-    if (!ok || !st.alive) { st.busy = false; return; }
+    st.done = false;
+    if (!ok || !st.alive) { st.busy = false; st.queue = []; return; }
     st.busy = false; st.c++; st.k = 0; st.typed = []; st.part = "";
     const w = words()[st.w];
     if (st.c >= w.chars.length) { st.w++; st.c = 0; }
     if (st.w >= words().length) { // 토막 끝 → 다음 토막(자동)
       st.s++; st.w = 0;
-      if (st.s >= segs.length) return lineDone();
+      if (st.s >= segs.length) { st.queue = []; return lineDone(); }
     }
     render();
+    const q = st.queue.splice(0); q.forEach(k => press(k)); // 축하 중에 누른 키 — 차례대로(또 글자가 끝나면 다시 기억됨)
   }
   async function lineDone() { // 줄 끝 → 대사 듣고 → 다음 줄(자동) · 자동 완성으로 끝냈으면 대사 소리 없이(W4)
     render();
@@ -221,7 +225,8 @@ export default async function write(app, ep, id, opts = {}) {
   async function press(j) { // W2
     const key0 = j; // 실제로 누른 자판(겹모음을 나눠 쳐 완성하면 j 는 겹모음으로 바뀜)
     if (st.auto) { st.auto = false; markAuto(); return; } // 자동 완성 중 자판 = 멈춤
-    if (st.busy || st.s >= segs.length) return;
+    if (st.s >= segs.length) return;
+    if (st.done) { st.queue.push(j); return; } // 글자 완성 축하 중 = 기억해 두기
     stopLoop(); st.sent = false; markSent();
     const c = words()[st.w].chars[st.c];
     let voiceSrc = jamoSrc(j);
@@ -244,6 +249,7 @@ export default async function write(app, ep, id, opts = {}) {
     st.busy = true; await run(["ok", voiceSrc]); st.busy = false;
   }
 
+  app.querySelector(".scr").addEventListener("pointerdown", e => { const k = e.target.closest("[data-j]"); if (!k) return; k.classList.add("pr"); setTimeout(() => k.classList.remove("pr"), 160); });
   app.querySelector(".scr").onclick = e => {
     const k = e.target.closest("[data-j]");
     if (k) return press(k.dataset.j);
