@@ -13,18 +13,18 @@
 //     못 넘어도 막지 않는다([다음 ▶]) · 음성 인식이 안 되는 곳은 점수 없이 듣고 비교만(녹음은 저장)
 //  S6 녹음은 이 기기 안에만(IndexedDB) — 서버로 보내지 않는다
 //  S7 영상 창 안(embedded): 스크롤 없이 · 줄 이동·닫기는 학습 화면이 한다 · 줄 전체까지 통과하면 다음 줄 말하기로
-import { t, lang } from "../i18n.js?v=1006.56";
-import { esc, sayParts } from "../text.js?v=1006.56";
-import { episode } from "../data.js?v=1006.56";
-import { paths } from "../paths.js?v=1006.56";
-import { audioCtx, hold, quietWake } from "../wake.js?v=1006.56";
-import * as sfx from "../sfx.js?v=1006.56";
-import { diagEnv, keepDiag } from "../diag.js?v=1006.56";
-import { playMine as playMineRec } from "../playmine.js?v=1006.56";
-import { bestHeard, heardHTML, endHint } from "../heard.js?v=1006.56";
-import { openCompare } from "../compare.js?v=1006.56";
-import { recDel, downloadRec, askPersist } from "../recstore.js?v=1006.56";
-import { logRec, dB, srWhy, srWatch, niceLabel, ALIAS } from "../recorder.js?v=1006.56";
+import { t, lang } from "../i18n.js?v=1006.59";
+import { esc, sayParts } from "../text.js?v=1006.59";
+import { episode } from "../data.js?v=1006.59";
+import { paths } from "../paths.js?v=1006.59";
+import { audioCtx, hold, quietWake } from "../wake.js?v=1006.59";
+import * as sfx from "../sfx.js?v=1006.59";
+import { diagEnv, keepDiag } from "../diag.js?v=1006.59";
+import { playMine as playMineRec } from "../playmine.js?v=1006.59";
+import { bestHeard, heardHTML, endHint } from "../heard.js?v=1006.59";
+import { openCompare } from "../compare.js?v=1006.59";
+import { recDel, downloadRec, askPersist } from "../recstore.js?v=1006.59";
+import { logRec, dB, srWhy, srWatch, niceLabel, ALIAS } from "../recorder.js?v=1006.59";
 
 // 통과 두 단계(본부 10-04 · 투덜이 「원어민은 되지만 외국인은 100% 어렵다」): 80↑ = ☆ 통과(✓ · [저장]) · 95↑ = ★ 완벽
 export const PASS = 80, PERFECT = 95;
@@ -51,8 +51,8 @@ const QUIET_MS = 2000, START_MS = 6000;
 export const maxMsFor = say => Math.max(8000, (3 + 0.8 * [...String(say || "")].filter(c => /[가-힣]/.test(c)).length) * 1000);
 
 // ── 닮음 = 음절 정렬(js/score.js · 「들린 말」 빨간 표시와 같은 함수 — 본부 10-04) ──
-import { similarity } from "../score.js?v=1006.56";
-import { scoreFx } from "../scorefx.js?v=1006.56"; // 점수별 효과(본부 10-05)
+import { similarity } from "../score.js?v=1006.59";
+import { scoreFx } from "../scorefx.js?v=1006.59"; // 점수별 효과(본부 10-05)
 export { similarity };
 
 // ── 내 목소리 저장(S6) ──
@@ -67,6 +67,8 @@ export const recGet = key => late(recGet0(key));
 const recGet0 = async key => { try { const d = await db(); return await new Promise(res => { const q = d.transaction("rec").objectStore("rec").get(key); q.onsuccess = () => { d.close(); res(q.result || null); }; q.onerror = () => { d.close(); res(null); }; }); } catch { return null; } };
 export const recPut = async (key, val) => { try { const d = await db(); await new Promise(res => { const tx = d.transaction("rec", "readwrite"); tx.objectStore("rec").put(val, key); tx.oncomplete = tx.onerror = () => { d.close(); res(); }; }); } catch {} };
 
+// 단추 글 = 기호(◀ ▶ ? ✕) + 글 — 좁으면 글만 숨김(머리 줄 한 줄 유지)
+const lbl = s => { const m = String(s).match(/^([^\p{L}\p{M}\p{N}]*)(.*?)([^\p{L}\p{M}\p{N}]*)$/u); return m ? `${m[1] ? `<i class="ic">${esc(m[1].trim())}</i>` : ""}<span class="lt">${esc(m[2])}</span>${m[3] ? `<i class="ic">${esc(m[3].trim())}</i>` : ""}` : esc(s); };
 export default async function speak(app, ep, id, opts = {}) {
   const d = await episode(ep, lang);
   const li = Math.max(0, d.lines.findIndex(l => String(l.id) === String(id)));
@@ -84,8 +86,8 @@ export default async function speak(app, ep, id, opts = {}) {
   const savedReady = Promise.all(parts.map(async p => { st.saved[p.key] = await recGet(`${ep}/${p.key}`); })); // 기다리지 않고 먼저 그린다 — 다 읽으면 다시 그림
 
   app.innerHTML = `<section class="scr speak ${opts.embedded ? "embedded" : ""}">
-    <div class="whead"><b>${esc(t("speak"))}</b><span class="sub">${li + 1} / ${d.lines.length} · <span class="ko" lang="ko">${esc(line.speaker)}</span></span>
-      <button class="micpick" data-act="help" aria-label="${esc(t("help"))}">${esc(t("help_btn"))}</button><span class="segnav"></span><button class="micpick closex" data-act="close">${esc(t("close_btn"))}</button></div>
+    <div class="whead"><b>${esc(t("speak"))}</b><span class="sub">${li + 1} / ${d.lines.length}<span class="spk"> · <span class="ko" lang="ko">${esc(line.speaker)}</span></span></span>
+      <button class="micpick" data-act="help" aria-label="${esc(t("help"))}">${lbl(t("help_btn"))}</button><span class="segnav"></span><button class="micpick closex" data-act="close" aria-label="${esc(t("close_btn"))}">${lbl(t("close_btn"))}</button></div>
     <div class="miclist" hidden></div>
     <div class="helpbox" hidden>${[1, 2, 3, 4, 5].map(k => `<p>${esc(t("help_sp_" + k))}</p>`).join("")}<p class="x">${esc(t("help_close"))}</p></div>
     <div class="task"><div class="say ko" lang="ko"></div><div class="tr"></div></div>
@@ -100,6 +102,9 @@ export default async function speak(app, ep, id, opts = {}) {
   </section>`;
   const $ = s => app.querySelector(s);
   const cur = () => parts[st.i];
+  // 머리 줄은 한 줄(본부 10-06 — 375×667 에서 「✕ बन्द」가 둘째 줄로 떨어짐) — 넘치면 h1: 단추 글 숨김(◀ ▶ ? ✕ 만) → h2: 제목 옆 「· 화자」 숨김
+  function fitHead() { const h = $(".whead"); if (!h) return; h.classList.remove("h1", "h2"); for (const c of ["h1", "h2"]) { if (h.scrollWidth <= h.clientWidth + 1) break; h.classList.add(c); } }
+  new ResizeObserver(() => fitHead()).observe($(".whead"));
   // [तुलना] = 비교 화면(파형 두 줄 + 음절 칸 · js/compare.js) — 다시 누르면 원래 말하기 화면 · 토막을 바꾸거나 🎤 를 누르면 닫음
   let cmp = null;
   const closeCmp = () => { cmp?.close(); cmp = null; $(".cmp").hidden = true; app.querySelector(".scr").classList.remove("cmpon"); $("[data-act=both]").setAttribute("aria-pressed", "false"); };
@@ -130,7 +135,8 @@ export default async function speak(app, ep, id, opts = {}) {
     for (let fs = 26; task.scrollHeight > task.clientHeight + 1 && fs >= 15; fs -= 1) say.style.fontSize = fs + "px";
     if (task.scrollHeight > task.clientHeight + 1) tr.hidden = true; // 그래도 넘치면 번역 줄을 접는다(아래 말풍선에 있다)
     $(".segnav").innerHTML = parts.length > 1
-      ? `<button data-seg="-1" ${st.i ? "" : "disabled"} aria-label="${esc(t("previous"))}">${esc(t("prev_btn"))}</button><span>${st.i + 1}/${parts.length}${sv?.score >= PASS ? " ✓" : ""}</span><button data-seg="1" ${st.i < parts.length - 1 ? "" : "disabled"} aria-label="${esc(t("next"))}">${esc(t("next_btn"))}</button>` : "";
+      ? `<button data-seg="-1" ${st.i ? "" : "disabled"} aria-label="${esc(t("previous"))}">${lbl(t("prev_btn"))}</button><span>${st.i + 1}/${parts.length}${sv?.score >= PASS ? " ✓" : ""}</span><button data-seg="1" ${st.i < parts.length - 1 ? "" : "disabled"} aria-label="${esc(t("next"))}">${lbl(t("next_btn"))}</button>` : "";
+    fitHead();
     const sc = st.score ?? null; // 점수는 이번에 말한 뒤에만(열 때 예전 점수를 보이지 않음 — ✓ 는 토막 번호 옆에)
     $(".sbar i").style.width = (sc ?? 0) + "%";
     $(".meter").classList.toggle("pass", sc != null && sc >= PASS);

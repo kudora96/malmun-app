@@ -729,3 +729,16 @@ a{color:inherit;text-decoration:none}
 .speak .sbtns [data-act=both][aria-pressed=true]{background:var(--hi);color:var(--on-hi);border-color:var(--hi)}
 .crow .csyl button.tight{overflow:visible;font-size:clamp(11px,1.9dvh,14px);z-index:1}
 .crow .csyl button{text-align:center}
+/* 말하기 머리 줄 = 한 줄(본부 10-06) — 넘치면 단추 글 숨김(h1) → 「· 화자」 숨김(h2) · learn.js 없이 speak.js fitHead */
+.speak .whead{flex-wrap:nowrap;min-width:0;overflow:hidden}
+.speak .whead .ic{font-style:normal}
+.speak .whead .ic+.lt,.speak .whead .lt+.ic{margin-left:3px}
+.speak .whead.h1 .lt{display:none}
+.speak .whead.h1 .micpick,.speak .whead.h1 .segnav button{min-width:30px;padding:0 6px}
+.speak .whead.h2 .spk{display:none}
+.speak .whead > *{flex:none}
+/* 비교 화면 내 목소리 = 들은 글자(본부 10-06) — 바뀐 칸: 위 작게 흐린 본보기 · 아래 크게 빨강 들은 글자 · 덧붙은 소리: 회색 작은 칸 */
+.speak .cmp .crow.y .csyl{height:clamp(30px,5.6dvh,40px)}
+.crow .csyl button .want{position:absolute;top:0;left:0;right:0;font-size:10px;line-height:1;font-weight:400;color:var(--mute);text-decoration:none}
+.crow .csyl button .got{display:block;padding-top:9px;color:var(--badc)}
+.crow .csyl .add{position:absolute;top:2px;height:16px;display:grid;place-items:center;font-size:10px;color:var(--mute);background:var(--bubble);border-radius:4px;opacity:.85;pointer-events:none}

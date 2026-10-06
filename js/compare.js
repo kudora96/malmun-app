@@ -5,12 +5,12 @@
 //  · 재생: 본보기 → 0.4초 → 내 목소리 · 재생 위치 세로 막대 + 지금 음절 강조 · 파형·음절 칸을 누르면 그 줄 그 음절부터
 //  녹음·점수 계산·[내 목소리] 재생(playmine.js playMine)은 그대로 — 여기는 그리기·DTW·비교 화면 안 재생만
 //  (본보기는 sfx.play 그대로 · 내 목소리는 playmine 과 같은 방식: decodeAudioData → BufferSource.start(t, offset) → Gain)
-import { esc } from "./text.js?v=1006.56";
-import { align } from "./score.js?v=1006.56";
-import { audioCtx } from "./wake.js?v=1006.56";
-import { leadOf, gainOf, FADE } from "./playmine.js?v=1006.56";
-import { speechEnd } from "./recstore.js?v=1006.56";
-import * as sfx from "./sfx.js?v=1006.56";
+import { esc } from "./text.js?v=1006.59";
+import { align } from "./score.js?v=1006.59";
+import { audioCtx } from "./wake.js?v=1006.59";
+import { leadOf, gainOf, FADE } from "./playmine.js?v=1006.59";
+import { speechEnd } from "./recstore.js?v=1006.59";
+import * as sfx from "./sfx.js?v=1006.59";
 
 const FR = 0.02; // 특징 칸 20ms
 const alignCache = new Map();
@@ -70,10 +70,22 @@ export async function openCompare(host, o) {
   const toY = s => { const k = Math.max(0, Math.min(A.length - 1, Math.round((s - mLead) / FR))); return yLead + (map[k] ?? 0) * FR; };
   const ysyl = msyl.map((x, k) => ({ ch: x.ch, s: toY(x.s), e: k < msyl.length - 1 ? toY(msyl[k + 1].s) : Math.min(yStop, toY(x.e) + 0.02) }));
   // 맞음/틀림 — 점수와 같은 정렬(본보기 음절마다 m 맞음 · s 바뀜 · d 빠짐)
-  let marks = W.map(() => "");
-  if (o.heard) { const ops = align(o.text, o.heard).ops.filter(x => x.t !== "i"); marks = W.map((_, k) => (ops[k]?.t === "m" ? "ok" : ops[k]?.t === "d" ? "miss" : "bad")); }
+  // 내 목소리 칸에는 「들은 글자」(본부 10-06): 바뀜 = 큰 빨강 들은 글자 + 위 작게 흐린 본보기 글자 · 빠짐 = 흐린 점선 칸 · 덧붙은 소리 = 회색 작은 칸(앞 음절 끝에)
+  let marks = W.map(() => ""), heardCh = W.map(() => null), extra = [];
+  if (o.heard) {
+    const H = [...String(o.heard).replace(/500/g, "오백")].filter(isSyl), ops = align(o.text, o.heard).ops; let k = 0, j = 0;
+    for (const x of ops) {
+      if (x.t === "m") { marks[k] = "ok"; heardCh[k] = H[j]; k++; j++; }
+      else if (x.t === "s") { marks[k] = "bad"; heardCh[k] = H[j]; k++; j++; }
+      else if (x.t === "d") { marks[k] = "miss"; k++; }
+      else { extra.push({ after: k - 1, ch: H[j] }); j++; }
+    }
+  }
   const span = Math.max(mStop - mLead, yStop - yLead, 0.5);
-  const row = (cls, lab, syl, lead) => `<div class="crow ${cls}"><div class="clab">${esc(lab)}</div><div class="cwave"><canvas></canvas><i class="cbar" hidden></i></div><div class="csyl ko" lang="ko">${syl.map((x, k) => `<button data-k="${k}" class="${marks[k]}" style="left:${(100 * (x.s - lead)) / span}%;width:${(100 * Math.max(0.02, x.e - x.s)) / span}%">${esc(x.ch)}</button>`).join("")}</div></div>`;
+  const pos = (s, e, lead) => `left:${(100 * (s - lead)) / span}%;width:${(100 * Math.max(0.02, e - s)) / span}%`;
+  const cell = (x, k, lead, mine) => `<button data-k="${k}" class="${marks[k]}" style="${pos(x.s, x.e, lead)}">${mine && marks[k] === "bad" && heardCh[k] ? `<small class="want">${esc(x.ch)}</small><span class="got">${esc(heardCh[k])}</span>` : esc(x.ch)}</button>`;
+  const extras = (syl, lead) => extra.map(x => { const at = x.after >= 0 ? syl[x.after].e : syl[0].s, [a0, a1] = x.after >= 0 ? [at - 0.03, at + 0.05] : [Math.max(lead, at - 0.08), at]; return `<span class="add" style="${pos(a0, a1, lead)}">${esc(x.ch)}</span>`; }).join("");
+  const row = (cls, lab, syl, lead) => `<div class="crow ${cls}"><div class="clab">${esc(lab)}</div><div class="cwave"><canvas></canvas><i class="cbar" hidden></i></div><div class="csyl ko" lang="ko">${syl.map((x, k) => cell(x, k, lead, cls === "y")).join("")}${cls === "y" ? extras(syl, lead) : ""}</div></div>`;
   const ticks = []; for (let s = 0; s <= span + 1e-6; s += span > 3 ? 1 : 0.5) ticks.push(`<span style="left:${(100 * s) / span}%">${s.toFixed(1)}</span>`);
   host.innerHTML = `<div class="cmpw">${row("m", t("model"), msyl, mLead)}${row("y", t("my_voice"), ysyl, yLead)}<div class="cruler">${ticks.join("")}</div></div>`;
   const rows = [...host.querySelectorAll(".crow")];
@@ -138,6 +150,6 @@ export async function openCompare(host, o) {
     stopPlay(); playRow(ri, Math.max(0, from)).then(() => host.classList.remove("playing"));
   };
   playBoth();
-  window.__cmp = { msyl, ysyl, marks, span, mLead, yLead, playBoth }; // 점검 도구용
+  window.__cmp = { msyl, ysyl, marks, heardCh, extra, span, mLead, yLead, playBoth }; // 점검 도구용
   return { close() { st.alive = false; stopPlay(); ro.disconnect(); host.onclick = null; host.innerHTML = ""; }, replay: playBoth };
 }

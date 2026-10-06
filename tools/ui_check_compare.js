@@ -17,6 +17,10 @@
     ok(c.msyl.length === A.length && c.msyl.every((x, k) => x.ch === A[k].ch && Math.abs(x.s - A[k].s) < 1e-6), "본보기 음절 = align.json", c.msyl.map(x => x.ch).join(""));
     ok(c.ysyl.length === c.msyl.length && c.ysyl.every((x, k) => !k || x.s >= c.ysyl[k - 1].s), "내 목소리 음절 = 같은 수 · 차례대로(DTW)", c.ysyl.map(x => x.s.toFixed(2)).join(" "));
     ok(c.marks.join(",") === "miss,bad,ok,ok,ok,ok,ok,ok,ok", "색 = 점수 정렬(우 빠짐 · 리 틀림 · 나머지 맞음)", c.marks.join(","));
+    const got = p.querySelector(".crow.y .csyl button[data-k='1']");
+    ok(got?.querySelector(".got")?.textContent === "저" && got?.querySelector(".want")?.textContent === "리" && p.querySelector(".crow.y .csyl button[data-k='0']").classList.contains("miss"), "들은 글자 표시: 리 칸 = 빨강 「저」 + 위 흐린 「리」 · 우 = 빠짐", got?.textContent);
+    const hd = p.querySelector(".whead"), ys = [...hd.children].filter(x => x.offsetParent).map(x => Math.round(x.getBoundingClientRect().top + x.getBoundingClientRect().height / 2));
+    ok(Math.max(...ys) - Math.min(...ys) <= 6 && hd.scrollWidth <= hd.clientWidth + 1, "말하기 머리 줄 한 줄(✕ 가 둘째 줄로 안 떨어짐)", hd.className + " · 높이 " + hd.offsetHeight);
     const sb = p.querySelector(".sbtns").getBoundingClientRect(), pr = p.getBoundingClientRect();
     ok(p.scrollHeight - p.clientHeight <= 0 && sb.bottom <= pr.bottom + 1 && !p.querySelector(".cmp").hidden, "위 칸 안(스크롤 0 · 단추 줄 보임)", `${p.scrollHeight - p.clientHeight}px`);
     const cut = [...p.querySelectorAll(".csyl button")].filter(x => x.scrollWidth > x.clientWidth + 1 && !x.classList.contains("tight")).length;
@@ -25,6 +29,13 @@
     ok(p.querySelector(".cmp").hidden && !p.querySelector(".task").offsetParent === false && b.getAttribute("aria-pressed") === "false", "다시 누름 → 원래 말하기 화면");
     b.click(); await W(1200); p.querySelectorAll(".segnav button")[0].click(); await W(400);
     ok(p.querySelector(".cmp").hidden, "토막 바꾸면 비교 화면 닫힘");
+    // 덧붙은 소리 = 회색 작은 칸
+    p.querySelectorAll(".segnav button")[1].click(); await W(400);
+    S.blob = await (await fetch("/media/audio/L01-00-01/units/L01-00-01_13_p02.mp3")).blob();
+    S.heardHTML = `<span class="lab">x:</span> <span class="ko">${heardHTML(want, "그럼 우리도 읽을 수 있어요").html}</span>`;
+    b.disabled = false; b.click(); await W(1500);
+    ok(window.__cmp.extra.map(x => x.ch).join("") === "그럼" && p.querySelectorAll(".crow.y .csyl .add").length === 2 && window.__cmp.marks.every(x => x === "ok"), "덧붙은 소리 = 회색 작은 칸(「그」「럼」) · 나머지 맞음", window.__cmp.extra.map(x => x.ch).join(""));
+    b.click(); await W(200);
   } catch (e) { res.push("✗ 점검 도중 오류: " + e.message); }
   const out = `${innerWidth}x${innerHeight}\n` + res.join("\n"); console.log(out); return out;
 })();
