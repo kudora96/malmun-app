@@ -4,11 +4,11 @@
 //  ⓓ ㅅ·ㅈ 으로 시작하는 말(ⓒ 꼴) — 첫 자음 안 잘림
 // 통과: 시작점 = 말 시작 −0.1초 ±0.05 (= 말 시작 0.05~0.15초 앞)
 (async () => {
-  const v = document.documentElement.dataset.v, { leadOf } = await import(`/js/playmine.js?v=${v}`);
+  const v = document.documentElement.dataset.v, { leadOf, voicedEnd } = await import(`/js/playmine.js?v=${v}`);
   const al = await (await fetch(`/data/L01-00-01/L01-00-01.align.json?${Date.now()}`)).json();
   const SR = 44100, ctx = new OfflineAudioContext(1, SR, SR), res = [];
   const load = async k => { const it = al.items[k]; const ab = await (await fetch(it.file.replace(/^.*?media/, "/media").replace(/\\/g, "/"))).arrayBuffer(); return { it, d: (await ctx.decodeAudioData(ab)).getChannelData(0) }; };
-  const buf = arr => ({ sampleRate: SR, getChannelData: () => arr });
+  const buf = arr => ({ sampleRate: SR, duration: arr.length / SR, getChannelData: () => arr });
   const rmsOf = (d, a, b) => { let s = 0; for (let i = a; i < b; i++) s += d[i] * d[i]; return Math.sqrt(s / Math.max(1, b - a)); };
   const peakOf = d => { let p = 0; for (const x of d) p = Math.max(p, Math.abs(x)); return p; };
   const cat = (...parts) => { const n = parts.reduce((a, p) => a + p.length, 0), o = new Float32Array(n); let at = 0; for (const p of parts) { o.set(p, at); at += p.length; } return o; };
@@ -27,6 +27,16 @@
     const { it, d } = await load(k);
     check(`ⓓ 첫 자음 ${it.syl[0].ch} · ${it.text}`, cat(zeros(0.3), d), 0.3 + it.syl[0].s);
   }
-  const bad = res.filter(x => x.startsWith("✗")).length, out = `${bad ? "✗" : "✓"} 앞 잡음 자르기 ${res.length - bad}/${res.length}\n` + res.join("\n");
+  // 뒤 잡음(투덜이 10-06) — 끝 = 마지막 음절 끝(e) 뒤 0.05~0.5초 · ⓔ1 말 + 0.5초 뒤 툭 → 툭 앞에서 끝 · ⓔ2 말 끝에 바로 부스럭 0.4초 → 부스럭 대부분 빠짐 · ⓔ3 받침·「요」 꼬리 안 잘림
+  const endCheck = (name, arr, eTruth, maxEnd) => { const e = voicedEnd(buf(arr)), ok = e >= eTruth + 0.05 - 1e-6 && e <= Math.min(maxEnd ?? 1e9, eTruth + 0.5); res.push(`${ok ? "✓" : "✗"} ${name} → 끝 ${e.toFixed(2)}초 · 마지막 음절 끝 ${eTruth.toFixed(2)} · 뒤 ${(e - eTruth).toFixed(2)}초`); };
+  for (const k of ["L01-00-01_13_p02", "L01-00-01_10_p03", "L01-00-01_01_p02", "L01-00-01_02_p01", "L01-00-01_09_p02", "L01-00-01_07_p02"]) {
+    const { it, d } = await load(k), eT = it.syl[it.syl.length - 1].e, pk = peakOf(d);
+    const thudAt = d.length / SR + 0.5;
+    endCheck(`ⓔ1 말 + 0.5초 뒤 툭 · ${it.text}`, cat(d, zeros(0.5), thud(Math.min(0.99, pk * 1.6)), zeros(0.3)), eT, thudAt - 0.05);
+    const cutN = Math.round(Math.min(it.dur, eT + 0.06) * SR), sp = d.slice(0, cutN), rmsS = rmsOf(d, Math.round(it.syl[0].s * SR), Math.round(eT * SR));
+    endCheck(`ⓔ2 말 끝에 바로 부스럭 0.4초 · ${it.text}`, cat(sp, rustle(rmsS), zeros(0.3)), eT, eT + 0.06 + 0.2);
+    endCheck(`ⓔ3 잡음 없음(끝 안 잘림) · ${it.text}`, cat(d, zeros(0.3)), eT);
+  }
+  const bad = res.filter(x => x.startsWith("✗")).length, out = `${bad ? "✗" : "✓"} 앞·뒤 잡음 자르기 ${res.length - bad}/${res.length}\n` + res.join("\n");
   console.log(out); return out;
 })();

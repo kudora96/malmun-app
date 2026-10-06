@@ -1,6 +1,6 @@
 // 저장한 내 녹음 관리 — 지우기 · 이 편 모두 지우기 · 내려받기 · 오래 남게(본부 10-04 · 투덜이 승인)
-import { audioCtx } from "./wake.js?v=1006.64";
-import { leadOf, gainOf, FADE } from "./playmine.js?v=1006.64";
+import { audioCtx } from "./wake.js?v=1006.68";
+import { leadOf, gainOf, FADE, voicedEnd } from "./playmine.js?v=1006.68";
 // 녹음·재생·점수 경로는 건드리지 않는다 — IndexedDB 「malmun」/rec(말하기 창 recGet·recPut 과 같은 곳)만 다룬다
 const open = () => new Promise((res, rej) => {
   const r = indexedDB.open("malmun", 1);
@@ -53,7 +53,7 @@ export function wavOf(buf, t0, t1, g = 1) {
 export async function downloadRec(blob, name) {
   try {
     const buf = await audioCtx().decodeAudioData(await blob.slice(0).arrayBuffer());
-    return save(wavOf(buf, leadOf(buf), speechEnd(buf), gainOf(buf)), `${name}.wav`); // 재생과 같은 크기(gainOf)
+    return save(wavOf(buf, leadOf(buf), voicedEnd(buf), gainOf(buf)), `${name}.wav`); // 재생과 같은 크기(gainOf)
   } catch { return save(blob, `${name}.${EXT(blob.type || "")}`); } // 풀기 실패 → 원본 그대로
 }
 

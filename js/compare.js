@@ -5,12 +5,12 @@
 //  · 재생: 본보기 → 0.4초 → 내 목소리 · 재생 위치 세로 막대 + 지금 음절 강조 · 파형·음절 칸을 누르면 그 줄 그 음절부터
 //  녹음·점수 계산·[내 목소리] 재생(playmine.js playMine)은 그대로 — 여기는 그리기·DTW·비교 화면 안 재생만
 //  (본보기는 sfx.play 그대로 · 내 목소리는 playmine 과 같은 방식: decodeAudioData → BufferSource.start(t, offset) → Gain)
-import { esc } from "./text.js?v=1006.64";
-import { align } from "./score.js?v=1006.64";
-import { audioCtx } from "./wake.js?v=1006.64";
-import { leadOf, gainOf, FADE } from "./playmine.js?v=1006.64";
-import { speechEnd } from "./recstore.js?v=1006.64";
-import * as sfx from "./sfx.js?v=1006.64";
+import { esc } from "./text.js?v=1006.68";
+import { align } from "./score.js?v=1006.68";
+import { audioCtx } from "./wake.js?v=1006.68";
+import { leadOf, gainOf, FADE, FADE_OUT, voicedEnd } from "./playmine.js?v=1006.68";
+import { speechEnd } from "./recstore.js?v=1006.68";
+import * as sfx from "./sfx.js?v=1006.68";
 
 const FR = 0.02; // 특징 칸 20ms
 const alignCache = new Map();
@@ -64,7 +64,7 @@ export async function openCompare(host, o) {
   const mLead0 = msyl?.length ? msyl[0].s : leadOf(mbuf, 0), mEnd = msyl?.length ? msyl[msyl.length - 1].e : speechEnd(mbuf, 0);
   if (!msyl?.length || msyl.length !== W.length) msyl = W.map((ch, k) => ({ ch, s: mLead0 + ((mEnd - mLead0) * k) / W.length, e: mLead0 + ((mEnd - mLead0) * (k + 1)) / W.length }));
   const mLead = Math.max(0, mLead0 - 0.08), mStop = Math.min(mbuf.duration, mEnd + 0.15);
-  const yLead = leadOf(ybuf), yStop = speechEnd(ybuf), yGain = gainOf(ybuf);
+  const yLead = leadOf(ybuf), yStop = Math.max(yLead + 0.1, voicedEnd(ybuf)), yGain = gainOf(ybuf); // 끝 = 말 끝(뒤 잡음 빼기 · [내 목소리]와 같은 함수)
   // 내 목소리 음절 = DTW 로 본보기 경계를 옮김
   const A = feats(mbuf.getChannelData(0), mbuf.sampleRate, mLead, mStop), B = feats(ybuf.getChannelData(0), ybuf.sampleRate, yLead, yStop), map = dtwMap(A, B);
   const toY = s => { const k = Math.max(0, Math.min(A.length - 1, Math.round((s - mLead) / FR))); return yLead + (map[k] ?? 0) * FR; };
@@ -131,7 +131,8 @@ export async function openCompare(host, o) {
       src.buffer = ybuf; g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(G, t0 + FADE);
       src.connect(g); g.connect(ctx.destination); st.src = src;
       src.onended = () => { if (st.src === src) st.src = null; cancelAnimationFrame(st.raf); rows[1].classList.remove("on"); rows[1].querySelector(".cbar").hidden = true; res(true); };
-      src.start(t0, from, Math.max(0.05, (to ?? yStop) - from));
+      const len = Math.max(0.05, (to ?? yStop) - from); g.gain.setValueAtTime(G, t0 + Math.max(FADE, len - FADE_OUT)); g.gain.linearRampToValueAtTime(0, t0 + len); // 끝 30ms 페이드아웃
+      src.start(t0, from, len);
       follow(1, yLead, ysyl, from, t0);
     }
   });

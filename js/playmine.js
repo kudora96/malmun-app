@@ -2,12 +2,13 @@
 // · <audio> 자리 옮기기(seek)는 쓰지 않는다(webm 을 찾아가며 소리가 깨졌다 — 1004.9)
 // · blob 을 decodeAudioData 로 풀어 AudioBufferSourceNode.start(0, lead) · 연결은 source → destination 직결(게인·필터 없음)
 //   lead = 말 시작 0.15초 전(같은 버퍼에서 잼) · 끝나면 멈춤 · 풀기 실패하면 <audio> 로 처음부터
-import { audioCtx } from "./wake.js?v=1006.64";
+import { audioCtx } from "./wake.js?v=1006.68";
 
 // 시작 = 말 시작 0.08초 전(본부 10-04: 0.15 → 0.08 · 앞 잡소리가 끼지 않게)
 // 첫 소리가 말보다 작고(최대에서 8dB 넘게 아래) 뒤에 조용한 틈이 있으면 녹음 켜는 순간의 잡소리일 수 있다(앞 소리 꼬리·딸깍 — 투덜이 17:49 녹음: −42dB 잡소리 → −53~−65 틈 → −30 말) →
 //   그 소리가 한 번 「조용함」(최대보다 20dB 아래 · 100ms 이상 이어짐)으로 떨어진 뒤의 첫 말 칸부터 · 조용한 틈이 없으면 그대로(바로 말함 = 0 근처)
 //   단 앞 소리가 말만큼 크면(최대에서 8dB 안) 진짜 첫 낱말로 보고 건너뛰지 않는다(바로 말하고 낱말 사이에 쉰 경우)
+export const FADE_OUT = 0.03; // 끝 30ms 페이드아웃(말 끝 뒤를 자를 때 딸깍 방지)
 export const FADE = 0.015; // 시작 15ms 페이드인(딸깍 방지 · 말 시작 0.08초 앞이라 본소리엔 안 닿음)
 // 손에 든 마이크의 「툭·부스럭」(본부 10-06 투덜이) — 위 방식은 잡음이 말만큼 크거나 틈이 100ms 안 되면 못 거름 →
 //   먼저 「목소리 칸」으로 말 시작을 찾는다: 20ms 칸마다 자기상관(80~400Hz = 지연 2.5~12.5ms) 정규화 최대 ≥ 0.5 이고 에너지 > 문턱인 칸이 3칸(60ms) 이어지는 첫 자리
@@ -38,11 +39,43 @@ export function voicedOnset(buf, from = 0, floor = from) {
   let on = -1, run = 0;
   for (let f = Math.floor((from * sr) / win); f < n; f++) { if (voiced(f)) { if (++run >= 3) { on = f - 2; break; } } else run = 0; }
   if (on < 0) return -1;
-  const vs = [...rms.slice(on, Math.min(n, on + 10))].sort((a, b) => a - b), vlev = vs[vs.length >> 1], noisy = vlev, soft = th * 0.5;
+  const vs = [...rms.slice(on, Math.min(n, on + 10))].sort((a, b) => a - b), vlev = vs[vs.length >> 1], noisy = vlev, soft = Math.min(th * 0.5, vlev * 0.03); // 작은 첫 소리 문턱 = 목소리 크기 기준(−30dB) — 큰 툭 때문에 전체 문턱이 올라가도 ㅈ·ㅅ 살림
   let a = on;
   const f0 = Math.floor((floor * sr) / win); // 앞으로 늘리는 한계 = 옛 방식이 잡소리를 건너뛴 자리(건너뛰지 않았으면 0)
   for (let f = on - 1; f >= f0 && on - f <= 12 && rms[f] > soft && rms[f] < noisy; f--) a = f; // 12칸 = 0.24초
+  if (on - a >= 12 && a - 1 >= f0 && rms[a - 1] > soft) a = on; // 0.24초 넘게 끊김 없이 이어진 앞소리 = 첫 자음이 아니라 부스럭(진짜 ㅅ·ㅊ 은 짧고 앞이 조용함) → 늘리지 않음
   return (a * win) / sr;
+}
+// 말 끝(투덜이 10-06 「앞은 잘 잘려서 좋은데 뒤에 잡음은 남아 있어 — 뒤에도 똑같이」 · 투덜이 허락)
+//   끝 = 마지막 「목소리 칸」(시작과 같은 자기상관 판정 · 3칸 이상 이어진 것) → 뒤로 문턱 절반 넘고 · 목소리 칸 크기보다 작고 · 영교차가 낮은(콧소리·ㄹ·「요」 꼬리) 칸만 이어서 늘림(최대 0.3초)
+//   조용한 칸이나 쉬— 하는 잡음(영교차 높음 · 받침 끝소리엔 없음)·「툭」(목소리보다 큼)을 만나면 멈춤 → + post(0.12초) · 못 찾으면 녹음 끝(그대로)
+export function voicedEnd(buf, post = 0.12) {
+  const d = buf.getChannelData(0), sr = buf.sampleRate, win = Math.max(1, Math.round(sr * 0.02)), n = Math.floor(d.length / win);
+  if (n < 3) return buf.duration;
+  const rms = new Float32Array(n), zc = new Float32Array(n);
+  for (let f = 0; f < n; f++) { let s = 0, z = 0; for (let k = f * win; k < (f + 1) * win; k++) { s += d[k] * d[k]; if (k > f * win && (d[k] >= 0) !== (d[k - 1] >= 0)) z++; } rms[f] = Math.sqrt(s / win); zc[f] = z / win; }
+  let peak = 0; for (const v of rms) if (v > peak) peak = v;
+  if (peak < 0.003) return buf.duration;
+  const th = Math.max(0.006, peak * 0.08), step = Math.max(1, Math.floor(sr / 12000)), sr2 = sr / step;
+  const lo = Math.max(1, Math.floor(sr2 * 0.0025)), hi = Math.ceil(sr2 * 0.0125);
+  const voiced = f => {
+    if (rms[f] <= th) return false;
+    const x = []; for (let k = f * win; k < (f + 1) * win; k += step) x.push(d[k]);
+    const m = x.reduce((a, v) => a + v, 0) / x.length; for (let i = 0; i < x.length; i++) x[i] -= m;
+    let best = 0;
+    for (let L = lo; L <= hi && L < x.length - 8; L++) {
+      let xy = 0, xx = 0, yy = 0; for (let i = 0; i + L < x.length; i++) { xy += x[i] * x[i + L]; xx += x[i] * x[i]; yy += x[i + L] * x[i + L]; }
+      const r = xx > 0 && yy > 0 ? xy / Math.sqrt(xx * yy) : 0; if (r > best) best = r;
+    }
+    return best >= 0.5;
+  };
+  let last = -1;
+  for (let f = n - 1; f >= 2; f--) if (voiced(f) && voiced(f - 1) && voiced(f - 2)) { last = f; break; } // 3칸(60ms) 이어진 목소리 — 짧은 「툭」은 안 걸림
+  if (last < 0) return buf.duration;
+  const vs = [...rms.slice(Math.max(0, last - 9), last + 1)].sort((a, b) => a - b), vlev = vs[vs.length >> 1], soft = Math.min(th * 0.5, vlev * 0.03), zmax = 4000 / sr; // 영교차 초당 4000번 아래(콧소리·모음 꼬리) — 쉬— 잡음은 그보다 훨씬 많음
+  let b = last;
+  for (let f = last + 1; f < n && f - last <= 15 && rms[f] > soft && rms[f] < vlev && zc[f] < zmax; f++) b = f; // 15칸 = 0.3초
+  return Math.min(buf.duration, ((b + 1) * win) / sr + post);
 }
 export function leadOf(buf, pre = 0.08) {
   const old = leadOld(buf, 0), first = leadOld(buf, 0, false); // 옛 방식(앞 잡소리 → 조용한 틈 → 말)으로 먼저 건너뛴 자리부터 · first = 건너뛰기 없이 첫 소리
@@ -94,14 +127,15 @@ export function playMine(blob) {
   const ctx = audioCtx();
   blob.arrayBuffer().then(ab => ctx.decodeAudioData(ab)).then(buf => {
     if (stopped) return resolve();
-    const lead = leadOf(buf), gain = gainOf(buf);
+    const lead = leadOf(buf), gain = gainOf(buf), end = Math.max(lead + 0.1, voicedEnd(buf)); // 끝 = 말 끝(뒤 잡음 빼기 · 투덜이 10-06)
     src = ctx.createBufferSource(); src.buffer = buf;
     const g = ctx.createGain(), G = gain * (window.__sfxVolume ?? 1); // 곱하기만(압축·필터 없음) · 점검에서만 작게
-    const t0 = ctx.currentTime + 0.01; g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(G, t0 + FADE); // 시작 15ms 페이드인
+    const t0 = ctx.currentTime + 0.01, len = end - lead; g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(G, t0 + FADE); // 시작 15ms 페이드인
+    g.gain.setValueAtTime(G, t0 + Math.max(FADE, len - FADE_OUT)); g.gain.linearRampToValueAtTime(0, t0 + len); // 끝 30ms 페이드아웃
     src.connect(g); g.connect(ctx.destination);
     src.onended = () => resolve();
-    src.start(t0, lead);
-    (window.__mineLog ||= []).push({ lead: Math.round(lead * 100) / 100, dur: Math.round(buf.duration * 100) / 100, gain: Math.round(gain * 100) / 100 });
+    src.start(t0, lead, len);
+    (window.__mineLog ||= []).push({ lead: Math.round(lead * 100) / 100, end: Math.round(end * 100) / 100, dur: Math.round(buf.duration * 100) / 100, gain: Math.round(gain * 100) / 100 });
   }).catch(viaAudio);
   h.paused = false; done.then(() => { h.paused = true; });
   return h;
