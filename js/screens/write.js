@@ -13,15 +13,15 @@
 //  W5 소리는 언제나 하나만 · 새 일을 하면 앞 소리는 멈춘다
 //  W6 영상 창 안(embedded): 창 안에서 스크롤 없이 다 보이게 — 긴 문장은 토막으로(◀ 1/3 ▶) ·
 //     토막을 다 쓰면 자동으로 다음 토막 · 줄을 다 쓰면 대사를 듣고 자동으로 다음 줄 쓰기 · 아래 ▶ = 이 부분 듣기
-import { t, lang } from "../i18n.js?v=1007.92";
-import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO } from "../text.js?v=1007.92";
-import { episode, chars, charsF } from "../data.js?v=1007.92";
-import { paths } from "../paths.js?v=1007.92";
-import { I } from "../ui.js?v=1007.92";
-import { audioCtx, hold } from "../wake.js?v=1007.92";
-import * as sfx from "../sfx.js?v=1007.92";
-import { scoreFx } from "../scorefx.js?v=1007.92";
-import { units as jamoUnits, baseOf } from "../jamobox.js?v=1007.92"; // 자모 자리 나누기(획순 · 자판 덧칠 · 손글씨 덩어리 — 본부 10-07) // 손글씨 점수 효과 = 말하기와 같은 규칙(본부 10-07)
+import { t, lang } from "../i18n.js?v=1007.96";
+import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO } from "../text.js?v=1007.96";
+import { episode, chars, charsF } from "../data.js?v=1007.96";
+import { paths } from "../paths.js?v=1007.96";
+import { I } from "../ui.js?v=1007.96";
+import { audioCtx, hold } from "../wake.js?v=1007.96";
+import * as sfx from "../sfx.js?v=1007.96";
+import { scoreFx } from "../scorefx.js?v=1007.96";
+import { units as jamoUnits, baseOf } from "../jamobox.js?v=1007.96"; // 자모 자리 나누기(획순 · 자판 덧칠 · 손글씨 덩어리 — 본부 10-07) // 손글씨 점수 효과 = 말하기와 같은 규칙(본부 10-07)
 
 const KEYS = [..."ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎㄲㄸㅃㅆㅉ"], VOW = [..."ㅏㅑㅓㅕㅗㅛㅜㅠㅡㅣ"];
 const VOW2 = [..."ㅐㅒㅔㅖㅘㅙㅚㅝㅞㅟㅢ"]; // 겹모음 줄(본부 10-06) — 칸 하나 · ㅓ+ㅣ 처럼 나눠 쳐도 받음
@@ -122,7 +122,7 @@ export default async function write(app, ep, id, opts = {}) {
     <div class="segrow"><div class="sent" lang="ko"></div><div class="segnav"></div><div class="wtip" hidden>${esc(t("w_tip"))}</div></div>
     <div class="work"></div>
     <div class="helpbox" hidden>${[1, 2, 3, 4, 5, 6].map(k => `<p>${esc(t("help_wr_" + k))}</p>`).join("")}<p class="x">${esc(t("help_close"))}</p></div>
-    <div class="wbtns"><button data-act="word">${esc(t("listen_word"))}</button><button data-act="sent">${esc(t("listen_part"))}</button><button data-act="auto">${esc(t("autofill"))}</button></div>
+    <div class="wbtns"><button data-act="sent">${esc(t("listen_part"))}</button><button data-act="auto">${esc(t("autofill"))}</button></div>
   </section>`;
 
   const $ = s => app.querySelector(s);
@@ -184,7 +184,13 @@ export default async function write(app, ep, id, opts = {}) {
     for (const c of ["c1", "c2", "c3", "c4"]) { if (!wrapped()) break; stg.classList.add(c); } // 줄은 꺾지 않음(글자 칸 높이 고정 · 10-06)
   }
   // 낱말 칸 글자 단추 = 한 줄 · 넘치면 글자 크기·안쪽 여백을 같이 줄임(위 글자 줄과 같은 방식) · 로마자는 아래 줄 따로
+  // 로마자·뜻 줄(투덜이 10-07 「단어 듣기」 빈자리) — 크게(로마자 15 · 뜻 17px)에서 칸 폭에 들어갈 때까지 줄임(최소 11px)
+  function fitSub2() {
+    const r = work.querySelector(".info .sub2"); if (!r || !r.clientWidth) return; const xs = [...r.querySelectorAll(".rom, .mean")]; xs.forEach(x => x.style.removeProperty("font-size"));
+    for (let k = 0; k < 8 && r.scrollWidth > r.clientWidth + 1; k++) xs.forEach(x => { const f = parseFloat(getComputedStyle(x).fontSize); if (f > 11) x.style.fontSize = f - 1 + "px"; });
+  }
   function fitWord() {
+    fitSub2();
     const row = work.querySelector(".info .word"); if (!row || !row.clientWidth) return;
     const bs = [...row.querySelectorAll(".wc")]; bs.forEach(b => { b.style.fontSize = ""; b.style.padding = ""; });
     for (let fs = parseFloat(getComputedStyle(bs[0] || row).fontSize) - 1; row.scrollWidth > row.clientWidth + 1 && fs >= 11; fs -= 1) bs.forEach(b => { b.style.fontSize = fs + "px"; b.style.padding = fs < 16 ? "0 2px" : ""; });

@@ -2,6 +2,8 @@
 // 확인: 맞음(딩동→자모) · 틀림(툭→그 자모 소리도) · 글자 완성(자모 … 0.5초 … 글자) · 소리 중 자판 무시 ·
 //       창 안 스크롤 없음(자판·단추가 창 안에) · 긴 줄 토막 나누기 · 토막 끝 → 다음 토막 · 줄 끝 → 대사 → 다음 줄 · 글자 반복 · 단어/문장 듣기 · 아래 ▶
 (async () => { const res = []; try {
+  // 학습자 기억값에 안 흔들리게(본부 10-07 — 손글씨 기억이 남아 자판 점검이 손글씨 화면에서 돎) — 자판 · 로마자 켬 · 속도 1×
+  try { localStorage.setItem("malmun.wmode", "kb"); localStorage.removeItem("malmun.rom"); localStorage.removeItem("malmun.rate.m"); localStorage.removeItem("malmun.rate.y"); } catch {}
   const W = ms => new Promise(s => setTimeout(s, ms));
   const log = []; const T = () => Math.round(performance.now());
   // 소리 끄기 = 음소거가 아니라 아주 작게(크롬은 뒤에 있는 탭의 「음소거된」 소리를 전기 아끼려 멈춘다 — 10-01 실측)
@@ -66,7 +68,7 @@
     const ev = log.slice(at0), st0 = ev.find(e => e.ev === "시작"), end0 = ev.find(e => e.ev === "끝");
     ok(st0 && st0.name.endsWith(wantId + ".mp3") && end0 && !ev.some(e => e.name.includes("_sub_t1")), name, desc(at0));
   };
-  await unitCheck(".panel [data-act=word]", units.lines["1"].words[0].id, "단어 듣기 → 따로 만든 「어서」 소리(끝까지)");
+  ok(!$(".panel [data-act=word]"), "「단어 듣기」 단추 없음(투덜이 10-07 — 「이 부분 듣기」가 다 읽음 · 글자 소리는 위 글자 줄)");
   await unitCheck(".panel [data-act=sent]", units.lines["1"].parts[0].id, `이 부분 듣기 → 따로 만든 토막 「${units.lines["1"].parts[0].say}」 소리(줄 전체 아님)`);
   $(".panel [data-act=sent]").click(); await W(200); ok($(".panel [data-act=sent]").getAttribute("aria-pressed") === "true", "이 부분 듣기 켜짐");
   $(".panel [data-act=sent]").click(); await W(200); ok($(".panel [data-act=sent]").getAttribute("aria-pressed") === "false", "다시 누르면 멈춤");

@@ -6,7 +6,7 @@
 // 시간·인식(본부 10-04 투덜이 승인): 말 사이 쉼 2초 · 🎤 뒤 6초 말 없으면 끝 · 최대 길이 = 문장 길이에 맞춤 · 인식이 혼자 끝나면 같은 트랙으로 다시
 // 그때와 다른 점(본부 10-04 「남긴 차이」): ① 윈도우 별칭 장치 「default」「communications」는 절대 안 고름(통신 장치를 열면 윈도우가 다른 소리를 줄임)
 //   ② 「준비 중 → 녹음 중」 표시(첫 소리가 들어오면) ③ 인식 오류 까닭을 돌려줌(onerror 를 삼키지 않음) ④ 진단 기록(이벤트만 듣고 소리 경로는 안 건드림)
-import { audioCtx } from "./wake.js?v=1007.92";
+import { audioCtx } from "./wake.js?v=1007.96";
 
 // 시간 규칙(본부 10-04 · 투덜이 「빨리 안 하면 바로 닫힘」): 말 사이 쉼 2초 · 🎤 뒤 6초 안에 말 없으면 끝 · 최대 길이는 부르는 쪽이 정함(문장 길이)
 const QUIET_MS = 2000, START_MS = 6000;
@@ -23,7 +23,8 @@ const dead = new Set();
 let stream = null;
 const devId = s => s?.getAudioTracks()[0]?.getSettings().deviceId || "";
 // 날소리로 녹음(본부 10-04) — 크롬 기본값(에코 제거·잡음 억제·자동 크기)이 말 도중 소리를 뚝뚝 끊었다 · 말하기 연습 녹음은 날소리가 맞다(녹음 중엔 앱이 소리를 안 틂)
-const RAW = { echoCancellation: false, noiseSuppression: false, autoGainControl: false };
+// 폰(안드로이드)은 폰 자체 잡음·울림 처리를 켬(투덜이 10-07 「폰 녹음에 PC 에 없던 잔잡음」) · PC 는 지금처럼 날소리 · 크기는 gainOf 로 맞춤 그대로
+const RAW = /Android/i.test(navigator.userAgent) ? { echoCancellation: true, noiseSuppression: true, autoGainControl: true } : { echoCancellation: false, noiseSuppression: false, autoGainControl: false };
 const openOne = c => Promise.race([navigator.mediaDevices.getUserMedia({ audio: { ...(c === true ? {} : c), ...RAW } }), new Promise((_, rej) => setTimeout(() => rej(Object.assign(new Error("timeout"), { name: "TimeoutError" })), 8000))]);
 
 // 마이크 열기 — 고른 마이크 → 기본 → 나머지 차례로(하나가 안 열려도 다음 것으로) · 별칭 장치는 건너뜀
@@ -59,6 +60,31 @@ export const srWhy = err => ({ "audio-capture": "sr_audio", network: "sr_network
 export const micWhy = e => (e?.name === "NotAllowedError" || e?.name === "SecurityError" ? "mic_denied" : e?.name === "NotFoundError" || e?.name === "OverconstrainedError" ? "mic_none" : e?.name === "SilentError" ? "mic_silent" : "mic_busy");
 
 // ── 진단 기록(화면에 안 보임 · 본부 10-04) — 녹음이 끝날 때마다 localStorage malmun.lastrec 에 마지막 5개 ──
+// 「받아쓰기만」 방식(본부 10-07 투덜이 「알아서」 — 안드로이드는 녹음과 받아쓰기를 같이 못 하는 기기가 있음) — 그 기기에서 녹음+받아쓰기가 말소리는 있는데 들은 말 0 으로 끝나면
+//  받아쓰기만으로 바꿔 기억(malmun.srmode = only) → 녹음 없이 글자 점수만 · 리듬·비교·내 목소리 없음 · 진단 화면에서 「다시 같이 시험」으로 되돌림 · PC·되는 기기는 그대로
+export const isAndroid = () => /Android/i.test(navigator.userAgent);
+export const srOnlyMode = () => { try { return localStorage.getItem("malmun.srmode") === "only"; } catch { return false; } };
+export const setSrOnly = on => { try { on ? localStorage.setItem("malmun.srmode", "only") : localStorage.removeItem("malmun.srmode"); } catch {} };
+// 받아쓰기만 녹음기 — record() 와 같은 모양({ stop, done }) · blob = null · 끝 = ■ · 마지막 결과 뒤 2초 · 인식이 혼자 끝남 · 최대 시간
+export function recordSROnly({ maxMs = 8000, onTick = () => {}, onReady = () => {}, onStop = () => {} } = {}) {
+  let stopFn = () => {}; const ctl = { stop: discard => stopFn(discard) };
+  ctl.done = new Promise(res => {
+    const SR = getSR(); if (!SR) { res({ error: Object.assign(new Error("nosr"), { name: "NotSupportedError" }) }); return; }
+    const heard = [], t0 = performance.now(), ev = []; let srErr = null, over = false, r = null, spoke = false, endT = 0, tick = 0, maxT = 0;
+    const fin = (why, discard) => { if (over) return; over = true; clearInterval(tick); clearTimeout(maxT); clearTimeout(endT); if (!discard) onStop(); try { r?.stop(); } catch {}
+      setTimeout(() => res(discard ? { cancelled: true } : { blob: null, heard, srErr, why, diag: { why, track: "sronly", sr: ev, sec: Math.round(performance.now() - t0) / 1000 } }), 500); };
+    stopFn = d => fin("stop", d);
+    try { r = new SR(); } catch (e) { res({ error: e }); return; }
+    r.lang = "ko-KR"; r.continuous = true; r.interimResults = true; r.maxAlternatives = 3;
+    r.onresult = e => { const rs = Array.from(e.results, x => Array.from(x)); for (const x of rs) for (const a of x) heard.push(a.transcript); if (rs.length > 1) heard.push(rs.map(x => x[0].transcript).join(" ")); spoke = true; clearTimeout(endT); endT = setTimeout(() => fin("pause"), QUIET_MS); };
+    r.onerror = e => { srErr = e.error || "error"; };
+    r.onend = () => fin(spoke ? "pause" : "nospeech");
+    srWatch(r, t0, ev);
+    try { r.start(); } catch (e) { res({ error: e }); return; }
+    setTimeout(() => { if (!over) onReady(); }, 0); tick = setInterval(() => onTick(performance.now() - t0, maxMs, 0), 60); maxT = setTimeout(() => fin("time"), maxMs);
+  });
+  return ctl;
+}
 export function srWatch(sr, t0, ev = []) {
   if (typeof sr.addEventListener !== "function") return ev; // 가짜 인식기(점검) 등
   for (const n of ["start", "audiostart", "soundstart", "speechstart", "speechend", "soundend", "audioend", "result", "nomatch", "error", "end"])

@@ -3,7 +3,8 @@
 //  · <audio> 에 누를 때마다 src 를 바꿔 틀면 매번 새로 받고 풀고 출력이 열리며 첫 0.1~0.3초가 약하게/잘려 나온다 → 버퍼는 샘플 단위로 정확히 시작
 //  · 소리마다 노드(음량)가 따로라, 한 재생기의 음량을 여러 소리가 같이 건드려 튀던 문제가 없다
 // 긴 것(설명 낭독 · 영상)은 계속 <audio>/<video>.
-import { audioCtx } from "./wake.js?v=1007.92";
+import { logErr } from "./errlog.js?v=1007.96";
+import { audioCtx } from "./wake.js?v=1007.96";
 
 const cache = new Map(); // url → Promise<AudioBuffer|null>(null = 파일 없음)
 const live = new Set();  // 지금 나는 소리
@@ -12,8 +13,9 @@ const note = (ev, url, extra) => window.__sfxLog?.push({ t: Math.round(performan
 
 export function load(url) {
   if (!cache.has(url)) {
+    // 받기·풀기 실패는 기록하고 기억에서 뺌 — 다음에 누르면 다시 받음(본부 10-07 폰: 한 번 실패한 소리가 그 뒤로 계속 안 나던 것)
     cache.set(url, fetch(url).then(r => { if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); })
-      .then(b => audioCtx().decodeAudioData(b)).catch(() => null));
+      .then(b => audioCtx().decodeAudioData(b)).catch(e => { logErr("sfx", e?.message || e?.name || "fail", { url: nameOf(url) }); setTimeout(() => cache.delete(url), 0); return null; }));
   }
   return cache.get(url);
 }

@@ -4,6 +4,8 @@
 // (10-02 확정: 블루투스 스피커는 완전한 무음·너무 작은 신호(25Hz · 0.00002)로는 안 깨어난다 — 투덜이 STOCKWELL II 로 이 값에서 「다 잘 들린다 · 웅 소리 안 들린다」)
 let ctx = null, osc = null, users = 0, quiet = false;
 
+// 누를 때마다 소리 엔진 깨우기(본부 10-07 폰 — 첫 터치 전에 만든 소리 엔진이 suspended 그대로면 자모 소리가 안 남)
+for (const ev of ["pointerdown", "touchend", "keydown"]) window.addEventListener(ev, () => { try { if (ctx && ctx.state !== "running") ctx.resume().catch(() => {}); } catch {} }, { capture: true, passive: true });
 export function audioCtx() {
   ctx ||= new (window.AudioContext || window.webkitAudioContext)();
   if (ctx.state === "suspended") ctx.resume().catch(() => {});

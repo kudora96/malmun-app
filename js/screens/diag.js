@@ -1,13 +1,14 @@
 // 진단 화면 #/diag(본부 10-07 「PC 에선 되는데 폰에선 안 됨」) — 투덜이가 폰에서 열어 사진 한 장 · 「복사」로 글째 보냄
 //  기기 · 받아쓰기(인식만 / 녹음+인식 동시) · 마이크(허락 · 실제 적용된 설정 · 장치) · 녹음 형식(지원 · 3초 녹음을 풀 수 있나)
 //  소리(AudioContext 상태 · 「가」 소리 · 효과음 · 음성 창고 읽기) · 최근 오류 20개 — 앱 동작은 안 바꿈(시험은 이 화면 안에서만)
-import { VERSION } from "../version.js?v=1007.92";
-import { esc } from "../text.js?v=1007.92";
-import { paths } from "../paths.js?v=1007.92";
-import { charsF } from "../data.js?v=1007.92";
-import { audioCtx } from "../wake.js?v=1007.92";
-import * as sfx from "../sfx.js?v=1007.92";
-import { errLog, clearErr } from "../errlog.js?v=1007.92";
+import { VERSION } from "../version.js?v=1007.96";
+import { esc } from "../text.js?v=1007.96";
+import { paths } from "../paths.js?v=1007.96";
+import { charsF } from "../data.js?v=1007.96";
+import { audioCtx } from "../wake.js?v=1007.96";
+import * as sfx from "../sfx.js?v=1007.96";
+import { srOnlyMode, setSrOnly } from "../recorder.js?v=1007.96";
+import { errLog, clearErr } from "../errlog.js?v=1007.96";
 
 export default async function diag(app) {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -19,7 +20,7 @@ export default async function diag(app) {
   let micPerm = "?"; try { micPerm = (await navigator.permissions?.query({ name: "microphone" }))?.state || "?"; } catch { micPerm = "query 안 됨"; }
   const base = {
     "판": VERSION, "주소": location.href.replace(/[?#].*$/, ""), "브라우저": navigator.userAgent, "화면": `${screen.width}×${screen.height} · 창 ${innerWidth}×${innerHeight} · dpr ${devicePixelRatio}`,
-    "받아쓰기 있음": SR ? (window.SpeechRecognition ? "SpeechRecognition" : "webkitSpeechRecognition") : "없음", "마이크 허락": micPerm,
+    "받아쓰기 방식": srOnlyMode() ? "받아쓰기만(이 기기는 녹음과 같이 안 됨으로 기억)" : "녹음+받아쓰기 같이", "받아쓰기 있음": SR ? (window.SpeechRecognition ? "SpeechRecognition" : "webkitSpeechRecognition") : "없음", "마이크 허락": micPerm,
     "녹음 형식": mrTypes, "AudioContext": (() => { try { return audioCtx().state; } catch (e) { return "만들기 실패 " + e.message; } })(),
     "preservesPitch": "preservesPitch" in HTMLMediaElement.prototype ? "있음" : "webkitPreservesPitch" in HTMLMediaElement.prototype ? "webkit 만" : "없음",
   };
@@ -31,7 +32,7 @@ export default async function diag(app) {
       <table class="dtab">${Object.entries(base).map(([k, v]) => row(k, v)).join("")}${Object.values(keys).map(k => row(k, res[k] ?? "—")).join("")}</table>
       <div class="dbtns">${tests.map(([a, l]) => `<button data-t="${a}">${esc(l)}</button>`).join("")}</div>
       <h3>최근 오류 ${errs.length}개</h3><ol class="derr">${errs.slice().reverse().map(e => `<li>${esc(`${e.at} ${e.kind} ${e.msg}${e.url ? " · " + e.url : ""}${e.src ? " · " + e.src + ":" + e.line : ""}`)}</li>`).join("") || "<li>없음</li>"}</ol>
-      <div class="dbtns"><button data-t="copy">복사</button><button data-t="clr">오류 지우기</button></div><p class="dmsg"></p></section>`;
+      <div class="dbtns"><button data-t="copy">복사</button>${srOnlyMode() ? '<button data-t="srboth">다시 같이 시험(받아쓰기만 끄기)</button>' : ""}<button data-t="clr">오류 지우기</button></div><p class="dmsg"></p></section>`;
   };
   paint();
   const msg = s => { const p = app.querySelector(".dmsg"); if (p) p.textContent = s; };
@@ -55,6 +56,7 @@ export default async function diag(app) {
     if (a === "copy") { const txt = [...app.querySelectorAll(".dtab tr")].map(tr => tr.innerText.replace(/\t/, ": ")).join("\n") + "\n오류:\n" + errLog().map(e => JSON.stringify(e)).join("\n");
       try { await navigator.clipboard.writeText(txt); msg("복사했어요"); } catch { msg("복사 안 됨 — 사진으로 보내 주세요"); } return; }
     if (a === "clr") { clearErr(); paint(); return; }
+    if (a === "srboth") { setSrOnly(false); location.reload(); return; } // 다음 말하기에서 녹음+받아쓰기 같이 다시 시험
     b.disabled = true; msg("시험 중…");
     try {
       if (a === "sr") set(keys.sr, await srOnce(null));
