@@ -9,7 +9,7 @@
   const al = await loadAlign("L01-00-01"), key = "L01-00-01_13_p02", it = al.items[key], text = it.text;
   const ctx = new OfflineAudioContext(1, 44100, 44100), dec = async u => ctx.decodeAudioData(await (await fetch(u)).arrayBuffer());
   const mbuf = await dec("/media/audio/L01-00-01/units/L01-00-01_13_p02.mp3"), sr = mbuf.sampleRate;
-  const R = (ybuf, mb = mbuf, k2 = key, heard) => { const pr = prepare({ al, key: k2, text: al.items[k2].text, mbuf: mb, ybuf }); return { ...rhythmScore({ msyl: pr.msyl, ysyl: pr.ysyl, mbuf: mb, ybuf, ends: pr.ends, heard }), pr }; };
+  const R = (ybuf, mb = mbuf, k2 = key, heard) => { const pr = prepare({ al, key: k2, text: al.items[k2].text, mbuf: mb, ybuf }); return { ...rhythmScore({ msyl: pr.msyl, ysyl: pr.ysyl, mbuf: mb, ybuf, ends: pr.ends, heard, groups: pr.groups }), pr }; };
   const speed = async r => { const oc = new OfflineAudioContext(1, Math.ceil((mbuf.length / r)) + 10, sr), s = oc.createBufferSource(); s.buffer = mbuf; s.playbackRate.value = r; s.connect(oc.destination); s.start(); return oc.startRendering(); };
   const a = R(mbuf); ok(a.R >= 0.97, "ⓐ 본보기 = 내 목소리 → R ≥ 0.97", `R ${a.R.toFixed(3)}`);
   for (const r of [0.8, 1.25]) { const b = R(await speed(r)); ok(b.R >= 0.9, `ⓑ ${r}배 빠르기 → R ≥ 0.9`, `R ${b.R.toFixed(3)}`); }
@@ -40,6 +40,17 @@
       let mb; try { mb = await dec(it2.file.replace(/^.*?media/, "/media").split(String.fromCharCode(92)).join("/")); } catch { continue; }
       const r2 = R(mb, mb, k2, it2.text); n++; if (withRhythm(100, r2.R) < 100) bad.push(`${k2} R ${r2.R.toFixed(3)} ${r2.worst?.kind} 「${r2.worst?.ch}」`); }
     ok(n > 50 && !bad.length, `ⓗ 모든 토막 본보기 = 내 목소리 → 100점(${n}토막)`, bad.slice(0, 5).join(" · ") || "모두 100"); }
+  { // ⓙ 긴 줄 = 낱말 단위 리듬(본부 10-07 · 투덜이 허락) — 15번 줄 전체
+    const k3 = "L01-00-01_15_line", it3 = al.items[k3], mb3 = await dec(it3.file.replace(/^.*?media/, "/media").split(String.fromCharCode(92)).join("/")), sr3 = mb3.sampleRate;
+    const self = R(mb3, mb3, k3); ok(withRhythm(100, self.R) === 100, "ⓙ 긴 줄 본보기 = 내 목소리 → 100(낱말 단위)", `R ${self.R.toFixed(3)}`);
+    // 「세종대왕이」만 2배 길게(그 구간을 0.5배 빠르기로) → 그 낱말이 가장 나쁨(주황)
+    const sy = it3.syl, w0 = sy.findIndex(x => x.ch === "세"), w1 = w0 + 4, a0 = Math.round(sy[w0].s * sr3), a1 = Math.round(sy[w1].e * sr3), d3 = mb3.getChannelData(0);
+    const seg = ctx.createBuffer(1, a1 - a0, sr3); seg.getChannelData(0).set(d3.subarray(a0, a1));
+    const oc = new OfflineAudioContext(1, (a1 - a0) * 2 + 10, sr3), so = oc.createBufferSource(); so.buffer = seg; so.playbackRate.value = 0.5; so.connect(oc.destination); so.start(); const slow = (await oc.startRendering()).getChannelData(0);
+    const nb3 = ctx.createBuffer(1, d3.length - (a1 - a0) + slow.length, sr3), y3 = nb3.getChannelData(0); y3.set(d3.subarray(0, a0), 0); y3.set(slow, a0); y3.set(d3.subarray(a1), a0 + slow.length);
+    const st3 = R(nb3, mb3, k3); ok(st3.worst?.ch === "세종대왕이" && st3.worst?.kind === "long", "ⓙ 「세종대왕이」만 2배 길게 → 그 낱말이 가장 나쁨(길다)", `R ${st3.R.toFixed(3)} → ${withRhythm(100, st3.R)}점 · ${st3.worst?.kind} 「${st3.worst?.ch}」 ${st3.worst?.a?.toFixed(2)}→${st3.worst?.b?.toFixed(2)}초`);
+    const r4 = await fetch("/tools/_rec/r4.webm"); if (r4.ok) { const yb4 = await new OfflineAudioContext(1, 48000, 48000).decodeAudioData(await r4.arrayBuffer()), d4 = R(yb4, mb3, k3);
+      res.push(`· 투덜이 r4(15번 줄): R ${d4.R.toFixed(3)} → ${withRhythm(100, d4.R)}점 · 가장 나쁜 낱말 ${d4.worst ? `${d4.worst.kind} 「${d4.worst.ch}」 ${d4.worst.a?.toFixed(2)}→${d4.worst.b?.toFixed(2)}초` : "없음"}`); } else res.push("· r4.webm 없음"); }
   ok(withRhythm(100, 0.8) === 98 && withRhythm(100, 0.7) === 95 && withRhythm(100, 0.6) === 92 && withRhythm(100, 0.849) === 99 && withRhythm(100, 0.85) === 100 && withRhythm(100, 0.95) === 100 && withRhythm(100, 0.3) === 88 && withRhythm(80, 0.95) === 80, "ⓔ 배수 식(내림: 100·0.8→98 · 0.7→95 · 0.6→92 · 0.849→99 · ≥0.85→그대로 · <0.5→88)", [0.8, 0.7, 0.6, 0.849, 0.85].map(r => withRhythm(100, r)).join(","));
   const bad = res.filter(x => x.startsWith("✗")).length, out = `${bad ? "✗" : "✓"} 리듬 ${res.filter(x => x.startsWith("✓")).length}/${res.filter(x => /^[✓✗]/.test(x)).length}\n` + res.join("\n");
   console.log(out); return out;

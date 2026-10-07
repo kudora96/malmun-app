@@ -5,13 +5,13 @@
 //  · 재생: 본보기 → 0.4초 → 내 목소리 · 재생 위치 세로 막대 + 지금 음절 강조 · 파형·음절 칸을 누르면 그 줄 그 음절부터
 //  녹음·점수 계산·[내 목소리] 재생(playmine.js playMine)은 그대로 — 여기는 그리기·DTW·비교 화면 안 재생만
 //  (본보기는 sfx.play 그대로 · 내 목소리는 playmine 과 같은 방식: decodeAudioData → BufferSource.start(t, offset) → Gain)
-import { prepare, rhythmScore, loadAlign, isSyl, R_FULL } from "./rhythm.js?v=1007.58";
-import { esc } from "./text.js?v=1007.58";
-import { align } from "./score.js?v=1007.58";
-import { audioCtx } from "./wake.js?v=1007.58";
-import { leadOf, gainOf, FADE, FADE_OUT, voicedEnd } from "./playmine.js?v=1007.58";
-import { speechEnd, wavOf } from "./recstore.js?v=1007.58";
-import * as sfx from "./sfx.js?v=1007.58";
+import { prepare, rhythmScore, loadAlign, isSyl, R_FULL } from "./rhythm.js?v=1007.65";
+import { esc } from "./text.js?v=1007.65";
+import { align } from "./score.js?v=1007.65";
+import { audioCtx } from "./wake.js?v=1007.65";
+import { leadOf, gainOf, FADE, FADE_OUT, voicedEnd } from "./playmine.js?v=1007.65";
+import { speechEnd, wavOf } from "./recstore.js?v=1007.65";
+import * as sfx from "./sfx.js?v=1007.65";
 
 // host 안에 그린다 → { close() } · o = { ep, key, url(본보기), text(본보기 글), blob(내 녹음), heard(들은 말 글자 · 없으면 색 없음), t(문구) }
 // 속도 단계(본부 10-07 · 투덜이 「견본에도 각각」) — 줄마다 자기 속도 · 누를 때마다 1 → 0.9 → 0.75 → 0.6 → 0.5 → 1 · 0.5 아래는 늘이기가 끊겨 뺌 · 고른 값 기억
@@ -40,8 +40,8 @@ export async function openCompare(host, o) {
   if (!mbuf || !ybuf) { host.innerHTML = `<div class="cmpw"><p class="cmpmsg">${esc(t("cmp_none"))}</p></div>`; return { close() { st.alive = false; } }; }
   // 본보기 음절(정렬 파일 · 없으면 말 구간을 고르게 나눈 임시 칸)
   // 음절 칸 = 리듬 점수와 같은 함수(js/rhythm.js prepare) · 본보기 = align.json · 내 목소리 = DTW
-  const { W, msyl, ysyl, ends, mLead, mStop, mEnd, mLead0, ref, yLead, yStop } = prepare({ al, key: o.key, text: o.text, mbuf, ybuf }), yGain = gainOf(ybuf);
-  const rh = rhythmScore({ msyl, ysyl, mbuf, ybuf, ends, heard: o.heard }); // 리듬이 가장 많이 깎인 음절 = 두 줄 그 칸에 주황 테두리
+  const { W, msyl, ysyl, ends, groups: rgroups, mLead, mStop, mEnd, mLead0, ref, yLead, yStop } = prepare({ al, key: o.key, text: o.text, mbuf, ybuf }), yGain = gainOf(ybuf);
+  const rh = rhythmScore({ msyl, ysyl, mbuf, ybuf, ends, heard: o.heard, groups: rgroups }); // 리듬이 가장 많이 깎인 음절 = 두 줄 그 칸에 주황 테두리
   // 맞음/틀림 — 점수와 같은 정렬(본보기 음절마다 m 맞음 · s 바뀜 · d 빠짐)
   // 내 목소리 칸에는 「들은 글자」(본부 10-06): 바뀜 = 큰 빨강 들은 글자 + 위 작게 흐린 본보기 글자 · 빠짐 = 흐린 점선 칸 · 덧붙은 소리 = 회색 작은 칸(앞 음절 끝에)
   let marks = W.map(() => ""), heardCh = W.map(() => null), extra = [];
@@ -56,16 +56,16 @@ export async function openCompare(host, o) {
   }
   const span = Math.max(mStop - mLead, yStop - yLead, 0.5);
   const pos = (s, e, lead) => `left:${(100 * (s - lead)) / span}%;width:${(100 * Math.max(0.02, e - s)) / span}%`;
-  const cell = (x, k, lead, mine) => `<span data-k="${k}" class="cel ${marks[k]}${rh.worst && rh.worst.k === k && rh.R < R_FULL ? " rworst" : ""}" style="${pos(x.s, x.e, lead)}"><span class="tx">${mine && marks[k] === "bad" && heardCh[k] ? `<small class="want">${esc(x.ch)}</small><span class="got">${esc(heardCh[k])}</span>` : esc(x.ch)}</span>${worstK === k ? `<b class="wtip">${rtip}</b>` : ""}</span>`;
+  const cell = (x, k, lead, mine) => `<span data-k="${k}" class="cel ${marks[k]}${worstSet.has(k) ? " rworst" : ""}" style="${pos(x.s, x.e, lead)}"><span class="tx">${mine && marks[k] === "bad" && heardCh[k] ? `<small class="want">${esc(x.ch)}</small><span class="got">${esc(heardCh[k])}</span>` : esc(x.ch)}</span>${worstK === k ? `<b class="wtip">${rtip}</b>` : ""}</span>`;
   // 낱말 칸(본부 10-07 투덜이 「글자가 길면 폰트를 알아서 줄여야」) — 10px 로도 음절 칸보다 글이 넓으면 그 줄은 띄어쓰기 낱말 하나 = 칸 하나
   // 칸 안 글자 = 음절별 색 그대로 · 리듬 가장 나쁜 음절 = 그 글자 주황 밑줄 · 틀린 글자 위 작은 본보기 글자 대신 올리면(폰은 손가락) 「들은 말 / 본보기」 말풍선
   const groups = (() => { const g = [], ws = String(o.text).split(/\s+/).filter(Boolean); let k = 0; for (const w of ws) { const n = [...w].filter(isSyl).length; if (!n) continue; g.push(Array.from({ length: n }, (_, i) => k + i)); k += n; } return k === W.length ? g : null; })();
-  const worstK = rh.worst && rh.R < R_FULL ? rh.worst.k : -1;
+  const worstK = rh.worst && rh.R < R_FULL ? rh.worst.k : -1, worstSet = new Set(worstK < 0 ? [] : rh.worst.ks || [worstK]); // 긴 줄 = 낱말 통째로 주황
   // 리듬 가장 나쁜 음절 = 왜인지 숫자로(본부 10-07 투덜이) — 올리면(폰은 손가락) 「नमुना 0.42s · मेरो आवाज 0.21s」 + 길다/짧다/멈춤 문구
   const rw = rh.worst, rtip = worstK < 0 ? "" : `${rw.kind === "pause" ? `<span>${esc(t("my_voice"))} ⏸ ${(rw.gap ?? 0).toFixed(2)}s</span>` : rw.a != null ? `<span>${esc(t("model"))} ${rw.a.toFixed(2)}s · ${esc(t("my_voice"))} ${rw.b.toFixed(2)}s</span>` : ""}<span>${esc(t("rhy_" + rw.kind, { s: `「${rw.ch}」` }))}</span>`;
   const wcell = (g, wi, syl, lead, mine) => {
     const a = syl[g[0]], b = syl[g[g.length - 1]], tip = mine && o.heard && g.some(k => marks[k] !== "ok") ? `<span>${esc(t("heard_label"))}: ${esc(g.map(k => (marks[k] === "miss" ? "·" : heardCh[k] ?? msyl[k].ch)).join(""))}</span><span>${esc(t("model"))}: ${esc(g.map(k => msyl[k].ch).join(""))}</span>` : "";
-    return `<span class="wcel" data-w="${wi}" style="${pos(a.s, b.e, lead)}"><span class="tx">${g.map(k => `<span data-k="${k}" class="wch ${marks[k]}${worstK === k ? " rworst" : ""}">${esc(mine && marks[k] === "bad" && heardCh[k] ? heardCh[k] : syl[k].ch)}</span>`).join("")}</span>${tip || g.includes(worstK) ? `<b class="wtip">${tip}${g.includes(worstK) ? rtip : ""}</b>` : ""}</span>`;
+    return `<span class="wcel" data-w="${wi}" style="${pos(a.s, b.e, lead)}"><span class="tx">${g.map(k => `<span data-k="${k}" class="wch ${marks[k]}${worstSet.has(k) ? " rworst" : ""}">${esc(mine && marks[k] === "bad" && heardCh[k] ? heardCh[k] : syl[k].ch)}</span>`).join("")}</span>${tip || g.includes(worstK) ? `<b class="wtip">${tip}${g.includes(worstK) ? rtip : ""}</b>` : ""}</span>`;
   };
   const extras = (syl, lead) => extra.map(x => { const at = x.after >= 0 ? syl[x.after].e : syl[0].s, [a0, a1] = x.after >= 0 ? [at - 0.03, at + 0.05] : [Math.max(lead, at - 0.08), at]; return `<span class="add" style="${pos(a0, a1, lead)}">${esc(x.ch)}</span>`; }).join("");
   const rkey = c => (c === "m" ? "m" : "y");
