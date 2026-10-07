@@ -58,12 +58,12 @@
     await draw(tr); $("[data-act=hdone]").click(); await W(400);
     const lab2 = $(".hscore")?.textContent || "", fxOn = $(".hbox .fx")?.classList.contains("on"), stay = wr().hand() === H0 && H0.passed, nextB = $("[data-act=hnext]");
     for (let k = 0; k < 60 && wr().busy(); k++) await W(100);
-    const best = P().querySelector(".sent .c.now .hb")?.textContent || "";
-    ok(/^\d+% ★$/.test(lab2) && fxOn && stay && !!nextB && best === lab2.replace(/% .*/, ""), "ⓒ 따라 그림 → 「n% ★」 + 효과 · 그 글자에 머묾 · 「다음 ▶」 · 위 글자 줄에 최고 점수", `「${lab2}」 · 효과 ${fxOn} · 최고 ${best}`);
+    const best = String(Object.values(JSON.parse(localStorage.getItem("malmun.hbest") || "{}")).pop() ?? ""); // 최고 점수 = 기억만(위 글자 줄엔 안 보임 · 투덜이 10-07)
+    ok(/^\d+% ★$/.test(lab2) && fxOn && stay && !!nextB && best === lab2.replace(/% .*/, "") && !P().querySelector(".sent .hb"), "ⓒ 따라 그림 → 「n% ★」 + 효과 · 그 글자에 머묾 · 「다음 ▶」 · 최고 점수 기억(글자 줄엔 숫자 안 보임)", `「${lab2}」 · 효과 ${fxOn} · 최고 ${best}`);
     // 다시 쓰기 — 그리기 시작하면 통과 풀림(점수 숨김) · 낮게 써도 최고 점수 그대로
     await draw(zig); const re = !H0.passed && $(".hscore").hidden; $("[data-act=hdone]").click(); await W(500);
     for (let k = 0; k < 60 && wr().busy(); k++) await W(100);
-    const best2 = P().querySelector(".sent .c.now .hb")?.textContent || "";
+    const best2 = String(Object.values(JSON.parse(localStorage.getItem("malmun.hbest") || "{}")).pop() ?? "");
     ok(re && best2 === best, "ⓒ 통과 뒤 다시 그리면 = 다시 쓰기 · 더 낮게 써도 최고 점수 그대로", `최고 ${best2}`);
     $("[data-act=hclear]").click(); await draw(tr); $("[data-act=hdone]").click(); await W(400); for (let k = 0; k < 60 && wr().busy(); k++) await W(100); // 실패한 획은 남아 있음(빠진 획만 더 그릴 수 있게) → 지우고 다시
     $("[data-act=hnext]")?.click(); for (let k = 0; k < 80 && wr().hand() === H0; k++) await W(100);

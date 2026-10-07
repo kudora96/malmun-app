@@ -13,15 +13,15 @@
 //  W5 소리는 언제나 하나만 · 새 일을 하면 앞 소리는 멈춘다
 //  W6 영상 창 안(embedded): 창 안에서 스크롤 없이 다 보이게 — 긴 문장은 토막으로(◀ 1/3 ▶) ·
 //     토막을 다 쓰면 자동으로 다음 토막 · 줄을 다 쓰면 대사를 듣고 자동으로 다음 줄 쓰기 · 아래 ▶ = 이 부분 듣기
-import { t, lang } from "../i18n.js?v=1007.51";
-import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO } from "../text.js?v=1007.51";
-import { episode, chars, charsF } from "../data.js?v=1007.51";
-import { paths } from "../paths.js?v=1007.51";
-import { I } from "../ui.js?v=1007.51";
-import { audioCtx, hold } from "../wake.js?v=1007.51";
-import * as sfx from "../sfx.js?v=1007.51";
-import { scoreFx } from "../scorefx.js?v=1007.51";
-import { units as jamoUnits, baseOf } from "../jamobox.js?v=1007.51"; // 자모 자리 나누기(획순 · 자판 덧칠 · 손글씨 덩어리 — 본부 10-07) // 손글씨 점수 효과 = 말하기와 같은 규칙(본부 10-07)
+import { t, lang } from "../i18n.js?v=1007.54";
+import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO } from "../text.js?v=1007.54";
+import { episode, chars, charsF } from "../data.js?v=1007.54";
+import { paths } from "../paths.js?v=1007.54";
+import { I } from "../ui.js?v=1007.54";
+import { audioCtx, hold } from "../wake.js?v=1007.54";
+import * as sfx from "../sfx.js?v=1007.54";
+import { scoreFx } from "../scorefx.js?v=1007.54";
+import { units as jamoUnits, baseOf } from "../jamobox.js?v=1007.54"; // 자모 자리 나누기(획순 · 자판 덧칠 · 손글씨 덩어리 — 본부 10-07) // 손글씨 점수 효과 = 말하기와 같은 규칙(본부 10-07)
 
 const KEYS = [..."ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎㄲㄸㅃㅆㅉ"], VOW = [..."ㅏㅑㅓㅕㅗㅛㅜㅠㅡㅣ"];
 const VOW2 = [..."ㅐㅒㅔㅖㅘㅙㅚㅝㅞㅟㅢ"]; // 겹모음 줄(본부 10-06) — 칸 하나 · ㅓ+ㅣ 처럼 나눠 쳐도 받음
@@ -116,11 +116,12 @@ export default async function write(app, ep, id, opts = {}) {
 
   app.innerHTML = `<section class="scr write ${opts.embedded ? "embedded" : ""}">
     ${opts.embedded
-      ? `<div class="whead"><b>${esc(t("write"))}</b><span class="sub">${li + 1} / ${d.lines.length} · <span class="ko" lang="ko">${esc(line.speaker)}</span></span>${modeBtns()}<span class="loopnote" aria-live="polite"></span></div>`
+      ? `<div class="whead"><b>${esc(t("write"))}</b><span class="sub">${li + 1} / ${d.lines.length} · <span class="ko" lang="ko">${esc(line.speaker)}</span></span>${modeBtns()}<button class="whelp" data-act="help" aria-label="${esc(t("help"))}">${esc(t("help_btn"))}</button><span class="loopnote" aria-live="polite"></span></div>`
       : `<div class="bar"><a class="iconbtn" href="#/learn/${ep}/${line.id}" aria-label="${esc(t("back"))}">${I.back}</a>
-      <div class="grow"><div class="t">${esc(t("write"))}</div><div class="sub">${li + 1} / ${d.lines.length} · <span class="ko" lang="ko">${esc(line.speaker)}</span></div></div>${modeBtns()}</div><div class="loopnote" aria-live="polite"></div>`}
+      <div class="grow"><div class="t">${esc(t("write"))}</div><div class="sub">${li + 1} / ${d.lines.length} · <span class="ko" lang="ko">${esc(line.speaker)}</span></div></div>${modeBtns()}<button class="whelp" data-act="help" aria-label="${esc(t("help"))}">${esc(t("help_btn"))}</button></div><div class="loopnote" aria-live="polite"></div>`}
     <div class="segrow"><div class="sent" lang="ko"></div><div class="segnav"></div><div class="wtip" hidden>${esc(t("w_tip"))}</div></div>
     <div class="work"></div>
+    <div class="helpbox" hidden>${[1, 2, 3, 4, 5, 6].map(k => `<p>${esc(t("help_wr_" + k))}</p>`).join("")}<p class="x">${esc(t("help_close"))}</p></div>
     <div class="wbtns"><button data-act="word">${esc(t("listen_word"))}</button><button data-act="sent">${esc(t("listen_part"))}</button><button data-act="auto">${esc(t("autofill"))}</button></div>
   </section>`;
 
@@ -155,7 +156,7 @@ export default async function write(app, ep, id, opts = {}) {
 
   function paintSent() {
     sentEl.innerHTML = `<svg class="spk" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M4 9v6h4l5 4V5L8 9H4z"/><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M16 8.5a5 5 0 0 1 0 7M18.8 6a8.5 8.5 0 0 1 0 12"/></svg>` + words().map((w, wi) => `<span class="w ${wi === st.w ? "on" : ""}">${w.chars.map((c, ci) =>
-      `<button class="c ko ${c.file ? "" : "noaudio"} ${st.wrote.has(wkey(st.s, wi, ci)) ? "done" : ""} ${st.loopAt && st.loopAt.w === wi && st.loopAt.c === ci ? "loop" : ""} ${wi === st.w && ci === st.c && st.s < segs.length ? "now" : ""}" data-w="${wi}" data-c="${ci}" ${c.file ? "" : 'aria-disabled="true"'}>${esc(c.ch)}${st.mode === "hand" && bestGet(wi, ci) != null ? `<small class="hb">${bestGet(wi, ci)}</small>` : ""}</button>`).join("")}</span>`).join("");
+      `<button class="c ko ${c.file ? "" : "noaudio"} ${st.wrote.has(wkey(st.s, wi, ci)) ? "done" : ""} ${st.loopAt && st.loopAt.w === wi && st.loopAt.c === ci ? "loop" : ""} ${wi === st.w && ci === st.c && st.s < segs.length ? "now" : ""}" data-w="${wi}" data-c="${ci}" ${c.file ? "" : 'aria-disabled="true"'}>${esc(c.ch)}</button>`).join("")}</span>`).join("");
     segnav.innerHTML = segs.length > 1
       ? `<button data-seg="-1" ${st.s ? "" : "disabled"} aria-label="${esc(t("previous"))}">◀</button><span>${st.s + 1}/${segs.length}</span><button data-seg="1" ${st.s < segs.length - 1 ? "" : "disabled"} aria-label="${esc(t("next"))}">▶</button>`
       : "";
@@ -198,7 +199,7 @@ export default async function write(app, ep, id, opts = {}) {
     }
     const w = words()[st.w], c = w.chars[st.c], jam = c.jamo;
     work.innerHTML = `<div class="stage"><div class="box"><canvas class="tcv" aria-hidden="true"></canvas><span class="target ko" lang="ko">${esc(c.ch)}</span><span class="typed ko" lang="ko">${esc(compose([...st.typed, st.part].flatMap(jamoParts), vowelLen(c.ch)))}</span></div>
-      <div class="info">${w.rom || w.mean ? `<div class="sub2">${w.rom ? `<span class="rom">${esc(w.rom)}</span>` : ""}${w.mean ? `<span class="mean tr">${esc(w.mean)}</span>` : ""}</div>` : ""}
+      <div class="info">${w.rom || w.mean || st.mode === "hand" ? `<div class="sub2">${w.rom ? `<span class="rom">${esc(w.rom)}</span>` : ""}${w.mean ? `<span class="mean tr">${esc(w.mean)}</span>` : ""}${st.mode === "hand" ? `<span class="htools" role="group">${Object.entries(TOOLS).map(([k, v]) => `<button data-tool="${k}" aria-pressed="${toolKey() === k}">${v.icon} ${esc(t("h_" + k))}</button>`).join("")}</span>` : ""}</div>` : ""}
       <div class="slotrow"><div class="slots">${jam.map((j, i) => `<span class="slot ${i < st.k ? "filled" : i === st.k ? "current" : ""}">${i <= st.k ? esc(j) : ""}</span>`).join("")}</div></div></div></div>
       ${st.mode === "hand" ? `<div class="hand"><div class="hbox"><canvas class="hguide" aria-hidden="true"></canvas><canvas class="hink" aria-label="${esc(t("w_hand"))}"></canvas><b class="hscore" hidden></b><span class="fx" aria-hidden="true"></span></div><div class="hbtns"><button data-act="hdone">✓ ${esc(t("h_done"))}</button><button data-act="horder">✎ ${esc(t("h_order"))}</button><button data-act="hundo">↶ ${esc(t("h_undo"))}</button><button data-act="hclear">✕ ${esc(t("h_clear"))}</button></div></div>`
         : `<div class="kb" lang="ko">${KB_ROWS.map(r => `<div class="kr">${r.map(j => `<button data-j="${j}">${j}</button>`).join("")}</div>`).join("")}</div>`}`;
@@ -234,9 +235,21 @@ export default async function write(app, ep, id, opts = {}) {
     x.fillStyle = x.strokeStyle = color; x.textBaseline = "alphabetic"; x.textAlign = "left"; x.fillText(ch, cx, cy);
     if (grow) { x.lineWidth = grow; x.lineJoin = "round"; x.strokeText(ch, cx, cy); }
   }
-  function inkPath(x, n, strokes, width, color = "#000") {
-    x.strokeStyle = x.fillStyle = color; x.lineWidth = width; x.lineCap = x.lineJoin = "round";
-    for (const S of strokes) { if (!S.length) continue; x.beginPath(); x.moveTo(S[0][0] * n, S[0][1] * n); if (S.length === 1) x.lineTo(S[0][0] * n + 0.01, S[0][1] * n); for (const [a, b] of S.slice(1)) x.lineTo(a * n, b * n); x.stroke(); }
+  // 쓰기 도구(본부 10-07 투덜이 「더 실감 나고 재미있게」) — 연필 4% · 펜 7% · 붓 12%(빠르면 가늘고 천천히·꾹 누르면 굵게 0.5~1.2배 · 끝은 가늘게) · 고른 것 기억
+  const TOOLS = { pencil: { w: 0.04, color: "#4a4a50", icon: "✏️" }, pen: { w: 0.07, color: "#1f2a5c", icon: "🖊" }, brush: { w: 0.12, color: "#161616", icon: "🖌" } };
+  const toolKey = () => { try { const k = localStorage.getItem("malmun.htool"); return TOOLS[k] ? k : "pen"; } catch { return "pen"; } };
+  // 획 그리기 — S.w = 그 획 도구 굵기(칸 비율 · 없으면 PEN) × 점마다 굵기 배수(p[2]) · extra = 더 붙일 굵기(px · 판정 「덮음」용) · look = 눈에 보이는 그림(연필 결·붓 끝)
+  function inkPath(x, n, strokes, extra = 0, color = "#000", look = false) {
+    x.lineCap = x.lineJoin = "round";
+    for (const S of strokes) { if (!S.length) continue;
+      const base = (S.w ?? PEN) * n, f = i => S[i]?.[2] ?? 1, col = look && S.tool && !color ? TOOLS[S.tool].color : color || "#000";
+      x.strokeStyle = x.fillStyle = col;
+      if (S.length === 1) { x.beginPath(); x.arc(S[0][0] * n, S[0][1] * n, (base * f(0) + extra) / 2, 0, Math.PI * 2); x.fill(); continue; }
+      const L = S.length, taper = i => (look && S.tool === "brush" ? Math.min(1, 0.35 + (0.65 * (L - 1 - i)) / Math.min(4, L - 1)) : 1); // 붓 끝 가늘게(마지막 4점)
+      if (S.tool === "brush" || S.some(p => p[2] != null)) for (let i = 1; i < L; i++) { x.lineWidth = base * ((f(i - 1) + f(i)) / 2) * taper(i) + extra; x.beginPath(); x.moveTo(S[i - 1][0] * n, S[i - 1][1] * n); x.lineTo(S[i][0] * n, S[i][1] * n); x.stroke(); }
+      else { x.lineWidth = base + extra; x.beginPath(); x.moveTo(S[0][0] * n, S[0][1] * n); for (const [a, b] of S.slice(1)) x.lineTo(a * n, b * n); x.stroke();
+        if (look && S.tool === "pencil") { x.save(); x.globalAlpha = 0.35; x.lineWidth = Math.max(1, base * 0.25); for (const o of [-0.32, 0.32]) { x.beginPath(); S.forEach(([a, b], i) => { const j = ((i * 7919) % 5) / 5 - 0.4; (i ? x.lineTo : x.moveTo).call(x, a * n + o * base + j, b * n - o * base * 0.5 + j); }); x.stroke(); } x.restore(); } } // 연필 결
+    }
   }
   const pix = (n, fn) => { const cv = document.createElement("canvas"); cv.width = cv.height = n; const x = cv.getContext("2d", { willReadFrequently: true }); fn(x); return x.getImageData(0, 0, n, n).data; };
   // 판정(본부 10-07 투덜이 「비슷해도 넘어가 버림」 → 엄하게)
@@ -256,7 +269,7 @@ export default async function write(app, ep, id, opts = {}) {
   }
   function handScore(ch, strokes, boxPx = st.hand?.s || 260) {
     const N = 160, k = N / boxPx, mask = pix(N, x => glyph(x, N, ch, "#000")), maskD = pix(N, x => glyph(x, N, ch, "#000", PEN * 2));
-    const near = pix(N, x => inkPath(x, N, strokes, PEN * N + 4 * k)), ink = pix(N, x => inkPath(x, N, strokes, PEN * N));
+    const near = pix(N, x => inkPath(x, N, strokes, 4 * k)), ink = pix(N, x => inkPath(x, N, strokes, 0)); // 덮음 = 도구 굵기 절반 + 2px · 벗어남 = 도구 굵기 그대로
     const us = unitsOf(ch), sc = N / UN, tot = us.reduce((a, u) => a + u.px.length, 0);
     const comps = us.length ? us.filter(u => u.px.length >= tot * 0.005).map(u => [...new Set(u.px.map(q => Math.min(N - 1, Math.floor((q % UN) * sc)) + Math.min(N - 1, Math.floor(Math.floor(q / UN) * sc)) * N))].filter(q => mask[q * 4 + 3] > 128)) : compsOf(mask, N), miss = []; // 덩어리 = 자모 자리(자판 덧칠·획순과 같은 나눔)
     const cov = comps.map(c => { let n = 0; for (const q of c) { if (near[q * 4 + 3] > 128) n++; else miss.push(q); } return c.length ? n / c.length : 0; });
@@ -323,21 +336,28 @@ export default async function write(app, ep, id, opts = {}) {
       x.beginPath(); x.moveTo(n / 2, 0); x.lineTo(n / 2, n); x.moveTo(0, n / 2); x.lineTo(n, n / 2); x.stroke(); x.setLineDash([]); // 십자 보조선(흐리게)
       glyph(x, n, c.ch, col("--hguide-ink"));
       if (missN) { const { miss, N } = missN, k = n / N; x.fillStyle = "#e08a1e"; for (const i of miss) x.fillRect((i % N) * k, Math.floor(i / N) * k, k + 0.5, k + 0.5); } }; // 덜 덮은 곳 주황
-    const paintInk = (color) => { const x = iv.getContext("2d"), n = iv.width; x.clearRect(0, 0, n, n); inkPath(x, n, H.strokes, PEN * n, color || (H.passed ? col("--okc") : col("--hink"))); }; // 통과 = 초록(다시 그려도)
+    const paintInk = (color) => { const x = iv.getContext("2d"), n = iv.width; x.clearRect(0, 0, n, n); inkPath(x, n, H.strokes, 0, color || (H.passed ? col("--okc") : null), true); }; // 도구마다 제 색 · 통과 = 초록 // 통과 = 초록(다시 그려도)
     const fit = () => { if (!hand.isConnected) return; const cs = getComputedStyle(hand), px = v => parseFloat(cs[v]) || 0, gap = px("columnGap") || 10; // 칸 크기 = 안쪽 여백 빼고(본부 10-07 왼쪽 끝 3px 에 붙던 것)
       const iw = hand.clientWidth - px("paddingLeft") - px("paddingRight"), ih = hand.clientHeight - px("paddingTop") - px("paddingBottom");
-      hand.classList.remove("stack"); const sA = Math.min(ih, iw - bt.offsetWidth - gap); // 단추 오른쪽
-      hand.classList.add("stack"); const sB = Math.min(ih - bt.offsetHeight - (px("rowGap") || 8), iw); // 단추 아래 한 줄(폰 세로 — 칸을 더 크게)
-      if (sA >= sB) hand.classList.remove("stack");
-      const s = Math.max(60, Math.floor(Math.max(sA, sB))), dpr = window.devicePixelRatio || 1;
+      // 단추 자리 = 오른쪽 한 줄 · 오른쪽 두 줄 · 칸 아래 중 단추가 다 들어가고 칸이 가장 큰 것(도구 3 + 단추 4 = 7개 · 375×667 에서 한 줄이면 넘침)
+      const lay = [["", c2 => Math.min(ih, iw - bt.offsetWidth - gap), () => bt.offsetHeight <= ih], ["two", () => Math.min(ih, iw - bt.offsetWidth - gap), () => bt.offsetHeight <= ih], ["stack", () => Math.min(ih - bt.offsetHeight - (px("rowGap") || 8), iw), () => bt.offsetWidth <= iw + 1]];
+      let best = null; for (const [k, sz, fits] of lay) { hand.classList.remove("stack", "two"); if (k) hand.classList.add(k); const v = sz(), f = fits(); if (f && (!best || v > best[1])) best = [k, v]; }
+      if (!best) best = ["stack", Math.min(ih - bt.offsetHeight - 8, iw)];
+      hand.classList.remove("stack", "two"); if (best[0]) hand.classList.add(best[0]);
+      const s = Math.max(60, Math.floor(best[1])), dpr = window.devicePixelRatio || 1;
       box.style.width = box.style.height = s + "px"; for (const cv of [gv, iv]) cv.width = cv.height = Math.round(s * dpr); H.s = s; paintGuide(); paintInk(); };
     fit(); H.ro?.disconnect(); H.ro = new ResizeObserver(() => fit()); H.ro.observe(hand);
     document.fonts?.load(`${glyphWeight()} 100px ${glyphFont()}`, c.ch).catch(() => {}).then(() => document.fonts.ready).then(() => { if (st.hand !== H) return; gCache.clear(); fit(); }); // 글꼴이 늦게 오면 글자 그림 다시
     const at = e => { const r = iv.getBoundingClientRect(); return [Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)), Math.min(1, Math.max(0, (e.clientY - r.top) / r.height))]; };
+    // 점 = [x, y, 굵기 배수] — 붓만: 진짜 펜이면 누르는 힘 · 아니면 빠르기(칸/초 · 빠를수록 가늘게) · 앞 점과 부드럽게 이어 붙임
+    const pt = (e, S) => { const p = at(e); if (toolKey() !== "brush" && !(S && S.tool === "brush")) return p; const now = e.timeStamp || performance.now();
+      let f; if (e.pointerType === "pen" && e.pressure > 0) f = 0.5 + 0.7 * Math.min(1, e.pressure);
+      else if (!S || !S.length) f = 1; else { const q = S[S.length - 1], dt = Math.max(1, now - (S.t || now - 16)), v = Math.hypot(p[0] - q[0], p[1] - q[1]) / (dt / 1000); f = 1.2 - 0.7 * Math.min(1, v / 2.5); }
+      if (S && S.length) f = S[S.length - 1][2] * 0.6 + f * 0.4; if (S) S.t = now; return [p[0], p[1], Math.max(0.5, Math.min(1.2, f))]; };
     iv.addEventListener("pointerdown", e => { if (st.busy || st.auto) return; e.preventDefault(); try { iv.setPointerCapture(e.pointerId); } catch {} clearTimeout(H.timer); stopLoop();
       if (H.passed) { H.passed = false; H.strokes = []; H.roles = null; H.orderTold = false; markHand(); const sc = work.querySelector(".hscore"); if (sc) sc.hidden = true; } // 통과 뒤 다시 그리면 = 다시 쓰기(더 높은 점수)
-      H.cur = [at(e)]; H.strokes.push(H.cur); paintInk(); });
-    iv.addEventListener("pointermove", e => { if (!H.cur) return; e.preventDefault(); const evs = e.getCoalescedEvents?.() || []; for (const ev of evs.length ? evs : [e]) H.cur.push(at(ev)); paintInk(); });
+      const tk = toolKey(); H.cur = Object.assign([pt(e, null)], { tool: tk, w: TOOLS[tk].w }); H.strokes.push(H.cur); paintInk(); });
+    iv.addEventListener("pointermove", e => { if (!H.cur) return; e.preventDefault(); const evs = e.getCoalescedEvents?.() || []; for (const ev of evs.length ? evs : [e]) H.cur.push(pt(ev, H.cur)); paintInk(); });
     const up = () => { if (!H.cur) return; const S = H.cur; H.cur = null; clearTimeout(H.timer); H.timer = setTimeout(() => st.hand === H && handJudge(), 1200);
       const msg = strokeHint(H, S); if (msg) bubble(msg); }; // 획순·방향 알림(짧은 말풍선)
     const bubble = msg => { let b = box.querySelector(".hbubble"); if (!b) { b = document.createElement("b"); b.className = "hbubble"; box.append(b); } b.textContent = msg; b.hidden = false; H.hints = (H.hints || []).concat(msg); clearTimeout(H.bt); H.bt = setTimeout(() => (b.hidden = true), 2500); };
@@ -479,7 +499,13 @@ export default async function write(app, ep, id, opts = {}) {
   }
 
   app.querySelector(".scr").addEventListener("pointerdown", e => { const k = e.target.closest("[data-j]"); if (!k) return; k.classList.add("pr"); setTimeout(() => k.classList.remove("pr"), 160); });
+  // 도움말(본부 10-07 — 말하기와 같은 모양·자리 · 칸 안 스크롤 0 = 글 크기로 맞춤)
+  const fitHelp = () => { const hb = $(".helpbox"); if (!hb || hb.hidden) return; const ps = [...hb.children]; ps.forEach(x => x.style.removeProperty("zoom")); for (let z = 0.95; z >= 0.55 && hb.scrollHeight > hb.clientHeight; z -= 0.05) ps.forEach(x => (x.style.zoom = z.toFixed(2))); };
+  new ResizeObserver(() => fitHelp()).observe($(".helpbox"));
   app.querySelector(".scr").onclick = e => {
+    const hb = $(".helpbox");
+    if (!hb.hidden) { hb.hidden = true; if (e.target.closest("[data-act=help], .helpbox")) return; } // 아무 데나 누르면 닫힘
+    if (e.target.closest("[data-act=help]")) { hush(); stopLoop(); hb.hidden = false; fitHelp(); return; }
     const k = e.target.closest("[data-j]");
     if (k) return press(k.dataset.j);
     const wc = e.target.closest("[data-wc]");
@@ -501,6 +527,8 @@ export default async function write(app, ep, id, opts = {}) {
       if (c.file) run([c.file]); else note.textContent = t("no_char_audio", { c: c.ch });
       return;
     }
+    const tb = e.target.closest("[data-tool]");
+    if (tb) { try { localStorage.setItem("malmun.htool", tb.dataset.tool); } catch {} app.querySelectorAll("[data-tool]").forEach(x => x.setAttribute("aria-pressed", String(x.dataset.tool === tb.dataset.tool))); return; } // 도구 고르기(기억) · 이미 그린 획은 그 도구 그대로
     const mb = e.target.closest("[data-mode]");
     if (mb) { if (st.mode !== mb.dataset.mode) { st.mode = mb.dataset.mode; try { localStorage.setItem("malmun.wmode", st.mode); } catch {} app.querySelectorAll("[data-mode]").forEach(x => x.setAttribute("aria-pressed", String(x.dataset.mode === st.mode))); st.typed = []; st.k = 0; st.part = ""; render(); } return; }
     const b = e.target.closest("[data-act]");

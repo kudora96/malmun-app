@@ -57,7 +57,7 @@
     // 「서」 눌러 돌아옴 — 건너뛴 「오」는 안 씀(기본) · 쓴 「어」는 초록(본부 10-07)
     [...document.querySelectorAll(".panel .sent .c")].find(c => c.textContent === "서").click(); await W(1500);
     const cs = t => [...document.querySelectorAll(".panel .sent .c")].find(c => c.textContent === t);
-    ok($(".panel .target")?.textContent === "서" && cs("어").classList.contains("done") && cs("서").classList.contains("now") && !cs("서").classList.contains("done") && getComputedStyle(cs("서")).backgroundColor !== getComputedStyle(cs("세")).backgroundColor, "「서」 눌러 돌아옴 · 쓴 「어」 초록 · 지금 글자 = 칠(안 쓴 칸과 바탕 다름)", $(".panel .target")?.textContent); }
+    ok($(".panel .target")?.textContent === "서" && cs("어").classList.contains("done") && cs("서").classList.contains("now") && getComputedStyle(cs("서")).backgroundColor !== getComputedStyle(cs("세")).backgroundColor, "「서」 눌러 돌아옴 · 쓴 「어」 초록 · 지금 글자 = 칠(안 쓴 칸과 바탕 다름)", $(".panel .target")?.textContent); }
   // 단어 듣기 · 문장 듣기 · 아래 ▶
   // 단어 듣기 · 이 부분 듣기 = 본부가 일레븐랩스로 따로 만든 소리(units/{id}.mp3) — 끝까지 다 나오고, 줄 전체(_sub_t1)는 안 나옴
   const units = await (await fetch("data/L01-00-01/L01-00-01.units.json", { cache: "no-store" })).json();

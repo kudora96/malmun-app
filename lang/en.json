@@ -175,5 +175,14 @@
  "h_order": "Order",
  "h_order_first": "Order: write {j} first",
  "h_dir_lr": "Direction: left to right",
- "h_dir_tb": "Direction: top to bottom"
+ "h_dir_tb": "Direction: top to bottom",
+ "h_pencil": "Pencil",
+ "h_pen": "Pen",
+ "h_brush": "Brush",
+ "help_wr_1": "⌨ Keyboard / ✍ Handwriting — choose how to write.",
+ "help_wr_2": "Top letter row — tap a letter to start writing from there. Filled letter: the one to write now. Green: already written.",
+ "help_wr_3": "Keyboard — press the consonants and vowels in order. The part you typed fills in dark over the faint letter. There are also \"Listen to word\", \"Listen to this part\" and \"Auto-complete\" buttons.",
+ "help_wr_4": "Handwriting — trace over the faint letter. Choose ✏️ Pencil, 🖊 Pen or 🖌 Brush. When you finish, press ✓ or lift your finger/mouse for a moment — your score appears.",
+ "help_wr_5": "Score — based on how much of the faint letter you covered and how much went outside it. 80% or more ☆, 95% or more ★.",
+ "help_wr_6": "Order — shows the stroke order and direction. It tells you if your order is wrong."
 }
