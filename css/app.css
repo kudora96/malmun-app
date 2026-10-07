@@ -874,3 +874,12 @@ a{color:inherit;text-decoration:none}
 .write .hbtns button[data-act=hdone]{background:var(--hi);border-color:var(--hi);color:var(--on-hi)}
 .write .hbtns button:active{transform:translateY(2px);box-shadow:none}
 .write:has(.hand){overscroll-behavior:contain}
+
+/* 손글씨 다듬기(본부 10-07) — 좌우 여백 16px · 칸+단추 묶음 가운데 · 위 작은 글자 상자·자모 칸 숨김(큰 칸과 같은 정보) */
+.write .hand{padding:4px 16px 6px;column-gap:12px}
+.write .work.handmode .stage .box,.write .work.handmode .stage .slots{display:none}
+.write .work.handmode .stage{grid-template-columns:minmax(0,1fr);grid-template-areas:"info" "btns"}
+.write .work.handmode .stage.btns-in{grid-template-areas:"info"}
+.write .hand.stack{flex-direction:column;row-gap:8px}
+.write .hand.stack .hbtns{flex-direction:row;justify-content:center;flex-wrap:nowrap}
+.write .hand.stack .hbtns button{min-height:32px;padding:4px 10px}
