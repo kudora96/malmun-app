@@ -21,6 +21,16 @@
     await back();
     ok(stayed && location.hash === "#/list", "ⓑ 창 열린 채 뒤로 = 창만 닫힘(편 그대로) · 한 번 더 = 목록 · 토막 옮기기는 칸 안 쌓음", `첫 뒤로 뒤 편 그대로 ${stayed} · 지금 ${location.hash}`);
     ok(hasClose, "ⓒ 쓰기 창 머리 줄에 ✕ 닫기 단추", wclose?.textContent.trim() || "없음");
+    // ⓓ 본부 순서(10-07): 처음 쓰는 학습자(도움말이 처음 뜸 → 「बन्द गर्न…」 글 눌러 닫기) · 탭 기록 50칸 꽉 참 · 빠르게 누름(✕ 바로 다음 창) → 뒤로 1번 = 목록
+    { for (const k of ["malmun.sp.help", "malmun.v9tip", "malmun.fliptip", "malmun.modetip", "malmun.wtip"]) try { localStorage.removeItem(k); } catch {}
+      for (let k = 0; k < 55; k++) history.pushState(null, "", location.href.split("#")[0] + "#/list"); // 기록 꽉 채움(같은 목록 주소)
+      location.hash = "#/list"; await W(800); location.hash = "#/learn/L01-00-01"; await W(2500);
+      const tipX = () => { const t = [...document.querySelectorAll(".panel .helpbox:not([hidden]) .x, .panel .helpbox:not([hidden])")][0]; t?.click(); };
+      await open("explain"); tipX(); await W(300); $(".panel [data-x=close]")?.click();
+      await open("write"); $(".panel [data-act=close]")?.click();
+      document.querySelectorAll(".line")[1].querySelector("[data-act=speak]").click(); await W(1300); tipX(); await W(300); $(".panel [data-act=close]")?.click(); await W(700);
+      const L0 = history.length; await back();
+      ok(location.hash === "#/list", "ⓓ 처음 도움말 닫기 · 기록 50칸 꽉 참 · 빠르게 누름 → 뒤로 1번 = 목록", `기록 ${L0}칸 · 지금 ${location.hash} · 뒤로 기록 ${(JSON.parse(localStorage.getItem("malmun.navlog") || "[]")).slice(-4).join(" | ")}`); }
     location.hash = "#/learn/L01-00-01"; await W(2000);
   } catch (e) { res.push("✗ 점검 도중 오류: " + e.message); }
   const bad = res.filter(x => x.startsWith("✗")).length, out = `${bad ? "✗" : "✓"} 뒤로 가기 ${res.length - bad}/${res.length}\n` + res.join("\n");

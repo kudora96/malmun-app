@@ -1,14 +1,14 @@
 // 진단 화면 #/diag(본부 10-07 「PC 에선 되는데 폰에선 안 됨」) — 투덜이가 폰에서 열어 사진 한 장 · 「복사」로 글째 보냄
 //  기기 · 받아쓰기(인식만 / 녹음+인식 동시) · 마이크(허락 · 실제 적용된 설정 · 장치) · 녹음 형식(지원 · 3초 녹음을 풀 수 있나)
 //  소리(AudioContext 상태 · 「가」 소리 · 효과음 · 음성 창고 읽기) · 최근 오류 20개 — 앱 동작은 안 바꿈(시험은 이 화면 안에서만)
-import { VERSION } from "../version.js?v=1007.100";
-import { esc } from "../text.js?v=1007.100";
-import { paths } from "../paths.js?v=1007.100";
-import { charsF } from "../data.js?v=1007.100";
-import { audioCtx } from "../wake.js?v=1007.100";
-import * as sfx from "../sfx.js?v=1007.100";
-import { srOnlyMode, setSrOnly } from "../recorder.js?v=1007.100";
-import { errLog, clearErr } from "../errlog.js?v=1007.100";
+import { VERSION } from "../version.js?v=1007.101";
+import { esc } from "../text.js?v=1007.101";
+import { paths } from "../paths.js?v=1007.101";
+import { charsF } from "../data.js?v=1007.101";
+import { audioCtx } from "../wake.js?v=1007.101";
+import * as sfx from "../sfx.js?v=1007.101";
+import { srOnlyMode, setSrOnly } from "../recorder.js?v=1007.101";
+import { errLog, clearErr } from "../errlog.js?v=1007.101";
 
 export default async function diag(app) {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -31,7 +31,7 @@ export default async function diag(app) {
     app.innerHTML = `<section class="scr diag"><div class="bar"><div class="grow"><div class="t">진단 · Diagnostics</div><div class="sub">사진 한 장 또는 「복사」로 보내 주세요</div></div><a class="dback" href="#/list">✕ 닫기</a></div>
       <table class="dtab">${Object.entries(base).map(([k, v]) => row(k, v)).join("")}${Object.values(keys).map(k => row(k, res[k] ?? "—")).join("")}</table>
       <div class="dbtns">${tests.map(([a, l]) => `<button data-t="${a}">${esc(l)}</button>`).join("")}</div>
-      <h3>최근 오류 ${errs.length}개</h3><ol class="derr">${errs.slice().reverse().map(e => `<li>${esc(`${e.at} ${e.kind} ${e.msg}${e.url ? " · " + e.url : ""}${e.src ? " · " + e.src + ":" + e.line : ""}`)}</li>`).join("") || "<li>없음</li>"}</ol>
+      <h3>뒤로 가기 기록</h3><ol class="derr">${(() => { try { return JSON.parse(localStorage.getItem("malmun.navlog") || "[]"); } catch { return []; } })().slice().reverse().map(x => `<li>${esc(x)}</li>`).join("") || "<li>없음</li>"}</ol><h3>최근 오류 ${errs.length}개</h3><ol class="derr">${errs.slice().reverse().map(e => `<li>${esc(`${e.at} ${e.kind} ${e.msg}${e.url ? " · " + e.url : ""}${e.src ? " · " + e.src + ":" + e.line : ""}`)}</li>`).join("") || "<li>없음</li>"}</ol>
       <div class="dbtns"><button data-t="copy">복사</button>${srOnlyMode() ? '<button data-t="srboth">다시 같이 시험(받아쓰기만 끄기)</button>' : ""}<button data-t="clr">오류 지우기</button></div><p class="dmsg"></p></section>`;
   };
   paint();
@@ -53,7 +53,7 @@ export default async function diag(app) {
   app.querySelector(".diag").addEventListener("click", async e => {
     const b = e.target.closest("[data-t]"); if (!b) return;
     const a = b.dataset.t; try { audioCtx().resume?.(); } catch {}
-    if (a === "copy") { const txt = [...app.querySelectorAll(".dtab tr")].map(tr => tr.innerText.replace(/\t/, ": ")).join("\n") + "\n오류:\n" + errLog().map(e => JSON.stringify(e)).join("\n");
+    if (a === "copy") { const txt = [...app.querySelectorAll(".dtab tr")].map(tr => tr.innerText.replace(/\t/, ": ")).join("\n") + "\n뒤로:\n" + (() => { try { return JSON.parse(localStorage.getItem("malmun.navlog") || "[]").join("\n"); } catch { return ""; } })() + "\n오류:\n" + errLog().map(e => JSON.stringify(e)).join("\n");
       try { await navigator.clipboard.writeText(txt); msg("복사했어요"); } catch { msg("복사 안 됨 — 사진으로 보내 주세요"); } return; }
     if (a === "clr") { clearErr(); paint(); return; }
     if (a === "srboth") { setSrOnly(false); location.reload(); return; } // 다음 말하기에서 녹음+받아쓰기 같이 다시 시험
