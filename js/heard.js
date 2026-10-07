@@ -1,7 +1,7 @@
 // 「들린 말」 한 줄 — 점수를 낸 그 인식 결과를 본보기와 음절 단위로 견줘 틀린 곳을 보여 준다(본부 10-04 · 투덜이 승인)
 // 견주기 = 음절 편집 거리 정렬(띄어쓰기·문장부호 무시) · 틀린·더 들어간 음절 = 빨간 밑줄 · 빠진 자리 = 빨간 「_」 · 색만으로 구별하지 않게 밑줄도
-import { esc } from "./text.js?v=1007.67";
-import { similarity, align } from "./score.js?v=1007.67";
+import { esc } from "./text.js?v=1007.68";
+import { similarity, align } from "./score.js?v=1007.68";
 
 // 가장 높은 점수를 낸 들은 말
 export function bestHeard(want, heard) {

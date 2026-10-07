@@ -13,19 +13,19 @@
 //     못 넘어도 막지 않는다([다음 ▶]) · 음성 인식이 안 되는 곳은 점수 없이 듣고 비교만(녹음은 저장)
 //  S6 녹음은 이 기기 안에만(IndexedDB) — 서버로 보내지 않는다
 //  S7 영상 창 안(embedded): 스크롤 없이 · 줄 이동·닫기는 학습 화면이 한다 · 줄 전체까지 통과하면 다음 줄 말하기로
-import { t, lang } from "../i18n.js?v=1007.67";
-import { esc, sayParts } from "../text.js?v=1007.67";
-import { episode } from "../data.js?v=1007.67";
-import { paths } from "../paths.js?v=1007.67";
-import { audioCtx, hold, quietWake } from "../wake.js?v=1007.67";
-import * as sfx from "../sfx.js?v=1007.67";
-import { diagEnv, keepDiag } from "../diag.js?v=1007.67";
-import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1007.67";
-import { bestHeard, heardHTML, endHint } from "../heard.js?v=1007.67";
-import { openCompare, playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1007.67";
-import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V } from "../rhythm.js?v=1007.67";
-import { recDel, downloadRec, askPersist } from "../recstore.js?v=1007.67";
-import { logRec, dB, srWhy, srWatch, niceLabel, ALIAS } from "../recorder.js?v=1007.67";
+import { t, lang } from "../i18n.js?v=1007.68";
+import { esc, sayParts } from "../text.js?v=1007.68";
+import { episode } from "../data.js?v=1007.68";
+import { paths } from "../paths.js?v=1007.68";
+import { audioCtx, hold, quietWake } from "../wake.js?v=1007.68";
+import * as sfx from "../sfx.js?v=1007.68";
+import { diagEnv, keepDiag } from "../diag.js?v=1007.68";
+import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1007.68";
+import { bestHeard, heardHTML, endHint } from "../heard.js?v=1007.68";
+import { openCompare, playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1007.68";
+import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace } from "../rhythm.js?v=1007.68";
+import { recDel, downloadRec, askPersist } from "../recstore.js?v=1007.68";
+import { logRec, dB, srWhy, srWatch, niceLabel, ALIAS } from "../recorder.js?v=1007.68";
 
 // 통과 두 단계(본부 10-04 · 투덜이 「원어민은 되지만 외국인은 100% 어렵다」): 80↑ = ☆ 통과(✓ · [저장]) · 95↑ = ★ 완벽
 export const PASS = 80, PERFECT = 95;
@@ -55,8 +55,8 @@ const QUIET_MS = 2000, START_MS = 6000;
 export const maxMsFor = say => Math.max(8000, (3 + 0.8 * [...String(say || "")].filter(c => /[가-힣]/.test(c)).length) * 1000);
 
 // ── 닮음 = 음절 정렬(js/score.js · 「들린 말」 빨간 표시와 같은 함수 — 본부 10-04) ──
-import { similarity } from "../score.js?v=1007.67";
-import { scoreFx } from "../scorefx.js?v=1007.67"; // 점수별 효과(본부 10-05)
+import { similarity } from "../score.js?v=1007.68";
+import { scoreFx } from "../scorefx.js?v=1007.68"; // 점수별 효과(본부 10-05)
 export { similarity };
 
 // ── 내 목소리 저장(S6) ──
@@ -237,14 +237,14 @@ export default async function speak(app, ep, id, opts = {}) {
   function showMicName() { const b = $(".micname"), l = niceLabel(st.stream?.getAudioTracks()[0]?.label); if (b && l) { b.textContent = `🎤 ${l} ✓`; b.hidden = false; } }
   // 녹음 시간 막대(🎤 아래) — 차오름 + 「0:04 / 0:12」 · 남은 시간 20% 아래면 주황
   const mmss = ms => `${Math.floor(ms / 60000)}:${String(Math.floor(ms / 1000) % 60).padStart(2, "0")}`;
-  // 녹음 시간 막대(투덜이 10-07 「시간 바가 있어야 더 빨리 읽어야 하는 걸 앎」) — 굵게 · 남은 초 · 멈추면 「n초 뒤 끝나요」 · 본보기 속도 ×1.4 안내선 + 위 문장 글자 차례로 옅게 칠(점수와 상관없음)
+  // 녹음 시간 막대(투덜이 10-07 「시간 바가 있어야 더 빨리 읽어야 하는 걸 앎」) — 굵게 · 남은 초 · 멈추면 「n초 뒤 끝나요」 · 본보기 음절 시각 ×1.15(÷본보기 속도) 안내선 + 위 문장 글자를 그 시각대로 칠(rhythm.js paceOf)(점수와 상관없음)
   function tickBar(el, max, quietMs = 0) {
     const b = $(".tbar"); if (!b) return;
     b.hidden = false; b.firstElementChild.style.width = Math.min(100, (100 * el) / max) + "%";
     b.classList.toggle("low", el > max * 0.8); b.classList.toggle("quiet", quietMs > 400);
-    const pace = st.paceMs, pl = b.querySelector(".pace"); if (pl) { pl.hidden = !pace; if (pace) pl.style.left = Math.min(100, (100 * pace) / max) + "%"; }
+    const pace = st.pace, pl = b.querySelector(".pace"); if (pl) { pl.hidden = !pace; if (pace) pl.style.left = Math.min(100, (100 * pace.end) / max) + "%"; }
     b.querySelector(".tt").textContent = quietMs > 400 ? t("quiet_left", { s: Math.max(0, (QUIET_MS - quietMs) / 1000).toFixed(1) }) : `⏱ ${mmss(el)} / ${mmss(max)} · ${t("time_left", { s: Math.max(0, Math.ceil((max - el) / 1000)) })}`;
-    if (pace) { const cs = $(".say").children, n = Math.min(cs.length, Math.floor((cs.length * el) / pace)); for (let i = 0; i < cs.length; i++) cs[i].classList.toggle("pace", i < n); }
+    if (pace) paintPace($(".say").children, pace, el); // 본보기 음절 시각대로(본부 10-07)
   }
   const clearPace = () => { for (const c of $(".say")?.children || []) c.classList.remove("pace"); };
   async function startRec(switched) {
@@ -317,8 +317,8 @@ export default async function speak(app, ep, id, opts = {}) {
     } catch {}
     st.maxMs = maxMsFor(cur().say); st.why = "stop";
     maxTimer = setTimeout(() => { st.why = "time"; stopRec(); }, st.maxMs);
-    // 본보기 길이 × 1.4 = 여유 있는 속도 안내 · 최대 길이 = max(지금 식, 본보기 × 2 + 2초)(투덜이 10-07 허락 — 긴 줄 또박또박이면 빠듯)
-    st.paceMs = 0; { const u = cur().src || lineSrc, t0 = st.diag.t0, myRec = st.rec; if (u) sfx.load(u).then(b => { if (!b || st.rec !== myRec) return; st.paceMs = b.duration * 1000 * 1.4;
+    // 따라 읽기 칠 = rhythm.js paceOf · 최대 길이 = max(지금 식, 본보기 × 2 + 2초)(투덜이 10-07 허락 — 긴 줄 또박또박이면 빠듯)
+    st.pace = null; { const p = cur(), u = p.src || lineSrc, t0 = st.diag.t0, myRec = st.rec; if (u) sfx.load(u).then(async b => { if (!b || st.rec !== myRec) return; const pc = await paceOf({ ep, key: p.src ? p.key : `${ep}_${String(line.id).padStart(2, "0")}_line`, text: p.text, rate: getRate("m"), buf: b }); if (st.rec === myRec) st.pace = pc;
       const m2 = Math.max(st.maxMs, b.duration * 2000 + 2000); if (m2 > st.maxMs) { st.maxMs = m2; clearTimeout(maxTimer); maxTimer = setTimeout(() => { st.why = "time"; stopRec(); }, Math.max(0, m2 - (performance.now() - t0))); } }).catch(() => {}); }
     paint();
   }

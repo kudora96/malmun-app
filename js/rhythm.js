@@ -10,16 +10,30 @@
 //      같은 음절 되풀이(「이…있어요」「거구구나」 — 들은 말에 더 들어간 음절이 옆 음절과 같거나 첫소리+모음이 같음)도 −0.08(「더듬음」)
 //  · 최종 점수 = 글자 점수(score.js) × f(R): R ≥ 0.85 → 1 · 0.5 ≤ R < 0.85 → 0.90 + 0.10 × (R − 0.5)/0.35 · R < 0.5 → 0.88
 //  녹음·재생은 그대로 — 받은 녹음(blob)을 풀어 재기만
-import { audioCtx } from "./wake.js?v=1007.67";
-import { leadOf, voicedEnd, keepFirstOf } from "./playmine.js?v=1007.67";
-import { speechEnd } from "./recstore.js?v=1007.67";
-import * as sfx from "./sfx.js?v=1007.67";
-import { align } from "./score.js?v=1007.67";
+import { audioCtx } from "./wake.js?v=1007.68";
+import { leadOf, voicedEnd, keepFirstOf } from "./playmine.js?v=1007.68";
+import { speechEnd } from "./recstore.js?v=1007.68";
+import * as sfx from "./sfx.js?v=1007.68";
+import { align } from "./score.js?v=1007.68";
 
 export const FR = 0.02; // 특징 칸 20ms
 const alignCache = new Map();
 export const loadAlign = ep => { if (!alignCache.has(ep)) alignCache.set(ep, fetch(`data/${ep}/${ep}.align.json?v=${document.documentElement.dataset.v || ""}`).then(r => (r.ok ? r.json() : null)).catch(() => null)); return alignCache.get(ep); };
 export const isSyl = ch => /[\p{L}\p{N}]/u.test(ch);
+// 녹음 중 따라 읽기 칠(표시만 · 점수와 무관 — 본부 10-07 「칠을 그대로 따라 하면 100이 안 나옴」)
+//  글자마다 = 본보기 음절 시작 시각(align.json) × 배수 · 본보기 쉼에서는 칠도 멈춤 · 배수 = 1.15 ÷ 본보기 속도(0.75× 고르면 그만큼 느리게)
+//  → { at: 글자(span)마다 켜지는 ms(부호·띄어쓰기는 앞 음절과 같이) , end: 다 읽는 ms(안내선) } · 음절 시각이 없으면 본보기 길이로 고르게
+export const PACE_X = 1.15, PACE_L0 = 600; // 배수 · 🎤 뒤 첫 음절까지 여유(ms)
+export async function paceOf({ ep, key, text, rate = 1, buf }) {
+  const cs = [...String(text)], f = PACE_X / (rate || 1), al = await loadAlign(ep), syl = al?.items?.[key]?.syl, n = cs.filter(isSyl).length;
+  let ts = null, end;
+  if (syl?.length && syl.length === n) { const s0 = syl[0].s; ts = syl.map(x => PACE_L0 + f * (x.s - s0) * 1000); end = PACE_L0 + f * (syl[n - 1].e - s0) * 1000; }
+  else if (buf && n) { const d = buf.duration * 1000 * f; ts = Array.from({ length: n }, (_, k) => PACE_L0 + (d * k) / n); end = PACE_L0 + d; }
+  else return null;
+  let k = -1; const at = cs.map(ch => { if (isSyl(ch)) k++; return k < 0 ? ts[0] : ts[k]; });
+  return { at, end };
+}
+export const paintPace = (els, pace, el) => { for (let i = 0; i < els.length; i++) els[i].classList.toggle("pace", !!pace && el >= pace.at[i]); };
 
 // 20ms 칸 특징 = MFCC 13개(말소리 맞춤의 표준 — 다른 사람 목소리끼리도 같은 음절을 잘 맞춤) · 말마다 평균 빼고 분산 1(CMVN)
 //  16kHz 근처로 솎음 → 25ms 창(해밍) → FFT 512 → 멜 필터 26개 → 로그 → DCT 13
