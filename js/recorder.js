@@ -6,7 +6,7 @@
 // 시간·인식(본부 10-04 투덜이 승인): 말 사이 쉼 2초 · 🎤 뒤 6초 말 없으면 끝 · 최대 길이 = 문장 길이에 맞춤 · 인식이 혼자 끝나면 같은 트랙으로 다시
 // 그때와 다른 점(본부 10-04 「남긴 차이」): ① 윈도우 별칭 장치 「default」「communications」는 절대 안 고름(통신 장치를 열면 윈도우가 다른 소리를 줄임)
 //   ② 「준비 중 → 녹음 중」 표시(첫 소리가 들어오면) ③ 인식 오류 까닭을 돌려줌(onerror 를 삼키지 않음) ④ 진단 기록(이벤트만 듣고 소리 경로는 안 건드림)
-import { audioCtx } from "./wake.js?v=1007.65";
+import { audioCtx } from "./wake.js?v=1007.67";
 
 // 시간 규칙(본부 10-04 · 투덜이 「빨리 안 하면 바로 닫힘」): 말 사이 쉼 2초 · 🎤 뒤 6초 안에 말 없으면 끝 · 최대 길이는 부르는 쪽이 정함(문장 길이)
 const QUIET_MS = 2000, START_MS = 6000;
@@ -149,7 +149,7 @@ export function record({ onLevel = () => {}, onSwitch = () => {}, onReady = () =
           if (rms > thr && !spoke) pref(devId(s) || (s.req !== true && s.req) || ""); // 소리가 들어온 마이크를 기억
           if (rms > thr) { spoke = true; quietAt = 0; } else if (spoke) { quietAt ||= now; if (now - quietAt > QUIET_MS) finish({ why: "pause" }); }
           if (!spoke && performance.now() - t0 > START_MS) finish({ why: "nospeech" }); // 🎤 뒤 6초 동안 말 없음
-          onTick(performance.now() - t0, maxMs);
+          onTick(performance.now() - t0, maxMs, spoke && quietAt ? now - quietAt : 0); // 3번째 = 말한 뒤 조용한 시간(ms · 카드 쉼 카운트다운 표시용 — 투덜이 10-07 허락 · 끊는 기준은 그대로)
           if (!spoke && peak < 0.0002 && liveMs > DEAD_MS) finish({ dead: true }); // 1.5초 신호가 아예 0 → 다음 마이크로
         }, 60);
       } catch {}

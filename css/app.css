@@ -931,3 +931,10 @@ a{color:inherit;text-decoration:none}
 .speak .tbar.quiet i{background:#e07b00}
 .speak .tbar .pace{position:absolute;top:-2px;bottom:-2px;width:2px;margin-left:-1px;background:var(--ink);opacity:.7}
 .speak .task .say span.pace{background:var(--hi-soft);border-radius:3px;box-shadow:0 2px 0 var(--hi)}
+/* 카드 말해보기 시간 막대 = 말하기 창과 같게(투덜이 10-07) */
+.sayb .tbar{height:20px;border-radius:10px;background:color-mix(in srgb,var(--line) 70%,var(--mute) 30%)}
+.sayb .tbar i{opacity:.9}
+.sayb .tbar .tt{font-size:11.5px;font-weight:700}
+.sayb .tbar.quiet i{background:#e07b00}
+.sayb .tbar .pace{position:absolute;top:-2px;bottom:-2px;width:2px;margin-left:-1px;background:var(--ink);opacity:.7}
+.sayb .saybig span.pace{background:var(--hi-soft);border-radius:3px;box-shadow:0 2px 0 var(--hi)}

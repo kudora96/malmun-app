@@ -10,11 +10,11 @@
 //      같은 음절 되풀이(「이…있어요」「거구구나」 — 들은 말에 더 들어간 음절이 옆 음절과 같거나 첫소리+모음이 같음)도 −0.08(「더듬음」)
 //  · 최종 점수 = 글자 점수(score.js) × f(R): R ≥ 0.85 → 1 · 0.5 ≤ R < 0.85 → 0.90 + 0.10 × (R − 0.5)/0.35 · R < 0.5 → 0.88
 //  녹음·재생은 그대로 — 받은 녹음(blob)을 풀어 재기만
-import { audioCtx } from "./wake.js?v=1007.65";
-import { leadOf, voicedEnd, keepFirstOf } from "./playmine.js?v=1007.65";
-import { speechEnd } from "./recstore.js?v=1007.65";
-import * as sfx from "./sfx.js?v=1007.65";
-import { align } from "./score.js?v=1007.65";
+import { audioCtx } from "./wake.js?v=1007.67";
+import { leadOf, voicedEnd, keepFirstOf } from "./playmine.js?v=1007.67";
+import { speechEnd } from "./recstore.js?v=1007.67";
+import * as sfx from "./sfx.js?v=1007.67";
+import { align } from "./score.js?v=1007.67";
 
 export const FR = 0.02; // 특징 칸 20ms
 const alignCache = new Map();
@@ -168,7 +168,8 @@ export function rhythmScore({ msyl, ysyl, mbuf, ybuf, ends, heard, groups }) {
   for (const k of E) { const ms = st(k, msyl, mS0), ys = st(k, ysyl, yS0); A[k] = tailCut(mbuf, ms, tEnd(msyl, k, mbuf)) - ms; Bm[k] = tailCut(ybuf, ys, tEnd(ysyl, k, ybuf)) - ys; }
   const sc = A.reduce((x, y) => x + y, 0) / (Bm.reduce((x, y) => x + y, 0) || 1), B = Bm.map(v => v * sc), wt = A.map(v => v);
   for (const k of E) if (!(B[k] > 2 * A[k] || B[k] - A[k] > 0.25)) wt[k] *= END_W; // 「나———」 끌기는 완화 없음
-  let R = 0, worst = null, worstHit = 0, stumble = false;
+  let R = 0, worst = null, worstHit = 0, stumble = false, over = null; // over = 1.7배 넘게 길거나 짧은 곳(가장 심한 것)
+  const RATIO = 1.7, overChk = (a, b, mk) => { const r = b / Math.max(1e-6, a); if ((r > RATIO || r < 1 / RATIO) && (!over || Math.abs(Math.log(r)) > Math.abs(Math.log(over.r)))) over = { r, ...mk() }; }; // 투덜이 10-07 허락 — 한 곳이라도 1.7배 넘게 틀리면 최대 99
   if (groups && groups.length >= 2 && n >= WORD_MODE_MIN) {
     // 낱말 단위(본부 10-07) — 낱말 길이 = 첫 음절 시작 ~ 끝 음절 끝(첫 낱말은 소리 시작부터 · 구 끝 낱말은 여운 빼고)
     //  내 낱말 경계 = DTW 경계 ±0.15초 안에 조용한 틈이 있으면 그 틈(가장 긴 것)에 붙임 · 빠르기 맞춤·여유·무게는 음절 때와 같은 식
@@ -182,7 +183,8 @@ export function rhythmScore({ msyl, ysyl, mbuf, ybuf, ends, heard, groups }) {
     groups.forEach((g, gi) => { const l = g.ks[g.ks.length - 1]; if (E.has(l) && !(Bw[gi] > 2 * Aw[gi] || Bw[gi] - Aw[gi] > 0.25)) ww[gi] *= END_W; });
     const Ws = ww.reduce((a, b) => a + b, 0) || 1;
     groups.forEach((g, gi) => { const a = Aw[gi], b = Bw[gi], sim = (Math.min(a, b) + TOL) / (Math.max(a, b) + TOL), w = ww[gi] / Ws; R += w * sim;
-      const hit = w * (1 - sim); if (hit > worstHit) { worstHit = hit; worst = { k: g.ks[0], ks: g.ks, word: gi, ch: g.w, kind: b > a ? "long" : "short", a, b }; } });
+      const hit = w * (1 - sim); if (hit > worstHit) { worstHit = hit; worst = { k: g.ks[0], ks: g.ks, word: gi, ch: g.w, kind: b > a ? "long" : "short", a, b }; }
+      overChk(a, b, () => ({ k: g.ks[0], ks: g.ks, word: gi, ch: g.w, kind: b > a ? "long" : "short", a, b })); }); // 낱말 = 여운 뺀 길이 비율
   } else {
   const Wsum = wt.reduce((x, y) => x + y, 0) || 1;
   for (let k = 0; k < n; k++) {
@@ -190,6 +192,7 @@ export function rhythmScore({ msyl, ysyl, mbuf, ybuf, ends, heard, groups }) {
     const sim = (Math.min(a, b) + TOL) / (Math.max(a, b) + TOL); // 본보기 시간으로 맞춰 견줌 · 칸 크기(20ms) 오차는 너그럽게(±60ms)
     const w = wt[k] / Wsum; R += w * sim;
     const hit = w * (1 - sim); if (hit > worstHit) { worstHit = hit; worst = { k, ch: msyl[k].ch, kind: b > a ? "long" : "short", a, b }; } // a·b = 견준 길이(초 · 내 것은 본보기 빠르기로 맞춤)
+    overChk(a + TOL, b + TOL, () => ({ k, ch: msyl[k].ch, kind: b > a ? "long" : "short", a, b })); // 음절 = ±60ms 여유 넣은 뒤 비율
   }
   }
   // 더듬음·쉼 — 내 말 안의 0.25초 넘는 틈인데 본보기 그 음절엔 0.1초 넘는 틈이 없으면 틈마다 −0.08
@@ -208,6 +211,7 @@ export function rhythmScore({ msyl, ysyl, mbuf, ybuf, ends, heard, groups }) {
     }
   }
   if (Q / P < 0.6 || Q / P > 1.8) { R -= 0.05; if (!worst) worst = { k: 0, ch: msyl[0].ch, kind: "speed" }; }
+  if (over && R >= R_FULL - 0.01) { R = R_FULL - 0.01; if (!worst) { const { r, ...o } = over; worst = o; } } // 1.7배 넘는 곳 = 최대 99 · 문구는 가장 많이 깎인 곳 그대로(빠르기 맞춤으로 옆 낱말이 튀어 보이는 것보다 믿을 만함)
   if (stumble) R = Math.min(R, R_FULL - 0.01); // 더듬음·본보기에 없는 쉼이 있으면 100 아님(앱 창 10-07 — −0.08 뒤에도 문턱 위면 깎이지 않던 것)
   return { R: Math.max(0, Math.min(1, R)), worst, p, q, ends: E };
 }

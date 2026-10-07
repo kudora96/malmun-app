@@ -1,7 +1,7 @@
-import { t } from "../i18n.js?v=1007.65";
-import { esc } from "../text.js?v=1007.65";
-import { langChip, openLangSheet } from "../ui.js?v=1007.65";
-import { rerender } from "../main.js?v=1007.65";
+import { t } from "../i18n.js?v=1007.67";
+import { esc } from "../text.js?v=1007.67";
+import { langChip, openLangSheet } from "../ui.js?v=1007.67";
+import { rerender } from "../main.js?v=1007.67";
 
 const KEY = "malmun.started";
 const started = () => { try { return localStorage.getItem(KEY) === "1"; } catch { return false; } };
