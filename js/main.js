@@ -1,14 +1,16 @@
-import { detectLang, setLang, LANGS, t } from "./i18n.js?v=1007.90";
-import { VERSION } from "./version.js?v=1007.90";
-import welcome from "./screens/welcome.js?v=1007.90";
-import list from "./screens/list.js?v=1007.90";
-import learn from "./screens/learn.js?v=1007.90";
-import explain from "./screens/explain.js?v=1007.90";
-import write from "./screens/write.js?v=1007.90";
-import speak from "./screens/speak.js?v=1007.90";
+import { detectLang, setLang, LANGS, t } from "./i18n.js?v=1007.92";
+import { VERSION } from "./version.js?v=1007.92";
+import welcome from "./screens/welcome.js?v=1007.92";
+import list from "./screens/list.js?v=1007.92";
+import learn from "./screens/learn.js?v=1007.92";
+import explain from "./screens/explain.js?v=1007.92";
+import write from "./screens/write.js?v=1007.92";
+import speak from "./screens/speak.js?v=1007.92";
+import diag from "./screens/diag.js?v=1007.92";
+import "./errlog.js?v=1007.92"; // 오류 기록(진단 화면용 · 기록만)
 
 const app = document.getElementById("app");
-const routes = { "": welcome, list, learn, explain, write, speak };
+const routes = { "": welcome, list, learn, explain, write, speak, diag }; // diag = 진단 화면(본부 10-07 폰)
 let cleanup = null;
 
 // 주소에서 편 ID·줄 번호 다듬기 — 복사할 때 뒤에 붙은 「 (설명」·따옴표·괄호를 잘라 낸다(본부 10-04: 「L01-00-01 (」로 읽혀 오류)
