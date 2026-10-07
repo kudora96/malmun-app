@@ -81,11 +81,11 @@
  "saved_file": "Saved to your Downloads folder.",
  "line_done": "This line is done!",
  "help_close": "Tap anywhere to close",
- "help_sp_1": "▶ Model — listen to how it is said.",
- "help_sp_2": "● Speak — say it. It stops by itself when you finish. 80% or more is a pass.",
- "help_sp_3": "▶ My voice — hear your recording. Compare — the model, then you.",
- "help_sp_4": "Only recordings that pass (80%+) are kept. Others are gone when you move on.",
- "help_sp_5": "Recordings stay inside this browser. Clearing site data deletes them. ⬇ saves one as a file.",
+ "help_sp_1": "▶ Model — listen to the model. Tap \"Speed\" to hear it slower (0.9 · 0.75 · 0.6 · 0.5×).",
+ "help_sp_2": "● Speak — say it after the model. It stops by itself when you finish.",
+ "help_sp_3": "▶ My voice — hear your recording, played without the noise before and after.",
+ "help_sp_4": "Score = letters × rhythm. You get 100 only when every letter is right and your rhythm matches the model over 90%. 80% or more passes (☆, you can save it); 95% or more gets ★.",
+ "help_sp_5": "Compare — the model's and your waveforms, top and bottom. Red letter: heard differently. Orange border: where the rhythm differs most. Tap the waveform to play from there.",
  "v9_snd": "🔊 Explanation sound",
  "v9_txt": "📖 Explanation text",
  "v9_ex": "Explanation",
@@ -163,5 +163,6 @@
  "rhy_short": "{s} is shorter than the model",
  "rhy_pause": "paused at {s}",
  "rhy_speed": "speed is very different from the model",
- "speed": "speed"
+ "speed": "speed",
+ "help_sp_6": "Only passing takes are kept (a higher score replaces it). Recordings stay in this browser and are deleted with the site data. Tap ⬇ to save a file."
 }

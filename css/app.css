@@ -826,3 +826,4 @@ a{color:inherit;text-decoration:none}
 .crow .cwave:hover,.crow .cwave.hov{background:var(--hi-soft)}
 .crow .cwave .chov{position:absolute;top:-2px;bottom:-2px;width:1px;margin-left:-.5px;background:var(--ink);opacity:.55;pointer-events:none}
 .crow .cwave .chov b{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);padding:0 3px;border-radius:3px;background:var(--ink);color:var(--bg);font-size:9px;font-weight:700;line-height:12px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.speak .helpbox{overflow:hidden} /* 도움말 = 스크롤 없이 글 크기로 맞춤(speak.js fitHelp) */

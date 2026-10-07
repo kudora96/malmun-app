@@ -51,7 +51,7 @@
   ok(!!line(1).querySelector("[data-act=speak]"), "줄 단추에 [말하기] 있음(쓰기 옆)", line(1).querySelector(".acts").innerText.replace(/\n/g, " · "));
   try { localStorage.removeItem("malmun.sp.help"); } catch {}
   await open(1);
-  const hb = $(".panel .helpbox"), hbShown = !hb.hidden && hb.querySelectorAll("p").length === 6;
+  const hb = $(".panel .helpbox"), hbShown = !hb.hidden && hb.querySelectorAll("p").length === 7;
   $(".panel .task").click(); await W(100);
   ok(hbShown && hb.hidden, "처음 열면 사용법 풍선이 저절로 · 아무 데나 누르면 닫힘");
   $(".panel [data-act=help]").click(); await W(100); const hb2 = !hb.hidden; $(".panel [data-act=help]").click(); await W(100);
