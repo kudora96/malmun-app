@@ -13,15 +13,15 @@
 //  W5 소리는 언제나 하나만 · 새 일을 하면 앞 소리는 멈춘다
 //  W6 영상 창 안(embedded): 창 안에서 스크롤 없이 다 보이게 — 긴 문장은 토막으로(◀ 1/3 ▶) ·
 //     토막을 다 쓰면 자동으로 다음 토막 · 줄을 다 쓰면 대사를 듣고 자동으로 다음 줄 쓰기 · 아래 ▶ = 이 부분 듣기
-import { t, lang } from "../i18n.js?v=1007.81";
-import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO } from "../text.js?v=1007.81";
-import { episode, chars, charsF } from "../data.js?v=1007.81";
-import { paths } from "../paths.js?v=1007.81";
-import { I } from "../ui.js?v=1007.81";
-import { audioCtx, hold } from "../wake.js?v=1007.81";
-import * as sfx from "../sfx.js?v=1007.81";
-import { scoreFx } from "../scorefx.js?v=1007.81";
-import { units as jamoUnits, baseOf } from "../jamobox.js?v=1007.81"; // 자모 자리 나누기(획순 · 자판 덧칠 · 손글씨 덩어리 — 본부 10-07) // 손글씨 점수 효과 = 말하기와 같은 규칙(본부 10-07)
+import { t, lang } from "../i18n.js?v=1007.84";
+import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO } from "../text.js?v=1007.84";
+import { episode, chars, charsF } from "../data.js?v=1007.84";
+import { paths } from "../paths.js?v=1007.84";
+import { I } from "../ui.js?v=1007.84";
+import { audioCtx, hold } from "../wake.js?v=1007.84";
+import * as sfx from "../sfx.js?v=1007.84";
+import { scoreFx } from "../scorefx.js?v=1007.84";
+import { units as jamoUnits, baseOf } from "../jamobox.js?v=1007.84"; // 자모 자리 나누기(획순 · 자판 덧칠 · 손글씨 덩어리 — 본부 10-07) // 손글씨 점수 효과 = 말하기와 같은 규칙(본부 10-07)
 
 const KEYS = [..."ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎㄲㄸㅃㅆㅉ"], VOW = [..."ㅏㅑㅓㅕㅗㅛㅜㅠㅡㅣ"];
 const VOW2 = [..."ㅐㅒㅔㅖㅘㅙㅚㅝㅞㅟㅢ"]; // 겹모음 줄(본부 10-06) — 칸 하나 · ㅓ+ㅣ 처럼 나눠 쳐도 받음
@@ -152,7 +152,7 @@ export default async function write(app, ep, id, opts = {}) {
     stopLoop(); st.sent = true; markSent();
     run([partStep()]).then(() => { st.sent = false; markSent(); });
   }
-  app.__wr = { reveal: async (ch, n = 200) => { await stkReady; const list = strokesOf(ch); return { list, at: k => revealOrder(ch, n, list, k, 1) }; }, glyphCv: (ch, n = 200) => { const cv = document.createElement("canvas"); cv.width = cv.height = n; glyph(cv.getContext("2d"), n, ch, "#000"); return cv; }, st: () => st, hand: () => st.hand, traceOf: ch => traceOf(ch), centerOf: ch => centerOf(ch), unitsOf: ch => unitsOf(ch), strokesOf: async ch => (await stkReady, strokesOf(ch)), strokeHint: (H, S) => strokeHint(H, S), strokeFit: async ch => { await stkReady; const us = unitsOf(ch), L = strokesOf(ch); return us.map((u, ui) => { const P = L.filter(S => S.unit === ui); let n = 0, k = 0; for (const S of P) { const f = fitOf(u, S.pts), m = S.pts.length - 1; n += m; k += f * m; } return { jamo: u.jamo, fit: n ? k / n : null }; }); }, handScore: (ch, S) => handScore(ch, S), handJudge: () => handJudge(), toggle: toggleSentence, busy: () => st.busy || st.done || st.queue.length > 0 || st.sent || st.auto || sfx.playing() }; // busy = 점검 도구가 소리 끝을 기다릴 때
+  app.__wr = { font: () => `${glyphWeight()} ${glyphFont()}`, reveal: async (ch, n = 200) => { await stkReady; await document.fonts?.load(`${glyphWeight()} 100px ${glyphFont()}`, ch).catch(() => {}); const list = strokesOf(ch); return { list, at: (k, f = 1) => revealOrder(ch, n, list, k, f) }; }, glyphCv: (ch, n = 200) => { const cv = document.createElement("canvas"); cv.width = cv.height = n; glyph(cv.getContext("2d"), n, ch, "#000"); return cv; }, st: () => st, hand: () => st.hand, traceOf: ch => traceOf(ch), centerOf: ch => centerOf(ch), unitsOf: ch => unitsOf(ch), strokesOf: async ch => (await stkReady, strokesOf(ch)), strokeHint: (H, S) => strokeHint(H, S), strokeFit: async ch => { await stkReady; const us = unitsOf(ch), L = strokesOf(ch); return us.map((u, ui) => { const P = L.filter(S => S.unit === ui); let n = 0, k = 0; for (const S of P) { const f = fitOf(u, S.pts), m = S.pts.length - 1; n += m; k += f * m; } return { jamo: u.jamo, fit: n ? k / n : null }; }); }, handScore: (ch, S) => handScore(ch, S), handJudge: () => handJudge(), toggle: toggleSentence, busy: () => st.busy || st.done || st.queue.length > 0 || st.sent || st.auto || sfx.playing() }; // busy = 점검 도구가 소리 끝을 기다릴 때
 
   function paintSent() {
     sentEl.innerHTML = `<svg class="spk" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M4 9v6h4l5 4V5L8 9H4z"/><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M16 8.5a5 5 0 0 1 0 7M18.8 6a8.5 8.5 0 0 1 0 12"/></svg>` + words().map((w, wi) => `<span class="w ${wi === st.w ? "on" : ""}">${w.chars.map((c, ci) =>
@@ -201,7 +201,7 @@ export default async function write(app, ep, id, opts = {}) {
     work.innerHTML = `<div class="stage"><div class="box"><canvas class="tcv" aria-hidden="true"></canvas><span class="target ko" lang="ko">${esc(c.ch)}</span><span class="typed ko" lang="ko">${esc(compose([...st.typed, st.part].flatMap(jamoParts), vowelLen(c.ch)))}</span></div>
       <div class="info">${w.rom || w.mean || st.mode === "hand" ? `<div class="sub2">${w.rom ? `<span class="rom">${esc(w.rom)}</span>` : ""}${w.mean ? `<span class="mean tr">${esc(w.mean)}</span>` : ""}${st.mode === "hand" ? `<span class="htools" role="group">${Object.entries(TOOLS).map(([k, v]) => `<button data-tool="${k}" aria-pressed="${toolKey() === k}">${v.icon} ${esc(t("h_" + k))}</button>`).join("")}</span>` : ""}</div>` : ""}
       <div class="slotrow"><div class="slots">${jam.map((j, i) => `<span class="slot ${i < st.k ? "filled" : i === st.k ? "current" : ""}">${i <= st.k ? esc(j) : ""}</span>`).join("")}</div></div></div></div>
-      ${st.mode === "hand" ? `<div class="hand"><div class="hbox"><canvas class="hguide" aria-hidden="true"></canvas><canvas class="hink" aria-label="${esc(t("w_hand"))}"></canvas><b class="hscore" hidden></b><span class="fx" aria-hidden="true"></span></div><div class="hbtns"><button data-act="hdone">✓ ${esc(t("h_done"))}</button><button data-act="horder">✎ ${esc(t("h_order"))}</button><button data-act="hundo">↶ ${esc(t("h_undo"))}</button><button data-act="hclear">✕ ${esc(t("h_clear"))}</button></div></div>`
+      ${st.mode === "hand" ? `<div class="hand"><div class="hbox"><canvas class="hguide" aria-hidden="true"></canvas><canvas class="hink" aria-label="${esc(t("w_hand"))}"></canvas><b class="hscore" hidden></b><span class="fx" aria-hidden="true"></span></div><div class="hbtns"><button data-act="hdone">✓ ${esc(t("h_done"))}</button><button data-act="horder">✎ ${esc(t("h_order"))}</button><button data-act="hundo">↶ ${esc(t("h_undo"))}</button><button data-act="hclear"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M15.4 3.6a2 2 0 0 1 2.8 0l2.2 2.2a2 2 0 0 1 0 2.8L11 18H6.6l-3-3a2 2 0 0 1 0-2.8z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M9.2 9.8l5 5M6.6 18H21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg> ${esc(t("h_clear"))}</button></div></div>`
         : `<div class="kb" lang="ko">${KB_ROWS.map(r => `<div class="kr">${r.map(j => `<button data-j="${j}">${j}</button>`).join("")}</div>`).join("")}</div>`}`;
     paintBox(c); // 자판 칸 = 회색 글자 위에 친 자모 자리만 진하게(본부 10-07 · 글자가 따로 그려져 어긋나던 것)
     work.classList.toggle("handmode", st.mode === "hand"); // 손글씨 = 위 작은 글자 상자·자모 칸 숨기고 큰 칸을 키움(본부 10-07)
@@ -214,8 +214,9 @@ export default async function write(app, ep, id, opts = {}) {
   // ── 손글씨 따라 쓰기 1단계(본부 10-07) — 흐린 회색 글자 위에 손가락·마우스·펜으로 · 판정 = 글자 마스크 덮음 × (1 − 벗어남) ≥ 70%
   //  덮음 = 글자 픽셀 중 펜 자국 근처(펜 굵기 2.4배 안)인 것 · 벗어남 = 펜 픽셀 중 글자(펜 굵기만큼 너그럽게 부풀림) 밖인 것 · 다 썼으면 「✓」 또는 1.2초 손 뗀 채면 자동
   // 본보기 글꼴(본부 10-07 시안 → 투덜이 고운바탕) — gothic = 앱 한글 고딕(굵게) · batang = 고운바탕(획 고르고 붓 끝) · myeongjo = 나눔명조 · 진단 스위치 malmun.hfont
-  const HFONT = { gothic: ["700", () => getComputedStyle(sentEl).fontFamily], batang: ["700", () => '"Gowun Batang", serif'], myeongjo: ["800", () => '"Nanum Myeongjo", serif'] };
-  const hfontKey = () => { try { const k = localStorage.getItem("malmun.hfont"); return HFONT[k] ? k : "batang"; } catch { return "batang"; } }; // 기본 = 고운바탕(투덜이 10-07 결정)
+  // 손글씨 글꼴(투덜이 10-07 결정 바꿈 「맑은 고딕처럼 일자로 죽 그리는 글씨」) — 모든 기기에서 같은 모양인 Noto Sans KR 500 기본 · 고운바탕·명조·굵은 고딕은 진단 스위치(malmun.hfont)로만
+  const HFONT = { gothic500: ["500", () => '"Noto Sans KR", sans-serif'], gothic: ["700", () => getComputedStyle(sentEl).fontFamily], batang: ["700", () => '"Gowun Batang", serif'], myeongjo: ["800", () => '"Nanum Myeongjo", serif'] };
+  const hfontKey = () => { try { const k = localStorage.getItem("malmun.hfont"); return HFONT[k] ? k : "gothic500"; } catch { return "gothic500"; } };
   const PEN = 0.06, PASS_H = 0.7, glyphFont = () => HFONT[hfontKey()][1](), glyphWeight = () => HFONT[hfontKey()][0];
   // 글자 그림 = 한 번(400×400)만 그려 두고 크기만 바꿔 씀 — 회색 안내 글자와 판정 마스크가 픽셀까지 같은 자리
   const GN = 400, gCache = new Map();
@@ -326,31 +327,39 @@ export default async function write(app, ep, id, opts = {}) {
   //  upto = 다 칠한 획 수 · f = 지금 획 진행(0~1) → { cv: 주황 칠 캔버스(n×n), ends: 획마다 { a: 시작 잉크 점, b: 끝 잉크 점, dir } (0~1) }
   const OR_FILL = "#c8641a", OR_MARK = "#7a3410";
   const nearInk = (u, [px, py]) => { let bd = Infinity, best = [px, py]; for (let i = 0; i < u.px.length; i++) { const q = u.px[i], x = (q % UN + 0.5) / UN, y = (Math.floor(q / UN) + 0.5) / UN, d = (x - px) ** 2 + (y - py) ** 2; if (d < bd) { bd = d; best = [x, y]; } } return best; };
-  //  잉크 나누기 = 그 자모 잉크 점마다 그 자모 획 중 가장 가까운 획 + 그 획 위 자리(0~1 · 길이 비율) → 획 진행 f 까지의 점만 칠함(빠짐없이 다 덮음 · 모양 = 글꼴)
-  const ownCache = new Map();
+  //  잉크 나누기(본부 10-07 「칠하는 중 톱니·빈틈」) — 글자 그림(400px · 글꼴 그대로 부드러운 가장자리)의 잉크 점마다 그 자모(jamobox) 획 중 가장 가까운 획 + 그 획 위 자리(0~1)
+  //  칠 = 글꼴 잉크 알파 × 진행 앞머리 부드럽게(획 길이 4%) → 빈틈·톱니 없음 · 한 획이 끝나면 그 획 몫 잉크 전부
+  const ownCache = new Map(), SOFT = 0.04;
   function inkOwners(ch, list) {
     const k = ch + "|" + hfontKey() + "|" + list.length; if (ownCache.has(k)) return ownCache.get(k);
-    const us = unitsOf(ch), own = new Int16Array(UN * UN).fill(-1), pos = new Float32Array(UN * UN);
+    const us = unitsOf(ch), img = glyphImg(ch), ga = img.getContext("2d").getImageData(0, 0, GN, GN).data, own = new Int16Array(GN * GN).fill(-1), pos = new Float32Array(GN * GN), alpha = new Uint8ClampedArray(GN * GN);
+    const u200 = new Int16Array(UN * UN).fill(-1); us.forEach((u, ui) => { for (const q of u.px) u200[q] = ui; });
+    const unitAt = (x, y) => { const cx = Math.min(UN - 1, (x * UN / GN) | 0), cy = Math.min(UN - 1, (y * UN / GN) | 0); for (let r = 0; r <= 3; r++) for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) { if (Math.max(Math.abs(dx), Math.abs(dy)) !== r) continue; const X = cx + dx, Y = cy + dy; if (X >= 0 && Y >= 0 && X < UN && Y < UN && u200[Y * UN + X] >= 0) return u200[Y * UN + X]; } return -1; };
     const segs = list.map(S => { const P = S.pts, L = [0]; for (let q = 1; q < P.length; q++) L.push(L[q - 1] + Math.hypot(P[q][0] - P[q - 1][0], P[q][1] - P[q - 1][1])); return { P, L, tot: L[L.length - 1] || 1 }; });
-    us.forEach((u, ui) => { const mine = list.map((S, si) => (S.unit === ui ? si : -1)).filter(v => v >= 0); if (!mine.length) return;
-      for (const q of u.px) { const x = (q % UN + 0.5) / UN, y = (Math.floor(q / UN) + 0.5) / UN; let bd = Infinity, bs = -1, bt = 0;
-        for (const si of mine) { const { P, L, tot } = segs[si];
-          if (P.length === 1) { const d = Math.hypot(x - P[0][0], y - P[0][1]); if (d < bd) { bd = d; bs = si; bt = 0; } continue; }
-          for (let a = 1; a < P.length; a++) { const ax = P[a - 1][0], ay = P[a - 1][1], dx = P[a][0] - ax, dy = P[a][1] - ay, ll = dx * dx + dy * dy || 1e-9, r = Math.max(0, Math.min(1, ((x - ax) * dx + (y - ay) * dy) / ll)), d = Math.hypot(x - ax - dx * r, y - ay - dy * r);
-            if (d < bd - 1e-9) { bd = d; bs = si; bt = (L[a - 1] + r * Math.sqrt(ll)) / tot; } } }
-        own[q] = bs; pos[q] = bt; } });
-    const o = { own, pos }; if (gCache.has(ch + "|0|" + hfontKey())) ownCache.set(k, o); return o; // 글꼴 온 뒤에만 기억
+    const byUnit = us.map((u, ui) => list.map((S, si) => (S.unit === ui ? si : -1)).filter(v => v >= 0));
+    for (let y = 0; y < GN; y++) for (let x = 0; x < GN; x++) { const q = y * GN + x, a = ga[q * 4 + 3]; if (a < 8) continue; alpha[q] = a;
+      const ui = unitAt(x, y), mine = ui >= 0 ? byUnit[ui] : []; const cand = mine.length ? mine : list.map((_, si) => si); // 자모를 못 찾은 가장자리 점 = 모든 획 중 가까운 것
+      const px = (x + 0.5) / GN, py = (y + 0.5) / GN; let bd = Infinity, bs = -1, bt = 0;
+      for (const si of cand) { const { P, L, tot } = segs[si];
+        if (P.length === 1) { const d = Math.hypot(px - P[0][0], py - P[0][1]); if (d < bd) { bd = d; bs = si; bt = 0; } continue; }
+        for (let a2 = 1; a2 < P.length; a2++) { const ax = P[a2 - 1][0], ay = P[a2 - 1][1], dx = P[a2][0] - ax, dy = P[a2][1] - ay, ll = dx * dx + dy * dy || 1e-9, r = Math.max(0, Math.min(1, ((px - ax) * dx + (py - ay) * dy) / ll)), d = Math.hypot(px - ax - dx * r, py - ay - dy * r);
+          if (d < bd - 1e-9) { bd = d; bs = si; bt = (L[a2 - 1] + r * Math.sqrt(ll)) / tot; } } }
+      own[q] = bs; pos[q] = bt; }
+    const o = { own, pos, alpha }; if (gCache.has(ch + "|0|" + hfontKey())) ownCache.set(k, o); return o; // 글꼴 온 뒤에만 기억
   }
+  // 칠 앞머리 자리(0~1 좌표) — 획 점 줄 위 f 지점(붓끝 점)
+  const pointAt = (S, f) => { const P = S.pts; if (P.length < 2) return P[0]; let tot = 0; const L = []; for (let k = 1; k < P.length; k++) { const d = Math.hypot(P[k][0] - P[k - 1][0], P[k][1] - P[k - 1][1]); L.push(d); tot += d; } let left = tot * f;
+    for (let k = 1; k < P.length; k++) { if (left <= L[k - 1]) { const r = L[k - 1] ? left / L[k - 1] : 0; return [P[k - 1][0] + (P[k][0] - P[k - 1][0]) * r, P[k - 1][1] + (P[k][1] - P[k - 1][1]) * r]; } left -= L[k - 1]; } return P[P.length - 1]; };
   function revealOrder(ch, n, list, upto, f) {
-    const { own, pos } = inkOwners(ch, list), us = unitsOf(ch), m = document.createElement("canvas"); m.width = m.height = UN; const mx = m.getContext("2d"), id = mx.createImageData(UN, UN);
-    for (let q = 0; q < UN * UN; q++) { const si = own[q]; if (si < 0) continue; if (si < upto || (si === upto && pos[q] <= f + 1e-6)) id.data[q * 4 + 3] = 255; }
+    const { own, pos, alpha } = inkOwners(ch, list), us = unitsOf(ch), m = document.createElement("canvas"); m.width = m.height = GN; const mx = m.getContext("2d"), id = mx.createImageData(GN, GN), D = id.data;
+    for (let q = 0; q < GN * GN; q++) { const si = own[q]; if (si < 0) continue; let a = 0;
+      if (si < upto || (si === upto && f >= 1)) a = 1; else if (si === upto) a = Math.max(0, Math.min(1, (f + SOFT - pos[q]) / SOFT));
+      if (a > 0) { D[q * 4 + 3] = alpha[q] * a; } }
     mx.putImageData(id, 0, 0);
-    const cv = document.createElement("canvas"); cv.width = cv.height = n; const cx = cv.getContext("2d"); glyph(cx, n, ch, OR_FILL); cx.globalCompositeOperation = "destination-in"; cx.imageSmoothingEnabled = true;
-    const k1 = n / UN; // 칸 경계 반 칸 너그럽게(가장자리 안 잘리게)
-    const m2 = document.createElement("canvas"); m2.width = m2.height = n; const m2x = m2.getContext("2d"); m2x.imageSmoothingEnabled = true; for (const [ox, oy] of [[0, 0], [k1 * 0.5, 0], [-k1 * 0.5, 0], [0, k1 * 0.5], [0, -k1 * 0.5]]) m2x.drawImage(m, ox, oy, n, n);
-    cx.drawImage(m2, 0, 0);
+    const cv = document.createElement("canvas"); cv.width = cv.height = n; const cx = cv.getContext("2d"); cx.imageSmoothingEnabled = true; cx.imageSmoothingQuality = "high"; cx.drawImage(m, 0, 0, n, n);
+    cx.globalCompositeOperation = "source-in"; cx.fillStyle = OR_FILL; cx.fillRect(0, 0, n, n);
     const ends = list.map(S => { const u = us[S.unit], P = S.pts, a = u ? nearInk(u, P[0]) : P[0], b = u ? nearInk(u, P[P.length - 1]) : P[P.length - 1], q = P[Math.max(0, P.length - 2)], z = P[P.length - 1]; return { a, b, dir: [z[0] - q[0], z[1] - q[1]] }; });
-    return { cv, ends };
+    return { cv, ends, tip: upto < list.length && f < 1 ? pointAt(list[upto], f) : null };
   }
   const ROLE = { cho: 0, jung: 1, jong: 2 };
   // 학습자 획 하나 → 순서·방향 알림(점수와 별개 · 깎지 않음 · 본부 10-07)
@@ -400,7 +409,8 @@ export default async function write(app, ep, id, opts = {}) {
       else if (!S || !S.length) f = 1; else { const q = S[S.length - 1], dt = Math.max(1, now - (S.t || now - 16)), v = Math.hypot(p[0] - q[0], p[1] - q[1]) / (dt / 1000); f = 1.2 - 0.7 * Math.min(1, v / 2.5); }
       if (S && S.length) f = S[S.length - 1][2] * 0.6 + f * 0.4; if (S) S.t = now; return [p[0], p[1], Math.max(0.5, Math.min(1.2, f))]; };
     iv.addEventListener("pointerdown", e => { if (st.busy || st.auto) return; e.preventDefault(); try { iv.setPointerCapture(e.pointerId); } catch {} clearTimeout(H.timer); stopLoop();
-      if (H.passed) { H.passed = false; H.strokes = []; H.roles = null; H.orderTold = false; markHand(); const sc = work.querySelector(".hscore"); if (sc) sc.hidden = true; } // 통과 뒤 다시 그리면 = 다시 쓰기(더 높은 점수)
+      if (H.passed) { H.passed = false; H.strokes = []; H.roles = null; H.orderTold = false; markHand(); } // 통과 뒤 다시 그리면 = 다시 쓰기(더 높은 점수)
+      clearTimeout(H.clr); { const sc = work.querySelector(".hscore"); if (sc) sc.hidden = true; } // 새로 쓰기 시작 = 점수 지움
       const tk = toolKey(); H.cur = Object.assign([pt(e, null)], { tool: tk, w: TOOLS[tk].w }); H.strokes.push(H.cur); paintInk(); });
     iv.addEventListener("pointermove", e => { if (!H.cur) return; e.preventDefault(); const evs = e.getCoalescedEvents?.() || []; for (const ev of evs.length ? evs : [e]) H.cur.push(pt(ev, H.cur)); paintInk(); });
     const up = () => { if (!H.cur) return; const S = H.cur; H.cur = null; clearTimeout(H.timer); H.timer = setTimeout(() => st.hand === H && handJudge(), 1200);
@@ -414,14 +424,15 @@ export default async function write(app, ep, id, opts = {}) {
       // 칸 크기 = 그릴 때마다 다시 잼(본부 10-07 1280×720 — 쓰기 창 막 연 직후 누르면 칸이 아직 작을 때 크기로 굳어 주황 글자가 왼쪽 위에 작게)
       const marks = (ends, k, f) => { const n = gv.width, lw = PEN * n; // 번호 원(시작 잉크 점) · 화살촉(끝 잉크 점 · 글자 잉크 안으로 자름)
         const ar = document.createElement("canvas"); ar.width = ar.height = n; const ax = ar.getContext("2d"); ax.fillStyle = OR_MARK;
-        for (let i = 0; i <= k && i < ends.length; i++) { if (i === k && f < 1) continue; const { b, dir } = ends[i], a = Math.atan2(dir[1], dir[0]), h = lw * 0.9, tip = [b[0] * n, b[1] * n];
+        for (let i = 0; i <= k && i < ends.length; i++) { if (i !== (f < 1 ? k - 1 : k)) continue; const { b, dir } = ends[i], a = Math.atan2(dir[1], dir[0]), h = lw * 0.9, tip = [b[0] * n, b[1] * n];
           ax.beginPath(); ax.moveTo(...tip); ax.lineTo(tip[0] - Math.cos(a - 0.5) * h, tip[1] - Math.sin(a - 0.5) * h); ax.lineTo(tip[0] - Math.cos(a + 0.5) * h, tip[1] - Math.sin(a + 0.5) * h); ax.closePath(); ax.fill(); }
         ax.globalCompositeOperation = "destination-in"; glyph(ax, n, c.ch, "#000"); x.drawImage(ar, 0, 0);
         for (let i = 0; i <= k && i < ends.length; i++) { const [px, py] = [ends[i].a[0] * n, ends[i].a[1] * n], r = lw * 0.62;
           x.fillStyle = OR_MARK; x.beginPath(); x.arc(px, py, r, 0, Math.PI * 2); x.fill(); x.fillStyle = "#fff"; x.font = `700 ${Math.round(r * 1.3)}px sans-serif`; x.textAlign = "center"; x.textBaseline = "middle"; x.fillText(String(i + 1), px, py + 0.5); } };
       for (let i = 0; i < list.length; i++) {
         const t0 = performance.now();
-        await new Promise(res => { const step = () => { if (H.anim !== my || st.hand !== H) return res(); const f = Math.min(1, (performance.now() - t0) / 500), R = revealOrder(c.ch, gv.width, list, i, f); paintGuide(); x.drawImage(R.cv, 0, 0); marks(R.ends, i, f); if (f >= 1) return res(); setTimeout(step, 16); }; step(); }); // 60번/초(rAF 는 창이 가려지면 멈춤)
+        await new Promise(res => { const step = () => { if (H.anim !== my || st.hand !== H) return res(); const f = Math.min(1, (performance.now() - t0) / 500), R = revealOrder(c.ch, gv.width, list, i, f); paintGuide(); x.drawImage(R.cv, 0, 0); marks(R.ends, i, f);
+          if (R.tip) { const n = gv.width; x.fillStyle = OR_MARK; x.beginPath(); x.arc(R.tip[0] * n, R.tip[1] * n, PEN * n * 0.28, 0, Math.PI * 2); x.fill(); } /* 칠 앞머리 = 작은 둥근 붓끝 점 */ if (f >= 1) return res(); setTimeout(step, 16); }; step(); }); // 60번/초(rAF 는 창이 가려지면 멈춤)
         if (H.anim !== my || st.hand !== H) return false;
       }
       H.orderShown = list.length;
@@ -452,6 +463,8 @@ export default async function write(app, ep, id, opts = {}) {
     note.textContent = t("h_again");
     H.paintGuide(r);
     setTimeout(() => { if (st.hand === H) H.paintGuide(); }, 900);
+    // 꽝(80% 아래)이면 덜 덮은 곳 주황 깜빡 뒤 1.2초에 내 획을 저절로 지움 — 바로 다시 쓰게(투덜이 10-07) · 점수는 남김(새로 쓰기 시작하면 지움)
+    const n0 = H.strokes.length; clearTimeout(H.clr); H.clr = setTimeout(() => { if (st.hand !== H || H.passed || H.cur || H.strokes.length !== n0) return; H.strokes = []; H.roles = null; H.orderTold = false; H.paintInk(); }, 1200);
   }
   function handNext() { // 「다음 ▶」
     const H = st.hand; if (!H?.passed || st.busy) return;

@@ -938,3 +938,7 @@ a{color:inherit;text-decoration:none}
 .sayb .tbar.quiet i{background:#e07b00}
 .sayb .tbar .pace{position:absolute;top:-2px;bottom:-2px;width:2px;margin-left:-1px;background:var(--ink);opacity:.7}
 .sayb .saybig span.pace{background:var(--hi-soft);border-radius:3px;box-shadow:0 2px 0 var(--hi)}
+
+/* 지우개 그림(본부 10-07) — 단추 글자 앞 · 글자 크기에 맞춤 */
+.write .hbtns .ico{display:inline-block;width:1.15em;height:1.15em;vertical-align:-0.2em;flex:none}
+.write .hbtns [data-act=hclear]{display:inline-flex;align-items:center;justify-content:center;gap:4px;white-space:nowrap}

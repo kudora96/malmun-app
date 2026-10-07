@@ -41,11 +41,13 @@ export function units(ch, mask, N) {
     while (st.length) { const q = st.pop(); px.push(q); const x = q % N, y = (q / N) | 0; for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const nx = x + dx, ny = y + dy; if (nx < 0 || ny < 0 || nx >= N || ny >= N) continue; const j = ny * N + nx; if (lab[j] < 0 && on(j)) { lab[j] = id; st.push(j); } } }
     comps.push(px); }
   const out = fr.map(f => ({ role: f.role, jamo: f.jamo, rect: f.rect, px: [] }));
-  for (const px of comps) {
-    let sx = 0, sy = 0; for (const q of px) { sx += q % N; sy += (q / N) | 0; }
-    const c = rel(sx / px.length, sy / px.length), k = pick(c);
+  // 덩어리마다 무게중심 칸 먼저(작은 점·티끌 1% 미만은 빼고) — 나누기는 「제 덩어리가 하나도 없는 칸」으로만(본부 10-07 Noto 500 「즈」: ㅈ 다리가 ㅡ 칸까지 내려와 ㅈ이 잘려 ㅡ에 붙던 것 · ㅡ 은 제 막대가 따로 있음)
+  const big = comps.reduce((a, px) => Math.max(a, px.length), 0), home = comps.map(px => { let sx = 0, sy = 0; for (const q of px) { sx += q % N; sy += (q / N) | 0; } return pick(rel(sx / px.length, sy / px.length)); });
+  const owns = new Set(home.filter((k, i) => comps[i].length >= big * 0.01));
+  for (let ci = 0; ci < comps.length; ci++) {
+    const px = comps[ci], k = home[ci];
     // 다른 칸에만 든(제 칸과 안 겹치는) 픽셀이 25% 넘으면 = 글꼴이 이어 그린 덩어리 → 픽셀마다 나눔 · 칸 경계에 살짝 걸친 「이」의 ㅇ 같은 건 통째로
-    const spans = [k, ...fr.map((f, j) => j).filter(j => { if (j === k) return false; let n = 0; for (const q of px) { const p = rel(q % N, (q / N) | 0); if (inR(fr[j].rect, p) && !inR(fr[k].rect, p)) n++; } return n > px.length * 0.25; })];
+    const spans = [k, ...fr.map((f, j) => j).filter(j => { if (j === k || (owns.has(j) && home.filter(h => h === j).length)) return false; let n = 0; for (const q of px) { const p = rel(q % N, (q / N) | 0); if (inR(fr[j].rect, p) && !inR(fr[k].rect, p)) n++; } return n > px.length * 0.25; })];
     if (spans.length > 1) for (const q of px) { const p = rel(q % N, (q / N) | 0); let b = spans[0], bd = Infinity; for (const j of spans) { const d = inR(fr[j].rect, p) ? 0 : d2(p, ctr(fr[j].rect)); if (d < bd) { bd = d; b = j; } } out[b].px.push(q); }
     else out[k].px.push(...px);
   }

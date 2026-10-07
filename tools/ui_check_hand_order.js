@@ -35,6 +35,25 @@
       rows.push(`${ch} ${list.map(S => S.jamo).join("")} ${areas.join("/")} · ${(cover * 100).toFixed(0)}%`);
     }
     ok(!bads.length, "ⓐ 획순 칠 = 글자 잉크 안만 · 획마다 칠 > 0 · 다 칠하면 97%+ 덮음(빠짐없이)", bads.join(" · ") || rows.join(" | "));
+    // ⓔ 칠 매끄럽게(본부 10-07 「쓰는 중간 깨짐」) — 중간 장면(25·50·75%)에 칠한 곳 안 바늘구멍 0 · 다 칠하면 글꼴 잉크와 같음(알파 차이 픽셀 ≤ 1%) · 획이 끝난 장면 ⊂ 다음 장면
+    { const rows = [], bad = [];
+      for (const ch of ["게", "구", "나", "했", "읽"]) { const { list, at } = await wr().reveal(ch, 200), g = alphaOf(wr().glyphCv(ch, 200)); let holes = 0, sub = 0;
+        for (let k = 0; k < list.length; k++) for (const f of [0.25, 0.5, 0.75]) { const a = alphaOf(at(k, f).cv); const on = i => a[i * 4 + 3] > 128;
+          for (let y = 1; y < 199; y++) for (let x = 1; x < 199; x++) { const i = y * 200 + x; if (g[i * 4 + 3] > 128 && !on(i) && on(i - 1) && on(i + 1) && on(i - 200) && on(i + 200)) holes++; } }
+        for (let k = 0; k + 1 < list.length; k++) { const a = alphaOf(at(k, 1).cv), b2 = alphaOf(at(k + 1, 0).cv); for (let i = 3; i < a.length; i += 4) if (a[i] > 128 && b2[i] < 100) sub++; }
+        const full = alphaOf(at(list.length - 1, 1).cv); let diff = 0, ink = 0; for (let i = 3; i < full.length; i += 4) { if (g[i] > 128) ink++; if (Math.abs(full[i] - g[i]) > 64) diff++; }
+        rows.push(`${ch} 구멍 ${holes} · 줄어듦 ${sub} · 다 칠함 차이 ${((100 * diff) / ink).toFixed(1)}%`); if (holes || sub || diff > ink * 0.01) bad.push(ch); }
+      ok(!bad.length, "ⓔ 획순 칠 중간 장면 바늘구멍 0 · 끝난 획은 그대로 · 다 칠하면 글꼴 잉크와 같음", rows.join(" | ")); }
+    // ⓕ 글꼴 = Noto Sans KR 500(투덜이 10-07) · 지우개 단추 = 그림 + 글
+    { const eb = $("[data-act=hclear]"); ok(/500/.test(wr().font()) && /Noto Sans KR/.test(wr().font()) && eb?.querySelector("svg") && /\p{L}/u.test(eb.textContent) && !/✕/.test(eb.textContent), "ⓕ 손글씨 글꼴 = Noto Sans KR 500 · 「지우기」 단추 = 지우개 그림 + 글", `${wr().font()} · 단추 「${eb?.textContent.trim()}」`); }
+    // ⓖ 꽝 → 1.2초 뒤 내 획 저절로 지움 · 점수는 남음 · 새로 그리기 시작하면 점수 지움
+    { const iv = $(".hink"), r = iv.getBoundingClientRect(), ev = (type, fx, fy) => iv.dispatchEvent(new PointerEvent(type, { bubbles: true, pointerId: 7, pointerType: "mouse", clientX: r.left + r.width * fx, clientY: r.top + r.height * fy, buttons: 1 }));
+      ev("pointerdown", 0.1, 0.1); for (let k = 1; k <= 8; k++) ev("pointermove", 0.1 + k * 0.02, 0.1); ev("pointerup", 0.26, 0.1); await W(100);
+      $("[data-act=hdone]").click(); await W(400); const sc1 = $(".hscore"), shown = !sc1.hidden, n1 = wr().hand().strokes.length; await W(1300);
+      const n2 = wr().hand().strokes.length, still = !$(".hscore").hidden;
+      ev("pointerdown", 0.5, 0.5); ev("pointerup", 0.5, 0.5); await W(100); const gone = $(".hscore").hidden;
+      ok(shown && n1 > 0 && n2 === 0 && still && gone, "ⓖ 꽝 → 1.2초 뒤 내 획 저절로 지움 · 점수는 남음 · 새로 쓰면 점수 지움", `점수 「${sc1.textContent}」 · 획 ${n1}→${n2} · 점수 남음 ${still} · 새로 쓰면 지움 ${gone}`);
+      $("[data-act=hclear]").click(); await W(200); }
     // ⓑ 손글씨 자동 — 지금 토막 끝까지
     const S0 = wr().st(), seg = S0.s, n0 = $(".sent").querySelectorAll(".c").length;
     $("[data-act=auto]").click(); await W(400);
