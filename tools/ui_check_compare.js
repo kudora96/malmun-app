@@ -17,27 +17,28 @@
     ok(c.msyl.length === A.length && c.msyl.every((x, k) => x.ch === A[k].ch && Math.abs(x.s - A[k].s) < 1e-6), "본보기 음절 = align.json", c.msyl.map(x => x.ch).join(""));
     ok(c.ysyl.length === c.msyl.length && c.ysyl.every((x, k) => !k || x.s >= c.ysyl[k - 1].s), "내 목소리 음절 = 같은 수 · 차례대로(DTW)", c.ysyl.map(x => x.s.toFixed(2)).join(" "));
     ok(c.marks.join(",") === "miss,bad,ok,ok,ok,ok,ok,ok,ok", "색 = 점수 정렬(우 빠짐 · 리 틀림 · 나머지 맞음)", c.marks.join(","));
-    const got = p.querySelector(".crow.y .csyl button[data-k='1']");
-    ok(got?.querySelector(".got")?.textContent === "저" && got?.querySelector(".want")?.textContent === "리" && p.querySelector(".crow.y .csyl button[data-k='0']").classList.contains("miss"), "들은 글자 표시: 리 칸 = 빨강 「저」 + 위 흐린 「리」 · 우 = 빠짐", got?.textContent);
+    const got = p.querySelector(".crow.y .csyl .cel[data-k='1']");
+    ok(got?.querySelector(".got")?.textContent === "저" && got?.querySelector(".want")?.textContent === "리" && p.querySelector(".crow.y .csyl .cel[data-k='0']").classList.contains("miss"), "들은 글자 표시: 리 칸 = 빨강 「저」 + 위 흐린 「리」 · 우 = 빠짐", got?.textContent);
     const hd = p.querySelector(".whead"), ys = [...hd.children].filter(x => x.offsetParent).map(x => Math.round(x.getBoundingClientRect().top + x.getBoundingClientRect().height / 2));
     ok(Math.max(...ys) - Math.min(...ys) <= 6 && hd.scrollWidth <= hd.clientWidth + 1, "말하기 머리 줄 한 줄(✕ 가 둘째 줄로 안 떨어짐)", hd.className + " · 높이 " + hd.offsetHeight);
     const sb = p.querySelector(".sbtns").getBoundingClientRect(), pr = p.getBoundingClientRect();
     const cmpB = Math.max(...[...p.querySelectorAll(".cmp .cmpw > *")].map(x => x.getBoundingClientRect().bottom)), cmpT = Math.min(...[...p.querySelectorAll(".cmp .cmpw > *")].map(x => x.getBoundingClientRect().top)), hdB = p.querySelector(".whead").getBoundingClientRect().bottom;
     ok(p.scrollHeight - p.clientHeight <= 0 && sb.bottom <= pr.bottom + 1 && !p.querySelector(".cmp").hidden && cmpB <= sb.top + 1 && cmpT >= hdB - 1, "위 칸 안(스크롤 0 · 비교 내용이 머리 줄과 단추 줄 사이 · 안 겹침)", `${p.scrollHeight - p.clientHeight}px · 비교 ${Math.round(cmpT)}~${Math.round(cmpB)} · 머리 ${Math.round(hdB)} · 단추 ${Math.round(sb.top)}`);
     // 음절 글자 = 한 크기 · 같은 층끼리 안 겹침(좁은 칸은 위·아래 번갈아)
-    const sizes = new Set([...p.querySelectorAll(".csyl button .tx")].map(x => getComputedStyle(x.querySelector(".got") || x).fontSize));
+    const sizes = new Set([...p.querySelectorAll(".csyl .cel .tx")].map(x => getComputedStyle(x.querySelector(".got") || x).fontSize));
     let overlap = 0; p.querySelectorAll(".csyl").forEach(row => { const tx = [...row.querySelectorAll("button .tx")].map(x => x.getBoundingClientRect()); for (let i = 0; i < tx.length; i++) for (let j = i + 1; j < tx.length; j++) { const a = tx[i], c = tx[j]; if (a.right > c.left + 2 && c.right > a.left + 2 && a.bottom > c.top + 2 && c.bottom > a.top + 2) overlap++; } });
-    ok(sizes.size === 1 && overlap === 0, "음절 글자 한 크기 · 겹침 0(좁은 칸은 위·아래 두 층)", `${[...sizes].join(",")} · 겹침 ${overlap} · 좁은 칸 ${p.querySelectorAll(".csyl button.narrow").length}`);
-    // 음절 칸 = 그 한 글자만 0.6배(본부 10-07) — 구간 s−0.02 ~ min(e, 다음 s − 0.02) · 음높이 그대로 · 벽시계로 끊음
-    { try { localStorage.removeItem("malmun.sylMode"); } catch {}
-      const s3 = c.msyl[3], s4 = c.msyl[4], t1 = performance.now(); p.querySelector(".crow.m .csyl button[data-k='3']").click(); await W(150);
-      const el = c.st.el, lp = c.lastPlay, a = [el?.playbackRate, el?.preservesPitch]; let endMs = 0; for (let k = 0; k < 40; k++) { if (!c.st.el) { endMs = performance.now() - t1; break; } await W(50); }
-      const want = (Math.min(s3.e, s4.s - 0.02) - (s3.s - 0.02)) / 0.6 * 1000;
-      ok(a[0] === 0.6 && a[1] === true && Math.abs(lp.from - (s3.s - 0.02)) < 0.005 && Math.abs(lp.to - Math.min(s3.e, s4.s - 0.02)) < 0.005 && endMs > 0 && endMs < want + 400, "음절 칸 = 그 한 글자만 0.6배(「읽」 · 다음 글자 20ms 앞에서 끊음)", `rate ${a[0]} · ${lp.from.toFixed(2)}~${lp.to.toFixed(2)} · ${Math.round(endMs)}ms(기대 ~${Math.round(want)})`);
-      try { localStorage.setItem("malmun.sylMode", "from"); } catch {}
-      p.querySelector(".crow.m .csyl button[data-k='3']").click(); await W(150); const lp2 = c.lastPlay;
-      ok(lp2.to === undefined && Math.abs(lp2.from - (s3.s - 0.02)) < 0.005, "진단 스위치 sylMode='from' = 그 글자부터 끝까지", `${lp2.from.toFixed(2)}~끝`);
-      try { localStorage.removeItem("malmun.sylMode"); } catch {} window.__cmp.stopPlay(); await W(100); }
+    ok(sizes.size === 1 && overlap === 0, "음절 글자 한 크기 · 겹침 0(좁은 칸은 위·아래 두 층)", `${[...sizes].join(",")} · 겹침 ${overlap} · 좁은 칸 ${p.querySelectorAll(".csyl .cel.narrow").length}`);
+    // 음절 칸 = 표시만(투덜이 10-07) — 단추 아님 · 손가락 커서 없음 · 탭 순서 밖 · 눌러도 소리 없음
+    { const cel = p.querySelector(".crow.m .csyl .cel[data-k='3']"), lp0 = c.lastPlay; window.__cmp.stopPlay(); cel.click(); await W(200);
+      const cs = getComputedStyle(cel);
+      ok(cel.tagName !== "BUTTON" && cs.cursor !== "pointer" && cel.tabIndex < 0 && c.lastPlay === lp0 && !c.st.el && !c.st.src, "음절 칸 = 표시만(단추 아님 · 커서 기본 · 탭 밖 · 눌러도 소리 없음)", `${cel.tagName} · ${cs.cursor} · tab ${cel.tabIndex}`); }
+    // 파형 = 누르고 싶게 — 올리면 세로 막대 + 시각 · 손가락 커서 · 누르면 그 음절 첫머리부터 그 줄 속도로 끝까지 · 재생 중 ▶ 칠
+    { const wv = p.querySelector(".crow.m .cwave"), wr = wv.getBoundingClientRect(), s3 = c.msyl[3], x = wr.left + ((s3.s + s3.e) / 2 - c.mLead) / c.span * wr.width, y = wr.top + wr.height / 2;
+      wv.dispatchEvent(new PointerEvent("pointermove", { clientX: x, clientY: y, bubbles: true, pointerType: "mouse" })); await W(50);
+      const h = wv.querySelector(".chov"), hl = h && !h.hidden ? h.firstChild.textContent : "";
+      wv.dispatchEvent(new MouseEvent("click", { clientX: x, clientY: y, bubbles: true })); await W(250); const lp = c.lastPlay, onB = p.querySelector(".crow.m").classList.contains("on");
+      ok(getComputedStyle(wv).cursor === "pointer" && hl === `${(s3.s - c.mLead).toFixed(2)}s` && Math.abs(lp.from - s3.s) < 0.005 && lp.to === undefined && onB, "파형: 올리면 막대 + 시각 · 누르면 「읽」 첫머리부터 끝까지 · ▶ 칠", `미리 보기 ${hl} · ${lp.from.toFixed(2)}~끝 · 칠 ${onB}`);
+      wv.dispatchEvent(new PointerEvent("pointerleave", { bubbles: true })); window.__cmp.stopPlay(); await W(100); }
     // ▶ 그 줄 전체 — 누르면 처음부터 · 재생 중 칠 · 다시 누르면 멈춤
     { const pm = p.querySelector(".crow.m [data-play]"); pm.click(); await W(250); const on1 = p.querySelector(".crow.m").classList.contains("on"), lp = c.lastPlay; pm.click(); await W(150); const on2 = p.querySelector(".crow.m").classList.contains("on");
       ok(/\p{L}/u.test(pm.textContent) && on1 && Math.abs(lp.from - c.mLead) < 0.005 && lp.to === undefined && !on2, "▶ 줄 전체 듣기(처음부터 · 칠) → 다시 누르면 멈춤", `${pm.textContent} · ${on1}/${on2}`); }
@@ -69,11 +70,11 @@
       for (let i = 0; i < pre; i++) x[i] = (Math.random() * 2 - 1) * 0.004; x.set(d, pre);
       S.blob = wavOf(nb, 0, nb.duration, 1); S.heardHTML = `<span class="lab">x:</span> <span class="ko">${heardHTML(want, want).html}</span>`;
       b.disabled = false; b.click(); await W(2500);
-      const c2 = window.__cmp, cells = [...p.querySelectorAll(".crow.y .csyl button")];
+      const c2 = window.__cmp, cells = [...p.querySelectorAll(".crow.y .csyl .cel")];
       const posOk = cells.every((el, k) => Math.abs(parseFloat(el.style.left) - (100 * (c2.ysyl[k].s - c2.yLead)) / c2.span) < 0.5);
-      cells[3].click(); await W(300);
+      { const wv = p.querySelector(".crow.y .cwave"), wr = wv.getBoundingClientRect(), s3 = c2.ysyl[3]; wv.dispatchEvent(new MouseEvent("click", { clientX: wr.left + ((s3.s + s3.e) / 2 - c2.yLead) / c2.span * wr.width, clientY: wr.top + 5, bubbles: true })); } await W(300);
       const lp = c2.lastPlay, yd = c2.ybuf.getChannelData(0), ysr = c2.ybuf.sampleRate, rms = (a, z) => { let q = 0; for (let i = Math.round(a * ysr); i < Math.round(z * ysr); i++) q += yd[i] * yd[i]; return Math.sqrt(q / Math.max(1, Math.round((z - a) * ysr))); };
-      ok(c2.yLead > 0.9 && posOk && lp?.ri === 1 && Math.abs(lp.from - (c2.ysyl[3].s - 0.02)) < 0.005 && rms(c2.ysyl[3].s, c2.ysyl[3].e) > 5 * rms(0.2, 0.8), "앞 1초 잡음 녹음: x=0 = lead · 칸 자리 = (s−lead)/전체 · 「읽」 칸 누름 = 그 칸 구간(말소리 있음)", `lead ${c2.yLead.toFixed(2)} · 칸 ${c2.ysyl[3].s.toFixed(2)}~${c2.ysyl[3].e.toFixed(2)} · 튼 곳 ${lp?.from.toFixed(2)}`);
+      ok(c2.yLead > 0.9 && posOk && lp?.ri === 1 && Math.abs(lp.from - c2.ysyl[3].s) < 0.005 && rms(c2.ysyl[3].s, c2.ysyl[3].e) > 5 * rms(0.2, 0.8), "앞 1초 잡음 녹음: x=0 = lead · 칸 자리 = (s−lead)/전체 · 「읽」 자리 파형 누름 = 그 음절부터(말소리 있음)", `lead ${c2.yLead.toFixed(2)} · 칸 ${c2.ysyl[3].s.toFixed(2)}~${c2.ysyl[3].e.toFixed(2)} · 튼 곳 ${lp?.from.toFixed(2)}`);
       b.click(); await W(200); }
   } catch (e) { res.push("✗ 점검 도중 오류: " + e.message); }
   const out = `${innerWidth}x${innerHeight}\n` + res.join("\n"); console.log(out); return out;

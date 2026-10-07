@@ -13,13 +13,13 @@
 //  W5 소리는 언제나 하나만 · 새 일을 하면 앞 소리는 멈춘다
 //  W6 영상 창 안(embedded): 창 안에서 스크롤 없이 다 보이게 — 긴 문장은 토막으로(◀ 1/3 ▶) ·
 //     토막을 다 쓰면 자동으로 다음 토막 · 줄을 다 쓰면 대사를 듣고 자동으로 다음 줄 쓰기 · 아래 ▶ = 이 부분 듣기
-import { t, lang } from "../i18n.js?v=1007.9";
-import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO } from "../text.js?v=1007.9";
-import { episode, chars, charsF } from "../data.js?v=1007.9";
-import { paths } from "../paths.js?v=1007.9";
-import { I } from "../ui.js?v=1007.9";
-import { audioCtx, hold } from "../wake.js?v=1007.9";
-import * as sfx from "../sfx.js?v=1007.9";
+import { t, lang } from "../i18n.js?v=1007.10";
+import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO } from "../text.js?v=1007.10";
+import { episode, chars, charsF } from "../data.js?v=1007.10";
+import { paths } from "../paths.js?v=1007.10";
+import { I } from "../ui.js?v=1007.10";
+import { audioCtx, hold } from "../wake.js?v=1007.10";
+import * as sfx from "../sfx.js?v=1007.10";
 
 const KEYS = [..."ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎㄲㄸㅃㅆㅉ"], VOW = [..."ㅏㅑㅓㅕㅗㅛㅜㅠㅡㅣ"];
 const VOW2 = [..."ㅐㅒㅔㅖㅘㅙㅚㅝㅞㅟㅢ"]; // 겹모음 줄(본부 10-06) — 칸 하나 · ㅓ+ㅣ 처럼 나눠 쳐도 받음

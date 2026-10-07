@@ -720,17 +720,17 @@ a{color:inherit;text-decoration:none}
 .crow.y .cwave canvas{color:var(--hi)}
 .crow .cbar{position:absolute;top:-2px;bottom:-2px;width:2px;margin-left:-1px;background:var(--pink);border-radius:1px;pointer-events:none}
 .crow .csyl{position:relative;height:clamp(22px,4.2dvh,30px)}
-.crow .csyl button{position:absolute;top:0;bottom:0;min-width:0;padding:0;border:0;border-left:1px solid var(--line);background:none;font-size:clamp(12px,2.2dvh,16px);font-weight:700;color:var(--ink);overflow:hidden;white-space:nowrap;cursor:pointer}
-.crow .csyl button.ok{color:var(--okc)}
-.crow .csyl button.bad{color:var(--badc);text-decoration:underline 2px;text-underline-offset:3px}
-.crow .csyl button.miss{color:var(--badc);opacity:.55;text-decoration:underline dotted 2px}
-.crow .csyl button.now{background:var(--hi-soft);border-radius:4px}
+.crow .csyl .cel{position:absolute;top:0;bottom:0;min-width:0;padding:0;border:0;border-left:1px solid var(--line);background:none;font-size:clamp(12px,2.2dvh,16px);font-weight:700;color:var(--ink);overflow:hidden;white-space:nowrap;cursor:pointer}
+.crow .csyl .cel.ok{color:var(--okc)}
+.crow .csyl .cel.bad{color:var(--badc);text-decoration:underline 2px;text-underline-offset:3px}
+.crow .csyl .cel.miss{color:var(--badc);opacity:.55;text-decoration:underline dotted 2px}
+.crow .csyl .cel.now{background:var(--hi-soft);border-radius:4px}
 .cruler{position:relative;height:14px;font-size:10px;color:var(--mute);font-variant-numeric:tabular-nums}
 .cruler span{position:absolute;transform:translateX(-50%)}
 .cruler span:first-child{transform:none}
 .speak .sbtns [data-act=both][aria-pressed=true]{background:var(--hi);color:var(--on-hi);border-color:var(--hi)}
-.crow .csyl button.tight{overflow:visible;font-size:clamp(11px,1.9dvh,14px);z-index:1}
-.crow .csyl button{text-align:center}
+.crow .csyl .cel.tight{overflow:visible;font-size:clamp(11px,1.9dvh,14px);z-index:1}
+.crow .csyl .cel{text-align:center}
 /* 말하기 머리 줄 = 한 줄(본부 10-06) — 넘치면 단추 글 숨김(h1) → 「· 화자」 숨김(h2) · learn.js 없이 speak.js fitHead */
 .speak .whead{flex-wrap:nowrap;min-width:0;overflow:hidden}
 .speak .whead .ic{font-style:normal}
@@ -741,20 +741,20 @@ a{color:inherit;text-decoration:none}
 .speak .whead > *{flex:none}
 /* 비교 화면 내 목소리 = 들은 글자(본부 10-06) — 바뀐 칸: 위 작게 흐린 본보기 · 아래 크게 빨강 들은 글자 · 덧붙은 소리: 회색 작은 칸 */
 .speak .cmp .crow.y .csyl{height:46px}
-.crow .csyl button .want{position:absolute;top:0;left:0;right:0;font-size:10px;line-height:1;font-weight:400;color:var(--mute);text-decoration:none}
-.crow .csyl button .got{display:block;padding-top:9px;color:var(--badc)}
+.crow .csyl .cel .want{position:absolute;top:0;left:0;right:0;font-size:10px;line-height:1;font-weight:400;color:var(--mute);text-decoration:none}
+.crow .csyl .cel .got{display:block;padding-top:9px;color:var(--badc)}
 .crow .csyl .add{position:absolute;top:2px;height:16px;display:grid;place-items:center;font-size:10px;color:var(--mute);background:var(--bubble);border-radius:4px;opacity:.85;pointer-events:none}
 /* 비교 음절 글자 한 크기 · 좁은 칸은 위·아래 두 층(본부 10-06) — 글은 칸 가운데에 떠 있고 칸 너비와 상관없이 보임 */
 .speak .cmp .crow .csyl{height:46px} /* 글자 세 층(위 0~16 · 가운데 15~31 · 아래 30~46)이 서로 안 겹치게 */
-.speak .cmp .crow .csyl button{overflow:visible;font-size:15px;font-weight:700}
-.speak .cmp .crow .csyl button .tx{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);white-space:nowrap;line-height:1.1;display:grid;justify-items:center;padding:0 1px;background:var(--bg);border-radius:3px}
-.speak .cmp .crow .csyl button.up .tx{top:0;transform:translate(-50%,0)}
-.speak .cmp .crow .csyl button.dn .tx{top:auto;bottom:0;transform:translate(-50%,0)}
-.speak .cmp .crow .csyl button.narrow::after{content:"";position:absolute;left:50%;top:30%;bottom:30%;width:1px;background:var(--line)}
-.speak .cmp .crow .csyl button .want{position:static;font-size:9px;line-height:1}
-.speak .cmp .crow .csyl button .got{display:block;padding-top:0;font-size:15px}
-.speak .cmp .crow .csyl button.now .tx{background:var(--hi-soft)}
-.speak .cmp .crow .csyl button.tight{font-size:15px}
+.speak .cmp .crow .csyl .cel{overflow:visible;font-size:15px;font-weight:700}
+.speak .cmp .crow .csyl .cel .tx{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);white-space:nowrap;line-height:1.1;display:grid;justify-items:center;padding:0 1px;background:var(--bg);border-radius:3px}
+.speak .cmp .crow .csyl .cel.up .tx{top:0;transform:translate(-50%,0)}
+.speak .cmp .crow .csyl .cel.dn .tx{top:auto;bottom:0;transform:translate(-50%,0)}
+.speak .cmp .crow .csyl .cel.narrow::after{content:"";position:absolute;left:50%;top:30%;bottom:30%;width:1px;background:var(--line)}
+.speak .cmp .crow .csyl .cel .want{position:static;font-size:9px;line-height:1}
+.speak .cmp .crow .csyl .cel .got{display:block;padding-top:0;font-size:15px}
+.speak .cmp .crow .csyl .cel.now .tx{background:var(--hi-soft)}
+.speak .cmp .crow .csyl .cel.tight{font-size:15px}
 .cmpw .craw{padding:1px 8px;border:1px dashed var(--line);border-radius:999px;background:none;font-size:10px;color:var(--mute)}
 .cmpw .cfoot{display:flex;justify-content:space-between;align-items:center;margin-top:-2px}
 .cmpw .cslow{padding:1px 10px;border:1px solid var(--line);border-radius:999px;background:var(--card);box-shadow:0 1px 0 var(--line);font-size:11px;font-weight:700;color:var(--ink)}
@@ -775,10 +775,10 @@ a{color:inherit;text-decoration:none}
 .learn .ctrl .iconbtn,.learn .ctrl .spd{border:1px solid var(--line);background:var(--card);box-shadow:0 1px 0 var(--line)}
 .learn .ctrl .iconbtn[aria-pressed=true]{background:var(--hi-soft);border-color:var(--hi)}
 .learn .ctrl .iconbtn:active,.learn .ctrl .spd:active{transform:translateY(1px);box-shadow:none}
-.speak .cmp .crow .csyl button{border:1px solid var(--line);border-radius:6px;background:var(--card);box-shadow:0 1px 0 var(--line)}
-.speak .cmp .crow .csyl button:active{transform:translateY(1px);box-shadow:none}
-.speak .cmp .crow .csyl button .tx{background:transparent}
-.speak .cmp .crow .csyl button.narrow .tx{background:var(--card);border:1px solid var(--line);border-radius:4px;box-shadow:0 1px 0 var(--line)}
+.speak .cmp .crow .csyl .cel{border:1px solid var(--line);border-radius:6px;background:var(--card);box-shadow:0 1px 0 var(--line)}
+.speak .cmp .crow .csyl .cel:active{transform:translateY(1px);box-shadow:none}
+.speak .cmp .crow .csyl .cel .tx{background:transparent}
+.speak .cmp .crow .csyl .cel.narrow .tx{background:var(--card);border:1px solid var(--line);border-radius:4px;box-shadow:0 1px 0 var(--line)}
 .cmpw .craw{border:1px solid var(--line);background:var(--card);box-shadow:0 1px 0 var(--line);color:var(--ink)}
 .cmpw .craw:active,.cmpw .cslow:active{transform:translateY(1px);box-shadow:none}
 /* 비교 화면이 작은 폰(375×667)에서도 단추 줄 위에 다 들어가게 — 파형·간격을 줄임(음절 줄 40px · 글자 14px 세 층 0/13/26) */
@@ -788,13 +788,13 @@ a{color:inherit;text-decoration:none}
 .crow .clab{font-size:10px;line-height:1.2}
 .crow .cwave{height:clamp(24px,5dvh,56px)}
 .speak .cmp .crow .csyl,.speak .cmp .crow.y .csyl{height:40px}
-.speak .cmp .crow .csyl button{font-size:14px}
-.speak .cmp .crow .csyl button .tx{line-height:1}
-.speak .cmp .crow .csyl button .got{font-size:14px}
+.speak .cmp .crow .csyl .cel{font-size:14px}
+.speak .cmp .crow .csyl .cel .tx{line-height:1}
+.speak .cmp .crow .csyl .cel .got{font-size:14px}
 .cruler{height:12px}
 .cmpw .cfoot{margin-top:0}
 /* 리듬이 가장 많이 깎인 음절(본부 10-06) — 두 줄 그 칸에 주황 테두리 */
-.speak .cmp .crow .csyl button.rworst{border:2px solid #e08a1e;box-shadow:0 0 0 1px rgba(224,138,30,.25)}
+.speak .cmp .crow .csyl .cel.rworst{border:2px solid #e08a1e;box-shadow:0 0 0 1px rgba(224,138,30,.25)}
 /* 다시 잴 수 없는 옛 점수(리듬 넣기 전 저장본) = 흐리게 · 다음 녹음이 덮을 수 있음 */
 .sbtns [data-act=savedplay].oldscore,.sayb [data-x=savedplay].oldscore{opacity:.55;font-style:italic}
 /* 비교 화면 줄마다 속도 단추(본부 10-07) — 이름표 옆 · 누를 때마다 1→0.9→0.75→0.6→0.5 · 1× 아니면 칠 */
@@ -814,3 +814,15 @@ a{color:inherit;text-decoration:none}
 .crow .clab .cplay{padding:0 8px;min-height:18px;border:1px solid var(--line);border-radius:999px;background:var(--card);box-shadow:0 1px 0 var(--line);font-size:10px;font-weight:700;color:var(--ink);line-height:16px}
 .crow.on .clab .cplay{background:var(--hi);color:var(--on-hi);border-color:var(--hi)}
 .crow .clab .cplay:active{transform:translateY(1px);box-shadow:none}
+
+/* 비교 화면 음절 칸 = 표시만(투덜이 10-07 「한 글자씩 듣기 포기 · 색만으로 의미」) — 누를 수 있게 안 보이게: 테두리·그림자·눌림·손가락 커서 없음 · 색·주황 표시는 그대로 */
+.speak .cmp .crow .csyl .cel{border:0;border-left:1px dashed var(--line);border-radius:0;background:none;box-shadow:none;cursor:default;user-select:none}
+.speak .cmp .crow .csyl .cel:first-child{border-left:0}
+.speak .cmp .crow .csyl .cel:active{transform:none}
+.speak .cmp .crow .csyl .cel.narrow .tx{border:0;box-shadow:none;background:var(--bg)}
+.speak .cmp .crow .csyl .cel.rworst{border:2px solid #e08a1e;border-radius:6px;box-shadow:none}
+/* 파형 = 누르고 싶게 — 손가락 커서 · 올리면 살짝 밝아짐 · 그 자리 세로 막대 + 시각 미리 보기 */
+.crow .cwave{cursor:pointer;transition:background-color .15s}
+.crow .cwave:hover,.crow .cwave.hov{background:var(--hi-soft)}
+.crow .cwave .chov{position:absolute;top:-2px;bottom:-2px;width:1px;margin-left:-.5px;background:var(--ink);opacity:.55;pointer-events:none}
+.crow .cwave .chov b{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);padding:0 3px;border-radius:3px;background:var(--ink);color:var(--bg);font-size:9px;font-weight:700;line-height:12px;white-space:nowrap;font-variant-numeric:tabular-nums}
