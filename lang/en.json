@@ -161,7 +161,7 @@
  "rhythm_line": "letters {l}% · rhythm {r}%",
  "rhy_long": "{s} is longer than the model",
  "rhy_short": "{s} is shorter than the model",
- "rhy_pause": "paused at {s}",
+ "rhy_pause": "stopped in the middle of {s} (stumble)",
  "rhy_speed": "speed is very different from the model",
  "rhy_stutter": "stumbled before {s}",
  "speed": "speed",
@@ -187,5 +187,6 @@
  "help_wr_6": "Order — shows the stroke order and direction. It tells you if your order is wrong.",
  "why_pause_tail": "You paused too long — keep going a bit faster to the end",
  "quiet_left": "Paused — stops in {s}s",
- "time_left": "{s}s left"
+ "time_left": "{s}s left",
+ "rhy_pause_word": "paused too long before {s}"
 }

@@ -10,11 +10,11 @@
 //      같은 음절 되풀이(「이…있어요」「거구구나」 — 들은 말에 더 들어간 음절이 옆 음절과 같거나 첫소리+모음이 같음)도 −0.08(「더듬음」)
 //  · 최종 점수 = 글자 점수(score.js) × f(R): R ≥ 0.85 → 1 · 0.5 ≤ R < 0.85 → 0.90 + 0.10 × (R − 0.5)/0.35 · R < 0.5 → 0.88
 //  녹음·재생은 그대로 — 받은 녹음(blob)을 풀어 재기만
-import { audioCtx } from "./wake.js?v=1007.68";
-import { leadOf, voicedEnd, keepFirstOf } from "./playmine.js?v=1007.68";
-import { speechEnd } from "./recstore.js?v=1007.68";
-import * as sfx from "./sfx.js?v=1007.68";
-import { align } from "./score.js?v=1007.68";
+import { audioCtx } from "./wake.js?v=1007.78";
+import { leadOf, voicedEnd, keepFirstOf } from "./playmine.js?v=1007.78";
+import { speechEnd } from "./recstore.js?v=1007.78";
+import * as sfx from "./sfx.js?v=1007.78";
+import { align } from "./score.js?v=1007.78";
 
 export const FR = 0.02; // 특징 칸 20ms
 const alignCache = new Map();
@@ -91,6 +91,7 @@ export function dtwMap(A, B) {
     if (d <= u && d <= l) { i--; j--; } else if (u <= l) i--; else j--;
   }
   for (let k = 0; k < n; k++) if (map[k] < 0) map[k] = k ? map[k - 1] : 0;
+  map.cost = D[at(n, m)] / (n + m); // 맞춤 비용(칸당) — 시작 후보 고르기용
   return map;
 }
 
@@ -124,11 +125,21 @@ export function prepare({ al, key, text, mbuf, ybuf }) {
   // 첫 낱말 뒤 쉼(본보기에 0.2초 넘는 조용한 틈 · 또는 글에 부호) = 내 첫 낱말을 앞 잡음으로 버리지 않음(10-07 「아, 저 혼자 알면」 본보기끼리도 「아」가 빠지던 것)
   const w1 = [...String(text).trim().split(/\s+/)[0]].filter(isSyl).length;
   const keepFirst = keepFirstOf(text) || (w1 > 0 && w1 < msyl.length && quietRuns(mbuf, msyl[w1 - 1].e - 0.05, msyl[w1].s + 0.05).some(x => x.e - x.s > 0.2));
-  const ref = Math.max(0, mEnd - mLead0), yLead = leadOf(ybuf, 0.08, ref, keepFirst), yStop = Math.max(yLead + 0.1, voicedEnd(ybuf, 0.12, ref));
-  const A = feats(mbuf.getChannelData(0), mbuf.sampleRate, mLead, mStop), B = feats(ybuf.getChannelData(0), ybuf.sampleRate, yLead, yStop), map = dtwMap(A, B);
+  const ref = Math.max(0, mEnd - mLead0); let yLead = leadOf(ybuf, 0.08, ref, keepFirst); const yStop = Math.max(yLead + 0.1, voicedEnd(ybuf, 0.12, ref));
+  const A = feats(mbuf.getChannelData(0), mbuf.sampleRate, mLead, mStop);
+  let B = feats(ybuf.getChannelData(0), ybuf.sampleRate, yLead, yStop), map = dtwMap(A, B);
+  // 천천히 읽기(투덜이 10-07 허락) — 「짧은 첫 덩어리 = 앞 잡음」이라 버린 시작이 있으면, 첫 소리부터 잡은 시작(keepFirst 방식)과 둘 다 맞춰 보고 본보기와 더 닮은 쪽(칸당 비용 낮은 쪽)
+  { const y2 = leadOf(ybuf, 0.08, 0, true); if (y2 < yLead - 0.1) { const B2 = feats(ybuf.getChannelData(0), ybuf.sampleRate, y2, yStop), m2 = dtwMap(A, B2); if (m2.cost < map.cost) { yLead = y2; B = B2; map = m2; } } }
   const toY = s => { const k = Math.max(0, Math.min(A.length - 1, Math.round((s - mLead) / FR))); return yLead + (map[k] ?? 0) * FR; };
   const ysyl0 = msyl.map((x, k) => ({ ch: x.ch, s: toY(x.s), e: k < msyl.length - 1 ? toY(msyl[k + 1].s) : Math.min(yStop, toY(x.e) + 0.02) }));
   const ysyl = minLen(ysyl0, msyl);
+  // 낱말 끝 칸이 쉼 위에 놓인 것 당기기(본부 10-07 r7 「글자요.」 — DTW 가 「요」 칸을 마침표 쉼 한가운데에 둠) — 낱말 시작 ~ 다음 낱말 시작 안 마지막 말소리(−30dB) 끝보다
+  //  끝 음절 칸이 0.15초 넘게 뒤로 가 있으면 그 낱말 음절 칸들을 [낱말 시작, 말소리 끝] 안에 본보기 길이 비율대로 다시 나눔(비교 화면 칸도 같이)
+  { let k0 = 0; const ws = String(text).split(/\s+/).map(w => [...w].filter(isSyl).length).filter(Boolean);
+    if (ws.reduce((a, b) => a + b, 0) === W.length) for (let gi = 0; gi < ws.length; gi++) { const f = k0, l = k0 + ws[gi] - 1; k0 += ws[gi];
+      const lim = gi < ws.length - 1 ? ysyl[l + 1].s : Math.min(ybuf.duration, ysyl[l].e + 0.3), e1 = speechEndIn(ybuf, ysyl[f].s, lim);
+      if (ysyl[l].e - e1 > 0.15 && e1 - ysyl[f].s > 0.04 * (l - f + 1)) { const md = msyl.slice(f, l + 1).map(x => Math.max(0.02, x.e - x.s)), T = md.reduce((a, b) => a + b, 0), span = e1 + 0.02 - ysyl[f].s; let t = ysyl[f].s;
+        for (let k = f; k <= l; k++) { const dd = (span * md[k - f]) / T; ysyl[k] = { ch: ysyl[k].ch, s: t, e: t + dd }; t += dd; } } } }
   // 끝 늘임 음절 = 마지막 + 문장부호 바로 앞(본부 10-07)
   const ends = new Set([W.length - 1]); { let k = -1; for (const ch of String(text)) { if (isSyl(ch)) k++; else if (k >= 0 && /[,.?!…~，。？！]/.test(ch)) ends.add(k); } }
   // 낱말(띄어쓰기) 묶음 — 긴 줄 리듬용(본부 10-07)
@@ -149,6 +160,17 @@ function quietRuns(buf, t0, t1) {
 const TOL = 0.06; // 본부 10-07 0.04 → 0.06
 const END_W = 0.5, END_DB = 15;
 // 그 음절 시작 ~ 소리가 자기 최대에서 15dB 내려간 첫 곳(최대 뒤) — 끄는 여운 빼고
+// 말소리 끝(10ms 칸) — [a, b) 안에서 그 녹음 말소리 최대 −30dB 를 넘는 마지막 칸 끝(−25 는 r5 「누구나가」 부드러운 끝을 자름) · 없으면 a(본부 10-07 r7 — 쉼 속 잡음을 낱말 끝으로 잡던 것)
+const loudCache = new WeakMap();
+export function speechEndIn(buf, a, b) {
+  let L = loudCache.get(buf);
+  if (!L) { const d = buf.getChannelData(0), w = Math.max(1, Math.round(buf.sampleRate * 0.01)), r = new Float32Array(Math.floor(d.length / w)); let pk = 0;
+    for (let i = 0; i < r.length; i++) { let q = 0; for (let k = i * w; k < (i + 1) * w; k++) q += d[k] * d[k]; r[i] = Math.sqrt(q / w); if (r[i] > pk) pk = r[i]; }
+    L = { r, thr: pk * Math.pow(10, -30 / 20) }; loudCache.set(buf, L); }
+  const i0 = Math.max(0, Math.floor(a / 0.01)), i1 = Math.min(L.r.length, Math.ceil(b / 0.01));
+  for (let i = i1 - 1; i >= i0; i--) if (L.r[i] > L.thr) return (i + 1) * 0.01;
+  return a;
+}
 function tailCut(buf, s, e, pkEnd = e) { // pkEnd = 최대 소리를 찾을 끝(그 음절 안 · 다음 낱말 첫소리를 최대로 잡지 않게)
   const d = buf.getChannelData(0), sr = buf.sampleRate, w = Math.max(1, Math.round(sr * FR)), a = Math.max(0, Math.round(s * sr)), b = Math.min(d.length, Math.round(e * sr)), r = [];
   for (let i = a; i + w <= b; i += w) { let q = 0; for (let k = i; k < i + w; k++) q += d[k] * d[k]; r.push(Math.sqrt(q / w)); }
@@ -178,6 +200,22 @@ export function rhythmScore({ msyl, ysyl, mbuf, ybuf, ends, heard, groups }) {
   const mS0 = headCut(mbuf, msyl[0].s, msyl[0].e), yS0 = headCut(ybuf, ysyl[0].s, ysyl[0].e), st = (k, x, s0) => (k ? x[k].s : s0);
   const A = msyl.map(x => Math.max(0, x.e - x.s)), Bm = ysyl.map(x => Math.max(0, x.e - x.s));
   A[0] = msyl[0].e - mS0; Bm[0] = ysyl[0].e - yS0;
+  // 쉼 자리(투덜이 10-07 허락) — 내 녹음의 0.25초+ 조용한 틈마다 가장 가까운 낱말 경계(띄어쓰기 · 내 DTW 시각)가 그 틈 안이거나 틈에서 0.3초 안이면 「낱말 사이 쉼」
+  //  (음절 칸이 쉼 가운데를 옆 음절에 넣는 DTW 오차를 타지 않게 · 그 쉼은 음절·낱말 길이에서 뺌) · 멀면 「낱말 안 쉼」
+  const ov = (g, x) => Math.max(0, Math.min(g.e, x.e) - Math.max(g.s, x.s));
+  const wb = groups && groups.length >= 2 ? groups.slice(1).map(g => g.ks[0]) : [], gapAt = new Map(), inGaps = [];
+  for (const g of quietRuns(ybuf, ysyl[0].s, ysyl[n - 1].e)) { if (g.e - g.s <= 0.25) continue;
+    // 경계까지 거리 = 경계가 틈 안이면 0 · 밖이면 틈 끝까지 · 가장 가까운 음절 경계가 낱말 경계(같은 거리면 낱말 경계 먼저)이고 0.3초 안일 때만 낱말 사이(「있|어요」 낱말 안 쉼을 짧은 「있」 때문에 낱말 사이로 잡지 않게)
+    const dist = b => { const t = ysyl[b].s; return t < g.s ? g.s - t : t > g.e ? t - g.e : 0; };
+    let dIn = Infinity; for (let b = 1; b < n; b++) if (!wb.includes(b)) dIn = Math.min(dIn, dist(b));
+    let kb = -1, dmin = 0.3; for (const b of wb) { const d = dist(b); if (d <= dmin && d <= dIn + 0.02) { dmin = d; kb = b; } }
+    // DTW 가 음절 칸을 쉼 속에 넣어 둔 경우(투덜이 r6 「그게 / 세종대왕이」 — 「세」「종」 칸이 0.4초 쉼 안) — 낱말 경계와 쉼 사이 음절 칸이 모두 쉼 빼면 소리가 거의 없으면(기대 길이 60% 아래) 그 음절들은 사실 쉼 건너편 = 낱말 사이 쉼
+    if (kb < 0) { const silent = k => { const x = ysyl[k]; return Math.max(0, x.e - x.s - ov(g, x)) < 0.6 * (msyl[k].e - msyl[k].s) * (Q / P); }; // 칸에서 쉼 뺀 소리 < 그 음절 기대 길이의 60%
+      for (const b of wb) { if (dist(b) > 0.45) continue; let k = ysyl[b].s < g.e ? b : b - 1, ok = true, m = 0;
+        if (ysyl[b].s < g.e) for (; k < n && ysyl[k].s < g.e - 0.05; k++, m++) ok = ok && silent(k); else for (; k >= 0 && ysyl[k].e > g.s + 0.05; k--, m++) ok = ok && silent(k); // 쉼 끝에 살짝 걸친 칸(0.05초)은 셈에서 뺌
+        if (ok && m > 0) { kb = b; break; } } }
+    if (kb >= 0) { if (!gapAt.has(kb) || g.e - g.s > gapAt.get(kb).e - gapAt.get(kb).s) gapAt.set(kb, g); } else inGaps.push(g); }
+  for (const g of gapAt.values()) for (let k = 0; k < n; k++) if (!E.has(k)) Bm[k] = Math.max(0.02, Bm[k] - ov(g, k ? ysyl[k] : { s: yS0, e: ysyl[0].e }));
   const tEnd = (x, k, buf) => (k < n - 1 ? Math.max(x[k].e, x[k + 1].s) : Math.min(buf.duration, x[k].e + 0.3)); // 여운 찾기 = 다음 음절 앞까지(정렬 칸 끝이 소리보다 일찍 끝나는 「요.」)
   for (const k of E) { const ms = st(k, msyl, mS0), ys = st(k, ysyl, yS0); A[k] = tailCut(mbuf, ms, tEnd(msyl, k, mbuf)) - ms; Bm[k] = tailCut(ybuf, ys, tEnd(ysyl, k, ybuf)) - ys; }
   const sc = A.reduce((x, y) => x + y, 0) / (Bm.reduce((x, y) => x + y, 0) || 1), B = Bm.map(v => v * sc), wt = A.map(v => v);
@@ -188,7 +226,7 @@ export function rhythmScore({ msyl, ysyl, mbuf, ybuf, ends, heard, groups }) {
     // 낱말 단위(본부 10-07) — 낱말 길이 = 첫 음절 시작 ~ 끝 음절 끝(첫 낱말은 소리 시작부터 · 구 끝 낱말은 여운 빼고)
     //  내 낱말 경계 = DTW 경계 ±0.15초 안에 조용한 틈이 있으면 그 틈(가장 긴 것)에 붙임 · 빠르기 맞춤·여유·무게는 음절 때와 같은 식
     const yq = quietRuns(ybuf, ysyl[0].s, ysyl[n - 1].e).filter(x => x.e - x.s >= 0.06), G = groups.length;
-    const yb = groups.map((g, i) => { if (!i) return null; const t = ysyl[g.ks[0]].s, near = yq.filter(x => x.e > t - 0.15 && x.s < t + 0.15 && x.s <= t + 0.08 && x.e >= t - 0.08); /* ±0.15초 안 · 경계(t)에 걸치거나 아주 가까운 틈만(낱말 안 받침 닫힘 틈을 잘못 잡지 않게) */ if (!near.length) return { end: t, start: t }; const r = near.sort((a, b) => b.e - b.s - (a.e - a.s))[0]; return { end: r.s, start: r.e }; });
+    const yb = groups.map((g, i) => { if (!i) return null; const wg = gapAt.get(g.ks[0]); if (wg) return { end: wg.s, start: wg.e }; const t = ysyl[g.ks[0]].s, near = yq.filter(x => x.e > t - 0.15 && x.s < t + 0.15 && x.s <= t + 0.08 && x.e >= t - 0.08); /* ±0.15초 안 · 경계(t)에 걸치거나 아주 가까운 틈만(낱말 안 받침 닫힘 틈을 잘못 잡지 않게) */ if (!near.length) return { end: t, start: t }; const r = near.sort((a, b) => b.e - b.s - (a.e - a.s))[0]; return { end: r.s, start: r.e }; });
     // 낱말 끝 = 끝 음절 시작 ~ 다음 낱말 시작 사이에서 소리가 자기 최대에서 15dB 내려간 곳(본보기·내 것 똑같이 · 쉼·여운 빼고) · 마지막 낱말은 +0.3초까지
     const mLen = (g, gi) => { const f = g.ks[0], l = g.ks[g.ks.length - 1], s0 = gi === 0 ? mS0 : msyl[f].s, ls = l === 0 ? mS0 : Math.max(s0, msyl[l].s), lim = gi < G - 1 ? Math.max(ls + 0.02, msyl[l + 1].s) : Math.min(mbuf.duration, msyl[l].e + 0.3); return Math.max(0.02, tailCut(mbuf, ls, lim, Math.max(ls + 0.02, msyl[l].e)) - s0); };
     const yLen = (g, gi) => { const f = g.ks[0], l = g.ks[g.ks.length - 1], s0 = gi === 0 ? yS0 : yb[gi]?.start ?? ysyl[f].s, ls = l === 0 ? yS0 : Math.max(s0, ysyl[l].s), lim = gi < G - 1 ? Math.max(ls + 0.02, yb[gi + 1]?.start ?? ysyl[l + 1].s) : Math.min(ybuf.duration, ysyl[l].e + 0.3); return Math.max(0.02, tailCut(ybuf, ls, lim, Math.max(ls + 0.02, gi < G - 1 ? yb[gi + 1]?.end ?? ysyl[l].e : ysyl[l].e)) - s0); };
@@ -209,9 +247,12 @@ export function rhythmScore({ msyl, ysyl, mbuf, ybuf, ends, heard, groups }) {
     overChk(a + TOL, b + TOL, () => ({ k, ch: msyl[k].ch, kind: b > a ? "long" : "short", a, b })); // 음절 = ±60ms 여유 넣은 뒤 비율
   }
   }
-  // 더듬음·쉼 — 내 말 안의 0.25초 넘는 틈인데 본보기 그 음절엔 0.1초 넘는 틈이 없으면 틈마다 −0.08
-  for (const g of quietRuns(ybuf, ysyl[0].s, ysyl[n - 1].e)) {
-    if (g.e - g.s <= 0.25) continue;
+  // 쉼 감점(투덜이 10-07 허락) — 본보기 그 자리에 0.1초+ 틈이 있으면 없음 · 낱말 사이 = 0.6초 넘을 때만 −0.08 · 낱말 안 = 0.25초 넘으면 −0.08(더듬음)
+  for (const [kb, g] of gapAt) {
+    const m = msyl[kb - 1], modelGap = mq.some(x => x.e - x.s > 0.1 && x.s < Math.max(m.e, msyl[kb].s) + 0.05 && x.e > m.s);
+    if (!modelGap && g.e - g.s > 0.6) { R -= 0.08; stumble = true; if (0.08 >= worstHit) { const gw = groups.find(x => x.ks[0] === kb); worstHit = 0.08; worst = { k: kb, ks: gw?.ks, ch: gw?.w || msyl[kb].ch, kind: "pause_word", gap: g.e - g.s }; } }
+  }
+  for (const g of inGaps) {
     const mid = (g.s + g.e) / 2; let k = ysyl.findIndex(x => mid < x.e); if (k < 0) k = n - 1; const m = msyl[k];
     const mE = k < n - 1 ? Math.max(m.e, msyl[k + 1].s) : m.e, modelGap = mq.some(x => x.e - x.s > 0.1 && x.s < mE && x.e > m.s); // 본보기 그 음절 + 다음 음절 앞까지(구 끝 쉼은 음절 칸 밖에 있음 — 10-07 「거구나」 본보기끼리도 더듬음으로 잡던 것)
     if (!modelGap) { R -= 0.08; stumble = true; if (0.08 >= worstHit) { worstHit = 0.08; worst = { k, ch: msyl[k].ch, kind: "pause", gap: g.e - g.s }; } }

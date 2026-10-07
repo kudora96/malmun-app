@@ -1,5 +1,5 @@
 // 리듬 점수 점검(본부 10-06 · 투덜이 허락) — 앱을 연 채로 실행 · 소리 안 남
-// 본보기(13번 2/4 「우리도 읽을 수 있어요」)를 내 목소리로: ⓐ 그대로 → R ≥ 0.97 · ⓑ 0.8배·1.25배 빠르기 → R ≥ 0.9 · ⓒ 「있」 앞에 0.4초 틈 → R 0.7~0.88(쉼으로 짚음)
+// 본보기(13번 2/4 「우리도 읽을 수 있어요」)를 내 목소리로: ⓐ 그대로 → R ≥ 0.97 · ⓑ 0.8배·1.25배 빠르기 → R ≥ 0.9 · ⓒ 쉼 자리 — 낱말 안 0.4초 → 더듬음 · 낱말 사이 0.4초 → 감점 없음 · 0.8초 → 오래 쉼(10-07)
 // ⓓ 투덜이 실제 녹음 r1~r3(tools/_rec · 깃에 안 올림) 값 보고 · ⓔ 배수 식(내림 · 글자 100 · 문턱 0.85(10-07) · R 0.8 → 98 · 0.7 → 95 · 0.6 → 92 · 0.849 → 99 · 0.85 → 100 · 0.3 → 88)
 // ⓖ 더듬음 놓치지 않기(본부 10-07) — 「나」를 본보기의 2.5배로 끌기 → 감점(「나」 길다) · 「이이있어요」(들은 말) → 「있」 더듬음 문구 · 100 아님
 // ⓕ 끝 늘임(본부 10-07 투덜이 「본보기가 끝을 끌면 100 을 못 넘음」) — 본보기 그대로인데 마지막 음절만 여운을 잘라 짧게 → 100 · ⓒ 「있」 앞 0.4초 멈춤 → 여전히 깎임(93~97)
@@ -13,9 +13,12 @@
   const speed = async r => { const oc = new OfflineAudioContext(1, Math.ceil((mbuf.length / r)) + 10, sr), s = oc.createBufferSource(); s.buffer = mbuf; s.playbackRate.value = r; s.connect(oc.destination); s.start(); return oc.startRendering(); };
   const a = R(mbuf); ok(a.R >= 0.97, "ⓐ 본보기 = 내 목소리 → R ≥ 0.97", `R ${a.R.toFixed(3)}`);
   for (const r of [0.8, 1.25]) { const b = R(await speed(r)); ok(b.R >= 0.9, `ⓑ ${r}배 빠르기 → R ≥ 0.9`, `R ${b.R.toFixed(3)}`); }
-  { const k = it.syl.findIndex(x => x.ch === "있"), at = Math.round(it.syl[k].s * sr), d = mbuf.getChannelData(0), gap = Math.round(0.4 * sr);
-    const nb = ctx.createBuffer(1, d.length + gap, sr), x = nb.getChannelData(0); x.set(d.subarray(0, at), 0); x.set(d.subarray(at), at + gap);
-    const c = R(nb), sc = withRhythm(100, c.R); ok(sc < 100 && c.worst?.kind === "pause", "ⓒ 「있」 앞 0.4초 틈 → 100 아님 · 쉼으로 짚음", `R ${c.R.toFixed(3)} · ${sc}점 · ${c.worst?.kind} 「${c.worst?.ch}」`); }
+  { // ⓒ 쉼 자리(투덜이 10-07 허락) — 낱말 안(「있|어요」) 0.4초 → 더듬음 · 낱말 사이(「수|있어요」) 0.4초 → 감점 없음 · 0.8초 → 오래 쉼
+    const ins = (ch, sec) => { const k = it.syl.findIndex(x => x.ch === ch), at = Math.round(it.syl[k].s * sr), d = mbuf.getChannelData(0), gap = Math.round(sec * sr);
+      const nb = ctx.createBuffer(1, d.length + gap, sr), x = nb.getChannelData(0); x.set(d.subarray(0, at), 0); x.set(d.subarray(at), at + gap); return R(nb); };
+    const c = ins("어", 0.4), sc = withRhythm(100, c.R); ok(sc < 100 && c.worst?.kind === "pause", "ⓒ 낱말 안 「있|어요」 0.4초 → 100 아님 · 더듬음(낱말 중간 멈춤)", `R ${c.R.toFixed(3)} · ${sc}점 · ${c.worst?.kind} 「${c.worst?.ch}」`);
+    const c2 = ins("있", 0.4), sc2 = withRhythm(100, c2.R); ok(sc2 === 100 && !/^pause/.test(c2.worst?.kind || ""), "ⓒ 낱말 사이 「수|있어요」 0.4초 → 감점 없음(100)", `R ${c2.R.toFixed(3)} · ${sc2}점 · ${c2.worst?.kind ?? "없음"}`);
+    const c3 = ins("있", 0.8), sc3 = withRhythm(100, c3.R); ok(sc3 < 100 && c3.worst?.kind === "pause_word", "ⓒ 낱말 사이 0.8초 → 100 아님 · 「오래 쉼」", `R ${c3.R.toFixed(3)} · ${sc3}점 · ${c3.worst?.kind} 「${c3.worst?.ch}」 ${c3.worst?.gap?.toFixed(2)}초`); }
   // ⓕ 끝을 끄는 본보기(15번 2/8 「하고 싶었던 거구나」 · 13번 2/4) — 내 것 = 본보기에서 마지막 음절 여운만 자름(음절 길이 45%에서 30ms 줄여 끝냄)
   for (const k2 of ["L01-00-01_15_p02", key]) {
     const it2 = al.items[k2]; if (!it2) { res.push(`· ${k2} 정렬 없음(건너뜀)`); continue; }
@@ -50,6 +53,8 @@
     const nb3 = ctx.createBuffer(1, d3.length - (a1 - a0) + slow.length, sr3), y3 = nb3.getChannelData(0); y3.set(d3.subarray(0, a0), 0); y3.set(slow, a0); y3.set(d3.subarray(a1), a0 + slow.length);
     const st3 = R(nb3, mb3, k3); ok(st3.worst?.ch === "세종대왕이" && st3.worst?.kind === "long" && withRhythm(100, st3.R) === 99, "ⓙ 「세종대왕이」만 2배 길게 → 그 낱말 길다 · 1.7배 넘음 = 최대 99(투덜이 10-07)", `R ${st3.R.toFixed(3)} → ${withRhythm(100, st3.R)}점 · ${st3.worst?.kind} 「${st3.worst?.ch}」 ${st3.worst?.a?.toFixed(2)}→${st3.worst?.b?.toFixed(2)}초`);
     const r4 = await fetch("/tools/_rec/r4.webm"); if (r4.ok) { const yb4 = await new OfflineAudioContext(1, 48000, 48000).decodeAudioData(await r4.arrayBuffer()), d4 = R(yb4, mb3, k3);
+      for (const f of ["r5", "r6", "r7"]) { const rq = await fetch(`/tools/_rec/${f}.webm`); if (!rq.ok) { res.push(`· ${f}.webm 없음`); continue; } const yb = await new OfflineAudioContext(1, 48000, 48000).decodeAudioData(await rq.arrayBuffer()), d = R(yb, mb3, k3);
+        ok(!/^pause/.test(d.worst?.kind || "") && withRhythm(100, d.R) >= 99 && !(d.worst?.b > 2 * d.worst?.a), `투덜이 ${f}(15번 줄 · ${{ r5: "낱말 사이 쉼 「누구나가 / 지금」 0.28초", r6: "낱말 사이 쉼 「그게 / 세종대왕이」 0.40초", r7: "「글자요.」 뒤 마침표 쉼 1초 — 낱말 끝을 쉼 속 잡음으로 재지 않기" }[f]}) → 쉼 감점 없음 · 2배 넘게 긴 낱말 없음`, `R ${d.R.toFixed(3)} → ${withRhythm(100, d.R)}점 · 가장 나쁜 곳 ${d.worst ? `${d.worst.kind} 「${d.worst.ch}」 ${d.worst.a?.toFixed(2) ?? ""}→${d.worst.b?.toFixed(2) ?? ""}` : "없음"}`); }
       res.push(`· 투덜이 r4(15번 줄): R ${d4.R.toFixed(3)} → ${withRhythm(100, d4.R)}점 · 가장 나쁜 낱말 ${d4.worst ? `${d4.worst.kind} 「${d4.worst.ch}」 ${d4.worst.a?.toFixed(2)}→${d4.worst.b?.toFixed(2)}초` : "없음"}`); } else res.push("· r4.webm 없음"); }
   ok(withRhythm(100, 0.8) === 98 && withRhythm(100, 0.7) === 95 && withRhythm(100, 0.6) === 92 && withRhythm(100, 0.849) === 99 && withRhythm(100, 0.85) === 100 && withRhythm(100, 0.95) === 100 && withRhythm(100, 0.3) === 88 && withRhythm(80, 0.95) === 80, "ⓔ 배수 식(내림: 100·0.8→98 · 0.7→95 · 0.6→92 · 0.849→99 · ≥0.85→그대로 · <0.5→88)", [0.8, 0.7, 0.6, 0.849, 0.85].map(r => withRhythm(100, r)).join(","));
   const bad = res.filter(x => x.startsWith("✗")).length, out = `${bad ? "✗" : "✓"} 리듬 ${res.filter(x => x.startsWith("✓")).length}/${res.filter(x => /^[✓✗]/.test(x)).length}\n` + res.join("\n");

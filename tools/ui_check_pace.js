@@ -1,6 +1,6 @@
 // 따라 읽기 칠 점검(본부 10-07 「칠을 그대로 따라 하면 100이 안 나옴」) — 앱을 연 채로 실행 · 소리 안 남
 // 모든 토막: 본보기 소리를 칠 시각(rhythm.js paceOf — 음절 시작 = 본보기 시각 × 배수)대로 늘인 가짜 녹음 → R ≥ 0.9 · 100점
-//  배수 = 1.15(기본 · 통과 조건) · 1.15/0.75 ≈ 1.53(본보기 속도 0.75× · 보고만 — 아주 느리면 첫 음절 시작 잡기가 점수 쪽 문제 · 고치려면 투덜이 허락) · 대조: 옛 칠(글자마다 고른 길이)대로 → 몇 토막은 100 아님(원인 확인용 · 보고만)
+//  배수 = 1.15(기본 · 통과 조건) · 1.15/0.75 ≈ 1.53(본보기 속도 0.75× · 아주 느리게 — 투덜이 10-07 허락으로 점수 쪽 시작·쉼 잡기 고침) · 대조: 옛 칠(글자마다 고른 길이)대로 → 몇 토막은 100 아님(원인 확인용 · 보고만)
 //  늘이기 = WSOLA(음높이·목소리 결 그대로) — 칠 시각을 마디로 한 구간별 직선 시각 대응
 (async () => {
   const v = document.documentElement.dataset.v, { prepare, rhythmScore, withRhythm, loadAlign, paceOf, PACE_L0 } = await import(`/js/rhythm.js?v=${v}`);
@@ -33,7 +33,7 @@
       if (rate === 1) { const D = (syl[syl.length - 1].e - s0) * 1.15, m = syl.length; // 옛 칠 = 글자마다 고른 길이
         const r0 = R(stretch(mb, [[s0, s0], ...syl.slice(1).map((x, k) => [x.s, s0 + (D * (k + 1)) / m]), [syl[m - 1].e, s0 + D]]), mb, k2); if (withRhythm(100, r0.R) < 100) old.push(`${k2} ${withRhythm(100, r0.R)}`); }
     }
-    (rate === 1 ? ok : (c, m, x) => res.push(`· ${m}${x ? " · " + x : ""}`))(n > 50 && !bad.length, `칠대로 따라 읽기(본보기 속도 ${rate}× · 배수 ${(1.15 / rate).toFixed(2)}) → 모든 토막 100점(${n}토막)`, bad.join(" · ") || `가장 낮은 R ${minR.toFixed(3)} · R 0.9 아래(100점이지만) ${low.length}토막${low.length ? ": " + low.join(" · ") : ""}`);
+    ok(n > 50 && !bad.length, `칠대로 따라 읽기(본보기 속도 ${rate}× · 배수 ${(1.15 / rate).toFixed(2)}) → 모든 토막 100점(${n}토막)`, bad.join(" · ") || `가장 낮은 R ${minR.toFixed(3)} · R 0.9 아래(100점이지만) ${low.length}토막${low.length ? ": " + low.join(" · ") : ""}`);
     if (rate === 1) res.push(`· 대조: 옛 칠(글자마다 고른 길이)대로 → 100 아닌 토막 ${old.length}/${n}${old.length ? " · " + old.slice(0, 6).join(" · ") : ""}`);
   }
   { const it = al.items["L01-00-01_15_p02"] ? ["L01-00-01_15_p02", al.items["L01-00-01_15_p02"]] : items[0], pc = await paceOf({ ep, key: it[0], text: it[1].text, rate: 1 });
