@@ -13,14 +13,15 @@
 //  W5 소리는 언제나 하나만 · 새 일을 하면 앞 소리는 멈춘다
 //  W6 영상 창 안(embedded): 창 안에서 스크롤 없이 다 보이게 — 긴 문장은 토막으로(◀ 1/3 ▶) ·
 //     토막을 다 쓰면 자동으로 다음 토막 · 줄을 다 쓰면 대사를 듣고 자동으로 다음 줄 쓰기 · 아래 ▶ = 이 부분 듣기
-import { t, lang } from "../i18n.js?v=1007.45";
-import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO } from "../text.js?v=1007.45";
-import { episode, chars, charsF } from "../data.js?v=1007.45";
-import { paths } from "../paths.js?v=1007.45";
-import { I } from "../ui.js?v=1007.45";
-import { audioCtx, hold } from "../wake.js?v=1007.45";
-import * as sfx from "../sfx.js?v=1007.45";
-import { scoreFx } from "../scorefx.js?v=1007.45"; // 손글씨 점수 효과 = 말하기와 같은 규칙(본부 10-07)
+import { t, lang } from "../i18n.js?v=1007.51";
+import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO } from "../text.js?v=1007.51";
+import { episode, chars, charsF } from "../data.js?v=1007.51";
+import { paths } from "../paths.js?v=1007.51";
+import { I } from "../ui.js?v=1007.51";
+import { audioCtx, hold } from "../wake.js?v=1007.51";
+import * as sfx from "../sfx.js?v=1007.51";
+import { scoreFx } from "../scorefx.js?v=1007.51";
+import { units as jamoUnits, baseOf } from "../jamobox.js?v=1007.51"; // 자모 자리 나누기(획순 · 자판 덧칠 · 손글씨 덩어리 — 본부 10-07) // 손글씨 점수 효과 = 말하기와 같은 규칙(본부 10-07)
 
 const KEYS = [..."ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎㄲㄸㅃㅆㅉ"], VOW = [..."ㅏㅑㅓㅕㅗㅛㅜㅠㅡㅣ"];
 const VOW2 = [..."ㅐㅒㅔㅖㅘㅙㅚㅝㅞㅟㅢ"]; // 겹모음 줄(본부 10-06) — 칸 하나 · ㅓ+ㅣ 처럼 나눠 쳐도 받음
@@ -106,7 +107,8 @@ export default async function write(app, ep, id, opts = {}) {
     if (w.end) { segs.push(cur); cur = []; n = 0; }
   }
   if (cur.length) segs.push(cur);
-  const st = { s: 0, w: 0, c: 0, k: 0, typed: [], part: "", busy: false, done: false, queue: [], loopAt: null, sent: false, alive: true, auto: false, mode: (() => { try { return localStorage.getItem("malmun.wmode") === "hand" ? "hand" : "kb"; } catch { return "kb"; } })() };
+  const st = { s: 0, w: 0, c: 0, k: 0, typed: [], part: "", busy: false, done: false, queue: [], loopAt: null, sent: false, alive: true, auto: false, wrote: new Set(), mode: (() => { try { return localStorage.getItem("malmun.wmode") === "hand" ? "hand" : "kb"; } catch { return "kb"; } })() };
+  const wkey = (s2, w, c) => `${s2}.${w}.${c}`;
   // 쓰기 방법(본부 10-07 투덜이 「ㅇ」) — ⌨ 자판 / ✍ 손글씨 · 고른 것 기억
   const modeBtns = () => `<span class="wmode" role="group">${[["kb", "⌨ " + t("w_kb")], ["hand", "✍ " + t("w_hand")]].map(([m, l]) => `<button data-mode="${m}" aria-pressed="${st.mode === m}">${esc(l)}</button>`).join("")}</span>`;
   const lineSrc = line.lineAudio ? paths.audio(ep, line.lineAudio) : null;
@@ -149,11 +151,11 @@ export default async function write(app, ep, id, opts = {}) {
     stopLoop(); st.sent = true; markSent();
     run([partStep()]).then(() => { st.sent = false; markSent(); });
   }
-  app.__wr = { hand: () => st.hand, traceOf: ch => traceOf(ch), centerOf: ch => centerOf(ch), handScore: (ch, S) => handScore(ch, S), handJudge: () => handJudge(), toggle: toggleSentence, busy: () => st.busy || st.done || st.queue.length > 0 || st.sent || st.auto || sfx.playing() }; // busy = 점검 도구가 소리 끝을 기다릴 때
+  app.__wr = { hand: () => st.hand, traceOf: ch => traceOf(ch), centerOf: ch => centerOf(ch), unitsOf: ch => unitsOf(ch), strokesOf: async ch => (await stkReady, strokesOf(ch)), strokeHint: (H, S) => strokeHint(H, S), handScore: (ch, S) => handScore(ch, S), handJudge: () => handJudge(), toggle: toggleSentence, busy: () => st.busy || st.done || st.queue.length > 0 || st.sent || st.auto || sfx.playing() }; // busy = 점검 도구가 소리 끝을 기다릴 때
 
   function paintSent() {
     sentEl.innerHTML = `<svg class="spk" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M4 9v6h4l5 4V5L8 9H4z"/><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M16 8.5a5 5 0 0 1 0 7M18.8 6a8.5 8.5 0 0 1 0 12"/></svg>` + words().map((w, wi) => `<span class="w ${wi === st.w ? "on" : ""}">${w.chars.map((c, ci) =>
-      `<button class="c ko ${c.file ? "" : "noaudio"} ${wi < st.w || (wi === st.w && ci < st.c) ? "done" : ""} ${st.loopAt && st.loopAt.w === wi && st.loopAt.c === ci ? "loop" : ""} ${wi === st.w && ci === st.c && st.s < segs.length ? "now" : ""}" data-w="${wi}" data-c="${ci}" ${c.file ? "" : 'aria-disabled="true"'}>${esc(c.ch)}${st.mode === "hand" && bestGet(wi, ci) != null ? `<small class="hb">${bestGet(wi, ci)}</small>` : ""}</button>`).join("")}</span>`).join("");
+      `<button class="c ko ${c.file ? "" : "noaudio"} ${st.wrote.has(wkey(st.s, wi, ci)) ? "done" : ""} ${st.loopAt && st.loopAt.w === wi && st.loopAt.c === ci ? "loop" : ""} ${wi === st.w && ci === st.c && st.s < segs.length ? "now" : ""}" data-w="${wi}" data-c="${ci}" ${c.file ? "" : 'aria-disabled="true"'}>${esc(c.ch)}${st.mode === "hand" && bestGet(wi, ci) != null ? `<small class="hb">${bestGet(wi, ci)}</small>` : ""}</button>`).join("")}</span>`).join("");
     segnav.innerHTML = segs.length > 1
       ? `<button data-seg="-1" ${st.s ? "" : "disabled"} aria-label="${esc(t("previous"))}">◀</button><span>${st.s + 1}/${segs.length}</span><button data-seg="1" ${st.s < segs.length - 1 ? "" : "disabled"} aria-label="${esc(t("next"))}">▶</button>`
       : "";
@@ -186,7 +188,7 @@ export default async function write(app, ep, id, opts = {}) {
     const bs = [...row.querySelectorAll(".wc")]; bs.forEach(b => { b.style.fontSize = ""; b.style.padding = ""; });
     for (let fs = parseFloat(getComputedStyle(bs[0] || row).fontSize) - 1; row.scrollWidth > row.clientWidth + 1 && fs >= 11; fs -= 1) bs.forEach(b => { b.style.fontSize = fs + "px"; b.style.padding = fs < 16 ? "0 2px" : ""; });
   }
-  let fitQ = 0; new ResizeObserver(() => { clearTimeout(fitQ); fitQ = setTimeout(() => { fitSent(); placeBtns(); fitWord(); }, 30); }).observe(sentEl);
+  let fitQ = 0; new ResizeObserver(() => { clearTimeout(fitQ); fitQ = setTimeout(() => { fitSent(); placeBtns(); fitWord(); const c0 = st.s < segs.length ? words()[st.w]?.chars[st.c] : null; if (c0) paintBox(c0, work.querySelector(".box.ok") != null); }, 30); }).observe(sentEl);
   function render() {
     paintSent();
     if (st.s >= segs.length) {
@@ -195,11 +197,12 @@ export default async function write(app, ep, id, opts = {}) {
       wb.remove(); return;
     }
     const w = words()[st.w], c = w.chars[st.c], jam = c.jamo;
-    work.innerHTML = `<div class="stage"><div class="box"><span class="target ko" lang="ko">${esc(c.ch)}</span><span class="typed ko" lang="ko">${esc(compose([...st.typed, st.part].flatMap(jamoParts), vowelLen(c.ch)))}</span></div>
+    work.innerHTML = `<div class="stage"><div class="box"><canvas class="tcv" aria-hidden="true"></canvas><span class="target ko" lang="ko">${esc(c.ch)}</span><span class="typed ko" lang="ko">${esc(compose([...st.typed, st.part].flatMap(jamoParts), vowelLen(c.ch)))}</span></div>
       <div class="info">${w.rom || w.mean ? `<div class="sub2">${w.rom ? `<span class="rom">${esc(w.rom)}</span>` : ""}${w.mean ? `<span class="mean tr">${esc(w.mean)}</span>` : ""}</div>` : ""}
       <div class="slotrow"><div class="slots">${jam.map((j, i) => `<span class="slot ${i < st.k ? "filled" : i === st.k ? "current" : ""}">${i <= st.k ? esc(j) : ""}</span>`).join("")}</div></div></div></div>
-      ${st.mode === "hand" ? `<div class="hand"><div class="hbox"><canvas class="hguide" aria-hidden="true"></canvas><canvas class="hink" aria-label="${esc(t("w_hand"))}"></canvas><b class="hscore" hidden></b><span class="fx" aria-hidden="true"></span></div><div class="hbtns"><button data-act="hdone">✓ ${esc(t("h_done"))}</button><button data-act="hundo">↶ ${esc(t("h_undo"))}</button><button data-act="hclear">✕ ${esc(t("h_clear"))}</button></div></div>`
+      ${st.mode === "hand" ? `<div class="hand"><div class="hbox"><canvas class="hguide" aria-hidden="true"></canvas><canvas class="hink" aria-label="${esc(t("w_hand"))}"></canvas><b class="hscore" hidden></b><span class="fx" aria-hidden="true"></span></div><div class="hbtns"><button data-act="hdone">✓ ${esc(t("h_done"))}</button><button data-act="horder">✎ ${esc(t("h_order"))}</button><button data-act="hundo">↶ ${esc(t("h_undo"))}</button><button data-act="hclear">✕ ${esc(t("h_clear"))}</button></div></div>`
         : `<div class="kb" lang="ko">${KB_ROWS.map(r => `<div class="kr">${r.map(j => `<button data-j="${j}">${j}</button>`).join("")}</div>`).join("")}</div>`}`;
+    paintBox(c); // 자판 칸 = 회색 글자 위에 친 자모 자리만 진하게(본부 10-07 · 글자가 따로 그려져 어긋나던 것)
     work.classList.toggle("handmode", st.mode === "hand"); // 손글씨 = 위 작은 글자 상자·자모 칸 숨기고 큰 칸을 키움(본부 10-07)
     if (st.mode === "hand") setupHand(c);
     fitWord(); placeBtns();
@@ -254,7 +257,8 @@ export default async function write(app, ep, id, opts = {}) {
   function handScore(ch, strokes, boxPx = st.hand?.s || 260) {
     const N = 160, k = N / boxPx, mask = pix(N, x => glyph(x, N, ch, "#000")), maskD = pix(N, x => glyph(x, N, ch, "#000", PEN * 2));
     const near = pix(N, x => inkPath(x, N, strokes, PEN * N + 4 * k)), ink = pix(N, x => inkPath(x, N, strokes, PEN * N));
-    const comps = compsOf(mask, N), miss = [];
+    const us = unitsOf(ch), sc = N / UN, tot = us.reduce((a, u) => a + u.px.length, 0);
+    const comps = us.length ? us.filter(u => u.px.length >= tot * 0.005).map(u => [...new Set(u.px.map(q => Math.min(N - 1, Math.floor((q % UN) * sc)) + Math.min(N - 1, Math.floor(Math.floor(q / UN) * sc)) * N))].filter(q => mask[q * 4 + 3] > 128)) : compsOf(mask, N), miss = []; // 덩어리 = 자모 자리(자판 덧칠·획순과 같은 나눔)
     const cov = comps.map(c => { let n = 0; for (const q of c) { if (near[q * 4 + 3] > 128) n++; else miss.push(q); } return c.length ? n / c.length : 0; });
     let p = 0, out = 0; for (let i = 3; i < ink.length; i += 4) if (ink[i] > 128) { p++; if (maskD[i] <= 128) out++; }
     const low = cov.length ? Math.min(...cov) : 0, avg = cov.length ? cov.reduce((a, b) => a + b, 0) / cov.length : 0, outside = p ? out / p : 1;
@@ -273,6 +277,43 @@ export default async function write(app, ep, id, opts = {}) {
   const traceOf = ch => { const N = 160, mask = pix(N, x => glyph(x, N, ch, "#000")), step = Math.max(2, Math.round(PEN * N * 0.8)), out = [];
     for (let y = Math.floor(step / 2); y < N; y += step) { let x0 = -1; for (let x = 0; x <= N; x++) { const on = x < N && mask[(y * N + x) * 4 + 3] > 128; if (on && x0 < 0) x0 = x; if (!on && x0 >= 0) { out.push([[(x0 + 0.5) / N, (y + 0.5) / N], [(x - 0.5) / N, (y + 0.5) / N]]); x0 = -1; } } }
     return out; };
+  // 자모 자리(js/jamobox.js) — 같은 글꼴 마스크로 · 글꼴이 바뀌면 다시
+  const UN = 200, uCache = new Map();
+  const unitsOf = ch => { const k = ch + "|" + hfontKey(); if (!uCache.has(k)) { const m = pix(UN, x => glyph(x, UN, ch, "#000")); uCache.set(k, jamoUnits(ch, m, UN).filter(u => u.px.length)); } return uCache.get(k); };
+  // 획순 자료(data/jamo_strokes.json · 본부) → 이 글자 획(0~1 · 쓰는 차례) = 자모 획 점을 그 자모 잉크 상자에 늘려 맞춤
+  let STK = null; const stkReady = fetch(`data/jamo_strokes.json?v=${document.documentElement.dataset.v || ""}`).then(r => r.json()).then(d => (STK = d)).catch(() => null);
+  function strokesOf(ch) {
+    if (!STK) return [];
+    const out = [];
+    unitsOf(ch).forEach((u, ui) => { const base = STK.base?.[u.jamo]; if (!base) return;
+      const pts = base.flat(), bx0 = Math.min(...pts.map(p => p[0])), bx1 = Math.max(...pts.map(p => p[0])), by0 = Math.min(...pts.map(p => p[1])), by1 = Math.max(...pts.map(p => p[1]));
+      // 자료 점 = 획 가운데 선 → 잉크 상자를 획 굵기 절반만큼 안으로(굵기 ≈ 2 × 넓이 / 둘레)
+      u.set ||= new Set(u.px); let edge = 0; for (const q of u.px) if (!u.set.has(q - 1) || !u.set.has(q + 1) || !u.set.has(q - UN) || !u.set.has(q + UN)) edge++;
+      const half = Math.min(0.06, u.px.length / Math.max(1, edge) / UN), b0 = u.box, bw = b0[2] - b0[0], bh = b0[3] - b0[1];
+      const x0 = b0[0] + Math.min(half, bw / 3), x1 = b0[2] - Math.min(half, bw / 3), y0 = b0[1] + Math.min(half, bh / 3), y1 = b0[3] - Math.min(half, bh / 3), mx = v => (bx1 - bx0 < 0.05 ? (x0 + x1) / 2 : x0 + ((v - bx0) / (bx1 - bx0)) * (x1 - x0)), my = v => (by1 - by0 < 0.05 ? (y0 + y1) / 2 : y0 + ((v - by0) / (by1 - by0)) * (y1 - y0));
+      for (const S of base) out.push({ unit: ui, role: u.role, jamo: u.jamo, pts: S.map(([x, y]) => [mx(x), my(y)]) }); });
+    return out;
+  }
+  const ROLE = { cho: 0, jung: 1, jong: 2 };
+  // 학습자 획 하나 → 순서·방향 알림(점수와 별개 · 깎지 않음 · 본부 10-07)
+  function strokeHint(H, S) {
+    if (!S || S.length < 2) return "";
+    const us = unitsOf(H.ch); if (!us.length) return "";
+    const [sx, sy] = S[0];
+    // 이 획의 자모 = 획 위 점들이 가장 많이 지나간 자모 잉크(4px 너그럽게) · 하나도 안 지나가면 시작점에 가장 가까운 자모 상자
+    us.forEach(u => (u.set ||= new Set(u.px)));
+    const hitU = (x, y) => { const cx = Math.round(x * UN), cy = Math.round(y * UN); for (let r = 0; r <= 4; r += 2) for (let k = 0; k < us.length; k++) for (const [dx, dy] of [[0, 0], [r, 0], [-r, 0], [0, r], [0, -r]]) if (us[k].set.has((cy + dy) * UN + cx + dx)) return k; return -1; };
+    const votes = new Array(us.length).fill(0); for (let i = 1; i < S.length; i++) for (let f = 0; f < 1; f += 0.25) { const k = hitU(S[i - 1][0] + (S[i][0] - S[i - 1][0]) * f, S[i - 1][1] + (S[i][1] - S[i - 1][1]) * f); if (k >= 0) votes[k]++; }
+    const nS = Math.max(1, (S.length - 1) * 4), mxv = Math.max(...votes); let ui = votes.indexOf(mxv);
+    if (mxv < nS * 0.5) { const mid = S[Math.floor(S.length / 2)], m2 = S.length > 1 ? [(S[0][0] + S[S.length - 1][0]) / 2, (S[0][1] + S[S.length - 1][1]) / 2] : mid; let bd = Infinity; us.forEach((u, k) => { const d = Math.hypot(m2[0] - (u.box[0] + u.box[2]) / 2, m2[1] - (u.box[1] + u.box[3]) / 2); if (d < bd) { bd = d; ui = k; } }); } // 잉크를 절반도 안 지나가면 = 획 가운데에 가장 가까운 자모 상자
+    const role = ROLE[us[ui].role]; H.roles ||= new Set();
+    if (!H.orderTold) { const need = us.find(u => ROLE[u.role] < role && !H.roles.has(ROLE[u.role])); if (need) { H.orderTold = true; H.roles.add(role); return t("h_order_first", { j: `「${need.jamo}」` }); } }
+    H.roles.add(role);
+    const [ex, ey] = S[S.length - 1], dx = ex - sx, dy = ey - sy, len = Math.hypot(dx, dy);
+    if (len >= 0.12 && Math.abs(dx) > 2 * Math.abs(dy) && dx < 0) return t("h_dir_lr");
+    if (len >= 0.12 && Math.abs(dy) > 2 * Math.abs(dx) && dy < 0) return t("h_dir_tb");
+    return "";
+  }
   function setupHand(c) {
     const hand = work.querySelector(".hand"), box = hand.querySelector(".hbox"), gv = box.querySelector(".hguide"), iv = box.querySelector(".hink"), bt = hand.querySelector(".hbtns");
     const H = (st.hand = { ch: c.ch, strokes: [], cur: null, timer: 0, s: 0 });
@@ -294,10 +335,30 @@ export default async function write(app, ep, id, opts = {}) {
     document.fonts?.load(`${glyphWeight()} 100px ${glyphFont()}`, c.ch).catch(() => {}).then(() => document.fonts.ready).then(() => { if (st.hand !== H) return; gCache.clear(); fit(); }); // 글꼴이 늦게 오면 글자 그림 다시
     const at = e => { const r = iv.getBoundingClientRect(); return [Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)), Math.min(1, Math.max(0, (e.clientY - r.top) / r.height))]; };
     iv.addEventListener("pointerdown", e => { if (st.busy || st.auto) return; e.preventDefault(); try { iv.setPointerCapture(e.pointerId); } catch {} clearTimeout(H.timer); stopLoop();
-      if (H.passed) { H.passed = false; H.strokes = []; markHand(); const sc = work.querySelector(".hscore"); if (sc) sc.hidden = true; } // 통과 뒤 다시 그리면 = 다시 쓰기(더 높은 점수)
+      if (H.passed) { H.passed = false; H.strokes = []; H.roles = null; H.orderTold = false; markHand(); const sc = work.querySelector(".hscore"); if (sc) sc.hidden = true; } // 통과 뒤 다시 그리면 = 다시 쓰기(더 높은 점수)
       H.cur = [at(e)]; H.strokes.push(H.cur); paintInk(); });
     iv.addEventListener("pointermove", e => { if (!H.cur) return; e.preventDefault(); const evs = e.getCoalescedEvents?.() || []; for (const ev of evs.length ? evs : [e]) H.cur.push(at(ev)); paintInk(); });
-    const up = () => { if (!H.cur) return; H.cur = null; clearTimeout(H.timer); H.timer = setTimeout(() => st.hand === H && handJudge(), 1200); };
+    const up = () => { if (!H.cur) return; const S = H.cur; H.cur = null; clearTimeout(H.timer); H.timer = setTimeout(() => st.hand === H && handJudge(), 1200);
+      const msg = strokeHint(H, S); if (msg) bubble(msg); }; // 획순·방향 알림(짧은 말풍선)
+    const bubble = msg => { let b = box.querySelector(".hbubble"); if (!b) { b = document.createElement("b"); b.className = "hbubble"; box.append(b); } b.textContent = msg; b.hidden = false; H.hints = (H.hints || []).concat(msg); clearTimeout(H.bt); H.bt = setTimeout(() => (b.hidden = true), 2500); };
+    // 획순 보기 — 회색 글자 위에 획을 하나씩(0.5초) · 시작점 번호 원 · 끝 화살촉 · 펜 굵기 · 진한 주황 → 다 그리고 1초 뒤 지움 · 다시 누르면 처음부터
+    H.showOrder = async () => {
+      await stkReady; const list = strokesOf(c.ch); if (!list.length) return;
+      const my = (H.anim = (H.anim || 0) + 1), x = gv.getContext("2d"), n = gv.width, lw = PEN * n, OR = "#c8641a";
+      const done = []; const drawS = (S, f) => { const P = S.pts.map(([a, b]) => [a * n, b * n]), L = []; let tot = 0; for (let i = 1; i < P.length; i++) { const d = Math.hypot(P[i][0] - P[i - 1][0], P[i][1] - P[i - 1][1]); L.push(d); tot += d; }
+        let left = tot * f; x.strokeStyle = OR; x.lineWidth = lw; x.lineCap = x.lineJoin = "round"; x.beginPath(); x.moveTo(...P[0]); let end = P[0], dir = [1, 0];
+        for (let i = 1; i < P.length && left > 0; i++) { const k = Math.min(1, left / (L[i - 1] || 1)); end = [P[i - 1][0] + (P[i][0] - P[i - 1][0]) * k, P[i - 1][1] + (P[i][1] - P[i - 1][1]) * k]; dir = [P[i][0] - P[i - 1][0], P[i][1] - P[i - 1][1]]; x.lineTo(...end); left -= L[i - 1]; }
+        x.stroke(); return { P, end, dir }; };
+      const mark = (i, S, fin) => { const { P, end, dir } = fin; const r = lw * 0.9;
+        x.fillStyle = OR; x.beginPath(); x.arc(P[0][0], P[0][1], r, 0, Math.PI * 2); x.fill(); x.fillStyle = "#fff"; x.font = `700 ${Math.round(r * 1.25)}px sans-serif`; x.textAlign = "center"; x.textBaseline = "middle"; x.fillText(String(i + 1), P[0][0], P[0][1] + 0.5);
+        const a = Math.atan2(dir[1], dir[0]), h = lw * 1.4; x.fillStyle = OR; x.beginPath(); x.moveTo(end[0] + Math.cos(a) * h, end[1] + Math.sin(a) * h); x.lineTo(end[0] + Math.cos(a + 2.4) * h, end[1] + Math.sin(a + 2.4) * h); x.lineTo(end[0] + Math.cos(a - 2.4) * h, end[1] + Math.sin(a - 2.4) * h); x.closePath(); x.fill(); };
+      for (let i = 0; i < list.length; i++) {
+        const t0 = performance.now();
+        await new Promise(res => { const step = () => { if (H.anim !== my || st.hand !== H) return res(); const f = Math.min(1, (performance.now() - t0) / 500); paintGuide(); done.forEach(([j, S]) => mark(j, S, drawS(S, 1))); const fin = drawS(list[i], f); if (f >= 1) { done.push([i, list[i]]); mark(i, list[i], fin); return res(); } setTimeout(step, 16); }; step(); }); // 60번/초(rAF 는 창이 가려지면 멈춤)
+        if (H.anim !== my) return;
+      }
+      H.orderShown = list.length; await new Promise(r => setTimeout(r, 1000)); if (H.anim === my && st.hand === H) paintGuide();
+    };
     iv.addEventListener("pointerup", up); iv.addEventListener("pointercancel", up);
     H.paintInk = paintInk; H.paintGuide = paintGuide; H.col = col;
   }
@@ -333,12 +394,28 @@ export default async function write(app, ep, id, opts = {}) {
     b.dataset.act = H?.passed ? "hnext" : "hdone"; b.textContent = H?.passed ? t("next_btn") : "✓ " + t("h_done");
   }
 
+  function paintBox(c, ok) {
+    const box = work.querySelector(".box"), cv = box?.querySelector(".tcv"); if (!cv) return;
+    const n0 = Math.round(Math.min(box.clientWidth, box.clientHeight)), dpr = window.devicePixelRatio || 1, n = Math.max(20, Math.round(n0 * dpr)); cv.width = cv.height = n;
+    const x = cv.getContext("2d"), cs = getComputedStyle(box), ink = cs.color || "#17302a";
+    x.globalAlpha = 0.16; glyph(x, n, c.ch, ink); x.globalAlpha = 1;
+    const bases = [...st.typed, ...[...(st.part || "")]].flatMap(j => baseOf(j)).length, us = unitsOf(c.ch).slice(0, ok ? 99 : bases); if (!us.length) return;
+    const dark = document.createElement("canvas"); dark.width = dark.height = n; const dx = dark.getContext("2d");
+    glyph(dx, n, c.ch, ok ? getComputedStyle(work).getPropertyValue("--hi").trim() || ink : ink);
+    const m = document.createElement("canvas"); m.width = m.height = UN; const mx = m.getContext("2d"), id = mx.createImageData(UN, UN);
+    for (const u of us) for (const q of u.px) id.data[q * 4 + 3] = 255;
+    mx.putImageData(id, 0, 0); dx.globalCompositeOperation = "destination-in"; dx.imageSmoothingEnabled = true;
+    const k = n / UN; for (const [ox, oy] of [[0, 0], [k, 0], [-k, 0], [0, k], [0, -k]]) dx.drawImage(m, ox, oy, n, n); // 칸 경계 한 칸 너그럽게(획 가장자리 안 잘리게)
+    x.drawImage(dark, 0, 0);
+  }
+
   async function finishChar(j, c, src = jamoSrc(j)) { // W3 · 손글씨는 글자 소리(src)
     st.busy = true; st.done = true;
-    work.querySelector(".box")?.classList.add("ok");
+    work.querySelector(".box")?.classList.add("ok"); paintBox(c, true);
     const ok = await run(["ok", src, GAP_NEXT]);
     st.done = false;
     if (!ok || !st.alive) { st.busy = false; st.queue = []; return; }
+    st.wrote.add(wkey(st.s, st.w, st.c)); // 직접 써서 마친 글자(위 글자 줄 초록 — 순서가 아니라 실제로 쓴 것만 · 본부 10-07)
     st.busy = false; st.c++; st.k = 0; st.typed = []; st.part = "";
     const w = words()[st.w];
     if (st.c >= w.chars.length) { st.w++; st.c = 0; }
@@ -418,10 +495,10 @@ export default async function write(app, ep, id, opts = {}) {
     if (cb) { // W1
       const w = +cb.dataset.w, ci = +cb.dataset.c, c = words()[w].chars[ci];
       if (st.auto) { st.jumpTo = { w, c: ci }; cb.blur(); hush(); Object.assign(st, { w, c: ci, k: 0, typed: [], part: "", done: false, queue: [] }); render(); return; } // 자동 완성 중 위 글자 누름 = 그 글자로 옮겨 거기부터 자동 이어서(본부 10-06 투덜이) · 앞 글자는 초록 · 지금 테두리 · 뒤는 기본
-      if (!c.file) { note.textContent = t("no_char_audio", { c: c.ch }); return; }
-      if (st.busy) return;
-      st.sent = false; markSent();
-      stopLoop(); cb.blur(); run([c.file]); // 10-06 투덜이: 한 번만(되풀이 없앰) · 누른 뒤 표시 안 남김
+      // 누른 글자로 바로 가서 쓰기(본부 10-07 투덜이 — 자판·손글씨 둘 다 · 건너뛴 글자는 「안 씀」 그대로 · 나중에 눌러 돌아와 씀) + 그 글자 소리 한 번
+      cb.blur(); hush(); stopLoop(); st.sent = false; markSent();
+      Object.assign(st, { w, c: ci, k: 0, typed: [], part: "", done: false, queue: [], busy: false }); render();
+      if (c.file) run([c.file]); else note.textContent = t("no_char_audio", { c: c.ch });
       return;
     }
     const mb = e.target.closest("[data-mode]");
@@ -431,7 +508,8 @@ export default async function write(app, ep, id, opts = {}) {
     const a = b.dataset.act;
     if (a === "hdone") return handJudge();
     if (a === "hnext") return handNext();
-    if (a === "hundo" || a === "hclear") { const H = st.hand; if (!H) return; clearTimeout(H.timer); if (a === "hundo") H.strokes.pop(); else H.strokes = []; if (H.passed) { H.passed = false; markHand(); } const sc = work.querySelector(".hscore"); if (sc) sc.hidden = true; H.paintInk(); note.textContent = ""; return; }
+    if (a === "horder") return st.hand?.showOrder?.();
+    if (a === "hundo" || a === "hclear") { const H = st.hand; if (!H) return; clearTimeout(H.timer); if (a === "hundo") H.strokes.pop(); else { H.strokes = []; H.roles = null; H.orderTold = false; } if (H.passed) { H.passed = false; markHand(); } const sc = work.querySelector(".hscore"); if (sc) sc.hidden = true; H.paintInk(); note.textContent = ""; return; }
     if (a === "sent") toggleSentence();
     else if (a === "word" && st.s < segs.length && !st.busy) { // W4 — 원음에서 이 낱말만
       stopLoop(); st.sent = false; markSent();

@@ -1,6 +1,6 @@
 // 저장한 내 녹음 관리 — 지우기 · 이 편 모두 지우기 · 내려받기 · 오래 남게(본부 10-04 · 투덜이 승인)
-import { audioCtx } from "./wake.js?v=1007.45";
-import { leadOf, gainOf, FADE, voicedEnd } from "./playmine.js?v=1007.45";
+import { audioCtx } from "./wake.js?v=1007.51";
+import { leadOf, gainOf, FADE, voicedEnd } from "./playmine.js?v=1007.51";
 // 녹음·재생·점수 경로는 건드리지 않는다 — IndexedDB 「malmun」/rec(말하기 창 recGet·recPut 과 같은 곳)만 다룬다
 const open = () => new Promise((res, rej) => {
   const r = indexedDB.open("malmun", 1);

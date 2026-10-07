@@ -1,10 +1,10 @@
 // 설명 화면 — 대사 낱말 카드 + 설명 문단(음성 조각과 1:1 하이라이트)
-import { t, lang, langName } from "../i18n.js?v=1007.45";
-import { esc, renderText, glossCards } from "../text.js?v=1007.45";
-import { episode } from "../data.js?v=1007.45";
-import { paths } from "../paths.js?v=1007.45";
-import { Sequence } from "../audio.js?v=1007.45";
-import { I } from "../ui.js?v=1007.45";
+import { t, lang, langName } from "../i18n.js?v=1007.51";
+import { esc, renderText, glossCards } from "../text.js?v=1007.51";
+import { episode } from "../data.js?v=1007.51";
+import { paths } from "../paths.js?v=1007.51";
+import { Sequence } from "../audio.js?v=1007.51";
+import { I } from "../ui.js?v=1007.51";
 
 const pref = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } };
 

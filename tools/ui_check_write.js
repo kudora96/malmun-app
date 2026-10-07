@@ -53,7 +53,11 @@
   $(".panel [data-seg='1']").click(); await W(200); $(".panel [data-seg='-1']").click(); await W(300); key("ㅇ"); await idle(); key("ㅓ"); await idle(4000);
   // 위 글자 줄 글자 누르기 = 그 글자 소리 한 번(되풀이 없음 · 눌린 표시 안 남김 · 10-06 투덜이)
   const ch = [...document.querySelectorAll(".panel .sent .c")].find(c => c.textContent === "오" && !c.classList.contains("noaudio"));
-  if (ch) { const at0 = log.length; ch.click(); await W(2600); const c2 = [...document.querySelectorAll(".panel .sent .c")].find(c => c.textContent === "오"); const st = log.slice(at0).filter(e => e.ev === "시작").length; ok(st === 1 && !c2.classList.contains("loop") && document.activeElement !== c2, "「오」 누름 → 소리 한 번 · 되풀이 없음 · 표시 안 남음", `시작 ${st}번`); }
+  if (ch) { const at0 = log.length; ch.click(); await W(2600); const c2 = [...document.querySelectorAll(".panel .sent .c")].find(c => c.textContent === "오"); const st = log.slice(at0).filter(e => e.ev === "시작").length; ok(st === 1 && !c2.classList.contains("loop") && document.activeElement !== c2 && $(".panel .target")?.textContent === "오" && c2.classList.contains("now"), "「오」 누름 → 그 글자로 가서 쓰기(칠) · 소리 한 번 · 되풀이 없음", `시작 ${st}번 · 지금 ${$(".panel .target")?.textContent}`);
+    // 「서」 눌러 돌아옴 — 건너뛴 「오」는 안 씀(기본) · 쓴 「어」는 초록(본부 10-07)
+    [...document.querySelectorAll(".panel .sent .c")].find(c => c.textContent === "서").click(); await W(1500);
+    const cs = t => [...document.querySelectorAll(".panel .sent .c")].find(c => c.textContent === t);
+    ok($(".panel .target")?.textContent === "서" && cs("어").classList.contains("done") && cs("서").classList.contains("now") && !cs("서").classList.contains("done") && getComputedStyle(cs("서")).backgroundColor !== getComputedStyle(cs("세")).backgroundColor, "「서」 눌러 돌아옴 · 쓴 「어」 초록 · 지금 글자 = 칠(안 쓴 칸과 바탕 다름)", $(".panel .target")?.textContent); }
   // 단어 듣기 · 문장 듣기 · 아래 ▶
   // 단어 듣기 · 이 부분 듣기 = 본부가 일레븐랩스로 따로 만든 소리(units/{id}.mp3) — 끝까지 다 나오고, 줄 전체(_sub_t1)는 안 나옴
   const units = await (await fetch("data/L01-00-01/L01-00-01.units.json", { cache: "no-store" })).json();

@@ -171,5 +171,9 @@
  "h_done": "Done",
  "h_undo": "Undo stroke",
  "h_clear": "Clear",
- "h_again": "Write it again"
+ "h_again": "Write it again",
+ "h_order": "Order",
+ "h_order_first": "Order: write {j} first",
+ "h_dir_lr": "Direction: left to right",
+ "h_dir_tb": "Direction: top to bottom"
 }

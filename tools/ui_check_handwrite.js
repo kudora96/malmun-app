@@ -74,6 +74,26 @@
     const ch1 = H1.ch; await draw(wr().traceOf(ch1)); for (let k = 0; k < 40 && !H1.passed; k++) await W(100);
     const auto = H1.passed; for (let k = 0; k < 60 && wr().busy(); k++) await W(100); $("[data-act=hnext]")?.click(); for (let k = 0; k < 80 && wr().hand() === H1; k++) await W(100);
     ok(auto && wr().hand() !== H1, "ⓕ 다 그리고 손 뗀 채 1.2초 → 저절로 판정(통과) → 다음 ▶", `「${ch1}」 → 「${wr().hand()?.ch}」`);
+    // ⓘ 획순(본부 10-07 2단계) — 세·종·왕·읽·이: 자료 획 차례대로 = 알림 0 · 중성 먼저 = 순서 알림 · 가로획 거꾸로 = 방향 알림 · 자료 점이 글꼴 획에서 많이 벗어난 자모 보고
+    { const fitBad = [], rows = [];
+      for (const ch of ["세", "종", "왕", "읽", "이"]) {
+        const list = await wr().strokesOf(ch), us = wr().unitsOf(ch), hint = S => wr().strokeHint(Hf, S); let Hf;
+        Hf = { ch }; const n0 = list.map(S => hint(S.pts)).filter(Boolean);
+        Hf = { ch }; const sw = [...list.filter(S => S.role !== "cho"), ...list.filter(S => S.role === "cho")].map(S => hint(S.pts)).filter(Boolean);
+        const hi = list.findIndex(S => { const a = S.pts[0], b = S.pts[S.pts.length - 1]; return Math.abs(b[0] - a[0]) > 2 * Math.abs(b[1] - a[1]) && Math.hypot(b[0] - a[0], b[1] - a[1]) >= 0.12; });
+        Hf = { ch }; const rv = list.map((S, i) => hint(i === hi ? [...S.pts].reverse() : S.pts)).filter(Boolean);
+        rows.push({ ch, n0, sw, rv, hi });
+        // 맞춤 확인: 획 위 점(촘촘히)이 그 자모 잉크(3px 너그럽게) 안에 든 비율
+        us.forEach((u, ui) => { const set = new Set(u.px), UN = 200, inU = (x, y) => { for (let dy = -3; dy <= 3; dy++) for (let dx = -3; dx <= 3; dx++) if (set.has(Math.round(y * UN + dy) * UN + Math.round(x * UN + dx))) return true; return false; };
+          let n = 0, k = 0; for (const S of list.filter(S => S.unit === ui)) for (let i = 1; i < S.pts.length; i++) for (let t = 0; t <= 1; t += 0.1) { const x = S.pts[i - 1][0] + (S.pts[i][0] - S.pts[i - 1][0]) * t, y = S.pts[i - 1][1] + (S.pts[i][1] - S.pts[i - 1][1]) * t; n++; if (inU(x, y)) k++; }
+          if (n && k / n < 0.7) fitBad.push(`${ch}의 ${u.jamo} ${Math.round((100 * k) / n)}%`); }); }
+      ok(rows.every(r => !r.n0.length), "ⓘ 자료 획 차례대로 그림 → 알림 0(세·종·왕·읽·이)", rows.map(r => `${r.ch}${r.n0.length ? "✗" + r.n0.join("/") : ""}`).join(" "));
+      ok(rows.every(r => r.sw.some(x => /पहिले|먼저|first/.test(x))), "ⓘ 중성부터 그림 → 「क्रम मिलेन: पहिले …」", rows.map(r => `${r.ch}:${r.sw[0] || "없음"}`).join(" · "));
+      ok(rows.every(r => r.hi < 0 || r.rv.some(x => /बायाँ|왼쪽|left/.test(x))), "ⓘ 가로획 오른쪽→왼쪽 → 「दिशा: बायाँबाट दायाँ」", rows.map(r => `${r.ch}:${r.hi < 0 ? "가로획 없음" : r.rv[0] || "없음"}`).join(" · "));
+      res.push(`· 자료 점 맞춤(획 위 점이 그 자모 잉크 안 70% 미만): ${fitBad.join(" · ") || "없음"}`); }
+    // ⓘ 화면: 「क्रम」 누르면 획을 하나씩 그림(중간 장면 = 주황 획 일부) · 다 그린 뒤 지움 · 중성부터 그리면 말풍선
+    { $("[data-act=horder]").click(); await W(700); const gv = $(".hguide"), gx = gv.getContext("2d"), d = gx.getImageData(0, 0, gv.width, gv.height).data; let org = 0; for (let i = 0; i < d.length; i += 4) if (d[i] > 180 && d[i + 1] > 80 && d[i + 1] < 130 && d[i + 2] < 60) org++;
+      ok(org > 50, "ⓘ 「क्रम」 → 회색 글자 위에 주황 획을 하나씩 그림(0.7초 장면)", `주황 픽셀 ${org}`); window.__orderShot = true; }
     // ⓐ 기억 — 다른 줄 쓰기를 열어도 손글씨 그대로 · 마지막에 자판으로 돌려 둠
     document.querySelectorAll(".line")[1].querySelector("[data-act=write]").click(); await W(1500);
     ok(!!P().querySelector(".hand"), "ⓐ 다시 열어도 손글씨 그대로(기억)");
