@@ -188,5 +188,6 @@
  "why_pause_tail": "중간에 오래 멈췄어요 — 쉬지 말고 조금 더 빨리 끝까지 말해 보세요",
  "quiet_left": "멈췄어요 — {s}초 뒤 끝나요",
  "time_left": "{s}초 남음",
- "rhy_pause_word": "{s} 앞에서 너무 오래 쉬었어요"
+ "rhy_pause_word": "{s} 앞에서 너무 오래 쉬었어요",
+ "cmp_stopped": "여기서 끝남"
 }

@@ -5,13 +5,13 @@
 //  · 재생: 본보기 → 0.4초 → 내 목소리 · 재생 위치 세로 막대 + 지금 음절 강조 · 파형·음절 칸을 누르면 그 줄 그 음절부터
 //  녹음·점수 계산·[내 목소리] 재생(playmine.js playMine)은 그대로 — 여기는 그리기·DTW·비교 화면 안 재생만
 //  (본보기는 sfx.play 그대로 · 내 목소리는 playmine 과 같은 방식: decodeAudioData → BufferSource.start(t, offset) → Gain)
-import { prepare, rhythmScore, loadAlign, isSyl, R_FULL } from "./rhythm.js?v=1007.84";
-import { esc } from "./text.js?v=1007.84";
-import { align } from "./score.js?v=1007.84";
-import { audioCtx } from "./wake.js?v=1007.84";
-import { leadOf, gainOf, FADE, FADE_OUT, voicedEnd } from "./playmine.js?v=1007.84";
-import { speechEnd, wavOf } from "./recstore.js?v=1007.84";
-import * as sfx from "./sfx.js?v=1007.84";
+import { prepare, rhythmScore, loadAlign, isSyl, R_FULL } from "./rhythm.js?v=1007.90";
+import { esc } from "./text.js?v=1007.90";
+import { align } from "./score.js?v=1007.90";
+import { audioCtx } from "./wake.js?v=1007.90";
+import { leadOf, gainOf, FADE, FADE_OUT, voicedEnd } from "./playmine.js?v=1007.90";
+import { speechEnd, wavOf } from "./recstore.js?v=1007.90";
+import * as sfx from "./sfx.js?v=1007.90";
 
 // host 안에 그린다 → { close() } · o = { ep, key, url(본보기), text(본보기 글), blob(내 녹음), heard(들은 말 글자 · 없으면 색 없음), t(문구) }
 // 속도 단계(본부 10-07 · 투덜이 「견본에도 각각」) — 줄마다 자기 속도 · 누를 때마다 1 → 0.9 → 0.75 → 0.6 → 0.5 → 1 · 0.5 아래는 늘이기가 끊겨 뺌 · 고른 값 기억
@@ -40,27 +40,45 @@ export async function openCompare(host, o) {
   if (!mbuf || !ybuf) { host.innerHTML = `<div class="cmpw"><p class="cmpmsg">${esc(t("cmp_none"))}</p></div>`; return { close() { st.alive = false; } }; }
   // 본보기 음절(정렬 파일 · 없으면 말 구간을 고르게 나눈 임시 칸)
   // 음절 칸 = 리듬 점수와 같은 함수(js/rhythm.js prepare) · 본보기 = align.json · 내 목소리 = DTW
-  const { W, msyl, ysyl, ends, groups: rgroups, mLead, mStop, mEnd, mLead0, ref, yLead, yStop } = prepare({ al, key: o.key, text: o.text, mbuf, ybuf }), yGain = gainOf(ybuf);
-  const rh = rhythmScore({ msyl, ysyl, mbuf, ybuf, ends, heard: o.heard, groups: rgroups }); // 리듬이 가장 많이 깎인 음절 = 두 줄 그 칸에 주황 테두리
+  const { W, msyl, ysyl: ysyl0, ends, groups: rgroups, mLead, mStop, mEnd, mLead0, ref, yLead, yStop } = prepare({ al, key: o.key, text: o.text, mbuf, ybuf }), yGain = gainOf(ybuf);
+  const rh = rhythmScore({ msyl, ysyl: ysyl0, mbuf, ybuf, ends, heard: o.heard, groups: rgroups }); // 리듬이 가장 많이 깎인 음절 = 두 줄 그 칸에 주황 테두리
   // 맞음/틀림 — 점수와 같은 정렬(본보기 음절마다 m 맞음 · s 바뀜 · d 빠짐)
   // 내 목소리 칸에는 「들은 글자」(본부 10-06): 바뀜 = 큰 빨강 들은 글자 + 위 작게 흐린 본보기 글자 · 빠짐 = 흐린 점선 칸 · 덧붙은 소리 = 회색 작은 칸(앞 음절 끝에)
   let marks = W.map(() => ""), heardCh = W.map(() => null), extra = [];
+  // 끊긴 녹음이면 들은 말을 문장 「앞부분」에만 맞춤(본부 10-07 r8 — 전체에 맞추면 「거구나」의 「구나」가 뒤 「누구나」에 붙어 빠진 칸이 가운데로 흩어짐)
+  //  앞 k 음절과의 맞음 비율(맞음 ÷ max(k, 들은 수))이 문장 전체보다 높은 가장 짧은 k → 그 뒤는 모두 빠짐(끝 빈자리 점선 칸)
+  let wantK = W.length;
+  if (o.heard) { const Hn = [...String(o.heard).replace(/500/g, "오백")].filter(isSyl).length, rate = ops => ops.filter(x => x.t === "m").length;
+    const full = rate(align(o.text, o.heard).ops) / Math.max(W.length, Hn); let best = full;
+    for (let k = Math.max(1, Math.floor(Hn * 0.6)); k < W.length; k++) { const r = rate(align(W.slice(0, k).join(""), o.heard).ops) / Math.max(k, Hn); if (r > best + 1e-9) { best = r; wantK = k; } } }
   if (o.heard) {
-    const H = [...String(o.heard).replace(/500/g, "오백")].filter(isSyl), ops = align(o.text, o.heard).ops; let k = 0, j = 0;
+    const H = [...String(o.heard).replace(/500/g, "오백")].filter(isSyl), ops = align(wantK < W.length ? W.slice(0, wantK).join("") : o.text, o.heard).ops; let k = 0, j = 0;
     for (const x of ops) {
       if (x.t === "m") { marks[k] = "ok"; heardCh[k] = H[j]; k++; j++; }
       else if (x.t === "s") { marks[k] = "bad"; heardCh[k] = H[j]; k++; j++; }
       else if (x.t === "d") { marks[k] = "miss"; k++; }
       else { extra.push({ after: k - 1, ch: H[j] }); j++; }
     }
+    for (let q = wantK; q < W.length; q++) marks[q] = "miss";
   }
-  const span = Math.max(mStop - mLead, yStop - yLead, 0.5);
+  // 끊긴 녹음(본부 10-07 r8 사진 — 빠진 낱말이 내 파형 앞쪽 좁은 곳에 몰려 두 층으로 겹침) — 끝쪽 빠진 음절(들은 말에 없음)은 내 말 끝 뒤 빈자리에 흐린 점선 칸으로 차례대로
+  //  들은 음절은 [첫 음절 시작, 내 말 끝]에 펴 놓음 · 자리가 모자라면 가로 길이를 늘림 · 내 파형 끝에 「여기서 끝남」 · 점수용 칸(ysyl0)은 그대로
+  let tail = W.length; if (o.heard) while (tail > 0 && marks[tail - 1] === "miss") tail--;
+  const cut = !!o.heard && tail > 0 && tail < W.length;
+  let ysyl = ysyl0, spanX = 0;
+  if (cut) { const L = tail - 1, a = ysyl0[0].s, k0 = (yStop - a) / Math.max(0.05, ysyl0[L].e - a);
+    ysyl = ysyl0.map((x, k) => (k <= L ? { ch: x.ch, s: a + (x.s - a) * k0, e: a + (x.e - a) * k0 } : { ...x }));
+    const md = msyl.slice(tail).map(x => Math.max(0.05, x.e - x.s)), T = md.reduce((p, q) => p + q, 0), base = Math.max(mStop - mLead, yStop - yLead), room = base - (yStop - yLead) - 0.08;
+    if (room < T * 0.8) spanX = yStop - yLead + 0.08 + T * 0.8;
+    const endAll = yLead + Math.max(base, spanX); let t0 = yStop + 0.08; const sc = (endAll - t0) / T;
+    md.forEach((d, i) => { const k = tail + i; ysyl[k] = { ch: ysyl0[k].ch, s: t0, e: t0 + d * sc }; t0 += d * sc; }); }
+  const span = Math.max(mStop - mLead, yStop - yLead, 0.5, spanX);
   const pos = (s, e, lead) => `left:${(100 * (s - lead)) / span}%;width:${(100 * Math.max(0.02, e - s)) / span}%`;
-  const cell = (x, k, lead, mine) => `<span data-k="${k}" class="cel ${marks[k]}${worstSet.has(k) ? " rworst" : ""}" style="${pos(x.s, x.e, lead)}"><span class="tx">${mine && marks[k] === "bad" && heardCh[k] ? `<small class="want">${esc(x.ch)}</small><span class="got">${esc(heardCh[k])}</span>` : esc(x.ch)}</span>${worstK === k ? `<b class="wtip">${rtip}</b>` : ""}</span>`;
+  const cell = (x, k, lead, mine) => `<span data-k="${k}" class="cel ${marks[k]}${mine && cut && k >= tail ? " ghost" : ""}${worstSet.has(k) ? " rworst" : ""}" style="${pos(x.s, x.e, lead)}"><span class="tx">${mine && marks[k] === "bad" && heardCh[k] ? `<small class="want">${esc(x.ch)}</small><span class="got">${esc(heardCh[k])}</span>` : esc(x.ch)}</span>${worstK === k ? `<b class="wtip">${rtip}</b>` : ""}</span>`;
   // 낱말 칸(본부 10-07 투덜이 「글자가 길면 폰트를 알아서 줄여야」) — 10px 로도 음절 칸보다 글이 넓으면 그 줄은 띄어쓰기 낱말 하나 = 칸 하나
   // 칸 안 글자 = 음절별 색 그대로 · 리듬 가장 나쁜 음절 = 그 글자 주황 밑줄 · 틀린 글자 위 작은 본보기 글자 대신 올리면(폰은 손가락) 「들은 말 / 본보기」 말풍선
   const groups = (() => { const g = [], ws = String(o.text).split(/\s+/).filter(Boolean); let k = 0; for (const w of ws) { const n = [...w].filter(isSyl).length; if (!n) continue; g.push(Array.from({ length: n }, (_, i) => k + i)); k += n; } return k === W.length ? g : null; })();
-  const worstK = rh.worst && rh.R < R_FULL ? rh.worst.k : -1, worstSet = new Set(worstK < 0 ? [] : rh.worst.ks || [worstK]); // 긴 줄 = 낱말 통째로 주황
+  const worstK = rh.worst && rh.R < R_FULL && !(cut && rh.worst.k >= tail) ? rh.worst.k : -1, /* 끊긴 녹음의 안 한 말은 「가장 나쁜 곳」으로 안 짚음 */ worstSet = new Set(worstK < 0 ? [] : rh.worst.ks || [worstK]); // 긴 줄 = 낱말 통째로 주황
   // 리듬 가장 나쁜 음절 = 왜인지 숫자로(본부 10-07 투덜이) — 올리면(폰은 손가락) 「नमुना 0.42s · मेरो आवाज 0.21s」 + 길다/짧다/멈춤 문구
   const rw = rh.worst, rtip = worstK < 0 ? "" : `${/^pause/.test(rw.kind) ? `<span>${esc(t("my_voice"))} ⏸ ${(rw.gap ?? 0).toFixed(2)}s</span>` : rw.a != null ? `<span>${esc(t("model"))} ${rw.a.toFixed(2)}s · ${esc(t("my_voice"))} ${rw.b.toFixed(2)}s</span>` : ""}<span>${esc(t("rhy_" + rw.kind, { s: `「${rw.ch}」` }))}</span>`;
   const wcell = (g, wi, syl, lead, mine) => {
@@ -73,6 +91,7 @@ export async function openCompare(host, o) {
   const ticks = []; for (let s = 0; s <= span + 1e-6; s += span > 3 ? 1 : 0.5) ticks.push(`<span style="left:${(100 * s) / span}%">${s.toFixed(1)}</span>`);
   host.innerHTML = `<div class="cmpw">${row("m", t("model"), msyl, mLead)}${row("y", t("my_voice"), ysyl, yLead)}<div class="cruler">${ticks.join("")}</div><div class="cfoot"><button class="craw" data-raw title="lead ${yLead.toFixed(2)} · end ${yStop.toFixed(2)} · ${ybuf.duration.toFixed(2)}s">⬇ ${esc(t("raw_dl"))}</button></div></div>`;
   const rows = [...host.querySelectorAll(".crow")];
+  if (cut) { const m = document.createElement("i"), x = (100 * (yStop - yLead)) / span; m.className = "cstop" + (x > 70 ? " r" : ""); m.style.left = x + "%"; m.innerHTML = `<b>${esc(t("cmp_stopped"))}</b>`; rows[1].querySelector(".cwave").append(m); } // 내 말이 여기서 끝남
   // 글자 크기 자동(본부 10-07) — 두 줄 같은 크기 15px → 가장 좁은 음절 칸에 글이 들어갈 때까지 줄임(최소 10px) · 그래도 넓으면 그 줄만 낱말 칸 · 낱말 칸도 넓으면 그 낱말만 더 줄임(최소 9px)
   const tight = () => {
     const rs = [...host.querySelectorAll(".csyl")], over = r => [...r.querySelectorAll(".cel")].some(c => c.querySelector(".tx").offsetWidth > c.clientWidth);
@@ -102,8 +121,16 @@ export async function openCompare(host, o) {
     }
   };
   const paintWaves = () => { draw(rows[0].querySelector("canvas"), mbuf, mLead, 1, mStop); draw(rows[1].querySelector("canvas"), ybuf, yLead, yGain, yStop); }; // 내 목소리 = [lead, end] 안만(앞·뒤 자른 그대로)
-  paintWaves();
-  const ro = new ResizeObserver(() => { paintWaves(); tight(); }); ro.observe(host);
+  // 빈자리 채우기(본부 10-07 폰 375×812 — 파형·눈금 아래가 ~150px 빔) · 모자라면 줄이기 — 남는 높이만큼 파형 두 줄을 키우고(각 최대 140px) 줄 사이를 조금 벌림 · 넘치면 되돌림
+  const fill = () => { const cw = host.querySelector(".cmpw"), wv = host.querySelector(".cwave"); host.style.removeProperty("--cwh"); host.style.removeProperty("--cgap"); if (!cw || !wv) return;
+    const cs = getComputedStyle(host), free = host.clientHeight - (parseFloat(cs.paddingTop) || 0) - (parseFloat(cs.paddingBottom) || 0) - cw.offsetHeight;
+    if (free < 0) { const h1 = Math.max(22, wv.offsetHeight + Math.floor(free / 2) - 1); host.style.setProperty("--cwh", h1 + "px"); host.style.setProperty("--cgap", "5px"); return; } // 모자라면(660×560 — ⬇ 원본 단추가 잘림) 파형을 줄임(최소 22px)
+    if (free < 12) return;
+    const h0 = wv.offsetHeight, h = Math.min(140, h0 + free * 0.36), rest = free - 2 * (h - h0);
+    host.style.setProperty("--cwh", Math.round(h) + "px"); host.style.setProperty("--cgap", Math.round(Math.min(22, 8 + Math.max(0, rest) * 0.12)) + "px");
+    if (host.scrollHeight > host.clientHeight + 1) { host.style.removeProperty("--cwh"); host.style.removeProperty("--cgap"); } };
+  fill(); paintWaves();
+  let lastH = host.clientHeight; const ro = new ResizeObserver(() => { if (host.clientHeight !== lastH) { lastH = host.clientHeight; fill(); } paintWaves(); tight(); }); ro.observe(host);
   // 재생 — 본보기 = sfx.play(같은 버퍼 · offset) · 내 목소리 = BufferSource.start(t, offset) + Gain(playmine 과 같은 방식)
   const stopPlay = () => { cancelAnimationFrame(st.raf); clearTimeout(st.timer); sfx.stopAll(); try { st.src?.stop(); } catch {} st.src = null; if (st.el) { st.el.onended = st.el.ontimeupdate = null; st.el.pause(); st.elDone?.(); st.el = null; } rows.forEach(r => { r.querySelector(".cbar").hidden = true; r.querySelectorAll(".csyl .now").forEach(b => b.classList.remove("now")); r.classList.remove("on"); }); host.classList.remove("playing"); };
   const follow = (ri, lead, syl, from, t0, posOf) => { // 재생 위치 막대 + 지금 음절 · posOf = 느리게(<audio>)일 때 지금 자리
@@ -180,6 +207,6 @@ export async function openCompare(host, o) {
     stopPlay(); playRow(ri, Math.max(0, from), to).then(() => host.classList.remove("playing")); // 파형 = 거기(그 음절 첫머리)부터 그 줄 속도로 끝까지
   };
   playBoth();
-  window.__cmp = { st, stopPlay, rh, msyl, ysyl, marks, heardCh, extra, span, mLead, yLead, yStop, ybuf, playBoth, playRow }; // 점검 도구용
+  window.__cmp = { st, stopPlay, rh, msyl, ysyl, ysyl0, cut, tail, marks, heardCh, extra, span, mLead, yLead, yStop, ybuf, playBoth, playRow }; // 점검 도구용
   return { close() { st.alive = false; stopPlay(); clearTimeout(st.tipT); if (st.wavUrl) URL.revokeObjectURL(st.wavUrl); ro.disconnect(); host.onclick = null; host.innerHTML = ""; }, replay: playBoth };
 }

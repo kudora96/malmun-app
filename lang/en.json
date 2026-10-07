@@ -188,5 +188,6 @@
  "why_pause_tail": "You paused too long — keep going a bit faster to the end",
  "quiet_left": "Paused — stops in {s}s",
  "time_left": "{s}s left",
- "rhy_pause_word": "paused too long before {s}"
+ "rhy_pause_word": "paused too long before {s}",
+ "cmp_stopped": "Stopped here"
 }

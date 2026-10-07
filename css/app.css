@@ -942,3 +942,13 @@ a{color:inherit;text-decoration:none}
 /* 지우개 그림(본부 10-07) — 단추 글자 앞 · 글자 크기에 맞춤 */
 .write .hbtns .ico{display:inline-block;width:1.15em;height:1.15em;vertical-align:-0.2em;flex:none}
 .write .hbtns [data-act=hclear]{display:inline-flex;align-items:center;justify-content:center;gap:4px;white-space:nowrap}
+
+/* 비교 화면 빈자리 채우기(본부 10-07) — compare.js fill() 이 남는 높이로 --cwh(파형 높이)·--cgap(줄 사이)을 정함 */
+.speak .cmp .crow .cwave{height:var(--cwh,clamp(34px,7dvh,56px))}
+.speak .cmp .cmpw{gap:var(--cgap,8px)}
+
+/* 끊긴 녹음(본부 10-07) — 빠진 끝 음절 = 내 말 뒤 빈자리에 흐린 점선 칸 · 내 파형 끝에 「여기서 끝남」 */
+.crow .csyl .cel.ghost{opacity:.5;border-left-style:dashed;outline:1px dashed var(--line);outline-offset:-2px;border-radius:4px}
+.crow .cwave .cstop{position:absolute;top:0;bottom:0;width:2px;margin-left:-1px;background:var(--badc);opacity:.85;pointer-events:none}
+.crow .cwave .cstop b{position:absolute;top:2px;left:5px;font-size:10px;line-height:1.2;font-weight:700;color:var(--badc);white-space:nowrap;background:var(--bubble);padding:0 3px;border-radius:3px}
+.crow .cwave .cstop.r b{left:auto;right:5px}
