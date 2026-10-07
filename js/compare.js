@@ -5,13 +5,13 @@
 //  · 재생: 본보기 → 0.4초 → 내 목소리 · 재생 위치 세로 막대 + 지금 음절 강조 · 파형·음절 칸을 누르면 그 줄 그 음절부터
 //  녹음·점수 계산·[내 목소리] 재생(playmine.js playMine)은 그대로 — 여기는 그리기·DTW·비교 화면 안 재생만
 //  (본보기는 sfx.play 그대로 · 내 목소리는 playmine 과 같은 방식: decodeAudioData → BufferSource.start(t, offset) → Gain)
-import { prepare, rhythmScore, loadAlign, isSyl } from "./rhythm.js?v=1007.6";
-import { esc } from "./text.js?v=1007.6";
-import { align } from "./score.js?v=1007.6";
-import { audioCtx } from "./wake.js?v=1007.6";
-import { leadOf, gainOf, FADE, FADE_OUT, voicedEnd } from "./playmine.js?v=1007.6";
-import { speechEnd, wavOf } from "./recstore.js?v=1007.6";
-import * as sfx from "./sfx.js?v=1007.6";
+import { prepare, rhythmScore, loadAlign, isSyl } from "./rhythm.js?v=1007.9";
+import { esc } from "./text.js?v=1007.9";
+import { align } from "./score.js?v=1007.9";
+import { audioCtx } from "./wake.js?v=1007.9";
+import { leadOf, gainOf, FADE, FADE_OUT, voicedEnd } from "./playmine.js?v=1007.9";
+import { speechEnd, wavOf } from "./recstore.js?v=1007.9";
+import * as sfx from "./sfx.js?v=1007.9";
 
 // host 안에 그린다 → { close() } · o = { ep, key, url(본보기), text(본보기 글), blob(내 녹음), heard(들은 말 글자 · 없으면 색 없음), t(문구) }
 // 속도 단계(본부 10-07 · 투덜이 「견본에도 각각」) — 줄마다 자기 속도 · 누를 때마다 1 → 0.9 → 0.75 → 0.6 → 0.5 → 1 · 0.5 아래는 늘이기가 끊겨 뺌 · 고른 값 기억
@@ -59,7 +59,7 @@ export async function openCompare(host, o) {
   const cell = (x, k, lead, mine) => `<button data-k="${k}" class="${marks[k]}${rh.worst && rh.worst.k === k && rh.R < 0.9 ? " rworst" : ""}" style="${pos(x.s, x.e, lead)}"><span class="tx">${mine && marks[k] === "bad" && heardCh[k] ? `<small class="want">${esc(x.ch)}</small><span class="got">${esc(heardCh[k])}</span>` : esc(x.ch)}</span></button>`;
   const extras = (syl, lead) => extra.map(x => { const at = x.after >= 0 ? syl[x.after].e : syl[0].s, [a0, a1] = x.after >= 0 ? [at - 0.03, at + 0.05] : [Math.max(lead, at - 0.08), at]; return `<span class="add" style="${pos(a0, a1, lead)}">${esc(x.ch)}</span>`; }).join("");
   const rkey = c => (c === "m" ? "m" : "y");
-  const row = (cls, lab, syl, lead) => `<div class="crow ${cls}"><div class="clab"><span>${esc(lab)}</span><button class="crate" data-rate="${cls}" aria-pressed="${getRate(rkey(cls)) !== 1}" aria-label="${esc(t("speed"))}">${rateTxt(getRate(rkey(cls)))}</button></div><div class="cwave"><canvas></canvas><i class="cbar" hidden></i></div><div class="csyl ko" lang="ko">${syl.map((x, k) => cell(x, k, lead, cls === "y")).join("")}${cls === "y" ? extras(syl, lead) : ""}</div></div>`;
+  const row = (cls, lab, syl, lead) => `<div class="crow ${cls}"><div class="clab"><button class="cplay" data-play="${cls}">▶ ${esc(lab)}</button><button class="crate" data-rate="${cls}" aria-pressed="${getRate(rkey(cls)) !== 1}" aria-label="${esc(t("speed"))}">${rateTxt(getRate(rkey(cls)))}</button></div><div class="cwave"><canvas></canvas><i class="cbar" hidden></i></div><div class="csyl ko" lang="ko">${syl.map((x, k) => cell(x, k, lead, cls === "y")).join("")}${cls === "y" ? extras(syl, lead) : ""}</div></div>`;
   const ticks = []; for (let s = 0; s <= span + 1e-6; s += span > 3 ? 1 : 0.5) ticks.push(`<span style="left:${(100 * s) / span}%">${s.toFixed(1)}</span>`);
   host.innerHTML = `<div class="cmpw">${row("m", t("model"), msyl, mLead)}${row("y", t("my_voice"), ysyl, yLead)}<div class="cruler">${ticks.join("")}</div><div class="cfoot"><button class="craw" data-raw title="lead ${yLead.toFixed(2)} · end ${yStop.toFixed(2)} · ${ybuf.duration.toFixed(2)}s">⬇ ${esc(t("raw_dl"))}</button></div></div>`;
   const rows = [...host.querySelectorAll(".crow")];
@@ -92,7 +92,7 @@ export async function openCompare(host, o) {
   paintWaves();
   const ro = new ResizeObserver(() => { paintWaves(); tight(); }); ro.observe(host);
   // 재생 — 본보기 = sfx.play(같은 버퍼 · offset) · 내 목소리 = BufferSource.start(t, offset) + Gain(playmine 과 같은 방식)
-  const stopPlay = () => { cancelAnimationFrame(st.raf); clearTimeout(st.timer); sfx.stopAll(); try { st.src?.stop(); } catch {} st.src = null; if (st.el) { st.el.onended = st.el.ontimeupdate = null; st.el.pause(); st.elDone?.(); st.el = null; } rows.forEach(r => { r.querySelector(".cbar").hidden = true; r.querySelectorAll(".csyl button").forEach(b => b.classList.remove("now")); r.classList.remove("on"); }); host.classList.remove("playing"); };
+  const stopPlay = () => { clearInterval(st.fadeT); cancelAnimationFrame(st.raf); clearTimeout(st.timer); sfx.stopAll(); try { st.src?.stop(); } catch {} st.src = null; if (st.el) { st.el.onended = st.el.ontimeupdate = null; st.el.pause(); st.elDone?.(); st.el = null; } rows.forEach(r => { r.querySelector(".cbar").hidden = true; r.querySelectorAll(".csyl button").forEach(b => b.classList.remove("now")); r.classList.remove("on"); }); host.classList.remove("playing"); };
   const follow = (ri, lead, syl, from, t0, posOf) => { // 재생 위치 막대 + 지금 음절 · posOf = 느리게(<audio>)일 때 지금 자리
     const r = rows[ri], bar = r.querySelector(".cbar"), bs = [...r.querySelectorAll(".csyl button")];
     r.classList.add("on"); bar.hidden = false;
@@ -104,16 +104,20 @@ export async function openCompare(host, o) {
     };
     step();
   };
-  const playRow = (ri, from, to) => new Promise(res => { // to = 끝(없으면 말 끝까지) — 음절 칸을 누르면 그 음절만(앞뒤 0.03초)
+  const playRow = (ri, from, to, opt = {}) => new Promise(res => { // opt = { rate, fade } — 음절 칸 한 글자 = 0.6배 · 앞뒤 25ms 페이드(본부 10-07) // to = 끝(없으면 말 끝까지) — 음절 칸을 누르면 그 음절만(앞뒤 0.03초)
     if (!st.alive) return res(false);
     if (window.__cmp) window.__cmp.lastPlay = { ri, from, to }; // 점검 도구용(그림 칸과 트는 구간이 같은 기준인지)
     host.classList.add("playing");
-    const rate = getRate(ri ? "y" : "m");
+    const rate = opt.rate ?? getRate(ri ? "y" : "m");
     if (rate !== 1) { // 느리게(투덜이 10-06 허락 · 10-07 단계 늘림) — 비교 화면 안에서만(투덜이 10-06 허락) — 비교 화면 안에서만 · 음높이 그대로(<audio>.preservesPitch) · 본보기 = 그 mp3 · 내 목소리 = WAV(내려받기와 같은 함수 · gainOf 크기)
       const url = ri ? (st.wavUrl ||= URL.createObjectURL(wavOf(ybuf, 0, ybuf.duration, yGain))) : o.url, end = to ?? (ri ? yStop : mStop);
       const el = (st.el = new Audio(url)); el.preservesPitch = el.mozPreservesPitch = el.webkitPreservesPitch = true; el.playbackRate = rate; el.volume = Math.min(1, window.__sfxVolume ?? 1);
       const done = () => { if (st.el === el) { st.el = null; el.pause(); } st.elDone = null; cancelAnimationFrame(st.raf); rows[ri].classList.remove("on"); rows[ri].querySelector(".cbar").hidden = true; res(true); };
       st.elDone = done;
+      if (opt.fade) { // 한 글자: 정확히 그 구간만(벽시계로 끊음) · 앞뒤 25ms 볼륨 페이드 · 뒤 글자로 넘치지 않게
+        const V = el.volume, F = opt.fade * 1000, ms = ((end - from) / rate) * 1000; el.volume = 0;
+        el.addEventListener("playing", () => { const t0 = performance.now(); st.fadeT = setInterval(() => { const dt = performance.now() - t0; el.volume = Math.max(0, Math.min(V, (V * Math.min(dt, ms - dt)) / F)); if (dt >= ms) { clearInterval(st.fadeT); done(); } }, 5); }, { once: true });
+      }
       el.ontimeupdate = () => { if (el.currentTime >= end) done(); };
       el.onended = done;
       const go = () => { el.currentTime = from; el.play().then(() => follow(ri, ri ? yLead : mLead, ri ? ysyl : msyl, from, 0, () => { if (el.currentTime >= end) done(); return el.currentTime; })).catch(done); };
@@ -148,15 +152,22 @@ export async function openCompare(host, o) {
       a.href = u; a.download = `malmun_raw_${o.key}_${new Date().toISOString().replace(/[:.]/g, "-")}.${ext}`; document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(u), 5000);
       return;
     }
+    const pb = e.target.closest("[data-play]");
+    if (pb) { const ri = pb.dataset.play === "m" ? 0 : 1, on = rows[ri].classList.contains("on"); stopPlay(); if (!on) playRow(ri, ri ? yLead : mLead).then(() => host.classList.remove("playing")); return; } // ▶ 그 줄 전체(그 줄 속도) · 다시 누르면 멈춤
     const r = e.target.closest(".crow"); if (!r) return;
     const ri = rows.indexOf(r), lead = ri ? yLead : mLead, syl = ri ? ysyl : msyl;
     let from = lead, to;
     const b = e.target.closest(".csyl button");
-    if (b) { const x = syl[+b.dataset.k]; from = Math.max(0, x.s - 0.03); to = x.e + 0.03; } // 그 음절만
+    let opt = {};
+    if (b) { // 음절 칸 = 그 한 글자만 0.6배 천천히(줄 속도와 상관없이 · 음높이 그대로 · 앞뒤 25ms 페이드 · 끝 = 다음 음절 20ms 앞까지) · 진단 스위치 malmun.sylMode='from' = 그 글자부터 끝까지(줄 속도)
+      const k = +b.dataset.k, x = syl[k], nx = syl[k + 1]; let mode = "one"; try { mode = localStorage.getItem("malmun.sylMode") || "one"; } catch {}
+      from = Math.max(0, x.s - 0.02);
+      if (mode === "from") to = undefined; else { to = nx ? Math.min(x.e, nx.s - 0.02) : x.e; opt = { rate: 0.6, fade: 0.025 }; }
+    }
     else { const w = r.querySelector(".cwave").getBoundingClientRect(); from = lead + (span * Math.max(0, Math.min(1, (e.clientX - w.left) / w.width))); const k = syl.findIndex(x => from < x.e); if (k >= 0) from = Math.min(from, syl[k].s); }
-    stopPlay(); playRow(ri, Math.max(0, from), to).then(() => host.classList.remove("playing"));
+    stopPlay(); playRow(ri, Math.max(0, from), to, opt).then(() => host.classList.remove("playing"));
   };
   playBoth();
-  window.__cmp = { st, rh, msyl, ysyl, marks, heardCh, extra, span, mLead, yLead, yStop, ybuf, playBoth, playRow }; // 점검 도구용
+  window.__cmp = { st, stopPlay, rh, msyl, ysyl, marks, heardCh, extra, span, mLead, yLead, yStop, ybuf, playBoth, playRow }; // 점검 도구용
   return { close() { st.alive = false; stopPlay(); if (st.wavUrl) URL.revokeObjectURL(st.wavUrl); ro.disconnect(); host.onclick = null; host.innerHTML = ""; }, replay: playBoth };
 }

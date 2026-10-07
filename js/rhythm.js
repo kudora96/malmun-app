@@ -5,10 +5,10 @@
 //      − 0.05 (말 전체 길이가 본보기의 0.6배 아래 · 1.8배 위)
 //  · 최종 점수 = 글자 점수(score.js) × f(R): R ≥ 0.90 → 1 · 0.5 ≤ R < 0.9 → 0.90 + 0.10 × (R − 0.5)/0.4 · R < 0.5 → 0.88
 //  녹음·재생은 그대로 — 받은 녹음(blob)을 풀어 재기만
-import { audioCtx } from "./wake.js?v=1007.6";
-import { leadOf, voicedEnd } from "./playmine.js?v=1007.6";
-import { speechEnd } from "./recstore.js?v=1007.6";
-import * as sfx from "./sfx.js?v=1007.6";
+import { audioCtx } from "./wake.js?v=1007.9";
+import { leadOf, voicedEnd } from "./playmine.js?v=1007.9";
+import { speechEnd } from "./recstore.js?v=1007.9";
+import * as sfx from "./sfx.js?v=1007.9";
 
 export const FR = 0.02; // 특징 칸 20ms
 const alignCache = new Map();
@@ -74,6 +74,25 @@ export function dtwMap(A, B) {
   return map;
 }
 
+// 음절 최소 길이(본부 10-07 — DTW 가 「도」 칸을 0 폭 가까이 찌그러뜨리고 옆 칸이 넓어짐 → 리듬도 틀어짐)
+//   칸마다 최소 = max(본보기 그 음절 길이의 25%, 40ms) · 모자란 칸은 최소로 늘리고 나머지 칸을 (최소를 넘는 만큼에 비례해) 줄임 · 첫 시작·끝 끝은 그대로
+function minLen(ys, ms) {
+  const n = ys.length; if (n < 2) return ys;
+  const T = ys[n - 1].e - ys[0].s, mins = ms.map(x => Math.max(0.25 * (x.e - x.s), 0.04));
+  const sumMin = mins.reduce((a, b) => a + b, 0); if (!(T > sumMin)) return ys;
+  let d = ys.map(x => Math.max(0, x.e - x.s));
+  for (let it = 0; it < 6; it++) {
+    const short = d.map((v, k) => v < mins[k] - 1e-6); if (!short.some(Boolean)) break;
+    const need = d.reduce((a, v, k) => a + (short[k] ? mins[k] - v : 0), 0), spare = d.reduce((a, v, k) => a + (short[k] ? 0 : v - mins[k]), 0);
+    if (!(spare > 0)) break;
+    d = d.map((v, k) => (short[k] ? mins[k] : v - ((v - mins[k]) * need) / spare));
+  }
+  const out = []; let t = ys[0].s;
+  for (let k = 0; k < n; k++) { out.push({ ch: ys[k].ch, s: t, e: t + d[k] }); t += d[k]; }
+  out[n - 1].e = ys[n - 1].e;
+  return out;
+}
+
 // 본보기·내 녹음 → 음절 칸 둘(비교 화면과 리듬 점수가 같은 칸을 씀)
 export function prepare({ al, key, text, mbuf, ybuf }) {
   const W = [...String(text)].filter(isSyl);
@@ -85,7 +104,8 @@ export function prepare({ al, key, text, mbuf, ybuf }) {
   const ref = Math.max(0, mEnd - mLead0), yLead = leadOf(ybuf, 0.08, ref), yStop = Math.max(yLead + 0.1, voicedEnd(ybuf, 0.12, ref));
   const A = feats(mbuf.getChannelData(0), mbuf.sampleRate, mLead, mStop), B = feats(ybuf.getChannelData(0), ybuf.sampleRate, yLead, yStop), map = dtwMap(A, B);
   const toY = s => { const k = Math.max(0, Math.min(A.length - 1, Math.round((s - mLead) / FR))); return yLead + (map[k] ?? 0) * FR; };
-  const ysyl = msyl.map((x, k) => ({ ch: x.ch, s: toY(x.s), e: k < msyl.length - 1 ? toY(msyl[k + 1].s) : Math.min(yStop, toY(x.e) + 0.02) }));
+  const ysyl0 = msyl.map((x, k) => ({ ch: x.ch, s: toY(x.s), e: k < msyl.length - 1 ? toY(msyl[k + 1].s) : Math.min(yStop, toY(x.e) + 0.02) }));
+  const ysyl = minLen(ysyl0, msyl);
   return { W, msyl, ysyl, aligned, mLead, mStop, mEnd, mLead0, ref, yLead, yStop };
 }
 

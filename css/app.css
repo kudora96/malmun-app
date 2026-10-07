@@ -810,3 +810,7 @@ a{color:inherit;text-decoration:none}
 .v9body .sayb .sbtns .mrate{position:static;align-self:center}
 .speak .sbtns .mrate[aria-pressed=true],.v9body .sayb .sbtns .mrate[aria-pressed=true]{background:var(--hi);color:var(--on-hi);border-color:var(--hi)}
 .speak .sbtns .mrate:active,.v9body .sayb .sbtns .mrate:active{transform:translateY(1px);box-shadow:none}
+/* 비교 화면 줄 이름표 = ▶ 그 줄 전체 듣기 단추(본부 10-07) · 재생 중 = 칠 */
+.crow .clab .cplay{padding:0 8px;min-height:18px;border:1px solid var(--line);border-radius:999px;background:var(--card);box-shadow:0 1px 0 var(--line);font-size:10px;font-weight:700;color:var(--ink);line-height:16px}
+.crow.on .clab .cplay{background:var(--hi);color:var(--on-hi);border-color:var(--hi)}
+.crow .clab .cplay:active{transform:translateY(1px);box-shadow:none}

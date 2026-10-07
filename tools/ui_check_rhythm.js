@@ -17,7 +17,7 @@
   for (const f of ["r1", "r2", "r3"]) {
     const r = await fetch(`/tools/_rec/${f}.webm`); if (!r.ok) { res.push(`· ${f}.webm 없음(건너뜀)`); continue; }
     const yb = await new OfflineAudioContext(1, 48000, 48000).decodeAudioData(await r.arrayBuffer()), d = R(yb);
-    res.push(`· 실제 녹음 ${f}: R ${d.R.toFixed(3)} · 배수 ${(withRhythm(100, d.R))}/100 · 가장 많이 깎인 곳 ${d.worst ? `${d.worst.kind} 「${d.worst.ch}」` : "없음"} · 내 음절 ${d.pr.ysyl.map(x => x.ch + x.s.toFixed(2)).join(" ")}`);
+    res.push(`· 실제 녹음 ${f}: R ${d.R.toFixed(3)} · 배수 ${(withRhythm(100, d.R))}/100 · 가장 많이 깎인 곳 ${d.worst ? `${d.worst.kind} 「${d.worst.ch}」` : "없음"} · 내 음절 ${d.pr.ysyl.map(x => x.ch + x.s.toFixed(2)).join(" ")} · 가장 짧은 칸 ${Math.min(...d.pr.ysyl.map(x => x.e - x.s)).toFixed(3)}초`);
   }
   ok(withRhythm(100, 0.8) === 97 && withRhythm(100, 0.7) === 95 && withRhythm(100, 0.6) === 92 && withRhythm(100, 0.899) === 99 && withRhythm(100, 0.9) === 100 && withRhythm(100, 0.95) === 100 && withRhythm(100, 0.3) === 88 && withRhythm(80, 0.95) === 80, "ⓔ 배수 식(내림: 100·0.8→97 · 0.7→95 · 0.6→92 · 0.899→99 · ≥0.9→그대로 · <0.5→88)", [0.8, 0.7, 0.6, 0.899, 0.9].map(r => withRhythm(100, r)).join(","));
   const bad = res.filter(x => x.startsWith("✗")).length, out = `${bad ? "✗" : "✓"} 리듬 ${res.filter(x => x.startsWith("✓")).length}/${res.filter(x => /^[✓✗]/.test(x)).length}\n` + res.join("\n");

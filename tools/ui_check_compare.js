@@ -28,17 +28,26 @@
     const sizes = new Set([...p.querySelectorAll(".csyl button .tx")].map(x => getComputedStyle(x.querySelector(".got") || x).fontSize));
     let overlap = 0; p.querySelectorAll(".csyl").forEach(row => { const tx = [...row.querySelectorAll("button .tx")].map(x => x.getBoundingClientRect()); for (let i = 0; i < tx.length; i++) for (let j = i + 1; j < tx.length; j++) { const a = tx[i], c = tx[j]; if (a.right > c.left + 2 && c.right > a.left + 2 && a.bottom > c.top + 2 && c.bottom > a.top + 2) overlap++; } });
     ok(sizes.size === 1 && overlap === 0, "음절 글자 한 크기 · 겹침 0(좁은 칸은 위·아래 두 층)", `${[...sizes].join(",")} · 겹침 ${overlap} · 좁은 칸 ${p.querySelectorAll(".csyl button.narrow").length}`);
-    // 음절 누르기 = 그 음절만(앞뒤 0.03초)
-    const log0 = (window.__sfxLog = []).length; p.querySelector(".crow.m .csyl button[data-k='3']").click(); await W(1500);
-    const st = window.__sfxLog.find(x => x.ev === "시작"), en = window.__sfxLog.find(x => x.ev === "끝" || x.ev === "멈춤"), s3 = c.msyl[3];
-    ok(st && en && Math.abs(en.pos - (s3.e + 0.03)) < 0.08, "음절 칸 누름 = 그 음절만(「읽」 s−0.03 ~ e+0.03)", en ? `끝 ${en.pos.toFixed(2)} · 기대 ${(s3.e + 0.03).toFixed(2)}` : "기록 없음");
+    // 음절 칸 = 그 한 글자만 0.6배(본부 10-07) — 구간 s−0.02 ~ min(e, 다음 s − 0.02) · 음높이 그대로 · 벽시계로 끊음
+    { try { localStorage.removeItem("malmun.sylMode"); } catch {}
+      const s3 = c.msyl[3], s4 = c.msyl[4], t1 = performance.now(); p.querySelector(".crow.m .csyl button[data-k='3']").click(); await W(150);
+      const el = c.st.el, lp = c.lastPlay, a = [el?.playbackRate, el?.preservesPitch]; let endMs = 0; for (let k = 0; k < 40; k++) { if (!c.st.el) { endMs = performance.now() - t1; break; } await W(50); }
+      const want = (Math.min(s3.e, s4.s - 0.02) - (s3.s - 0.02)) / 0.6 * 1000;
+      ok(a[0] === 0.6 && a[1] === true && Math.abs(lp.from - (s3.s - 0.02)) < 0.005 && Math.abs(lp.to - Math.min(s3.e, s4.s - 0.02)) < 0.005 && endMs > 0 && endMs < want + 400, "음절 칸 = 그 한 글자만 0.6배(「읽」 · 다음 글자 20ms 앞에서 끊음)", `rate ${a[0]} · ${lp.from.toFixed(2)}~${lp.to.toFixed(2)} · ${Math.round(endMs)}ms(기대 ~${Math.round(want)})`);
+      try { localStorage.setItem("malmun.sylMode", "from"); } catch {}
+      p.querySelector(".crow.m .csyl button[data-k='3']").click(); await W(150); const lp2 = c.lastPlay;
+      ok(lp2.to === undefined && Math.abs(lp2.from - (s3.s - 0.02)) < 0.005, "진단 스위치 sylMode='from' = 그 글자부터 끝까지", `${lp2.from.toFixed(2)}~끝`);
+      try { localStorage.removeItem("malmun.sylMode"); } catch {} window.__cmp.stopPlay(); await W(100); }
+    // ▶ 그 줄 전체 — 누르면 처음부터 · 재생 중 칠 · 다시 누르면 멈춤
+    { const pm = p.querySelector(".crow.m [data-play]"); pm.click(); await W(250); const on1 = p.querySelector(".crow.m").classList.contains("on"), lp = c.lastPlay; pm.click(); await W(150); const on2 = p.querySelector(".crow.m").classList.contains("on");
+      ok(/\p{L}/u.test(pm.textContent) && on1 && Math.abs(lp.from - c.mLead) < 0.005 && lp.to === undefined && !on2, "▶ 줄 전체 듣기(처음부터 · 칠) → 다시 누르면 멈춤", `${pm.textContent} · ${on1}/${on2}`); }
     // 줄마다 속도(본부 10-07) — 본보기 줄 단추 두 번 = 0.75× · 그 줄 음절 누르면 <audio> rate 0.75 · 음높이 그대로 · 내 목소리 줄은 1× 그대로(보통 재생) · 기억됨
     { try { localStorage.removeItem("malmun.rate.m"); localStorage.removeItem("malmun.rate.y"); } catch {}
       const rm = () => p.querySelector(".crow.m [data-rate]"), ry = () => p.querySelector(".crow.y [data-rate]");
       rm().click(); await W(50); rm().click(); await W(50);
-      const t1 = performance.now(); p.querySelector(".crow.m .csyl button[data-k='3']").click(); await W(300);
-      const el = c.st.el, a = [el?.playbackRate, el?.preservesPitch]; let endMs = 0; for (let k = 0; k < 30; k++) { if (!c.st.el) { endMs = performance.now() - t1; break; } await W(100); }
-      p.querySelector(".crow.y .csyl button[data-k='3']").click(); await W(200); const yEl = !!c.st.el;
+      const t1 = performance.now(); p.querySelector(".crow.m [data-play]").click(); await W(300);
+      const el = c.st.el, a = [el?.playbackRate, el?.preservesPitch]; let endMs = 1; c.st.el?.pause(); window.__cmp.st.elDone?.();
+      p.querySelector(".crow.y [data-play]").click(); await W(200); const yEl = !!c.st.el; p.querySelector(".crow.y [data-play]").click(); await W(100);
       ok(/ 0\.75×$/.test(rm().textContent) && /\p{L}/u.test(rm().textContent) && rm().getAttribute("aria-pressed") === "true" && / 1×$/.test(ry().textContent) && a[0] === 0.75 && a[1] === true && endMs > 0 && !yEl && localStorage.getItem("malmun.rate.m") === "0.75", "줄마다 속도: 본보기 0.75×(음높이 그대로 · 칠 · 기억) · 내 목소리 1×(보통 재생)", `본보기 ${rm().textContent} rate ${a[0]} pitch ${a[1]} ${Math.round(endMs)}ms · 내 ${ry().textContent}`);
       for (let k = 0; k < 3; k++) { rm().click(); await W(30); }
       ok(/ 1×$/.test(rm().textContent) && rm().getAttribute("aria-pressed") === "false", "단계 차례 0.75 → 0.6 → 0.5 → 1 (1× = 칠 없음)", rm().textContent); }
@@ -64,7 +73,7 @@
       const posOk = cells.every((el, k) => Math.abs(parseFloat(el.style.left) - (100 * (c2.ysyl[k].s - c2.yLead)) / c2.span) < 0.5);
       cells[3].click(); await W(300);
       const lp = c2.lastPlay, yd = c2.ybuf.getChannelData(0), ysr = c2.ybuf.sampleRate, rms = (a, z) => { let q = 0; for (let i = Math.round(a * ysr); i < Math.round(z * ysr); i++) q += yd[i] * yd[i]; return Math.sqrt(q / Math.max(1, Math.round((z - a) * ysr))); };
-      ok(c2.yLead > 0.9 && posOk && lp?.ri === 1 && Math.abs(lp.from - (c2.ysyl[3].s - 0.03)) < 0.005 && rms(c2.ysyl[3].s, c2.ysyl[3].e) > 5 * rms(0.2, 0.8), "앞 1초 잡음 녹음: x=0 = lead · 칸 자리 = (s−lead)/전체 · 「읽」 칸 누름 = 그 칸 구간(말소리 있음)", `lead ${c2.yLead.toFixed(2)} · 칸 ${c2.ysyl[3].s.toFixed(2)}~${c2.ysyl[3].e.toFixed(2)} · 튼 곳 ${lp?.from.toFixed(2)}`);
+      ok(c2.yLead > 0.9 && posOk && lp?.ri === 1 && Math.abs(lp.from - (c2.ysyl[3].s - 0.02)) < 0.005 && rms(c2.ysyl[3].s, c2.ysyl[3].e) > 5 * rms(0.2, 0.8), "앞 1초 잡음 녹음: x=0 = lead · 칸 자리 = (s−lead)/전체 · 「읽」 칸 누름 = 그 칸 구간(말소리 있음)", `lead ${c2.yLead.toFixed(2)} · 칸 ${c2.ysyl[3].s.toFixed(2)}~${c2.ysyl[3].e.toFixed(2)} · 튼 곳 ${lp?.from.toFixed(2)}`);
       b.click(); await W(200); }
   } catch (e) { res.push("✗ 점검 도중 오류: " + e.message); }
   const out = `${innerWidth}x${innerHeight}\n` + res.join("\n"); console.log(out); return out;
