@@ -5,10 +5,10 @@
 //      − 0.05 (말 전체 길이가 본보기의 0.6배 아래 · 1.8배 위)
 //  · 최종 점수 = 글자 점수(score.js) × f(R): R ≥ 0.90 → 1 · 0.5 ≤ R < 0.9 → 0.90 + 0.10 × (R − 0.5)/0.4 · R < 0.5 → 0.88
 //  녹음·재생은 그대로 — 받은 녹음(blob)을 풀어 재기만
-import { audioCtx } from "./wake.js?v=1007.3";
-import { leadOf, voicedEnd } from "./playmine.js?v=1007.3";
-import { speechEnd } from "./recstore.js?v=1007.3";
-import * as sfx from "./sfx.js?v=1007.3";
+import { audioCtx } from "./wake.js?v=1007.6";
+import { leadOf, voicedEnd } from "./playmine.js?v=1007.6";
+import { speechEnd } from "./recstore.js?v=1007.6";
+import * as sfx from "./sfx.js?v=1007.6";
 
 export const FR = 0.02; // 특징 칸 20ms
 const alignCache = new Map();

@@ -1,6 +1,6 @@
-import { t, lang, langName, LANGS, setLang } from "./i18n.js?v=1007.3";
-import { VERSION } from "./version.js?v=1007.3";
-import { esc } from "./text.js?v=1007.3";
+import { t, lang, langName, LANGS, setLang } from "./i18n.js?v=1007.6";
+import { VERSION } from "./version.js?v=1007.6";
+import { esc } from "./text.js?v=1007.6";
 
 const svg = (d, fill) => `<svg class="ico" viewBox="0 0 24 24" ${fill ? 'fill="currentColor"' : 'fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"'} aria-hidden="true">${d}</svg>`;
 export const I = {

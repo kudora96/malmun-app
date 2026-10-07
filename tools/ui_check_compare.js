@@ -39,9 +39,9 @@
       const t1 = performance.now(); p.querySelector(".crow.m .csyl button[data-k='3']").click(); await W(300);
       const el = c.st.el, a = [el?.playbackRate, el?.preservesPitch]; let endMs = 0; for (let k = 0; k < 30; k++) { if (!c.st.el) { endMs = performance.now() - t1; break; } await W(100); }
       p.querySelector(".crow.y .csyl button[data-k='3']").click(); await W(200); const yEl = !!c.st.el;
-      ok(rm().textContent === "0.75×" && rm().getAttribute("aria-pressed") === "true" && ry().textContent === "1×" && a[0] === 0.75 && a[1] === true && endMs > 0 && !yEl && localStorage.getItem("malmun.rate.m") === "0.75", "줄마다 속도: 본보기 0.75×(음높이 그대로 · 칠 · 기억) · 내 목소리 1×(보통 재생)", `본보기 ${rm().textContent} rate ${a[0]} pitch ${a[1]} ${Math.round(endMs)}ms · 내 ${ry().textContent}`);
+      ok(/ 0\.75×$/.test(rm().textContent) && /\p{L}/u.test(rm().textContent) && rm().getAttribute("aria-pressed") === "true" && / 1×$/.test(ry().textContent) && a[0] === 0.75 && a[1] === true && endMs > 0 && !yEl && localStorage.getItem("malmun.rate.m") === "0.75", "줄마다 속도: 본보기 0.75×(음높이 그대로 · 칠 · 기억) · 내 목소리 1×(보통 재생)", `본보기 ${rm().textContent} rate ${a[0]} pitch ${a[1]} ${Math.round(endMs)}ms · 내 ${ry().textContent}`);
       for (let k = 0; k < 3; k++) { rm().click(); await W(30); }
-      ok(rm().textContent === "1×" && rm().getAttribute("aria-pressed") === "false", "단계 차례 0.75 → 0.6 → 0.5 → 1 (1× = 칠 없음)", rm().textContent); }
+      ok(/ 1×$/.test(rm().textContent) && rm().getAttribute("aria-pressed") === "false", "단계 차례 0.75 → 0.6 → 0.5 → 1 (1× = 칠 없음)", rm().textContent); }
     b.click(); await W(300);
     ok(p.querySelector(".cmp").hidden && !p.querySelector(".task").offsetParent === false && b.getAttribute("aria-pressed") === "false", "다시 누름 → 원래 말하기 화면");
     b.click(); await W(1200); p.querySelectorAll(".segnav button")[0].click(); await W(400);

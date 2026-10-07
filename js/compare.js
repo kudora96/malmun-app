@@ -5,13 +5,13 @@
 //  · 재생: 본보기 → 0.4초 → 내 목소리 · 재생 위치 세로 막대 + 지금 음절 강조 · 파형·음절 칸을 누르면 그 줄 그 음절부터
 //  녹음·점수 계산·[내 목소리] 재생(playmine.js playMine)은 그대로 — 여기는 그리기·DTW·비교 화면 안 재생만
 //  (본보기는 sfx.play 그대로 · 내 목소리는 playmine 과 같은 방식: decodeAudioData → BufferSource.start(t, offset) → Gain)
-import { prepare, rhythmScore, loadAlign, isSyl } from "./rhythm.js?v=1007.3";
-import { esc } from "./text.js?v=1007.3";
-import { align } from "./score.js?v=1007.3";
-import { audioCtx } from "./wake.js?v=1007.3";
-import { leadOf, gainOf, FADE, FADE_OUT, voicedEnd } from "./playmine.js?v=1007.3";
-import { speechEnd, wavOf } from "./recstore.js?v=1007.3";
-import * as sfx from "./sfx.js?v=1007.3";
+import { prepare, rhythmScore, loadAlign, isSyl } from "./rhythm.js?v=1007.6";
+import { esc } from "./text.js?v=1007.6";
+import { align } from "./score.js?v=1007.6";
+import { audioCtx } from "./wake.js?v=1007.6";
+import { leadOf, gainOf, FADE, FADE_OUT, voicedEnd } from "./playmine.js?v=1007.6";
+import { speechEnd, wavOf } from "./recstore.js?v=1007.6";
+import * as sfx from "./sfx.js?v=1007.6";
 
 // host 안에 그린다 → { close() } · o = { ep, key, url(본보기), text(본보기 글), blob(내 녹음), heard(들은 말 글자 · 없으면 색 없음), t(문구) }
 // 속도 단계(본부 10-07 · 투덜이 「견본에도 각각」) — 줄마다 자기 속도 · 누를 때마다 1 → 0.9 → 0.75 → 0.6 → 0.5 → 1 · 0.5 아래는 늘이기가 끊겨 뺌 · 고른 값 기억
@@ -19,9 +19,21 @@ export const RATES = [1, 0.9, 0.75, 0.6, 0.5];
 const rateKey = k => `malmun.rate.${k}`;
 export const getRate = k => { try { const v = parseFloat(localStorage.getItem(rateKey(k))); return RATES.includes(v) ? v : 1; } catch { return 1; } };
 const setRate = (k, v) => { try { localStorage.setItem(rateKey(k), String(v)); } catch {} };
-const rateTxt = v => `${v}×`;
+let rateWord = ""; // 「गति」 — 단추엔 글자가 꼭 있게(아이콘만 단추 없음 원칙)
+const rateTxt = v => `${rateWord ? rateWord + " " : ""}${v}×`;
+// 본보기 느리게 틀기(투덜이 10-07 허락 — 말하기 화면·설명 말해보기 「▶ नमुना」 도 본보기 속도) · 음높이 그대로 · 1× 일 땐 쓰지 않음(원래 재생 그대로)
+export function playSlow(url, rate) {
+  const el = new Audio(url); el.preservesPitch = el.mozPreservesPitch = el.webkitPreservesPitch = true; el.playbackRate = rate; el.volume = Math.min(1, window.__sfxVolume ?? 1);
+  let resolve; const done = new Promise(r => (resolve = r)), end = () => resolve(true);
+  el.onended = el.onerror = end; el.play().catch(end);
+  return { el, done, pause() { el.pause(); end(); }, get playing() { return !el.paused && !el.ended; } };
+}
+export const rateLabel = v => rateTxt(v);
+export const setRateWord = w => { rateWord = w || ""; };
+export const nextRate = k => { const nv = RATES[(RATES.indexOf(getRate(k)) + 1) % RATES.length]; setRate(k, nv); return nv; };
 export async function openCompare(host, o) {
   const { t } = o, ctx = audioCtx(), st = { alive: true, raf: 0, src: null, timer: 0 };
+  setRateWord(t("speed"));
   host.innerHTML = `<div class="cmpw"><p class="cmpmsg">…</p></div>`;
   const [al, mbuf, ybuf] = await Promise.all([loadAlign(o.ep), sfx.load(o.url), o.blob.arrayBuffer().then(ab => ctx.decodeAudioData(ab)).catch(() => null)]);
   if (!st.alive) return { close() {} };
