@@ -5,13 +5,13 @@
 //  · 재생: 본보기 → 0.4초 → 내 목소리 · 재생 위치 세로 막대 + 지금 음절 강조 · 파형·음절 칸을 누르면 그 줄 그 음절부터
 //  녹음·점수 계산·[내 목소리] 재생(playmine.js playMine)은 그대로 — 여기는 그리기·DTW·비교 화면 안 재생만
 //  (본보기는 sfx.play 그대로 · 내 목소리는 playmine 과 같은 방식: decodeAudioData → BufferSource.start(t, offset) → Gain)
-import { prepare, rhythmScore, loadAlign, isSyl, R_FULL } from "./rhythm.js?v=1007.80";
-import { esc } from "./text.js?v=1007.80";
-import { align } from "./score.js?v=1007.80";
-import { audioCtx } from "./wake.js?v=1007.80";
-import { leadOf, gainOf, FADE, FADE_OUT, voicedEnd } from "./playmine.js?v=1007.80";
-import { speechEnd, wavOf } from "./recstore.js?v=1007.80";
-import * as sfx from "./sfx.js?v=1007.80";
+import { prepare, rhythmScore, loadAlign, isSyl, R_FULL } from "./rhythm.js?v=1007.81";
+import { esc } from "./text.js?v=1007.81";
+import { align } from "./score.js?v=1007.81";
+import { audioCtx } from "./wake.js?v=1007.81";
+import { leadOf, gainOf, FADE, FADE_OUT, voicedEnd } from "./playmine.js?v=1007.81";
+import { speechEnd, wavOf } from "./recstore.js?v=1007.81";
+import * as sfx from "./sfx.js?v=1007.81";
 
 // host 안에 그린다 → { close() } · o = { ep, key, url(본보기), text(본보기 글), blob(내 녹음), heard(들은 말 글자 · 없으면 색 없음), t(문구) }
 // 속도 단계(본부 10-07 · 투덜이 「견본에도 각각」) — 줄마다 자기 속도 · 누를 때마다 1 → 0.9 → 0.75 → 0.6 → 0.5 → 1 · 0.5 아래는 늘이기가 끊겨 뺌 · 고른 값 기억
@@ -166,7 +166,7 @@ export async function openCompare(host, o) {
     if (rb) { const k = rb.dataset.rate === "m" ? "m" : "y", nv = RATES[(RATES.indexOf(getRate(k)) + 1) % RATES.length]; setRate(k, nv); rb.textContent = rateTxt(nv); rb.setAttribute("aria-pressed", String(nv !== 1)); stopPlay(); o.onRate?.(k, nv); return; } // 줄 속도 바꾸기(다음 재생부터 · 기억)
     if (e.target.closest("[data-raw]")) { // 진단(본부 10-06): 내 녹음 원본 그대로(webm · 자르기·크기 맞춤 없음) 내려받기 — 실제 녹음에서 앞·뒤 자르기가 왜 안 먹는지 본부가 직접 봄
       const u = URL.createObjectURL(o.blob), a = document.createElement("a"), ext = (o.blob.type.match(/audio\/(\w+)/) || [, "webm"])[1];
-      a.href = u; a.download = `malmun_raw_${o.key}_${new Date().toISOString().replace(/[:.]/g, "-")}.${ext}`; document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(u), 5000);
+      a.href = u; a.download = `malmun_raw_${o.key}${o.why ? "_why-" + o.why : ""}_${new Date().toISOString().replace(/[:.]/g, "-")}.${ext}`; document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(u), 5000);
       return;
     }
     const pb = e.target.closest("[data-play]");

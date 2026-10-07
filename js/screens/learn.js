@@ -10,24 +10,24 @@
 //  R7 영상은 늘 맨 위 · 지금 줄은 영상 바로 아래(앞 줄은 영상 뒤로) — 손으로 목록을 움직이면 4초 동안은 따라가지 않음
 //  R8 듣기 모드(대사→설명 · 설명만)도 R1~R6 그대로(영상 대신 소리 조각) · 모드를 바꾸면 멈춤(▶ 로 시작)
 //  R9 다시 들어오면 마지막 줄이 선택된 채 멈춰 있음
-import * as sfxL from "../sfx.js?v=1007.80"; // 카드 말하기 최대 길이 = 본보기 길이로(10-07)
-import { t, lang, langName } from "../i18n.js?v=1007.80";
-import { esc, renderText, glossCards, sayParts } from "../text.js?v=1007.80";
-import { episode } from "../data.js?v=1007.80";
-import { paths } from "../paths.js?v=1007.80";
-import { Sequence } from "../audio.js?v=1007.80";
-import { I, progress, SPEAKER } from "../ui.js?v=1007.80";
-import writeView from "./write.js?v=1007.80";
-import { diagEnv, keepDiag } from "../diag.js?v=1007.80";
-import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1007.80";
-import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace } from "../rhythm.js?v=1007.80";
-import { playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1007.80";
-import { bestHeard, heardHTML, endHint } from "../heard.js?v=1007.80";
-import { recDel, downloadRec, askPersist } from "../recstore.js?v=1007.80";
-import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1007.80";
-import { scoreFx, stopFx } from "../scorefx.js?v=1007.80"; // 점수별 효과(본부 10-05)
-import { record, micWhy, srWhy, canScore, closeMic, logRec, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1007.80";
-import { hold, quietWake } from "../wake.js?v=1007.80";
+import * as sfxL from "../sfx.js?v=1007.81"; // 카드 말하기 최대 길이 = 본보기 길이로(10-07)
+import { t, lang, langName } from "../i18n.js?v=1007.81";
+import { esc, renderText, glossCards, sayParts } from "../text.js?v=1007.81";
+import { episode } from "../data.js?v=1007.81";
+import { paths } from "../paths.js?v=1007.81";
+import { Sequence } from "../audio.js?v=1007.81";
+import { I, progress, SPEAKER } from "../ui.js?v=1007.81";
+import writeView from "./write.js?v=1007.81";
+import { diagEnv, keepDiag } from "../diag.js?v=1007.81";
+import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1007.81";
+import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace } from "../rhythm.js?v=1007.81";
+import { playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1007.81";
+import { bestHeard, heardHTML, endHint } from "../heard.js?v=1007.81";
+import { recDel, downloadRec, askPersist } from "../recstore.js?v=1007.81";
+import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1007.81";
+import { scoreFx, stopFx } from "../scorefx.js?v=1007.81"; // 점수별 효과(본부 10-05)
+import { record, micWhy, srWhy, canScore, closeMic, logRec, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1007.81";
+import { hold, quietWake } from "../wake.js?v=1007.81";
 
 const RATES = [1, 0.75, 0.5];
 const pref = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } };
@@ -520,7 +520,7 @@ export default async function learn(app, ep, startId) {
     let sc = canScore() && r.heard.length ? Math.max(...r.heard.map(h => similarity(L[i].say.ko, h))) : null;
     const env = await diagEnv(); // 진단(화면에 안 보임) — 소리 엔진·🔁·녹음 시작 때 재생 중이었는지·출력 장치 + 녹음 소리 자체(malmun_diag · 마지막 3개)
     logRec({ where: "card", line: L[i].id, want: L[i].say.ko, ...r.diag, heard: [...new Set(r.heard)], score: sc, ...env, playingAtStart });
-    keepDiag(r.blob, { where: "card", line: L[i].id, score: sc, heard: [...new Set(r.heard)] });
+    keepDiag(r.blob, { where: "card", why: r.diag?.why, cut: r.diag?.cut, line: L[i].id, score: sc, heard: [...new Set(r.heard)] });
     // 리듬(투덜이 10-06 허락) — 글자 점수 × 리듬 배수(말하기 창과 같은 함수) · 근거는 결과 줄에
     let rhy = null;
     if (sc > 0) { const rh = await rhythmOf({ ep, key: `${ep}_${String(L[i].id).padStart(2, "0")}_say`, url: L[i].say.src, text: L[i].say.ko, blob: r.blob, heard: bestHeard(L[i].say.ko, r.heard) }); if (st.panel?.i !== i) return; if (rh) { rhy = { L: sc, R: rh.R, worst: rh.worst }; sc = withRhythm(sc, rh.R); } }

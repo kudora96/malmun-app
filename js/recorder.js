@@ -6,7 +6,7 @@
 // 시간·인식(본부 10-04 투덜이 승인): 말 사이 쉼 2초 · 🎤 뒤 6초 말 없으면 끝 · 최대 길이 = 문장 길이에 맞춤 · 인식이 혼자 끝나면 같은 트랙으로 다시
 // 그때와 다른 점(본부 10-04 「남긴 차이」): ① 윈도우 별칭 장치 「default」「communications」는 절대 안 고름(통신 장치를 열면 윈도우가 다른 소리를 줄임)
 //   ② 「준비 중 → 녹음 중」 표시(첫 소리가 들어오면) ③ 인식 오류 까닭을 돌려줌(onerror 를 삼키지 않음) ④ 진단 기록(이벤트만 듣고 소리 경로는 안 건드림)
-import { audioCtx } from "./wake.js?v=1007.80";
+import { audioCtx } from "./wake.js?v=1007.81";
 
 // 시간 규칙(본부 10-04 · 투덜이 「빨리 안 하면 바로 닫힘」): 말 사이 쉼 2초 · 🎤 뒤 6초 안에 말 없으면 끝 · 최대 길이는 부르는 쪽이 정함(문장 길이)
 const QUIET_MS = 2000, START_MS = 6000;
@@ -95,9 +95,11 @@ export function record({ onLevel = () => {}, onSwitch = () => {}, onReady = () =
       const rec = new MediaRecorder(s), chunks = [], heard = [], t0 = performance.now(), srEv = [];
       let sr = null, srErr = null, trackPassed = false, maxRms = 0, over = false, src = null, meter = 0, maxT = 0;
       rec.ondataavailable = e => e.data.size && chunks.push(e.data);
+      rec.addEventListener("stop", () => { if (!over) { cut = s.getAudioTracks()[0]?.readyState || "?"; finish({ why: "cut" }); } }); // 녹음이 저절로 멈춤 = 「cut」(까닭 진단)
       rec.start();
       // 음성 인식 — continuous + 중간 결과 · 녹음하는 바로 그 트랙으로 · 녹음이 끝날 때까지 혼자 end 되면 같은 트랙으로 다시(진단 restart@ · 본부 10-04)
-      let srOff = false, srAt = 0;
+      // 인식에는 녹음 트랙의 복사본(투덜이 10-07 r8 허락 — 인식이 끝나며 받은 트랙을 꺼 녹음이 끊기던 것) · 녹음 끝은 앱 규칙만
+      let srOff = false, srAt = 0, srTrack = null, thrNow = 0, noiseNow = 0, quietMs = 0, cut = ""; const dropSrTrack = () => { try { srTrack?.stop(); } catch {} srTrack = null; };
       const startSR = () => {
         if (over || srOff) return;
         const SR = getSR(); if (!SR) return;
@@ -112,7 +114,8 @@ export function record({ onLevel = () => {}, onSwitch = () => {}, onReady = () =
         r.onend = () => { if (over || srOff || sr !== r) return; srEv.push(`restart@${Math.round(performance.now() - t0)}`); setTimeout(startSR, performance.now() - srAt < 1000 ? 200 : 0); };
         srWatch(r, t0, srEv);
         sr = r; srAt = performance.now();
-        try { r.start(s.getAudioTracks()[0]); trackPassed = true; } catch { try { r.start(); } catch {} }
+        dropSrTrack(); const tr = s.getAudioTracks()[0];
+        try { srTrack = tr?.clone?.() || null; r.start(srTrack || tr); trackPassed = srTrack ? "clone" : true; } catch { dropSrTrack(); try { r.start(); } catch {} }
       };
       startSR();
       const finish = (extra = {}) => {
@@ -121,10 +124,11 @@ export function record({ onLevel = () => {}, onSwitch = () => {}, onReady = () =
         if (!extra.dead && !cancelled) onStop();
         try { src?.disconnect(); } catch {}
         try { sr?.stop(); } catch {}
+        { const t = srTrack; srTrack = null; setTimeout(() => { try { t?.stop(); } catch {} }, 2500); } // 마지막 결과가 올 틈을 두고 끔
         rec.onstop = async () => {
           if (sr && !extra.dead && !cancelled) for (let k = 0; k < 20 && !heard.length; k++) await new Promise(r => setTimeout(r, 100)); // 인식 결과는 조금 늦게 온다
           res({ blob: new Blob(chunks, { type: rec.mimeType || "audio/webm" }), heard, srErr, why: extra.why || "stop", ...extra,
-            diag: { mic: s.getAudioTracks()[0]?.label || "", track: trackPassed, sr: srEv, sec: Math.round(performance.now() - t0) / 1000, maxDb: dB(maxRms), dead: !!extra.dead, cancelled } });
+            diag: { why: extra.why || "stop", cut, quiet: quietMs, thrDb: dB(thrNow), noiseDb: dB(noiseNow), mic: s.getAudioTracks()[0]?.label || "", track: trackPassed, sr: srEv, sec: Math.round(performance.now() - t0) / 1000, maxDb: dB(maxRms), dead: !!extra.dead, cancelled } });
         };
         try { rec.state !== "inactive" ? rec.stop() : rec.onstop(); } catch { rec.onstop(); }
       };
@@ -145,9 +149,9 @@ export function record({ onLevel = () => {}, onSwitch = () => {}, onReady = () =
           if (switched && !kept && peak >= 0.0002 && liveMs > DEAD_MS) { kept = true; pref(devId(s) || (s.req !== true && s.req) || ""); }
           // 말소리 기준 = 방 소음의 3배(0.004~0.02) — 투덜이 10-07: 마이크 최대가 −31~−34dB(0.02~0.028)라 고정 0.02 면 조금 작게 말해도 「조용」 → 2초 뒤 끊김
           if (!spoke && rms < 0.02) noise = noise ? noise * 0.9 + rms * 0.1 : rms;
-          const thr = Math.min(0.02, Math.max(0.004, noise * 3));
+          const thr = Math.min(0.02, Math.max(0.004, noise * 3)); thrNow = thr; noiseNow = noise;
           if (rms > thr && !spoke) pref(devId(s) || (s.req !== true && s.req) || ""); // 소리가 들어온 마이크를 기억
-          if (rms > thr) { spoke = true; quietAt = 0; } else if (spoke) { quietAt ||= now; if (now - quietAt > QUIET_MS) finish({ why: "pause" }); }
+          if (rms > thr) { spoke = true; quietAt = 0; } else if (spoke) { quietAt ||= now; if (now - quietAt > QUIET_MS) { quietMs = now - quietAt; finish({ why: "pause" }); } }
           if (!spoke && performance.now() - t0 > START_MS) finish({ why: "nospeech" }); // 🎤 뒤 6초 동안 말 없음
           onTick(performance.now() - t0, maxMs, spoke && quietAt ? now - quietAt : 0); // 3번째 = 말한 뒤 조용한 시간(ms · 카드 쉼 카운트다운 표시용 — 투덜이 10-07 허락 · 끊는 기준은 그대로)
           if (!spoke && peak < 0.0002 && liveMs > DEAD_MS) finish({ dead: true }); // 1.5초 신호가 아예 0 → 다음 마이크로
