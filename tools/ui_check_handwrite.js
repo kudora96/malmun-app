@@ -1,6 +1,7 @@
 // 손글씨 따라 쓰기 1단계 점검(본부 10-07 투덜이 「ㅇ」) — #/learn/L01-00-01 을 연 채로 크기마다 실행 · 소리는 아주 작게
 // ⓐ 모드 단추 ⌨/✍ (단추 모양 · 고른 것 기억) ⓑ 손글씨 칸 = 정사각 · 창 안 · 스크롤 0 · 자판 없음 · 다른 칸과 안 겹침
-// ⓒ 글자 모양 그대로 따라 그린 획(마스크 가로 훑기 · 진짜 pointer 이벤트) + ✓ → 통과 · 다음 글자 ⓓ 엉뚱한 낙서 → 실패 · 「다시」 · 같은 글자
+// ⓒ 글자 모양 그대로 따라 그린 획(마스크 가로 훑기 · 진짜 pointer 이벤트) + ✓ → 「n% ★」 통과 · 머묾 · 다음 ▶ ⓓ 엉뚱한 낙서 → 실패 · 같은 글자
+// ⓗ 엄한 판정(본부 10-07): 정확히 ≥95 · 한쪽 획 빼먹음 실패 · 펜 굵기만큼 비낌 <80 · 대충 동그라미+막대 실패 · 가운데 선 점수 참고
 // ⓔ 한 획 되돌리기 · 지우기 ⓕ 손 뗀 채 1.2초 → 저절로 판정 ⓖ 그리는 동안 화면·창 안 움직임(touch-action none · 스크롤 0)
 (async () => {
   const W = ms => new Promise(s => setTimeout(s, ms)), res = [], ok = (c, m, x = "") => res.push(`${c ? "✓" : "✗"} ${m}${x ? " · " + x : ""}`);
@@ -28,28 +29,51 @@
     // ⓖ 그리는 동안 안 움직임
     const y0 = [window.scrollY, p.scrollTop, sc.scrollTop, document.querySelector(".learn")?.scrollTop ?? 0].join(",");
     const ta = getComputedStyle(iv).touchAction;
-    // ⓓ 낙서 → 실패
+    // ⓓ 낙서 → 실패 · 칸 위 점수(80 아래 = 빨강 · 별 없음)
     const zig = [Array.from({ length: 14 }, (_, i) => [0.05 + 0.065 * i, i % 2 ? 0.08 : 0.2]), Array.from({ length: 14 }, (_, i) => [0.05 + 0.065 * i, i % 2 ? 0.9 : 0.78])];
     await draw(zig); $("[data-act=hdone]").click(); await W(700);
-    const sc1 = wr().hand().last?.score ?? -1, noteTxt = P().querySelector(".loopnote")?.textContent || "";
-    ok(sc1 >= 0 && sc1 < 0.7 && wr().hand().ch === ch0 && /\d+%/.test(noteTxt), "ⓓ 엉뚱한 낙서 → 실패 · 「다시」 문구 · 같은 글자", `점수 ${Math.round(sc1 * 100)}% · 「${noteTxt}」`);
+    const sc1 = wr().hand().last?.pct ?? -1, lab1 = $(".hscore")?.textContent || "";
+    ok(sc1 >= 0 && sc1 < 80 && wr().hand().ch === ch0 && !wr().hand().passed && /^\d+%$/.test(lab1) && $(".hscore").classList.contains("bad"), "ⓓ 엉뚱한 낙서 → 실패 · 칸 위 「n%」(빨강·별 없음) · 같은 글자", `「${lab1}」`);
     const y1 = [window.scrollY, p.scrollTop, sc.scrollTop, document.querySelector(".learn")?.scrollTop ?? 0].join(",");
     ok(ta === "none" && y0 === y1, "ⓖ 그리는 동안 화면·창 안 움직임(touch-action none)", `${ta} · ${y0} → ${y1}`);
     // ⓔ 되돌리기·지우기
     $("[data-act=hclear]").click(); await draw([[[0.2, 0.2], [0.8, 0.2]], [[0.2, 0.5], [0.8, 0.5]]]); await W(100);
     const n2 = wr().hand().strokes.length; $("[data-act=hundo]").click(); const n1 = wr().hand().strokes.length; $("[data-act=hclear]").click(); const n0 = wr().hand().strokes.length;
     ok(n2 === 2 && n1 === 1 && n0 === 0, "ⓔ 한 획 되돌리기 2→1 · 지우기 → 0", `${n2}→${n1}→${n0}`);
-    // ⓒ 따라 그리기 → 통과 · 다음 글자
+    // ⓗ 엄한 판정(본부 10-07) — 점수만 계산(화면 그대로) · 지금 글자로
+    { const s = wr().hand().s, tr0 = wr().traceOf(ch0), sc = S => wr().handScore(ch0, S, s);
+      const full = sc(tr0), cen = sc(wr().centerOf(ch0));
+      const half = sc(tr0.map(S => S.filter(([x]) => x < 0.5)).filter(S => S.length)); // 오른쪽 획 빼먹음
+      const shift = sc(tr0.map(S => S.map(([x, y]) => [x + 0.06, y]))); // 펜 굵기만큼 비껴
+      const circ = sc([Array.from({ length: 41 }, (_, i) => [0.3 + 0.24 * Math.cos(i * Math.PI / 20), 0.5 + 0.34 * Math.sin(i * Math.PI / 20)]), [[0.75, 0.1], [0.75, 0.9]]]); // 대충 큰 동그라미 + 막대
+      ok(full.pct >= 95, "ⓗ 정확히 따라 그림 → 95 이상(★)", `${full.pct}% · 덩어리 ${full.comps.map(v => Math.round(v * 100)).join("/")}`);
+      ok(!half.ok && half.pct < 80, "ⓗ 오른쪽 획 빼먹고 왼쪽만 → 실패", `${half.pct}% · 덩어리 ${half.comps.map(v => Math.round(v * 100)).join("/")}`);
+      ok(shift.pct < 80, "ⓗ 펜 굵기만큼 옆으로 비껴 그림 → 80 아래", `${shift.pct}% · 벗어남 ${Math.round(shift.outside * 100)}%`);
+      ok(circ.pct < 80, "ⓗ 대충 큰 동그라미 + 막대 → 실패", `${circ.pct}%`);
+      res.push(`· 참고: 글자 가운데 선만 따라 그림(조심스러운 학습자) → ${cen.pct}% · 덩어리 ${cen.comps.map(v => Math.round(v * 100)).join("/")} · 벗어남 ${Math.round(cen.outside * 100)}%`); }
+    // ⓒ 따라 그리기 → 통과(★ · 초록 점수 · 효과) → 그 자리 머묾(다시 쓰기 가능) · 위 글자 줄에 최고 점수 · 「다음 ▶」→ 다음 글자
     await W(1300);
-    const tr = wr().traceOf(ch0), sTr = wr().handScore(ch0, tr).score;
     for (let k = 0; k < 60 && wr().busy(); k++) await W(100);
-    await draw(tr); $("[data-act=hdone]").click(); for (let k = 0; k < 80 && wr().hand() === H0; k++) await W(100);
+    const tr = wr().traceOf(ch0);
+    await draw(tr); $("[data-act=hdone]").click(); await W(400);
+    const lab2 = $(".hscore")?.textContent || "", fxOn = $(".hbox .fx")?.classList.contains("on"), stay = wr().hand() === H0 && H0.passed, nextB = $("[data-act=hnext]");
+    for (let k = 0; k < 60 && wr().busy(); k++) await W(100);
+    const best = P().querySelector(".sent .c.now .hb")?.textContent || "";
+    ok(/^\d+% ★$/.test(lab2) && fxOn && stay && !!nextB && best === lab2.replace(/% .*/, ""), "ⓒ 따라 그림 → 「n% ★」 + 효과 · 그 글자에 머묾 · 「다음 ▶」 · 위 글자 줄에 최고 점수", `「${lab2}」 · 효과 ${fxOn} · 최고 ${best}`);
+    // 다시 쓰기 — 그리기 시작하면 통과 풀림(점수 숨김) · 낮게 써도 최고 점수 그대로
+    await draw(zig); const re = !H0.passed && $(".hscore").hidden; $("[data-act=hdone]").click(); await W(500);
+    for (let k = 0; k < 60 && wr().busy(); k++) await W(100);
+    const best2 = P().querySelector(".sent .c.now .hb")?.textContent || "";
+    ok(re && best2 === best, "ⓒ 통과 뒤 다시 그리면 = 다시 쓰기 · 더 낮게 써도 최고 점수 그대로", `최고 ${best2}`);
+    $("[data-act=hclear]").click(); await draw(tr); $("[data-act=hdone]").click(); await W(400); for (let k = 0; k < 60 && wr().busy(); k++) await W(100); // 실패한 획은 남아 있음(빠진 획만 더 그릴 수 있게) → 지우고 다시
+    $("[data-act=hnext]")?.click(); for (let k = 0; k < 80 && wr().hand() === H0; k++) await W(100);
     const H1 = wr().hand();
-    ok(sTr >= 0.7 && H1 !== H0 && H1.ch !== undefined, "ⓒ 글자 모양 따라 그림 → 통과 → 다음 글자", `「${ch0}」 ${Math.round(sTr * 100)}% → 다음 「${H1.ch}」`);
-    // ⓕ 손 뗀 채 1.2초 → 저절로
-    for (let k = 0; k < 60 && wr().busy(); k++) await W(100); // 앞 글자 소리 끝날 때까지(소리 중엔 그리기 안 받음)
-    const ch1 = H1.ch; await draw(wr().traceOf(ch1)); for (let k = 0; k < 100 && wr().hand() === H1; k++) await W(100); // 1.2초 뒤 판정 → 글자 소리 → 다음(최대 10초)
-    ok(wr().hand() !== H1, "ⓕ 다 그리고 손 뗀 채 1.2초 → 저절로 판정 · 다음으로", `「${ch1}」 → 「${wr().hand()?.ch}」`);
+    ok(H1 !== H0 && H1?.ch !== undefined, "ⓒ 「다음 ▶」 → 다음 글자", `「${ch0}」 → 「${H1?.ch}」`);
+    // ⓕ 손 뗀 채 1.2초 → 저절로 판정(통과면 머묾 → 다음 ▶)
+    for (let k = 0; k < 60 && wr().busy(); k++) await W(100);
+    const ch1 = H1.ch; await draw(wr().traceOf(ch1)); for (let k = 0; k < 40 && !H1.passed; k++) await W(100);
+    const auto = H1.passed; for (let k = 0; k < 60 && wr().busy(); k++) await W(100); $("[data-act=hnext]")?.click(); for (let k = 0; k < 80 && wr().hand() === H1; k++) await W(100);
+    ok(auto && wr().hand() !== H1, "ⓕ 다 그리고 손 뗀 채 1.2초 → 저절로 판정(통과) → 다음 ▶", `「${ch1}」 → 「${wr().hand()?.ch}」`);
     // ⓐ 기억 — 다른 줄 쓰기를 열어도 손글씨 그대로 · 마지막에 자판으로 돌려 둠
     document.querySelectorAll(".line")[1].querySelector("[data-act=write]").click(); await W(1500);
     ok(!!P().querySelector(".hand"), "ⓐ 다시 열어도 손글씨 그대로(기억)");
@@ -57,7 +81,7 @@
     ok(!!P().querySelector(".kb") && localStorage.getItem("malmun.wmode") === "kb", "ⓐ ⌨ 누름 → 자판으로");
     document.querySelectorAll(".line")[1].querySelector("[data-act=write]").click(); await W(600); // 닫기(같은 단추 다시)
   } catch (e) { res.push("✗ 점검 도중 오류: " + e.message); }
-  localStorage.removeItem("malmun.wmode");
+  localStorage.removeItem("malmun.wmode"); localStorage.removeItem("malmun.hbest");
   const bad = res.filter(x => x.startsWith("✗")).length, out = `${bad ? "✗" : "✓"} ${innerWidth}x${innerHeight} 손글씨 ${res.length - bad}/${res.length}\n` + res.join("\n");
   console.log(out); return out;
 })();

@@ -883,3 +883,10 @@ a{color:inherit;text-decoration:none}
 .write .hand.stack{flex-direction:column;row-gap:8px}
 .write .hand.stack .hbtns{flex-direction:row;justify-content:center;flex-wrap:nowrap}
 .write .hand.stack .hbtns button{min-height:32px;padding:4px 10px}
+
+/* 손글씨 점수(본부 10-07) — 칸 위 왼쪽 「87% ☆」 · 효과(scorefx)는 칸 오른쪽 위 · 위 글자 줄 그 글자 아래 최고 점수 작게 */
+.write .hbox .hscore{position:absolute;left:8px;top:6px;z-index:2;padding:1px 8px;border-radius:999px;font-size:14px;font-weight:800;font-variant-numeric:tabular-nums;pointer-events:none;background:var(--card);box-shadow:0 1px 0 var(--line)}
+.write .hbox .hscore.ok{color:var(--okc)}
+.write .hbox .hscore.bad{color:var(--badc)}
+.write .hbox .fx{right:8px;top:6px;bottom:auto}
+.write .sent .c .hb{font-size:.5em;vertical-align:sub;margin-left:1px;line-height:1;font-weight:700;color:var(--okc);font-variant-numeric:tabular-nums}

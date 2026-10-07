@@ -10,23 +10,23 @@
 //  R7 영상은 늘 맨 위 · 지금 줄은 영상 바로 아래(앞 줄은 영상 뒤로) — 손으로 목록을 움직이면 4초 동안은 따라가지 않음
 //  R8 듣기 모드(대사→설명 · 설명만)도 R1~R6 그대로(영상 대신 소리 조각) · 모드를 바꾸면 멈춤(▶ 로 시작)
 //  R9 다시 들어오면 마지막 줄이 선택된 채 멈춰 있음
-import { t, lang, langName } from "../i18n.js?v=1007.41";
-import { esc, renderText, glossCards, sayParts } from "../text.js?v=1007.41";
-import { episode } from "../data.js?v=1007.41";
-import { paths } from "../paths.js?v=1007.41";
-import { Sequence } from "../audio.js?v=1007.41";
-import { I, progress, SPEAKER } from "../ui.js?v=1007.41";
-import writeView from "./write.js?v=1007.41";
-import { diagEnv, keepDiag } from "../diag.js?v=1007.41";
-import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1007.41";
-import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V } from "../rhythm.js?v=1007.41";
-import { playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1007.41";
-import { bestHeard, heardHTML, endHint } from "../heard.js?v=1007.41";
-import { recDel, downloadRec, askPersist } from "../recstore.js?v=1007.41";
-import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1007.41";
-import { scoreFx, stopFx } from "../scorefx.js?v=1007.41"; // 점수별 효과(본부 10-05)
-import { record, micWhy, srWhy, canScore, closeMic, logRec, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1007.41";
-import { hold, quietWake } from "../wake.js?v=1007.41";
+import { t, lang, langName } from "../i18n.js?v=1007.45";
+import { esc, renderText, glossCards, sayParts } from "../text.js?v=1007.45";
+import { episode } from "../data.js?v=1007.45";
+import { paths } from "../paths.js?v=1007.45";
+import { Sequence } from "../audio.js?v=1007.45";
+import { I, progress, SPEAKER } from "../ui.js?v=1007.45";
+import writeView from "./write.js?v=1007.45";
+import { diagEnv, keepDiag } from "../diag.js?v=1007.45";
+import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1007.45";
+import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V } from "../rhythm.js?v=1007.45";
+import { playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1007.45";
+import { bestHeard, heardHTML, endHint } from "../heard.js?v=1007.45";
+import { recDel, downloadRec, askPersist } from "../recstore.js?v=1007.45";
+import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1007.45";
+import { scoreFx, stopFx } from "../scorefx.js?v=1007.45"; // 점수별 효과(본부 10-05)
+import { record, micWhy, srWhy, canScore, closeMic, logRec, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1007.45";
+import { hold, quietWake } from "../wake.js?v=1007.45";
 
 const RATES = [1, 0.75, 0.5];
 const pref = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } };
