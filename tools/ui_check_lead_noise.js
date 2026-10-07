@@ -27,6 +27,11 @@
     const { it, d } = await load(k);
     check(`ⓓ 첫 자음 ${it.syl[0].ch} · ${it.text}`, cat(zeros(0.3), d), 0.3 + it.syl[0].s);
   }
+  // ⓕ(시작 허용 0.08초 더 — 정렬 첫 음절보다 모음 「아」 소리가 조금 먼저) 첫 낱말 뒤 쉼(투덜이 10-07 「아, 저 혼자 알면」 — 짧은 첫 「아」를 앞 잡음으로 버리던 것) — keepFirst 면 「아」부터 · 툭은 여전히 빠짐
+  { const checkK = (name, arr, truth) => { const l = leadOf(buf(arr), 0.1, 0, true), ok = l >= truth - 0.18 - 1e-6 && l <= truth - 0.05 + 1e-6; res.push(`${ok ? "✓" : "✗"} ${name} → 시작 ${l.toFixed(2)}초 · 말 시작 ${truth.toFixed(2)}`); };
+    for (const k of ["L01-00-01_06_p01", "L01-00-01_06_say", "L01-00-01_02_p01"]) { const { it, d } = await load(k), pk = peakOf(d), s0 = it.syl[0].s, cut = Math.max(0, Math.round((s0 - 0.02) * SR)), sp = d.slice(cut);
+      checkK(`ⓕ 첫 낱말 뒤 쉼 · 잡음 없음 · ${it.text}`, cat(zeros(0.3), d), 0.3 + s0);
+      checkK(`ⓕ 첫 낱말 뒤 쉼 · 큰 툭+틈 · ${it.text}`, cat(zeros(0.3), thud(Math.min(0.99, pk * 1.6)), zeros(0.03), sp), 0.3 + 0.05 + 0.03 + 0.02); } }
   // 뒤 잡음(투덜이 10-06) — 끝 = 마지막 음절 끝(e) 뒤 0.05~0.5초 · ⓔ1 말 + 0.5초 뒤 툭 → 툭 앞에서 끝 · ⓔ2 말 끝에 바로 부스럭 0.4초 → 부스럭 대부분 빠짐 · ⓔ3 받침·「요」 꼬리 안 잘림
   const endCheck = (name, arr, eTruth, maxEnd) => { const e = voicedEnd(buf(arr)), ok = e >= eTruth + 0.05 - 1e-6 && e <= Math.min(maxEnd ?? 1e9, eTruth + 0.5); res.push(`${ok ? "✓" : "✗"} ${name} → 끝 ${e.toFixed(2)}초 · 마지막 음절 끝 ${eTruth.toFixed(2)} · 뒤 ${(e - eTruth).toFixed(2)}초`); };
   for (const k of ["L01-00-01_13_p02", "L01-00-01_10_p03", "L01-00-01_01_p02", "L01-00-01_02_p01", "L01-00-01_09_p02", "L01-00-01_07_p02"]) {

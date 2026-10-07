@@ -13,13 +13,13 @@
 //  W5 소리는 언제나 하나만 · 새 일을 하면 앞 소리는 멈춘다
 //  W6 영상 창 안(embedded): 창 안에서 스크롤 없이 다 보이게 — 긴 문장은 토막으로(◀ 1/3 ▶) ·
 //     토막을 다 쓰면 자동으로 다음 토막 · 줄을 다 쓰면 대사를 듣고 자동으로 다음 줄 쓰기 · 아래 ▶ = 이 부분 듣기
-import { t, lang } from "../i18n.js?v=1007.12";
-import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO } from "../text.js?v=1007.12";
-import { episode, chars, charsF } from "../data.js?v=1007.12";
-import { paths } from "../paths.js?v=1007.12";
-import { I } from "../ui.js?v=1007.12";
-import { audioCtx, hold } from "../wake.js?v=1007.12";
-import * as sfx from "../sfx.js?v=1007.12";
+import { t, lang } from "../i18n.js?v=1007.38";
+import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO } from "../text.js?v=1007.38";
+import { episode, chars, charsF } from "../data.js?v=1007.38";
+import { paths } from "../paths.js?v=1007.38";
+import { I } from "../ui.js?v=1007.38";
+import { audioCtx, hold } from "../wake.js?v=1007.38";
+import * as sfx from "../sfx.js?v=1007.38";
 
 const KEYS = [..."ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎㄲㄸㅃㅆㅉ"], VOW = [..."ㅏㅑㅓㅕㅗㅛㅜㅠㅡㅣ"];
 const VOW2 = [..."ㅐㅒㅔㅖㅘㅙㅚㅝㅞㅟㅢ"]; // 겹모음 줄(본부 10-06) — 칸 하나 · ㅓ+ㅣ 처럼 나눠 쳐도 받음
@@ -105,15 +105,17 @@ export default async function write(app, ep, id, opts = {}) {
     if (w.end) { segs.push(cur); cur = []; n = 0; }
   }
   if (cur.length) segs.push(cur);
-  const st = { s: 0, w: 0, c: 0, k: 0, typed: [], part: "", busy: false, done: false, queue: [], loopAt: null, sent: false, alive: true, auto: false };
+  const st = { s: 0, w: 0, c: 0, k: 0, typed: [], part: "", busy: false, done: false, queue: [], loopAt: null, sent: false, alive: true, auto: false, mode: (() => { try { return localStorage.getItem("malmun.wmode") === "hand" ? "hand" : "kb"; } catch { return "kb"; } })() };
+  // 쓰기 방법(본부 10-07 투덜이 「ㅇ」) — ⌨ 자판 / ✍ 손글씨 · 고른 것 기억
+  const modeBtns = () => `<span class="wmode" role="group">${[["kb", "⌨ " + t("w_kb")], ["hand", "✍ " + t("w_hand")]].map(([m, l]) => `<button data-mode="${m}" aria-pressed="${st.mode === m}">${esc(l)}</button>`).join("")}</span>`;
   const lineSrc = line.lineAudio ? paths.audio(ep, line.lineAudio) : null;
   hush();
 
   app.innerHTML = `<section class="scr write ${opts.embedded ? "embedded" : ""}">
     ${opts.embedded
-      ? `<div class="whead"><b>${esc(t("write"))}</b><span class="sub">${li + 1} / ${d.lines.length} · <span class="ko" lang="ko">${esc(line.speaker)}</span></span><span class="loopnote" aria-live="polite"></span></div>`
+      ? `<div class="whead"><b>${esc(t("write"))}</b><span class="sub">${li + 1} / ${d.lines.length} · <span class="ko" lang="ko">${esc(line.speaker)}</span></span>${modeBtns()}<span class="loopnote" aria-live="polite"></span></div>`
       : `<div class="bar"><a class="iconbtn" href="#/learn/${ep}/${line.id}" aria-label="${esc(t("back"))}">${I.back}</a>
-      <div class="grow"><div class="t">${esc(t("write"))}</div><div class="sub">${li + 1} / ${d.lines.length} · <span class="ko" lang="ko">${esc(line.speaker)}</span></div></div></div><div class="loopnote" aria-live="polite"></div>`}
+      <div class="grow"><div class="t">${esc(t("write"))}</div><div class="sub">${li + 1} / ${d.lines.length} · <span class="ko" lang="ko">${esc(line.speaker)}</span></div></div>${modeBtns()}</div><div class="loopnote" aria-live="polite"></div>`}
     <div class="segrow"><div class="sent" lang="ko"></div><div class="segnav"></div><div class="wtip" hidden>${esc(t("w_tip"))}</div></div>
     <div class="work"></div>
     <div class="wbtns"><button data-act="word">${esc(t("listen_word"))}</button><button data-act="sent">${esc(t("listen_part"))}</button><button data-act="auto">${esc(t("autofill"))}</button></div>
@@ -146,7 +148,7 @@ export default async function write(app, ep, id, opts = {}) {
     stopLoop(); st.sent = true; markSent();
     run([partStep()]).then(() => { st.sent = false; markSent(); });
   }
-  app.__wr = { toggle: toggleSentence, busy: () => st.busy || st.done || st.queue.length > 0 || st.sent || st.auto || sfx.playing() }; // busy = 점검 도구가 소리 끝을 기다릴 때
+  app.__wr = { hand: () => st.hand, traceOf: ch => traceOf(ch), handScore: (ch, S) => handScore(ch, S), handJudge: () => handJudge(), toggle: toggleSentence, busy: () => st.busy || st.done || st.queue.length > 0 || st.sent || st.auto || sfx.playing() }; // busy = 점검 도구가 소리 끝을 기다릴 때
 
   function paintSent() {
     sentEl.innerHTML = `<svg class="spk" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M4 9v6h4l5 4V5L8 9H4z"/><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M16 8.5a5 5 0 0 1 0 7M18.8 6a8.5 8.5 0 0 1 0 12"/></svg>` + words().map((w, wi) => `<span class="w ${wi === st.w ? "on" : ""}">${w.chars.map((c, ci) =>
@@ -195,16 +197,91 @@ export default async function write(app, ep, id, opts = {}) {
     work.innerHTML = `<div class="stage"><div class="box"><span class="target ko" lang="ko">${esc(c.ch)}</span><span class="typed ko" lang="ko">${esc(compose([...st.typed, st.part].flatMap(jamoParts), vowelLen(c.ch)))}</span></div>
       <div class="info">${w.rom || w.mean ? `<div class="sub2">${w.rom ? `<span class="rom">${esc(w.rom)}</span>` : ""}${w.mean ? `<span class="mean tr">${esc(w.mean)}</span>` : ""}</div>` : ""}
       <div class="slotrow"><div class="slots">${jam.map((j, i) => `<span class="slot ${i < st.k ? "filled" : i === st.k ? "current" : ""}">${i <= st.k ? esc(j) : ""}</span>`).join("")}</div></div></div></div>
-      <div class="kb" lang="ko">${KB_ROWS.map(r => `<div class="kr">${r.map(j => `<button data-j="${j}">${j}</button>`).join("")}</div>`).join("")}</div>`;
+      ${st.mode === "hand" ? `<div class="hand"><div class="hbox"><canvas class="hguide" aria-hidden="true"></canvas><canvas class="hink" aria-label="${esc(t("w_hand"))}"></canvas></div><div class="hbtns"><button data-act="hdone">✓ ${esc(t("h_done"))}</button><button data-act="hundo">↶ ${esc(t("h_undo"))}</button><button data-act="hclear">✕ ${esc(t("h_clear"))}</button></div></div>`
+        : `<div class="kb" lang="ko">${KB_ROWS.map(r => `<div class="kr">${r.map(j => `<button data-j="${j}">${j}</button>`).join("")}</div>`).join("")}</div>`}`;
+    if (st.mode === "hand") setupHand(c);
     fitWord(); placeBtns();
     fitWord(); setTimeout(fitWord, 30); // 낱말 글자 단추 = 한 줄(본부 10-06 — 세 단추 때문에 좁아져 꺾이던 것)
   }
   function goSeg(s) { st.auto = false; markAuto(); resetSounds(); st.busy = false; Object.assign(st, { s, w: 0, c: 0, k: 0, typed: [], part: "", done: false, queue: [] }); render(); }
 
-  async function finishChar(j, c) { // W3
+  // ── 손글씨 따라 쓰기 1단계(본부 10-07) — 흐린 회색 글자 위에 손가락·마우스·펜으로 · 판정 = 글자 마스크 덮음 × (1 − 벗어남) ≥ 70%
+  //  덮음 = 글자 픽셀 중 펜 자국 근처(펜 굵기 2.4배 안)인 것 · 벗어남 = 펜 픽셀 중 글자(펜 굵기만큼 너그럽게 부풀림) 밖인 것 · 다 썼으면 「✓」 또는 1.2초 손 뗀 채면 자동
+  const PEN = 0.06, PASS_H = 0.7, glyphFont = () => getComputedStyle(sentEl).fontFamily;
+  // 글자 그림 = 한 번(400×400)만 그려 두고 크기만 바꿔 씀 — 회색 안내 글자와 판정 마스크가 픽셀까지 같은 자리
+  const GN = 400, gCache = new Map();
+  function glyphImg(ch, grow = 0) {
+    const key = ch + "|" + grow; if (gCache.has(key)) return gCache.get(key);
+    const cv = document.createElement("canvas"); cv.width = cv.height = GN; glyphRaw(cv.getContext("2d"), GN, ch, "#000", grow * GN); gCache.set(key, cv); return cv;
+  }
+  function glyph(x, n, ch, color, grow = 0) { // grow = 칸에 대한 비율
+    const img = glyphImg(ch, grow), t = document.createElement("canvas"); t.width = t.height = n; const tx = t.getContext("2d");
+    tx.drawImage(img, 0, 0, n, n); tx.globalCompositeOperation = "source-in"; tx.fillStyle = color; tx.fillRect(0, 0, n, n);
+    x.drawImage(t, 0, 0);
+  }
+  function glyphRaw(x, n, ch, color, grow = 0) { // n×n 칸 가운데 꽉 차게(글꼴 실제 글자 상자로 맞춤)
+    x.font = `700 ${Math.round(n * 0.8)}px ${glyphFont()}`; const m = x.measureText(ch), w = m.actualBoundingBoxLeft + m.actualBoundingBoxRight, h = m.actualBoundingBoxAscent + m.actualBoundingBoxDescent;
+    const f = Math.min((n * 0.84) / Math.max(1, w), (n * 0.84) / Math.max(1, h)); x.font = `700 ${Math.round(n * 0.8 * f)}px ${glyphFont()}`;
+    const m2 = x.measureText(ch), cx = n / 2 + (m2.actualBoundingBoxLeft - m2.actualBoundingBoxRight) / 2, cy = n / 2 + (m2.actualBoundingBoxAscent - m2.actualBoundingBoxDescent) / 2;
+    x.fillStyle = x.strokeStyle = color; x.textBaseline = "alphabetic"; x.textAlign = "left"; x.fillText(ch, cx, cy);
+    if (grow) { x.lineWidth = grow; x.lineJoin = "round"; x.strokeText(ch, cx, cy); }
+  }
+  function inkPath(x, n, strokes, width, color = "#000") {
+    x.strokeStyle = x.fillStyle = color; x.lineWidth = width; x.lineCap = x.lineJoin = "round";
+    for (const S of strokes) { if (!S.length) continue; x.beginPath(); x.moveTo(S[0][0] * n, S[0][1] * n); if (S.length === 1) x.lineTo(S[0][0] * n + 0.01, S[0][1] * n); for (const [a, b] of S.slice(1)) x.lineTo(a * n, b * n); x.stroke(); }
+  }
+  const pix = (n, fn) => { const cv = document.createElement("canvas"); cv.width = cv.height = n; const x = cv.getContext("2d", { willReadFrequently: true }); fn(x); return x.getImageData(0, 0, n, n).data; };
+  function handScore(ch, strokes) {
+    const N = 160, mask = pix(N, x => glyph(x, N, ch, "#000")), maskD = pix(N, x => glyph(x, N, ch, "#000", PEN * 1.2));
+    const near = pix(N, x => inkPath(x, N, strokes, PEN * N * 2.4)), ink = pix(N, x => inkPath(x, N, strokes, PEN * N));
+    let m = 0, cov = 0, p = 0, out = 0; const miss = [];
+    for (let i = 3; i < mask.length; i += 4) { if (mask[i] > 128) { m++; if (near[i] > 128) cov++; else miss.push((i - 3) / 4); } if (ink[i] > 128) { p++; if (maskD[i] <= 128) out++; } }
+    const cover = m ? cov / m : 0, outside = p ? out / p : 1;
+    return { score: cover * (1 - outside), cover, outside, miss, N };
+  }
+  // 점검 도구용 — 글자 마스크를 가로줄로 훑은 획(정규화 0~1)
+  const traceOf = ch => { const N = 160, mask = pix(N, x => glyph(x, N, ch, "#000")), step = Math.max(2, Math.round(PEN * N * 0.8)), out = [];
+    for (let y = Math.floor(step / 2); y < N; y += step) { let x0 = -1; for (let x = 0; x <= N; x++) { const on = x < N && mask[(y * N + x) * 4 + 3] > 128; if (on && x0 < 0) x0 = x; if (!on && x0 >= 0) { out.push([[(x0 + 0.5) / N, (y + 0.5) / N], [(x - 0.5) / N, (y + 0.5) / N]]); x0 = -1; } } }
+    return out; };
+  function setupHand(c) {
+    const hand = work.querySelector(".hand"), box = hand.querySelector(".hbox"), gv = box.querySelector(".hguide"), iv = box.querySelector(".hink"), bt = hand.querySelector(".hbtns");
+    const H = (st.hand = { ch: c.ch, strokes: [], cur: null, timer: 0, s: 0 });
+    const col = v => { const e = document.createElement("i"); e.style.color = `var(${v})`; box.append(e); const c2 = getComputedStyle(e).color; e.remove(); return c2; }; // 칸 색 낱말 → 실제 색(밝은·어두운 판 따라)
+    const paintGuide = (missN) => { const x = gv.getContext("2d"), n = gv.width; x.clearRect(0, 0, n, n);
+      x.strokeStyle = col("--hguide-line"); x.lineWidth = Math.max(1, n / 300); x.setLineDash([n / 60, n / 60]);
+      x.beginPath(); x.moveTo(n / 2, 0); x.lineTo(n / 2, n); x.moveTo(0, n / 2); x.lineTo(n, n / 2); x.stroke(); x.setLineDash([]); // 십자 보조선(흐리게)
+      glyph(x, n, c.ch, col("--hguide-ink"));
+      if (missN) { const { miss, N } = missN, k = n / N; x.fillStyle = "#e08a1e"; for (const i of miss) x.fillRect((i % N) * k, Math.floor(i / N) * k, k + 0.5, k + 0.5); } }; // 덜 덮은 곳 주황
+    const paintInk = (color) => { const x = iv.getContext("2d"), n = iv.width; x.clearRect(0, 0, n, n); inkPath(x, n, H.strokes, PEN * n, color || col("--hink")); };
+    const fit = () => { if (!hand.isConnected) return; const s = Math.max(60, Math.floor(Math.min(hand.clientHeight - 6, hand.clientWidth - bt.offsetWidth - 14))), dpr = window.devicePixelRatio || 1;
+      box.style.width = box.style.height = s + "px"; for (const cv of [gv, iv]) cv.width = cv.height = Math.round(s * dpr); H.s = s; paintGuide(); paintInk(); };
+    fit(); H.ro?.disconnect(); H.ro = new ResizeObserver(() => fit()); H.ro.observe(hand);
+    document.fonts?.ready.then(() => { if (st.hand !== H) return; gCache.clear(); fit(); }); // 글꼴이 늦게 오면 글자 그림 다시
+    const at = e => { const r = iv.getBoundingClientRect(); return [Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)), Math.min(1, Math.max(0, (e.clientY - r.top) / r.height))]; };
+    iv.addEventListener("pointerdown", e => { if (st.busy || st.auto) return; e.preventDefault(); try { iv.setPointerCapture(e.pointerId); } catch {} clearTimeout(H.timer); stopLoop(); H.cur = [at(e)]; H.strokes.push(H.cur); paintInk(); });
+    iv.addEventListener("pointermove", e => { if (!H.cur) return; e.preventDefault(); const evs = e.getCoalescedEvents?.() || []; for (const ev of evs.length ? evs : [e]) H.cur.push(at(ev)); paintInk(); });
+    const up = () => { if (!H.cur) return; H.cur = null; clearTimeout(H.timer); H.timer = setTimeout(() => st.hand === H && handJudge(), 1200); };
+    iv.addEventListener("pointerup", up); iv.addEventListener("pointercancel", up);
+    H.paintInk = paintInk; H.paintGuide = paintGuide; H.col = col;
+  }
+  async function handJudge() {
+    const H = st.hand; if (!H || !H.strokes.length || st.busy || st.s >= segs.length) return;
+    clearTimeout(H.timer);
+    const c = words()[st.w].chars[st.c], r = handScore(c.ch, H.strokes); H.last = r;
+    if (r.score >= PASS_H) { // 통과 — 초록 + 그 글자 소리 → 다음 글자
+      note.textContent = ""; H.paintInk(H.col("--okc"));
+      st.typed = c.jamo.slice(); st.k = c.jamo.length; st.part = "";
+      return finishChar(c.jamo[c.jamo.length - 1], c, c.file || jamoSrc(c.jamo[c.jamo.length - 1]));
+    }
+    note.textContent = `${t("h_again")} · ${Math.round(r.score * 100)}%`;
+    H.paintGuide(r); st.busy = true; await run(["bad"]); st.busy = false;
+    setTimeout(() => { if (st.hand === H) H.paintGuide(); }, 900);
+  }
+
+  async function finishChar(j, c, src = jamoSrc(j)) { // W3 · 손글씨는 글자 소리(src)
     st.busy = true; st.done = true;
     work.querySelector(".box")?.classList.add("ok");
-    const ok = await run(["ok", jamoSrc(j), GAP_NEXT]);
+    const ok = await run(["ok", src, GAP_NEXT]);
     st.done = false;
     if (!ok || !st.alive) { st.busy = false; st.queue = []; return; }
     st.busy = false; st.c++; st.k = 0; st.typed = []; st.part = "";
@@ -292,9 +369,13 @@ export default async function write(app, ep, id, opts = {}) {
       stopLoop(); cb.blur(); run([c.file]); // 10-06 투덜이: 한 번만(되풀이 없앰) · 누른 뒤 표시 안 남김
       return;
     }
+    const mb = e.target.closest("[data-mode]");
+    if (mb) { if (st.mode !== mb.dataset.mode) { st.mode = mb.dataset.mode; try { localStorage.setItem("malmun.wmode", st.mode); } catch {} app.querySelectorAll("[data-mode]").forEach(x => x.setAttribute("aria-pressed", String(x.dataset.mode === st.mode))); st.typed = []; st.k = 0; st.part = ""; render(); } return; }
     const b = e.target.closest("[data-act]");
     if (!b) return;
     const a = b.dataset.act;
+    if (a === "hdone") return handJudge();
+    if (a === "hundo" || a === "hclear") { const H = st.hand; if (!H) return; clearTimeout(H.timer); if (a === "hundo") H.strokes.pop(); else H.strokes = []; H.paintInk(); note.textContent = ""; return; }
     if (a === "sent") toggleSentence();
     else if (a === "word" && st.s < segs.length && !st.busy) { // W4 — 원음에서 이 낱말만
       stopLoop(); st.sent = false; markSent();
@@ -311,5 +392,5 @@ export default async function write(app, ep, id, opts = {}) {
   // 이 줄에서 쓸 소리를 미리 받아 풀어 둔다(대사 · 낱말·토막 · 글자 · 자판 자모) — 누르는 순간 바로 나오게
   sfx.preload([lineSrc, ...allWords.map(w => unitSrc(w.unit)), ...segs.map(g => unitSrc(g.unit)),
     ...allWords.flatMap(w => w.chars.map(c => c.file)), ...[...KEYS, ...VOW, ...VOW2].map(jamoSrc)]);
-  return () => { release(); st.alive = false; hush(); delete app.__wr; };
+  return () => { release(); st.alive = false; hush(); st.hand?.ro?.disconnect(); clearTimeout(st.hand?.timer); delete app.__wr; };
 }

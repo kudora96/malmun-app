@@ -10,23 +10,23 @@
 //  R7 영상은 늘 맨 위 · 지금 줄은 영상 바로 아래(앞 줄은 영상 뒤로) — 손으로 목록을 움직이면 4초 동안은 따라가지 않음
 //  R8 듣기 모드(대사→설명 · 설명만)도 R1~R6 그대로(영상 대신 소리 조각) · 모드를 바꾸면 멈춤(▶ 로 시작)
 //  R9 다시 들어오면 마지막 줄이 선택된 채 멈춰 있음
-import { t, lang, langName } from "../i18n.js?v=1007.12";
-import { esc, renderText, glossCards, sayParts } from "../text.js?v=1007.12";
-import { episode } from "../data.js?v=1007.12";
-import { paths } from "../paths.js?v=1007.12";
-import { Sequence } from "../audio.js?v=1007.12";
-import { I, progress, SPEAKER } from "../ui.js?v=1007.12";
-import writeView from "./write.js?v=1007.12";
-import { diagEnv, keepDiag } from "../diag.js?v=1007.12";
-import { playMine as playMineRec } from "../playmine.js?v=1007.12";
-import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V } from "../rhythm.js?v=1007.12";
-import { playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1007.12";
-import { bestHeard, heardHTML, endHint } from "../heard.js?v=1007.12";
-import { recDel, downloadRec, askPersist } from "../recstore.js?v=1007.12";
-import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1007.12";
-import { scoreFx, stopFx } from "../scorefx.js?v=1007.12"; // 점수별 효과(본부 10-05)
-import { record, micWhy, srWhy, canScore, closeMic, logRec, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1007.12";
-import { hold, quietWake } from "../wake.js?v=1007.12";
+import { t, lang, langName } from "../i18n.js?v=1007.38";
+import { esc, renderText, glossCards, sayParts } from "../text.js?v=1007.38";
+import { episode } from "../data.js?v=1007.38";
+import { paths } from "../paths.js?v=1007.38";
+import { Sequence } from "../audio.js?v=1007.38";
+import { I, progress, SPEAKER } from "../ui.js?v=1007.38";
+import writeView from "./write.js?v=1007.38";
+import { diagEnv, keepDiag } from "../diag.js?v=1007.38";
+import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1007.38";
+import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V } from "../rhythm.js?v=1007.38";
+import { playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1007.38";
+import { bestHeard, heardHTML, endHint } from "../heard.js?v=1007.38";
+import { recDel, downloadRec, askPersist } from "../recstore.js?v=1007.38";
+import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1007.38";
+import { scoreFx, stopFx } from "../scorefx.js?v=1007.38"; // 점수별 효과(본부 10-05)
+import { record, micWhy, srWhy, canScore, closeMic, logRec, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1007.38";
+import { hold, quietWake } from "../wake.js?v=1007.38";
 
 const RATES = [1, 0.75, 0.5];
 const pref = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } };
@@ -473,7 +473,7 @@ export default async function learn(app, ep, startId) {
   function spStop() { quietWake(false); sp?.ctl?.stop(true); sp?.audio?.pause(); sp?.slow?.pause(); sp = null; closeMic(); } // 카드를 닫을 때 마이크도 닫음(그때처럼 · 카드가 열려 있는 동안은 쥐고 있음)
   const playRec = b => { // 말 시작 자리부터 — 풀어서 그 자리부터 직결 재생(js/playmine.js · <audio> 자리 옮기기 안 씀) · 한 번만
     ex.stop(); clearTimeout(st.gap); st.gap = 0; st.exLoop = null; sp.audio?.pause();
-    return (sp.audio = playMineRec(b));
+    return (sp.audio = playMineRec(b, { keepFirst: keepFirstOf(L[sp.i]?.say?.ko) }));
   };
   // [내 목소리] = 방금 녹음(잘됐든 못됐든) · 80% 넘으면 [저장] → 눌러야 저장 · 저장한 것은 「저장됨 ▶」 · 열 때 예전 점수 안 보임(투덜이 10-04)
   async function spInit(i) {
@@ -516,7 +516,7 @@ export default async function learn(app, ep, startId) {
     keepDiag(r.blob, { where: "card", line: L[i].id, score: sc, heard: [...new Set(r.heard)] });
     // 리듬(투덜이 10-06 허락) — 글자 점수 × 리듬 배수(말하기 창과 같은 함수) · 근거는 결과 줄에
     let rhy = null;
-    if (sc > 0) { const rh = await rhythmOf({ ep, key: `${ep}_${String(L[i].id).padStart(2, "0")}_say`, url: L[i].say.src, text: L[i].say.ko, blob: r.blob }); if (st.panel?.i !== i) return; if (rh) { rhy = { L: sc, R: rh.R, worst: rh.worst }; sc = withRhythm(sc, rh.R); } }
+    if (sc > 0) { const rh = await rhythmOf({ ep, key: `${ep}_${String(L[i].id).padStart(2, "0")}_say`, url: L[i].say.src, text: L[i].say.ko, blob: r.blob, heard: bestHeard(L[i].say.ko, r.heard) }); if (st.panel?.i !== i) return; if (rh) { rhy = { L: sc, R: rh.R, worst: rh.worst }; sc = withRhythm(sc, rh.R); } }
     sp.blob = r.blob; sp.score = sc; sp.rhy = rhy;
     mineB.disabled = false; // 방금 녹음 — 언제나
     btn.textContent = "🎤 " + t(sc != null && sc >= PASS ? "speak_now" : "try_again");

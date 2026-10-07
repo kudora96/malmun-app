@@ -6,7 +6,7 @@
   try {
   const W = ms => new Promise(s => setTimeout(s, ms));
   const $ = s => document.querySelector(s);
-  const ok = (c, name, extra = "") => res.push(`${c ? "✓" : "✗"} ${name}${extra ? " · " + extra : ""}`);
+  const ok = (c, name, extra = "") => { res.push(`${c ? "✓" : "✗"} ${name}${extra ? " · " + extra : ""}`); try { sessionStorage.setItem("__sp_part", res.join("\n")); } catch {} }; // 도중 결과도 남김(페이지가 바뀌어도 읽게)
   const log = (window.__sfxLog = []); window.__sfxVolume = 0.0001;
   const vd = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, "volume");
   Object.defineProperty(HTMLMediaElement.prototype, "volume", { configurable: true, get() { return vd.get.call(this); }, set(v) { vd.set.call(this, Math.min(v, 0.0001)); } });

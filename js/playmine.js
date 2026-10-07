@@ -2,7 +2,7 @@
 // · <audio> 자리 옮기기(seek)는 쓰지 않는다(webm 을 찾아가며 소리가 깨졌다 — 1004.9)
 // · blob 을 decodeAudioData 로 풀어 AudioBufferSourceNode.start(0, lead) · 연결은 source → destination 직결(게인·필터 없음)
 //   lead = 말 시작 0.15초 전(같은 버퍼에서 잼) · 끝나면 멈춤 · 풀기 실패하면 <audio> 로 처음부터
-import { audioCtx } from "./wake.js?v=1007.12";
+import { audioCtx } from "./wake.js?v=1007.38";
 
 // 시작 = 말 시작 0.08초 전(본부 10-04: 0.15 → 0.08 · 앞 잡소리가 끼지 않게)
 // 첫 소리가 말보다 작고(최대에서 8dB 넘게 아래) 뒤에 조용한 틈이 있으면 녹음 켜는 순간의 잡소리일 수 있다(앞 소리 꼬리·딸깍 — 투덜이 17:49 녹음: −42dB 잡소리 → −53~−65 틈 → −30 말) →
@@ -27,7 +27,7 @@ function clustersOf(n, voiced, f0 = 0) {
   }
   return out;
 }
-export function voicedOnset(buf, from = 0, floor = from, ref = 0) {
+export function voicedOnset(buf, from = 0, floor = from, ref = 0, strongDb = 18) {
   const d = buf.getChannelData(0), sr = buf.sampleRate, win = Math.max(1, Math.round(sr * 0.02)), n = Math.floor(d.length / win);
   if (n < 3) return -1;
   const rms = new Float32Array(n);
@@ -50,7 +50,7 @@ export function voicedOnset(buf, from = 0, floor = from, ref = 0) {
   const memo0 = new Int8Array(n).fill(-1), vz0 = f => (memo0[f] < 0 ? (memo0[f] = voiced(f) ? 1 : 0) : memo0[f]) === 1;
   // 시작 찾기의 「목소리」 = 자기상관 + 가장 큰 말소리에서 18dB 안(본부 10-07 투덜이 r3 — 말 앞 1초 동안 −12~−25dB 숨·옷·손 소리가 자기상관만 넘어 목소리로 잡힘 · 끝 찾기와 같은 조건)
   //   작은 첫 자음(ㅅ·ㅎ·ㅈ)은 아래 앞으로 늘리기가 살림 · 「와!」 같은 짧고 큰 첫 낱말은 18dB 안이라 그대로
-  const strong = peak * Math.pow(10, -18 / 20), vz = f => rms[f] > strong && vz0(f);
+  const strong = peak * Math.pow(10, -strongDb / 20), vz = f => rms[f] > strong && vz0(f);
   // 첫 덩어리가 짧고(목소리 0.12초 미만 · 본보기 길이를 알면 0.25초 미만이고 나머지가 본보기 말의 0.6배 넘음) 뒤에 0.35초 넘는 틈 = 앞 잡음 → 버리고 다음 덩어리부터
   const cl = clustersOf(n, vz, Math.floor((from * sr) / win));
   let dropped = false;
@@ -103,7 +103,11 @@ export function voicedEnd(buf, post = 0.12, ref = 0) { // ref = 본보기 말 �
   for (let f = last + 1; f < n && f - last <= 15 && rms[f] > soft && rms[f] < vlev && zc[f] < zmax; f++) b = f; // 15칸 = 0.3초
   return Math.min(buf.duration, ((b + 1) * win) / sr + post);
 }
-export function leadOf(buf, pre = 0.08, ref = 0) { // ref = 본보기 말 길이(초 · 알면)
+// keepFirst(투덜이 10-07 허락) = 첫 낱말 뒤에 쉼이 있는 말(「아, 저 혼자 알면」「와!」) — 짧은 첫 덩어리를 앞 잡음으로 버리지 않음
+//   옛 건너뛰기(첫 소리 → 조용한 틈 → 말)를 하지 않고 · 목소리 덩어리는 0.12초 미만일 때만 버림(툭·손 소리는 여전히 빠짐)
+export const keepFirstOf = text => /^[\s"'「“]*[^\s,.?!…]+[,.?!…]/.test(String(text || "")); // 첫 낱말 바로 뒤 부호
+export function leadOf(buf, pre = 0.08, ref = 0, keepFirst = false) { // ref = 본보기 말 길이(초 · 알면)
+  if (keepFirst) { const first = leadOld(buf, 0, false), v = voicedOnset(buf, first, 0, 0, 28); return Math.max(0, (v >= 0 ? v : first) - pre); } // 28dB = 첫 「아」가 한숨처럼 작아도(−18~−21dB) 목소리면 살림
   const old = leadOld(buf, 0), first = leadOld(buf, 0, false); // 옛 방식(앞 잡소리 → 조용한 틈 → 말)으로 먼저 건너뛴 자리부터 · first = 건너뛰기 없이 첫 소리
   const v = voicedOnset(buf, old, old > first + 1e-9 ? old : 0, ref);
   return Math.max(0, (v >= 0 ? v : old) - pre);
@@ -140,7 +144,7 @@ export function gainOf(buf, target = -16) {
 }
 
 // → { pause(), done: Promise } — pause() 는 멈춤(같은 단추 다시 = 처음부터 한 번)
-export function playMine(blob) {
+export function playMine(blob, o = {}) { // o.keepFirst = 첫 낱말 뒤 쉼 있는 말
   let src = null, el = null, stopped = false, resolve;
   const done = new Promise(r => (resolve = r));
   const h = { pause() { stopped = true; try { src?.stop(); } catch {} el?.pause(); resolve(); }, done };
@@ -153,7 +157,7 @@ export function playMine(blob) {
   const ctx = audioCtx();
   blob.arrayBuffer().then(ab => ctx.decodeAudioData(ab)).then(buf => {
     if (stopped) return resolve();
-    const lead = leadOf(buf), gain = gainOf(buf), end = Math.max(lead + 0.1, voicedEnd(buf)); // 끝 = 말 끝(뒤 잡음 빼기 · 투덜이 10-06)
+    const lead = leadOf(buf, 0.08, 0, !!o.keepFirst), gain = gainOf(buf), end = Math.max(lead + 0.1, voicedEnd(buf)); // 끝 = 말 끝(뒤 잡음 빼기 · 투덜이 10-06)
     src = ctx.createBufferSource(); src.buffer = buf;
     const g = ctx.createGain(), G = gain * (window.__sfxVolume ?? 1); // 곱하기만(압축·필터 없음) · 점검에서만 작게
     const t0 = ctx.currentTime + 0.01, len = end - lead; g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(G, t0 + FADE); // 시작 15ms 페이드인

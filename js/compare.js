@@ -5,13 +5,13 @@
 //  · 재생: 본보기 → 0.4초 → 내 목소리 · 재생 위치 세로 막대 + 지금 음절 강조 · 파형·음절 칸을 누르면 그 줄 그 음절부터
 //  녹음·점수 계산·[내 목소리] 재생(playmine.js playMine)은 그대로 — 여기는 그리기·DTW·비교 화면 안 재생만
 //  (본보기는 sfx.play 그대로 · 내 목소리는 playmine 과 같은 방식: decodeAudioData → BufferSource.start(t, offset) → Gain)
-import { prepare, rhythmScore, loadAlign, isSyl } from "./rhythm.js?v=1007.12";
-import { esc } from "./text.js?v=1007.12";
-import { align } from "./score.js?v=1007.12";
-import { audioCtx } from "./wake.js?v=1007.12";
-import { leadOf, gainOf, FADE, FADE_OUT, voicedEnd } from "./playmine.js?v=1007.12";
-import { speechEnd, wavOf } from "./recstore.js?v=1007.12";
-import * as sfx from "./sfx.js?v=1007.12";
+import { prepare, rhythmScore, loadAlign, isSyl, R_FULL } from "./rhythm.js?v=1007.38";
+import { esc } from "./text.js?v=1007.38";
+import { align } from "./score.js?v=1007.38";
+import { audioCtx } from "./wake.js?v=1007.38";
+import { leadOf, gainOf, FADE, FADE_OUT, voicedEnd } from "./playmine.js?v=1007.38";
+import { speechEnd, wavOf } from "./recstore.js?v=1007.38";
+import * as sfx from "./sfx.js?v=1007.38";
 
 // host 안에 그린다 → { close() } · o = { ep, key, url(본보기), text(본보기 글), blob(내 녹음), heard(들은 말 글자 · 없으면 색 없음), t(문구) }
 // 속도 단계(본부 10-07 · 투덜이 「견본에도 각각」) — 줄마다 자기 속도 · 누를 때마다 1 → 0.9 → 0.75 → 0.6 → 0.5 → 1 · 0.5 아래는 늘이기가 끊겨 뺌 · 고른 값 기억
@@ -40,8 +40,8 @@ export async function openCompare(host, o) {
   if (!mbuf || !ybuf) { host.innerHTML = `<div class="cmpw"><p class="cmpmsg">${esc(t("cmp_none"))}</p></div>`; return { close() { st.alive = false; } }; }
   // 본보기 음절(정렬 파일 · 없으면 말 구간을 고르게 나눈 임시 칸)
   // 음절 칸 = 리듬 점수와 같은 함수(js/rhythm.js prepare) · 본보기 = align.json · 내 목소리 = DTW
-  const { W, msyl, ysyl, mLead, mStop, mEnd, mLead0, ref, yLead, yStop } = prepare({ al, key: o.key, text: o.text, mbuf, ybuf }), yGain = gainOf(ybuf);
-  const rh = rhythmScore({ msyl, ysyl, mbuf, ybuf }); // 리듬이 가장 많이 깎인 음절 = 두 줄 그 칸에 주황 테두리
+  const { W, msyl, ysyl, ends, mLead, mStop, mEnd, mLead0, ref, yLead, yStop } = prepare({ al, key: o.key, text: o.text, mbuf, ybuf }), yGain = gainOf(ybuf);
+  const rh = rhythmScore({ msyl, ysyl, mbuf, ybuf, ends, heard: o.heard }); // 리듬이 가장 많이 깎인 음절 = 두 줄 그 칸에 주황 테두리
   // 맞음/틀림 — 점수와 같은 정렬(본보기 음절마다 m 맞음 · s 바뀜 · d 빠짐)
   // 내 목소리 칸에는 「들은 글자」(본부 10-06): 바뀜 = 큰 빨강 들은 글자 + 위 작게 흐린 본보기 글자 · 빠짐 = 흐린 점선 칸 · 덧붙은 소리 = 회색 작은 칸(앞 음절 끝에)
   let marks = W.map(() => ""), heardCh = W.map(() => null), extra = [];
@@ -56,27 +56,40 @@ export async function openCompare(host, o) {
   }
   const span = Math.max(mStop - mLead, yStop - yLead, 0.5);
   const pos = (s, e, lead) => `left:${(100 * (s - lead)) / span}%;width:${(100 * Math.max(0.02, e - s)) / span}%`;
-  const cell = (x, k, lead, mine) => `<span data-k="${k}" class="cel ${marks[k]}${rh.worst && rh.worst.k === k && rh.R < 0.9 ? " rworst" : ""}" style="${pos(x.s, x.e, lead)}"><span class="tx">${mine && marks[k] === "bad" && heardCh[k] ? `<small class="want">${esc(x.ch)}</small><span class="got">${esc(heardCh[k])}</span>` : esc(x.ch)}</span></span>`;
+  const cell = (x, k, lead, mine) => `<span data-k="${k}" class="cel ${marks[k]}${rh.worst && rh.worst.k === k && rh.R < R_FULL ? " rworst" : ""}" style="${pos(x.s, x.e, lead)}"><span class="tx">${mine && marks[k] === "bad" && heardCh[k] ? `<small class="want">${esc(x.ch)}</small><span class="got">${esc(heardCh[k])}</span>` : esc(x.ch)}</span>${worstK === k ? `<b class="wtip">${rtip}</b>` : ""}</span>`;
+  // 낱말 칸(본부 10-07 투덜이 「글자가 길면 폰트를 알아서 줄여야」) — 10px 로도 음절 칸보다 글이 넓으면 그 줄은 띄어쓰기 낱말 하나 = 칸 하나
+  // 칸 안 글자 = 음절별 색 그대로 · 리듬 가장 나쁜 음절 = 그 글자 주황 밑줄 · 틀린 글자 위 작은 본보기 글자 대신 올리면(폰은 손가락) 「들은 말 / 본보기」 말풍선
+  const groups = (() => { const g = [], ws = String(o.text).split(/\s+/).filter(Boolean); let k = 0; for (const w of ws) { const n = [...w].filter(isSyl).length; if (!n) continue; g.push(Array.from({ length: n }, (_, i) => k + i)); k += n; } return k === W.length ? g : null; })();
+  const worstK = rh.worst && rh.R < R_FULL ? rh.worst.k : -1;
+  // 리듬 가장 나쁜 음절 = 왜인지 숫자로(본부 10-07 투덜이) — 올리면(폰은 손가락) 「नमुना 0.42s · मेरो आवाज 0.21s」 + 길다/짧다/멈춤 문구
+  const rw = rh.worst, rtip = worstK < 0 ? "" : `${rw.kind === "pause" ? `<span>${esc(t("my_voice"))} ⏸ ${(rw.gap ?? 0).toFixed(2)}s</span>` : rw.a != null ? `<span>${esc(t("model"))} ${rw.a.toFixed(2)}s · ${esc(t("my_voice"))} ${rw.b.toFixed(2)}s</span>` : ""}<span>${esc(t("rhy_" + rw.kind, { s: `「${rw.ch}」` }))}</span>`;
+  const wcell = (g, wi, syl, lead, mine) => {
+    const a = syl[g[0]], b = syl[g[g.length - 1]], tip = mine && o.heard && g.some(k => marks[k] !== "ok") ? `<span>${esc(t("heard_label"))}: ${esc(g.map(k => (marks[k] === "miss" ? "·" : heardCh[k] ?? msyl[k].ch)).join(""))}</span><span>${esc(t("model"))}: ${esc(g.map(k => msyl[k].ch).join(""))}</span>` : "";
+    return `<span class="wcel" data-w="${wi}" style="${pos(a.s, b.e, lead)}"><span class="tx">${g.map(k => `<span data-k="${k}" class="wch ${marks[k]}${worstK === k ? " rworst" : ""}">${esc(mine && marks[k] === "bad" && heardCh[k] ? heardCh[k] : syl[k].ch)}</span>`).join("")}</span>${tip || g.includes(worstK) ? `<b class="wtip">${tip}${g.includes(worstK) ? rtip : ""}</b>` : ""}</span>`;
+  };
   const extras = (syl, lead) => extra.map(x => { const at = x.after >= 0 ? syl[x.after].e : syl[0].s, [a0, a1] = x.after >= 0 ? [at - 0.03, at + 0.05] : [Math.max(lead, at - 0.08), at]; return `<span class="add" style="${pos(a0, a1, lead)}">${esc(x.ch)}</span>`; }).join("");
   const rkey = c => (c === "m" ? "m" : "y");
-  const row = (cls, lab, syl, lead) => `<div class="crow ${cls}"><div class="clab"><button class="cplay" data-play="${cls}">▶ ${esc(lab)}</button><button class="crate" data-rate="${cls}" aria-pressed="${getRate(rkey(cls)) !== 1}" aria-label="${esc(t("speed"))}">${rateTxt(getRate(rkey(cls)))}</button></div><div class="cwave"><canvas></canvas><i class="cbar" hidden></i></div><div class="csyl ko" lang="ko">${syl.map((x, k) => cell(x, k, lead, cls === "y")).join("")}${cls === "y" ? extras(syl, lead) : ""}</div></div>`;
+  const row = (cls, lab, syl, lead) => `<div class="crow ${cls}"><div class="clab"><button class="cplay" data-play="${cls}">▶ ${esc(lab)}</button><button class="crate" data-rate="${cls}" aria-pressed="${getRate(rkey(cls)) !== 1}" aria-label="${esc(t("speed"))}">${rateTxt(getRate(rkey(cls)))}</button></div><div class="cwave"><canvas></canvas><i class="cbar" hidden></i></div><div class="csyl ko" lang="ko">${syl.map((x, k) => cell(x, k, lead, cls === "y")).join("")}${groups ? groups.map((g, wi) => wcell(g, wi, syl, lead, cls === "y")).join("") : ""}${cls === "y" ? extras(syl, lead) : ""}</div></div>`;
   const ticks = []; for (let s = 0; s <= span + 1e-6; s += span > 3 ? 1 : 0.5) ticks.push(`<span style="left:${(100 * s) / span}%">${s.toFixed(1)}</span>`);
   host.innerHTML = `<div class="cmpw">${row("m", t("model"), msyl, mLead)}${row("y", t("my_voice"), ysyl, yLead)}<div class="cruler">${ticks.join("")}</div><div class="cfoot"><button class="craw" data-raw title="lead ${yLead.toFixed(2)} · end ${yStop.toFixed(2)} · ${ybuf.duration.toFixed(2)}s">⬇ ${esc(t("raw_dl"))}</button></div></div>`;
   const rows = [...host.querySelectorAll(".crow")];
-  // 음절 글자 = 두 줄 모두 한 크기(본부 10-06 투덜이) · 칸이 글보다 좁으면 글을 칸 가운데 위·아래 두 층으로 번갈아(가는 선으로 칸과 이음) — 겹치지 않게
-  const tight = () => host.querySelectorAll(".csyl").forEach(row => { // 차례대로 놓되 가운데 → 위 → 아래 중 이미 놓인 글자와 안 겹치는 첫 자리(실제 크기로 잼)
-    const placed = [], hit = (a, b) => a.right > b.left + 2 && b.right > a.left + 2 && a.bottom > b.top + 2 && b.bottom > a.top + 2; // 2px 닿는 것까지는 겹침 아님
-    row.querySelectorAll("button").forEach(b => {
-      const tx = b.querySelector(".tx"); if (!tx) return;
-      b.classList.remove("up", "dn", "narrow"); const narrow = tx.offsetWidth > b.clientWidth - 2;
-      let best = null;
-      for (const c of ["", "up", "dn"]) { b.classList.remove("up", "dn"); if (c) b.classList.add(c); const r = tx.getBoundingClientRect(); if (!placed.some(p => hit(r, p))) { best = c; break; } }
-      b.classList.remove("up", "dn"); if (best === null) best = "up"; if (best) b.classList.add(best);
-      if (narrow || best) b.classList.add("narrow");
-      placed.push(tx.getBoundingClientRect());
-    });
-  });
+  // 글자 크기 자동(본부 10-07) — 두 줄 같은 크기 15px → 가장 좁은 음절 칸에 글이 들어갈 때까지 줄임(최소 10px) · 그래도 넓으면 그 줄만 낱말 칸 · 낱말 칸도 넓으면 그 낱말만 더 줄임(최소 9px)
+  const tight = () => {
+    const rs = [...host.querySelectorAll(".csyl")], over = r => [...r.querySelectorAll(".cel")].some(c => c.querySelector(".tx").offsetWidth > c.clientWidth);
+    rs.forEach(r => { r.classList.remove("words"); r.querySelectorAll(".wcel").forEach(w => { w.classList.remove("up", "dn"); w.querySelector(".tx").style.removeProperty("font-size"); }); });
+    let fs = 15; host.style.setProperty("--cfs", fs + "px");
+    while (fs > 10 && rs.some(over)) host.style.setProperty("--cfs", --fs + "px");
+    rs.forEach(r => { if (!groups || !over(r)) return; r.classList.add("words");
+      r.querySelectorAll(".wcel").forEach(w => { const tx = w.querySelector(".tx"); for (let f = fs - 0.5; f >= 9 && tx.offsetWidth > w.clientWidth; f -= 0.5) tx.style.fontSize = f + "px"; });
+      // 9px 로도 낱말이 칸보다 넓으면(아주 긴 줄) 낱말을 가운데 → 위 → 아래 중 이미 놓인 낱말과 안 겹치는 첫 층에
+      const placed = [], hit = (a, b) => a.right > b.left + 1 && b.right > a.left + 1 && a.bottom > b.top + 1 && b.bottom > a.top + 1;
+      r.querySelectorAll(".wcel").forEach(w => { const tx = w.querySelector(".tx"); let best = null;
+        for (const c of ["", "up", "dn"]) { w.classList.remove("up", "dn"); if (c) w.classList.add(c); const q = tx.getBoundingClientRect(); if (!placed.some(p => hit(q, p))) { best = c; break; } }
+        w.classList.remove("up", "dn"); if (best === null) best = "up"; if (best) w.classList.add(best); placed.push(tx.getBoundingClientRect()); }); });
+    host.querySelectorAll(".wtip").forEach(b => { const c = b.parentElement, r = c.closest(".csyl").getBoundingClientRect(), x = c.getBoundingClientRect(), mid = (x.left + x.right) / 2 - r.left; b.classList.toggle("tl", mid < r.width * 0.3); b.classList.toggle("tr", mid > r.width * 0.7); }); // 말풍선이 화면 밖으로 안 나가게
+  };
   tight(); document.fonts?.ready.then(() => st.alive && tight()); setTimeout(() => st.alive && tight(), 120); // 글꼴이 늦게 와 글자 폭이 바뀌어도 다시
+  host.addEventListener("pointerdown", e => { const w = e.target.closest(".wcel, .cel.rworst"); if (!w || e.pointerType === "mouse") return; host.querySelectorAll(".tip").forEach(x => x !== w && x.classList.remove("tip")); w.classList.add("tip"); clearTimeout(st.tipT); st.tipT = setTimeout(() => w.classList.remove("tip"), 2500); }); // 폰 = 손가락 닿으면 말풍선 잠깐
   // 파형 — 20ms 보다 잘게(가로 픽셀마다 최대 크기) · 내 목소리는 gainOf 크기로
   const draw = (cv, buf, lead, g, stop = Infinity) => { // stop 뒤(말 끝 뒤 잡음)는 그리지 않음
     const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1, W2 = Math.max(1, Math.round(r.width * dpr)), H2 = Math.max(1, Math.round(r.height * dpr));
@@ -92,9 +105,9 @@ export async function openCompare(host, o) {
   paintWaves();
   const ro = new ResizeObserver(() => { paintWaves(); tight(); }); ro.observe(host);
   // 재생 — 본보기 = sfx.play(같은 버퍼 · offset) · 내 목소리 = BufferSource.start(t, offset) + Gain(playmine 과 같은 방식)
-  const stopPlay = () => { cancelAnimationFrame(st.raf); clearTimeout(st.timer); sfx.stopAll(); try { st.src?.stop(); } catch {} st.src = null; if (st.el) { st.el.onended = st.el.ontimeupdate = null; st.el.pause(); st.elDone?.(); st.el = null; } rows.forEach(r => { r.querySelector(".cbar").hidden = true; r.querySelectorAll(".csyl .cel").forEach(b => b.classList.remove("now")); r.classList.remove("on"); }); host.classList.remove("playing"); };
+  const stopPlay = () => { cancelAnimationFrame(st.raf); clearTimeout(st.timer); sfx.stopAll(); try { st.src?.stop(); } catch {} st.src = null; if (st.el) { st.el.onended = st.el.ontimeupdate = null; st.el.pause(); st.elDone?.(); st.el = null; } rows.forEach(r => { r.querySelector(".cbar").hidden = true; r.querySelectorAll(".csyl .now").forEach(b => b.classList.remove("now")); r.classList.remove("on"); }); host.classList.remove("playing"); };
   const follow = (ri, lead, syl, from, t0, posOf) => { // 재생 위치 막대 + 지금 음절 · posOf = 느리게(<audio>)일 때 지금 자리
-    const r = rows[ri], bar = r.querySelector(".cbar"), bs = [...r.querySelectorAll(".csyl .cel")];
+    const r = rows[ri], bar = r.querySelector(".cbar"), bs = [...r.querySelectorAll(r.querySelector(".csyl").classList.contains("words") ? ".csyl .wch" : ".csyl .cel")]; // 낱말 칸이면 그 안 글자
     r.classList.add("on"); bar.hidden = false;
     const step = () => {
       const pos = posOf ? posOf() : from + Math.max(0, ctx.currentTime - t0);
@@ -168,5 +181,5 @@ export async function openCompare(host, o) {
   };
   playBoth();
   window.__cmp = { st, stopPlay, rh, msyl, ysyl, marks, heardCh, extra, span, mLead, yLead, yStop, ybuf, playBoth, playRow }; // 점검 도구용
-  return { close() { st.alive = false; stopPlay(); if (st.wavUrl) URL.revokeObjectURL(st.wavUrl); ro.disconnect(); host.onclick = null; host.innerHTML = ""; }, replay: playBoth };
+  return { close() { st.alive = false; stopPlay(); clearTimeout(st.tipT); if (st.wavUrl) URL.revokeObjectURL(st.wavUrl); ro.disconnect(); host.onclick = null; host.innerHTML = ""; }, replay: playBoth };
 }
