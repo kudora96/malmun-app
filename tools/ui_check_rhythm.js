@@ -14,7 +14,7 @@
   { const k = it.syl.findIndex(x => x.ch === "있"), at = Math.round(it.syl[k].s * sr), d = mbuf.getChannelData(0), gap = Math.round(0.4 * sr);
     const nb = ctx.createBuffer(1, d.length + gap, sr), x = nb.getChannelData(0); x.set(d.subarray(0, at), 0); x.set(d.subarray(at), at + gap);
     const c = R(nb); ok(c.R >= 0.7 && c.R <= 0.88 && c.worst?.kind === "pause", "ⓒ 「있」 앞 0.4초 틈 → R 0.7~0.88 · 쉼으로 짚음", `R ${c.R.toFixed(3)} · ${c.worst?.kind} 「${c.worst?.ch}」`); }
-  for (const f of ["r1", "r2"]) {
+  for (const f of ["r1", "r2", "r3"]) {
     const r = await fetch(`/tools/_rec/${f}.webm`); if (!r.ok) { res.push(`· ${f}.webm 없음(건너뜀)`); continue; }
     const yb = await new OfflineAudioContext(1, 48000, 48000).decodeAudioData(await r.arrayBuffer()), d = R(yb);
     res.push(`· 실제 녹음 ${f}: R ${d.R.toFixed(3)} · 배수 ${(withRhythm(100, d.R))}/100 · 가장 많이 깎인 곳 ${d.worst ? `${d.worst.kind} 「${d.worst.ch}」` : "없음"} · 내 음절 ${d.pr.ysyl.map(x => x.ch + x.s.toFixed(2)).join(" ")}`);

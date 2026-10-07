@@ -2,7 +2,7 @@
 // · <audio> 자리 옮기기(seek)는 쓰지 않는다(webm 을 찾아가며 소리가 깨졌다 — 1004.9)
 // · blob 을 decodeAudioData 로 풀어 AudioBufferSourceNode.start(0, lead) · 연결은 source → destination 직결(게인·필터 없음)
 //   lead = 말 시작 0.15초 전(같은 버퍼에서 잼) · 끝나면 멈춤 · 풀기 실패하면 <audio> 로 처음부터
-import { audioCtx } from "./wake.js?v=1006.89";
+import { audioCtx } from "./wake.js?v=1007.3";
 
 // 시작 = 말 시작 0.08초 전(본부 10-04: 0.15 → 0.08 · 앞 잡소리가 끼지 않게)
 // 첫 소리가 말보다 작고(최대에서 8dB 넘게 아래) 뒤에 조용한 틈이 있으면 녹음 켜는 순간의 잡소리일 수 있다(앞 소리 꼬리·딸깍 — 투덜이 17:49 녹음: −42dB 잡소리 → −53~−65 틈 → −30 말) →
@@ -47,7 +47,10 @@ export function voicedOnset(buf, from = 0, floor = from, ref = 0) {
     }
     return best >= 0.5;
   };
-  const memo = new Int8Array(n).fill(-1), vz = f => (memo[f] < 0 ? (memo[f] = voiced(f) ? 1 : 0) : memo[f]) === 1;
+  const memo0 = new Int8Array(n).fill(-1), vz0 = f => (memo0[f] < 0 ? (memo0[f] = voiced(f) ? 1 : 0) : memo0[f]) === 1;
+  // 시작 찾기의 「목소리」 = 자기상관 + 가장 큰 말소리에서 18dB 안(본부 10-07 투덜이 r3 — 말 앞 1초 동안 −12~−25dB 숨·옷·손 소리가 자기상관만 넘어 목소리로 잡힘 · 끝 찾기와 같은 조건)
+  //   작은 첫 자음(ㅅ·ㅎ·ㅈ)은 아래 앞으로 늘리기가 살림 · 「와!」 같은 짧고 큰 첫 낱말은 18dB 안이라 그대로
+  const strong = peak * Math.pow(10, -18 / 20), vz = f => rms[f] > strong && vz0(f);
   // 첫 덩어리가 짧고(목소리 0.12초 미만 · 본보기 길이를 알면 0.25초 미만이고 나머지가 본보기 말의 0.6배 넘음) 뒤에 0.35초 넘는 틈 = 앞 잡음 → 버리고 다음 덩어리부터
   const cl = clustersOf(n, vz, Math.floor((from * sr) / win));
   let dropped = false;
