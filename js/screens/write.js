@@ -13,15 +13,15 @@
 //  W5 소리는 언제나 하나만 · 새 일을 하면 앞 소리는 멈춘다
 //  W6 영상 창 안(embedded): 창 안에서 스크롤 없이 다 보이게 — 긴 문장은 토막으로(◀ 1/3 ▶) ·
 //     토막을 다 쓰면 자동으로 다음 토막 · 줄을 다 쓰면 대사를 듣고 자동으로 다음 줄 쓰기 · 아래 ▶ = 이 부분 듣기
-import { t, lang } from "../i18n.js?v=1007.78";
-import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO } from "../text.js?v=1007.78";
-import { episode, chars, charsF } from "../data.js?v=1007.78";
-import { paths } from "../paths.js?v=1007.78";
-import { I } from "../ui.js?v=1007.78";
-import { audioCtx, hold } from "../wake.js?v=1007.78";
-import * as sfx from "../sfx.js?v=1007.78";
-import { scoreFx } from "../scorefx.js?v=1007.78";
-import { units as jamoUnits, baseOf } from "../jamobox.js?v=1007.78"; // 자모 자리 나누기(획순 · 자판 덧칠 · 손글씨 덩어리 — 본부 10-07) // 손글씨 점수 효과 = 말하기와 같은 규칙(본부 10-07)
+import { t, lang } from "../i18n.js?v=1007.80";
+import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO } from "../text.js?v=1007.80";
+import { episode, chars, charsF } from "../data.js?v=1007.80";
+import { paths } from "../paths.js?v=1007.80";
+import { I } from "../ui.js?v=1007.80";
+import { audioCtx, hold } from "../wake.js?v=1007.80";
+import * as sfx from "../sfx.js?v=1007.80";
+import { scoreFx } from "../scorefx.js?v=1007.80";
+import { units as jamoUnits, baseOf } from "../jamobox.js?v=1007.80"; // 자모 자리 나누기(획순 · 자판 덧칠 · 손글씨 덩어리 — 본부 10-07) // 손글씨 점수 효과 = 말하기와 같은 규칙(본부 10-07)
 
 const KEYS = [..."ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎㄲㄸㅃㅆㅉ"], VOW = [..."ㅏㅑㅓㅕㅗㅛㅜㅠㅡㅣ"];
 const VOW2 = [..."ㅐㅒㅔㅖㅘㅙㅚㅝㅞㅟㅢ"]; // 겹모음 줄(본부 10-06) — 칸 하나 · ㅓ+ㅣ 처럼 나눠 쳐도 받음
@@ -410,8 +410,9 @@ export default async function write(app, ep, id, opts = {}) {
     //  keep = 자동 손글씨(다 칠한 채로 남음 = 「써진」 상태) · 다시 누르거나 멈추면 그 자리에서 그침 → true = 끝까지 칠함
     H.showOrder = async ({ keep = false } = {}) => {
       await stkReady; await document.fonts?.load(`${glyphWeight()} 100px ${glyphFont()}`, c.ch).catch(() => {}); const list = strokesOf(c.ch); if (!list.length) return false;
-      const my = (H.anim = (H.anim || 0) + 1), x = gv.getContext("2d"), n = gv.width, lw = PEN * n;
-      const marks = (ends, k, f) => { // 번호 원(시작 잉크 점) · 화살촉(끝 잉크 점 · 글자 잉크 안으로 자름)
+      const my = (H.anim = (H.anim || 0) + 1), x = gv.getContext("2d");
+      // 칸 크기 = 그릴 때마다 다시 잼(본부 10-07 1280×720 — 쓰기 창 막 연 직후 누르면 칸이 아직 작을 때 크기로 굳어 주황 글자가 왼쪽 위에 작게)
+      const marks = (ends, k, f) => { const n = gv.width, lw = PEN * n; // 번호 원(시작 잉크 점) · 화살촉(끝 잉크 점 · 글자 잉크 안으로 자름)
         const ar = document.createElement("canvas"); ar.width = ar.height = n; const ax = ar.getContext("2d"); ax.fillStyle = OR_MARK;
         for (let i = 0; i <= k && i < ends.length; i++) { if (i === k && f < 1) continue; const { b, dir } = ends[i], a = Math.atan2(dir[1], dir[0]), h = lw * 0.9, tip = [b[0] * n, b[1] * n];
           ax.beginPath(); ax.moveTo(...tip); ax.lineTo(tip[0] - Math.cos(a - 0.5) * h, tip[1] - Math.sin(a - 0.5) * h); ax.lineTo(tip[0] - Math.cos(a + 0.5) * h, tip[1] - Math.sin(a + 0.5) * h); ax.closePath(); ax.fill(); }
@@ -420,16 +421,16 @@ export default async function write(app, ep, id, opts = {}) {
           x.fillStyle = OR_MARK; x.beginPath(); x.arc(px, py, r, 0, Math.PI * 2); x.fill(); x.fillStyle = "#fff"; x.font = `700 ${Math.round(r * 1.3)}px sans-serif`; x.textAlign = "center"; x.textBaseline = "middle"; x.fillText(String(i + 1), px, py + 0.5); } };
       for (let i = 0; i < list.length; i++) {
         const t0 = performance.now();
-        await new Promise(res => { const step = () => { if (H.anim !== my || st.hand !== H) return res(); const f = Math.min(1, (performance.now() - t0) / 500), R = revealOrder(c.ch, n, list, i, f); paintGuide(); x.drawImage(R.cv, 0, 0); marks(R.ends, i, f); if (f >= 1) return res(); setTimeout(step, 16); }; step(); }); // 60번/초(rAF 는 창이 가려지면 멈춤)
+        await new Promise(res => { const step = () => { if (H.anim !== my || st.hand !== H) return res(); const f = Math.min(1, (performance.now() - t0) / 500), R = revealOrder(c.ch, gv.width, list, i, f); paintGuide(); x.drawImage(R.cv, 0, 0); marks(R.ends, i, f); if (f >= 1) return res(); setTimeout(step, 16); }; step(); }); // 60번/초(rAF 는 창이 가려지면 멈춤)
         if (H.anim !== my || st.hand !== H) return false;
       }
       H.orderShown = list.length;
-      if (keep) { paintGuide(); x.drawImage(revealOrder(c.ch, n, list, list.length, 1).cv, 0, 0); return true; } // 자동 = 다 칠한 글자로 남김(번호·화살 없이)
+      if (keep) { paintGuide(); x.drawImage(revealOrder(c.ch, gv.width, list, list.length, 1).cv, 0, 0); return true; } // 자동 = 다 칠한 글자로 남김(번호·화살 없이)
       await new Promise(r => setTimeout(r, 1000)); if (H.anim === my && st.hand === H) paintGuide(); return true;
     };
     H.stopOrder = () => { H.anim = (H.anim || 0) + 1; };
     iv.addEventListener("pointerup", up); iv.addEventListener("pointercancel", up);
-    H.paintInk = paintInk; H.paintGuide = paintGuide; H.col = col;
+    H.paintInk = paintInk; H.paintGuide = paintGuide; H.col = col; H.fit = fit; // fit = 점검용(칸 크기 다시)
   }
   // 점수(본부 10-07 투덜이) — 칸 위 「87% ☆」 + 말하기와 같은 효과음 · 통과해도 그 자리에서 다시 쓰면 더 높은 점수 노림(그 글자 최고 점수 기억 · 위 글자 줄 아래 작은 숫자) · 「다음 ▶」으로 넘어감
   const bestKey = (w, c) => `${ep}/${line.id}/${st.s}.${w}.${c}`;

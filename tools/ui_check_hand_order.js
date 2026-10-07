@@ -6,9 +6,20 @@
   const W = ms => new Promise(s => setTimeout(s, ms)), res = [], ok = (c, m, x = "") => res.push(`${c ? "✓" : "✗"} ${m}${x ? " · " + x : ""}`);
   window.__sfxVolume = 0.0001;
   try {
+    const P = () => document.querySelector(".panel"), $ = s => P().querySelector(s), wr = () => P().querySelector(".write")?.parentElement?.__wr;
+    // ⓓ 쓰기 창 막 연 직후 바로 「क्रम」(본부 10-07 1280×720 — 주황 글자가 칸 왼쪽 위에 작게) → 다 칠한 장면(지우기 전) 주황 테두리 상자 = 회색 글자 테두리 상자 ±5%
+    { localStorage.setItem("malmun.wmode", "hand"); const L = document.querySelectorAll(".line"), li = L.length - 1;
+      L[li].querySelector("[data-act=write]").click(); await W(60); for (let k = 0; k < 40 && !wr(); k++) await W(25);
+      P().querySelector("[data-seg=\"1\"]")?.click(); await W(30); { const gv0 = $(".hguide"); gv0.width = gv0.height = 60; } // 창이 아직 자리 잡기 전(칸 60px)에 잰 상태를 흉내
+      P().querySelector("[data-act=horder]")?.click(); await W(120); wr().hand().fit(); await W(100); // 그 뒤 칸이 제 크기로(ResizeObserver)
+      await W(1400); for (let k = 0; k < 120 && !wr().hand().orderShown; k++) await W(25); // 1.6초 장면(크기) → 다 그린 바로 그 장면(1초 뒤 지우기 전)
+      const gv = $(".hguide"), n = gv.width, d = gv.getContext("2d").getImageData(0, 0, n, n).data, ch = wr().hand().ch, g = wr().glyphCv(ch, n).getContext("2d").getImageData(0, 0, n, n).data;
+      const bb = test => { let x0 = n, y0 = n, x1 = -1, y1 = -1; for (let i = 0; i < n * n; i++) if (test(i * 4)) { const x = i % n, y = (i / n) | 0; if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; } return [x0, y0, x1, y1]; };
+      const ob = bb(i => d[i] > 150 && d[i + 1] < 140 && d[i + 2] < 90 && d[i + 3] > 200), gb = bb(i => g[i + 3] > 128), off = Math.max(...ob.map((v, k) => Math.abs(v - gb[k]))) / n;
+      ok(ob[2] > 0 && off <= 0.05 && n > 100, `ⓓ 쓰기 창 연 직후 바로 획순 → 주황이 회색 글자와 같은 자리·크기(${innerWidth}×${innerHeight} · dpr ${devicePixelRatio} · 「${ch}」)`, `주황 ${ob.join(",")} · 회색 ${gb.join(",")} · 칸 ${n}px · 어긋남 ${(off * 100).toFixed(1)}%`);
+      L[li].querySelector("[data-act=write]").click(); await W(600); }
     localStorage.removeItem("malmun.wmode");
     document.querySelectorAll(".line")[0].querySelector("[data-act=write]").click(); await W(1500);
-    const P = () => document.querySelector(".panel"), $ = s => P().querySelector(s), wr = () => P().querySelector(".write")?.parentElement?.__wr;
     $("[data-mode=hand]").click(); await W(800);
     // ⓐ
     const alphaOf = cv => cv.getContext("2d").getImageData(0, 0, cv.width, cv.height).data;
