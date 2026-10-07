@@ -13,19 +13,19 @@
 //     못 넘어도 막지 않는다([다음 ▶]) · 음성 인식이 안 되는 곳은 점수 없이 듣고 비교만(녹음은 저장)
 //  S6 녹음은 이 기기 안에만(IndexedDB) — 서버로 보내지 않는다
 //  S7 영상 창 안(embedded): 스크롤 없이 · 줄 이동·닫기는 학습 화면이 한다 · 줄 전체까지 통과하면 다음 줄 말하기로
-import { t, lang } from "../i18n.js?v=1006.89";
-import { esc, sayParts } from "../text.js?v=1006.89";
-import { episode } from "../data.js?v=1006.89";
-import { paths } from "../paths.js?v=1006.89";
-import { audioCtx, hold, quietWake } from "../wake.js?v=1006.89";
-import * as sfx from "../sfx.js?v=1006.89";
-import { diagEnv, keepDiag } from "../diag.js?v=1006.89";
-import { playMine as playMineRec } from "../playmine.js?v=1006.89";
-import { bestHeard, heardHTML, endHint } from "../heard.js?v=1006.89";
-import { openCompare } from "../compare.js?v=1006.89";
-import { rhythmOf, withRhythm, rhyText } from "../rhythm.js?v=1006.89";
-import { recDel, downloadRec, askPersist } from "../recstore.js?v=1006.89";
-import { logRec, dB, srWhy, srWatch, niceLabel, ALIAS } from "../recorder.js?v=1006.89";
+import { t, lang } from "../i18n.js?v=1007.2";
+import { esc, sayParts } from "../text.js?v=1007.2";
+import { episode } from "../data.js?v=1007.2";
+import { paths } from "../paths.js?v=1007.2";
+import { audioCtx, hold, quietWake } from "../wake.js?v=1007.2";
+import * as sfx from "../sfx.js?v=1007.2";
+import { diagEnv, keepDiag } from "../diag.js?v=1007.2";
+import { playMine as playMineRec } from "../playmine.js?v=1007.2";
+import { bestHeard, heardHTML, endHint } from "../heard.js?v=1007.2";
+import { openCompare } from "../compare.js?v=1007.2";
+import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V } from "../rhythm.js?v=1007.2";
+import { recDel, downloadRec, askPersist } from "../recstore.js?v=1007.2";
+import { logRec, dB, srWhy, srWatch, niceLabel, ALIAS } from "../recorder.js?v=1007.2";
 
 // 통과 두 단계(본부 10-04 · 투덜이 「원어민은 되지만 외국인은 100% 어렵다」): 80↑ = ☆ 통과(✓ · [저장]) · 95↑ = ★ 완벽
 export const PASS = 80, PERFECT = 95;
@@ -52,8 +52,8 @@ const QUIET_MS = 2000, START_MS = 6000;
 export const maxMsFor = say => Math.max(8000, (3 + 0.8 * [...String(say || "")].filter(c => /[가-힣]/.test(c)).length) * 1000);
 
 // ── 닮음 = 음절 정렬(js/score.js · 「들린 말」 빨간 표시와 같은 함수 — 본부 10-04) ──
-import { similarity } from "../score.js?v=1006.89";
-import { scoreFx } from "../scorefx.js?v=1006.89"; // 점수별 효과(본부 10-05)
+import { similarity } from "../score.js?v=1007.2";
+import { scoreFx } from "../scorefx.js?v=1007.2"; // 점수별 효과(본부 10-05)
 export { similarity };
 
 // ── 내 목소리 저장(S6) ──
@@ -84,7 +84,7 @@ export default async function speak(app, ep, id, opts = {}) {
   if (opts.task === "say" && line.say) parts.startAt = parts.length - 1; // 설명의 「이제 말해 보세요」에서 들어오면 그 과제부터
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   const st = { i: parts.startAt || 0, rec: null, stream: null, blob: null, score: null, saved: {}, busy: false, model: false, alive: true, mine: null };
-  const savedReady = Promise.all(parts.map(async p => { st.saved[p.key] = await recGet(`${ep}/${p.key}`); })); // 기다리지 않고 먼저 그린다 — 다 읽으면 다시 그림
+  const savedReady = Promise.all(parts.map(async p => { const k = `${ep}/${p.key}`; st.saved[p.key] = await upgradeSaved(await recGet(k), { ep, key: p.key, url: p.src, text: p.say || p.text }, v => recPut(k, v)); })); // 옛 판(리듬 없음) 저장본은 새 점수로 // 기다리지 않고 먼저 그린다 — 다 읽으면 다시 그림
 
   app.innerHTML = `<section class="scr speak ${opts.embedded ? "embedded" : ""}">
     <div class="whead"><b>${esc(t("speak"))}</b><span class="sub">${li + 1} / ${d.lines.length}<span class="spk"> · <span class="ko" lang="ko">${esc(line.speaker)}</span></span></span>
@@ -148,6 +148,7 @@ export default async function speak(app, ep, id, opts = {}) {
     $("[data-act=mine]").disabled = $("[data-act=both]").disabled = !mineBlob();
     $("[data-act=keep]").hidden = !(sc != null && sc >= PASS && mineBlob() && !st.kept); // 80% 넘으면 [저장]
     $("[data-act=savedplay]").hidden = $("[data-act=savedl]").hidden = $("[data-act=savedel]").hidden = !savedRec()?.blob;
+    $("[data-act=savedplay]").classList.toggle("oldscore", !!savedRec()?.old); // 다시 못 잰 옛 점수 = 흐리게
     if (savedRec()?.blob) $("[data-act=savedplay]").textContent = t("saved_short", { n: `${starOf(savedRec().score)} ${savedRec().score ?? ""}`.trim() }); // 저장된 것도 점수 보이게
     $(".heardline").innerHTML = !st.rec && st.heardHTML ? st.heardHTML : ""; // 들린 말(틀린 음절 빨간 밑줄 · 빠진 자리 _)
     $(".mic").classList.toggle("on", !!st.rec);
@@ -349,7 +350,7 @@ export default async function speak(app, ep, id, opts = {}) {
     if (a === "keep") { // [저장] — 더 높거나 같은 점수면 바꿔 끼움
       const p = cur(), old = st.saved[p.key];
       if (!st.blob || !(st.score >= PASS)) return;
-      if (st.score >= (old?.score ?? 0)) { st.saved[p.key] = { blob: st.blob, score: st.score, at: Date.now() }; recPut(`${ep}/${p.key}`, st.saved[p.key]); st.kept = "kept"; askPersist(); }
+      if (st.score >= keptScore(old)) { st.saved[p.key] = { blob: st.blob, score: st.score, at: Date.now(), scoreV: SCORE_V, letter: st.rhy?.L ?? st.score, R: st.rhy?.R ?? null }; recPut(`${ep}/${p.key}`, st.saved[p.key]); st.kept = "kept"; askPersist(); }
       else st.kept = "kept_better";
       return paint();
     }

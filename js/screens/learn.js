@@ -10,22 +10,22 @@
 //  R7 영상은 늘 맨 위 · 지금 줄은 영상 바로 아래(앞 줄은 영상 뒤로) — 손으로 목록을 움직이면 4초 동안은 따라가지 않음
 //  R8 듣기 모드(대사→설명 · 설명만)도 R1~R6 그대로(영상 대신 소리 조각) · 모드를 바꾸면 멈춤(▶ 로 시작)
 //  R9 다시 들어오면 마지막 줄이 선택된 채 멈춰 있음
-import { t, lang, langName } from "../i18n.js?v=1006.89";
-import { esc, renderText, glossCards, sayParts } from "../text.js?v=1006.89";
-import { episode } from "../data.js?v=1006.89";
-import { paths } from "../paths.js?v=1006.89";
-import { Sequence } from "../audio.js?v=1006.89";
-import { I, progress, SPEAKER } from "../ui.js?v=1006.89";
-import writeView from "./write.js?v=1006.89";
-import { diagEnv, keepDiag } from "../diag.js?v=1006.89";
-import { playMine as playMineRec } from "../playmine.js?v=1006.89";
-import { rhythmOf, withRhythm, rhyText } from "../rhythm.js?v=1006.89";
-import { bestHeard, heardHTML, endHint } from "../heard.js?v=1006.89";
-import { recDel, downloadRec, askPersist } from "../recstore.js?v=1006.89";
-import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1006.89";
-import { scoreFx, stopFx } from "../scorefx.js?v=1006.89"; // 점수별 효과(본부 10-05)
-import { record, micWhy, srWhy, canScore, closeMic, logRec, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1006.89";
-import { hold, quietWake } from "../wake.js?v=1006.89";
+import { t, lang, langName } from "../i18n.js?v=1007.2";
+import { esc, renderText, glossCards, sayParts } from "../text.js?v=1007.2";
+import { episode } from "../data.js?v=1007.2";
+import { paths } from "../paths.js?v=1007.2";
+import { Sequence } from "../audio.js?v=1007.2";
+import { I, progress, SPEAKER } from "../ui.js?v=1007.2";
+import writeView from "./write.js?v=1007.2";
+import { diagEnv, keepDiag } from "../diag.js?v=1007.2";
+import { playMine as playMineRec } from "../playmine.js?v=1007.2";
+import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V } from "../rhythm.js?v=1007.2";
+import { bestHeard, heardHTML, endHint } from "../heard.js?v=1007.2";
+import { recDel, downloadRec, askPersist } from "../recstore.js?v=1007.2";
+import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1007.2";
+import { scoreFx, stopFx } from "../scorefx.js?v=1007.2"; // 점수별 효과(본부 10-05)
+import { record, micWhy, srWhy, canScore, closeMic, logRec, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1007.2";
+import { hold, quietWake } from "../wake.js?v=1007.2";
 
 const RATES = [1, 0.75, 0.5];
 const pref = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } };
@@ -475,11 +475,11 @@ export default async function learn(app, ep, startId) {
   };
   // [내 목소리] = 방금 녹음(잘됐든 못됐든) · 80% 넘으면 [저장] → 눌러야 저장 · 저장한 것은 「저장됨 ▶」 · 열 때 예전 점수 안 보임(투덜이 10-04)
   async function spInit(i) {
-    const saved = await recGet(sayKey(i));
+    const saved = await upgradeSaved(await recGet(sayKey(i)), { ep, key: `${ep}_${String(L[i].id).padStart(2, "0")}_say`, url: L[i].say.src, text: L[i].say.ko }, v => recPut(sayKey(i), v)); // 옛 판 저장본은 새 점수로
     if (st.panel?.i !== i || !saved?.blob) return;
-    sp = { i, saved: { blob: saved.blob, score: saved.score } };
+    sp = { i, saved: { blob: saved.blob, score: saved.score, old: !!saved.old } };
     if (st.panel?.i !== i) return;
-    const b = panel.querySelector(".sayb [data-x=savedplay]"); if (b) { b.hidden = false; b.textContent = t("saved_short", { n: `${starOf(saved.score)} ${saved.score ?? ""}`.trim() }); } // 저장된 것도 점수
+    const b = panel.querySelector(".sayb [data-x=savedplay]"); if (b) { b.classList.toggle("oldscore", !!saved.old); b.hidden = false; b.textContent = t("saved_short", { n: `${starOf(saved.score)} ${saved.score ?? ""}`.trim() }); } // 저장된 것도 점수
     panel.querySelectorAll(".sayb [data-x=savedl], .sayb [data-x=savedel]").forEach(x => { x.hidden = false; }); // 저장한 것 내려받기 · 지우기
   }
   async function spRec(i, btn) {
@@ -515,7 +515,7 @@ export default async function learn(app, ep, startId) {
     // 리듬(투덜이 10-06 허락) — 글자 점수 × 리듬 배수(말하기 창과 같은 함수) · 근거는 결과 줄에
     let rhy = null;
     if (sc > 0) { const rh = await rhythmOf({ ep, key: `${ep}_${String(L[i].id).padStart(2, "0")}_say`, url: L[i].say.src, text: L[i].say.ko, blob: r.blob }); if (st.panel?.i !== i) return; if (rh) { rhy = { L: sc, R: rh.R, worst: rh.worst }; sc = withRhythm(sc, rh.R); } }
-    sp.blob = r.blob; sp.score = sc;
+    sp.blob = r.blob; sp.score = sc; sp.rhy = rhy;
     mineB.disabled = false; // 방금 녹음 — 언제나
     btn.textContent = "🎤 " + t(sc != null && sc >= PASS ? "speak_now" : "try_again");
     // 점수가 안 나오면 절대 통과·저장 아님(본부 10-04 — 엉뚱한 말도 그냥 넘어가던 것) · 왜 안 나왔는지 짧게
@@ -592,7 +592,7 @@ export default async function learn(app, ep, startId) {
       if (!sp?.blob || !(sp.score >= PASS)) return;
       const msg = panel.querySelector(".sayb .smsg");
       recGet(sayKey(i)).then(old => {
-        if (sp.score >= (old?.score ?? 0)) { recPut(sayKey(i), { blob: sp.blob, score: sp.score, at: Date.now() }); sp.saved = { blob: sp.blob, score: sp.score }; msg.textContent = `${sp.score}% ✓ · ${starOf(sp.score)} ${t("kept")}`; }
+        if (sp.score >= keptScore(old)) { recPut(sayKey(i), { blob: sp.blob, score: sp.score, at: Date.now(), scoreV: SCORE_V, letter: sp.rhy?.L ?? sp.score, R: sp.rhy?.R ?? null }); sp.saved = { blob: sp.blob, score: sp.score }; msg.textContent = `${sp.score}% ✓ · ${starOf(sp.score)} ${t("kept")}`; }
         else msg.textContent = `${sp.score}% ✓ · ${starOf(sp.score)} ${t("kept_better")}`;
         x.hidden = true; const sb = panel.querySelector(".sayb [data-x=savedplay]"); sb.hidden = false; sb.textContent = t("saved_short", { n: `${starOf(sp.saved?.score ?? sp.score)} ${sp.saved?.score ?? sp.score}`.trim() });
         panel.querySelectorAll(".sayb [data-x=savedl], .sayb [data-x=savedel]").forEach(y => { y.hidden = false; }); askPersist(); // 처음 저장 때 오래 남게(조용히)

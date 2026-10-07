@@ -5,10 +5,10 @@
 //      − 0.05 (말 전체 길이가 본보기의 0.6배 아래 · 1.8배 위)
 //  · 최종 점수 = 글자 점수(score.js) × f(R): R ≥ 0.90 → 1 · 0.5 ≤ R < 0.9 → 0.90 + 0.10 × (R − 0.5)/0.4 · R < 0.5 → 0.88
 //  녹음·재생은 그대로 — 받은 녹음(blob)을 풀어 재기만
-import { audioCtx } from "./wake.js?v=1006.89";
-import { leadOf, voicedEnd } from "./playmine.js?v=1006.89";
-import { speechEnd } from "./recstore.js?v=1006.89";
-import * as sfx from "./sfx.js?v=1006.89";
+import { audioCtx } from "./wake.js?v=1007.2";
+import { leadOf, voicedEnd } from "./playmine.js?v=1007.2";
+import { speechEnd } from "./recstore.js?v=1007.2";
+import * as sfx from "./sfx.js?v=1007.2";
 
 export const FR = 0.02; // 특징 칸 20ms
 const alignCache = new Map();
@@ -140,3 +140,18 @@ export async function rhythmOf({ ep, key, url, text, blob }) {
 
 // 결과 줄 근거 — 「글자 100% · 리듬 78%」 + 리듬이 90% 아래면 가장 많이 깎인 곳 한 곳
 export const rhyText = (h, t) => `${t("rhythm_line", { l: h.L, r: Math.floor(h.R * 100 + 1e-9) })}${h.R < 0.9 && h.worst ? " · " + t("rhy_" + h.worst.kind, { s: `「${h.worst.ch}」` }) : ""}`;
+
+// 저장본 점수 판(본부 10-06 — 리듬 넣기 전에 저장한 100점이 남아 새 녹음(96)을 「앞 저장본이 더 높음」으로 밀어냄)
+//  scoreV 2 = 글자 × f(R) 내림 · 옛 판 저장본은 열 때 그 저장된 소리로 리듬을 다시 재 새 점수로 바꿔 저장(옛 값은 score0 에 그대로)
+//  다시 못 재면(본보기 음절 시각 없음 등) old 표시 — 흐리게 보이고 다음 녹음이 덮을 수 있음
+export const SCORE_V = 2;
+export async function upgradeSaved(rec, o, put) {
+  if (!rec?.blob || rec.scoreV === SCORE_V) return rec;
+  const rh = await rhythmOf({ ...o, blob: rec.blob });
+  if (!rh) return { ...rec, old: true };
+  const up = { ...rec, score0: rec.score, letter: rec.score, R: rh.R, score: withRhythm(rec.score, rh.R), scoreV: SCORE_V };
+  put?.(up);
+  return up;
+}
+// 「더 높은 점수 유지」 견주기 — 새 판 점수끼리만(옛 점수는 언제나 덮을 수 있게)
+export const keptScore = rec => (rec?.blob && rec.scoreV === SCORE_V ? rec.score ?? 0 : -1);

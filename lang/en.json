@@ -162,5 +162,6 @@
  "rhy_long": "{s} is longer than the model",
  "rhy_short": "{s} is shorter than the model",
  "rhy_pause": "paused at {s}",
- "rhy_speed": "speed is very different from the model"
+ "rhy_speed": "speed is very different from the model",
+ "speed": "speed"
 }

@@ -5,15 +5,21 @@
 //  · 재생: 본보기 → 0.4초 → 내 목소리 · 재생 위치 세로 막대 + 지금 음절 강조 · 파형·음절 칸을 누르면 그 줄 그 음절부터
 //  녹음·점수 계산·[내 목소리] 재생(playmine.js playMine)은 그대로 — 여기는 그리기·DTW·비교 화면 안 재생만
 //  (본보기는 sfx.play 그대로 · 내 목소리는 playmine 과 같은 방식: decodeAudioData → BufferSource.start(t, offset) → Gain)
-import { prepare, rhythmScore, loadAlign, isSyl } from "./rhythm.js?v=1006.89";
-import { esc } from "./text.js?v=1006.89";
-import { align } from "./score.js?v=1006.89";
-import { audioCtx } from "./wake.js?v=1006.89";
-import { leadOf, gainOf, FADE, FADE_OUT, voicedEnd } from "./playmine.js?v=1006.89";
-import { speechEnd, wavOf } from "./recstore.js?v=1006.89";
-import * as sfx from "./sfx.js?v=1006.89";
+import { prepare, rhythmScore, loadAlign, isSyl } from "./rhythm.js?v=1007.2";
+import { esc } from "./text.js?v=1007.2";
+import { align } from "./score.js?v=1007.2";
+import { audioCtx } from "./wake.js?v=1007.2";
+import { leadOf, gainOf, FADE, FADE_OUT, voicedEnd } from "./playmine.js?v=1007.2";
+import { speechEnd, wavOf } from "./recstore.js?v=1007.2";
+import * as sfx from "./sfx.js?v=1007.2";
 
 // host 안에 그린다 → { close() } · o = { ep, key, url(본보기), text(본보기 글), blob(내 녹음), heard(들은 말 글자 · 없으면 색 없음), t(문구) }
+// 속도 단계(본부 10-07 · 투덜이 「견본에도 각각」) — 줄마다 자기 속도 · 누를 때마다 1 → 0.9 → 0.75 → 0.6 → 0.5 → 1 · 0.5 아래는 늘이기가 끊겨 뺌 · 고른 값 기억
+export const RATES = [1, 0.9, 0.75, 0.6, 0.5];
+const rateKey = k => `malmun.rate.${k}`;
+export const getRate = k => { try { const v = parseFloat(localStorage.getItem(rateKey(k))); return RATES.includes(v) ? v : 1; } catch { return 1; } };
+const setRate = (k, v) => { try { localStorage.setItem(rateKey(k), String(v)); } catch {} };
+const rateTxt = v => `${v}×`;
 export async function openCompare(host, o) {
   const { t } = o, ctx = audioCtx(), st = { alive: true, raf: 0, src: null, timer: 0 };
   host.innerHTML = `<div class="cmpw"><p class="cmpmsg">…</p></div>`;
@@ -40,9 +46,10 @@ export async function openCompare(host, o) {
   const pos = (s, e, lead) => `left:${(100 * (s - lead)) / span}%;width:${(100 * Math.max(0.02, e - s)) / span}%`;
   const cell = (x, k, lead, mine) => `<button data-k="${k}" class="${marks[k]}${rh.worst && rh.worst.k === k && rh.R < 0.9 ? " rworst" : ""}" style="${pos(x.s, x.e, lead)}"><span class="tx">${mine && marks[k] === "bad" && heardCh[k] ? `<small class="want">${esc(x.ch)}</small><span class="got">${esc(heardCh[k])}</span>` : esc(x.ch)}</span></button>`;
   const extras = (syl, lead) => extra.map(x => { const at = x.after >= 0 ? syl[x.after].e : syl[0].s, [a0, a1] = x.after >= 0 ? [at - 0.03, at + 0.05] : [Math.max(lead, at - 0.08), at]; return `<span class="add" style="${pos(a0, a1, lead)}">${esc(x.ch)}</span>`; }).join("");
-  const row = (cls, lab, syl, lead) => `<div class="crow ${cls}"><div class="clab">${esc(lab)}</div><div class="cwave"><canvas></canvas><i class="cbar" hidden></i></div><div class="csyl ko" lang="ko">${syl.map((x, k) => cell(x, k, lead, cls === "y")).join("")}${cls === "y" ? extras(syl, lead) : ""}</div></div>`;
+  const rkey = c => (c === "m" ? "m" : "y");
+  const row = (cls, lab, syl, lead) => `<div class="crow ${cls}"><div class="clab"><span>${esc(lab)}</span><button class="crate" data-rate="${cls}" aria-pressed="${getRate(rkey(cls)) !== 1}" aria-label="${esc(t("speed"))}">${rateTxt(getRate(rkey(cls)))}</button></div><div class="cwave"><canvas></canvas><i class="cbar" hidden></i></div><div class="csyl ko" lang="ko">${syl.map((x, k) => cell(x, k, lead, cls === "y")).join("")}${cls === "y" ? extras(syl, lead) : ""}</div></div>`;
   const ticks = []; for (let s = 0; s <= span + 1e-6; s += span > 3 ? 1 : 0.5) ticks.push(`<span style="left:${(100 * s) / span}%">${s.toFixed(1)}</span>`);
-  host.innerHTML = `<div class="cmpw">${row("m", t("model"), msyl, mLead)}${row("y", t("my_voice"), ysyl, yLead)}<div class="cruler">${ticks.join("")}</div><div class="cfoot"><button class="cslow" data-slow aria-pressed="false">0.75×</button><button class="craw" data-raw title="lead ${yLead.toFixed(2)} · end ${yStop.toFixed(2)} · ${ybuf.duration.toFixed(2)}s">⬇ ${esc(t("raw_dl"))}</button></div></div>`;
+  host.innerHTML = `<div class="cmpw">${row("m", t("model"), msyl, mLead)}${row("y", t("my_voice"), ysyl, yLead)}<div class="cruler">${ticks.join("")}</div><div class="cfoot"><button class="craw" data-raw title="lead ${yLead.toFixed(2)} · end ${yStop.toFixed(2)} · ${ybuf.duration.toFixed(2)}s">⬇ ${esc(t("raw_dl"))}</button></div></div>`;
   const rows = [...host.querySelectorAll(".crow")];
   // 음절 글자 = 두 줄 모두 한 크기(본부 10-06 투덜이) · 칸이 글보다 좁으면 글을 칸 가운데 위·아래 두 층으로 번갈아(가는 선으로 칸과 이음) — 겹치지 않게
   const tight = () => host.querySelectorAll(".csyl").forEach(row => { // 차례대로 놓되 가운데 → 위 → 아래 중 이미 놓인 글자와 안 겹치는 첫 자리(실제 크기로 잼)
@@ -89,9 +96,10 @@ export async function openCompare(host, o) {
     if (!st.alive) return res(false);
     if (window.__cmp) window.__cmp.lastPlay = { ri, from, to }; // 점검 도구용(그림 칸과 트는 구간이 같은 기준인지)
     host.classList.add("playing");
-    if (st.slow) { // 0.75× 느리게(투덜이 10-06 허락) — 비교 화면 안에서만 · 음높이 그대로(<audio>.preservesPitch) · 본보기 = 그 mp3 · 내 목소리 = WAV(내려받기와 같은 함수 · gainOf 크기)
+    const rate = getRate(ri ? "y" : "m");
+    if (rate !== 1) { // 느리게(투덜이 10-06 허락 · 10-07 단계 늘림) — 비교 화면 안에서만(투덜이 10-06 허락) — 비교 화면 안에서만 · 음높이 그대로(<audio>.preservesPitch) · 본보기 = 그 mp3 · 내 목소리 = WAV(내려받기와 같은 함수 · gainOf 크기)
       const url = ri ? (st.wavUrl ||= URL.createObjectURL(wavOf(ybuf, 0, ybuf.duration, yGain))) : o.url, end = to ?? (ri ? yStop : mStop);
-      const el = (st.el = new Audio(url)); el.preservesPitch = el.mozPreservesPitch = el.webkitPreservesPitch = true; el.playbackRate = 0.75; el.volume = Math.min(1, window.__sfxVolume ?? 1);
+      const el = (st.el = new Audio(url)); el.preservesPitch = el.mozPreservesPitch = el.webkitPreservesPitch = true; el.playbackRate = rate; el.volume = Math.min(1, window.__sfxVolume ?? 1);
       const done = () => { if (st.el === el) { st.el = null; el.pause(); } st.elDone = null; cancelAnimationFrame(st.raf); rows[ri].classList.remove("on"); rows[ri].querySelector(".cbar").hidden = true; res(true); };
       st.elDone = done;
       el.ontimeupdate = () => { if (el.currentTime >= end) done(); };
@@ -121,8 +129,8 @@ export async function openCompare(host, o) {
     await playRow(1, yLead); host.classList.remove("playing");
   };
   host.onclick = e => { // 음절 칸 · 파형 누르기 = 그 줄 그 자리부터
-    const sl = e.target.closest("[data-slow]");
-    if (sl) { st.slow = !st.slow; sl.setAttribute("aria-pressed", String(st.slow)); stopPlay(); return; } // 0.75× 켜고 끄기(다음 재생부터)
+    const rb = e.target.closest("[data-rate]");
+    if (rb) { const k = rb.dataset.rate === "m" ? "m" : "y", nv = RATES[(RATES.indexOf(getRate(k)) + 1) % RATES.length]; setRate(k, nv); rb.textContent = rateTxt(nv); rb.setAttribute("aria-pressed", String(nv !== 1)); stopPlay(); o.onRate?.(k, nv); return; } // 줄 속도 바꾸기(다음 재생부터 · 기억)
     if (e.target.closest("[data-raw]")) { // 진단(본부 10-06): 내 녹음 원본 그대로(webm · 자르기·크기 맞춤 없음) 내려받기 — 실제 녹음에서 앞·뒤 자르기가 왜 안 먹는지 본부가 직접 봄
       const u = URL.createObjectURL(o.blob), a = document.createElement("a"), ext = (o.blob.type.match(/audio\/(\w+)/) || [, "webm"])[1];
       a.href = u; a.download = `malmun_raw_${o.key}_${new Date().toISOString().replace(/[:.]/g, "-")}.${ext}`; document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(u), 5000);
