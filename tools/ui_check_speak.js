@@ -1,7 +1,8 @@
 // 말하기 전수 점검(S1~S7) — #/learn/{편} 을 연 채로 실행. 마이크와 음성 인식은 가짜로 바꿔 앱 동작만 본다
 // (가짜 마이크 = 0.8초 동안 삑 소리 뒤 조용 → 「말이 끝나고 1초 조용하면 멈춤」을 확인 · 가짜 인식 = 정해 준 글자를 돌려줌)
 (async () => {
-  window.__noRhythm = true; // 가짜 마이크(삑 소리)로는 리듬을 잴 수 없음 — 글자 점수·화면 흐름만 봄(리듬은 tools/ui_check_rhythm.js)
+  window.__noRhythm = true;
+  window.__noSrSwitch = true; try { localStorage.removeItem("malmun.srmode"); localStorage.removeItem("malmun.srmiss"); } catch {} // 녹음+받아쓰기 방식으로 고정(받아쓰기만 방식은 ui_check_sronly) // 가짜 마이크(삑 소리)로는 리듬을 잴 수 없음 — 글자 점수·화면 흐름만 봄(리듬은 tools/ui_check_rhythm.js)
   const res = [];
   try {
   const W = ms => new Promise(s => setTimeout(s, ms));
@@ -69,7 +70,8 @@
   ok(!$(".panel .mic").classList.contains("on"), "말이 끝나고 조용하면 저절로 멈춤");
   ok(/40%/.test($(".panel .msg").textContent) && !$(".panel .meter").classList.contains("pass") && /1\/5/.test($(".panel .segnav").innerText.replace(/\s/g, "")), "다르게 말함(안녕하세요 / 어서 오세요) → 40%(「세요」 두 음절만) · 통과 아님 · 그 자리에 있음(막지 않음)", $(".panel .msg").textContent);
   ok(!$(".panel [data-act=mine]").disabled && $(".panel [data-act=keep]").hidden, "못 넘어도 방금 녹음은 [내 목소리]로 들림 · [저장] 없음(투덜이 10-04)");
-  ok(window.__lastC && window.__lastC.echoCancellation === false && window.__lastC.noiseSuppression === false && window.__lastC.autoGainControl === false, "마이크는 날소리로(에코 제거·잡음 억제·자동 크기 끔 — 말이 뚝뚝 끊기던 것)", JSON.stringify(window.__lastC));
+  const andr = /Android/i.test(navigator.userAgent), want = andr; // 안드로이드 = 폰 자체 처리 켬(본부 10-07) · 그 밖 = 날소리
+  ok(window.__lastC && window.__lastC.echoCancellation === want && window.__lastC.noiseSuppression === want && window.__lastC.autoGainControl === want, "마이크는 날소리로(에코 제거·잡음 억제·자동 크기 끔 — 말이 뚝뚝 끊기던 것)", JSON.stringify(window.__lastC));
   ok(window.__srCont === true, "음성 인식이 말을 끝까지 들음(짧은 말을 중간에 끊지 않음)");
   ok(window.__srTrack === "audio", "음성 인식이 녹음하는 그 마이크를 들음(크롬 기본 마이크가 아니라)", String(window.__srTrack));
   // 점수에 맞는 한마디 — 반쯤 맞음(50%)과 많이 틀림(40 미만)은 말이 다르다

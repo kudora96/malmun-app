@@ -6,7 +6,7 @@
 // 시간·인식(본부 10-04 투덜이 승인): 말 사이 쉼 2초 · 🎤 뒤 6초 말 없으면 끝 · 최대 길이 = 문장 길이에 맞춤 · 인식이 혼자 끝나면 같은 트랙으로 다시
 // 그때와 다른 점(본부 10-04 「남긴 차이」): ① 윈도우 별칭 장치 「default」「communications」는 절대 안 고름(통신 장치를 열면 윈도우가 다른 소리를 줄임)
 //   ② 「준비 중 → 녹음 중」 표시(첫 소리가 들어오면) ③ 인식 오류 까닭을 돌려줌(onerror 를 삼키지 않음) ④ 진단 기록(이벤트만 듣고 소리 경로는 안 건드림)
-import { audioCtx } from "./wake.js?v=1007.96";
+import { audioCtx } from "./wake.js?v=1007.100";
 
 // 시간 규칙(본부 10-04 · 투덜이 「빨리 안 하면 바로 닫힘」): 말 사이 쉼 2초 · 🎤 뒤 6초 안에 말 없으면 끝 · 최대 길이는 부르는 쪽이 정함(문장 길이)
 const QUIET_MS = 2000, START_MS = 6000;
@@ -64,7 +64,15 @@ export const micWhy = e => (e?.name === "NotAllowedError" || e?.name === "Securi
 //  받아쓰기만으로 바꿔 기억(malmun.srmode = only) → 녹음 없이 글자 점수만 · 리듬·비교·내 목소리 없음 · 진단 화면에서 「다시 같이 시험」으로 되돌림 · PC·되는 기기는 그대로
 export const isAndroid = () => /Android/i.test(navigator.userAgent);
 export const srOnlyMode = () => { try { return localStorage.getItem("malmun.srmode") === "only"; } catch { return false; } };
-export const setSrOnly = on => { try { on ? localStorage.setItem("malmun.srmode", "only") : localStorage.removeItem("malmun.srmode"); } catch {} };
+export const setSrOnly = on => { try { on ? localStorage.setItem("malmun.srmode", "only") : localStorage.removeItem("malmun.srmode"); localStorage.removeItem("malmun.srmiss"); } catch {} };
+// 바꾸기는 「연속 2번」만(본부 10-07 QA — 우물거림·잡음으로 한 번 비어도 녹음·리듬·비교를 영구로 잃지 않게) · 그 사이 한 번이라도 들은 말이 있으면 0 으로
+//  → true = 이번에 받아쓰기만으로 바꿈 · 점검 도구는 window.__noSrSwitch 로 끔
+export function srMiss(missed) {
+  if (window.__noSrSwitch) return false;
+  try { if (!missed) { localStorage.removeItem("malmun.srmiss"); return false; }
+    const n = (+localStorage.getItem("malmun.srmiss") || 0) + 1; if (n >= 2) { setSrOnly(true); return true; } localStorage.setItem("malmun.srmiss", String(n)); } catch {}
+  return false;
+}
 // 받아쓰기만 녹음기 — record() 와 같은 모양({ stop, done }) · blob = null · 끝 = ■ · 마지막 결과 뒤 2초 · 인식이 혼자 끝남 · 최대 시간
 export function recordSROnly({ maxMs = 8000, onTick = () => {}, onReady = () => {}, onStop = () => {} } = {}) {
   let stopFn = () => {}; const ctl = { stop: discard => stopFn(discard) };
@@ -74,14 +82,16 @@ export function recordSROnly({ maxMs = 8000, onTick = () => {}, onReady = () => 
     const fin = (why, discard) => { if (over) return; over = true; clearInterval(tick); clearTimeout(maxT); clearTimeout(endT); if (!discard) onStop(); try { r?.stop(); } catch {}
       setTimeout(() => res(discard ? { cancelled: true } : { blob: null, heard, srErr, why, diag: { why, track: "sronly", sr: ev, sec: Math.round(performance.now() - t0) / 1000 } }), 500); };
     stopFn = d => fin("stop", d);
-    try { r = new SR(); } catch (e) { res({ error: e }); return; }
-    r.lang = "ko-KR"; r.continuous = true; r.interimResults = true; r.maxAlternatives = 3;
-    r.onresult = e => { const rs = Array.from(e.results, x => Array.from(x)); for (const x of rs) for (const a of x) heard.push(a.transcript); if (rs.length > 1) heard.push(rs.map(x => x[0].transcript).join(" ")); spoke = true; clearTimeout(endT); endT = setTimeout(() => fin("pause"), QUIET_MS); };
-    r.onerror = e => { srErr = e.error || "error"; };
-    r.onend = () => fin(spoke ? "pause" : "nospeech");
-    srWatch(r, t0, ev);
-    try { r.start(); } catch (e) { res({ error: e }); return; }
+    const onres = e => { const rs = Array.from(e.results, x => Array.from(x)); for (const x of rs) for (const a of x) heard.push(a.transcript); if (rs.length > 1) heard.push(rs.map(x => x[0].transcript).join(" ")); spoke = true; clearTimeout(endT); endT = setTimeout(() => fin("pause"), QUIET_MS); };
+    // 인식이 혼자 끝나도(크롬은 조용하면 몇 초 만에 끝냄) 다시 켜서 이어 들음 — 끝은 녹음 방식과 같은 규칙: ■ · 말 뒤 2초 · 🎤 뒤 6초 말 없음 · 최대 시간(본부 10-07 QA)
+    const start = () => { if (over) return; if (r) { r.onend = r.onresult = r.onerror = null; }
+      try { r = new SR(); } catch (e) { fin(spoke ? "pause" : "nospeech"); return; }
+      r.lang = "ko-KR"; r.continuous = true; r.interimResults = true; r.maxAlternatives = 3;
+      r.onresult = onres; r.onerror = e => { srErr = e.error || "error"; }; r.onend = () => { if (!over) { ev.push(`restart@${Math.round(performance.now() - t0)}`); setTimeout(start, 150); } };
+      srWatch(r, t0, ev); try { r.start(); } catch { fin(spoke ? "pause" : "nospeech"); } };
+    start(); if (over) return;
     setTimeout(() => { if (!over) onReady(); }, 0); tick = setInterval(() => onTick(performance.now() - t0, maxMs, 0), 60); maxT = setTimeout(() => fin("time"), maxMs);
+    setTimeout(() => { if (!spoke) fin("nospeech"); }, START_MS); // 🎤 뒤 6초 말 없음
   });
   return ctl;
 }

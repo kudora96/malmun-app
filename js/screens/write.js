@@ -13,15 +13,15 @@
 //  W5 소리는 언제나 하나만 · 새 일을 하면 앞 소리는 멈춘다
 //  W6 영상 창 안(embedded): 창 안에서 스크롤 없이 다 보이게 — 긴 문장은 토막으로(◀ 1/3 ▶) ·
 //     토막을 다 쓰면 자동으로 다음 토막 · 줄을 다 쓰면 대사를 듣고 자동으로 다음 줄 쓰기 · 아래 ▶ = 이 부분 듣기
-import { t, lang } from "../i18n.js?v=1007.96";
-import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO } from "../text.js?v=1007.96";
-import { episode, chars, charsF } from "../data.js?v=1007.96";
-import { paths } from "../paths.js?v=1007.96";
-import { I } from "../ui.js?v=1007.96";
-import { audioCtx, hold } from "../wake.js?v=1007.96";
-import * as sfx from "../sfx.js?v=1007.96";
-import { scoreFx } from "../scorefx.js?v=1007.96";
-import { units as jamoUnits, baseOf } from "../jamobox.js?v=1007.96"; // 자모 자리 나누기(획순 · 자판 덧칠 · 손글씨 덩어리 — 본부 10-07) // 손글씨 점수 효과 = 말하기와 같은 규칙(본부 10-07)
+import { t, lang } from "../i18n.js?v=1007.100";
+import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO } from "../text.js?v=1007.100";
+import { episode, chars, charsF } from "../data.js?v=1007.100";
+import { paths } from "../paths.js?v=1007.100";
+import { I } from "../ui.js?v=1007.100";
+import { audioCtx, hold } from "../wake.js?v=1007.100";
+import * as sfx from "../sfx.js?v=1007.100";
+import { scoreFx } from "../scorefx.js?v=1007.100";
+import { units as jamoUnits, baseOf } from "../jamobox.js?v=1007.100"; // 자모 자리 나누기(획순 · 자판 덧칠 · 손글씨 덩어리 — 본부 10-07) // 손글씨 점수 효과 = 말하기와 같은 규칙(본부 10-07)
 
 const KEYS = [..."ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎㄲㄸㅃㅆㅉ"], VOW = [..."ㅏㅑㅓㅕㅗㅛㅜㅠㅡㅣ"];
 const VOW2 = [..."ㅐㅒㅔㅖㅘㅙㅚㅝㅞㅟㅢ"]; // 겹모음 줄(본부 10-06) — 칸 하나 · ㅓ+ㅣ 처럼 나눠 쳐도 받음
@@ -116,7 +116,7 @@ export default async function write(app, ep, id, opts = {}) {
 
   app.innerHTML = `<section class="scr write ${opts.embedded ? "embedded" : ""}">
     ${opts.embedded
-      ? `<div class="whead"><b>${esc(t("write"))}</b><span class="sub">${li + 1} / ${d.lines.length} · <span class="ko" lang="ko">${esc(line.speaker)}</span></span>${modeBtns()}<button class="whelp" data-act="help" aria-label="${esc(t("help"))}">${esc(t("help_btn"))}</button><span class="loopnote" aria-live="polite"></span></div>`
+      ? `<div class="whead"><b>${esc(t("write"))}</b><span class="sub">${li + 1} / ${d.lines.length} · <span class="ko" lang="ko">${esc(line.speaker)}</span></span>${modeBtns()}<button class="whelp" data-act="help" aria-label="${esc(t("help"))}">${esc(t("help_btn"))}</button><button class="whelp wclose" data-act="close" aria-label="${esc(t("close_btn"))}">✕<span class="lt">${esc(String(t("close_btn")).replace(/^✕\s*/, " "))}</span></button><span class="loopnote" aria-live="polite"></span></div>`
       : `<div class="bar"><a class="iconbtn" href="#/learn/${ep}/${line.id}" aria-label="${esc(t("back"))}">${I.back}</a>
       <div class="grow"><div class="t">${esc(t("write"))}</div><div class="sub">${li + 1} / ${d.lines.length} · <span class="ko" lang="ko">${esc(line.speaker)}</span></div></div>${modeBtns()}<button class="whelp" data-act="help" aria-label="${esc(t("help"))}">${esc(t("help_btn"))}</button></div><div class="loopnote" aria-live="polite"></div>`}
     <div class="segrow"><div class="sent" lang="ko"></div><div class="segnav"></div><div class="wtip" hidden>${esc(t("w_tip"))}</div></div>
@@ -189,8 +189,10 @@ export default async function write(app, ep, id, opts = {}) {
     const r = work.querySelector(".info .sub2"); if (!r || !r.clientWidth) return; const xs = [...r.querySelectorAll(".rom, .mean")]; xs.forEach(x => x.style.removeProperty("font-size"));
     for (let k = 0; k < 8 && r.scrollWidth > r.clientWidth + 1; k++) xs.forEach(x => { const f = parseFloat(getComputedStyle(x).fontSize); if (f > 11) x.style.fontSize = f - 1 + "px"; });
   }
+  // 머리 줄 한 줄 유지(본부 10-07) — 넘치면 ✕ 닫기 글을 숨기고 ✕ 만
+  function fitHeadW() { const h = work.closest(".write")?.querySelector(".whead") || app.querySelector(".whead"); if (!h) return; h.classList.remove("narrow"); if (h.scrollWidth > h.clientWidth + 1) h.classList.add("narrow"); }
   function fitWord() {
-    fitSub2();
+    fitSub2(); fitHeadW();
     const row = work.querySelector(".info .word"); if (!row || !row.clientWidth) return;
     const bs = [...row.querySelectorAll(".wc")]; bs.forEach(b => { b.style.fontSize = ""; b.style.padding = ""; });
     for (let fs = parseFloat(getComputedStyle(bs[0] || row).fontSize) - 1; row.scrollWidth > row.clientWidth + 1 && fs >= 11; fs -= 1) bs.forEach(b => { b.style.fontSize = fs + "px"; b.style.padding = fs < 16 ? "0 2px" : ""; });
@@ -613,6 +615,7 @@ export default async function write(app, ep, id, opts = {}) {
     const b = e.target.closest("[data-act]");
     if (!b) return;
     const a = b.dataset.act;
+    if (a === "close") { hush(); stopLoop(); return opts.onClose?.(); } // ✕ 닫기(본부 10-07 — 말하기·설명 창과 같게 · 폰 뒤로도 같은 동작)
     if (a === "hdone") return handJudge();
     if (a === "hnext") return handNext();
     if (a === "horder") return st.hand?.showOrder?.();

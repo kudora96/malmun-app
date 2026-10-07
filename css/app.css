@@ -973,3 +973,9 @@ a{color:inherit;text-decoration:none}
 
 /* 받아쓰기만 기기(본부 10-07) — 내 목소리·비교 단추 흐리게(누르면 까닭 글) */
 button.dim{opacity:.45}
+
+.srboth{padding:4px 10px;border-radius:10px;border:1px solid var(--line);background:var(--bubble);box-shadow:0 2px 0 var(--line);font-size:12px;font-weight:700;color:var(--ink)}
+
+/* 쓰기 창 ✕ 닫기(본부 10-07) — 머리 줄 맨 오른쪽 · 좁으면 글은 숨기고 ✕만(머리 줄 한 줄) */
+.write .whead .wclose{margin-left:auto}
+.write .whead.narrow .wclose .lt{display:none}

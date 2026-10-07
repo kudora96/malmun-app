@@ -10,11 +10,11 @@
 //      같은 음절 되풀이(「이…있어요」「거구구나」 — 들은 말에 더 들어간 음절이 옆 음절과 같거나 첫소리+모음이 같음)도 −0.08(「더듬음」)
 //  · 최종 점수 = 글자 점수(score.js) × f(R): R ≥ 0.85 → 1 · 0.5 ≤ R < 0.85 → 0.90 + 0.10 × (R − 0.5)/0.35 · R < 0.5 → 0.88
 //  녹음·재생은 그대로 — 받은 녹음(blob)을 풀어 재기만
-import { audioCtx } from "./wake.js?v=1007.96";
-import { leadOf, voicedEnd, keepFirstOf } from "./playmine.js?v=1007.96";
-import { speechEnd } from "./recstore.js?v=1007.96";
-import * as sfx from "./sfx.js?v=1007.96";
-import { align } from "./score.js?v=1007.96";
+import { audioCtx } from "./wake.js?v=1007.100";
+import { leadOf, voicedEnd, keepFirstOf } from "./playmine.js?v=1007.100";
+import { speechEnd } from "./recstore.js?v=1007.100";
+import * as sfx from "./sfx.js?v=1007.100";
+import { align } from "./score.js?v=1007.100";
 
 export const FR = 0.02; // 특징 칸 20ms
 const alignCache = new Map();
