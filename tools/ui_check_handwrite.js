@@ -90,10 +90,21 @@
       ok(rows.every(r => !r.n0.length), "ⓘ 자료 획 차례대로 그림 → 알림 0(세·종·왕·읽·이)", rows.map(r => `${r.ch}${r.n0.length ? "✗" + r.n0.join("/") : ""}`).join(" "));
       ok(rows.every(r => r.sw.some(x => /पहिले|먼저|first/.test(x))), "ⓘ 중성부터 그림 → 「क्रम मिलेन: पहिले …」", rows.map(r => `${r.ch}:${r.sw[0] || "없음"}`).join(" · "));
       ok(rows.every(r => r.hi < 0 || r.rv.some(x => /बायाँ|왼쪽|left/.test(x))), "ⓘ 가로획 오른쪽→왼쪽 → 「दिशा: बायाँबाट दायाँ」", rows.map(r => `${r.ch}:${r.hi < 0 ? "가로획 없음" : r.rv[0] || "없음"}`).join(" · "));
-      res.push(`· 자료 점 맞춤(획 위 점이 그 자모 잉크 안 70% 미만): ${fitBad.join(" · ") || "없음"}`); }
+      res.push(`· 자료 점 맞춤(획 위 점이 그 자모 잉크 안 70% 미만): ${fitBad.join(" · ") || "없음"}`);
+      // 획 붙이기 뒤 자모별 표(본부 10-07) — 24자모 × 세·종·왕·읽·이·했·싶·글·한·국 + 자모가 다 나오게 몇 음절 더
+      const tbl = {}; for (const ch of ["세", "종", "왕", "읽", "이", "했", "싶", "글", "한", "국", "뭐", "책", "토", "퓨", "랴", "벼", "끝", "쿄", "의", "됐", "뷔"]) for (const r of await wr().strokeFit(ch)) if (r.fit != null) (tbl[r.jamo] ||= []).push(`${ch}${Math.round(r.fit * 100)}`);
+      const low = Object.entries(tbl).filter(([, v]) => v.some(x => +x.replace(/\D/g, "") < 70));
+      res.push(`· 자모별 잉크 안 비율(획 붙이기 뒤): ${Object.entries(tbl).map(([j, v]) => `${j}[${v.join(" ")}]`).join(" ")}`);
+      ok(true, `ⓘ 획 붙이기 뒤 70% 아래 자모 ${low.length}개`, low.map(([j, v]) => `${j}: ${v.filter(x => +x.replace(/\D/g, "") < 70).join(" ")}`).join(" · ") || "없음"); }
     // ⓘ 화면: 「क्रम」 누르면 획을 하나씩 그림(중간 장면 = 주황 획 일부) · 다 그린 뒤 지움 · 중성부터 그리면 말풍선
     { $("[data-act=horder]").click(); await W(700); const gv = $(".hguide"), gx = gv.getContext("2d"), d = gx.getImageData(0, 0, gv.width, gv.height).data; let org = 0; for (let i = 0; i < d.length; i += 4) if (d[i] > 180 && d[i + 1] > 80 && d[i + 1] < 130 && d[i + 2] < 60) org++;
-      ok(org > 50, "ⓘ 「क्रम」 → 회색 글자 위에 주황 획을 하나씩 그림(0.7초 장면)", `주황 픽셀 ${org}`); window.__orderShot = true; }
+      ok(org > 50, "ⓘ 「क्रम」 → 회색 글자 위에 주황 획을 하나씩 그림(0.7초 장면)", `주황 픽셀 ${org}`);
+      // 다 그린 장면(획 수 × 0.5초 뒤): 주황 획 가운데 줄 픽셀이 회색 글자 잉크(획 굵기 절반 너그럽게) 안에 든 비율 ≥ 70%(본부 10-07 — 그려진 픽셀 기준)
+      const nS = (await wr().strokesOf(wr().hand().ch)).length; await W(nS * 500 + 100 - 700);
+      const d2 = gx.getImageData(0, 0, gv.width, gv.height).data, n = gv.width, gl = document.createElement("canvas"); gl.width = gl.height = n; const glx = gl.getContext("2d");
+      const g0 = wr().unitsOf(wr().hand().ch), UN = 200, k = UN / n, inkSet = new Set(g0.flatMap(u => u.px)); let o2 = 0, on = 0, r = Math.round(0.03 * UN);
+      for (let y = 0; y < n; y += 2) for (let x = 0; x < n; x += 2) { const i = (y * n + x) * 4; if (d2[i] > 180 && d2[i + 1] > 80 && d2[i + 1] < 130 && d2[i + 2] < 60) { o2++; const cx = Math.round(x * k), cy = Math.round(y * k); let hit = false; for (let dy = -r; dy <= r && !hit; dy += 2) for (let dx = -r; dx <= r && !hit; dx += 2) if (inkSet.has((cy + dy) * UN + cx + dx)) hit = true; if (hit) on++; } }
+      ok(o2 > 50 && on / o2 >= 0.7, `ⓘ 「क्रम」 다 그린 장면: 주황 획이 회색 글자 위(${innerWidth}×${innerHeight} · dpr ${devicePixelRatio})`, `${Math.round((100 * on) / Math.max(1, o2))}% · 주황 ${o2}`); }
     // ⓐ 기억 — 다른 줄 쓰기를 열어도 손글씨 그대로 · 마지막에 자판으로 돌려 둠
     document.querySelectorAll(".line")[1].querySelector("[data-act=write]").click(); await W(1500);
     ok(!!P().querySelector(".hand"), "ⓐ 다시 열어도 손글씨 그대로(기억)");

@@ -13,15 +13,15 @@
 //  W5 소리는 언제나 하나만 · 새 일을 하면 앞 소리는 멈춘다
 //  W6 영상 창 안(embedded): 창 안에서 스크롤 없이 다 보이게 — 긴 문장은 토막으로(◀ 1/3 ▶) ·
 //     토막을 다 쓰면 자동으로 다음 토막 · 줄을 다 쓰면 대사를 듣고 자동으로 다음 줄 쓰기 · 아래 ▶ = 이 부분 듣기
-import { t, lang } from "../i18n.js?v=1007.54";
-import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO } from "../text.js?v=1007.54";
-import { episode, chars, charsF } from "../data.js?v=1007.54";
-import { paths } from "../paths.js?v=1007.54";
-import { I } from "../ui.js?v=1007.54";
-import { audioCtx, hold } from "../wake.js?v=1007.54";
-import * as sfx from "../sfx.js?v=1007.54";
-import { scoreFx } from "../scorefx.js?v=1007.54";
-import { units as jamoUnits, baseOf } from "../jamobox.js?v=1007.54"; // 자모 자리 나누기(획순 · 자판 덧칠 · 손글씨 덩어리 — 본부 10-07) // 손글씨 점수 효과 = 말하기와 같은 규칙(본부 10-07)
+import { t, lang } from "../i18n.js?v=1007.58";
+import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO } from "../text.js?v=1007.58";
+import { episode, chars, charsF } from "../data.js?v=1007.58";
+import { paths } from "../paths.js?v=1007.58";
+import { I } from "../ui.js?v=1007.58";
+import { audioCtx, hold } from "../wake.js?v=1007.58";
+import * as sfx from "../sfx.js?v=1007.58";
+import { scoreFx } from "../scorefx.js?v=1007.58";
+import { units as jamoUnits, baseOf } from "../jamobox.js?v=1007.58"; // 자모 자리 나누기(획순 · 자판 덧칠 · 손글씨 덩어리 — 본부 10-07) // 손글씨 점수 효과 = 말하기와 같은 규칙(본부 10-07)
 
 const KEYS = [..."ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎㄲㄸㅃㅆㅉ"], VOW = [..."ㅏㅑㅓㅕㅗㅛㅜㅠㅡㅣ"];
 const VOW2 = [..."ㅐㅒㅔㅖㅘㅙㅚㅝㅞㅟㅢ"]; // 겹모음 줄(본부 10-06) — 칸 하나 · ㅓ+ㅣ 처럼 나눠 쳐도 받음
@@ -152,7 +152,7 @@ export default async function write(app, ep, id, opts = {}) {
     stopLoop(); st.sent = true; markSent();
     run([partStep()]).then(() => { st.sent = false; markSent(); });
   }
-  app.__wr = { hand: () => st.hand, traceOf: ch => traceOf(ch), centerOf: ch => centerOf(ch), unitsOf: ch => unitsOf(ch), strokesOf: async ch => (await stkReady, strokesOf(ch)), strokeHint: (H, S) => strokeHint(H, S), handScore: (ch, S) => handScore(ch, S), handJudge: () => handJudge(), toggle: toggleSentence, busy: () => st.busy || st.done || st.queue.length > 0 || st.sent || st.auto || sfx.playing() }; // busy = 점검 도구가 소리 끝을 기다릴 때
+  app.__wr = { hand: () => st.hand, traceOf: ch => traceOf(ch), centerOf: ch => centerOf(ch), unitsOf: ch => unitsOf(ch), strokesOf: async ch => (await stkReady, strokesOf(ch)), strokeHint: (H, S) => strokeHint(H, S), strokeFit: async ch => { await stkReady; const us = unitsOf(ch), L = strokesOf(ch); return us.map((u, ui) => { const P = L.filter(S => S.unit === ui); let n = 0, k = 0; for (const S of P) { const f = fitOf(u, S.pts), m = S.pts.length - 1; n += m; k += f * m; } return { jamo: u.jamo, fit: n ? k / n : null }; }); }, handScore: (ch, S) => handScore(ch, S), handJudge: () => handJudge(), toggle: toggleSentence, busy: () => st.busy || st.done || st.queue.length > 0 || st.sent || st.auto || sfx.playing() }; // busy = 점검 도구가 소리 끝을 기다릴 때
 
   function paintSent() {
     sentEl.innerHTML = `<svg class="spk" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M4 9v6h4l5 4V5L8 9H4z"/><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M16 8.5a5 5 0 0 1 0 7M18.8 6a8.5 8.5 0 0 1 0 12"/></svg>` + words().map((w, wi) => `<span class="w ${wi === st.w ? "on" : ""}">${w.chars.map((c, ci) =>
@@ -221,7 +221,7 @@ export default async function write(app, ep, id, opts = {}) {
   const GN = 400, gCache = new Map();
   function glyphImg(ch, grow = 0) {
     const key = ch + "|" + grow + "|" + hfontKey(); if (gCache.has(key)) return gCache.get(key);
-    const cv = document.createElement("canvas"); cv.width = cv.height = GN; glyphRaw(cv.getContext("2d"), GN, ch, "#000", grow * GN); gCache.set(key, cv); return cv;
+    const cv = document.createElement("canvas"); cv.width = cv.height = GN; const okG = glyphRaw(cv.getContext("2d"), GN, ch, "#000", grow * GN); if (okG && document.fonts?.check?.(`${glyphWeight()} 40px ${glyphFont()}`, ch) !== false) gCache.set(key, cv); return cv; // 글꼴이 아직이면 저장 안 함(본부 10-07 1280×720 — 글꼴 오기 전 모양으로 자모 자리가 틀어져 획순이 구석에 작게)
   }
   function glyph(x, n, ch, color, grow = 0) { // grow = 칸에 대한 비율
     const img = glyphImg(ch, grow), t = document.createElement("canvas"); t.width = t.height = n; const tx = t.getContext("2d");
@@ -234,6 +234,7 @@ export default async function write(app, ep, id, opts = {}) {
     const m2 = x.measureText(ch), cx = n / 2 + (m2.actualBoundingBoxLeft - m2.actualBoundingBoxRight) / 2, cy = n / 2 + (m2.actualBoundingBoxAscent - m2.actualBoundingBoxDescent) / 2;
     x.fillStyle = x.strokeStyle = color; x.textBaseline = "alphabetic"; x.textAlign = "left"; x.fillText(ch, cx, cy);
     if (grow) { x.lineWidth = grow; x.lineJoin = "round"; x.strokeText(ch, cx, cy); }
+    return w >= 1 && h >= 1; // 글자 상자를 못 재면(글꼴 아직) 거짓
   }
   // 쓰기 도구(본부 10-07 투덜이 「더 실감 나고 재미있게」) — 연필 4% · 펜 7% · 붓 12%(빠르면 가늘고 천천히·꾹 누르면 굵게 0.5~1.2배 · 끝은 가늘게) · 고른 것 기억
   const TOOLS = { pencil: { w: 0.04, color: "#4a4a50", icon: "✏️" }, pen: { w: 0.07, color: "#1f2a5c", icon: "🖊" }, brush: { w: 0.12, color: "#161616", icon: "🖌" } };
@@ -292,7 +293,7 @@ export default async function write(app, ep, id, opts = {}) {
     return out; };
   // 자모 자리(js/jamobox.js) — 같은 글꼴 마스크로 · 글꼴이 바뀌면 다시
   const UN = 200, uCache = new Map();
-  const unitsOf = ch => { const k = ch + "|" + hfontKey(); if (!uCache.has(k)) { const m = pix(UN, x => glyph(x, UN, ch, "#000")); uCache.set(k, jamoUnits(ch, m, UN).filter(u => u.px.length)); } return uCache.get(k); };
+  const unitsOf = ch => { const k = ch + "|" + hfontKey(); if (uCache.has(k)) return uCache.get(k); const m = pix(UN, x => glyph(x, UN, ch, "#000")), us = jamoUnits(ch, m, UN).filter(u => u.px.length); if (gCache.has(ch + "|0|" + hfontKey())) uCache.set(k, us); return us; }; // 글꼴 그림이 저장된(= 글꼴 온) 뒤에만 기억
   // 획순 자료(data/jamo_strokes.json · 본부) → 이 글자 획(0~1 · 쓰는 차례) = 자모 획 점을 그 자모 잉크 상자에 늘려 맞춤
   let STK = null; const stkReady = fetch(`data/jamo_strokes.json?v=${document.documentElement.dataset.v || ""}`).then(r => r.json()).then(d => (STK = d)).catch(() => null);
   function strokesOf(ch) {
@@ -304,8 +305,21 @@ export default async function write(app, ep, id, opts = {}) {
       u.set ||= new Set(u.px); let edge = 0; for (const q of u.px) if (!u.set.has(q - 1) || !u.set.has(q + 1) || !u.set.has(q - UN) || !u.set.has(q + UN)) edge++;
       const half = Math.min(0.06, u.px.length / Math.max(1, edge) / UN), b0 = u.box, bw = b0[2] - b0[0], bh = b0[3] - b0[1];
       const x0 = b0[0] + Math.min(half, bw / 3), x1 = b0[2] - Math.min(half, bw / 3), y0 = b0[1] + Math.min(half, bh / 3), y1 = b0[3] - Math.min(half, bh / 3), mx = v => (bx1 - bx0 < 0.05 ? (x0 + x1) / 2 : x0 + ((v - bx0) / (bx1 - bx0)) * (x1 - x0)), my = v => (by1 - by0 < 0.05 ? (y0 + y1) / 2 : y0 + ((v - by0) / (by1 - by0)) * (y1 - y0));
-      for (const S of base) out.push({ unit: ui, role: u.role, jamo: u.jamo, pts: S.map(([x, y]) => [mx(x), my(y)]) }); });
+      for (const S of base) out.push({ unit: ui, role: u.role, jamo: u.jamo, pts: snap(u, S.map(([x, y]) => [mx(x), my(y)])) }); });
     return out;
+  }
+  // 획 붙이기(본부 10-07) — 상자 맞춤 뒤 획을 자기 방향에 수직으로 ±12%(상자 기준) 안에서 옮겨 보며 잉크와 가장 많이 겹치는 자리로
+  //  가로획 = 위아래 · 세로획 = 좌우 · 비스듬·꺾인·둥근 획 = 두 방향 모두 · 같으면 덜 옮긴 쪽
+  const inkIn = (u, x, y) => { u.set ||= new Set(u.px); const cx = Math.round(x * UN), cy = Math.round(y * UN); for (const [dx, dy] of [[0, 0], [3, 0], [-3, 0], [0, 3], [0, -3]]) if (u.set.has((cy + dy) * UN + cx + dx)) return true; return false; };
+  const fitOf = (u, P) => { let n = 0, k = 0; for (let i = 1; i < P.length; i++) for (let f = 0; f <= 1; f += 0.125) { n++; if (inkIn(u, P[i - 1][0] + (P[i][0] - P[i - 1][0]) * f, P[i - 1][1] + (P[i][1] - P[i - 1][1]) * f)) k++; } return n ? k / n : 0; };
+  function snap(u, P) {
+    if (P.length < 2) return P;
+    const bw = u.box[2] - u.box[0], bh = u.box[3] - u.box[1], dx = P[P.length - 1][0] - P[0][0], dy = P[P.length - 1][1] - P[0][1];
+    const horiz = P.length === 2 && Math.abs(dx) > 3 * Math.abs(dy), vert = P.length === 2 && Math.abs(dy) > 3 * Math.abs(dx);
+    const xs = horiz ? [0] : Array.from({ length: 13 }, (_, i) => (i - 6) * 0.02 * bw), ys = vert ? [0] : Array.from({ length: 13 }, (_, i) => (i - 6) * 0.02 * bh);
+    let best = [0, 0], bf = fitOf(u, P) + 1e-9;
+    for (const ox of xs) for (const oy of ys) { if (!ox && !oy) continue; const f = fitOf(u, P.map(([x, y]) => [x + ox, y + oy])); if (f > bf + 1e-6 || (Math.abs(f - bf) < 1e-6 && Math.hypot(ox, oy) < Math.hypot(...best))) { bf = f; best = [ox, oy]; } }
+    return P.map(([x, y]) => [x + best[0], y + best[1]]);
   }
   const ROLE = { cho: 0, jung: 1, jong: 2 };
   // 학습자 획 하나 → 순서·방향 알림(점수와 별개 · 깎지 않음 · 본부 10-07)
@@ -318,7 +332,7 @@ export default async function write(app, ep, id, opts = {}) {
     const hitU = (x, y) => { const cx = Math.round(x * UN), cy = Math.round(y * UN); for (let r = 0; r <= 4; r += 2) for (let k = 0; k < us.length; k++) for (const [dx, dy] of [[0, 0], [r, 0], [-r, 0], [0, r], [0, -r]]) if (us[k].set.has((cy + dy) * UN + cx + dx)) return k; return -1; };
     const votes = new Array(us.length).fill(0); for (let i = 1; i < S.length; i++) for (let f = 0; f < 1; f += 0.25) { const k = hitU(S[i - 1][0] + (S[i][0] - S[i - 1][0]) * f, S[i - 1][1] + (S[i][1] - S[i - 1][1]) * f); if (k >= 0) votes[k]++; }
     const nS = Math.max(1, (S.length - 1) * 4), mxv = Math.max(...votes); let ui = votes.indexOf(mxv);
-    if (mxv < nS * 0.5) { const mid = S[Math.floor(S.length / 2)], m2 = S.length > 1 ? [(S[0][0] + S[S.length - 1][0]) / 2, (S[0][1] + S[S.length - 1][1]) / 2] : mid; let bd = Infinity; us.forEach((u, k) => { const d = Math.hypot(m2[0] - (u.box[0] + u.box[2]) / 2, m2[1] - (u.box[1] + u.box[3]) / 2); if (d < bd) { bd = d; ui = k; } }); } // 잉크를 절반도 안 지나가면 = 획 가운데에 가장 가까운 자모 상자
+    if (mxv < nS * 0.5) { const mid = S[Math.floor(S.length / 2)], m2 = S.length > 1 ? [(S[0][0] + S[S.length - 1][0]) / 2, (S[0][1] + S[S.length - 1][1]) / 2] : mid; let bd = Infinity; us.forEach((u, k) => { let d = Infinity; for (let i = 0; i < u.px.length; i += 3) { const q = u.px[i], e = Math.hypot(m2[0] - (q % UN) / UN, m2[1] - Math.floor(q / UN) / UN); if (e < d) d = e; } if (d < bd) { bd = d; ui = k; } }); } // 잉크를 절반도 안 지나가면 = 획 가운데에 가장 가까운 자모 잉크
     const role = ROLE[us[ui].role]; H.roles ||= new Set();
     if (!H.orderTold) { const need = us.find(u => ROLE[u.role] < role && !H.roles.has(ROLE[u.role])); if (need) { H.orderTold = true; H.roles.add(role); return t("h_order_first", { j: `「${need.jamo}」` }); } }
     H.roles.add(role);
@@ -347,7 +361,7 @@ export default async function write(app, ep, id, opts = {}) {
       const s = Math.max(60, Math.floor(best[1])), dpr = window.devicePixelRatio || 1;
       box.style.width = box.style.height = s + "px"; for (const cv of [gv, iv]) cv.width = cv.height = Math.round(s * dpr); H.s = s; paintGuide(); paintInk(); };
     fit(); H.ro?.disconnect(); H.ro = new ResizeObserver(() => fit()); H.ro.observe(hand);
-    document.fonts?.load(`${glyphWeight()} 100px ${glyphFont()}`, c.ch).catch(() => {}).then(() => document.fonts.ready).then(() => { if (st.hand !== H) return; gCache.clear(); fit(); }); // 글꼴이 늦게 오면 글자 그림 다시
+    document.fonts?.load(`${glyphWeight()} 100px ${glyphFont()}`, c.ch).catch(() => {}).then(() => document.fonts.ready).then(() => { if (st.hand !== H) return; gCache.clear(); uCache.clear(); fit(); }); // 글꼴이 늦게 오면 글자 그림 다시
     const at = e => { const r = iv.getBoundingClientRect(); return [Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)), Math.min(1, Math.max(0, (e.clientY - r.top) / r.height))]; };
     // 점 = [x, y, 굵기 배수] — 붓만: 진짜 펜이면 누르는 힘 · 아니면 빠르기(칸/초 · 빠를수록 가늘게) · 앞 점과 부드럽게 이어 붙임
     const pt = (e, S) => { const p = at(e); if (toolKey() !== "brush" && !(S && S.tool === "brush")) return p; const now = e.timeStamp || performance.now();
@@ -363,7 +377,7 @@ export default async function write(app, ep, id, opts = {}) {
     const bubble = msg => { let b = box.querySelector(".hbubble"); if (!b) { b = document.createElement("b"); b.className = "hbubble"; box.append(b); } b.textContent = msg; b.hidden = false; H.hints = (H.hints || []).concat(msg); clearTimeout(H.bt); H.bt = setTimeout(() => (b.hidden = true), 2500); };
     // 획순 보기 — 회색 글자 위에 획을 하나씩(0.5초) · 시작점 번호 원 · 끝 화살촉 · 펜 굵기 · 진한 주황 → 다 그리고 1초 뒤 지움 · 다시 누르면 처음부터
     H.showOrder = async () => {
-      await stkReady; const list = strokesOf(c.ch); if (!list.length) return;
+      await stkReady; await document.fonts?.load(`${glyphWeight()} 100px ${glyphFont()}`, c.ch).catch(() => {}); const list = strokesOf(c.ch); if (!list.length) return;
       const my = (H.anim = (H.anim || 0) + 1), x = gv.getContext("2d"), n = gv.width, lw = PEN * n, OR = "#c8641a";
       const done = []; const drawS = (S, f) => { const P = S.pts.map(([a, b]) => [a * n, b * n]), L = []; let tot = 0; for (let i = 1; i < P.length; i++) { const d = Math.hypot(P[i][0] - P[i - 1][0], P[i][1] - P[i - 1][1]); L.push(d); tot += d; }
         let left = tot * f; x.strokeStyle = OR; x.lineWidth = lw; x.lineCap = x.lineJoin = "round"; x.beginPath(); x.moveTo(...P[0]); let end = P[0], dir = [1, 0];

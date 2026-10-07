@@ -280,7 +280,8 @@
   $(".panel [data-act=rec]").click(); await W(300); window.__mic.g.gain.value = 0.3; await W(600); window.__mic.g.gain.value = 0.001; await W(1500);
   const still = $(".panel .mic").classList.contains("on"), tbt = $(".panel .tbar .tt")?.textContent || "";
   window.__mic.g.gain.value = 0.3; await W(500); window.__mic.g.gain.value = 0.001; await waitIdle(); await settle2();
-  ok(still && /\/ 0:08/.test(tbt), "말 사이 1.5초 쉼 → 안 끊김 · 시간 막대 「0:0n / 0:08」", tbt + " · " + $(".panel .msg").textContent);
+  const tbq = /\d\.\d/.test(tbt) && $(".panel .tbar")?.classList.contains("quiet") !== undefined;
+  ok(still && tbq, "말 사이 1.5초 쉼 → 안 끊김 · 시간 막대에 쉼 카운트다운(「रोकिनुभयो — n.n सेकेन्डमा …」 · 투덜이 10-07)", tbt + " · " + $(".panel .msg").textContent);
   // 2.5초 쉼 → 끊김 + (못 넘었으면) 쉼 안내
   window.__heard = "가나다"; $(".panel [data-act=rec]").click(); await W(300); window.__mic.g.gain.value = 0.3; await W(500); window.__mic.g.gain.value = 0.001; await W(2600);
   const cut = !$(".panel .mic").classList.contains("on"); await waitIdle(); await settle2();

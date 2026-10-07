@@ -13,26 +13,28 @@
 //     못 넘어도 막지 않는다([다음 ▶]) · 음성 인식이 안 되는 곳은 점수 없이 듣고 비교만(녹음은 저장)
 //  S6 녹음은 이 기기 안에만(IndexedDB) — 서버로 보내지 않는다
 //  S7 영상 창 안(embedded): 스크롤 없이 · 줄 이동·닫기는 학습 화면이 한다 · 줄 전체까지 통과하면 다음 줄 말하기로
-import { t, lang } from "../i18n.js?v=1007.54";
-import { esc, sayParts } from "../text.js?v=1007.54";
-import { episode } from "../data.js?v=1007.54";
-import { paths } from "../paths.js?v=1007.54";
-import { audioCtx, hold, quietWake } from "../wake.js?v=1007.54";
-import * as sfx from "../sfx.js?v=1007.54";
-import { diagEnv, keepDiag } from "../diag.js?v=1007.54";
-import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1007.54";
-import { bestHeard, heardHTML, endHint } from "../heard.js?v=1007.54";
-import { openCompare, playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1007.54";
-import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V } from "../rhythm.js?v=1007.54";
-import { recDel, downloadRec, askPersist } from "../recstore.js?v=1007.54";
-import { logRec, dB, srWhy, srWatch, niceLabel, ALIAS } from "../recorder.js?v=1007.54";
+import { t, lang } from "../i18n.js?v=1007.58";
+import { esc, sayParts } from "../text.js?v=1007.58";
+import { episode } from "../data.js?v=1007.58";
+import { paths } from "../paths.js?v=1007.58";
+import { audioCtx, hold, quietWake } from "../wake.js?v=1007.58";
+import * as sfx from "../sfx.js?v=1007.58";
+import { diagEnv, keepDiag } from "../diag.js?v=1007.58";
+import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1007.58";
+import { bestHeard, heardHTML, endHint } from "../heard.js?v=1007.58";
+import { openCompare, playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1007.58";
+import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V } from "../rhythm.js?v=1007.58";
+import { recDel, downloadRec, askPersist } from "../recstore.js?v=1007.58";
+import { logRec, dB, srWhy, srWatch, niceLabel, ALIAS } from "../recorder.js?v=1007.58";
 
 // 통과 두 단계(본부 10-04 · 투덜이 「원어민은 되지만 외국인은 100% 어렵다」): 80↑ = ☆ 통과(✓ · [저장]) · 95↑ = ★ 완벽
 export const PASS = 80, PERFECT = 95;
 export const starOf = sc => (sc >= PERFECT ? "★" : sc >= PASS ? "☆" : "");
 // 점수 한 줄 + 끝난 까닭(시간 다 됨 · 6초 말 없음 · 못 넘었는데 2초 쉼으로 끝남 — ■ 누름은 안내 없음)
 // 끝난 까닭(본부 10-06): ⏱ 시간 다 됨은 그대로 · 2초 쉼(pause)은 문구에 안 씀 — 대신 들은 내용(hint = heard.js endHint)으로
-export const scoreLine = (sc, why, t, hint) => `${sc}%${sc >= PASS ? " ✓" : ""} · ${starOf(sc) ? starOf(sc) + " " : ""}${t(sc >= PERFECT ? "score_5" : sc >= PASS ? "score_4" : sc >= 60 ? "score_3" : sc >= 40 ? "score_2" : "score_1")}${why === "time" ? " · " + t("why_time") : (h => (h ? " · " + h : ""))(hintText(sc, t, hint))}`;
+// 시간 다 됨 · 끝까지 못 가고 오래 멈춤 = 「천천히 다시」 대신 「조금 더 빨리」(투덜이 10-07 — 긴 줄을 또박또박 읽다 끊김)
+const fastLine = (sc, why, t, hint) => `${sc}% · ${t(why === "time" ? "why_time" : "why_pause_tail")}${hint?.kind === "tail" && hint.tail ? " · " + hintText(sc, t, hint).split(" — ")[0] : ""}`;
+export const scoreLine = (sc, why, t, hint) => sc < PASS && (why === "time" || (why === "pause" && hint?.kind === "tail")) ? fastLine(sc, why, t, hint) : `${sc}%${sc >= PASS ? " ✓" : ""} · ${starOf(sc) ? starOf(sc) + " " : ""}${t(sc >= PERFECT ? "score_5" : sc >= PASS ? "score_4" : sc >= 60 ? "score_3" : sc >= 40 ? "score_2" : "score_1")}${why === "time" ? " · " + t("why_time") : (h => (h ? " · " + h : ""))(hintText(sc, t, hint))}`;
 // 틀린 곳을 글로(본부 10-06 투덜이 결정) — 낱말은 한글 그대로 「」 · 로마자 켜짐이면 괄호에(있는 낱말만) · 2개까지 · 통과면 짧게
 const romOn = () => { try { return localStorage.getItem("malmun.rom") !== "0"; } catch { return true; } };
 const short = (w, n = 8) => { const a = [...String(w)]; let k = 0, i = 0; for (; i < a.length && k < n; i++) if (/[가-힣]/.test(a[i])) k++; return i < a.length ? a.slice(0, i).join("").trim() + "…" : w; };
@@ -53,8 +55,8 @@ const QUIET_MS = 2000, START_MS = 6000;
 export const maxMsFor = say => Math.max(8000, (3 + 0.8 * [...String(say || "")].filter(c => /[가-힣]/.test(c)).length) * 1000);
 
 // ── 닮음 = 음절 정렬(js/score.js · 「들린 말」 빨간 표시와 같은 함수 — 본부 10-04) ──
-import { similarity } from "../score.js?v=1007.54";
-import { scoreFx } from "../scorefx.js?v=1007.54"; // 점수별 효과(본부 10-05)
+import { similarity } from "../score.js?v=1007.58";
+import { scoreFx } from "../scorefx.js?v=1007.58"; // 점수별 효과(본부 10-05)
 export { similarity };
 
 // ── 내 목소리 저장(S6) ──
@@ -94,7 +96,7 @@ export default async function speak(app, ep, id, opts = {}) {
     <div class="miclist" hidden></div>
     <div class="helpbox" hidden>${[1, 2, 3, 4, 5, 6].map(k => `<p>${esc(t("help_sp_" + k))}</p>`).join("")}<p class="x">${esc(t("help_close"))}</p></div>
     <div class="task"><div class="say ko" lang="ko"></div><div class="tr"></div></div>
-    <div class="meter"><div class="lvl" hidden><i></i></div><div class="sbar"><i></i><em style="left:${PASS}%"></em></div><div class="tbar" hidden><i></i><span class="tt"></span></div><div class="msgw"><div class="msg" aria-live="polite"></div><span class="fx" aria-hidden="true"></span></div><div class="heardline"></div><div class="keeprow"><button data-act="keep" title="${esc(t("keep"))}" hidden>${esc(t("keep_short"))}</button><button data-act="savedplay" title="${esc(t("saved_title"))}" hidden>${esc(t("saved_play"))}</button><span class="mini"><button data-act="savedl" title="${esc(t("download"))}" hidden>⬇ ${esc(t("dl_short"))}</button><button data-act="savedel" title="${esc(t("del_one"))}" hidden>🗑 ${esc(t("del_short"))}</button></span></div><button class="micname" data-act="pick" hidden></button></div>
+    <div class="meter"><div class="lvl" hidden><i></i></div><div class="sbar"><i></i><em style="left:${PASS}%"></em></div><div class="tbar" hidden><i></i><em class="pace" hidden></em><span class="tt"></span></div><div class="msgw"><div class="msg" aria-live="polite"></div><span class="fx" aria-hidden="true"></span></div><div class="heardline"></div><div class="keeprow"><button data-act="keep" title="${esc(t("keep"))}" hidden>${esc(t("keep_short"))}</button><button data-act="savedplay" title="${esc(t("saved_title"))}" hidden>${esc(t("saved_play"))}</button><span class="mini"><button data-act="savedl" title="${esc(t("download"))}" hidden>⬇ ${esc(t("dl_short"))}</button><button data-act="savedel" title="${esc(t("del_one"))}" hidden>🗑 ${esc(t("del_short"))}</button></span></div><button class="micname" data-act="pick" hidden></button></div>
     <div class="cmp" hidden></div>
     <div class="sbtns">
       <span class="mcol"><button data-act="model">▶ ${esc(t("model"))}</button><button class="mrate" data-act="mrate" aria-label="${esc(t("speed"))}">${esc(rateLabel(getRate("m")))}</button></span>
@@ -131,7 +133,7 @@ export default async function speak(app, ep, id, opts = {}) {
   function paint() {
     if (!st.rec && !st.starting) quietWake(false); // 녹음이 끝나면 깨우기 소리 다시
     const p = cur(), sv = st.saved[p.key];
-    $(".say").textContent = p.text;
+    $(".say").innerHTML = [...String(p.text)].map(ch => `<span>${esc(ch)}</span>`).join(""); // 글자마다(녹음 중 속도 안내 칠 — 본부 10-07)
     // 「말해 보기」 과제 = 카드와 같게 로마자(작게 · 로마자 꺼지면 숨김) + 뜻(학습자 언어) — 괄호 없음(본부 10-05)
     const sp = p.task ? sayParts(line.v9?.text?.[lang]?.say) : null, romOn = (() => { try { return localStorage.getItem("malmun.rom") !== "0"; } catch { return true; } })();
     $(".tr").innerHTML = p.whole ? esc(line.tr || "") : sp ? `${romOn && sp.rom ? `<span class="trrom">${esc(sp.rom)}</span>` : ""}${esc(sp.mean)}` : "";
@@ -235,11 +237,16 @@ export default async function speak(app, ep, id, opts = {}) {
   function showMicName() { const b = $(".micname"), l = niceLabel(st.stream?.getAudioTracks()[0]?.label); if (b && l) { b.textContent = `🎤 ${l} ✓`; b.hidden = false; } }
   // 녹음 시간 막대(🎤 아래) — 차오름 + 「0:04 / 0:12」 · 남은 시간 20% 아래면 주황
   const mmss = ms => `${Math.floor(ms / 60000)}:${String(Math.floor(ms / 1000) % 60).padStart(2, "0")}`;
-  function tickBar(el, max) {
+  // 녹음 시간 막대(투덜이 10-07 「시간 바가 있어야 더 빨리 읽어야 하는 걸 앎」) — 굵게 · 남은 초 · 멈추면 「n초 뒤 끝나요」 · 본보기 속도 ×1.4 안내선 + 위 문장 글자 차례로 옅게 칠(점수와 상관없음)
+  function tickBar(el, max, quietMs = 0) {
     const b = $(".tbar"); if (!b) return;
     b.hidden = false; b.firstElementChild.style.width = Math.min(100, (100 * el) / max) + "%";
-    b.classList.toggle("low", el > max * 0.8); b.querySelector(".tt").textContent = `${mmss(el)} / ${mmss(max)}`;
+    b.classList.toggle("low", el > max * 0.8); b.classList.toggle("quiet", quietMs > 400);
+    const pace = st.paceMs, pl = b.querySelector(".pace"); if (pl) { pl.hidden = !pace; if (pace) pl.style.left = Math.min(100, (100 * pace) / max) + "%"; }
+    b.querySelector(".tt").textContent = quietMs > 400 ? t("quiet_left", { s: Math.max(0, (QUIET_MS - quietMs) / 1000).toFixed(1) }) : `⏱ ${mmss(el)} / ${mmss(max)} · ${t("time_left", { s: Math.max(0, Math.ceil((max - el) / 1000)) })}`;
+    if (pace) { const cs = $(".say").children, n = Math.min(cs.length, Math.floor((cs.length * el) / pace)); for (let i = 0; i < cs.length; i++) cs[i].classList.toggle("pace", i < n); }
   }
+  const clearPace = () => { for (const c of $(".say")?.children || []) c.classList.remove("pace"); };
   async function startRec(switched) {
     stopSounds();
     st.switched = !!switched;
@@ -301,7 +308,7 @@ export default async function speak(app, ep, id, opts = {}) {
         if (rms > thr && !spoke) micPref(devId(st.stream) || (st.micReq !== true && st.micReq) || ""); // 소리가 들어온 마이크를 기억
         if (rms > thr) { spoke = true; quietAt = 0; } else if (spoke) { quietAt ||= Date.now(); if (Date.now() - quietAt > QUIET_MS) { st.why = "pause"; stopRec(); } }
         if (!spoke && performance.now() - st.diag.t0 > START_MS) { st.why = "nospeech"; stopRec(); } // 🎤 뒤 6초 말 없음
-        tickBar(performance.now() - st.diag.t0, st.maxMs);
+        tickBar(performance.now() - st.diag.t0, st.maxMs, spoke && quietAt ? Date.now() - quietAt : 0);
         // 1.5초 동안 신호가 아예 0 이면(꺼진 마이크 · 소리 없는 블루투스 — 조용한 방의 산 마이크는 0 이 아니다) 다음 마이크로 바꿔 다시 녹음
         if (!spoke && peak < 0.0002 && liveMs > DEAD_MS) { dead.add(st.micReq); if (devId(st.stream)) dead.add(devId(st.stream)); stopRec(true); closeMic(); startRec(true); }
       }, 60));
@@ -310,6 +317,9 @@ export default async function speak(app, ep, id, opts = {}) {
     } catch {}
     st.maxMs = maxMsFor(cur().say); st.why = "stop";
     maxTimer = setTimeout(() => { st.why = "time"; stopRec(); }, st.maxMs);
+    // 본보기 길이 × 1.4 = 여유 있는 속도 안내 · 최대 길이 = max(지금 식, 본보기 × 2 + 2초)(투덜이 10-07 허락 — 긴 줄 또박또박이면 빠듯)
+    st.paceMs = 0; { const u = cur().src || lineSrc, t0 = st.diag.t0, myRec = st.rec; if (u) sfx.load(u).then(b => { if (!b || st.rec !== myRec) return; st.paceMs = b.duration * 1000 * 1.4;
+      const m2 = Math.max(st.maxMs, b.duration * 2000 + 2000); if (m2 > st.maxMs) { st.maxMs = m2; clearTimeout(maxTimer); maxTimer = setTimeout(() => { st.why = "time"; stopRec(); }, Math.max(0, m2 - (performance.now() - t0))); } }).catch(() => {}); }
     paint();
   }
   function stopRec(discard) {
@@ -323,7 +333,7 @@ export default async function speak(app, ep, id, opts = {}) {
     paint();
   }
   async function finish(blob) {
-    st.whyEnd = st.why; const tb = $(".tbar"); if (tb) tb.hidden = true;
+    st.whyEnd = st.why; const tb = $(".tbar"); if (tb) tb.hidden = true; clearPace();
     st.blob = blob; st.kept = null; st.hint = null; // 방금 녹음(원본 그대로) — 언제나 [내 목소리]로
     if (sr) { // 인식 결과가 조금 늦게 온다 — 그동안 「확인 중…」
       if (!heard.length) $(".msg").textContent = t("checking");

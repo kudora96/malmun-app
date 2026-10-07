@@ -1,6 +1,6 @@
 // 편 불러오기 — 공통 + KR층 + 학습자 언어층을 sub_id 로 조인(app_build_spec §3-4)
-import { paths } from "./paths.js?v=1007.54";
-import { VERSION } from "./version.js?v=1007.54";
+import { paths } from "./paths.js?v=1007.58";
+import { VERSION } from "./version.js?v=1007.58";
 
 const cache = new Map();
 // 앱 판 번호를 붙여 받는다 — 새 판이면 옛 데이터를 쓰지 않게(tools/bump_version.py)

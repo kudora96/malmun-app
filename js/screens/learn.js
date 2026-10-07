@@ -10,23 +10,24 @@
 //  R7 영상은 늘 맨 위 · 지금 줄은 영상 바로 아래(앞 줄은 영상 뒤로) — 손으로 목록을 움직이면 4초 동안은 따라가지 않음
 //  R8 듣기 모드(대사→설명 · 설명만)도 R1~R6 그대로(영상 대신 소리 조각) · 모드를 바꾸면 멈춤(▶ 로 시작)
 //  R9 다시 들어오면 마지막 줄이 선택된 채 멈춰 있음
-import { t, lang, langName } from "../i18n.js?v=1007.54";
-import { esc, renderText, glossCards, sayParts } from "../text.js?v=1007.54";
-import { episode } from "../data.js?v=1007.54";
-import { paths } from "../paths.js?v=1007.54";
-import { Sequence } from "../audio.js?v=1007.54";
-import { I, progress, SPEAKER } from "../ui.js?v=1007.54";
-import writeView from "./write.js?v=1007.54";
-import { diagEnv, keepDiag } from "../diag.js?v=1007.54";
-import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1007.54";
-import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V } from "../rhythm.js?v=1007.54";
-import { playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1007.54";
-import { bestHeard, heardHTML, endHint } from "../heard.js?v=1007.54";
-import { recDel, downloadRec, askPersist } from "../recstore.js?v=1007.54";
-import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1007.54";
-import { scoreFx, stopFx } from "../scorefx.js?v=1007.54"; // 점수별 효과(본부 10-05)
-import { record, micWhy, srWhy, canScore, closeMic, logRec, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1007.54";
-import { hold, quietWake } from "../wake.js?v=1007.54";
+import * as sfxL from "../sfx.js?v=1007.58"; // 카드 말하기 최대 길이 = 본보기 길이로(10-07)
+import { t, lang, langName } from "../i18n.js?v=1007.58";
+import { esc, renderText, glossCards, sayParts } from "../text.js?v=1007.58";
+import { episode } from "../data.js?v=1007.58";
+import { paths } from "../paths.js?v=1007.58";
+import { Sequence } from "../audio.js?v=1007.58";
+import { I, progress, SPEAKER } from "../ui.js?v=1007.58";
+import writeView from "./write.js?v=1007.58";
+import { diagEnv, keepDiag } from "../diag.js?v=1007.58";
+import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1007.58";
+import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V } from "../rhythm.js?v=1007.58";
+import { playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1007.58";
+import { bestHeard, heardHTML, endHint } from "../heard.js?v=1007.58";
+import { recDel, downloadRec, askPersist } from "../recstore.js?v=1007.58";
+import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1007.58";
+import { scoreFx, stopFx } from "../scorefx.js?v=1007.58"; // 점수별 효과(본부 10-05)
+import { record, micWhy, srWhy, canScore, closeMic, logRec, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1007.58";
+import { hold, quietWake } from "../wake.js?v=1007.58";
 
 const RATES = [1, 0.75, 0.5];
 const pref = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } };
@@ -492,9 +493,10 @@ export default async function learn(app, ep, startId) {
     // 「준비 중」 → 마이크에서 실제 소리가 들어오기 시작하면 「녹음 중」(본부 10-03 — 그 전에 말하면 앞이 비어 버린다)
     quietWake(true); // 녹음하는 동안 깨우기 소리 멈춤(에코 제거가 말을 끊지 않게)
     const tb = box.querySelector(".tbar"), mm = ms => `${Math.floor(ms / 60000)}:${String(Math.floor(ms / 1000) % 60).padStart(2, "0")}`;
+    const sayBuf = L[i].say.src ? await Promise.race([sfxL.load(L[i].say.src), new Promise(r => setTimeout(() => r(null), 150))]) : null;
     const ctl = record({
-      maxMs: maxMsFor(L[i].say.ko), // 최대 길이 = max(8, 3 + 0.8 × 음절)초
-      onTick: (el, max) => { tb.hidden = false; tb.firstElementChild.style.width = Math.min(100, (100 * el) / max) + "%"; tb.classList.toggle("low", el > max * 0.8); tb.querySelector(".tt").textContent = `${mm(el)} / ${mm(max)}`; },
+      maxMs: Math.max(maxMsFor(L[i].say.ko), sayBuf ? sayBuf.duration * 2000 + 2000 : 0), // 최대 길이 = max(8, 3 + 0.8 × 음절, 본보기 × 2 + 2)초(투덜이 10-07 허락)
+      onTick: (el, max) => { tb.hidden = false; tb.firstElementChild.style.width = Math.min(100, (100 * el) / max) + "%"; tb.classList.toggle("low", el > max * 0.8); tb.querySelector(".tt").textContent = `⏱ ${mm(el)} / ${mm(max)} · ${t("time_left", { s: Math.max(0, Math.ceil((max - el) / 1000)) })}`; },
       onLevel: v => { lvl.firstElementChild.style.width = Math.round(v * 100) + "%"; },
       onStop: () => { if (sp?.ctl === ctl) { msg.textContent = t("checking"); lvl.hidden = true; } },
       onSwitch: () => { btn.textContent = "… " + t("mic_opening"); lvl.hidden = true; msg.textContent = t("mic_switched"); },
