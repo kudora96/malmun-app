@@ -20,17 +20,19 @@
   navigator.mediaDevices.enumerateDevices = async () => [
     { kind: "audioinput", deviceId: "default", label: "기본값 - 시험 마이크" }, { kind: "audioinput", deviceId: "bt", label: "시험 블루투스" }, { kind: "audioinput", deviceId: "usb", label: "시험 USB 마이크" }];
   const asked = (window.__asked = []);
+  // 소리 크기 하나를 모든 열린 가짜 마이크가 같이 씀(안드로이드는 녹음마다 마이크를 닫고 다시 엶 — 본부 10-08 · 다시 열어도 같은 마이크처럼)
+  let lvl = 0.3; const gains = []; const shared = { o: null, ctx: null, g: { gain: { get value() { return lvl; }, set value(v) { lvl = v; gains.forEach(x => (x.gain.value = v)); } } } };
   navigator.mediaDevices.getUserMedia = async c => {
     micAsked++; window.__lastC = c.audio; asked.push(c.audio === true || !c.audio.deviceId ? "기본" : c.audio.deviceId.exact);
     if (window.__micFail > 0) { window.__micFail--; throw new DOMException("Device was removed", "NotReadableError"); }
     if (window.__micDeny) throw new DOMException("denied", "NotAllowedError");
-    const ctx = new AudioContext(), dst = ctx.createMediaStreamDestination(), o = ctx.createOscillator(), g = ctx.createGain();
+    const ctx = (await (window.__micCtxP ||= import(`/js/wake.js?v=${document.documentElement.dataset.v}`).then(m => m.audioCtx()))), dst = ctx.createMediaStreamDestination(), o = ctx.createOscillator(), g = ctx.createGain();
     const id = asked[asked.length - 1], dumb = (window.__silentIds || []).includes(id);
-    g.gain.value = dumb ? 0 : 0.3; o.connect(g); g.connect(dst); o.start();
-    if (!dumb) window.__mic = { o, g, ctx };
+    g.gain.value = dumb ? 0 : lvl; o.connect(g); g.connect(dst); o.start();
+    if (!dumb) { gains.push(g); shared.o = o; shared.ctx = ctx; window.__mic = shared; }
     const tr = dst.stream.getAudioTracks()[0], gs = tr.getSettings.bind(tr); tr.getSettings = () => ({ ...gs(), deviceId: id === "기본" ? "bt" : id });
     (window.__tracks ||= []).push(dst.stream.getAudioTracks()[0]);
-    return dst.stream;
+    return (window.__offOnStop ||= (s, o) => { for (const t of s.getAudioTracks()) { const f = t.stop.bind(t); t.stop = () => { f(); try { o.stop(); o.disconnect(); } catch {} }; } return s; })(dst.stream, o);
   };
   const speakFor = ms => { const m = window.__mic; if (m) { m.g.gain.value = 0.3; setTimeout(() => { m.g.gain.value = 0; }, ms); } };
   // 가짜 음성 인식
@@ -88,7 +90,8 @@
   $(".panel [data-seg='1']").click(); await W(300);
   ok(/2\/5/.test($(".panel .segnav").innerText.replace(/\s/g, "")) && $(".panel .say").textContent.startsWith("경복궁에"), "▶ 로 다음 토막", $(".panel .say").textContent);
 
-  ok(micAsked === 1, "마이크 허락은 처음 한 번만(창이 열려 있는 동안 마이크를 쥐고 있음 — 10-01 판처럼)", String(micAsked));
+  if (/Android/i.test(navigator.userAgent)) ok(micAsked >= 1, "안드로이드 = 녹음마다 마이크를 닫고 다시 엶(본부 10-08 · 허락은 브라우저가 한 번만 물음)", String(micAsked));
+  else ok(micAsked === 1, "마이크 허락은 처음 한 번만(창이 열려 있는 동안 마이크를 쥐고 있음 — 10-01 판처럼)", String(micAsked));
   // 저장 확인: 앞 토막으로 돌아가면 ✓ + 내 목소리 켜짐
   $(".panel [data-seg='-1']").click(); await W(300);
   ok(/1\/5✓/.test($(".panel .segnav").innerText.replace(/\s/g, "")) && !$(".panel [data-act=savedplay]").hidden && $(".panel [data-act=mine]").disabled, "앞 토막으로 → ✓ · 「저장됨 ▶」 · (방금 녹음 없음이라 [내 목소리] 꺼짐)", $(".panel .segnav").innerText.replace(/\s/g, ""));
@@ -343,20 +346,20 @@
   await open(1); while (!/(^|\D)1\/5/.test($(".panel .segnav").innerText.replace(/\s/g, ""))) { $(".panel [data-seg='-1']").click(); await W(150); }
   const fxRun = async h => { fxSeen.length = 0; fxSize.length = 0; if (h == null) window.__srNone = true; await say(h ?? "아무 말"); await waitIdle(); await settle2(); window.__srNone = false; const after = fxBox($(".panel .speak .fx")); await W(1900); return [fxSeen.join(","), fxSize.every(x => x === after) && fxBox($(".panel .speak .fx")) === after ? "" : `크기 ${fxSize}→${after}`].join(""); };
   const fxA = await fxRun("어서 오세요"), fxB = await fxRun("어서 오세"), fxC = await fxRun("너 죽는다"), fxD = await fxRun(null);
-  ok(fxA === "perfect" && fxB === "pass" && fxC === "miss" && fxD === "", "말하기 창 효과: 100% = perfect · 80% = pass · 0%(말은 들림) = miss · 말소리 없음 = 없음 · 창 크기·스크롤 그대로", `${fxA}|${fxB}|${fxC}|${fxD || "없음"}`);
+  ok(fxA === "perfect" && fxB === "pass" && fxC === "miss" && fxD === "miss", "말하기 창 효과: 100% = perfect · 80% = pass · 0%(말은 들림) = miss · 못 알아들음도 꽝 = miss(투덜이 10-08) · 창 크기·스크롤 그대로", `${fxA}|${fxB}|${fxC}|${fxD || "없음"}`);
   const fxPl = fxPlayed();
-  ok(["score_perfect", "score_pass", "score_miss"].every(n => fxPl.includes(n)) && fxPl.length === 3, "효과음 score_perfect/pass/miss 가 점수 뜰 때 한 번씩(말소리 없음은 소리 없음)", `남 ${fxPl}`);
+  ok(["score_perfect", "score_pass", "score_miss"].every(n => fxPl.includes(n)) && fxPl.length === 4, "효과음 score_perfect/pass/miss 가 점수 뜰 때 한 번씩(못 알아들음도 꽝 소리 — 투덜이 10-08)", `남 ${fxPl}`);
   line(1).querySelector("[data-act=explain]").click(); await W(800);
   const crun = async h => { fxSeen.length = 0; fxSize.length = 0; if (h == null) window.__srNone = true; else window.__heard = h; await crec(); window.__srNone = false; const after = fxBox($(".panel .sayb .fx")); await W(1900); return fxSeen.join(",") + (fxSize.every(x => x === after) && fxBox($(".panel .sayb .fx")) === after ? "" : ` 크기 ${fxSize}→${after}`); };
   const cA = await crun("한국에 온 걸 환영해요"), cB = await crun("너 죽는다"), cC = await crun(null);
-  ok(cA === "perfect" && cB === "miss" && cC === "", "카드 효과: 100% = perfect · 엉뚱한 말 = miss · 말소리 없음 = 없음 · 카드 크기 그대로(효과가 떠 있을 때 = 사라진 뒤)", `${cA}|${cB}|${cC || "없음"}`);
+  ok(cA === "perfect" && cB === "miss" && cC === "miss", "카드 효과: 100% = perfect · 엉뚱한 말 = miss · 못 알아들음도 꽝 = miss(투덜이 10-08) · 카드 크기 그대로(효과가 떠 있을 때 = 사라진 뒤)", `${cA}|${cB}|${cC || "없음"}`);
   // 🎤 누르면 울리던 효과음도 바로 멈춤(녹음에 안 섞임)
   window.__heard = "한국에 온 걸 환영해요"; await crec(); await W(250); const fxN0 = window.__sfxLog.length;
   $(".panel .sayb [data-x=rec]").click(); await W(300); const fxCut = window.__sfxLog.slice(fxN0).some(e => e.ev === "멈춤" && /score_perfect/.test(e.name));
   speakFor(700); for (let k = 0; k < 60 && $(".panel .sayb [data-x=rec]").classList.contains("on"); k++) await W(150); await W(2300);
   ok(fxCut, "카드: 효과음(2초 perfect) 중 🎤 → 효과음 바로 멈춤");
   window.fetch = of; mo.disconnect();
-  window.__mic?.ctx.close();
+  window.__mic?.o?.stop?.(); // 가짜 마이크 소리 끔(소리 엔진은 앱 것이라 닫지 않음)
   } catch (e) { res.push("✗ 점검 도중 오류: " + e.message); }
   const out = res.join("\n"); console.log(out); window.__noRhythm = false; return out;
 })();

@@ -12,7 +12,7 @@
     try { sessionStorage.removeItem("malmun.srmode"); localStorage.removeItem("malmun.mic"); } catch {}
     const tracks = []; let gum = 0, mic = null;
     navigator.mediaDevices.enumerateDevices = async () => [{ kind: "audioinput", deviceId: "default", label: "기본값 - 시험 마이크" }];
-    navigator.mediaDevices.getUserMedia = async () => { gum++; const ctx = new AudioContext(), dst = ctx.createMediaStreamDestination(), o = ctx.createOscillator(), g = ctx.createGain(); g.gain.value = 0; o.connect(g); g.connect(dst); o.start(); mic = { g }; tracks.push(dst.stream.getAudioTracks()[0]); return dst.stream; };
+    navigator.mediaDevices.getUserMedia = async () => { gum++; const ctx = (await (window.__micCtxP ||= import(`/js/wake.js?v=${document.documentElement.dataset.v}`).then(m => m.audioCtx()))), dst = ctx.createMediaStreamDestination(), o = ctx.createOscillator(), g = ctx.createGain(); g.gain.value = 0; o.connect(g); g.connect(dst); o.start(); mic = { g }; tracks.push(dst.stream.getAudioTracks()[0]); return (window.__offOnStop ||= (s, o) => { for (const t of s.getAudioTracks()) { const f = t.stop.bind(t); t.stop = () => { f(); try { o.stop(); o.disconnect(); } catch {} }; } return s; })(dst.stream, o); };
     const micLive = () => tracks.some(t => t.readyState === "live");
     // __srSilent = 앞으로 몇 번(인식 켜기)은 말없이 2.7초 만에 혼자 끝남(진짜 크롬처럼) · Infinity = 계속 말 없음
     window.SpeechRecognition = window.webkitSpeechRecognition = class { start() { if (micLive()) { setTimeout(() => { this.onerror?.({ error: "audio-capture" }); this.onend?.(); }, 300); return; }
@@ -33,7 +33,7 @@
     const m2 = $(".panel .msg").textContent, mb = $(".panel [data-act=mine]");
     const dim = mb.classList.contains("dim") && $(".panel [data-act=both]").classList.contains("dim");
     mb.click(); await W(200); const m3 = $(".panel .msg").textContent;
-    ok(gum === g0 && /^\d+%/.test(m2) && /글자 점수만|अक्षर अंक मात्र|letter score only/.test(m2) && dim && /리듬|लय|rhythm/i.test(m3), "ⓑ 받아쓰기만: 마이크 안 엶 · 글자 점수 · 「글자 점수만」 · 내 목소리·비교 흐림 → 누르면 까닭", `마이크 ${gum - g0}번 · 「${m2}」 · 흐림 ${dim} · 「${m3}」`);
+    ok(gum === g0 && /^\d+%/.test(m2) && /글자 점수만|अक्षरको अंक मात्र|अक्षर अंक मात्र|letter score only/.test(m2) && dim && /리듬|लय|rhythm/i.test(m3), "ⓑ 받아쓰기만: 마이크 안 엶 · 글자 점수 · 「글자 점수만」 · 내 목소리·비교 흐림 → 누르면 까닭", `마이크 ${gum - g0}번 · 「${m2}」 · 흐림 ${dim} · 「${m3}」`);
     // ⓔ 받아쓰기만에서도 끝 규칙 같게 — 🎤 뒤 말 없음(인식이 혼자 끝나도 다시 켜며 6초) → 「목소리가 안 들렸어요」 · 3초 머뭇(인식이 한 번 끝남) 뒤 말 → 점수
     { window.__srSilent = Infinity; const t0 = performance.now(); $(".panel [data-act=rec]").click(); await W(300); for (let k = 0; k < 120 && $(".panel [data-act=rec]").classList.contains("on"); k++) await W(100); for (let k = 0; k < 40 && !/%/.test($(".panel .msg").textContent); k++) await W(100);
       const sec = (performance.now() - t0) / 1000, mn = $(".panel .msg").textContent; window.__srSilent = 1;
@@ -47,7 +47,7 @@
     if (!cb) ok(false, "ⓒ 카드 말해 보기 단추 없음");
     else { window.__heard = $(".panel .sayb .saybig")?.textContent || ""; const g1 = gum; cb.click(); await W(300); for (let k = 0; k < 80 && cb.classList.contains("on"); k++) await W(100); for (let k = 0; k < 80 && !/%/.test($(".panel .sayb .smsg").textContent); k++) await W(100); await W(300);
       const cm = $(".panel .sayb .smsg").textContent, mine = $(".panel .sayb [data-x=mine]");
-      ok(gum === g1 && /^\d+%/.test(cm) && /글자 점수만|अक्षर अंक मात्र|letter score only/.test(cm) && mine.classList.contains("dim"), "ⓒ 카드도 받아쓰기만 · 글자 점수 · 내 목소리 흐림", `마이크 ${gum - g1}번 · 「${cm}」`); }
+      ok(gum === g1 && /^\d+%/.test(cm) && /글자 점수만|अक्षरको अंक मात्र|अक्षर अंक मात्र|letter score only/.test(cm) && mine.classList.contains("dim"), "ⓒ 카드도 받아쓰기만 · 글자 점수 · 내 목소리 흐림", `마이크 ${gum - g1}번 · 「${cm}」`); }
     document.querySelectorAll(".line")[9].querySelector("[data-act=explain]").click(); await W(600);
     // ⓓ PC
     sessionStorage.removeItem("malmun.srmode"); setUA(false);

@@ -35,6 +35,12 @@
       rows.push(`${ch} ${list.map(S => S.jamo).join("")} ${areas.join("/")} · ${(cover * 100).toFixed(0)}%`);
     }
     ok(!bads.length, "ⓐ 획순 칠 = 글자 잉크 안만 · 획마다 칠 > 0 · 다 칠하면 97%+ 덮음(빠짐없이)", bads.join(" · ") || rows.join(" | "));
+    // ⓘ ㅐ 의 짧은 가로(본부 10-08 투덜이 「대」 — 가로가 오른쪽 ㅣ 와 같이 나중에 칠해짐) — ㅏ 짧은 가로 획이 두 세로 사이 가로대를 거의 다 칠함(오른쪽 ㅣ 가 아니라)
+    { const rows = [], bad = [];
+      for (const ch of ["대", "해", "개", "새"]) { const { list, at } = await wr().reveal(ch, 200); const k = list.findIndex((S, j) => S.jamo === "ㅏ" && j > 0 && list[j - 1].jamo === "ㅏ"); if (k < 0) { bad.push(ch + " 획 없음"); continue; }
+        const a0 = alphaOf(at(k - 1, 1).cv), a1 = alphaOf(at(k, 1).cv); let n = 0, xMax = 0; for (let i = 0; i < 40000; i++) if (a1[i * 4 + 3] > 128 && a0[i * 4 + 3] <= 128) { n++; xMax = Math.max(xMax, i % 200); }
+        const right = list[k + 1]?.pts[0][0] * 200, gap = right - xMax; rows.push(`${ch} 가로 ${n}px · 오른쪽 ㅣ 까지 ${gap.toFixed(0)}px`); if (n < 140 || gap > 14) bad.push(ch); }
+      ok(!bad.length, "ⓘ ㅐ 짧은 가로 = ㅏ 차례에 두 세로 사이 가로대를 칠함(대·해·개·새)", rows.join(" | ")); }
     // ⓔ 칠 매끄럽게(본부 10-07 「쓰는 중간 깨짐」) — 중간 장면(25·50·75%)에 칠한 곳 안 바늘구멍 0 · 다 칠하면 글꼴 잉크와 같음(알파 차이 픽셀 ≤ 1%) · 획이 끝난 장면 ⊂ 다음 장면
     { const rows = [], bad = [];
       for (const ch of ["게", "구", "나", "했", "읽"]) { const { list, at } = await wr().reveal(ch, 200), g = alphaOf(wr().glyphCv(ch, 200)); let holes = 0, sub = 0;

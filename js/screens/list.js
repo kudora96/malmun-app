@@ -1,10 +1,10 @@
-import { t } from "../i18n.js?v=1008.2";
-import { esc } from "../text.js?v=1008.2";
-import { catalog } from "../data.js?v=1008.2";
-import { langChip, openLangSheet, progress } from "../ui.js?v=1008.2";
-import { rerender } from "../main.js?v=1008.2";
-import { VERSION } from "../version.js?v=1008.2";
-import { recCount, recDelEpisode } from "../recstore.js?v=1008.2";
+import { t } from "../i18n.js?v=1008.22";
+import { esc } from "../text.js?v=1008.22";
+import { catalog } from "../data.js?v=1008.22";
+import { langChip, openLangSheet, progress, uiKoBtn, toggleUiKo } from "../ui.js?v=1008.22";
+import { rerender } from "../main.js?v=1008.22";
+import { VERSION } from "../version.js?v=1008.22";
+import { recCount, recDelEpisode } from "../recstore.js?v=1008.22";
 
 const mmss = s => `${Math.floor(s / 60)}:${String(Math.round(s % 60)).padStart(2, "0")}`;
 
@@ -16,7 +16,7 @@ export default async function list(app, unit = "L01-00") {
   const seen = Math.min(p.line || 0, first?.lines || 0);
   app.innerHTML = `<section class="scr list">
     <div class="bar"><div class="grow"><div class="t ko" lang="ko">${esc(cat.units[unit] || unit)}</div>
-      <div class="sub">${esc(unit)} · ${esc(t("n_episodes", { n: eps.length }))}</div></div>${langChip()}</div>
+      <div class="sub">${esc(unit)} · ${esc(t("n_episodes", { n: eps.length }))}</div></div><span class="hbt">${uiKoBtn()}${langChip()}</span></div>
     ${first ? `<a class="hero" href="#/learn/${first.id}"><img src="img/${first.id}.jpg" alt="">
       <div><div class="ttl ko" lang="ko">${esc(first.id.slice(-2))} ${esc(first.title)}</div>
       <div class="meta">${mmss(first.duration)} · ${esc(t("n_lines", { n: first.lines }))}${seen ? " · " + esc(t("seen_to", { n: seen })) : ""}</div>
@@ -29,6 +29,7 @@ export default async function list(app, unit = "L01-00") {
     <p class="ver">v${esc(VERSION)}</p>
   </section>`;
   app.querySelector("[data-act=lang]").onclick = () => openLangSheet(rerender);
+  const uk = app.querySelector("[data-act=uiko]"); if (uk) uk.onclick = () => toggleUiKo(rerender);
   // 이 편 녹음 모두 지우기(녹음이 있을 때만 보임 · 한 번 묻고 · 진단 녹음도 같이)
   const da = app.querySelector(".delall button");
   if (da) {

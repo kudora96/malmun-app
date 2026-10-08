@@ -13,7 +13,7 @@
     try { localStorage.removeItem("malmun.mic"); localStorage.removeItem("malmun.lastrec"); } catch {}
     navigator.mediaDevices.enumerateDevices = async () => [{ kind: "audioinput", deviceId: "default", label: "기본값 - 시험 마이크" }];
     let mic = null;
-    navigator.mediaDevices.getUserMedia = async () => { const ctx = new AudioContext(), dst = ctx.createMediaStreamDestination(), o = ctx.createOscillator(), g = ctx.createGain(); g.gain.value = 0; o.connect(g); g.connect(dst); o.start(); mic = { g }; return dst.stream; };
+    navigator.mediaDevices.getUserMedia = async () => { const ctx = (await (window.__micCtxP ||= import(`/js/wake.js?v=${document.documentElement.dataset.v}`).then(m => m.audioCtx()))), dst = ctx.createMediaStreamDestination(), o = ctx.createOscillator(), g = ctx.createGain(); g.gain.value = 0; o.connect(g); g.connect(dst); o.start(); mic = { g }; return (window.__offOnStop ||= (s, o) => { for (const t of s.getAudioTracks()) { const f = t.stop.bind(t); t.stop = () => { f(); try { o.stop(); o.disconnect(); } catch {} }; } return s; })(dst.stream, o); };
     const talk = async () => { mic.g.gain.value = 0.3; await W(1700); mic.g.gain.value = 0; await W(500); mic.g.gain.value = 0.3; await W(1800); mic.g.gain.value = 0; }; // 1.7초 말 · 0.5초 숨 · 1.8초 말
     let n = 0; const tracks = [];
     // 가짜 인식: 1번째 = 「그게 세종대왕이」 뒤 1.2초에 받은 트랙을 끄고 혼자 끝남 · 2번째부터 = 「하고 싶었던 거구나」

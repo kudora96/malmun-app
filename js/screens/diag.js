@@ -1,14 +1,14 @@
 // 진단 화면 #/diag(본부 10-07 「PC 에선 되는데 폰에선 안 됨」) — 투덜이가 폰에서 열어 사진 한 장 · 「복사」로 글째 보냄
 //  기기 · 받아쓰기(인식만 / 녹음+인식 동시) · 마이크(허락 · 실제 적용된 설정 · 장치) · 녹음 형식(지원 · 3초 녹음을 풀 수 있나)
 //  소리(AudioContext 상태 · 「가」 소리 · 효과음 · 음성 창고 읽기) · 최근 오류 20개 — 앱 동작은 안 바꿈(시험은 이 화면 안에서만)
-import { VERSION } from "../version.js?v=1008.2";
-import { esc } from "../text.js?v=1008.2";
-import { paths } from "../paths.js?v=1008.2";
-import { charsF } from "../data.js?v=1008.2";
-import { audioCtx } from "../wake.js?v=1008.2";
-import * as sfx from "../sfx.js?v=1008.2";
-import { srOnlyMode, setSrOnly } from "../recorder.js?v=1008.2";
-import { errLog, clearErr } from "../errlog.js?v=1008.2";
+import { VERSION } from "../version.js?v=1008.22";
+import { esc } from "../text.js?v=1008.22";
+import { paths } from "../paths.js?v=1008.22";
+import { charsF } from "../data.js?v=1008.22";
+import { audioCtx } from "../wake.js?v=1008.22";
+import * as sfx from "../sfx.js?v=1008.22";
+import { srOnlyMode, setSrOnly } from "../recorder.js?v=1008.22";
+import { errLog, clearErr } from "../errlog.js?v=1008.22";
 
 export default async function diag(app) {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -24,13 +24,17 @@ export default async function diag(app) {
     "녹음 형식": mrTypes, "AudioContext": (() => { try { return audioCtx().state; } catch (e) { return "만들기 실패 " + e.message; } })(),
     "preservesPitch": "preservesPitch" in HTMLMediaElement.prototype ? "있음" : "webkitPreservesPitch" in HTMLMediaElement.prototype ? "webkit 만" : "없음",
   };
-  const tests = [["sr", "받아쓰기만 시험(5초 · 「안녕하세요」라고 말해 보세요)"], ["srrec", "녹음+받아쓰기 동시 시험(5초)"], ["mic", "마이크 열기 · 설정 보기"], ["rec", "3초 녹음 → 풀기 시험"], ["ga", "「가」 소리 틀기"], ["fx", "효과음 틀기"], ["r2", "음성 창고 읽기 시험"]];
-  const keys = { sr: "받아쓰기만", srrec: "녹음+받아쓰기", mic: "마이크 설정", rec: "녹음 풀기", ga: "「가」 소리", fx: "효과음", r2: "음성 창고" };
+  const tests = [["sr", "받아쓰기만 시험(5초 · 「안녕하세요」라고 말해 보세요)"], ["srrec", "녹음+받아쓰기 동시 시험(5초)"], ["recsr", "녹음 3초 → 그 녹음 소리로 받아쓰기(동시 아님)"], ["srthen", "받아쓰기 먼저(5초) → 끝난 뒤 녹음 3초"], ["mic", "마이크 열기 · 설정 보기"], ["rec", "3초 녹음 → 풀기 시험"], ["ga", "「가」 소리 틀기"], ["fx", "효과음 틀기"], ["r2", "음성 창고 읽기 시험"]];
+  const keys = { sr: "받아쓰기만", srrec: "녹음+받아쓰기", recsr: "녹음→그 소리 받아쓰기", srthen: "받아쓰기→녹음", mic: "마이크 설정", rec: "녹음 풀기", ga: "「가」 소리", fx: "효과음", r2: "음성 창고" };
+  // 최근 말하기 녹음 5개(본부 10-08 갤럭시 — 녹음/점수 엇박자 · 녹음 소리 줄어듦) — malmun.lastrec(녹음마다 · 재생하면 키움·peak 덧붙음)
+  const recRows = () => { let a = []; try { a = JSON.parse(localStorage.getItem("malmun.lastrec") || "[]"); } catch {} const ev = x => { const sr = x.sr || [], n = k => sr.filter(e => String(e).startsWith(k)).length; return `start ${n("start@")} · audiostart ${n("audiostart")} · speechstart ${n("speechstart")} · result ${n("result")} · nomatch ${n("nomatch")}${sr.filter(e => String(e).startsWith("error")).map(e => " · " + e).join("")}${n("restart") ? " · restart " + n("restart") : ""}`; };
+    return a.slice().reverse().map(x => [String(x.at || "").slice(11, 19), x.where, `방식 ${x.mode || "?"}`, `끝 ${x.why || "?"}${x.cut ? "(" + x.cut + ")" : ""}`, ev(x), `들음 「${(x.heard || []).slice(-1)[0] || "없음"}」`, `점수 ${x.score ?? "-"}`, `녹음 최대 ${x.maxDb ?? "?"}dB`, x.play || "재생 전", `마이크 뒤 ${x.micAfter || "?"}`, `${x.mic || ""} · ${x.set || ""}`, `ctx ${x.ctxRate || "?"}Hz ${x.ctxState || ""}`].join(" | ")); };
   const paint = () => {
     const errs = errLog();
     app.innerHTML = `<section class="scr diag"><div class="bar"><div class="grow"><div class="t">진단 · Diagnostics</div><div class="sub">사진 한 장 또는 「복사」로 보내 주세요</div></div><a class="dback" href="#/list">✕ 닫기</a></div>
       <table class="dtab">${Object.entries(base).map(([k, v]) => row(k, v)).join("")}${Object.values(keys).map(k => row(k, res[k] ?? "—")).join("")}</table>
       <div class="dbtns">${tests.map(([a, l]) => `<button data-t="${a}">${esc(l)}</button>`).join("")}</div>
+      <h3>최근 말하기 녹음 5개</h3><ol class="derr drec">${recRows().map(x => `<li>${esc(x)}</li>`).join("") || "<li>없음</li>"}</ol>
       <h3>뒤로 가기 기록</h3><ol class="derr">${(() => { try { return JSON.parse(localStorage.getItem("malmun.navlog") || "[]"); } catch { return []; } })().slice().reverse().map(x => `<li>${esc(x)}</li>`).join("") || "<li>없음</li>"}</ol><h3>최근 오류 ${errs.length}개</h3><ol class="derr">${errs.slice().reverse().map(e => `<li>${esc(`${e.at} ${e.kind} ${e.msg}${e.url ? " · " + e.url : ""}${e.src ? " · " + e.src + ":" + e.line : ""}`)}</li>`).join("") || "<li>없음</li>"}</ol>
       <div class="dbtns"><button data-t="copy">복사</button>${srOnlyMode() ? '<button data-t="srboth">다시 같이 시험(받아쓰기만 끄기)</button>' : ""}<button data-t="clr">오류 지우기</button></div><p class="dmsg"></p></section>`;
   };
@@ -53,13 +57,24 @@ export default async function diag(app) {
   app.querySelector(".diag").addEventListener("click", async e => {
     const b = e.target.closest("[data-t]"); if (!b) return;
     const a = b.dataset.t; try { audioCtx().resume?.(); } catch {}
-    if (a === "copy") { const txt = [...app.querySelectorAll(".dtab tr")].map(tr => tr.innerText.replace(/\t/, ": ")).join("\n") + "\n뒤로:\n" + (() => { try { return JSON.parse(localStorage.getItem("malmun.navlog") || "[]").join("\n"); } catch { return ""; } })() + "\n오류:\n" + errLog().map(e => JSON.stringify(e)).join("\n");
+    if (a === "copy") { const txt = [...app.querySelectorAll(".dtab tr")].map(tr => tr.innerText.replace(/\t/, ": ")).join("\n") + "\n최근 녹음:\n" + recRows().join("\n") + "\n뒤로:\n" + (() => { try { return JSON.parse(localStorage.getItem("malmun.navlog") || "[]").join("\n"); } catch { return ""; } })() + "\n오류:\n" + errLog().map(e => JSON.stringify(e)).join("\n");
       try { await navigator.clipboard.writeText(txt); msg("복사했어요"); } catch { msg("복사 안 됨 — 사진으로 보내 주세요"); } return; }
     if (a === "clr") { clearErr(); paint(); return; }
     if (a === "srboth") { setSrOnly(false); location.reload(); return; } // 다음 말하기에서 녹음+받아쓰기 같이 다시 시험
     b.disabled = true; msg("시험 중…");
     try {
       if (a === "sr") set(keys.sr, await srOnce(null));
+      else if (a === "recsr") { // 녹음 먼저 → 그 녹음을 WebAudio → MediaStreamDestination 트랙으로 틀며 받아쓰기(마이크와 동시 사용 없음)
+        const s = await navigator.mediaDevices.getUserMedia({ audio: true }); const rec = new MediaRecorder(s), ch = []; rec.ondataavailable = x => x.data.size && ch.push(x.data); const stopped = new Promise(r => (rec.onstop = r));
+        msg("3초 동안 「안녕하세요」라고 말하세요"); rec.start(); await wait(3000); rec.stop(); await stopped; s.getTracks().forEach(x => x.stop());
+        const ctx = audioCtx(), buf = await ctx.decodeAudioData(await new Blob(ch, { type: rec.mimeType }).arrayBuffer()), dst = ctx.createMediaStreamDestination(), src = ctx.createBufferSource(); src.buffer = buf; src.connect(dst);
+        msg("녹음 소리로 받아쓰기 중…"); const tr = dst.stream.getAudioTracks()[0]; setTimeout(() => { try { src.start(); } catch {} }, 400);
+        const out = await srOnce(tr, Math.ceil(buf.duration * 1000) + 1500); tr.stop(); set(keys.recsr, `녹음 ${buf.duration.toFixed(1)}초 · ${out}`); }
+      else if (a === "srthen") { // 마이크 열고 받아쓰기 먼저 → 끝난 뒤 녹음
+        const s = await navigator.mediaDevices.getUserMedia({ audio: true }); msg("5초 동안 말하세요(받아쓰기)"); const o1 = await srOnce(null);
+        msg("이제 3초 녹음"); const rec = new MediaRecorder(s), ch = []; rec.ondataavailable = x => x.data.size && ch.push(x.data); const stopped = new Promise(r => (rec.onstop = r)); rec.start(); await wait(3000); rec.stop(); await stopped; s.getTracks().forEach(x => x.stop());
+        let dec = ""; try { const buf = await audioCtx().decodeAudioData(await new Blob(ch, { type: rec.mimeType }).arrayBuffer()); let pk = 0; const d = buf.getChannelData(0); for (let i = 0; i < d.length; i++) pk = Math.max(pk, Math.abs(d[i])); dec = `녹음 ${buf.duration.toFixed(1)}초 최대 ${(20 * Math.log10(pk || 1e-9)).toFixed(1)}dB`; } catch (er) { dec = "녹음 풀기 실패 " + er.name; }
+        set(keys.srthen, `${o1} → ${dec}`); }
       else if (a === "srrec" || a === "mic" || a === "rec") {
         const s = await navigator.mediaDevices.getUserMedia({ audio: true });
         const tr = s.getAudioTracks()[0], gs = tr.getSettings?.() || {};

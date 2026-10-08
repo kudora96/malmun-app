@@ -988,3 +988,26 @@ button.dim{opacity:.45}
 .ctrl .iconbtn:disabled{opacity:.3;cursor:default;box-shadow:none}
 /* 비교 화면 방금 점수(투덜이 10-08 「비교에서 점수가 안 떠 답답」) — 내 목소리 줄 이름 오른쪽 */
 .crow .clab .cscore{margin-left:auto;font-size:12px;font-weight:800;color:var(--hi);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+
+/* 재생 노래방 칠(본부 10-08) — 견본 재생 때 글자 · 설명 읽는 문장 안 낱말 — 녹음 중 칠(pace)과 같은 모양 */
+.saybig span.kar,.speak .task .say span.kar,.v9body .sn .kw.kar{background:var(--hi-soft);border-radius:3px;box-shadow:0 2px 0 var(--hi)}
+
+/* 쓰기 글자 칸 = 그 글자 소리 단추(투덜이 10-08 「누르고 싶은」 — 올라와 있는 단추 · 누르면 내려감 · 올리면 살짝 밝게 · 그림 표시 없음) */
+.write .stage .box{cursor:pointer;background:var(--bubble);border:2px solid color-mix(in srgb,var(--ink) 28%,transparent);box-shadow:0 4px 0 color-mix(in srgb,var(--ink) 28%,transparent);border-radius:12px;position:relative;transition:transform .06s,box-shadow .06s,background-color .12s}
+@media (hover:hover){.write .stage .box:hover{background:var(--bubble-cur)}}
+.write .stage .box:active{transform:translateY(4px);box-shadow:0 0 0 transparent}
+
+/* 화자 이름 옆 학습자 말(본부 10-08) — 작게 · 줄바꿈 없이 */
+.spkg{font-size:.86em;font-weight:500;opacity:.85;white-space:nowrap}
+
+/* 「ने ⇄ 한」 앱 글 토글(본부 10-08) — 단추 모양 · 켜진 쪽 굵게·강조 */
+.chip.uiko{gap:3px;padding:4px 9px;font-size:12px;flex:none;white-space:nowrap}
+.chip.uiko .a,.chip.uiko .b{opacity:.55;font-weight:500}
+.chip.uiko[aria-pressed=false] .a,.chip.uiko[aria-pressed=true] .b{opacity:1;font-weight:800;color:var(--hi)}
+.learn .vtitle .chip.uiko{margin-top:2px}
+.hbt{display:flex;gap:6px;align-items:center;flex:none}
+.write .stage .box.ok{border-color:var(--hi);background:var(--hi-soft)}
+/* 머리 줄 화자 이름이 길어 넘칠 때(본부 10-08 이름 옆 학습자 말) — 번호·이름 칸만 줄이고 끝은 … · 다른 단추는 그대로 */
+.write .whead > *{flex:none}
+.write .whead .sub{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.write .whead .loopnote{flex:0 1 auto}

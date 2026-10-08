@@ -13,15 +13,15 @@
 //  W5 소리는 언제나 하나만 · 새 일을 하면 앞 소리는 멈춘다
 //  W6 영상 창 안(embedded): 창 안에서 스크롤 없이 다 보이게 — 긴 문장은 토막으로(◀ 1/3 ▶) ·
 //     토막을 다 쓰면 자동으로 다음 토막 · 줄을 다 쓰면 대사를 듣고 자동으로 다음 줄 쓰기 · 아래 ▶ = 이 부분 듣기
-import { t, lang } from "../i18n.js?v=1008.2";
-import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO } from "../text.js?v=1008.2";
-import { episode, chars, charsF } from "../data.js?v=1008.2";
-import { paths } from "../paths.js?v=1008.2";
-import { I } from "../ui.js?v=1008.2";
-import { audioCtx, hold } from "../wake.js?v=1008.2";
-import * as sfx from "../sfx.js?v=1008.2";
-import { scoreFx } from "../scorefx.js?v=1008.2";
-import { units as jamoUnits, baseOf } from "../jamobox.js?v=1008.2"; // 자모 자리 나누기(획순 · 자판 덧칠 · 손글씨 덩어리 — 본부 10-07) // 손글씨 점수 효과 = 말하기와 같은 규칙(본부 10-07)
+import { t, lang } from "../i18n.js?v=1008.22";
+import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO } from "../text.js?v=1008.22";
+import { episode, chars, charsF } from "../data.js?v=1008.22";
+import { paths } from "../paths.js?v=1008.22";
+import { I, spkHtml } from "../ui.js?v=1008.22";
+import { audioCtx, hold } from "../wake.js?v=1008.22";
+import * as sfx from "../sfx.js?v=1008.22";
+import { scoreFx } from "../scorefx.js?v=1008.22";
+import { units as jamoUnits, baseOf } from "../jamobox.js?v=1008.22"; // 자모 자리 나누기(획순 · 자판 덧칠 · 손글씨 덩어리 — 본부 10-07) // 손글씨 점수 효과 = 말하기와 같은 규칙(본부 10-07)
 
 const KEYS = [..."ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎㄲㄸㅃㅆㅉ"], VOW = [..."ㅏㅑㅓㅕㅗㅛㅜㅠㅡㅣ"];
 const VOW2 = [..."ㅐㅒㅔㅖㅘㅙㅚㅝㅞㅟㅢ"]; // 겹모음 줄(본부 10-06) — 칸 하나 · ㅓ+ㅣ 처럼 나눠 쳐도 받음
@@ -116,9 +116,9 @@ export default async function write(app, ep, id, opts = {}) {
 
   app.innerHTML = `<section class="scr write ${opts.embedded ? "embedded" : ""}">
     ${opts.embedded
-      ? `<div class="whead"><b>${esc(t("write"))}</b><span class="sub">${li + 1} / ${d.lines.length} · <span class="ko" lang="ko">${esc(line.speaker)}</span></span>${modeBtns()}<button class="whelp" data-act="help" aria-label="${esc(t("help"))}">${esc(t("help_btn"))}</button><button class="whelp wclose" data-act="close" aria-label="${esc(t("close_btn"))}">✕<span class="lt">${esc(String(t("close_btn")).replace(/^✕\s*/, " "))}</span></button><span class="loopnote" aria-live="polite"></span></div>`
+      ? `<div class="whead"><b>${esc(t("write"))}</b><span class="sub">${li + 1} / ${d.lines.length} · ${spkHtml(line.speaker)}</span>${modeBtns()}<button class="whelp" data-act="help" aria-label="${esc(t("help"))}">${esc(t("help_btn"))}</button><button class="whelp wclose" data-act="close" aria-label="${esc(t("close_btn"))}">✕<span class="lt">${esc(String(t("close_btn")).replace(/^✕\s*/, " "))}</span></button><span class="loopnote" aria-live="polite"></span></div>`
       : `<div class="bar"><a class="iconbtn" href="#/learn/${ep}/${line.id}" aria-label="${esc(t("back"))}">${I.back}</a>
-      <div class="grow"><div class="t">${esc(t("write"))}</div><div class="sub">${li + 1} / ${d.lines.length} · <span class="ko" lang="ko">${esc(line.speaker)}</span></div></div>${modeBtns()}<button class="whelp" data-act="help" aria-label="${esc(t("help"))}">${esc(t("help_btn"))}</button></div><div class="loopnote" aria-live="polite"></div>`}
+      <div class="grow"><div class="t">${esc(t("write"))}</div><div class="sub">${li + 1} / ${d.lines.length} · ${spkHtml(line.speaker)}</div></div>${modeBtns()}<button class="whelp" data-act="help" aria-label="${esc(t("help"))}">${esc(t("help_btn"))}</button></div><div class="loopnote" aria-live="polite"></div>`}
     <div class="segrow"><div class="sent" lang="ko"></div><div class="segnav"></div><div class="wtip" hidden>${esc(t("w_tip"))}</div></div>
     <div class="work"></div>
     <div class="helpbox" hidden>${[1, 2, 3, 4, 5, 6].map(k => `<p>${esc(t("help_wr_" + k))}</p>`).join("")}<p class="x">${esc(t("help_close"))}</p></div>
@@ -152,11 +152,11 @@ export default async function write(app, ep, id, opts = {}) {
     stopLoop(); st.sent = true; markSent();
     run([partStep()]).then(() => { st.sent = false; markSent(); });
   }
-  app.__wr = { owners: async ch => { await stkReady; const list = strokesOf(ch); return { list, ...inkOwners(ch, list), GN }; }, font: () => `${glyphWeight()} ${glyphFont()}`, reveal: async (ch, n = 200) => { await stkReady; await document.fonts?.load(`${glyphWeight()} 100px ${glyphFont()}`, ch).catch(() => {}); const list = strokesOf(ch); return { list, at: (k, f = 1) => revealOrder(ch, n, list, k, f) }; }, glyphCv: (ch, n = 200) => { const cv = document.createElement("canvas"); cv.width = cv.height = n; glyph(cv.getContext("2d"), n, ch, "#000"); return cv; }, st: () => st, hand: () => st.hand, traceOf: ch => traceOf(ch), centerOf: ch => centerOf(ch), unitsOf: ch => unitsOf(ch), strokesOf: async ch => (await stkReady, strokesOf(ch)), strokeHint: (H, S) => strokeHint(H, S), strokeFit: async ch => { await stkReady; const us = unitsOf(ch), L = strokesOf(ch); return us.map((u, ui) => { const P = L.filter(S => S.unit === ui); let n = 0, k = 0; for (const S of P) { const f = fitOf(u, S.pts), m = S.pts.length - 1; n += m; k += f * m; } return { jamo: u.jamo, fit: n ? k / n : null }; }); }, handScore: (ch, S) => handScore(ch, S), handJudge: () => handJudge(), toggle: toggleSentence, busy: () => st.busy || st.done || st.queue.length > 0 || st.sent || st.auto || sfx.playing() }; // busy = 점검 도구가 소리 끝을 기다릴 때
+  app.__wr = { owners: async ch => { await stkReady; const list = strokesOf(ch); return { list, ...inkOwners(ch, list), GN }; }, font: () => `${glyphWeight()} ${glyphFont()}`, reveal: async (ch, n = 200) => { await stkReady; await document.fonts?.load(`${glyphWeight()} 100px ${glyphFont()}`, ch).catch(() => {}); const list = strokesOf(ch); return { list, at: (k, f = 1) => revealOrder(ch, n, list, k, f) }; }, glyphCv: (ch, n = 200) => { const cv = document.createElement("canvas"); cv.width = cv.height = n; glyph(cv.getContext("2d"), n, ch, "#000"); return cv; }, st: () => st, hand: () => st.hand, traceOf: ch => traceOf(ch), centerOf: ch => centerOf(ch), unitsOf: ch => unitsOf(ch), strokesOf: async ch => (await stkReady, strokesOf(ch)), strokeHint: (H, S) => strokeHint(H, S), strokeFit: async ch => { await stkReady; const us = unitsOf(ch), L = strokesOf(ch); return us.map((u, ui) => { const P = L.filter(S => S.unit === ui); let n = 0, k = 0; for (const S of P) { const f = fitOf(u, S.pts), m = S.pts.length - 1; n += m; k += f * m; } return { jamo: u.jamo, fit: n ? k / n : null }; }); }, handScore: (ch, S) => handScore(ch, S), handJudge: () => handJudge(), toggle: toggleSentence, paintCheck: (ch, k, n) => paintCheck(ch, k, n), busy: () => st.busy || st.done || st.queue.length > 0 || st.sent || st.auto || sfx.playing() }; // busy = 점검 도구가 소리 끝을 기다릴 때
 
   function paintSent() {
-    sentEl.innerHTML = `<svg class="spk" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M4 9v6h4l5 4V5L8 9H4z"/><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M16 8.5a5 5 0 0 1 0 7M18.8 6a8.5 8.5 0 0 1 0 12"/></svg>` + words().map((w, wi) => `<span class="w ${wi === st.w ? "on" : ""}">${w.chars.map((c, ci) =>
-      `<button class="c ko ${c.file ? "" : "noaudio"} ${st.wrote.has(wkey(st.s, wi, ci)) ? "done" : ""} ${st.loopAt && st.loopAt.w === wi && st.loopAt.c === ci ? "loop" : ""} ${wi === st.w && ci === st.c && st.s < segs.length ? "now" : ""}" data-w="${wi}" data-c="${ci}" ${c.file ? "" : 'aria-disabled="true"'}>${esc(c.ch)}</button>`).join("")}</span>`).join("");
+    sentEl.innerHTML = `<svg class="spk" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M4 9v6h4l5 4V5L8 9H4z"/><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M16 8.5a5 5 0 0 1 0 7M18.8 6a8.5 8.5 0 0 1 0 12"/></svg>` + (segs[Math.min(st.s, segs.length - 1)] || []).map((w, wi) => `<span class="w ${wi === st.w ? "on" : ""}">${w.chars.map((c, ci) =>
+      `<button class="c ko ${c.file ? "" : "noaudio"} ${st.wrote.has(wkey(Math.min(st.s, segs.length - 1), wi, ci)) ? "done" : ""} ${st.loopAt && st.loopAt.w === wi && st.loopAt.c === ci ? "loop" : ""} ${wi === st.w && ci === st.c && st.s < segs.length ? "now" : ""}" data-w="${wi}" data-c="${ci}" ${c.file ? "" : 'aria-disabled="true"'}>${esc(c.ch)}</button>`).join("")}</span>`).join("");
     segnav.innerHTML = segs.length > 1
       ? `<button data-seg="-1" ${st.s ? "" : "disabled"} aria-label="${esc(t("previous"))}">◀</button><span>${st.s + 1}/${segs.length}</span><button data-seg="1" ${st.s < segs.length - 1 ? "" : "disabled"} aria-label="${esc(t("next"))}">▶</button>`
       : "";
@@ -212,7 +212,7 @@ export default async function write(app, ep, id, opts = {}) {
       wb.remove(); return;
     }
     const w = words()[st.w], c = w.chars[st.c], jam = c.jamo;
-    work.innerHTML = `<div class="stage"><div class="box"><canvas class="tcv" aria-hidden="true"></canvas><span class="target ko" lang="ko">${esc(c.ch)}</span><span class="typed ko" lang="ko">${esc(compose([...st.typed, st.part].flatMap(jamoParts), vowelLen(c.ch)))}</span></div>
+    work.innerHTML = `<div class="stage"><div class="box" role="button" tabindex="0" aria-label="${esc(t("listen_char") || "▶")}"><canvas class="tcv" aria-hidden="true"></canvas><span class="target ko" lang="ko">${esc(c.ch)}</span><span class="typed ko" lang="ko">${esc(compose([...st.typed, st.part].flatMap(jamoParts), vowelLen(c.ch)))}</span></div>
       <div class="info">${w.rom || w.mean || st.mode === "hand" ? `<div class="sub2">${w.chars.length > 1 ? `<span class="wko ko" lang="ko">${w.chars.map((x, i) => i === st.c ? `<b>${esc(x.ch)}</b>` : esc(x.ch)).join("")}</span>` : ""}${w.rom ? `<span class="rom">${romMark(w.rom, w.chars.length, st.c)}</span>` : ""}${w.mean ? `<span class="mean tr">${esc(w.mean)}</span>` : ""}${st.mode === "hand" ? `<span class="htools" role="group">${Object.entries(TOOLS).map(([k, v]) => `<button data-tool="${k}" aria-pressed="${toolKey() === k}">${v.icon} ${esc(t("h_" + k))}</button>`).join("")}</span>` : ""}</div>` : ""}
       <div class="slotrow"><div class="slots">${jam.map((j, i) => `<span class="slot ${i < st.k ? "filled" : i === st.k ? "current" : ""}">${i <= st.k ? esc(j) : ""}</span>`).join("")}</div></div></div></div>
       ${st.mode === "hand" ? `<div class="hand"><div class="hbox"><canvas class="hguide" aria-hidden="true"></canvas><canvas class="hink" aria-label="${esc(t("w_hand"))}"></canvas><b class="hscore" hidden></b><span class="fx" aria-hidden="true"></span></div><div class="hbtns"><button data-act="hdone">✓ ${esc(t("h_done"))}</button><button data-act="horder">✎ ${esc(t("h_order"))}</button><button data-act="hundo">↶ ${esc(t("h_undo"))}</button><button data-act="hclear"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M15.4 3.6a2 2 0 0 1 2.8 0l2.2 2.2a2 2 0 0 1 0 2.8L11 18H6.6l-3-3a2 2 0 0 1 0-2.8z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M9.2 9.8l5 5M6.6 18H21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg> ${esc(t("h_clear"))}</button></div></div>`
@@ -335,10 +335,12 @@ export default async function write(app, ep, id, opts = {}) {
       for (let h = 0; h < qd.length; h++) { const p = qd[h], x = p % N, y = (p / N) | 0; if (dist[p] >= D) continue; for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]]) { /* 8방향(대각 쪽 고리 바깥도) */ const nx = x + dx, ny = y + dy; if (nx < 0 || ny < 0 || nx >= N || ny >= N) continue; const j = ny * N + nx; if (dist[j] < 0 && on(j)) { dist[j] = dist[p] + 1; qd.push(j); } } }
       for (let q = 0; q < N * N; q++) if (dist[q] > 0 && owner[q] !== k) owner[q] = k; }
     const out = us.map(u => ({ ...u, px: [] })); for (let q = 0; q < N * N; q++) if (owner[q] >= 0) out[owner[q]].px.push(q);
+    // 고리 넓히기가 다른 자모를 절반 넘게 먹으면 그 자모는 원래대로(본부 10-08 「흑」 — ㅎ 동그라미 바로 아래 ㅡ 가 1% 만 남던 것)
+    out.forEach((u, k) => { if (u.px.length < us[k].px.length * 0.5) { const keep = new Set(us[k].px); out.forEach((v, j) => { if (j !== k) v.px = v.px.filter(q => !keep.has(q)); }); u.px = us[k].px.slice(); } });
     for (const u of out) { if (!u.px.length) continue; let a = N, b = N, c = -1, d = -1; for (const q of u.px) { const x = q % N, y = (q / N) | 0; if (x < a) a = x; if (x > c) c = x; if (y < b) b = y; if (y > d) d = y; } u.box = [a / N, b / N, (c + 1) / N, (d + 1) / N]; }
-    return out.filter(u => u.px.length);
+    return out.map((u, k) => (u.px.length ? u : us[k])); // 자모 칸은 빼지 않음(빼면 뒤 자모가 한 칸씩 밀림 · 본부 10-08)
   }
-  const unitsOf = ch => { const k = ch + "|" + hfontKey(); if (uCache.has(k)) return uCache.get(k); const m = pix(UN, x => glyph(x, UN, ch, "#000")), us = ringFix(jamoUnits(ch, m, UN).filter(u => u.px.length), m); if (gCache.has(ch + "|0|" + hfontKey())) uCache.set(k, us); return us; }; // 글꼴 그림이 저장된(= 글꼴 온) 뒤에만 기억
+  const unitsOf = ch => { const k = ch + "|" + hfontKey(); if (uCache.has(k)) return uCache.get(k); const m = pix(UN, x => glyph(x, UN, ch, "#000")), us = ringFix(jamoUnits(ch, m, UN), m); if (gCache.has(ch + "|0|" + hfontKey())) uCache.set(k, us); return us; }; // 글꼴 그림이 저장된(= 글꼴 온) 뒤에만 기억
   // 획순 자료(data/jamo_strokes.json · 본부) → 이 글자 획(0~1 · 쓰는 차례) = 자모 획 점을 그 자모 잉크 상자에 늘려 맞춤
   let STK = null; const stkReady = fetch(`data/jamo_strokes.json?v=${document.documentElement.dataset.v || ""}`).then(r => r.json()).then(d => (STK = d)).catch(() => null);
   // 획 끝 늘이기(투덜이 10-08 「대」 — ㅐ 의 ㅏ 가로획 자료가 0.04 길이라 가로획 잉크 대부분이 다음 ㅣ 몫이 되어 4번째 획이 안 칠해짐)
@@ -350,8 +352,9 @@ export default async function write(app, ep, id, opts = {}) {
     for (const S of list) { const P = S.pts; if (P.length < 2) continue; const a0 = P[0], z = P[P.length - 1]; if (Math.hypot(a0[0] - z[0], a0[1] - z[1]) < 0.02) continue; // 닫힌 획(ㅇ) 제외
       for (const end of [0, P.length - 1]) { const q = P[end], prev = P[end === 0 ? 1 : P.length - 2], L = Math.hypot(q[0] - prev[0], q[1] - prev[1]); if (L < 1e-6) continue;
         const dx = (q[0] - prev[0]) / L, dy = (q[1] - prev[1]) / L, step = 0.5 / UN; let best = q;
+        const near0 = new Set(list.filter(T => T !== S && segDist(T.pts, q[0], q[1]) < 0.9 * halfOf(T))); // 늘이기 시작할 때 이미 몸통 안인 획(「대」 ㅏ 짧은 가로 = ㅏ 세로에 붙어 시작)은 멈춤 기준에서 뺌
         for (let k = 1; k < UN; k++) { const x = q[0] + dx * step * k, y = q[1] + dy * step * k, o = at(x, y); if (o < 0 || o < S.unit) break; // 잉크 끝 · 먼저 쓴 자모(ㅗ 꼭지가 ㅇ 안으로) 에선 멈춤
-          if (list.some(T => T !== S && segDist(T.pts, x, y) < 0.9 * halfOf(T))) break; best = [x, y]; }
+          if (list.some(T => T !== S && !near0.has(T) && segDist(T.pts, x, y) < 0.9 * halfOf(T))) break; best = [x, y]; }
         P[end] = best; } }
   }
   function strokesOf(ch) {
@@ -565,19 +568,38 @@ export default async function write(app, ep, id, opts = {}) {
     const x = cv.getContext("2d"), cs = getComputedStyle(box), ink = cs.color || "#17302a";
     x.globalAlpha = 0.16; glyph(x, n, c.ch, ink); x.globalAlpha = 1;
     const bases = [...st.typed, ...[...(st.part || "")]].flatMap(j => baseOf(j)).length, us = unitsOf(c.ch).slice(0, ok ? 99 : bases); if (!us.length) return;
+    x.drawImage(darkOf(c.ch, us, n, ok ? getComputedStyle(work).getPropertyValue("--hi").trim() || ink : ink), 0, 0);
+  }
+  // 친 자모만 진하게 = 글자를 진하게 그린 뒤 친 자모 픽셀(UN 칸) 마스크로 오려 냄
+  function darkOf(ch, us, n, color) {
     const dark = document.createElement("canvas"); dark.width = dark.height = n; const dx = dark.getContext("2d");
-    glyph(dx, n, c.ch, ok ? getComputedStyle(work).getPropertyValue("--hi").trim() || ink : ink);
+    glyph(dx, n, ch, color);
     const m = document.createElement("canvas"); m.width = m.height = UN; const mx = m.getContext("2d"), id = mx.createImageData(UN, UN);
     for (const u of us) for (const q of u.px) id.data[q * 4 + 3] = 255;
-    mx.putImageData(id, 0, 0); dx.globalCompositeOperation = "destination-in"; dx.imageSmoothingEnabled = true;
-    const k = n / UN; for (const [ox, oy] of [[0, 0], [k, 0], [-k, 0], [0, k], [0, -k]]) dx.drawImage(m, ox, oy, n, n); // 칸 경계 한 칸 너그럽게(획 가장자리 안 잘리게)
-    x.drawImage(dark, 0, 0);
+    mx.putImageData(id, 0, 0);
+    // 칸 경계 한 칸 너그럽게(획 가장자리 안 잘리게) = 마스크를 ±1칸 5번 「합쳐」 그린 뒤 한 번만 오려 냄(본부 10-08 — destination-in 으로 5번 그려 교집합이 되어 친 자모 가장자리 6~10% 덜 칠해지던 것)
+    const mm = document.createElement("canvas"); mm.width = mm.height = n; const mmx = mm.getContext("2d"); mmx.imageSmoothingEnabled = true;
+    const k = n / UN; for (const [ox, oy] of [[0, 0], [k, 0], [-k, 0], [0, k], [0, -k]]) mmx.drawImage(m, ox, oy, n, n);
+    dx.globalCompositeOperation = "destination-in"; dx.drawImage(mm, 0, 0);
+    return dark;
+  }
+  // 점검용(본부 10-08 판별식) — 앞 k 자모를 친 칠 · 친 자모 잉크(알파 ≥200) 중 덜 칠한 비율 · 안 친 자모 잉크(친 자모에서 2칸 넘게 떨어진 것) 중 칠한 비율
+  function paintCheck(ch, k, n = 240) {
+    const us = unitsOf(ch), d = darkOf(ch, us.slice(0, k), n, "#000").getContext("2d").getImageData(0, 0, n, n).data;
+    const g = document.createElement("canvas"); g.width = g.height = n; const gx = g.getContext("2d"); glyph(gx, n, ch, "#000"); const gd = gx.getImageData(0, 0, n, n).data;
+    const own = new Int16Array(UN * UN).fill(-1); us.forEach((u, j) => { for (const q of u.px) own[q] = j; });
+    const near = (X, Y, r) => { for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) { const x = X + dx, y = Y + dy; if (x >= 0 && y >= 0 && x < UN && y < UN && own[y * UN + x] >= 0 && own[y * UN + x] < k) return true; } return false; };
+    let inT = 0, under = 0, inU = 0, over = 0;
+    for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) { const i = y * n + x; if (gd[i * 4 + 3] < 200) continue; const X = Math.floor(x * UN / n), Y = Math.floor(y * UN / n), o = own[Y * UN + X];
+      if (o >= 0 && o < k) { inT++; if (d[i * 4 + 3] < 200) under++; } else if (o >= k && !near(X, Y, 2)) { inU++; if (d[i * 4 + 3] >= 200) over++; } }
+    return { under: inT ? under / inT : 0, over: inU ? over / inU : 0 };
   }
 
   async function finishChar(j, c, src = jamoSrc(j)) { // W3 · 손글씨는 글자 소리(src)
     st.busy = true; st.done = true;
     work.querySelector(".box")?.classList.add("ok"); paintBox(c, true);
-    const ok = await run(["ok", src, GAP_NEXT]);
+    // 글자 완성 = 딩동 → 마지막 자모 → 그 글자 소리 → 다음 글자(투덜이 10-08 — 자판·자동 완성도 · 손글씨는 이미 글자 소리 · 한 번 되돌렸다가 「나쁘지 않아, 지금처럼」으로 유지)
+    const ok = await run(c.file && src !== c.file ? ["ok", src, 120, c.file, GAP_NEXT] : ["ok", src, GAP_NEXT]);
     st.done = false;
     if (!ok || !st.alive) { st.busy = false; st.queue = []; return; }
     if (!st.auto) st.wrote.add(wkey(st.s, st.w, st.c)); // 직접 써서 마친 글자(자동으로 쓴 것은 빼고)(위 글자 줄 초록 — 순서가 아니라 실제로 쓴 것만 · 본부 10-07)
@@ -591,7 +613,7 @@ export default async function write(app, ep, id, opts = {}) {
     render();
     const q = st.queue.splice(0); q.forEach(k => press(k)); // 축하 중에 누른 키 — 차례대로(또 글자가 끝나면 다시 기억됨)
   }
-  async function lineDone() { // 줄 끝 → 대사 듣고 → 다음 줄(자동) · 자동 완성으로 끝냈으면 대사 소리 없이(W4)
+  async function lineDone() { // 줄 끝 → 대사 듣고 → 다음 줄(자동) · 자동 완성으로 끝냈으면 대사 소리 없이(W4 · 투덜이 10-08 「멈추는 카드 없애자 · 끊김 싫다」로 원래대로)
     render();
     st.sent = !st.auto; markSent();
     const ok = await run(st.auto ? [900] : [lineSrc, 900]);
@@ -673,6 +695,8 @@ export default async function write(app, ep, id, opts = {}) {
     if (e.target.closest("[data-act=help]")) { hush(); stopLoop(); hb.hidden = false; fitHelp(); return; }
     const k = e.target.closest("[data-j]");
     if (k) return press(k.dataset.j);
+    const bx = e.target.closest(".stage .box"); // 왼쪽 위 글자 칸 = 그 글자 소리 한 번(투덜이 10-08 · 단추 모양) · 자판 누르면 바로 끊고 자판 처리(run 이 앞 소리를 끊음)
+    if (bx) { const c = st.s < segs.length ? words()[st.w]?.chars[st.c] : null; if (c?.file && !st.done && !st.auto && !st.busy) { stopLoop(); st.sent = false; markSent(); run([c.file]); } return; }
     const wc = e.target.closest("[data-wc]");
     if (wc) { // 글자 하나 소리(W4)
       if (st.busy || st.auto) return;
@@ -684,6 +708,7 @@ export default async function write(app, ep, id, opts = {}) {
     if (sg) return goSeg(Math.max(0, Math.min(segs.length - 1, st.s + +sg.dataset.seg)));
     const cb = e.target.closest(".sent .c");
     if (cb) { // W1
+      if (st.s >= segs.length) { hush(); st.s = segs.length - 1; } // 줄 끝 카드에서 위 글자 = 마지막 토막 그 글자로(본부 10-08)
       const w = +cb.dataset.w, ci = +cb.dataset.c, c = words()[w].chars[ci];
       if (st.auto) { st.jumpTo = { w, c: ci }; cb.blur(); hush(); st.hand?.stopOrder?.(); Object.assign(st, { w, c: ci, k: 0, typed: [], part: "", done: false, queue: [] }); render(); return; } // 자동 완성 중 위 글자 누름 = 그 글자로 옮겨 거기부터 자동 이어서(본부 10-06 투덜이) · 앞 글자는 초록 · 지금 테두리 · 뒤는 기본
       // 누른 글자로 바로 가서 쓰기(본부 10-07 투덜이 — 자판·손글씨 둘 다 · 건너뛴 글자는 「안 씀」 그대로 · 나중에 눌러 돌아와 씀) + 그 글자 소리 한 번
@@ -696,7 +721,7 @@ export default async function write(app, ep, id, opts = {}) {
     const tb = e.target.closest("[data-tool]");
     if (tb) { try { localStorage.setItem("malmun.htool", tb.dataset.tool); } catch {} app.querySelectorAll("[data-tool]").forEach(x => x.setAttribute("aria-pressed", String(x.dataset.tool === tb.dataset.tool))); return; } // 도구 고르기(기억) · 이미 그린 획은 그 도구 그대로
     const mb = e.target.closest("[data-mode]");
-    if (mb) { if (st.mode !== mb.dataset.mode) { st.mode = mb.dataset.mode; try { localStorage.setItem("malmun.wmode", st.mode); } catch {} app.querySelectorAll("[data-mode]").forEach(x => x.setAttribute("aria-pressed", String(x.dataset.mode === st.mode))); st.typed = []; st.k = 0; st.part = ""; render(); } return; }
+    if (mb) { if (st.mode !== mb.dataset.mode) { if (st.auto) stopAuto(); st.hand?.stopOrder?.(); hush(); stopLoop(); st.busy = false; st.done = false; st.queue = []; st.mode = mb.dataset.mode; /* 모드 바꾸기 = 돌던 것(자동·획순·소리) 먼저 멈춤 — 본부 10-08 투덜이: 자판 자동 켠 채 손글씨로 바꾸면 저 혼자 계속 씀 */ try { localStorage.setItem("malmun.wmode", st.mode); } catch {} app.querySelectorAll("[data-mode]").forEach(x => x.setAttribute("aria-pressed", String(x.dataset.mode === st.mode))); st.typed = []; st.k = 0; st.part = ""; render(); } return; }
     const b = e.target.closest("[data-act]");
     if (!b) return;
     const a = b.dataset.act;

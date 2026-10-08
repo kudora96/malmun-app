@@ -77,7 +77,7 @@
       ok(c2.yLead > 0.9 && posOk && lp?.ri === 1 && Math.abs(lp.from - c2.ysyl[3].s) < 0.005 && rms(c2.ysyl[3].s, c2.ysyl[3].e) > 5 * rms(0.2, 0.8), "앞 1초 잡음 녹음: x=0 = lead · 칸 자리 = (s−lead)/전체 · 「읽」 자리 파형 누름 = 그 음절부터(말소리 있음)", `lead ${c2.yLead.toFixed(2)} · 칸 ${c2.ysyl[3].s.toFixed(2)}~${c2.ysyl[3].e.toFixed(2)} · 튼 곳 ${lp?.from.toFixed(2)}`);
       b.click(); await W(200); }
     // 투덜이 10-08: 견본 나오는 중 내 목소리 줄 ▶ → 두 겹(끊긴 차례 재생이 내 목소리를 또 틂) · 아래 [내 목소리] 단추는 비교 줄 재생 때 안 켬 · 방금 점수 표시
-    { S.score = 88; const p2 = document.querySelector(".panel"), b2 = p2.querySelector("[data-act=both]"); b2.click(); await W(600); b2.click(); for (let k = 0; k < 40 && !p2.querySelector(".crow.y [data-play]"); k++) await W(150); await W(300);
+    { S.score = 88; const p2 = document.querySelector(".panel"), b2 = p2.querySelector("[data-act=both]"); if (b2.getAttribute("aria-pressed") === "true") { b2.click(); await W(300); } b2.disabled = false; b2.click(); for (let k = 0; k < 40 && !p2.querySelector(".crow.y [data-play]"); k++) await W(150); await W(300);
       const c3 = window.__cmp; c3.plays = []; p2.querySelector(".crow.y [data-play]").click(); await W(250);
       const lit = p2.querySelector("[data-act=mine]").classList.contains("playing"); await W(c3.ybuf.duration * 1000 + 2500);
       const ys = c3.plays.filter(r => r === 1).length;

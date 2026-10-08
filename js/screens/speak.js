@@ -13,19 +13,20 @@
 //     못 넘어도 막지 않는다([다음 ▶]) · 음성 인식이 안 되는 곳은 점수 없이 듣고 비교만(녹음은 저장)
 //  S6 녹음은 이 기기 안에만(IndexedDB) — 서버로 보내지 않는다
 //  S7 영상 창 안(embedded): 스크롤 없이 · 줄 이동·닫기는 학습 화면이 한다 · 줄 전체까지 통과하면 다음 줄 말하기로
-import { t, lang } from "../i18n.js?v=1008.2";
-import { esc, sayParts } from "../text.js?v=1008.2";
-import { episode } from "../data.js?v=1008.2";
-import { paths } from "../paths.js?v=1008.2";
-import { audioCtx, hold, quietWake } from "../wake.js?v=1008.2";
-import * as sfx from "../sfx.js?v=1008.2";
-import { diagEnv, keepDiag } from "../diag.js?v=1008.2";
-import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1008.2";
-import { bestHeard, heardHTML, endHint } from "../heard.js?v=1008.2";
-import { openCompare, playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1008.2";
-import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace, lateFactor } from "../rhythm.js?v=1008.2";
-import { recDel, downloadRec, askPersist } from "../recstore.js?v=1008.2";
-import { logRec, dB, srWhy, srWatch, niceLabel, ALIAS, srOnlyMode, setSrOnly, isAndroid, recordSROnly, srMiss } from "../recorder.js?v=1008.2";
+import { t, lang } from "../i18n.js?v=1008.22";
+import { esc, sayParts } from "../text.js?v=1008.22";
+import { spkHtml } from "../ui.js?v=1008.22";
+import { episode } from "../data.js?v=1008.22";
+import { paths } from "../paths.js?v=1008.22";
+import { audioCtx, hold, quietWake } from "../wake.js?v=1008.22";
+import * as sfx from "../sfx.js?v=1008.22";
+import { diagEnv, keepDiag } from "../diag.js?v=1008.22";
+import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1008.22";
+import { bestHeard, heardHTML, endHint } from "../heard.js?v=1008.22";
+import { openCompare, playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1008.22";
+import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace, lateFactor, sylAt, karaokeRun } from "../rhythm.js?v=1008.22";
+import { recDel, downloadRec, askPersist } from "../recstore.js?v=1008.22";
+import { logRec, dB, srWhy, srWatch, niceLabel, ALIAS, srOnlyMode, setSrOnly, isAndroid, recordSROnly, srMiss, micSet } from "../recorder.js?v=1008.22";
 
 // 통과 두 단계(본부 10-04 · 투덜이 「원어민은 되지만 외국인은 100% 어렵다」): 80↑ = ☆ 통과(✓ · [저장]) · 95↑ = ★ 완벽
 export const PASS = 80, PERFECT = 95;
@@ -62,8 +63,8 @@ export function quietLimit(want, heard) {
 export const maxMsFor = say => Math.max(8000, (3 + 0.8 * [...String(say || "")].filter(c => /[가-힣]/.test(c)).length) * 1000);
 
 // ── 닮음 = 음절 정렬(js/score.js · 「들린 말」 빨간 표시와 같은 함수 — 본부 10-04) ──
-import { similarity, align } from "../score.js?v=1008.2";
-import { scoreFx } from "../scorefx.js?v=1008.2"; // 점수별 효과(본부 10-05)
+import { similarity, align } from "../score.js?v=1008.22";
+import { scoreFx } from "../scorefx.js?v=1008.22"; // 점수별 효과(본부 10-05)
 export { similarity };
 
 // ── 내 목소리 저장(S6) ──
@@ -98,7 +99,7 @@ export default async function speak(app, ep, id, opts = {}) {
   const savedReady = Promise.all(parts.map(async p => { const k = `${ep}/${p.key}`; st.saved[p.key] = await upgradeSaved(await recGet(k), { ep, key: p.key, url: p.src, text: p.say || p.text }, v => recPut(k, v)); })); // 옛 판(리듬 없음) 저장본은 새 점수로 // 기다리지 않고 먼저 그린다 — 다 읽으면 다시 그림
 
   app.innerHTML = `<section class="scr speak ${opts.embedded ? "embedded" : ""}">
-    <div class="whead"><b>${esc(t("speak"))}</b><span class="sub">${li + 1} / ${d.lines.length}<span class="spk"> · <span class="ko" lang="ko">${esc(line.speaker)}</span></span></span>
+    <div class="whead"><b>${esc(t("speak"))}</b><span class="sub">${li + 1} / ${d.lines.length}<span class="spk"> · ${spkHtml(line.speaker)}</span></span>
       <button class="micpick" data-act="help" aria-label="${esc(t("help"))}">${lbl(t("help_btn"))}</button><span class="segnav"></span><button class="micpick closex" data-act="close" aria-label="${esc(t("close_btn"))}">${lbl(t("close_btn"))}</button></div>
     <div class="miclist" hidden></div>
     <div class="helpbox" hidden>${[1, 2, 3, 4, 5, 6].map(k => `<p>${esc(t("help_sp_" + k))}</p>`).join("")}<p class="x">${esc(t("help_close"))}</p></div>
@@ -185,8 +186,11 @@ export default async function speak(app, ep, id, opts = {}) {
   async function playModel() {
     stopSounds(); st.model = true; paint();
     const p = cur(), r = getRate("m");
-    if (r !== 1 && (p.src || lineSrc)) { const h = (st.slow = playSlow(p.src || lineSrc, r)); await h.done; if (st.slow === h) st.slow = null; } // 본보기 속도(1× 아니면 · 음높이 그대로)
-    else if (!(p.src && (await sfx.play(p.src))) && lineSrc && p.src !== lineSrc && !p.task) await sfx.play(lineSrc);
+    // 견본 재생 때도 위 글자를 소리 따라 칠(본부 10-08 투덜이 · 녹음 중 칠과 같은 모양)
+    const at = await sylAt(ep, p.src ? p.key : `${ep}_${String(line.id).padStart(2, "0")}_line`, p.text).catch(() => null), els = () => $(".say")?.children;
+    if (r !== 1 && (p.src || lineSrc)) { const h = (st.slow = playSlow(p.src || lineSrc, r)); const stopK = karaokeRun(els, at, () => h.el.currentTime, () => st.slow === h && st.model); await h.done; stopK(); if (st.slow === h) st.slow = null; } // 본보기 속도(1× 아니면 · 음높이 그대로)
+    else { const u = p.src || lineSrc; if (u) await sfx.load(u); const t0 = performance.now() + 10, stopK = karaokeRun(els, p.src || p.whole ? at : null, () => (performance.now() - t0) / 1000, () => st.model);
+      if (!(p.src && (await sfx.play(p.src))) && lineSrc && p.src !== lineSrc && !p.task) await sfx.play(lineSrc); stopK(); }
     st.model = false; if (st.alive) paint();
   }
   const playMine = async (rec = { blob: mineBlob() }, key = "mine") => { // 말 시작 자리부터 — 풀어서 그 자리부터 직결 재생(js/playmine.js · <audio> 자리 옮기기 안 씀)
@@ -262,7 +266,7 @@ export default async function speak(app, ep, id, opts = {}) {
     stopSounds();
     st.switched = !!switched;
     $(".msg").textContent = t("mic_opening");
-    try { await openMic(); st.micErr = ""; }
+    try { if (!(srOnlyMode() && SR)) await openMic(); st.micErr = ""; } // 받아쓰기만 = 마이크를 열지 않음(안드로이드는 녹음마다 마이크를 닫으므로 · 본부 10-08)
     catch (e) {
       // 거절·막힘 안내는 다시 그려도 남게 st.micErr 에 붙듦(본부 10-04 · 창은 그대로 · 본보기 듣기는 됨)
       if (e.name === "SilentError") { dead.clear(); $(".msg").textContent = st.micErr = t("mic_silent"); showMics(t("mic_silent")); }
@@ -272,7 +276,7 @@ export default async function speak(app, ep, id, opts = {}) {
     if (!st.alive) return;
     if (srOnlyMode() && SR) { // 받아쓰기만(이 기기는 녹음과 받아쓰기를 같이 못 함 — 본부 10-07) · 마이크 열기 없음
       closeMic(); scoreFx($(".fx"), null); st.score = null; st.note = null; st.kept = null; heard = []; srErr = null; st.why = "stop"; st.maxMs = maxMsFor(cur().say);
-      st.diag = { t0: performance.now(), sr: [], track: "sronly", peak: 0, mic: "" };
+      st.diag = { t0: performance.now(), sr: [], track: "sronly", peak: 0, mic: "", mode: "받아쓰기만" };
       const c = recordSROnly({ maxMs: st.maxMs, onTick: (el, max) => tickBar(el, max, 0), quietFor: h => quietLimit(cur().say, h) }), fake = { state: "recording", onstop: () => {}, stop: () => c.stop() };
       st.rec = fake; st.ready = true; sr = { stop() {} }; paint();
       const r = await c.done; if (st.rec === fake) st.rec = null; if (fake.onstop === null || r.cancelled || !st.alive) return; // 버림(다른 토막·닫기)
@@ -281,7 +285,7 @@ export default async function speak(app, ep, id, opts = {}) {
     }
     const rec = new MediaRecorder(st.stream), chunks = [];
     scoreFx($(".fx"), null); st.rec = rec; st.ready = false; st.score = null; st.note = null; st.kept = null; heard = []; srErr = null;
-    st.diag = { t0: performance.now(), sr: [], track: false, peak: 0, mic: st.stream.getAudioTracks()[0]?.label || "" }; // ◆ 진단
+    st.diag = { t0: performance.now(), sr: [], track: false, peak: 0, mic: st.stream.getAudioTracks()[0]?.label || "", mode: "같이", set: micSet(st.stream) }; // ◆ 진단
     rec.ondataavailable = e => e.data.size && chunks.push(e.data);
     // 녹음이 저절로 멈춤(stopRec 안 거침) = 「cut」 + 그때 마이크 트랙 상태를 진단에(투덜이 10-07 r8 — 까닭 안내 없이 끊김)
     rec.onstop = () => { if (st.rec === rec) { st.why = "cut"; st.diag.cut = st.stream?.getAudioTracks()[0]?.readyState || "?"; st.rec = null; clearTimeout(maxTimer); clearInterval(meterTimer); st.srOver?.(); } finish(new Blob(chunks, { type: rec.mimeType || "audio/webm" })); };
@@ -364,6 +368,7 @@ export default async function speak(app, ep, id, opts = {}) {
     paint();
   }
   async function finish(blob) {
+    if (isAndroid()) closeMic(); // 안드로이드 = 녹음 끝날 때마다 마이크 닫음 → 다음 녹음 때 새로 엶(본부 10-08 갤럭시 「녹음 소리가 확 줄어듦」 · 허락은 다시 안 물음)
     st.whyEnd = st.why; const tb = $(".tbar"); if (tb) tb.hidden = true; clearPace();
     st.blob = blob; st.kept = null; st.hint = null;
     // 녹음+받아쓰기를 같이 했는데 말소리는 있었고 들은 말이 0 → 이 기기(안드로이드)는 받아쓰기만으로 바꿔 기억(본부 10-07)
@@ -383,7 +388,7 @@ export default async function speak(app, ep, id, opts = {}) {
     // 리듬(투덜이 10-06 허락) — 글자 점수 × 리듬 배수 · 본보기 음절 시각(align.json)이 있을 때만 · 근거는 결과 줄에 「글자 % · 리듬 %」
     st.rhy = null; st.late = false;
     if (blob && sr && heard.length && st.score > 0) { const rh = await rhythmOf({ ep, key: p.key, url: p.src, text: p.say || p.text, blob, heard: bestHeard(p.say, heard) }); if (!st.alive) return; if (rh) { st.rhy = { L: st.score, R: rh.R, worst: rh.worst }; st.score = withRhythm(st.score, rh.R); const lf = lateFactor(rh.yEnd, st.pace?.end); if (lf.late) { st.late = true; st.score = Math.floor(st.score * lf.f + 1e-9); } } } // 노래방 칠보다 많이 늦으면 최대 80쯤(투덜이 10-08)
-    if (st.diag) { const env = await diagEnv(); logRec({ where: "speak", why: st.whyEnd, cut: st.diag.cut, quiet: st.diag.quiet, thrDb: dB(st.diag.thr || 0), noiseDb: dB(st.diag.noise || 0), line: line.id, part: p.key, want: p.say, mic: st.diag.mic, track: st.diag.track, sr: st.diag.sr, sec: Math.round(performance.now() - st.diag.t0) / 1000, maxDb: dB(st.diag.peak), heard: [...new Set(heard)], score: st.score, ...env, playingAtStart: !!st.playingAtStart }); keepDiag(blob, { where: "speak", why: st.whyEnd, cut: st.diag.cut, line: line.id, part: p.key, score: st.score, heard: [...new Set(heard)] }); } // 진단(화면에 안 보임) — 녹음 소리도 malmun_diag 에 마지막 3개
+    if (st.diag) { const env = await diagEnv(); logRec({ where: "speak", mode: st.diag.mode, set: st.diag.set, micAfter: st.stream?.getAudioTracks()[0]?.readyState || "닫힘", why: st.whyEnd, cut: st.diag.cut, quiet: st.diag.quiet, thrDb: dB(st.diag.thr || 0), noiseDb: dB(st.diag.noise || 0), line: line.id, part: p.key, want: p.say, mic: st.diag.mic, track: st.diag.track, sr: st.diag.sr, sec: Math.round(performance.now() - st.diag.t0) / 1000, maxDb: dB(st.diag.peak), heard: [...new Set(heard)], score: st.score, ...env, playingAtStart: !!st.playingAtStart }); keepDiag(blob, { where: "speak", why: st.whyEnd, cut: st.diag.cut, line: line.id, part: p.key, score: st.score, heard: [...new Set(heard)] }); } // 진단(화면에 안 보임) — 녹음 소리도 malmun_diag 에 마지막 3개
     // 저장은 자동이 아님 — 80% 넘으면 [저장] 단추가 나오고 학습자가 누른다(투덜이 10-04) · 저절로 다음 토막으로 넘기지도 않는다(저장할 틈)
     paint();
     if (sr && !heard.length && !st.diag?.spoke && st.whyEnd !== "cut") st.whyEnd = "nospeech"; // 마이크를 켜고 아무 말도 안 함 = 「목소리가 안 들렸어요」(투덜이 10-08)

@@ -1,4 +1,4 @@
-import { VERSION } from "./version.js?v=1008.2";
+import { VERSION } from "./version.js?v=1008.22";
 // 학습자 언어 — 고르게 하지 않는다(CLAUDE.md).
 // ① 저장된 선택 ② 폰 언어가 22개 중 하나 ③ 폰 시간대로 나라 짐작 ④ 영어
 export const LANGS = [
@@ -45,7 +45,13 @@ export function detectLang() {
   return { lang: "en", how: "default" };
 }
 
-let strings = {}, fallback = {};
+let strings = {}, fallback = {}, koUi = {};
+// 「ने ⇄ 한」 앱 글 한국어 토글(본부 10-08 투덜이) — 켜면 앱 글(lang/*.json)만 {lang}.ko.json(학습자 말 글을 한국어로 옮긴 것)으로 · 배우는 내용(대사·뜻·설명·자막)은 그대로 · 기억 malmun.uiko
+export const KO_UI = ["ne"]; // {lang}.ko.json 이 있는 언어
+const UIKO = "malmun.uiko";
+export const uiKoOn = () => { try { return KO_UI.includes(lang) && localStorage.getItem(UIKO) === "1"; } catch { return false; } };
+async function loadKoUi() { koUi = uiKoOn() ? await fetch(`lang/${lang}.ko.json?v=${VERSION}`).then(r => (r.ok ? r.json() : {})).catch(() => ({})) : {}; }
+export async function setUiKo(on) { try { localStorage.setItem(UIKO, on ? "1" : "0"); } catch {} await loadKoUi(); }
 export let lang = "en";
 
 export async function setLang(code, remember = false) {
@@ -53,12 +59,13 @@ export async function setLang(code, remember = false) {
   if (remember) store(false, code);
   const load = c => fetch(`lang/${c}.json?v=${VERSION}`).then(r => (r.ok ? r.json() : {})).catch(() => ({}));
   [fallback, strings] = await Promise.all([load("en"), code === "en" ? Promise.resolve({}) : load(code)]);
+  await loadKoUi();
   document.documentElement.lang = code;
   document.documentElement.dir = RTL.has(code) ? "rtl" : "ltr";
 }
 
 export const t = (k, vars) => {
-  let s = strings[k] ?? fallback[k] ?? k;
+  let s = koUi[k] ?? strings[k] ?? fallback[k] ?? k;
   if (vars) for (const [a, b] of Object.entries(vars)) s = s.replace(`{${a}}`, b);
   return s;
 };

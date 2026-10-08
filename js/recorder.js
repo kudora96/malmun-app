@@ -6,7 +6,7 @@
 // 시간·인식(본부 10-04 투덜이 승인): 말 사이 쉼 2초 · 🎤 뒤 6초 말 없으면 끝 · 최대 길이 = 문장 길이에 맞춤 · 인식이 혼자 끝나면 같은 트랙으로 다시
 // 그때와 다른 점(본부 10-04 「남긴 차이」): ① 윈도우 별칭 장치 「default」「communications」는 절대 안 고름(통신 장치를 열면 윈도우가 다른 소리를 줄임)
 //   ② 「준비 중 → 녹음 중」 표시(첫 소리가 들어오면) ③ 인식 오류 까닭을 돌려줌(onerror 를 삼키지 않음) ④ 진단 기록(이벤트만 듣고 소리 경로는 안 건드림)
-import { audioCtx } from "./wake.js?v=1008.2";
+import { audioCtx } from "./wake.js?v=1008.22";
 
 // 시간 규칙(본부 10-04 · 투덜이 「빨리 안 하면 바로 닫힘」): 말 사이 쉼 2초 · 🎤 뒤 6초 안에 말 없으면 끝 · 최대 길이는 부르는 쪽이 정함(문장 길이)
 const QUIET_MS = 2000, START_MS = 6000;
@@ -110,6 +110,11 @@ export function logRec(entry) {
     localStorage.setItem("malmun.lastrec", JSON.stringify(a.slice(-5)));
   } catch {}
 }
+// 마지막 녹음 기록에 덧붙임(재생 때 키움·peak 등 · 본부 10-08 갤럭시 「녹음 소리가 확 줄어듦」 진단)
+export function noteRec(patch) { try { const a = JSON.parse(localStorage.getItem("malmun.lastrec") || "[]"); if (!a.length) return; Object.assign(a[a.length - 1], patch); localStorage.setItem("malmun.lastrec", JSON.stringify(a)); } catch {} }
+// 마이크 실제 설정(안드로이드 echo/noise/agc 확인용)
+export const micSet = s => { const g = s?.getAudioTracks?.()[0]?.getSettings?.() || {}; return `echo ${g.echoCancellation} · noise ${g.noiseSuppression} · agc ${g.autoGainControl}${g.sampleRate ? " · " + g.sampleRate + "Hz" : ""}`; };
+export const micOpen = () => stream?.getAudioTracks()[0]?.readyState || "닫힘";
 export const dB = x => (x > 0 ? Math.round(20 * Math.log10(x) * 10) / 10 : -120);
 
 // record() → { stop(discard), done: Promise<{ blob, heard[], srErr, diag } | { error } | { cancelled }> }
@@ -167,7 +172,7 @@ export function record({ onLevel = () => {}, onSwitch = () => {}, onReady = () =
         rec.onstop = async () => {
           if (sr && !extra.dead && !cancelled) for (let k = 0; k < 20 && !heard.length; k++) await new Promise(r => setTimeout(r, 100)); // 인식 결과는 조금 늦게 온다
           res({ blob: new Blob(chunks, { type: rec.mimeType || "audio/webm" }), heard, srErr, why: extra.why || "stop", ...extra,
-            diag: { why: extra.why || "stop", cut, quiet: quietMs, thrDb: dB(thrNow), noiseDb: dB(noiseNow), mic: s.getAudioTracks()[0]?.label || "", track: trackPassed, sr: srEv, sec: Math.round(performance.now() - t0) / 1000, maxDb: dB(maxRms), dead: !!extra.dead, cancelled } });
+            diag: { mode: "같이", set: micSet(s), why: extra.why || "stop", cut, quiet: quietMs, thrDb: dB(thrNow), noiseDb: dB(noiseNow), mic: s.getAudioTracks()[0]?.label || "", track: trackPassed, sr: srEv, sec: Math.round(performance.now() - t0) / 1000, maxDb: dB(maxRms), dead: !!extra.dead, cancelled } });
         };
         try { rec.state !== "inactive" ? rec.stop() : rec.onstop(); } catch { rec.onstop(); }
       };

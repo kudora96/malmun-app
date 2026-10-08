@@ -2,7 +2,8 @@
 // · <audio> 자리 옮기기(seek)는 쓰지 않는다(webm 을 찾아가며 소리가 깨졌다 — 1004.9)
 // · blob 을 decodeAudioData 로 풀어 AudioBufferSourceNode.start(0, lead) · 연결은 source → destination 직결(게인·필터 없음)
 //   lead = 말 시작 0.15초 전(같은 버퍼에서 잼) · 끝나면 멈춤 · 풀기 실패하면 <audio> 로 처음부터
-import { audioCtx } from "./wake.js?v=1008.2";
+import { audioCtx } from "./wake.js?v=1008.22";
+import { noteRec } from "./recorder.js?v=1008.22";
 
 // 시작 = 말 시작 0.08초 전(본부 10-04: 0.15 → 0.08 · 앞 잡소리가 끼지 않게)
 // 첫 소리가 말보다 작고(최대에서 8dB 넘게 아래) 뒤에 조용한 틈이 있으면 녹음 켜는 순간의 잡소리일 수 있다(앞 소리 꼬리·딸깍 — 투덜이 17:49 녹음: −42dB 잡소리 → −53~−65 틈 → −30 말) →
@@ -130,17 +131,19 @@ function leadOld(buf, pre = 0.08, skip = true) {
 
 // 말소리 크기 맞추기(본부 10-04: 날소리 녹음이 본보기보다 18dB 작음 — 녹음은 그대로 두고 틀 때·내려받을 때 곱하기만)
 // 말소리 RMS = 20ms 칸 중 에너지가 최대 칸의 5% 넘는 칸만 평균 → g = 10^((−16 − 말소리dB)/20) · 최대 표본 × g ≤ 0.89(−1dBFS) · 1~16배
-export function gainOf(buf, target = -16) {
+export const gainOf = (buf, target = -16) => gainInfo(buf, target).g;
+// 키움 한도 = 99.9 백분위 크기(본부 10-08 갤럭시 — 짧은 「탁」 하나가 최대값이 되어 녹음 전체가 작게 재생되던 것 · 그 0.1% 는 잠깐 넘쳐도 들리는 차이 없음)
+export function gainInfo(buf, target = -16) {
   const d = buf.getChannelData(0), win = Math.max(1, Math.round(buf.sampleRate * 0.02)), ms = [];
-  let peak = 0;
-  for (let i = 0; i < d.length; i++) { const v = Math.abs(d[i]); if (v > peak) peak = v; }
+  const step = Math.max(1, Math.floor(d.length / 200000)), ab = new Float32Array(Math.ceil(d.length / step)); for (let i = 0, j = 0; i < d.length; i += step, j++) ab[j] = Math.abs(d[i]); ab.sort();
+  const peak = ab[Math.min(ab.length - 1, Math.floor(ab.length * 0.999))] || 0, top1 = ab[ab.length - 1] || 0;
   for (let i = 0; i + win <= d.length; i += win) { let s = 0; for (let k = i; k < i + win; k++) s += d[k] * d[k]; ms.push(s / win); }
-  const top = Math.max(0, ...ms); if (!(top > 0) || !(peak > 0)) return 1;
-  const sp = ms.filter(e => e > top * 0.05), rms = Math.sqrt(sp.reduce((a, e) => a + e, 0) / sp.length);
-  if (!(20 * Math.log10(rms) >= -45)) return 1; // 말이 없던 녹음(말소리 −45dB 아래 = 바탕 소리뿐)은 키우지 않음 — 「쉬—」 잡음만 커진다(본부 10-04)
+  let top = 0; for (const e of ms) if (e > top) top = e; const info = { g: 1, peak, top1, rms: 0 }; if (!(top > 0) || !(peak > 0)) return info;
+  const sp = ms.filter(e => e > top * 0.05), rms = Math.sqrt(sp.reduce((a, e) => a + e, 0) / sp.length); info.rms = rms;
+  if (!(20 * Math.log10(rms) >= -45)) return info; // 말이 없던 녹음(말소리 −45dB 아래 = 바탕 소리뿐)은 키우지 않음 — 「쉬—」 잡음만 커진다(본부 10-04)
   let g = Math.pow(10, (target - 20 * Math.log10(rms)) / 20);
   g = Math.min(g, 0.89 / peak);
-  return Math.max(1, Math.min(16, g));
+  info.g = Math.max(1, Math.min(16, g)); return info;
 }
 
 // → { pause(), done: Promise } — pause() 는 멈춤(같은 단추 다시 = 처음부터 한 번)
@@ -157,7 +160,7 @@ export function playMine(blob, o = {}) { // o.keepFirst = 첫 낱말 뒤 쉼 있
   const ctx = audioCtx();
   blob.arrayBuffer().then(ab => ctx.decodeAudioData(ab)).then(buf => {
     if (stopped) return resolve();
-    const lead = leadOf(buf, 0.08, 0, !!o.keepFirst), gain = gainOf(buf), end = Math.max(lead + 0.1, voicedEnd(buf)); // 끝 = 말 끝(뒤 잡음 빼기 · 투덜이 10-06)
+    const gi = gainInfo(buf), lead = leadOf(buf, 0.08, 0, !!o.keepFirst), gain = gi.g, end = Math.max(lead + 0.1, voicedEnd(buf)); // 끝 = 말 끝(뒤 잡음 빼기 · 투덜이 10-06)
     src = ctx.createBufferSource(); src.buffer = buf;
     const g = ctx.createGain(), G = gain * (window.__sfxVolume ?? 1); // 곱하기만(압축·필터 없음) · 점검에서만 작게
     const t0 = ctx.currentTime + 0.01, len = end - lead; g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(G, t0 + FADE); // 시작 15ms 페이드인
@@ -165,6 +168,7 @@ export function playMine(blob, o = {}) { // o.keepFirst = 첫 낱말 뒤 쉼 있
     src.connect(g); g.connect(ctx.destination);
     src.onended = () => resolve();
     src.start(t0, lead, len);
+    { const db = x => (x > 0 ? Math.round(20 * Math.log10(x) * 10) / 10 : -120); noteRec({ play: `키움 ×${Math.round(gain * 100) / 100} · peak99.9 ${db(gi.peak)}dB · 최대 ${db(gi.top1)}dB · 말소리 ${db(gi.rms)}dB` }); } // 진단 표(최근 녹음)
     (window.__mineLog ||= []).push({ lead: Math.round(lead * 100) / 100, end: Math.round(end * 100) / 100, dur: Math.round(buf.duration * 100) / 100, gain: Math.round(gain * 100) / 100 });
   }).catch(viaAudio);
   h.paused = false; done.then(() => { h.paused = true; });

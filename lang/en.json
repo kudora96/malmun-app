@@ -196,5 +196,9 @@
  "sr_both_again": "Try both again",
  "sr_both_set": "Next time recording and speech recognition will be tried together again.",
  "why_late": "Accurate, but much too slow — read along as the colour fills in",
- "why_late_short": "too slow"
+ "why_late_short": "too slow",
+ "listen_char": "Hear letter",
+ "spk_teacher": "Teacher",
+ "spk_dubu": "Dubu",
+ "spk_kong": "Kong"
 }

@@ -43,7 +43,7 @@
   ok(/^효과음 → 시작\(j_giyeok\.mp3\)/.test(desc(at)) && $(".panel .slot.current")?.classList.contains("shake"), "ㄱ 틀림 → 뿅뿅(귀여운 틀림 소리) → 그래도 ㄱ 소리 · 흔들림", desc(at));
   at = log.length; key("ㅓ"); await W(150); key("ㅅ"); await idle();
   const ev = log.slice(at);
-  ok(/^효과음 → 시작\(j_eo\.mp3\) → 끝\(j_eo\.mp3\)/.test(desc(at)) && !ev.some(e => /uC5B4|eo_char/.test(e.name)), "ㅓ 완성 → 딩동 → ㅓ 소리 · 글자를 읽어 주는 소리 없음(W3)", desc(at));
+  ok(/^효과음 → 시작\(j_eo\.mp3\) → 끝\(j_eo\.mp3\) → 시작\(uC5B4\.mp3\) → 끝\(uC5B4\.mp3\)/.test(desc(at)), "ㅓ 완성 → 딩동 → ㅓ 소리 → 「어」 글자 소리(W3 · 투덜이 10-08)", desc(at));
   // 누르면 언제나 받기(본부 10-06) — 글자 완성 축하 중 누른 ㅅ 은 기억했다가 다음 글자 「서」로 넘어가자마자 처리
   const iEo = ev.findIndex(e => e.ev === "끝" && /j_eo/.test(e.name)), iS = ev.findIndex(e => e.ev === "시작" && /j_siot/.test(e.name));
   ok(iS > iEo && iEo >= 0 && $(".panel .target")?.textContent === "서" && document.querySelectorAll(".panel .slot.filled").length === 1, "글자 완성 축하 중 누른 ㅅ → 다음 글자 「서」 첫 칸으로 이어짐", desc(at));
@@ -83,7 +83,7 @@
   ok(w8.seen.length >= 1 && !badShape.length && $(".panel .segnav").innerText.replace(/\s/g, "") !== segBefore && $(".panel [data-act=auto]").getAttribute("aria-pressed") === "false",
     "자동 완성 → 남은 글자를 한 자모씩 다 쳐서 토막 끝 · 저절로 멈춤", `${w8.seen.join(" ")}${badShape.length ? " · 틀린 모양 " + badShape.join(" ") : ""} · 토막 ${segBefore} → ${$(".panel .segnav").innerText.replace(/\s/g, "")}`);
   const autoSounds = log.slice(atAuto).filter(e => e.ev === "시작").map(e => e.name);
-  ok(autoSounds.length > 0 && autoSounds.every(n => /^j\//.test(n) || /\/j_/.test(n)), "자동 완성 → 자음·모음 소리만(글자·단어·문장 소리 없음)", autoSounds.join(","));
+  ok(autoSounds.length > 0 && autoSounds.every(n => /^j\//.test(n) || /\/j_/.test(n) || /chars_f\/u[0-9A-F]{4}\.mp3$/.test(n)) && autoSounds.some(n => /chars_f\/u/.test(n)), "자동 완성 → 자음·모음 소리 + 글자 완성 때 글자 소리(단어·문장 소리 없음 · 투덜이 10-08)", autoSounds.join(","));
   $(".panel [data-act=auto]").click(); await W(1500); $(".panel [data-act=auto]").click(); await W(200);
   ok($(".panel [data-act=auto]").getAttribute("aria-pressed") === "false", "자동 완성 중 다시 누름 → 멈춤");
   await idle(8000);

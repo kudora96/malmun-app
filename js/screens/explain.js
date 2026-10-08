@@ -1,10 +1,10 @@
 // 설명 화면 — 대사 낱말 카드 + 설명 문단(음성 조각과 1:1 하이라이트)
-import { t, lang, langName } from "../i18n.js?v=1008.2";
-import { esc, renderText, glossCards } from "../text.js?v=1008.2";
-import { episode } from "../data.js?v=1008.2";
-import { paths } from "../paths.js?v=1008.2";
-import { Sequence } from "../audio.js?v=1008.2";
-import { I } from "../ui.js?v=1008.2";
+import { t, lang, langName } from "../i18n.js?v=1008.22";
+import { esc, renderText, glossCards } from "../text.js?v=1008.22";
+import { episode } from "../data.js?v=1008.22";
+import { paths } from "../paths.js?v=1008.22";
+import { Sequence } from "../audio.js?v=1008.22";
+import { I, spkHtml } from "../ui.js?v=1008.22";
 
 const pref = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } };
 
@@ -19,9 +19,9 @@ export default async function explain(app, ep, id, view, opts = {}) {
   const seq = new Sequence();
 
   app.innerHTML = `<section class="scr explain ${opts.embedded ? "embedded" : ""} ${showRom ? "" : "hide-rom"}">
-    ${opts.embedded ? `<div class="pbar"><b>${esc(t("explain"))}</b><span class="sub">${idx + 1} / ${d.lines.length} · <span class="ko" lang="ko">${esc(l.speaker)}</span></span><button class="iconbtn" data-act="close" aria-label="${esc(t("btn_close"))}">✕</button></div>`
+    ${opts.embedded ? `<div class="pbar"><b>${esc(t("explain"))}</b><span class="sub">${idx + 1} / ${d.lines.length} · ${spkHtml(l.speaker)}</span><button class="iconbtn" data-act="close" aria-label="${esc(t("btn_close"))}">✕</button></div>`
     : `<div class="bar"><a class="iconbtn" href="#/learn/${ep}/${l.id}" aria-label="${esc(t("back"))}">${I.back}</a>
-      <div class="grow"><div class="t">${esc(t("explain"))}</div><div class="sub">${idx + 1} / ${d.lines.length} · <span class="ko" lang="ko">${esc(l.speaker)}</span></div></div>
+      <div class="grow"><div class="t">${esc(t("explain"))}</div><div class="sub">${idx + 1} / ${d.lines.length} · ${spkHtml(l.speaker)}</div></div>
       <a class="chip" href="#/write/${ep}/${l.id}">${esc(t("write"))}</a></div>`}
     <div class="quote">
       <div class="glosses">${cards.length ? cards.map(c => `<span class="g"><span class="rom">${esc(c.rom)}</span><span class="kw ko" lang="ko">${esc(c.ko)}</span><span class="mean">${esc(c.mean)}</span></span>`).join("")

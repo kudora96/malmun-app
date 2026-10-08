@@ -1,6 +1,6 @@
-import { t, lang, langName, LANGS, setLang } from "./i18n.js?v=1008.2";
-import { VERSION } from "./version.js?v=1008.2";
-import { esc } from "./text.js?v=1008.2";
+import { t, lang, langName, LANGS, setLang, KO_UI, uiKoOn, setUiKo } from "./i18n.js?v=1008.22";
+import { VERSION } from "./version.js?v=1008.22";
+import { esc } from "./text.js?v=1008.22";
 
 const svg = (d, fill) => `<svg class="ico" viewBox="0 0 24 24" ${fill ? 'fill="currentColor"' : 'fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"'} aria-hidden="true">${d}</svg>`;
 export const I = {
@@ -15,6 +15,9 @@ export const I = {
 
 export const langChip = () => `<button class="chip" data-act="lang" aria-label="${esc(t("lang_title"))}">${I.globe}<span>${esc(langName(lang))}</span></button>`;
 
+// 「ने ⇄ 한」 토글(본부 10-08) — 소리 없는 토글이어도 단추 모양 · 켜짐 = 「한」 쪽 강조 · 누르면 앱 글만 바뀌고 화면 다시 그림
+export const uiKoBtn = () => (KO_UI.includes(lang) ? `<button class="chip uiko" data-act="uiko" aria-pressed="${uiKoOn()}" aria-label="${esc(langName(lang))} ⇄ 한국어"><span class="a" lang="${lang}">${esc(langName(lang).slice(0, 2))}</span>⇄<span class="b" lang="ko">한</span></button>` : "");
+export async function toggleUiKo(after) { await setUiKo(!uiKoOn()); after?.(); }
 export function openLangSheet(onPick) {
   const root = document.getElementById("sheet-root");
   root.innerHTML = `<div class="sheet-dim" data-close></div>
@@ -40,3 +43,6 @@ export const progress = {
   set(ep, v) { try { localStorage.setItem("malmun.p." + ep, JSON.stringify({ ...progress.get(ep), ...v })); } catch {} },
 };
 export const SPEAKER = { "선생님": "teacher", "콩": "kong", "두부": "dubu" };
+// 화자 이름 옆 학습자 말(본부 10-08 투덜이) — 선생님 = 그 나라 말 「선생님」(뜻) · 두부·콩 = 이름 로마자(로마자 끄기와 무관) · 표 = lang/*.json 「spk_<id>」(없으면 en)
+export const spkGloss = ko => { const id = SPEAKER[ko], k = "spk_" + id, g = id ? t(k) : ""; return g && g !== k && g !== ko ? g : ""; };
+export const spkHtml = ko => { const g = spkGloss(ko); return `<span class="ko" lang="ko">${esc(ko)}</span>${g ? `<span class="spkg"> · ${esc(g)}</span>` : ""}`; };

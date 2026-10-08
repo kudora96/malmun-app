@@ -10,11 +10,11 @@
 //      같은 음절 되풀이(「이…있어요」「거구구나」 — 들은 말에 더 들어간 음절이 옆 음절과 같거나 첫소리+모음이 같음)도 −0.08(「더듬음」)
 //  · 최종 점수 = 글자 점수(score.js) × f(R): R ≥ 0.85 → 1 · 0.5 ≤ R < 0.85 → 0.90 + 0.10 × (R − 0.5)/0.35 · R < 0.5 → 0.88
 //  녹음·재생은 그대로 — 받은 녹음(blob)을 풀어 재기만
-import { audioCtx } from "./wake.js?v=1008.2";
-import { leadOf, voicedEnd, keepFirstOf } from "./playmine.js?v=1008.2";
-import { speechEnd } from "./recstore.js?v=1008.2";
-import * as sfx from "./sfx.js?v=1008.2";
-import { align } from "./score.js?v=1008.2";
+import { audioCtx } from "./wake.js?v=1008.22";
+import { leadOf, voicedEnd, keepFirstOf } from "./playmine.js?v=1008.22";
+import { speechEnd } from "./recstore.js?v=1008.22";
+import * as sfx from "./sfx.js?v=1008.22";
+import { align } from "./score.js?v=1008.22";
 
 export const FR = 0.02; // 특징 칸 20ms
 const alignCache = new Map();
@@ -32,6 +32,19 @@ export async function paceOf({ ep, key, text, rate = 1, buf }) {
   else return null;
   let k = -1; const at = cs.map(ch => { if (isSyl(ch)) k++; return k < 0 ? ts[0] : ts[k]; });
   return { at, end };
+}
+// 재생 노래방 칠(본부 10-08 투덜이) — 견본 소리 재생 위치(초)를 따라 글자마다 칠(class kar · 녹음 중 칠 pace 와 같은 모양) · 음절 시작 = align.json(소리 파일 안 시각)
+export async function sylAt(ep, key, text) {
+  const al = await loadAlign(ep), syl = al?.items?.[key]?.syl, cs = [...String(text)], n = cs.filter(isSyl).length;
+  if (!syl?.length || syl.length !== n) return null; let k = -1; return cs.map(ch => { if (isSyl(ch)) k++; return k < 0 ? syl[0].s : syl[k].s; });
+}
+export const paintAt = (els, at, t) => { for (let i = 0; i < els.length; i++) els[i].classList.toggle("kar", !!at && t != null && t >= at[i] - 0.02); };
+// getEls() 글자들 · getT() 재생 위치(초) · isOn() 아직 재생 중 → 끝나면 칠 지움
+export function karaokeRun(getEls, at, getT, isOn) {
+  if (!at) return () => {};
+  const id = setInterval(() => { if (!isOn()) { stop(); return; } paintAt(getEls() || [], at, getT()); }, 40);
+  const stop = () => { clearInterval(id); paintAt(getEls() || [], null, 0); };
+  return stop;
 }
 export const paintPace = (els, pace, el) => { for (let i = 0; i < els.length; i++) els[i].classList.toggle("pace", !!pace && el >= pace.at[i]); };
 

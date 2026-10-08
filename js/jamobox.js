@@ -51,6 +51,21 @@ export function units(ch, mask, N) {
     if (spans.length > 1) for (const q of px) { const p = rel(q % N, (q / N) | 0); let b = spans[0], bd = Infinity; for (const j of spans) { const d = inR(fr[j].rect, p) ? 0 : d2(p, ctr(fr[j].rect)); if (d < bd) { bd = d; b = j; } } out[b].px.push(q); }
     else out[k].px.push(...px);
   }
+  // 빈 칸 금지(본부 10-08 — 11,172자 중 911자가 자모 하나를 통째로 잃어 뒤 자모가 한 칸씩 밀림 · 쌍자음·받침 글자 초성 등)
+  //  빈 칸 = 그 칸 안 잉크를 가장 많이 가진 자모에게서, 그 칸 안이고 제 칸 가운데보다 빈 칸 가운데에 더 가까운 픽셀을 받아 옴(쌍자음 한 덩어리 = 좌우 반)
+  //  칸 안 잉크가 없으면 칸을 조금씩 넓혀 찾음 · 가져온 쪽이 비게 되면 둘이 픽셀마다 가까운 칸 가운데로 나눔
+  { const own = new Int16Array(N * N).fill(-1); out.forEach((u, k) => { for (const q of u.px) own[q] = k; });
+    const grow = (r, g) => [r[0] - g, r[1] - g, r[2] + g, r[3] + g];
+    for (let pass = 0; pass < fr.length; pass++) {
+      const k = out.findIndex(u => !u.px.length); if (k < 0) break;
+      let cand = []; for (let g = 0; g <= 0.3 && !cand.length; g += 0.05) { const r = grow(fr[k].rect, g); for (let i = 0; i < N * N; i++) if (own[i] >= 0 && own[i] !== k && inR(r, rel(i % N, (i / N) | 0))) cand.push(i); }
+      if (!cand.length) break;
+      const cnt = new Map(); for (const i of cand) cnt.set(own[i], (cnt.get(own[i]) || 0) + 1);
+      const o = [...cnt].sort((a, b) => b[1] - a[1])[0][0], ck = ctr(fr[k].rect), co = ctr(fr[o].rect), cs = new Set(cand);
+      let moved = 0, left = 0; for (const i of out[o].px) { const p = rel(i % N, (i / N) | 0); if (cs.has(i) && d2(p, ck) <= d2(p, co)) { own[i] = k; moved++; } else left++; }
+      if (!moved || !left) for (const i of out[o].px) { const p = rel(i % N, (i / N) | 0); own[i] = d2(p, ck) <= d2(p, co) ? k : o; } // 한쪽이 다 가져가면 가까운 칸 가운데로 나눔
+      out.forEach(u => (u.px = [])); for (let i = 0; i < N * N; i++) if (own[i] >= 0) out[own[i]].px.push(i);
+    } }
   for (const u of out) { // 잉크 상자(0~1 · 캔버스 기준) · 잉크 없으면 틀 칸
     if (!u.px.length) { u.box = [x0 / N + u.rect[0] * W / N, y0 / N + u.rect[1] * Hh / N, x0 / N + u.rect[2] * W / N, y0 / N + u.rect[3] * Hh / N]; continue; }
     let a = N, b = N, c = -1, d = -1; for (const q of u.px) { const x = q % N, y = (q / N) | 0; if (x < a) a = x; if (x > c) c = x; if (y < b) b = y; if (y > d) d = y; }
