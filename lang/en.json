@@ -194,5 +194,7 @@
  "sr_only_why": "This phone can't record and recognise speech at the same time, so only the letter score is given — no rhythm, compare or my voice.",
  "sr_only_switched": "This phone can't record and recognise speech together — from now on only speech recognition is used for the score. Please say it again.",
  "sr_both_again": "Try both again",
- "sr_both_set": "Next time recording and speech recognition will be tried together again."
+ "sr_both_set": "Next time recording and speech recognition will be tried together again.",
+ "why_late": "Accurate, but much too slow — read along as the colour fills in",
+ "why_late_short": "too slow"
 }

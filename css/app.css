@@ -986,3 +986,5 @@ button.dim{opacity:.45}
 .write .info .wko b{color:var(--hi);font-weight:800}
 .write .info .rom b{color:var(--ink);font-weight:700}
 .ctrl .iconbtn:disabled{opacity:.3;cursor:default;box-shadow:none}
+/* 비교 화면 방금 점수(투덜이 10-08 「비교에서 점수가 안 떠 답답」) — 내 목소리 줄 이름 오른쪽 */
+.crow .clab .cscore{margin-left:auto;font-size:12px;font-weight:800;color:var(--hi);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}

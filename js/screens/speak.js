@@ -23,7 +23,7 @@ import { diagEnv, keepDiag } from "../diag.js?v=1008.2";
 import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1008.2";
 import { bestHeard, heardHTML, endHint } from "../heard.js?v=1008.2";
 import { openCompare, playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1008.2";
-import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace } from "../rhythm.js?v=1008.2";
+import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace, lateFactor } from "../rhythm.js?v=1008.2";
 import { recDel, downloadRec, askPersist } from "../recstore.js?v=1008.2";
 import { logRec, dB, srWhy, srWatch, niceLabel, ALIAS, srOnlyMode, setSrOnly, isAndroid, recordSROnly, srMiss } from "../recorder.js?v=1008.2";
 
@@ -128,7 +128,7 @@ export default async function speak(app, ep, id, opts = {}) {
     stopSounds(); closeCmp();
     const p = cur(), b = mineBlob(); if (!b || !p.src) return;
     app.querySelector(".scr").classList.add("cmpon"); $(".cmp").hidden = false; $("[data-act=both]").setAttribute("aria-pressed", "true");
-    const c = await openCompare($(".cmp"), { ep, key: p.key, url: p.src, text: p.say || p.text, blob: b, heard: heardOf(), why: st.blob === b ? st.whyEnd : null, t, onRate: () => paint(), beforePlay: () => { st.slow?.pause(); st.slow = null; st.model = false; if (st.mine) { st.mine.pause(); st.mine = null; } } });
+    const c = await openCompare($(".cmp"), { ep, key: p.key, url: p.src, text: p.say || p.text, blob: b, heard: heardOf(), why: st.blob === b ? st.whyEnd : null, t, onRate: () => paint(), scoreTxt: st.blob === b && st.score != null ? `${st.score}%${st.score >= PASS ? " " + (starOf(st.score) || "✓") : ""}${st.late ? " · " + t("why_late_short") : ""}` : null, beforePlay: () => { st.slow?.pause(); st.slow = null; st.model = false; if (st.mine) { st.mine.pause(); st.mine = null; } } });
     if (!$(".scr").classList.contains("cmpon")) return c.close();
     cmp = c;
   }
@@ -154,7 +154,8 @@ export default async function speak(app, ep, id, opts = {}) {
     // 점수는 언제나 % — 알아듣지 못했으면 「0% · 까닭」(투덜이 10-04)
     $(".msg").textContent = st.rec ? t(!st.ready ? "mic_opening" : st.switched ? "mic_switched" : "listening") : st.kept ? `${sc}% ✓ · ${starOf(sc)} ${t(st.kept)}` : st.note ? `0% · ${t(st.whyEnd === "nospeech" ? "why_nospeech" : st.note)}` : st.micErr && sc == null && !mineBlob() ? st.micErr : sc == null ? (SR ? t(mineBlob() ? "no_score" : "speak_hint") : t(mineBlob() ? "no_score" : "speak_hint_noscore"))
       : scoreLine(sc, st.whyEnd, t, st.hint); // 점수에 맞는 한마디 + 끝난 까닭·틀린 곳(들은 내용으로)
-    if (!st.rec && st.rhy && sc != null && !st.note && st.rhy.L >= PASS) $(".msg").textContent += " · " + rhyText(st.rhy, t); // 근거: 글자 % · 리듬 % · 가장 많이 깎인 곳
+    if (!st.rec && st.rhy && sc != null && !st.note && st.rhy.L >= PASS) $(".msg").textContent += " · " + rhyText(st.rhy, t);
+    if (!st.rec && st.late && sc != null && !st.note) $(".msg").textContent += " · " + t("why_late"); // 정확하지만 너무 늦음 // 근거: 글자 % · 리듬 % · 가장 많이 깎인 곳
     $("[data-act=mine]").disabled = $("[data-act=both]").disabled = !mineBlob() && !srOnlyMode();
     for (const b of [$("[data-act=mine]"), $("[data-act=both]")]) { const dim = srOnlyMode() && !mineBlob(); b.classList.toggle("dim", dim); b.setAttribute("aria-disabled", String(dim)); } // 받아쓰기만 = 흐리게(누르면 까닭)
     if (srOnlyMode() && !st.rec && st.score != null && !st.note) $(".msg").textContent += " · " + t("sr_only_note");
@@ -335,6 +336,7 @@ export default async function speak(app, ep, id, opts = {}) {
         const thr = Math.min(0.02, Math.max(0.004, noise * 2)); st.diag.noise = noise; st.diag.thr = thr; // 진단(끝난 까닭 옆에)
         if (rms > thr && !spoke) micPref(devId(st.stream) || (st.micReq !== true && st.micReq) || ""); // 소리가 들어온 마이크를 기억
         if (srLast) spoke = true; // 받아쓰기가 말을 받았으면 소리가 작아도 말한 것
+        st.diag.spoke = spoke;
         if (rms > thr) { spoke = true; quietAt = 0; } else if (spoke) { quietAt = Math.max(quietAt || Date.now(), srLast); if (Date.now() - quietAt > quietLimit(cur().say, heard)) { st.why = "pause"; st.diag.quiet = Date.now() - quietAt; stopRec(); } }
         if (!spoke && performance.now() - st.diag.t0 > START_MS) { st.why = "nospeech"; stopRec(); } // 🎤 뒤 6초 말 없음
         tickBar(performance.now() - st.diag.t0, st.maxMs, spoke && quietAt ? Date.now() - quietAt : 0);
@@ -379,12 +381,13 @@ export default async function speak(app, ep, id, opts = {}) {
     if (!st.alive) return;
     const p = cur(), old = st.saved[p.key];
     // 리듬(투덜이 10-06 허락) — 글자 점수 × 리듬 배수 · 본보기 음절 시각(align.json)이 있을 때만 · 근거는 결과 줄에 「글자 % · 리듬 %」
-    st.rhy = null;
-    if (blob && sr && heard.length && st.score > 0) { const rh = await rhythmOf({ ep, key: p.key, url: p.src, text: p.say || p.text, blob, heard: bestHeard(p.say, heard) }); if (!st.alive) return; if (rh) { st.rhy = { L: st.score, R: rh.R, worst: rh.worst }; st.score = withRhythm(st.score, rh.R); } }
+    st.rhy = null; st.late = false;
+    if (blob && sr && heard.length && st.score > 0) { const rh = await rhythmOf({ ep, key: p.key, url: p.src, text: p.say || p.text, blob, heard: bestHeard(p.say, heard) }); if (!st.alive) return; if (rh) { st.rhy = { L: st.score, R: rh.R, worst: rh.worst }; st.score = withRhythm(st.score, rh.R); const lf = lateFactor(rh.yEnd, st.pace?.end); if (lf.late) { st.late = true; st.score = Math.floor(st.score * lf.f + 1e-9); } } } // 노래방 칠보다 많이 늦으면 최대 80쯤(투덜이 10-08)
     if (st.diag) { const env = await diagEnv(); logRec({ where: "speak", why: st.whyEnd, cut: st.diag.cut, quiet: st.diag.quiet, thrDb: dB(st.diag.thr || 0), noiseDb: dB(st.diag.noise || 0), line: line.id, part: p.key, want: p.say, mic: st.diag.mic, track: st.diag.track, sr: st.diag.sr, sec: Math.round(performance.now() - st.diag.t0) / 1000, maxDb: dB(st.diag.peak), heard: [...new Set(heard)], score: st.score, ...env, playingAtStart: !!st.playingAtStart }); keepDiag(blob, { where: "speak", why: st.whyEnd, cut: st.diag.cut, line: line.id, part: p.key, score: st.score, heard: [...new Set(heard)] }); } // 진단(화면에 안 보임) — 녹음 소리도 malmun_diag 에 마지막 3개
     // 저장은 자동이 아님 — 80% 넘으면 [저장] 단추가 나오고 학습자가 누른다(투덜이 10-04) · 저절로 다음 토막으로 넘기지도 않는다(저장할 틈)
     paint();
-    if (sr && heard.length) scoreFx($(".fx"), st.score, { busy: () => !!st.rec }); // 점수가 뜨는 순간 효과 한 번 · 말소리 없음(못 알아들음)은 효과 없음
+    if (sr && !heard.length && !st.diag?.spoke && st.whyEnd !== "cut") st.whyEnd = "nospeech"; // 마이크를 켜고 아무 말도 안 함 = 「목소리가 안 들렸어요」(투덜이 10-08)
+    if (sr) scoreFx($(".fx"), st.score, { busy: () => !!st.rec }); // 점수가 뜨는 순간 효과 한 번 · 아무 말도 없었어도 꽝(투덜이 10-08 「그냥 0 만 떠」)
   }
   app.__sp = { closeList: () => closeMics(true), toggle: () => (st.model ? (stopSounds(), paint()) : playModel()), busy: () => !!st.rec || st.model || sfx.playing(), _finish: finish, _state: st, _cur: () => cur(), _paint: () => paint() };
 
@@ -423,7 +426,7 @@ export default async function speak(app, ep, id, opts = {}) {
     if (a === "mrate") { const nv = nextRate("m"); paint(); app.querySelector(".cmp .crow.m [data-rate]")?.replaceChildren(rateLabel(nv)); return; } // 본보기 속도(비교 화면 본보기 줄과 같은 값 · 기억)
     // 재생 중인 단추를 다시 누르면 멈춤(투덜이 10-08 — 내 목소리가 끝까지 다 나왔다) · 칠 표시(litT)와 같은 기준 · 비교 화면 차례 재생 중이면 그것도 멈춤
     const cmpRow = app.querySelector(".cmp:not([hidden]) .crow.on"), cmpOn = cmpRow ? (cmpRow.classList.contains("m") ? "model" : "mine") : "", mineOn = !!(st.mine && !st.mine.paused);
-    if ((a === "mine" && ((mineOn && st.mineKey === "mine") || cmpOn === "mine")) || (a === "savedplay" && mineOn && st.mineKey === "savedplay") || (a === "model" && cmpOn === "model")) { stopSounds(); cmp?.stop?.(); paint(); return; }
+    if ((a === "mine" && mineOn && st.mineKey === "mine") || (a === "savedplay" && mineOn && st.mineKey === "savedplay")) { stopSounds(); paint(); return; }
     if (a === "savedplay") { stopRec(true); playMine(savedRec(), "savedplay"); return; }
     if (a === "model") { stopRec(true); st.model ? (stopSounds(), paint()) : playModel(); }
     else if (a === "rec") { if (st.starting) return; closeCmp(); if (!st.rec) { st.playingAtStart = sfx.playing() || st.model || !!st.mine; st.heardHTML = ""; quietWake(true); } /* 진단 · 녹음하는 동안 깨우기 소리 멈춤 */ st.rec ? stopRec() : (st.starting = true, startRec().finally(() => { st.starting = false; if (!st.rec) quietWake(false); })); } // 마이크를 여는 동안 또 눌러도 하나만(빠르게 여러 번 누름)
@@ -437,7 +440,7 @@ export default async function speak(app, ep, id, opts = {}) {
   const litT = setInterval(() => {
     const row = app.querySelector(".cmp:not([hidden]) .crow.on"), cmpOn = row ? (row.classList.contains("m") ? "model" : "mine") : "";
     const mineOn = !!(st.mine && !st.mine.paused);
-    const on = { model: st.model || cmpOn === "model", mine: (mineOn && st.mineKey === "mine") || cmpOn === "mine", savedplay: mineOn && st.mineKey === "savedplay" };
+    const on = { model: st.model, mine: mineOn && st.mineKey === "mine", savedplay: mineOn && st.mineKey === "savedplay" }; // 비교 화면 줄 재생은 그 줄 ▶ 만 칠(아래 단추는 안 켬 — 투덜이 10-08 「두 개가 동시에 켜져」)
     for (const k in on) $(`[data-act=${k}]`)?.classList.toggle("playing", !!on[k]);
   }, 100);
   paint();

@@ -87,7 +87,7 @@ export async function openCompare(host, o) {
   };
   const extras = (syl, lead) => extra.map(x => { const at = x.after >= 0 ? syl[x.after].e : syl[0].s, [a0, a1] = x.after >= 0 ? [at - 0.03, at + 0.05] : [Math.max(lead, at - 0.08), at]; return `<span class="add" style="${pos(a0, a1, lead)}">${esc(x.ch)}</span>`; }).join("");
   const rkey = c => (c === "m" ? "m" : "y");
-  const row = (cls, lab, syl, lead) => `<div class="crow ${cls}"><div class="clab"><button class="cplay" data-play="${cls}">▶ ${esc(lab)}</button><button class="crate" data-rate="${cls}" aria-pressed="${getRate(rkey(cls)) !== 1}" aria-label="${esc(t("speed"))}">${rateTxt(getRate(rkey(cls)))}</button></div><div class="cwave"><canvas></canvas><i class="cbar" hidden></i></div><div class="csyl ko" lang="ko">${syl.map((x, k) => cell(x, k, lead, cls === "y")).join("")}${groups ? groups.map((g, wi) => wcell(g, wi, syl, lead, cls === "y")).join("") : ""}${cls === "y" ? extras(syl, lead) : ""}</div></div>`;
+  const row = (cls, lab, syl, lead) => `<div class="crow ${cls}"><div class="clab"><button class="cplay" data-play="${cls}">▶ ${esc(lab)}</button><button class="crate" data-rate="${cls}" aria-pressed="${getRate(rkey(cls)) !== 1}" aria-label="${esc(t("speed"))}">${rateTxt(getRate(rkey(cls)))}</button>${cls === "y" && o.scoreTxt ? `<b class="cscore">${esc(o.scoreTxt)}</b>` : ""}</div><div class="cwave"><canvas></canvas><i class="cbar" hidden></i></div><div class="csyl ko" lang="ko">${syl.map((x, k) => cell(x, k, lead, cls === "y")).join("")}${groups ? groups.map((g, wi) => wcell(g, wi, syl, lead, cls === "y")).join("") : ""}${cls === "y" ? extras(syl, lead) : ""}</div></div>`;
   const ticks = []; for (let s = 0; s <= span + 1e-6; s += span > 3 ? 1 : 0.5) ticks.push(`<span style="left:${(100 * s) / span}%">${s.toFixed(1)}</span>`);
   host.innerHTML = `<div class="cmpw">${row("m", t("model"), msyl, mLead)}${row("y", t("my_voice"), ysyl, yLead)}<div class="cruler">${ticks.join("")}</div><div class="cfoot"><button class="craw" data-raw title="lead ${yLead.toFixed(2)} · end ${yStop.toFixed(2)} · ${ybuf.duration.toFixed(2)}s">⬇ ${esc(t("raw_dl"))}</button></div></div>`;
   const rows = [...host.querySelectorAll(".crow")];
@@ -132,7 +132,7 @@ export async function openCompare(host, o) {
   fill(); paintWaves();
   let lastH = host.clientHeight; const ro = new ResizeObserver(() => { if (host.clientHeight !== lastH) { lastH = host.clientHeight; fill(); } paintWaves(); tight(); }); ro.observe(host);
   // 재생 — 본보기 = sfx.play(같은 버퍼 · offset) · 내 목소리 = BufferSource.start(t, offset) + Gain(playmine 과 같은 방식)
-  const stopPlay = () => { cancelAnimationFrame(st.raf); clearTimeout(st.timer); sfx.stopAll(); try { st.src?.stop(); } catch {} st.src = null; if (st.el) { st.el.onended = st.el.ontimeupdate = null; st.el.pause(); st.elDone?.(); st.el = null; } rows.forEach(r => { r.querySelector(".cbar").hidden = true; r.querySelectorAll(".csyl .now").forEach(b => b.classList.remove("now")); r.classList.remove("on"); }); host.classList.remove("playing"); };
+  const stopPlay = () => { st.gen = (st.gen || 0) + 1; cancelAnimationFrame(st.raf); clearTimeout(st.timer); sfx.stopAll(); try { st.src?.stop(); } catch {} st.src = null; if (st.el) { st.el.onended = st.el.ontimeupdate = null; st.el.pause(); st.elDone?.(); st.el = null; } rows.forEach(r => { r.querySelector(".cbar").hidden = true; r.querySelectorAll(".csyl .now").forEach(b => b.classList.remove("now")); r.classList.remove("on"); }); host.classList.remove("playing"); };
   const follow = (ri, lead, syl, from, t0, posOf) => { // 재생 위치 막대 + 지금 음절 · posOf = 느리게(<audio>)일 때 지금 자리
     const r = rows[ri], bar = r.querySelector(".cbar"), bs = [...r.querySelectorAll(r.querySelector(".csyl").classList.contains("words") ? ".csyl .wch" : ".csyl .cel")]; // 낱말 칸이면 그 안 글자
     r.classList.add("on"); bar.hidden = false;
@@ -147,7 +147,7 @@ export async function openCompare(host, o) {
   const playRow = (ri, from, to) => new Promise(res => { // to = 끝(없으면 말 끝까지) — 음절 칸을 누르면 그 음절만(앞뒤 0.03초)
     if (!st.alive) return res(false);
     o.beforePlay?.(); // 말하기 창 아래 단추 소리(본보기·내 목소리)는 멈춤 — 소리는 언제나 하나(투덜이 10-08 두 번 울림)
-    if (window.__cmp) window.__cmp.lastPlay = { ri, from, to }; // 점검 도구용(그림 칸과 트는 구간이 같은 기준인지)
+    if (window.__cmp) { window.__cmp.lastPlay = { ri, from, to }; (window.__cmp.plays ||= []).push(ri); } // 점검 도구용(그림 칸과 트는 구간이 같은 기준인지)
     host.classList.add("playing");
     const rate = getRate(ri ? "y" : "m");
     if (rate !== 1) { // 느리게(투덜이 10-06 허락 · 10-07 단계 늘림) — 비교 화면 안에서만(투덜이 10-06 허락) — 비교 화면 안에서만 · 음높이 그대로(<audio>.preservesPitch) · 본보기 = 그 mp3 · 내 목소리 = WAV(내려받기와 같은 함수 · gainOf 크기)
@@ -175,11 +175,12 @@ export async function openCompare(host, o) {
       follow(1, yLead, ysyl, from, t0);
     }
   });
+  // 차례 재생은 번호표로(투덜이 10-08 — 견본이 나오는 중 내 목소리 줄 ▶ 을 누르면, 끊긴 차례 재생이 「재생 중」 표시를 보고 이어서 내 목소리를 또 틀어 두 겹)
   const playBoth = async () => {
-    stopPlay();
-    await playRow(0, mLead); if (!st.alive || !host.classList.contains("playing")) return;
-    await new Promise(r => (st.timer = setTimeout(r, 400))); if (!st.alive || !host.classList.contains("playing")) return;
-    await playRow(1, yLead); host.classList.remove("playing");
+    stopPlay(); const g = st.gen;
+    await playRow(0, mLead); if (!st.alive || st.gen !== g) return;
+    await new Promise(r => (st.timer = setTimeout(r, 400))); if (!st.alive || st.gen !== g) return;
+    await playRow(1, yLead); if (st.gen === g) host.classList.remove("playing");
   };
   // 파형 위 자리 → 그 줄 시각(그 자리 음절의 첫머리로 맞춤 — 말 중간부터 시작하지 않게)
   const waveAt = (r, x) => { const ri = rows.indexOf(r), lead = ri ? yLead : mLead, syl = ri ? ysyl : msyl, w = r.querySelector(".cwave").getBoundingClientRect(); let t = lead + span * Math.max(0, Math.min(1, (x - w.left) / w.width)); const k = syl.findIndex(s => t < s.e); if (k >= 0) t = Math.min(t, syl[k].s); return Math.max(lead, t); };

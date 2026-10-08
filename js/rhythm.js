@@ -268,7 +268,14 @@ export function rhythmScore({ msyl, ysyl, mbuf, ybuf, ends, heard, groups }) {
   if (Q / P < 0.6 || Q / P > 1.8) { R -= 0.05; if (!worst) worst = { k: 0, ch: msyl[0].ch, kind: "speed" }; }
   if (over && R >= R_FULL - 0.01) { R = R_FULL - 0.01; if (!worst) { const { r, ...o } = over; worst = o; } } // 1.7배 넘는 곳 = 최대 99 · 문구는 가장 많이 깎인 곳 그대로(빠르기 맞춤으로 옆 낱말이 튀어 보이는 것보다 믿을 만함)
   if (stumble) R = Math.min(R, R_FULL - 0.01); // 더듬음·본보기에 없는 쉼이 있으면 100 아님(앱 창 10-07 — −0.08 뒤에도 문턱 위면 깎이지 않던 것)
-  return { R: Math.max(0, Math.min(1, R)), worst, p, q, ends: E };
+  return { R: Math.max(0, Math.min(1, R)), worst, p, q, ends: E, yEnd: ysyl[n - 1].e };
+}
+// 늦음(투덜이 10-08 「노래방 색이 다 칠해지고 한참 뒤 또박또박 읽어도 100점 — 시간은 주되 100점은 안 되게 · 80점쯤」)
+//  내 말 끝(녹음 시작부터 · yEnd) − 노래방 칠 끝(본보기 빠르기 · paceEnd) = 늦음 · 여유 = 0.8초 + 칠 길이의 15% · 그 뒤 칠 길이의 50% 더 늦을 때까지 1 → 0.8 로 줄임(최소 0.8)
+export function lateFactor(yEnd, paceEnd) {
+  if (!(yEnd > 0) || !(paceEnd > 0)) return { f: 1, late: false };
+  const over = yEnd - paceEnd - (0.8 + 0.15 * paceEnd); if (over <= 0) return { f: 1, late: false };
+  const f = 1 - 0.2 * Math.min(1, over / (0.5 * paceEnd)); return f >= 0.97 ? { f: 1, late: false } : { f, late: true }; // 조금 늦음(−3점 안)은 봐줌
 }
 export const R_FULL = 0.85; // 본부 10-07(투덜이 직접 허락) 0.90 → 0.85
 export const rhythmFactor = R => (R >= R_FULL ? 1 : R >= 0.5 ? 0.9 + (0.1 * (R - 0.5)) / (R_FULL - 0.5) : 0.88);

@@ -20,7 +20,7 @@ import { I, progress, SPEAKER } from "../ui.js?v=1008.2";
 import writeView from "./write.js?v=1008.2";
 import { diagEnv, keepDiag } from "../diag.js?v=1008.2";
 import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1008.2";
-import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace } from "../rhythm.js?v=1008.2";
+import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace, lateFactor } from "../rhythm.js?v=1008.2";
 import { playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1008.2";
 import { bestHeard, heardHTML, endHint } from "../heard.js?v=1008.2";
 import { recDel, downloadRec, askPersist } from "../recstore.js?v=1008.2";
@@ -539,7 +539,7 @@ export default async function learn(app, ep, startId) {
     if (r.blob) keepDiag(r.blob, { where: "card", why: r.diag?.why, cut: r.diag?.cut, line: L[i].id, score: sc, heard: [...new Set(r.heard)] });
     // 리듬(투덜이 10-06 허락) — 글자 점수 × 리듬 배수(말하기 창과 같은 함수) · 근거는 결과 줄에
     let rhy = null;
-    if (sc > 0 && r.blob) { const rh = await rhythmOf({ ep, key: `${ep}_${String(L[i].id).padStart(2, "0")}_say`, url: L[i].say.src, text: L[i].say.ko, blob: r.blob, heard: bestHeard(L[i].say.ko, r.heard) }); if (st.panel?.i !== i) return; if (rh) { rhy = { L: sc, R: rh.R, worst: rh.worst }; sc = withRhythm(sc, rh.R); } }
+    if (sc > 0 && r.blob) { const rh = await rhythmOf({ ep, key: `${ep}_${String(L[i].id).padStart(2, "0")}_say`, url: L[i].say.src, text: L[i].say.ko, blob: r.blob, heard: bestHeard(L[i].say.ko, r.heard) }); if (st.panel?.i !== i) return; if (rh) { rhy = { L: sc, R: rh.R, worst: rh.worst }; sc = withRhythm(sc, rh.R); const lf = lateFactor(rh.yEnd, pace?.end); if (lf.late) { rhy.late = true; sc = Math.floor(sc * lf.f + 1e-9); } } } // 노래방 칠보다 많이 늦으면 최대 80쯤(투덜이 10-08)
     sp.blob = r.blob; sp.score = sc; sp.rhy = rhy;
     mineB.disabled = false; mineB.classList.toggle("dim", !r.blob); // 방금 녹음 — 언제나 · 받아쓰기만이면 흐리게(누르면 까닭)
     btn.textContent = "🎤 " + t(sc != null && sc >= PASS ? "speak_now" : "try_again");
@@ -548,9 +548,10 @@ export default async function learn(app, ep, startId) {
     box.querySelector("[data-x=keep]").hidden = !(sc != null && sc >= PASS);
     msg.textContent = switchedSR ? `0% · ${t("sr_only_switched")}` : sc == null ? (canScore() ? `0% · ${t(r.why === "nospeech" ? "why_nospeech" : srWhy(r.srErr))}` : t("speak_hint_noscore")) : scoreLine(sc, r.why, t, (h => h && { ...h, say: L[i].say.ko, rom: Object.fromEntries([...(L[i].v9?.pieces || []).map(p => [p.ko, p.rom]), ...Object.entries(L[i].v9?.gloss || {}).map(([k, g]) => [k, g.rom])].filter(([k, r]) => k && r)) })(endHint(L[i].say.ko, r.heard))); // 두 단계 통과 ☆/★ + 끝난 까닭
     if (rhy && sc != null) msg.textContent += " · " + rhyText(rhy, t);
+    if (rhy?.late && sc != null) msg.textContent += " · " + t("why_late");
     if (!r.blob && sc != null) msg.textContent += " · " + t("sr_only_note");
     box.classList.toggle("pass", sc != null && sc >= PASS);
-    scoreFx(box.querySelector(".fx"), sc, { busy: () => !!sp?.ctl }); // 점수가 뜨는 순간 효과 한 번 · 말소리 없음(점수 없음)은 효과 없음
+    scoreFx(box.querySelector(".fx"), sc ?? (canScore() && !switchedSR ? 0 : null), { busy: () => !!sp?.ctl }); // 점수가 뜨는 순간 효과 한 번 · 아무 말도 없었어도 꽝(투덜이 10-08)
     const bh = bestHeard(L[i].say.ko, r.heard); // 들린 말 — 점수를 낸 그 인식 결과 · 틀린 음절 빨간 밑줄 · 빠진 자리 _
     box.querySelector(".heardline").innerHTML = switchedSR ? `<button class="srboth" data-x="srboth">${esc(t("sr_both_again"))}</button>` : bh ? (({ html, ok }) => `<span class="lab">${esc(t("heard_label"))}:</span> <span class="ko" lang="ko">${html}</span>${ok ? " ✓" : ""}`)(heardHTML(L[i].say.ko, bh)) : "";
   }

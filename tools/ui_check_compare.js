@@ -76,6 +76,13 @@
       const lp = c2.lastPlay, yd = c2.ybuf.getChannelData(0), ysr = c2.ybuf.sampleRate, rms = (a, z) => { let q = 0; for (let i = Math.round(a * ysr); i < Math.round(z * ysr); i++) q += yd[i] * yd[i]; return Math.sqrt(q / Math.max(1, Math.round((z - a) * ysr))); };
       ok(c2.yLead > 0.9 && posOk && lp?.ri === 1 && Math.abs(lp.from - c2.ysyl[3].s) < 0.005 && rms(c2.ysyl[3].s, c2.ysyl[3].e) > 5 * rms(0.2, 0.8), "앞 1초 잡음 녹음: x=0 = lead · 칸 자리 = (s−lead)/전체 · 「읽」 자리 파형 누름 = 그 음절부터(말소리 있음)", `lead ${c2.yLead.toFixed(2)} · 칸 ${c2.ysyl[3].s.toFixed(2)}~${c2.ysyl[3].e.toFixed(2)} · 튼 곳 ${lp?.from.toFixed(2)}`);
       b.click(); await W(200); }
+    // 투덜이 10-08: 견본 나오는 중 내 목소리 줄 ▶ → 두 겹(끊긴 차례 재생이 내 목소리를 또 틂) · 아래 [내 목소리] 단추는 비교 줄 재생 때 안 켬 · 방금 점수 표시
+    { S.score = 88; const p2 = document.querySelector(".panel"), b2 = p2.querySelector("[data-act=both]"); b2.click(); await W(600); b2.click(); for (let k = 0; k < 40 && !p2.querySelector(".crow.y [data-play]"); k++) await W(150); await W(300);
+      const c3 = window.__cmp; c3.plays = []; p2.querySelector(".crow.y [data-play]").click(); await W(250);
+      const lit = p2.querySelector("[data-act=mine]").classList.contains("playing"); await W(c3.ybuf.duration * 1000 + 2500);
+      const ys = c3.plays.filter(r => r === 1).length;
+      ok(ys === 1 && !lit, "견본 나오는 중 내 목소리 줄 ▶ → 내 목소리 한 번만(두 겹 없음) · 아래 단추 안 켜짐", `내 목소리 ${ys}번 · 아래 칠 ${lit}`);
+      const sc = p2.querySelector(".cmp .cscore"); ok(!!sc && /%/.test(sc.textContent) && sc.getBoundingClientRect().right <= p2.getBoundingClientRect().right + 1, "비교 화면에 방금 점수(내 목소리 줄 오른쪽 · 창 안)", sc?.textContent || "없음"); }
   } catch (e) { res.push("✗ 점검 도중 오류: " + e.message); }
   const out = `${innerWidth}x${innerHeight}\n` + res.join("\n"); console.log(out); return out;
 })();
