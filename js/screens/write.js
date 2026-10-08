@@ -13,15 +13,15 @@
 //  W5 소리는 언제나 하나만 · 새 일을 하면 앞 소리는 멈춘다
 //  W6 영상 창 안(embedded): 창 안에서 스크롤 없이 다 보이게 — 긴 문장은 토막으로(◀ 1/3 ▶) ·
 //     토막을 다 쓰면 자동으로 다음 토막 · 줄을 다 쓰면 대사를 듣고 자동으로 다음 줄 쓰기 · 아래 ▶ = 이 부분 듣기
-import { t, lang } from "../i18n.js?v=1008.22";
-import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO } from "../text.js?v=1008.22";
-import { episode, chars, charsF } from "../data.js?v=1008.22";
-import { paths } from "../paths.js?v=1008.22";
-import { I, spkHtml } from "../ui.js?v=1008.22";
-import { audioCtx, hold } from "../wake.js?v=1008.22";
-import * as sfx from "../sfx.js?v=1008.22";
-import { scoreFx } from "../scorefx.js?v=1008.22";
-import { units as jamoUnits, baseOf } from "../jamobox.js?v=1008.22"; // 자모 자리 나누기(획순 · 자판 덧칠 · 손글씨 덩어리 — 본부 10-07) // 손글씨 점수 효과 = 말하기와 같은 규칙(본부 10-07)
+import { t, lang } from "../i18n.js?v=1008.23";
+import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO } from "../text.js?v=1008.23";
+import { episode, chars, charsF } from "../data.js?v=1008.23";
+import { paths } from "../paths.js?v=1008.23";
+import { I, spkHtml } from "../ui.js?v=1008.23";
+import { audioCtx, hold } from "../wake.js?v=1008.23";
+import * as sfx from "../sfx.js?v=1008.23";
+import { scoreFx } from "../scorefx.js?v=1008.23";
+import { units as jamoUnits, baseOf } from "../jamobox.js?v=1008.23"; // 자모 자리 나누기(획순 · 자판 덧칠 · 손글씨 덩어리 — 본부 10-07) // 손글씨 점수 효과 = 말하기와 같은 규칙(본부 10-07)
 
 const KEYS = [..."ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎㄲㄸㅃㅆㅉ"], VOW = [..."ㅏㅑㅓㅕㅗㅛㅜㅠㅡㅣ"];
 const VOW2 = [..."ㅐㅒㅔㅖㅘㅙㅚㅝㅞㅟㅢ"]; // 겹모음 줄(본부 10-06) — 칸 하나 · ㅓ+ㅣ 처럼 나눠 쳐도 받음
@@ -109,6 +109,7 @@ export default async function write(app, ep, id, opts = {}) {
   if (cur.length) segs.push(cur);
   const st = { s: 0, w: 0, c: 0, k: 0, typed: [], part: "", busy: false, done: false, queue: [], loopAt: null, sent: false, alive: true, auto: false, wrote: new Set(), mode: (() => { try { return localStorage.getItem("malmun.wmode") === "hand" ? "hand" : "kb"; } catch { return "kb"; } })() };
   const wkey = (s2, w, c) => `${s2}.${w}.${c}`;
+  if (opts.pos && Number.isInteger(opts.pos.s) && opts.pos.s < segs.length) { const ws = segs[opts.pos.s] || []; st.s = opts.pos.s; st.w = Math.min(opts.pos.w || 0, Math.max(0, ws.length - 1)); st.c = Math.min(opts.pos.c || 0, Math.max(0, (ws[st.w]?.chars.length || 1) - 1)); (opts.pos.wrote || []).forEach(k => st.wrote.add(k)); } // ने⇄한 토글 뒤 같은 토막·글자(본부 10-08)
   // 쓰기 방법(본부 10-07 투덜이 「ㅇ」) — ⌨ 자판 / ✍ 손글씨 · 고른 것 기억
   const modeBtns = () => `<span class="wmode" role="group">${[["kb", "⌨ " + t("w_kb")], ["hand", "✍ " + t("w_hand")]].map(([m, l]) => `<button data-mode="${m}" aria-pressed="${st.mode === m}">${esc(l)}</button>`).join("")}</span>`;
   const lineSrc = line.lineAudio ? paths.audio(ep, line.lineAudio) : null;

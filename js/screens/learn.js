@@ -10,24 +10,24 @@
 //  R7 영상은 늘 맨 위 · 지금 줄은 영상 바로 아래(앞 줄은 영상 뒤로) — 손으로 목록을 움직이면 4초 동안은 따라가지 않음
 //  R8 듣기 모드(대사→설명 · 설명만)도 R1~R6 그대로(영상 대신 소리 조각) · 모드를 바꾸면 멈춤(▶ 로 시작)
 //  R9 다시 들어오면 마지막 줄이 선택된 채 멈춰 있음
-import * as sfxL from "../sfx.js?v=1008.22"; // 카드 말하기 최대 길이 = 본보기 길이로(10-07)
-import { t, lang, langName } from "../i18n.js?v=1008.22";
-import { esc, renderText, glossCards, sayParts } from "../text.js?v=1008.22";
-import { episode } from "../data.js?v=1008.22";
-import { paths } from "../paths.js?v=1008.22";
-import { Sequence } from "../audio.js?v=1008.22";
-import { I, progress, SPEAKER, spkHtml, uiKoBtn, toggleUiKo } from "../ui.js?v=1008.22";
-import writeView from "./write.js?v=1008.22";
-import { diagEnv, keepDiag } from "../diag.js?v=1008.22";
-import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1008.22";
-import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace, lateFactor, sylAt, paintAt, karaokeRun } from "../rhythm.js?v=1008.22";
-import { playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1008.22";
-import { bestHeard, heardHTML, endHint } from "../heard.js?v=1008.22";
-import { recDel, downloadRec, askPersist } from "../recstore.js?v=1008.22";
-import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1008.22";
-import { scoreFx, stopFx } from "../scorefx.js?v=1008.22"; // 점수별 효과(본부 10-05)
-import { record, recordSROnly, srOnlyMode, setSrOnly, isAndroid, srMiss, micWhy, srWhy, canScore, closeMic, logRec, micOpen, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1008.22";
-import { hold, quietWake } from "../wake.js?v=1008.22";
+import * as sfxL from "../sfx.js?v=1008.23"; // 카드 말하기 최대 길이 = 본보기 길이로(10-07)
+import { t, lang, langName } from "../i18n.js?v=1008.23";
+import { esc, renderText, glossCards, sayParts } from "../text.js?v=1008.23";
+import { episode } from "../data.js?v=1008.23";
+import { paths } from "../paths.js?v=1008.23";
+import { Sequence } from "../audio.js?v=1008.23";
+import { I, progress, SPEAKER, spkHtml, uiKoBtn, toggleUiKo } from "../ui.js?v=1008.23";
+import writeView from "./write.js?v=1008.23";
+import { diagEnv, keepDiag } from "../diag.js?v=1008.23";
+import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1008.23";
+import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace, lateFactor, sylAt, paintAt, karaokeRun } from "../rhythm.js?v=1008.23";
+import { playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1008.23";
+import { bestHeard, heardHTML, endHint } from "../heard.js?v=1008.23";
+import { recDel, downloadRec, askPersist } from "../recstore.js?v=1008.23";
+import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1008.23";
+import { scoreFx, stopFx } from "../scorefx.js?v=1008.23"; // 점수별 효과(본부 10-05)
+import { record, recordSROnly, srOnlyMode, setSrOnly, isAndroid, srMiss, micWhy, srWhy, canScore, closeMic, logRec, micOpen, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1008.23";
+import { hold, quietWake } from "../wake.js?v=1008.23";
 
 const RATES = [1, 0.75, 0.5];
 const pref = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } };
@@ -450,7 +450,9 @@ export default async function learn(app, ep, startId) {
   const navPush = () => { if (nav.skip > 0) { nav.want++; navLog("push-wait"); return; } doPush(); };
   const navPop = () => { if (nav.want > 0) { nav.want--; navLog("pop-cancel"); return; } if (nav.depth > 0 && history.state?.malmun) { nav.depth--; nav.skip++; navLog("pop"); history.back(); } };
   // 앞 화면(창이 열린 채 다른 화면으로 간 것)이 남긴 「창 칸」은 건너뜀 — 뒤로가 아무 일도 안 하는 것처럼 보이던 것(본부 10-07)
-  if (history.state?.malmun) history.replaceState(null, "");
+  // ने⇄한 토글로 다시 그릴 때 열려 있던 창·자리(본부 10-08 — 쓰기 창이 닫혀 하던 걸 잃던 것) · 그 창 칸(history)은 그대로 이어 씀
+  const reopen = (() => { try { const r = JSON.parse(sessionStorage.getItem("malmun.reopen") || "null"); sessionStorage.removeItem("malmun.reopen"); return r && r.ep === ep && Date.now() - r.at < 10000 ? r : null; } catch { return null; } })();
+  if (reopen && history.state?.malmun) { nav.n = history.state.malmun; nav.depth = 1; } else if (history.state?.malmun) history.replaceState(null, "");
   const onPop = () => {
     if (nav.skip) { nav.skip--; navLog("popped"); if (!nav.skip && nav.want > 0) { nav.want--; doPush(); } return; }
     navLog("back");
@@ -460,8 +462,8 @@ export default async function learn(app, ep, startId) {
     if (st.panel) closePanel(true);
   };
   addEventListener("popstate", onPop);
-  async function openPanel(kind, i, { autoplay = false, task } = {}) {
-    if (!st.panel) navPush(); // 처음 열 때만 한 칸
+  async function openPanel(kind, i, { autoplay = false, task, restore = null } = {}) {
+    if (!st.panel && !(restore && nav.depth > 0)) navPush(); // 처음 열 때만 한 칸(토글로 다시 열 때는 있던 칸 그대로)
     i = Math.max(0, Math.min(L.length - 1, i));
     stopAll(); ex.stop(); st.once = false; select(i, { scroll: false });
     st.panel?.cleanup?.();
@@ -477,7 +479,7 @@ export default async function learn(app, ep, startId) {
       setTimeout(() => keepVisible(i), 60); // 카드가 길어도 그 줄이 아래 막대에 가리지 않게
     } else {
       const view = kind === "speak" ? speakView : writeView; // 줄을 다 쓰면(말하면) 다음 줄의 같은 메뉴로(W6 · S7)
-      const cleanup = await view(panel, ep, L[i].id, { embedded: true, task, onNext: k => openPanel(kind, k), onClose: () => closePanel(), navPush, navPop });
+      const cleanup = await view(panel, ep, L[i].id, { embedded: true, task, pos: restore, onNext: k => openPanel(kind, k), onClose: () => closePanel(), navPush, navPop });
       if (st.panel !== mine) return cleanup?.();
       mine.cleanup = cleanup; fitPanel(); panel.classList.remove("fitting"); setTimeout(() => st.panel === mine && fitPanel(), 300);
       setTimeout(() => { fitCard(i); keepVisible(i); }, 60); // 쓰기 창이면 자막 카드 글을 그 자리에 맞춤(손 스크롤 중이어도)
@@ -813,7 +815,8 @@ export default async function learn(app, ep, startId) {
     } else if (a === "spd") { st.rate = (st.rate + 1) % RATES.length; const r = RATES[st.rate]; b.textContent = r + "×"; v.playbackRate = r; seq.setRate(r); ex.setRate(r); }
   };
   v.addEventListener("click", togglePlay);
-  app.querySelector("[data-act=uiko]")?.addEventListener("click", e => { e.stopPropagation(); toggleUiKo(() => import("../main.js?v=1008.22").then(m => m.rerender())); }); // 앱 글 한국어 토글 → 화면 다시 그림(도는 것은 cleanup 이 멈춤)
+  app.querySelector("[data-act=uiko]")?.addEventListener("click", e => { e.stopPropagation(); const p = st.panel; if (p) { const w = panel.__wr?.st?.() || panel.querySelector(".write")?.parentElement?.__wr?.st?.(), sp = panel.__sp?._state; try { sessionStorage.setItem("malmun.reopen", JSON.stringify({ ep, at: Date.now(), kind: p.kind, i: p.i, s: w?.s, w: w?.w, c: w?.c, wrote: w ? [...w.wrote] : [], part: sp?.i })); } catch {} }
+    toggleUiKo(() => import("../main.js?v=1008.23").then(m => m.rerender())); }); // 앱 글 한국어 토글 → 화면 다시 그림(도는 것은 cleanup 이 멈춤) → 열려 있던 창·자리로 다시 엶
   app.querySelector("[data-act=fs]").onclick = () => {
     const w = app.querySelector("#vwrap");
     if (document.fullscreenElement) document.exitFullscreen?.();
@@ -836,6 +839,7 @@ export default async function learn(app, ep, startId) {
   v.addEventListener("loadedmetadata", settle, { once: true });
   v.addEventListener("loadedmetadata", () => { if (v.paused && !st.once) v.currentTime = L[st.cur].start; }, { once: true });
   sync();
+  if (reopen) openPanel(reopen.kind, reopen.i, { restore: reopen }); // ने⇄한 토글 전 창·자리
   const release = hold(); // 소리 장치 깨워 두기(첫소리 먹힘 방지)
   return () => { clearInterval(edgeT); clearInterval(litT); clearInterval(seekTimer); clearInterval(hlTimer); document.removeEventListener("pointerdown", onDocDown, true); removeEventListener("popstate", onPop); clearTimeout(st.animEnd); release(); st.panel?.cleanup?.(); ex.stop(); removeEventListener("resize", pad); removeEventListener("resize", onFit); clearInterval(timer); clearTimeout(st.gap); document.removeEventListener("keydown", onKey); seq.stop(); v.pause(); v.removeAttribute("src"); v.load(); };
 }

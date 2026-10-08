@@ -13,20 +13,20 @@
 //     못 넘어도 막지 않는다([다음 ▶]) · 음성 인식이 안 되는 곳은 점수 없이 듣고 비교만(녹음은 저장)
 //  S6 녹음은 이 기기 안에만(IndexedDB) — 서버로 보내지 않는다
 //  S7 영상 창 안(embedded): 스크롤 없이 · 줄 이동·닫기는 학습 화면이 한다 · 줄 전체까지 통과하면 다음 줄 말하기로
-import { t, lang } from "../i18n.js?v=1008.22";
-import { esc, sayParts } from "../text.js?v=1008.22";
-import { spkHtml } from "../ui.js?v=1008.22";
-import { episode } from "../data.js?v=1008.22";
-import { paths } from "../paths.js?v=1008.22";
-import { audioCtx, hold, quietWake } from "../wake.js?v=1008.22";
-import * as sfx from "../sfx.js?v=1008.22";
-import { diagEnv, keepDiag } from "../diag.js?v=1008.22";
-import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1008.22";
-import { bestHeard, heardHTML, endHint } from "../heard.js?v=1008.22";
-import { openCompare, playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1008.22";
-import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace, lateFactor, sylAt, karaokeRun } from "../rhythm.js?v=1008.22";
-import { recDel, downloadRec, askPersist } from "../recstore.js?v=1008.22";
-import { logRec, dB, srWhy, srWatch, niceLabel, ALIAS, srOnlyMode, setSrOnly, isAndroid, recordSROnly, srMiss, micSet } from "../recorder.js?v=1008.22";
+import { t, lang } from "../i18n.js?v=1008.23";
+import { esc, sayParts } from "../text.js?v=1008.23";
+import { spkHtml } from "../ui.js?v=1008.23";
+import { episode } from "../data.js?v=1008.23";
+import { paths } from "../paths.js?v=1008.23";
+import { audioCtx, hold, quietWake } from "../wake.js?v=1008.23";
+import * as sfx from "../sfx.js?v=1008.23";
+import { diagEnv, keepDiag } from "../diag.js?v=1008.23";
+import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1008.23";
+import { bestHeard, heardHTML, endHint } from "../heard.js?v=1008.23";
+import { openCompare, playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1008.23";
+import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace, lateFactor, sylAt, karaokeRun } from "../rhythm.js?v=1008.23";
+import { recDel, downloadRec, askPersist } from "../recstore.js?v=1008.23";
+import { logRec, dB, srWhy, srWatch, niceLabel, ALIAS, srOnlyMode, setSrOnly, isAndroid, recordSROnly, srMiss, micSet } from "../recorder.js?v=1008.23";
 
 // 통과 두 단계(본부 10-04 · 투덜이 「원어민은 되지만 외국인은 100% 어렵다」): 80↑ = ☆ 통과(✓ · [저장]) · 95↑ = ★ 완벽
 export const PASS = 80, PERFECT = 95;
@@ -63,8 +63,8 @@ export function quietLimit(want, heard) {
 export const maxMsFor = say => Math.max(8000, (3 + 0.8 * [...String(say || "")].filter(c => /[가-힣]/.test(c)).length) * 1000);
 
 // ── 닮음 = 음절 정렬(js/score.js · 「들린 말」 빨간 표시와 같은 함수 — 본부 10-04) ──
-import { similarity, align } from "../score.js?v=1008.22";
-import { scoreFx } from "../scorefx.js?v=1008.22"; // 점수별 효과(본부 10-05)
+import { similarity, align } from "../score.js?v=1008.23";
+import { scoreFx } from "../scorefx.js?v=1008.23"; // 점수별 효과(본부 10-05)
 export { similarity };
 
 // ── 내 목소리 저장(S6) ──
@@ -95,7 +95,7 @@ export default async function speak(app, ep, id, opts = {}) {
   if (line.say) parts.push({ key: `${ep}_${String(line.id).padStart(2, "0")}_say`, text: line.say.ko, say: line.say.ko, src: line.say.src || (line.say.audio ? paths.audio(ep, line.say.audio) : null), task: true });
   if (opts.task === "say" && line.say) parts.startAt = parts.length - 1; // 설명의 「이제 말해 보세요」에서 들어오면 그 과제부터
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  const st = { i: parts.startAt || 0, rec: null, stream: null, blob: null, score: null, saved: {}, busy: false, model: false, alive: true, mine: null };
+  const st = { i: Number.isInteger(opts.pos?.part) && opts.pos.part < parts.length ? opts.pos.part : parts.startAt || 0, rec: null, stream: null, blob: null, score: null, saved: {}, busy: false, model: false, alive: true, mine: null };
   const savedReady = Promise.all(parts.map(async p => { const k = `${ep}/${p.key}`; st.saved[p.key] = await upgradeSaved(await recGet(k), { ep, key: p.key, url: p.src, text: p.say || p.text }, v => recPut(k, v)); })); // 옛 판(리듬 없음) 저장본은 새 점수로 // 기다리지 않고 먼저 그린다 — 다 읽으면 다시 그림
 
   app.innerHTML = `<section class="scr speak ${opts.embedded ? "embedded" : ""}">

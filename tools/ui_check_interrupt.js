@@ -69,9 +69,16 @@
       window.SpeechRecognition = window.webkitSpeechRecognition = class { start() {} stop() { setTimeout(() => this.onend?.(), 50); } abort() { this.stop(); } };
       const lab0 = $(".line [data-act=speak]")?.textContent;
       { await openP("speak"); $(".panel [data-act=model]").click(); await W(400); $("[data-act=uiko]").click(); await W(1500); const mx = await peak(1000), lab1 = $(".line [data-act=speak]")?.textContent;
-        ok(mx === 0 && !$(".panel:not([hidden]) .speak") && lab1 !== lab0, "견본 재생 중 → ने⇄한 토글 = 소리 0 · 앱 글 바뀜", `소리 ${mx} · 「${lab0}」→「${lab1}」`); }
+        ok(mx === 0 && !!$(".panel:not([hidden]) .speak") && lab1 !== lab0, "견본 재생 중 → ने⇄한 토글 = 소리 0 · 앱 글 바뀜 · 말하기 창은 그대로 다시 열림", `소리 ${mx} · 「${lab0}」→「${lab1}」`); }
       { await openP("speak"); $(".panel [data-act=rec]")?.click(); await W(700); $("[data-act=uiko]").click(); await W(1500); const mx = await peak(1000), mic = !!$(".panel .mic.on, .panel [data-act=rec].on"), lab2 = $(".line [data-act=speak]")?.textContent;
         ok(mx === 0 && !mic && lab2 === lab0, "녹음 중 → ने⇄한 토글 = 소리 0 · 녹음 멈춤 · 다시 누르면 원래 글", `소리 ${mx} · 녹음 ${mic} · 「${lab2}」`); }
+      // 창이 열린 채 토글 = 같은 창·같은 자리로 다시 열림(본부 10-08 — 쓰기 창이 닫혀 하던 걸 잃던 것) · 자동 중이면 멈춘 뒤
+      { localStorage.setItem("malmun.wmode", "kb"); await openP("write", 1); $(".panel [data-seg='1']")?.click(); await W(300); const c2 = [...document.querySelectorAll(".panel .sent .c")][1]; c2?.click(); await W(600); const a0 = pos();
+        autoBtn().click(); await W(700); $("[data-act=uiko]").click(); await W(2200); const a1 = pos(), kind = !!$(".panel:not([hidden]) .write"), au = wr()?.st().auto, mx = await peak(800), [x, y] = await stillFor(3000);
+        ok(kind && a1.split(".").slice(0, 3).join(".") === a0.split(".").slice(0, 3).join(".") && !au && mx <= 1 && x === y, "쓰기 창(토막 2·글자 2) 자동 중 → ने⇄한 토글 = 쓰기 창 그대로 · 같은 자리 · 자동 멈춤 · 저 혼자 안 씀", `창 ${kind} · ${a0}→${a1} · 자동 ${au} · 소리 ${mx} · ${x}→${y}`);
+        $("[data-act=uiko]").click(); await W(2200); ok(!!$(".panel:not([hidden]) .write") && pos().split(".").slice(0, 3).join(".") === a0.split(".").slice(0, 3).join("."), "다시 토글 = 쓰기 창·자리 그대로", pos()); await closeP(); }
+      { await openP("speak", 1); const sp0 = $(".panel")?.__sp?._state.i; $(".panel .segnav [data-seg='1']")?.click(); await W(500); const sp1 = $(".panel")?.__sp?._state.i; $("[data-act=uiko]").click(); await W(2200); const sp2 = $(".panel")?.__sp?._state.i;
+        ok(!!$(".panel:not([hidden]) .speak") && sp2 === sp1, "말하기 창(다른 토막) → ने⇄한 토글 = 말하기 창·같은 토막", `${sp0}→${sp1}→${sp2}`); $("[data-act=uiko]").click(); await W(2200); await closeP(); }
       try { localStorage.removeItem("malmun.uiko"); } catch {}
       md.getUserMedia = kg; md.enumerateDevices = ke; window.SpeechRecognition = kS; window.webkitSpeechRecognition = kw;
     }
