@@ -979,3 +979,9 @@ button.dim{opacity:.45}
 /* 쓰기 창 ✕ 닫기(본부 10-07) — 머리 줄 맨 오른쪽 · 좁으면 글은 숨기고 ✕만(머리 줄 한 줄) */
 .write .whead .wclose{margin-left:auto}
 .write .whead.narrow .wclose .lt{display:none}
+/* 낱말 묶음(투덜이 10-08) — 같은 낱말 글자 밑 이음 막대 · 지금 낱말은 강조색 · 뜻 줄 앞 낱말 전체(지금 글자 굵게) */
+.write .sent .w{background:color-mix(in srgb,var(--ink) 11%,transparent);border-radius:10px;padding:3px 3px 1px}
+.write .sent .w.on{background:color-mix(in srgb,var(--hi) 30%,transparent)}
+.write .info .wko{font-weight:600;color:var(--mute);margin-right:6px}
+.write .info .wko b{color:var(--hi);font-weight:800}
+.write .info .rom b{color:var(--ink);font-weight:700}

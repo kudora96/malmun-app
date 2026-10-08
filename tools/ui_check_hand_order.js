@@ -54,6 +54,15 @@
       ev("pointerdown", 0.5, 0.5); ev("pointerup", 0.5, 0.5); await W(100); const gone = $(".hscore").hidden;
       ok(shown && n1 > 0 && n2 === 0 && still && gone, "ⓖ 꽝 → 1.2초 뒤 내 획 저절로 지움 · 점수는 남음 · 새로 쓰면 점수 지움", `점수 「${sc1.textContent}」 · 획 ${n1}→${n2} · 점수 남음 ${still} · 새로 쓰면 지움 ${gone}`);
       $("[data-act=hclear]").click(); await W(200); }
+    // ⓗ 글자 누르면 획순 바로(투덜이 10-08) · ✎ 획순 = 멈춤 ⇄ 멈춘 곳부터 이어서(처음부터 다시 아님)
+    { const cs = [...$(".sent").querySelectorAll(".c")], cb = cs[Math.min(1, cs.length - 1)]; cb.click(); await W(700);
+      const H = wr().hand(), auto1 = !!H?.ordPlaying; await W(600);
+      $("[data-act=horder]").click(); await W(150); const at1 = H.ordAt ? { ...H.ordAt } : null, paused = !H.ordPlaying && !!at1, pr = $("[data-act=horder]").getAttribute("aria-pressed");
+      await W(700); const still = H.ordAt && H.ordAt.i === at1?.i && Math.abs(H.ordAt.f - at1.f) < 1e-6;
+      $("[data-act=horder]").click(); await W(80); const at2 = H.ordAt ? { ...H.ordAt } : null, resumed = H.ordPlaying && at2 && (at2.i > at1.i || (at2.i === at1.i && at2.f >= at1.f - 0.02));
+      for (let k = 0; k < 80 && H.ordPlaying; k++) await W(100);
+      ok(auto1 && paused && pr === "false" && still && resumed && !H.ordAt, "ⓗ 글자 누름 → 획순 저절로 · ✎ → 그 자리 멈춤 · 다시 → 이어서 끝까지", `저절로 ${auto1} · 멈춤 ${JSON.stringify(at1)} · 그대로 ${!!still} · 이어서 ${JSON.stringify(at2)}`);
+      await W(1200); }
     // ⓑ 손글씨 자동 — 지금 토막 끝까지
     const S0 = wr().st(), seg = S0.s, n0 = $(".sent").querySelectorAll(".c").length;
     $("[data-act=auto]").click(); await W(400);

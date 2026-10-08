@@ -6,7 +6,7 @@
 // 시간·인식(본부 10-04 투덜이 승인): 말 사이 쉼 2초 · 🎤 뒤 6초 말 없으면 끝 · 최대 길이 = 문장 길이에 맞춤 · 인식이 혼자 끝나면 같은 트랙으로 다시
 // 그때와 다른 점(본부 10-04 「남긴 차이」): ① 윈도우 별칭 장치 「default」「communications」는 절대 안 고름(통신 장치를 열면 윈도우가 다른 소리를 줄임)
 //   ② 「준비 중 → 녹음 중」 표시(첫 소리가 들어오면) ③ 인식 오류 까닭을 돌려줌(onerror 를 삼키지 않음) ④ 진단 기록(이벤트만 듣고 소리 경로는 안 건드림)
-import { audioCtx } from "./wake.js?v=1007.102";
+import { audioCtx } from "./wake.js?v=1008.1";
 
 // 시간 규칙(본부 10-04 · 투덜이 「빨리 안 하면 바로 닫힘」): 말 사이 쉼 2초 · 🎤 뒤 6초 안에 말 없으면 끝 · 최대 길이는 부르는 쪽이 정함(문장 길이)
 const QUIET_MS = 2000, START_MS = 6000;
@@ -74,7 +74,7 @@ export function srMiss(missed) {
   return false;
 }
 // 받아쓰기만 녹음기 — record() 와 같은 모양({ stop, done }) · blob = null · 끝 = ■ · 마지막 결과 뒤 2초 · 인식이 혼자 끝남 · 최대 시간
-export function recordSROnly({ maxMs = 8000, onTick = () => {}, onReady = () => {}, onStop = () => {} } = {}) {
+export function recordSROnly({ maxMs = 8000, onTick = () => {}, onReady = () => {}, onStop = () => {}, quietFor = () => QUIET_MS } = {}) {
   let stopFn = () => {}; const ctl = { stop: discard => stopFn(discard) };
   ctl.done = new Promise(res => {
     const SR = getSR(); if (!SR) { res({ error: Object.assign(new Error("nosr"), { name: "NotSupportedError" }) }); return; }
@@ -82,7 +82,7 @@ export function recordSROnly({ maxMs = 8000, onTick = () => {}, onReady = () => 
     const fin = (why, discard) => { if (over) return; over = true; clearInterval(tick); clearTimeout(maxT); clearTimeout(endT); if (!discard) onStop(); try { r?.stop(); } catch {}
       setTimeout(() => res(discard ? { cancelled: true } : { blob: null, heard, srErr, why, diag: { why, track: "sronly", sr: ev, sec: Math.round(performance.now() - t0) / 1000 } }), 500); };
     stopFn = d => fin("stop", d);
-    const onres = e => { const rs = Array.from(e.results, x => Array.from(x)); for (const x of rs) for (const a of x) heard.push(a.transcript); if (rs.length > 1) heard.push(rs.map(x => x[0].transcript).join(" ")); spoke = true; clearTimeout(endT); endT = setTimeout(() => fin("pause"), QUIET_MS); };
+    const onres = e => { const rs = Array.from(e.results, x => Array.from(x)); for (const x of rs) for (const a of x) heard.push(a.transcript); if (rs.length > 1) heard.push(rs.map(x => x[0].transcript).join(" ")); spoke = true; clearTimeout(endT); endT = setTimeout(() => fin("pause"), quietFor(heard)); }; // 끝까지 안 들렸으면 더 기다림(speak.js quietLimit · 투덜이 10-08)
     // 인식이 혼자 끝나도(크롬은 조용하면 몇 초 만에 끝냄) 다시 켜서 이어 들음 — 끝은 녹음 방식과 같은 규칙: ■ · 말 뒤 2초 · 🎤 뒤 6초 말 없음 · 최대 시간(본부 10-07 QA)
     const start = () => { if (over) return; if (r) { r.onend = r.onresult = r.onerror = null; }
       try { r = new SR(); } catch (e) { fin(spoke ? "pause" : "nospeech"); return; }

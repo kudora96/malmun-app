@@ -46,6 +46,8 @@
       const half = sc(tr0.map(S => S.filter(([x]) => x < 0.5)).filter(S => S.length)); // 오른쪽 획 빼먹음
       const shift = sc(tr0.map(S => S.map(([x, y]) => [x + 0.06, y]))); // 펜 굵기만큼 비껴
       const circ = sc([Array.from({ length: 41 }, (_, i) => [0.3 + 0.24 * Math.cos(i * Math.PI / 20), 0.5 + 0.34 * Math.sin(i * Math.PI / 20)]), [[0.75, 0.1], [0.75, 0.9]]]); // 대충 큰 동그라미 + 막대
+      { const tl = ["pencil", "pen", "brush"].map(tk => sc(wr().centerOf(ch0).map(S => Object.assign(S.slice(), { tool: tk, w: { pencil: 0.04, pen: 0.07, brush: 0.12 }[tk] }))).pct); // 투덜이 10-08 — 가는 도구도 가운데를 따라 그리면 100 가까이
+        ok(tl.every(v => v >= 95) && Math.max(...tl) - Math.min(...tl) <= 2, "ⓗ 연필·펜·붓으로 가운데 따라 그림 → 모두 95 이상 · 도구 차이 없음", tl.join("/")); }
       ok(full.pct >= 95, "ⓗ 정확히 따라 그림 → 95 이상(★)", `${full.pct}% · 덩어리 ${full.comps.map(v => Math.round(v * 100)).join("/")}`);
       ok(!half.ok && half.pct < 80, "ⓗ 오른쪽 획 빼먹고 왼쪽만 → 실패", `${half.pct}% · 덩어리 ${half.comps.map(v => Math.round(v * 100)).join("/")}`);
       ok(shift.pct < 80, "ⓗ 펜 굵기만큼 옆으로 비껴 그림 → 80 아래", `${shift.pct}% · 벗어남 ${Math.round(shift.outside * 100)}%`);
