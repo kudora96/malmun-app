@@ -133,6 +133,14 @@
   const gi = jam.indexOf("j_giyeok");
   ok(gi >= 0 && jam[gi + 1] === "j_e" && !jam.includes("j_eo"), "자동 완성 「게」 = ㄱ(기역) → ㅔ(에) 소리 차례 · ㅓ 소리 없음", jam.slice(0, 8).join(" → "));
   f = fits(); ok(f.scroll <= 1 && f.inside && document.querySelectorAll(".panel .kb .kr:nth-child(4) button, .panel .kb .kr:nth-child(5) button").length === 11, "겹모음 줄 11개 넣어도 창 안 스크롤 없음 · 자판이 창 안", `넘침 ${f.scroll}px`);
+  // 투덜이 10-08 폰: 자동 완성 중 글자 마지막 자모 소리 때 자판 → 멈춤 · 그 뒤 자판이 눌려도 소리 안 나던 것(다 친 글자에 머묾)
+  { await reSeg(); const wrx = () => $(".panel .write")?.parentElement?.__wr; $(".panel [data-act=auto]").click(); let hit = false;
+    for (let i = 0; i < 400 && !hit; i++) { await W(25); const S = wrx()?.st?.(); if (S && S.done && S.auto) hit = true; }
+    const before = tgt(); key("ㄱ"); await W(150); const S1 = wrx().st(), after = tgt();
+    await idle(4000); at = log.length; let err = null; const oe = e => (err = e.message || String(e.reason)); addEventListener("error", oe); addEventListener("unhandledrejection", oe);
+    const nj = [...document.querySelectorAll(".panel .slot")].length ? null : null; key("ㅏ"); await idle(3000); removeEventListener("error", oe); removeEventListener("unhandledrejection", oe);
+    const snd = log.slice(at).some(e => e.ev === "시작" && /chars_f\/j_|letters\/j/.test(e.name));
+    ok(hit && !S1.auto && S1.k === 0 && !err && snd, "자동 완성 중 글자 끝 소리 때 자판 → 멈춤 · 다음 글자로 · 그 뒤 자판 소리 남(오류 없음)", `멈춘 순간 ${before}→${after} · k ${S1.k} · 소리 ${snd} · 오류 ${err || "없음"}`); }
   } catch (e) { res.push("✗ 점검 도중 오류: " + e.message); }
   const out = res.join("\n"); console.log(out); return out;
 })();

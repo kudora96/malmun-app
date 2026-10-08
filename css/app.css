@@ -985,3 +985,4 @@ button.dim{opacity:.45}
 .write .info .wko{font-weight:600;color:var(--mute);margin-right:6px}
 .write .info .wko b{color:var(--hi);font-weight:800}
 .write .info .rom b{color:var(--ink);font-weight:700}
+.ctrl .iconbtn:disabled{opacity:.3;cursor:default;box-shadow:none}

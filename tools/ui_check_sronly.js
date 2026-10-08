@@ -9,7 +9,7 @@
   const keep = { gum: navigator.mediaDevices.getUserMedia, en: navigator.mediaDevices.enumerateDevices, SR: window.SpeechRecognition, wSR: window.webkitSpeechRecognition };
   const setUA = android => { if (android) Object.defineProperty(navigator, "userAgent", { configurable: true, get: () => "Mozilla/5.0 (Linux; Android 14; SM-S918N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0 Mobile Safari/537.36" }); else delete navigator.userAgent; };
   try {
-    try { localStorage.removeItem("malmun.srmode"); localStorage.removeItem("malmun.mic"); } catch {}
+    try { sessionStorage.removeItem("malmun.srmode"); localStorage.removeItem("malmun.mic"); } catch {}
     const tracks = []; let gum = 0, mic = null;
     navigator.mediaDevices.enumerateDevices = async () => [{ kind: "audioinput", deviceId: "default", label: "기본값 - 시험 마이크" }];
     navigator.mediaDevices.getUserMedia = async () => { gum++; const ctx = new AudioContext(), dst = ctx.createMediaStreamDestination(), o = ctx.createOscillator(), g = ctx.createGain(); g.gain.value = 0; o.connect(g); g.connect(dst); o.start(); mic = { g }; tracks.push(dst.stream.getAudioTracks()[0]); return dst.stream; };
@@ -24,10 +24,10 @@
     document.querySelectorAll(".line")[0].querySelector("[data-act=speak]").click(); await W(1500); document.querySelector("video")?.pause();
     const p = $(".panel"); window.__heard = p.__sp._cur().say;
     const once = async () => { $(".panel [data-act=rec]").click(); await W(500); talk(); for (let k = 0; k < 100 && $(".panel [data-act=rec]").classList.contains("on"); k++) await W(100); for (let k = 0; k < 80 && !/%/.test($(".panel .msg").textContent); k++) await W(100); await W(300); return $(".panel .msg").textContent; };
-    const m0 = await once(), one = localStorage.getItem("malmun.srmode") !== "only";
+    const m0 = await once(), one = sessionStorage.getItem("malmun.srmode") !== "only";
     const m1 = await once(), btn = $(".panel [data-act=srboth]");
-    ok(one && localStorage.getItem("malmun.srmode") === "only" && /0%/.test(m1) && /बोली पहिचान|recognition|받아쓰기/i.test(m1) && !!btn, "ⓐ 안드로이드: 말소리 있는데 들은 말 0 — 1번은 그대로 · 연속 2번이면 받아쓰기만으로(기억) · 안내 + 「다시 같이 시험」 단추", `1번 뒤 그대로 ${one} · 「${m1}」 · 단추 ${!!btn}`);
-    btn?.click(); await W(200); ok(localStorage.getItem("malmun.srmode") !== "only", "ⓐ 「다시 같이 시험」 누르면 받아쓰기만 꺼짐"); localStorage.setItem("malmun.srmode", "only");
+    ok(one && sessionStorage.getItem("malmun.srmode") === "only" && /0%/.test(m1) && /बोली पहिचान|recognition|받아쓰기/i.test(m1) && !!btn, "ⓐ 안드로이드: 말소리 있는데 들은 말 0 — 1번은 그대로 · 연속 2번이면 받아쓰기만으로(기억) · 안내 + 「다시 같이 시험」 단추", `1번 뒤 그대로 ${one} · 「${m1}」 · 단추 ${!!btn}`);
+    btn?.click(); await W(200); ok(sessionStorage.getItem("malmun.srmode") !== "only", "ⓐ 「다시 같이 시험」 누르면 받아쓰기만 꺼짐"); sessionStorage.setItem("malmun.srmode", "only");
     // ⓑ
     const g0 = gum; $(".panel [data-act=rec]").click(); for (let k = 0; k < 80 && $(".panel [data-act=rec]").classList.contains("on"); k++) await W(100); for (let k = 0; k < 80 && !/%/.test($(".panel .msg").textContent); k++) await W(100); await W(300);
     const m2 = $(".panel .msg").textContent, mb = $(".panel [data-act=mine]");
@@ -50,13 +50,13 @@
       ok(gum === g1 && /^\d+%/.test(cm) && /글자 점수만|अक्षर अंक मात्र|letter score only/.test(cm) && mine.classList.contains("dim"), "ⓒ 카드도 받아쓰기만 · 글자 점수 · 내 목소리 흐림", `마이크 ${gum - g1}번 · 「${cm}」`); }
     document.querySelectorAll(".line")[9].querySelector("[data-act=explain]").click(); await W(600);
     // ⓓ PC
-    localStorage.removeItem("malmun.srmode"); setUA(false);
+    sessionStorage.removeItem("malmun.srmode"); setUA(false);
     document.querySelectorAll(".line")[0].querySelector("[data-act=speak]").click(); await W(1500); document.querySelector("video")?.pause();
     $(".panel [data-act=rec]").click(); await W(500); talk(); for (let k = 0; k < 100 && $(".panel [data-act=rec]").classList.contains("on"); k++) await W(100); for (let k = 0; k < 80 && !/%/.test($(".panel .msg").textContent); k++) await W(100); await W(300);
-    ok(localStorage.getItem("malmun.srmode") !== "only", "ⓓ PC(안드로이드 아님)는 같은 실패에도 받아쓰기만으로 안 바뀜", $(".panel .msg").textContent);
+    ok(sessionStorage.getItem("malmun.srmode") !== "only", "ⓓ PC(안드로이드 아님)는 같은 실패에도 받아쓰기만으로 안 바뀜", $(".panel .msg").textContent);
     document.querySelectorAll(".line")[0].querySelector("[data-act=speak]").click(); await W(600);
   } catch (e) { res.push("✗ 점검 도중 오류: " + e.message); }
-  setUA(false); try { localStorage.removeItem("malmun.srmode"); } catch {}
+  setUA(false); try { sessionStorage.removeItem("malmun.srmode"); } catch {}
   navigator.mediaDevices.getUserMedia = keep.gum; navigator.mediaDevices.enumerateDevices = keep.en; window.SpeechRecognition = keep.SR; window.webkitSpeechRecognition = keep.wSR;
   const bad = res.filter(x => x.startsWith("✗")).length, out = `${bad ? "✗" : "✓"} 받아쓰기만 ${res.length - bad}/${res.length}\n` + res.join("\n");
   console.log(out); return out;

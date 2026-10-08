@@ -1,14 +1,14 @@
 // 진단 화면 #/diag(본부 10-07 「PC 에선 되는데 폰에선 안 됨」) — 투덜이가 폰에서 열어 사진 한 장 · 「복사」로 글째 보냄
 //  기기 · 받아쓰기(인식만 / 녹음+인식 동시) · 마이크(허락 · 실제 적용된 설정 · 장치) · 녹음 형식(지원 · 3초 녹음을 풀 수 있나)
 //  소리(AudioContext 상태 · 「가」 소리 · 효과음 · 음성 창고 읽기) · 최근 오류 20개 — 앱 동작은 안 바꿈(시험은 이 화면 안에서만)
-import { VERSION } from "../version.js?v=1008.1";
-import { esc } from "../text.js?v=1008.1";
-import { paths } from "../paths.js?v=1008.1";
-import { charsF } from "../data.js?v=1008.1";
-import { audioCtx } from "../wake.js?v=1008.1";
-import * as sfx from "../sfx.js?v=1008.1";
-import { srOnlyMode, setSrOnly } from "../recorder.js?v=1008.1";
-import { errLog, clearErr } from "../errlog.js?v=1008.1";
+import { VERSION } from "../version.js?v=1008.2";
+import { esc } from "../text.js?v=1008.2";
+import { paths } from "../paths.js?v=1008.2";
+import { charsF } from "../data.js?v=1008.2";
+import { audioCtx } from "../wake.js?v=1008.2";
+import * as sfx from "../sfx.js?v=1008.2";
+import { srOnlyMode, setSrOnly } from "../recorder.js?v=1008.2";
+import { errLog, clearErr } from "../errlog.js?v=1008.2";
 
 export default async function diag(app) {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;

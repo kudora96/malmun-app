@@ -2,7 +2,7 @@
 // (가짜 마이크 = 0.8초 동안 삑 소리 뒤 조용 → 「말이 끝나고 1초 조용하면 멈춤」을 확인 · 가짜 인식 = 정해 준 글자를 돌려줌)
 (async () => {
   window.__noRhythm = true;
-  window.__noSrSwitch = true; try { localStorage.removeItem("malmun.srmode"); localStorage.removeItem("malmun.srmiss"); } catch {} // 녹음+받아쓰기 방식으로 고정(받아쓰기만 방식은 ui_check_sronly) // 가짜 마이크(삑 소리)로는 리듬을 잴 수 없음 — 글자 점수·화면 흐름만 봄(리듬은 tools/ui_check_rhythm.js)
+  window.__noSrSwitch = true; try { sessionStorage.removeItem("malmun.srmode"); sessionStorage.removeItem("malmun.srmiss"); } catch {} // 녹음+받아쓰기 방식으로 고정(받아쓰기만 방식은 ui_check_sronly) // 가짜 마이크(삑 소리)로는 리듬을 잴 수 없음 — 글자 점수·화면 흐름만 봄(리듬은 tools/ui_check_rhythm.js)
   const res = [];
   try {
   const W = ms => new Promise(s => setTimeout(s, ms));

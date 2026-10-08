@@ -6,7 +6,7 @@
 // 시간·인식(본부 10-04 투덜이 승인): 말 사이 쉼 2초 · 🎤 뒤 6초 말 없으면 끝 · 최대 길이 = 문장 길이에 맞춤 · 인식이 혼자 끝나면 같은 트랙으로 다시
 // 그때와 다른 점(본부 10-04 「남긴 차이」): ① 윈도우 별칭 장치 「default」「communications」는 절대 안 고름(통신 장치를 열면 윈도우가 다른 소리를 줄임)
 //   ② 「준비 중 → 녹음 중」 표시(첫 소리가 들어오면) ③ 인식 오류 까닭을 돌려줌(onerror 를 삼키지 않음) ④ 진단 기록(이벤트만 듣고 소리 경로는 안 건드림)
-import { audioCtx } from "./wake.js?v=1008.1";
+import { audioCtx } from "./wake.js?v=1008.2";
 
 // 시간 규칙(본부 10-04 · 투덜이 「빨리 안 하면 바로 닫힘」): 말 사이 쉼 2초 · 🎤 뒤 6초 안에 말 없으면 끝 · 최대 길이는 부르는 쪽이 정함(문장 길이)
 const QUIET_MS = 2000, START_MS = 6000;
@@ -63,14 +63,16 @@ export const micWhy = e => (e?.name === "NotAllowedError" || e?.name === "Securi
 // 「받아쓰기만」 방식(본부 10-07 투덜이 「알아서」 — 안드로이드는 녹음과 받아쓰기를 같이 못 하는 기기가 있음) — 그 기기에서 녹음+받아쓰기가 말소리는 있는데 들은 말 0 으로 끝나면
 //  받아쓰기만으로 바꿔 기억(malmun.srmode = only) → 녹음 없이 글자 점수만 · 리듬·비교·내 목소리 없음 · 진단 화면에서 「다시 같이 시험」으로 되돌림 · PC·되는 기기는 그대로
 export const isAndroid = () => /Android/i.test(navigator.userAgent);
-export const srOnlyMode = () => { try { return localStorage.getItem("malmun.srmode") === "only"; } catch { return false; } };
-export const setSrOnly = on => { try { on ? localStorage.setItem("malmun.srmode", "only") : localStorage.removeItem("malmun.srmode"); localStorage.removeItem("malmun.srmiss"); } catch {} };
+// 기억은 이번 방문(창)만 — 투덜이 10-08 갤럭시: 한 번 바뀌면 영영 녹음이 꺼져 「내 목소리」를 못 들음(진짜 까닭은 구글 앱 마이크 허락이었음) → 다음에 열면 다시 같이 시험
+try { localStorage.removeItem("malmun.srmode"); localStorage.removeItem("malmun.srmiss"); } catch {} // 옛 판이 영구로 남긴 값 지움
+export const srOnlyMode = () => { try { return sessionStorage.getItem("malmun.srmode") === "only"; } catch { return false; } };
+export const setSrOnly = on => { try { on ? sessionStorage.setItem("malmun.srmode", "only") : sessionStorage.removeItem("malmun.srmode"); sessionStorage.removeItem("malmun.srmiss"); } catch {} };
 // 바꾸기는 「연속 2번」만(본부 10-07 QA — 우물거림·잡음으로 한 번 비어도 녹음·리듬·비교를 영구로 잃지 않게) · 그 사이 한 번이라도 들은 말이 있으면 0 으로
 //  → true = 이번에 받아쓰기만으로 바꿈 · 점검 도구는 window.__noSrSwitch 로 끔
 export function srMiss(missed) {
   if (window.__noSrSwitch) return false;
-  try { if (!missed) { localStorage.removeItem("malmun.srmiss"); return false; }
-    const n = (+localStorage.getItem("malmun.srmiss") || 0) + 1; if (n >= 2) { setSrOnly(true); return true; } localStorage.setItem("malmun.srmiss", String(n)); } catch {}
+  try { if (!missed) { sessionStorage.removeItem("malmun.srmiss"); return false; }
+    const n = (+sessionStorage.getItem("malmun.srmiss") || 0) + 1; if (n >= 2) { setSrOnly(true); return true; } sessionStorage.setItem("malmun.srmiss", String(n)); } catch {}
   return false;
 }
 // 받아쓰기만 녹음기 — record() 와 같은 모양({ stop, done }) · blob = null · 끝 = ■ · 마지막 결과 뒤 2초 · 인식이 혼자 끝남 · 최대 시간
@@ -135,13 +137,14 @@ export function record({ onLevel = () => {}, onSwitch = () => {}, onReady = () =
       rec.start();
       // 음성 인식 — continuous + 중간 결과 · 녹음하는 바로 그 트랙으로 · 녹음이 끝날 때까지 혼자 end 되면 같은 트랙으로 다시(진단 restart@ · 본부 10-04)
       // 인식에는 녹음 트랙의 복사본(투덜이 10-07 r8 허락 — 인식이 끝나며 받은 트랙을 꺼 녹음이 끊기던 것) · 녹음 끝은 앱 규칙만
-      let srOff = false, srAt = 0, srTrack = null, thrNow = 0, noiseNow = 0, quietMs = 0, cut = ""; const dropSrTrack = () => { try { srTrack?.stop(); } catch {} srTrack = null; };
+      let srOff = false, srAt = 0, srTrack = null, thrNow = 0, noiseNow = 0, quietMs = 0, cut = "", srLast = 0; const dropSrTrack = () => { try { srTrack?.stop(); } catch {} srTrack = null; };
       const startSR = () => {
         if (over || srOff) return;
         const SR = getSR(); if (!SR) return;
         let r; try { r = new SR(); } catch { return; }
         r.lang = "ko-KR"; r.continuous = true; r.interimResults = true; r.maxAlternatives = 3;
         r.onresult = e => {
+          srLast = Date.now(); // 받아쓰기가 말을 받은 때 = 쉼은 여기서부터(투덜이 10-08)
           const rs = Array.from(e.results, x => Array.from(x));
           for (const x of rs) for (const a of x) heard.push(a.transcript);
           if (rs.length > 1) heard.push(rs.map(x => x[0].transcript).join(" "));
@@ -185,9 +188,11 @@ export function record({ onLevel = () => {}, onSwitch = () => {}, onReady = () =
           if (switched && !kept && peak >= 0.0002 && liveMs > DEAD_MS) { kept = true; pref(devId(s) || (s.req !== true && s.req) || ""); }
           // 말소리 기준 = 방 소음의 3배(0.004~0.02) — 투덜이 10-07: 마이크 최대가 −31~−34dB(0.02~0.028)라 고정 0.02 면 조금 작게 말해도 「조용」 → 2초 뒤 끊김
           if (!spoke && rms < 0.02) noise = noise ? noise * 0.9 + rms * 0.1 : rms;
-          const thr = Math.min(0.02, Math.max(0.004, noise * 3)); thrNow = thr; noiseNow = noise;
+          // 기준 = 소음 2배 · 쉼은 소리가 작아진 때와 받아쓰기가 마지막으로 말을 받은 때 중 늦은 때부터(투덜이 10-08 — 작게 말하면 기준 −34dB 아래라 말하는 중에 끊김)
+          const thr = Math.min(0.02, Math.max(0.004, noise * 2)); thrNow = thr; noiseNow = noise;
           if (rms > thr && !spoke) pref(devId(s) || (s.req !== true && s.req) || ""); // 소리가 들어온 마이크를 기억
-          if (rms > thr) { spoke = true; quietAt = 0; } else if (spoke) { quietAt ||= now; if (now - quietAt > QUIET_MS) { quietMs = now - quietAt; finish({ why: "pause" }); } }
+          if (srLast) spoke = true;
+          if (rms > thr) { spoke = true; quietAt = 0; } else if (spoke) { quietAt = Math.max(quietAt || now, srLast); if (now - quietAt > QUIET_MS) { quietMs = now - quietAt; finish({ why: "pause" }); } }
           if (!spoke && performance.now() - t0 > START_MS) finish({ why: "nospeech" }); // 🎤 뒤 6초 동안 말 없음
           onTick(performance.now() - t0, maxMs, spoke && quietAt ? now - quietAt : 0); // 3번째 = 말한 뒤 조용한 시간(ms · 카드 쉼 카운트다운 표시용 — 투덜이 10-07 허락 · 끊는 기준은 그대로)
           if (!spoke && peak < 0.0002 && liveMs > DEAD_MS) finish({ dead: true }); // 1.5초 신호가 아예 0 → 다음 마이크로
