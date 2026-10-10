@@ -81,6 +81,16 @@
     // ── 설명 · 영상 ──
     { await openP("explain"); $(".panel .v9bar [data-x=ex]")?.click(); await W(600); await openP("write"); const mx = await peak(1500); ok(mx === 0, "설명 읽는 중 → 쓰기 창 열기 = 설명 소리 멈춤", `소리 ${mx}`); await closeP(); }
     { await openP("explain"); $(".panel .v9bar [data-x=ex]")?.click(); await W(600); $(".ctrl [data-act=next]")?.click(); await W(300); const mx = await peak(1500); ok(mx <= 1, "설명 읽는 중 → 아래 ▶| 다음 줄 = 소리 하나 이하", `소리 ${mx}`); await closeP(); }
+    // 설명 「말해 보세요」 칸(본부 10-10 막 누르기 씨앗 1 — 견본 중 칸 글 누름 = 설명 읽기가 같이 켜져 두 겹)
+    { const li = [...L()].findIndex(l => l.querySelector("[data-act=explain]")); 
+      for (const r of ["1", "0.75"]) { localStorage.setItem("malmun.rate.m", r); await openP("explain", li >= 0 ? li : 3); const md = $(".panel .sayb [data-x=model]");
+        if (!md) { res.push(`– 설명 칸 견본 단추 없음(${r}×)`); await closeP(); continue; }
+        md.click(); await W(400); $(".panel .sayb .saybig")?.click(); const m1 = await peak(1200);
+        md.click(); await W(400); $(".panel .sayb .sayp")?.click(); const m2 = await peak(900);
+        const sns = [...document.querySelectorAll(".panel .v9body .sn")]; for (const x of sns.slice(0, 3)) { x.click(); await W(80); } md.click(); const m3 = await peak(1200);
+        md.click(); await W(400); sns[1]?.click(); const m4 = await peak(1000);
+        ok(m1 <= 1 && m2 <= 1 && m3 <= 1 && m4 <= 1, `설명 칸 견본(${r}×) 중 → 칸 글 누름 · 문장 연타 → 견본 · 견본 중 문장 = 소리 하나 이하`, `${m1}/${m2}/${m3}/${m4}`); await closeP(); }
+      localStorage.removeItem("malmun.rate.m"); }
     { const v = document.querySelector("video"); v.muted = true; $(".ctrl [data-act=play]")?.click(); await W(800); await openP("explain", 3); const vp = v.paused; $(".panel .v9bar [data-x=ex]")?.click(); await W(500); const mx = await peak(1200);
       ok(vp && mx <= 1, "영상 재생 중 → 다른 줄 설명 = 영상 멈춤 · 소리 하나 이하", `영상 멈춤 ${vp} · 소리 ${mx}`); await closeP(); v.muted = false; }
     // ── 「ने ⇄ 한」 앱 글 토글(본부 10-08) — 견본 재생·녹음 중에 누름 = 소리 0 · 마이크 꺼짐 · 다시 누르면 원래 글 ──

@@ -13,15 +13,15 @@
 //  W5 소리는 언제나 하나만 · 새 일을 하면 앞 소리는 멈춘다
 //  W6 영상 창 안(embedded): 창 안에서 스크롤 없이 다 보이게 — 긴 문장은 토막으로(◀ 1/3 ▶) ·
 //     토막을 다 쓰면 자동으로 다음 토막 · 줄을 다 쓰면 대사를 듣고 자동으로 다음 줄 쓰기 · 아래 ▶ = 이 부분 듣기
-import { t, lang } from "../i18n.js?v=1010.32";
-import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO } from "../text.js?v=1010.32";
-import { episode, chars, charsF } from "../data.js?v=1010.32";
-import { paths } from "../paths.js?v=1010.32";
-import { I, spkHtml } from "../ui.js?v=1010.32";
-import { audioCtx, hold } from "../wake.js?v=1010.32";
-import * as sfx from "../sfx.js?v=1010.32";
-import { scoreFx } from "../scorefx.js?v=1010.32";
-import { units as jamoUnits, baseOf, shapeFix } from "../jamobox.js?v=1010.32"; // 자모 자리 나누기(획순 · 자판 덧칠 · 손글씨 덩어리 — 본부 10-07) // 손글씨 점수 효과 = 말하기와 같은 규칙(본부 10-07)
+import { t, lang } from "../i18n.js?v=1010.96";
+import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO } from "../text.js?v=1010.96";
+import { episode, chars, charsF } from "../data.js?v=1010.96";
+import { paths } from "../paths.js?v=1010.96";
+import { I, spkHtml } from "../ui.js?v=1010.96";
+import { audioCtx, hold } from "../wake.js?v=1010.96";
+import * as sfx from "../sfx.js?v=1010.96";
+import { scoreFx } from "../scorefx.js?v=1010.96";
+import { units as jamoUnits, baseOf, shapeFix } from "../jamobox.js?v=1010.96"; // 자모 자리 나누기(획순 · 자판 덧칠 · 손글씨 덩어리 — 본부 10-07) // 손글씨 점수 효과 = 말하기와 같은 규칙(본부 10-07)
 
 const KEYS = [..."ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎㄲㄸㅃㅆㅉ"], VOW = [..."ㅏㅑㅓㅕㅗㅛㅜㅠㅡㅣ"];
 const VOW2 = [..."ㅐㅒㅔㅖㅘㅙㅚㅝㅞㅟㅢ"]; // 겹모음 줄(본부 10-06) — 칸 하나 · ㅓ+ㅣ 처럼 나눠 쳐도 받음
@@ -156,7 +156,7 @@ export default async function write(app, ep, id, opts = {}) {
     const my = (st.sentGen = (st.sentGen || 0) + 1);
     run([partStep()]).then(ok => { if (st.sentGen !== my) return; st.sent = false; markSent(); if (ok) again(); else if (st.resumeAuto) { st.resumeAuto = false; markAuto(); } }); // 다른 걸 눌러 끊기면 자동 다시 안 함
   }
-  app.__wr = { owners: async ch => { await stkReady; const list = strokesOf(ch); return { list, ...inkOwners(ch, list), GN }; }, font: () => `${glyphWeight()} ${glyphFont()}`, reveal: async (ch, n = 200) => { await stkReady; await document.fonts?.load(`${glyphWeight()} 100px ${glyphFont()}`, ch).catch(() => {}); const list = strokesOf(ch); return { list, at: (k, f = 1) => revealOrder(ch, n, list, k, f) }; }, glyphCv: (ch, n = 200) => { const cv = document.createElement("canvas"); cv.width = cv.height = n; glyph(cv.getContext("2d"), n, ch, "#000"); return cv; }, st: () => st, hand: () => st.hand, traceOf: ch => traceOf(ch), centerOf: ch => centerOf(ch), unitsOf: ch => unitsOf(ch), strokesOf: async ch => (await stkReady, strokesOf(ch)), strokeHint: (H, S) => strokeHint(H, S), strokeFit: async ch => { await stkReady; const us = unitsOf(ch), L = strokesOf(ch); return us.map((u, ui) => { const P = L.filter(S => S.unit === ui); let n = 0, k = 0; for (const S of P) { const f = fitOf(u, S.pts), m = S.pts.length - 1; n += m; k += f * m; } return { jamo: u.jamo, fit: n ? k / n : null }; }); }, handScore: (ch, S) => handScore(ch, S), handJudge: () => handJudge(), toggle: toggleSentence, brushPath: (ch, S) => brushPath(ch, S), paintCheck: (ch, k, n) => paintCheck(ch, k, n), busy: () => st.busy || st.done || st.queue.length > 0 || st.sent || st.auto || sfx.playing() }; // busy = 점검 도구가 소리 끝을 기다릴 때
+  app.__wr = { owners: async ch => { await stkReady; const list = strokesOf(ch); return { list, ...inkOwners(ch, list), GN }; }, font: () => `${glyphWeight()} ${glyphFont()}`, reveal: async (ch, n = 200) => { await stkReady; await document.fonts?.load(`${glyphWeight()} 100px ${glyphFont()}`, ch).catch(() => {}); const list = strokesOf(ch); return { list, at: (k, f = 1) => revealOrder(ch, n, list, k, f) }; }, glyphCv: (ch, n = 200) => { const cv = document.createElement("canvas"); cv.width = cv.height = n; glyph(cv.getContext("2d"), n, ch, "#000"); return cv; }, st: () => st, hand: () => st.hand, traceOf: ch => traceOf(ch), centerOf: ch => centerOf(ch), unitsOf: ch => unitsOf(ch), unitSteps: ch => { const m = pix(UN, x => glyph(x, UN, ch, "#000")), cp = us => us.map(u => ({ jamo: u.jamo, role: u.role, n: u.px.length, px: u.px.slice() })), a = jamoUnits(ch, m, UN), r = ringFix(a, m), s0 = cp(r); shapeFix(r, m, UN); const s1 = cp(r); deCrumb(r); return { raw: cp(a), ring: s0, shape: s1, crumb: cp(r) }; }, strokesOf: async ch => (await stkReady, strokesOf(ch)), strokeHint: (H, S) => strokeHint(H, S), strokeFit: async ch => { await stkReady; const us = unitsOf(ch), L = strokesOf(ch); return us.map((u, ui) => { const P = L.filter(S => S.unit === ui); let n = 0, k = 0; for (const S of P) { const f = fitOf(u, S.pts), m = S.pts.length - 1; n += m; k += f * m; } return { jamo: u.jamo, fit: n ? k / n : null }; }); }, handScore: (ch, S) => handScore(ch, S), handJudge: () => handJudge(), toggle: toggleSentence, brushPath: (ch, S) => brushPath(ch, S), paintCheck: (ch, k, n) => paintCheck(ch, k, n), busy: () => st.busy || st.done || st.queue.length > 0 || st.sent || st.auto || sfx.playing() }; // busy = 점검 도구가 소리 끝을 기다릴 때
 
   function paintSent() {
     sentEl.innerHTML = `<svg class="spk" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M4 9v6h4l5 4V5L8 9H4z"/><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M16 8.5a5 5 0 0 1 0 7M18.8 6a8.5 8.5 0 0 1 0 12"/></svg>` + (segs[Math.min(st.s, segs.length - 1)] || []).map((w, wi) => `<span class="w ${wi === st.w ? "on" : ""}">${w.chars.map((c, ci) =>
@@ -347,6 +347,19 @@ export default async function write(app, ep, id, opts = {}) {
   const UN = 200, uCache = new Map();
   // ㅇ 고리 바로잡기(투덜이 10-08 「왕」) — 글꼴이 ㅇ 아래와 ㅗ 꼭지를 이어 그리면 자모 나누기가 ㅇ 아래 반을 ㅗ 에 줌 → 획순이 ㅇ 위 → 아래 두 번
   //  ㅇ 자모마다 가장 가까운 「구멍」(글자 밖과 이어지지 않은 빈 곳)을 찾아, 그 구멍에서 획 굵기만큼 안의 잉크 = ㅇ 몫으로 되돌림
+  // 부스러기 정리(본부 10-10 전수 1,257자) — 자모 안에서 본체와 안 이어진 작은 조각(< max(40칸, 그 자모 30%)) = 가장 많이 맞닿은 이웃 자모 몫 · 바뀌면 true
+  function deCrumb(us) {
+    const N = UN, own = new Int16Array(N * N).fill(-1); us.forEach((u, k) => { for (const q of u.px) own[q] = k; }); let changed = false;
+    for (let pass = 0; pass < 3; pass++) { let moved = false;
+      us.forEach((u, k) => { const seen = new Set(), comps = [];
+        for (const q0 of u.px) { if (seen.has(q0) || own[q0] !== k) continue; const c = [], st = [q0]; seen.add(q0); while (st.length) { const q = st.pop(); c.push(q); const x = q % N; for (const j of [x > 0 ? q - 1 : -1, x < N - 1 ? q + 1 : -1, q - N, q + N]) if (j >= 0 && j < N * N && own[j] === k && !seen.has(j)) { seen.add(j); st.push(j); } } comps.push(c); }
+        if (comps.length < 2) return; comps.sort((a, b) => b.length - a.length); const lim = Math.max(40, u.px.length * 0.3);
+        for (const c of comps.slice(1)) { if (c.length >= lim) continue; const cnt = new Map(); for (const q of c) { const x = q % N; for (const j of [x > 0 ? q - 1 : -1, x < N - 1 ? q + 1 : -1, q - N, q + N, x > 0 ? q - N - 1 : -1, x < N - 1 ? q - N + 1 : -1, x > 0 ? q + N - 1 : -1, x < N - 1 ? q + N + 1 : -1]) { const o = j >= 0 && j < N * N ? own[j] : -1; if (o >= 0 && o !== k) cnt.set(o, (cnt.get(o) || 0) + 1); } }
+          if (!cnt.size) continue; const to = [...cnt].sort((a, b) => b[1] - a[1])[0][0]; for (const q of c) own[q] = to; moved = true; } });
+      if (!moved) break; changed = true; us.forEach(u => (u.px = [])); for (let i = 0; i < N * N; i++) if (own[i] >= 0) us[own[i]].px.push(i); }
+    return changed;
+  }
+  const HV = new Set("ㅗㅛㅜㅠㅡ");
   function ringFix(us, m) {
     const N = UN, on = i => m[i * 4 + 3] > 128, idx = us.map((u, k) => (u.jamo === "ㅇ" || u.jamo === "ㅎ" ? k : -1)).filter(k => k >= 0); // ㅎ 도 동그라미(「호」 — ㅎ 고리가 ㅗ 몫이 되던 것) if (!idx.length) return us;
     const outside = new Uint8Array(N * N), st0 = [];
@@ -359,11 +372,11 @@ export default async function write(app, ep, id, opts = {}) {
     if (!holes.length) return us;
     let area = 0, edge = 0; for (let q = 0; q < N * N; q++) { if (!on(q)) continue; area++; const x = q % N, y = (q / N) | 0; if (!x || !y || x === N - 1 || y === N - 1 || !on(q - 1) || !on(q + 1) || !on(q - N) || !on(q + N)) edge++; }
     const D = Math.ceil(((2 * area) / Math.max(1, edge)) * 1.05), owner = new Int16Array(N * N).fill(-1); us.forEach((u, k) => { for (const q of u.px) owner[q] = k; });
-    const used = new Set();
+    const used = new Set(), ringSet = new Map(), holeOf = new Map();
     for (const k of idx) { const u = us[k]; let sx = 0, sy = 0; for (const q of u.px) { sx += q % N; sy += (q / N) | 0; } const ux = sx / u.px.length / N, uy = sy / u.px.length / N;
       let hb = null, bd = Infinity; for (const h of holes) { if (used.has(h.id)) continue; const d = Math.hypot(h.cx - ux, h.cy - uy); if (d < bd) { bd = d; hb = h; } }
       if (u.jamo === "ㅎ") { hb = null; bd = Infinity; for (const h of holes) { if (used.has(h.id) || h.cy < uy - 0.02) continue; const d = Math.hypot(h.cx - ux, h.cy - uy); if (d < bd) { bd = d; hb = h; } } } // ㅎ 동그라미 = 꼭지·가로 아래
-      if (!hb || bd > (u.jamo === "ㅎ" ? 0.4 : 0.25)) continue; used.add(hb.id);
+      if (!hb || bd > (u.jamo === "ㅎ" ? 0.4 : 0.25)) continue; used.add(hb.id); holeOf.set(k, hb.px[0]);
       // 고리 = 구멍에서 실제(유클리드) 거리 ≤ 그 고리 두께(고리 바깥 가장자리까지 거리의 중앙값) + 0.5칸(본부 10-10 투덜이 「요」 — 걸음 수·글자 평균 굵기로 잡아 ㅛ 꼭지 머리가 ㅇ 몫이 되던 것)
       const bnd = hb.px.filter(p => [p - 1, p + 1, p - N, p + N].some(j => j >= 0 && j < N * N && on(j))).map(p => [p % N, (p / N) | 0]);
       let hx0 = N, hx1 = 0, hy0 = N, hy1 = 0; for (const [x, y] of bnd) { if (x < hx0) hx0 = x; if (x > hx1) hx1 = x; if (y < hy0) hy0 = y; if (y > hy1) hy1 = y; }
@@ -371,18 +384,29 @@ export default async function write(app, ep, id, opts = {}) {
       for (let y = Math.max(0, hy0 - R); y <= Math.min(N - 1, hy1 + R); y++) for (let x = Math.max(0, hx0 - R); x <= Math.min(N - 1, hx1 + R); x++) { const q = y * N + x; if (!on(q)) continue; let b2 = Infinity; for (const [bx, by] of bnd) { const d2 = (bx - x) ** 2 + (by - y) ** 2; if (d2 < b2) b2 = d2; } dist[q] = Math.sqrt(b2); cand.push(q); }
       const outerD = cand.filter(q => dist[q] <= 2.5 * D && [q - 1, q + 1, q - N, q + N].some(j => j >= 0 && j < N * N && outside[j])).map(q => dist[q]).sort((p, q) => p - q);
       const thick = (outerD.length ? outerD[outerD.length >> 1] : D) + 0.5;
-      for (const q of cand) if (dist[q] <= thick && owner[q] !== k) owner[q] = k;
+      // 고리 바깥 타원(본부 10-10 「왕」「호」「오」 — 고리 = 바깥 타원 안 띠만 · 기둥은 모음 몫) = 구멍 가운데서 사방 180줄로 나가 잉크가 끝나는 곳 · 기둥·가로획으로 길게 빠진 줄(중앙값 1.25배 넘음)은 빼고 타원 맞춤(최소제곱 Ax²+Cy²+Dx+Ey=1)
+      const ecx = (hx0 + hx1) / 2, ecy = (hy0 + hy1) / 2, rays = [];
+      for (let a = 0; a < 180; a++) { const t = (a / 180) * 2 * Math.PI, dx = Math.cos(t), dy = Math.sin(t); let inInk = false, r = 0, hit = -1; for (; r < N; r += 0.5) { const x = Math.round(ecx + dx * r), y = Math.round(ecy + dy * r); if (x < 0 || y < 0 || x >= N || y >= N) break; const o = on(y * N + x); if (o) inInk = true; else if (inInk) { hit = r; break; } } if (hit > 0) rays.push([dx, dy, hit]); }
+      const rm = rays.map(r => r[2]).sort((p, q) => p - q)[rays.length >> 1] || 0, pts = rays.filter(r => r[2] <= rm * 1.25).map(([dx, dy, r]) => [dx * r, dy * r]);
+      let inEll = () => true, eTop = hy0 - thick;
+      if (pts.length >= 40) { const M = Array.from({ length: 4 }, () => new Float64Array(5)); for (const [x, y] of pts) { const v = [x * x, y * y, x, y]; for (let r = 0; r < 4; r++) { for (let c = 0; c < 4; c++) M[r][c] += v[r] * v[c]; M[r][4] += v[r]; } }
+        for (let c = 0; c < 4; c++) { let pv = c; for (let r = c + 1; r < 4; r++) if (Math.abs(M[r][c]) > Math.abs(M[pv][c])) pv = r; [M[c], M[pv]] = [M[pv], M[c]]; for (let r = 0; r < 4; r++) if (r !== c && M[c][c]) { const f = M[r][c] / M[c][c]; for (let k2 = c; k2 < 5; k2++) M[r][k2] -= f * M[c][k2]; } }
+        const [A, C, Dx, Ey] = M.map((r, i) => r[4] / r[i]);
+        if (A > 0 && C > 0) { const x0 = -Dx / (2 * A), y0 = -Ey / (2 * C), G = 1 + A * x0 * x0 + C * y0 * y0, ax = Math.sqrt(G / A) + 0.3, ay = Math.sqrt(G / C) + 0.3;
+          inEll = q => ((q % N - ecx - x0) / ax) ** 2 + ((((q / N) | 0) - ecy - y0) / ay) ** 2 <= 1; eTop = ecy + y0 - ay; } }
+      const rs = new Set(); for (const q of cand) if (dist[q] <= thick && inEll(q)) { owner[q] = k; rs.add(q); } ringSet.set(k, rs);
       // 고리 밖인데 이 ㅇ 몫인 잉크(꼭지 머리 등) = 붙어 있는 이웃 자모에게 돌려줌
       { let moved = true; for (let it = 0; it < 3 * D && moved; it++) { moved = false; const chg = [];
-          for (const q of cand) { if (owner[q] !== k || dist[q] <= thick + 1) continue; const cnt = new Map(); for (const j of [q - 1, q + 1, q - N, q + N, q - N - 1, q - N + 1, q + N - 1, q + N + 1]) { const o = j >= 0 && j < N * N ? owner[j] : -1; if (o >= 0 && o !== k) cnt.set(o, (cnt.get(o) || 0) + 1); } if (cnt.size) chg.push([q, [...cnt].sort((p, r) => r[1] - p[1])[0][0]]); }
+          for (const q of cand) { if (owner[q] !== k || (dist[q] <= thick + 1 && inEll(q)) || (u.jamo === "ㅎ" && (q / N | 0) < eTop)) continue; /* ㅎ 꼭지·가로(고리 위)는 ㅎ 몫 그대로(「혹」) */ const cnt = new Map(); for (const j of [q - 1, q + 1, q - N, q + N, q - N - 1, q - N + 1, q + N - 1, q + N + 1]) { const o = j >= 0 && j < N * N ? owner[j] : -1; if (o >= 0 && o !== k) cnt.set(o, (cnt.get(o) || 0) + 1); } if (cnt.size) chg.push([q, [...cnt].sort((p, r) => r[1] - p[1])[0][0]]); }
           for (const [q, o] of chg) { owner[q] = o; moved = true; } } } }
     const out = us.map(u => ({ ...u, px: [] })); for (let q = 0; q < N * N; q++) if (owner[q] >= 0) out[owner[q]].px.push(q);
-    // 고리 넓히기가 다른 자모를 절반 넘게 먹으면 그 자모는 원래대로(본부 10-08 「흑」 — ㅎ 동그라미 바로 아래 ㅡ 가 1% 만 남던 것)
-    out.forEach((u, k) => { if (u.px.length < us[k].px.length * 0.5) { const keep = new Set(us[k].px); out.forEach((v, j) => { if (j !== k) v.px = v.px.filter(q => !keep.has(q)); }); u.px = us[k].px.slice(); } });
+    // 고리 넓히기가 다른 자모를 80% 넘게 먹으면 그 자모는 원래대로(본부 10-08 「흑」 — ㅎ 동그라미 바로 아래 ㅡ 가 1% 만 남던 것 · 10-10 「호」 고리 통째가 ㅗ 몫이면 절반 넘게 넘어가는 게 맞음)
+    out.forEach((u, k) => { if (u.px.length < us[k].px.length * 0.2 && !(u.role === "jung" && HV.has(u.jamo))) { const keep = new Set(us[k].px); out.forEach((v, j) => { if (j !== k) v.px = v.px.filter(q => !keep.has(q)); }); u.px = us[k].px.slice(); } });
     for (const u of out) { if (!u.px.length) continue; let a = N, b = N, c = -1, d = -1; for (const q of u.px) { const x = q % N, y = (q / N) | 0; if (x < a) a = x; if (x > c) c = x; if (y < b) b = y; if (y > d) d = y; } u.box = [a / N, b / N, (c + 1) / N, (d + 1) / N]; }
-    return out.map((u, k) => (u.px.length ? u : us[k])); // 자모 칸은 빼지 않음(빼면 뒤 자모가 한 칸씩 밀림 · 본부 10-08)
+    for (const [k, rs] of ringSet) { out[k].ring = new Set([...rs].filter(q => owner[q] === k)); out[k].hole = holeOf.get(k); } // 고리 픽셀 · 고리 안 구멍 한 칸(shapeFix 가 「고리 위아래 줄」 가릴 때)
+    return out.map((u, k) => (u.px.length || (u.role === "jung" && HV.has(u.jamo)) ? u : us[k])); // 가로 모음은 비어도 됨(뒤 shapeFix 가 띠·기둥을 찾아 줌 · 「훅」) · 자모 칸은 빼지 않음(빼면 뒤 자모가 한 칸씩 밀림 · 본부 10-08)
   }
-  const unitsOf = ch => { const k = ch + "|" + hfontKey(); if (uCache.has(k)) return uCache.get(k); const m = pix(UN, x => glyph(x, UN, ch, "#000")), us = ringFix(jamoUnits(ch, m, UN), m); if (shapeFix(us, m, UN)) us.forEach(u => { if (!u.px.length) return; let a = UN, b = UN, c = -1, d = -1; for (const q of u.px) { const x = q % UN, y = (q / UN) | 0; if (x < a) a = x; if (x > c) c = x; if (y < b) b = y; if (y > d) d = y; } u.box = [a / UN, b / UN, (c + 1) / UN, (d + 1) / UN]; delete u.set; delete u.half; }); /* ㅇ 고리 보정 뒤 획 모양 한 번 더(「어」「예」 ㅓㅕ 꼭지 뿌리) */ if (gCache.has(ch + "|0|" + hfontKey())) uCache.set(k, us); return us; }; // 글꼴 그림이 저장된(= 글꼴 온) 뒤에만 기억
+  const unitsOf = ch => { const k = ch + "|" + hfontKey(); if (uCache.has(k)) return uCache.get(k); const m = pix(UN, x => glyph(x, UN, ch, "#000")), us = ringFix(jamoUnits(ch, m, UN), m); if ((shapeFix(us, m, UN) | deCrumb(us))) us.forEach(u => { if (!u.px.length) return; let a = UN, b = UN, c = -1, d = -1; for (const q of u.px) { const x = q % UN, y = (q / UN) | 0; if (x < a) a = x; if (x > c) c = x; if (y < b) b = y; if (y > d) d = y; } u.box = [a / UN, b / UN, (c + 1) / UN, (d + 1) / UN]; delete u.set; delete u.half; }); /* ㅇ 고리 보정 뒤 획 모양 한 번 더(「어」「예」 ㅓㅕ 꼭지 뿌리) */ if (gCache.has(ch + "|0|" + hfontKey())) uCache.set(k, us); return us; }; // 글꼴 그림이 저장된(= 글꼴 온) 뒤에만 기억
   // 획순 자료(data/jamo_strokes.json · 본부) → 이 글자 획(0~1 · 쓰는 차례) = 자모 획 점을 그 자모 잉크 상자에 늘려 맞춤
   let STK = null; const stkReady = fetch(`data/jamo_strokes.json?v=${document.documentElement.dataset.v || ""}`).then(r => r.json()).then(d => (STK = d)).catch(() => null);
   // 획 끝 늘이기(투덜이 10-08 「대」 — ㅐ 의 ㅏ 가로획 자료가 0.04 길이라 가로획 잉크 대부분이 다음 ㅣ 몫이 되어 4번째 획이 안 칠해짐)
