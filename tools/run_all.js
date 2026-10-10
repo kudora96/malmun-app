@@ -2,7 +2,7 @@
 // 말하기 점검은 history.back 대신 popstate(점검 도중 앞 화면으로 빠져나가지 않게) · 각 점검 전에 #/learn 새로 열기 · 4분 넘으면 시간 초과
 (async () => {
   const W = ms => new Promise(s => setTimeout(s, ms));
-  const names = (window.__allNames || ["speak", "learn", "explain_fit", "noscroll", "write", "write_help", "handwrite", "hand_order", "compare", "cmp_cut", "rhythm", "pace", "lead_noise", "sr_cut", "quiet_stop", "sronly", "back", "jamobox", "interrupt", "monkey"]);
+  const names = (window.__allNames || ["speak", "learn", "explain_fit", "noscroll", "write", "write_help", "handwrite", "hand_order", "compare", "cmp_cut", "rhythm", "pace", "lead_noise", "sr_cut", "quiet_stop", "sronly", "back", "jamobox", "magnet", "interrupt", "monkey"]);
   const out = { v: document.documentElement.dataset.v, size: `${innerWidth}x${innerHeight}`, done: [], fails: [] }, save = () => { try { sessionStorage.setItem("__all", JSON.stringify(out)); } catch {} };
   window.__sfxVolume = 0.0001; save();
   try { localStorage.removeItem("malmun.uiko"); await (await import(`/js/i18n.js?v=${document.documentElement.dataset.v}`)).setUiKo(false); } catch {} // ने⇄한 토글이 켜진 채 남아 있으면(앞 점검이 끊김) 앱 글이 한국어라 문구 점검이 틀림

@@ -198,5 +198,9 @@
  "why_late": "정확해요. 그런데 너무 늦게 읽었어요 — 노래방 색이 칠해지는 속도로 읽어 보세요",
  "why_late_short": "너무 늦음",
  "listen_char": "글자 듣기",
- "spk_teacher": "선생님"
+ "spk_teacher": "선생님",
+ "h_magnet": "자석",
+ "h_order_ok": "✓ 순서 맞음",
+ "h_order_again": "순서 다시: {n}번",
+ "h_magnet_miss": "회색 획 가까이 그어 주세요"
 }
