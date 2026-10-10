@@ -5,13 +5,13 @@
 //  · 재생: 본보기 → 0.4초 → 내 목소리 · 재생 위치 세로 막대 + 지금 음절 강조 · 파형·음절 칸을 누르면 그 줄 그 음절부터
 //  녹음·점수 계산·[내 목소리] 재생(playmine.js playMine)은 그대로 — 여기는 그리기·DTW·비교 화면 안 재생만
 //  (본보기는 sfx.play 그대로 · 내 목소리는 playmine 과 같은 방식: decodeAudioData → BufferSource.start(t, offset) → Gain)
-import { prepare, rhythmScore, loadAlign, isSyl, R_FULL } from "./rhythm.js?v=1008.23";
-import { esc } from "./text.js?v=1008.23";
-import { align } from "./score.js?v=1008.23";
-import { audioCtx } from "./wake.js?v=1008.23";
-import { leadOf, gainOf, FADE, FADE_OUT, voicedEnd } from "./playmine.js?v=1008.23";
-import { speechEnd, wavOf } from "./recstore.js?v=1008.23";
-import * as sfx from "./sfx.js?v=1008.23";
+import { prepare, rhythmScore, loadAlign, isSyl, R_FULL } from "./rhythm.js?v=1010.19";
+import { esc } from "./text.js?v=1010.19";
+import { align } from "./score.js?v=1010.19";
+import { audioCtx } from "./wake.js?v=1010.19";
+import { leadOf, gainOf, FADE, FADE_OUT, voicedEnd } from "./playmine.js?v=1010.19";
+import { speechEnd, wavOf } from "./recstore.js?v=1010.19";
+import * as sfx from "./sfx.js?v=1010.19";
 
 // host 안에 그린다 → { close() } · o = { ep, key, url(본보기), text(본보기 글), blob(내 녹음), heard(들은 말 글자 · 없으면 색 없음), t(문구) }
 // 속도 단계(본부 10-07 · 투덜이 「견본에도 각각」) — 줄마다 자기 속도 · 누를 때마다 1 → 0.9 → 0.75 → 0.6 → 0.5 → 1 · 0.5 아래는 늘이기가 끊겨 뺌 · 고른 값 기억
@@ -149,11 +149,13 @@ export async function openCompare(host, o) {
     o.beforePlay?.(); // 말하기 창 아래 단추 소리(본보기·내 목소리)는 멈춤 — 소리는 언제나 하나(투덜이 10-08 두 번 울림)
     if (window.__cmp) { window.__cmp.lastPlay = { ri, from, to }; (window.__cmp.plays ||= []).push(ri); } // 점검 도구용(그림 칸과 트는 구간이 같은 기준인지)
     host.classList.add("playing");
+    // 번호표(본부 10-10) — 끊긴 뒤 늦게 도는 끝 콜백이 새로 시작한 줄의 막대(st.raf)·표시를 끄지 않게 · 끊긴 것은 아무것도 안 건드림(stopPlay 가 이미 정리)
+    const gen = st.gen, fin = () => { if (st.gen === gen) { cancelAnimationFrame(st.raf); rows[ri].classList.remove("on"); rows[ri].querySelector(".cbar").hidden = true; } res(st.gen === gen); };
     const rate = getRate(ri ? "y" : "m");
     if (rate !== 1) { // 느리게(투덜이 10-06 허락 · 10-07 단계 늘림) — 비교 화면 안에서만(투덜이 10-06 허락) — 비교 화면 안에서만 · 음높이 그대로(<audio>.preservesPitch) · 본보기 = 그 mp3 · 내 목소리 = WAV(내려받기와 같은 함수 · gainOf 크기)
       const url = ri ? (st.wavUrl ||= URL.createObjectURL(wavOf(ybuf, 0, ybuf.duration, yGain))) : o.url, end = to ?? (ri ? yStop : mStop);
       const el = (st.el = new Audio(url)); el.preservesPitch = el.mozPreservesPitch = el.webkitPreservesPitch = true; el.playbackRate = rate; el.volume = Math.min(1, window.__sfxVolume ?? 1);
-      const done = () => { if (st.el === el) { st.el = null; el.pause(); } st.elDone = null; cancelAnimationFrame(st.raf); rows[ri].classList.remove("on"); rows[ri].querySelector(".cbar").hidden = true; res(true); };
+      const done = () => { if (st.el === el) { st.el = null; el.pause(); } st.elDone = null; fin(); };
       st.elDone = done;
       el.ontimeupdate = () => { if (el.currentTime >= end) done(); };
       el.onended = done;
@@ -164,12 +166,12 @@ export async function openCompare(host, o) {
     if (ri === 0) {
       const t0 = ctx.currentTime + 0.01;
       follow(0, mLead, msyl, from, t0);
-      sfx.play(o.url, { offset: from, dur: Math.max(0.05, (to ?? mStop) - from), fade: 0.01 }).then(() => { cancelAnimationFrame(st.raf); rows[0].classList.remove("on"); rows[0].querySelector(".cbar").hidden = true; res(true); });
+      sfx.play(o.url, { offset: from, dur: Math.max(0.05, (to ?? mStop) - from), fade: 0.01 }).then(fin);
     } else {
       const src = ctx.createBufferSource(), g = ctx.createGain(), G = yGain * (window.__sfxVolume ?? 1), t0 = ctx.currentTime + 0.01;
       src.buffer = ybuf; g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(G, t0 + FADE);
       src.connect(g); g.connect(ctx.destination); st.src = src;
-      src.onended = () => { if (st.src === src) st.src = null; cancelAnimationFrame(st.raf); rows[1].classList.remove("on"); rows[1].querySelector(".cbar").hidden = true; res(true); };
+      src.onended = () => { if (st.src === src) st.src = null; fin(); };
       const len = Math.max(0.05, (to ?? yStop) - from); g.gain.setValueAtTime(G, t0 + Math.max(FADE, len - FADE_OUT)); g.gain.linearRampToValueAtTime(0, t0 + len); // 끝 30ms 페이드아웃
       src.start(t0, from, len);
       follow(1, yLead, ysyl, from, t0);
@@ -199,14 +201,14 @@ export async function openCompare(host, o) {
       return;
     }
     const pb = e.target.closest("[data-play]");
-    if (pb) { const ri = pb.dataset.play === "m" ? 0 : 1, on = rows[ri].classList.contains("on"); stopPlay(); if (!on) playRow(ri, ri ? yLead : mLead).then(() => host.classList.remove("playing")); return; } // ▶ 그 줄 전체(그 줄 속도) · 다시 누르면 멈춤
+    if (pb) { const ri = pb.dataset.play === "m" ? 0 : 1, on = rows[ri].classList.contains("on"); stopPlay(); if (!on) playRow(ri, ri ? yLead : mLead).then(ok => ok && host.classList.remove("playing")); return; } // ▶ 그 줄 전체(그 줄 속도) · 다시 누르면 멈춤
     const r = e.target.closest(".crow"); if (!r) return;
     const ri = rows.indexOf(r), lead = ri ? yLead : mLead, syl = ri ? ysyl : msyl;
     let from = lead, to;
     if (e.target.closest(".csyl")) return; // 음절 칸 = 표시만(투덜이 10-07 「한 글자씩 듣기 포기」)
     if (!e.target.closest(".cwave")) return;
     from = waveAt(r, e.clientX);
-    stopPlay(); playRow(ri, Math.max(0, from), to).then(() => host.classList.remove("playing")); // 파형 = 거기(그 음절 첫머리)부터 그 줄 속도로 끝까지
+    stopPlay(); playRow(ri, Math.max(0, from), to).then(ok => ok && host.classList.remove("playing")); // 파형 = 거기(그 음절 첫머리)부터 그 줄 속도로 끝까지
   };
   playBoth();
   window.__cmp = { st, stopPlay, rh, msyl, ysyl, ysyl0, cut, tail, marks, heardCh, extra, span, mLead, yLead, yStop, ybuf, playBoth, playRow }; // 점검 도구용

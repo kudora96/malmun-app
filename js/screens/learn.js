@@ -10,24 +10,24 @@
 //  R7 영상은 늘 맨 위 · 지금 줄은 영상 바로 아래(앞 줄은 영상 뒤로) — 손으로 목록을 움직이면 4초 동안은 따라가지 않음
 //  R8 듣기 모드(대사→설명 · 설명만)도 R1~R6 그대로(영상 대신 소리 조각) · 모드를 바꾸면 멈춤(▶ 로 시작)
 //  R9 다시 들어오면 마지막 줄이 선택된 채 멈춰 있음
-import * as sfxL from "../sfx.js?v=1008.23"; // 카드 말하기 최대 길이 = 본보기 길이로(10-07)
-import { t, lang, langName } from "../i18n.js?v=1008.23";
-import { esc, renderText, glossCards, sayParts } from "../text.js?v=1008.23";
-import { episode } from "../data.js?v=1008.23";
-import { paths } from "../paths.js?v=1008.23";
-import { Sequence } from "../audio.js?v=1008.23";
-import { I, progress, SPEAKER, spkHtml, uiKoBtn, toggleUiKo } from "../ui.js?v=1008.23";
-import writeView from "./write.js?v=1008.23";
-import { diagEnv, keepDiag } from "../diag.js?v=1008.23";
-import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1008.23";
-import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace, lateFactor, sylAt, paintAt, karaokeRun } from "../rhythm.js?v=1008.23";
-import { playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1008.23";
-import { bestHeard, heardHTML, endHint } from "../heard.js?v=1008.23";
-import { recDel, downloadRec, askPersist } from "../recstore.js?v=1008.23";
-import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1008.23";
-import { scoreFx, stopFx } from "../scorefx.js?v=1008.23"; // 점수별 효과(본부 10-05)
-import { record, recordSROnly, srOnlyMode, setSrOnly, isAndroid, srMiss, micWhy, srWhy, canScore, closeMic, logRec, micOpen, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1008.23";
-import { hold, quietWake } from "../wake.js?v=1008.23";
+import * as sfxL from "../sfx.js?v=1010.19"; // 카드 말하기 최대 길이 = 본보기 길이로(10-07)
+import { t, lang, langName } from "../i18n.js?v=1010.19";
+import { esc, renderText, glossCards, sayParts } from "../text.js?v=1010.19";
+import { episode } from "../data.js?v=1010.19";
+import { paths } from "../paths.js?v=1010.19";
+import { Sequence } from "../audio.js?v=1010.19";
+import { I, progress, SPEAKER, spkHtml, uiKoBtn, toggleUiKo } from "../ui.js?v=1010.19";
+import writeView from "./write.js?v=1010.19";
+import { diagEnv, keepDiag } from "../diag.js?v=1010.19";
+import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1010.19";
+import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace, lateFactor, sylAt, paintAt, karaokeRun } from "../rhythm.js?v=1010.19";
+import { playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1010.19";
+import { bestHeard, heardHTML, endHint } from "../heard.js?v=1010.19";
+import { recDel, downloadRec, askPersist } from "../recstore.js?v=1010.19";
+import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1010.19";
+import { scoreFx, stopFx } from "../scorefx.js?v=1010.19"; // 점수별 효과(본부 10-05)
+import { record, recordSROnly, srOnlyMode, setSrOnly, isAndroid, srMiss, micWhy, srWhy, canScore, closeMic, logRec, micOpen, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1010.19";
+import { hold, quietWake } from "../wake.js?v=1010.19";
 
 const RATES = [1, 0.75, 0.5];
 const pref = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } };
@@ -816,7 +816,7 @@ export default async function learn(app, ep, startId) {
   };
   v.addEventListener("click", togglePlay);
   app.querySelector("[data-act=uiko]")?.addEventListener("click", e => { e.stopPropagation(); const p = st.panel; if (p) { const w = panel.__wr?.st?.() || panel.querySelector(".write")?.parentElement?.__wr?.st?.(), sp = panel.__sp?._state; try { sessionStorage.setItem("malmun.reopen", JSON.stringify({ ep, at: Date.now(), kind: p.kind, i: p.i, s: w?.s, w: w?.w, c: w?.c, wrote: w ? [...w.wrote] : [], part: sp?.i })); } catch {} }
-    toggleUiKo(() => import("../main.js?v=1008.23").then(m => m.rerender())); }); // 앱 글 한국어 토글 → 화면 다시 그림(도는 것은 cleanup 이 멈춤) → 열려 있던 창·자리로 다시 엶
+    toggleUiKo(() => import("../main.js?v=1010.19").then(m => m.rerender())); }); // 앱 글 한국어 토글 → 화면 다시 그림(도는 것은 cleanup 이 멈춤) → 열려 있던 창·자리로 다시 엶
   app.querySelector("[data-act=fs]").onclick = () => {
     const w = app.querySelector("#vwrap");
     if (document.fullscreenElement) document.exitFullscreen?.();

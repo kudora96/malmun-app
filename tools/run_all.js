@@ -5,6 +5,7 @@
   const names = (window.__allNames || ["speak", "learn", "explain_fit", "noscroll", "write", "write_help", "handwrite", "hand_order", "compare", "cmp_cut", "rhythm", "pace", "lead_noise", "sr_cut", "quiet_stop", "sronly", "back", "jamobox", "interrupt", "monkey"]);
   const out = { v: document.documentElement.dataset.v, size: `${innerWidth}x${innerHeight}`, done: [], fails: [] }, save = () => { try { sessionStorage.setItem("__all", JSON.stringify(out)); } catch {} };
   window.__sfxVolume = 0.0001; save();
+  try { localStorage.removeItem("malmun.uiko"); await (await import(`/js/i18n.js?v=${document.documentElement.dataset.v}`)).setUiKo(false); } catch {} // ने⇄한 토글이 켜진 채 남아 있으면(앞 점검이 끊김) 앱 글이 한국어라 문구 점검이 틀림
   for (const n of names) {
     try {
       // 점검마다 학습자 기억값 지우기(앞 점검이 남긴 손글씨·받아쓰기만·속도 등에 안 흔들리게) · 말하기는 맨 앞(다른 점검이 가로챈 함수 영향 없음)

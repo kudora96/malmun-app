@@ -66,10 +66,46 @@ export function units(ch, mask, N) {
       if (!moved || !left) for (const i of out[o].px) { const p = rel(i % N, (i / N) | 0); own[i] = d2(p, ck) <= d2(p, co) ? k : o; } // 한쪽이 다 가져가면 가까운 칸 가운데로 나눔
       out.forEach(u => (u.px = [])); for (let i = 0; i < N * N; i++) if (own[i] >= 0) out[own[i]].px.push(i);
     } }
+  shapeFix(out, mask, N);
   for (const u of out) { // 잉크 상자(0~1 · 캔버스 기준) · 잉크 없으면 틀 칸
     if (!u.px.length) { u.box = [x0 / N + u.rect[0] * W / N, y0 / N + u.rect[1] * Hh / N, x0 / N + u.rect[2] * W / N, y0 / N + u.rect[3] * Hh / N]; continue; }
     let a = N, b = N, c = -1, d = -1; for (const q of u.px) { const x = q % N, y = (q / N) | 0; if (x < a) a = x; if (x > c) c = x; if (y < b) b = y; if (y > d) d = y; }
     u.box = [a / N, b / N, (c + 1) / N, (d + 1) / N];
   }
   return out;
+}
+
+// 획 모양으로 다듬기(본부 10-08 「구」「예」) — units() 끝과 write.js 의 ㅇ 고리 보정 뒤에 한 번 더(고리 넓히기가 꼭지 뿌리를 다시 가져가지 않게)
+//  out = units(px·rect·role·jamo) · 바꾼 것만 px 를 고침(상자는 부른 쪽이 다시 계산)
+export function shapeFix(out, mask, N) {
+  const on = i => mask[i * 4 + 3] > 128;
+  let x0 = N, y0 = N, x1 = -1, y1 = -1;
+  for (const u of out) for (const q of u.px) { const x = q % N, y = (q / N) | 0; if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+  if (x1 < 0) return false;
+  const W = Math.max(1, x1 - x0 + 1), Hh = Math.max(1, y1 - y0 + 1);
+  { const own = new Int16Array(N * N).fill(-1); out.forEach((u, k) => { for (const q of u.px) own[q] = k; });
+    const ry = y => (y - y0 + 0.5) / Hh; let moved = false;
+    const vr = new Uint16Array(N * N); for (let x = x0; x <= x1; x++) { let y = y0; while (y <= y1) { if (!on(y * N + x)) { y++; continue; } let e = y; while (e <= y1 && on(e * N + x)) e++; for (let t = y; t < e; t++) vr[t * N + x] = e - y; y = e; } } // 세로로 이어진 잉크 길이(초성 세로 기둥에서 꼭지 따라가기 멈춤)
+    out.forEach((u, k) => {
+      if (u.role !== "jung") return;
+      const r = u.rect;
+      if (H.has(u.jamo)) {
+        const xa = x0 + Math.floor(r[0] * W), xb = x0 + Math.ceil(r[2] * W) - 1, bands = []; let cur = null;
+        for (let y = y0; y <= y1; y++) { let run = 0, best = null; for (let x = xa; x <= Math.min(x1, xb); x++) { if (on(y * N + x)) { run++; if (!best || run > best[2]) best = [x - run + 1, x, run]; } else run = 0; }
+          if (best && best[2] >= 0.6 * (xb - xa + 1)) { if (cur && cur.y1 === y - 1) { cur.y1 = y; cur.runs.push([y, best[0], best[1]]); } else bands.push((cur = { y0: y, y1: y, runs: [[y, best[0], best[1]]] })); } else cur = null; }
+        const tgt = /[ㅗㅛ]/.test(u.jamo) ? r[3] - 0.08 : /[ㅜㅠ]/.test(u.jamo) ? r[1] + 0.08 : (r[1] + r[3]) / 2;
+        const down = /[ㅜㅠ]/.test(u.jamo), up = /[ㅗㅛ]/.test(u.jamo), stem = b => { let c = 0; for (const [y, xs, xe] of b.runs) for (let x = xs; x <= xe; x++) { for (let t = 1; t <= 3; t++) { const yy = down ? b.y1 + t : up ? b.y0 - t : y; if (yy >= 0 && yy < N && own[yy * N + x] === k) c++; } if (own[y * N + x] === k) c++; } return c; };
+        let bb = null, bs = -1, bd = Infinity; for (const b of bands) { const c = (ry(b.y0) + ry(b.y1)) / 2; if (c < r[1] - 0.15 || c > r[3] + 0.02) continue; const sv = stem(b), d = Math.abs(c - tgt); if (sv > bs || (sv === bs && d < bd)) { bs = sv; bd = d; bb = b; } }
+        if (bb) for (const [y, xs, xe] of bb.runs) for (let x = xs; x <= xe; x++) { const q = y * N + x, o = own[q]; if (o >= 0 && o !== k && out[o].role === "cho") { own[q] = k; moved = true; } }
+      } else if (V.has(u.jamo)) {
+        const ya = y0 + Math.floor(r[1] * Hh), yb = Math.min(y1, y0 + Math.ceil(r[3] * Hh) - 1), xa = x0 + Math.floor(Math.max(0, r[0] - 0.1) * W), xb = Math.min(x1, x0 + Math.ceil(r[2] * W) - 1);
+        let cx = -1, ct = 0, cb = 0;
+        for (let x = xa; x <= xb && cx < 0; x++) { let run = 0, top = 0; for (let y = ya; y <= yb; y++) { if (own[y * N + x] === k) { if (!run) top = y; run++; if (run >= 0.45 * (yb - ya + 1)) { cx = x; ct = top; cb = top + run - 1; let yy = y + 1; while (yy <= yb && own[yy * N + x] === k) yy++; cb = yy - 1; break; } } else run = 0; } }
+        if (cx < 0) return;
+        for (let y = ct; y <= cb; y++) { const run = []; for (let x = cx - 1; x >= x0 && on(y * N + x) && vr[y * N + x] < 0.2 * Hh; x--) run.push(y * N + x); if (run.length && run.length <= 0.3 * W) for (const q of run) if (own[q] >= 0 && out[own[q]].role === "cho") { own[q] = k; moved = true; } }
+      }
+    });
+    if (moved) { const keep = out.map(u => u.px); out.forEach(u => (u.px = [])); for (let i = 0; i < N * N; i++) if (own[i] >= 0) out[own[i]].px.push(i); out.forEach((u, k) => { if (!u.px.length) u.px = keep[k]; }); }
+  }
+  return true;
 }

@@ -39,7 +39,8 @@
     { const rows = [], bad = [];
       for (const ch of ["대", "해", "개", "새"]) { const { list, at } = await wr().reveal(ch, 200); const k = list.findIndex((S, j) => S.jamo === "ㅏ" && j > 0 && list[j - 1].jamo === "ㅏ"); if (k < 0) { bad.push(ch + " 획 없음"); continue; }
         const a0 = alphaOf(at(k - 1, 1).cv), a1 = alphaOf(at(k, 1).cv); let n = 0, xMax = 0; for (let i = 0; i < 40000; i++) if (a1[i * 4 + 3] > 128 && a0[i * 4 + 3] <= 128) { n++; xMax = Math.max(xMax, i % 200); }
-        const right = list[k + 1]?.pts[0][0] * 200, gap = right - xMax; rows.push(`${ch} 가로 ${n}px · 오른쪽 ㅣ 까지 ${gap.toFixed(0)}px`); if (n < 140 || gap > 14) bad.push(ch); }
+        const Q = wr().brushPath(ch, list[k + 1]), mid = Q[Q.length >> 1], right = mid.x * 200 - (mid.w / 1.15 / 2) * 200, gap = right - xMax; // 오른쪽 ㅣ 몸통 왼쪽 가장자리까지(붓 칠 · 10-10 — ㅣ 몸통은 ㅣ 차례)
+        rows.push(`${ch} 가로 ${n}px · 오른쪽 ㅣ 가장자리까지 ${gap.toFixed(0)}px`); if (n < 25 || gap > 4) bad.push(ch); }
       ok(!bad.length, "ⓘ ㅐ 짧은 가로 = ㅏ 차례에 두 세로 사이 가로대를 칠함(대·해·개·새)", rows.join(" | ")); }
     // ⓔ 칠 매끄럽게(본부 10-07 「쓰는 중간 깨짐」) — 중간 장면(25·50·75%)에 칠한 곳 안 바늘구멍 0 · 다 칠하면 글꼴 잉크와 같음(알파 차이 픽셀 ≤ 1%) · 획이 끝난 장면 ⊂ 다음 장면
     { const rows = [], bad = [];

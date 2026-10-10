@@ -55,7 +55,17 @@
     { $(".panel [data-act=model]").click(); await W(400); await openP("speak", 2); const mx = await peak(1200); ok(mx <= 1, "말하기 견본 중 → 다른 줄 말하기 = 소리 하나 이하", `소리 ${mx}`); await closeP(); }
     { await openP("speak"); const p = $(".panel"), S = p.__sp._state; S.blob = await (await fetch(p.__sp._cur().src)).blob(); p.__sp._paint(); await W(200); p.querySelector("[data-act=both]").click(); await W(2000);
       p.querySelector(".cmp .crow.m [data-play]")?.click(); await W(300); p.querySelector("[data-act=model]").click(); const mx = await peak(1500);
-      ok(mx <= 1, "비교 줄 재생 중 → 아래 견본 단추 = 소리 하나 이하(두 겹 없음)", `소리 최대 ${mx}`); await closeP(); }
+      ok(mx <= 1, "비교 줄 재생 중 → 아래 견본 단추 = 소리 하나 이하(두 겹 없음)", `소리 최대 ${mx}`);
+      // 견본 줄 재생 중 → 내 목소리 줄 ▶ = 그 줄 막대가 움직임(본부 10-10 — 늦게 돈 견본 끝 콜백이 막대를 꺼 0초에 멈춰 있던 것) · 반대 · 느리게(0.75×)
+      const barAt = ri => parseFloat(p.querySelector(`.cmp .crow.${ri} .cbar`)?.style.left || "0");
+      const rafOn = await new Promise(r => { let f = false; requestAnimationFrame(() => (f = true)); setTimeout(() => r(f), 300); }); // 화면이 가려지면 브라우저가 그리기(rAF)를 멈춤 → 막대 움직임은 못 잼
+      for (const slow of [false, true]) { if (slow) { localStorage.setItem("malmun.rate.m", "0.75"); localStorage.setItem("malmun.rate.y", "0.75"); }
+        for (const [x, y] of [["m", "y"], ["y", "m"]]) { p.querySelector(`.cmp .crow.${x} [data-play]`)?.click(); await W(500); p.querySelector(`.cmp .crow.${y} [data-play]`)?.click(); await W(150);
+          const on = !!p.querySelector(`.cmp .crow.${y}.on`), vis = !p.querySelector(`.cmp .crow.${y} .cbar`)?.hidden, a0 = barAt(y); await W(400); const a1 = barAt(y), m = `비교 ${x === "m" ? "견본" : "내 목소리"} 재생 중 → ${y === "m" ? "견본" : "내 목소리"} 줄 ▶ = 그 줄 켜짐 · 막대 움직임${slow ? "(0.75×)" : ""}`;
+          if (rafOn) ok(on && vis && a1 > a0, m, `${a0.toFixed(1)}→${a1.toFixed(1)}% · 켜짐 ${on}`); else res.push(`– ${m} · 화면 가려져 막대 못 잼(켜짐 ${on})`);
+          for (const r2 of ["m", "y"]) if (p.querySelector(`.cmp .crow.${r2}.on`)) p.querySelector(`.cmp .crow.${r2} [data-play]`)?.click(); await W(300); } }
+      localStorage.removeItem("malmun.rate.y"); localStorage.removeItem("malmun.rate.m");
+      await closeP(); }
     // ── 설명 · 영상 ──
     { await openP("explain"); $(".panel .v9bar [data-x=ex]")?.click(); await W(600); await openP("write"); const mx = await peak(1500); ok(mx === 0, "설명 읽는 중 → 쓰기 창 열기 = 설명 소리 멈춤", `소리 ${mx}`); await closeP(); }
     { await openP("explain"); $(".panel .v9bar [data-x=ex]")?.click(); await W(600); $(".ctrl [data-act=next]")?.click(); await W(300); const mx = await peak(1500); ok(mx <= 1, "설명 읽는 중 → 아래 ▶| 다음 줄 = 소리 하나 이하", `소리 ${mx}`); await closeP(); }
