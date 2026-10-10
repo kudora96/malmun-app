@@ -6,7 +6,7 @@
 // 시간·인식(본부 10-04 투덜이 승인): 말 사이 쉼 2초 · 🎤 뒤 6초 말 없으면 끝 · 최대 길이 = 문장 길이에 맞춤 · 인식이 혼자 끝나면 같은 트랙으로 다시
 // 그때와 다른 점(본부 10-04 「남긴 차이」): ① 윈도우 별칭 장치 「default」「communications」는 절대 안 고름(통신 장치를 열면 윈도우가 다른 소리를 줄임)
 //   ② 「준비 중 → 녹음 중」 표시(첫 소리가 들어오면) ③ 인식 오류 까닭을 돌려줌(onerror 를 삼키지 않음) ④ 진단 기록(이벤트만 듣고 소리 경로는 안 건드림)
-import { audioCtx } from "./wake.js?v=1010.23";
+import { audioCtx } from "./wake.js?v=1010.32";
 
 // 시간 규칙(본부 10-04 · 투덜이 「빨리 안 하면 바로 닫힘」): 말 사이 쉼 2초 · 🎤 뒤 6초 안에 말 없으면 끝 · 최대 길이는 부르는 쪽이 정함(문장 길이)
 const QUIET_MS = 2000, START_MS = 6000;
@@ -65,7 +65,12 @@ export const micWhy = e => (e?.name === "NotAllowedError" || e?.name === "Securi
 export const isAndroid = () => /Android/i.test(navigator.userAgent);
 // 기억은 이번 방문(창)만 — 투덜이 10-08 갤럭시: 한 번 바뀌면 영영 녹음이 꺼져 「내 목소리」를 못 들음(진짜 까닭은 구글 앱 마이크 허락이었음) → 다음에 열면 다시 같이 시험
 try { localStorage.removeItem("malmun.srmode"); localStorage.removeItem("malmun.srmiss"); } catch {} // 옛 판이 영구로 남긴 값 지움
-export const srOnlyMode = () => { try { return sessionStorage.getItem("malmun.srmode") === "only"; } catch { return false; } };
+// 기기 받아쓰기 방식 기억(본부 10-10 갤럭시 — 녹음+받아쓰기 동시 불가 기기) — "seq-ok" = 녹음 뒤 그 녹음 소리로 받아쓰기 됨 · "sronly" = 그것도 안 됨 → 받아쓰기만(기기 기억 · 지우기는 진단 화면)
+export const devSR = () => { try { return localStorage.getItem("malmun.srdev"); } catch { return null; } };
+export const setDevSR = v => { try { v ? localStorage.setItem("malmun.srdev", v) : localStorage.removeItem("malmun.srdev"); } catch {} };
+export const srOnlyMode = () => { try { return sessionStorage.getItem("malmun.srmode") === "only" || devSR() === "sronly"; } catch { return false; } };
+// 안드로이드 기본 = 녹음만 하고(받아쓰기 동시에 안 켬) 끝나면 그 녹음 소리로 받아쓰기 · 점검 도구는 window.__noSeq 로 옛 「같이」 방식
+export const seqMode = () => /Android/i.test(navigator.userAgent) && !!getSR() && !srOnlyMode() && !window.__noSeq;
 export const setSrOnly = on => { try { on ? sessionStorage.setItem("malmun.srmode", "only") : sessionStorage.removeItem("malmun.srmode"); sessionStorage.removeItem("malmun.srmiss"); } catch {} };
 // 바꾸기는 「연속 2번」만(본부 10-07 QA — 우물거림·잡음으로 한 번 비어도 녹음·리듬·비교를 영구로 잃지 않게) · 그 사이 한 번이라도 들은 말이 있으면 0 으로
 //  → true = 이번에 받아쓰기만으로 바꿈 · 점검 도구는 window.__noSrSwitch 로 끔
@@ -97,6 +102,27 @@ export function recordSROnly({ maxMs = 8000, onTick = () => {}, onReady = () => 
   });
   return ctl;
 }
+// 녹음 소리(blob)를 받아쓰기에 흘림 — 스피커로는 안 보냄(소리 안 남) · AudioContext → MediaStreamDestination 트랙 → SR.start(트랙) · 녹음 길이 + 1.5초 기다림
+export async function srOnBlob(blob) {
+  const SR = getSR(); if (!SR || !blob) return { heard: [], srErr: "nosr", ev: [] };
+  const ctx = audioCtx(); let buf; try { if (ctx.state !== "running") await ctx.resume().catch(() => {}); buf = await ctx.decodeAudioData(await blob.arrayBuffer()); } catch { return { heard: [], srErr: "decode", ev: [] }; }
+  return new Promise(res => {
+    const dst = ctx.createMediaStreamDestination(), src = ctx.createBufferSource(); src.buffer = buf; src.connect(dst);
+    const tr = dst.stream.getAudioTracks()[0], heard = [], ev = [], t0 = performance.now(); let srErr = null, done = false, r = null;
+    // 진단(본부 10-10 — 실기기에서 단번에 원인 가르기): 녹음 길이·최대 크기 · 트랙 만들기 · start(트랙) 예외 · 걸린 시간
+    let pk = 0; { const d = buf.getChannelData(0); for (let i = 0; i < d.length; i += 4) pk = Math.max(pk, Math.abs(d[i])); }
+    const info = { dur: Math.round(buf.duration * 10) / 10, maxDb: pk > 0 ? Math.round(200 * Math.log10(pk)) / 10 : -120, track: !!tr && tr.readyState, startErr: null, ms: 0 };
+    const fin = () => { if (done) return; done = true; try { r?.stop(); } catch {} setTimeout(() => { try { src.stop(); } catch {} try { tr.stop(); } catch {} info.ms = Math.round(performance.now() - t0); res({ heard, srErr, ev, info }); }, 700); };
+    try { r = new SR(); } catch { res({ heard, srErr: "nosr", ev, info }); return; }
+    r.lang = "ko-KR"; r.continuous = false; r.interimResults = false; r.maxAlternatives = 3; // 한 번만(끝 = 트랙 끝 + 1.5초) · 앞 0.3초 무음 뒤 재생(첫 음절 놓치지 않게)
+    r.onresult = e => { const rs = Array.from(e.results, x => Array.from(x)); for (const x of rs) for (const a of x) heard.push(a.transcript); if (rs.length > 1) heard.push(rs.map(x => x[0].transcript).join(" ")); };
+    r.onerror = e => { srErr = e.error || "error"; }; r.onend = () => fin();
+    srWatch(r, t0, ev);
+    try { r.start(tr); } catch (e) { info.startErr = e?.name || "error"; srErr = "track"; fin(); return; }
+    setTimeout(() => { try { src.start(); } catch {} }, 300);
+    setTimeout(fin, 300 + buf.duration * 1000 + 1500);
+  });
+}
 export function srWatch(sr, t0, ev = []) {
   if (typeof sr.addEventListener !== "function") return ev; // 가짜 인식기(점검) 등
   for (const n of ["start", "audiostart", "soundstart", "speechstart", "speechend", "soundend", "audioend", "result", "nomatch", "error", "end"])
@@ -119,7 +145,7 @@ export const dB = x => (x > 0 ? Math.round(20 * Math.log10(x) * 10) / 10 : -120)
 
 // record() → { stop(discard), done: Promise<{ blob, heard[], srErr, diag } | { error } | { cancelled }> }
 // onLevel(0~1) 소리 크기 · onReady() 첫 소리가 들어옴 · onStop() 녹음 끝(결과 기다리는 중) · onSwitch() 소리 0 인 마이크를 버리고 다른 마이크로 다시
-export function record({ onLevel = () => {}, onSwitch = () => {}, onReady = () => {}, onStop = () => {}, onTick = () => {}, maxMs = 8000 } = {}) {
+export function record({ onLevel = () => {}, onSwitch = () => {}, onReady = () => {}, onStop = () => {}, onTick = () => {}, maxMs = 8000, noSR = false } = {}) { // noSR = 녹음만(받아쓰기는 끝난 뒤 srOnBlob)
   let stopNow = () => {}, cancelled = false;
   const ctl = { stop: discard => { if (discard) cancelled = true; stopNow({ why: "stop" }); } }; // ■ = 멈춤(안내 없음)
   ctl.done = (async () => {
@@ -161,7 +187,7 @@ export function record({ onLevel = () => {}, onSwitch = () => {}, onReady = () =
         dropSrTrack(); const tr = s.getAudioTracks()[0];
         try { srTrack = tr?.clone?.() || null; r.start(srTrack || tr); trackPassed = srTrack ? "clone" : true; } catch { dropSrTrack(); try { r.start(); } catch {} }
       };
-      startSR();
+      if (!noSR) startSR();
       const finish = (extra = {}) => {
         if (over) return; over = true;
         clearInterval(meter); clearTimeout(maxT); onLevel(0);
@@ -172,7 +198,7 @@ export function record({ onLevel = () => {}, onSwitch = () => {}, onReady = () =
         rec.onstop = async () => {
           if (sr && !extra.dead && !cancelled) for (let k = 0; k < 20 && !heard.length; k++) await new Promise(r => setTimeout(r, 100)); // 인식 결과는 조금 늦게 온다
           res({ blob: new Blob(chunks, { type: rec.mimeType || "audio/webm" }), heard, srErr, why: extra.why || "stop", ...extra,
-            diag: { mode: "같이", set: micSet(s), why: extra.why || "stop", cut, quiet: quietMs, thrDb: dB(thrNow), noiseDb: dB(noiseNow), mic: s.getAudioTracks()[0]?.label || "", track: trackPassed, sr: srEv, sec: Math.round(performance.now() - t0) / 1000, maxDb: dB(maxRms), dead: !!extra.dead, cancelled } });
+            diag: { mode: noSR ? "녹음→받아쓰기" : "같이", set: micSet(s), why: extra.why || "stop", cut, quiet: quietMs, thrDb: dB(thrNow), noiseDb: dB(noiseNow), mic: s.getAudioTracks()[0]?.label || "", track: trackPassed, sr: srEv, sec: Math.round(performance.now() - t0) / 1000, maxDb: dB(maxRms), dead: !!extra.dead, cancelled } });
         };
         try { rec.state !== "inactive" ? rec.stop() : rec.onstop(); } catch { rec.onstop(); }
       };

@@ -107,13 +107,25 @@
       const g0 = wr().unitsOf(wr().hand().ch), UN = 200, k = UN / n, inkSet = new Set(g0.flatMap(u => u.px)); let o2 = 0, on = 0, r = Math.round(0.03 * UN);
       for (let y = 0; y < n; y += 2) for (let x = 0; x < n; x += 2) { const i = (y * n + x) * 4; if (d2[i] > 180 && d2[i + 1] > 80 && d2[i + 1] < 130 && d2[i + 2] < 60) { o2++; const cx = Math.round(x * k), cy = Math.round(y * k); let hit = false; for (let dy = -r; dy <= r && !hit; dy += 2) for (let dx = -r; dx <= r && !hit; dx += 2) if (inkSet.has((cy + dy) * UN + cx + dx)) hit = true; if (hit) on++; } }
       ok(o2 > 50 && on / o2 >= 0.7, `ⓘ 「क्रम」 다 그린 장면: 주황 획이 회색 글자 위(${innerWidth}×${innerHeight} · dpr ${devicePixelRatio})`, `${Math.round((100 * on) / Math.max(1, o2))}% · 주황 ${o2}`); }
+    // ⓙ 다시 쓰기 점수 같음(본부 10-10 「100 뒤 다시 쓰면 68」) — 통과 → 바로(글자 소리 중) 지우기 → 같은 글씨 = 같은 점수 · 통과 소리 중 바로 그리기 · 꽝 → 자동 지우기 기다리는 중에 지우고 다시 그림 = 새 글씨 안 지워짐
+    { if (!$("[data-act=hclear]")) { localStorage.setItem("malmun.wmode", "hand"); if (P()?.querySelector(".write")) document.querySelectorAll(".line")[0].querySelector("[data-act=write]").click(), await W(600); document.querySelectorAll(".line")[0].querySelector("[data-act=write]").click(); await W(1600); document.querySelector("video")?.pause(); }
+      for (let k = 0; k < 40 && wr()?.busy(); k++) await W(100);
+      const H = wr().hand(), ch = H.ch, L = await wr().strokesOf(ch), good = L.map(S => wr().brushPath(ch, S).filter((_, i, a) => i % Math.max(1, Math.floor(a.length / 20)) === 0).map(q => [q.x, q.y]));
+      const judge = async () => { $("[data-act=hdone]").click(); await W(300); return wr().hand().last?.pct ?? -1; };
+      $("[data-act=hclear]").click(); await draw(good); const s1 = await judge(); // 통과 → 글자 소리 중
+      $("[data-act=hclear]").click(); await W(50); await draw(good); const s2 = await judge();
+      for (let k = 0; k < 40 && wr().busy(); k++) await W(100); await W(200); await draw(good.slice(0, 1)); const s3 = wr().hand().strokes.length; // 통과 뒤(소리 중) 바로 그리기 = 첫 획 받음
+      $("[data-act=hclear]").click(); await draw(good.slice(0, 1)); const bad = await judge(); // 꽝 → 1.2초 뒤 자동 지우기 예정
+      $("[data-act=hclear]").click(); await W(100); await draw(good); await W(1500); const kept = wr().hand().strokes.length; const s4 = wr().hand().passed ? wr().hand().last?.pct ?? -1 : await judge(); // 손 뗀 뒤 1.2초 자동 채점
+      ok(s1 >= 95 && s2 === s1 && s3 >= 1 && bad < 80 && kept === good.length && s4 >= 95, "ⓙ 통과 → 지우기 → 같은 글씨 = 같은 점수 · 통과 소리 중 첫 획 받음 · 꽝 뒤 자동 지우기가 새 글씨 안 지움", `${s1}→${s2} · 소리 중 획 ${s3} · 꽝 ${bad} · 남은 획 ${kept}/${good.length} → ${s4}`);
+      $("[data-act=hclear]").click(); await W(200); for (let k = 0; k < 40 && wr().busy(); k++) await W(100); }
     // ⓐ 기억 — 다른 줄 쓰기를 열어도 손글씨 그대로 · 마지막에 자판으로 돌려 둠
     document.querySelectorAll(".line")[1].querySelector("[data-act=write]").click(); await W(1500);
     ok(!!P().querySelector(".hand"), "ⓐ 다시 열어도 손글씨 그대로(기억)");
     P().querySelector("[data-mode=kb]").click(); await W(300);
     ok(!!P().querySelector(".kb") && localStorage.getItem("malmun.wmode") === "kb", "ⓐ ⌨ 누름 → 자판으로");
     document.querySelectorAll(".line")[1].querySelector("[data-act=write]").click(); await W(600); // 닫기(같은 단추 다시)
-  } catch (e) { res.push("✗ 점검 도중 오류: " + e.message); }
+  } catch (e) { res.push("✗ 점검 도중 오류: " + e.message + " · " + String(e.stack || "").split(String.fromCharCode(10)).slice(1, 3).join(" ").replace(/ +/g, " ").slice(0, 160)); }
   localStorage.removeItem("malmun.wmode"); localStorage.removeItem("malmun.hbest");
   const bad = res.filter(x => x.startsWith("✗")).length, out = `${bad ? "✗" : "✓"} ${innerWidth}x${innerHeight} 손글씨 ${res.length - bad}/${res.length}\n` + res.join("\n");
   console.log(out); return out;

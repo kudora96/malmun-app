@@ -39,7 +39,7 @@
   // 감시
   let over2 = 0; const mon = setInterval(() => {
     const n = sounds(); over2 = n >= 2 ? over2 + 100 : 0; if (over2 === 400) report("소리 2개 이상 0.3초+", n);
-    const s = wrSt(), b = $(".panel [data-act=auto]"); if (s && b && /⏹|■/.test(b.textContent) !== !!s.auto) report("자동 표시 ≠ 실제", `${b.textContent} / ${s.auto}`);
+    const s = wrSt(), b = $(".panel [data-act=auto]"); if (s && b && /⏹|■/.test(b.textContent) !== !!(s.auto || s.resumeAuto)) report("자동 표시 ≠ 실제", `${b.textContent} / ${s.auto}`);
     if (document.documentElement.scrollWidth > innerWidth + 1) report("가로 넘침", document.documentElement.scrollWidth);
   }, 100);
   try {

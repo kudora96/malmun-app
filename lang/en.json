@@ -168,7 +168,7 @@
  "help_sp_6": "Only passing takes are kept (a higher score replaces it). Recordings stay in this browser and are deleted with the site data. Tap ⬇ to save a file.",
  "w_kb": "Keyboard",
  "w_hand": "Handwriting",
- "h_done": "Done",
+ "h_done": "Check",
  "h_undo": "Undo stroke",
  "h_clear": "Clear",
  "h_again": "Write it again",
@@ -204,5 +204,6 @@
  "h_magnet": "Magnet",
  "h_order_ok": "✓ Order OK",
  "h_order_again": "Order again: stroke {n}",
- "h_magnet_miss": "Draw near the gray stroke"
+ "h_magnet_miss": "Draw near the gray stroke",
+ "sr_retry_dev": "Please say it once more."
 }

@@ -105,6 +105,14 @@ export function shapeFix(out, mask, N) {
         for (let y = ct; y <= cb; y++) { const run = []; for (let x = cx - 1; x >= x0 && on(y * N + x) && vr[y * N + x] < 0.2 * Hh; x--) run.push(y * N + x); if (run.length && run.length <= 0.3 * W) for (const q of run) if (own[q] >= 0 && out[own[q]].role === "cho") { own[q] = k; moved = true; } }
       }
     });
+    // 겹모음 오른쪽 ㅣ(ㅐㅔㅒㅖㅚㅟㅢ…) 기둥 왼쪽에 붙은 잉크 = 앞 모음 몫(본부 10-10 경계 그림 「대」 — ㅐ 가운데 가로대가 ㅣ 몫이던 것)
+    out.forEach((u, k) => {
+      if (u.role !== "jung" || u.jamo !== "ㅣ" || k === 0 || out[k - 1].role !== "jung") return;
+      const xa = x0 + Math.floor(Math.max(0, u.rect[0] - 0.1) * W), ya = y0 + Math.floor(u.rect[1] * Hh), yb = Math.min(y1, y0 + Math.ceil(u.rect[3] * Hh) - 1);
+      let cx = -1; for (let x = xa; x <= x1 && cx < 0; x++) { let run = 0; for (let y = ya; y <= yb; y++) { if (own[y * N + x] === k) { run++; if (run >= 0.45 * (yb - ya + 1)) { cx = x; break; } } else run = 0; } }
+      if (cx < 0) return;
+      for (let y = y0; y <= y1; y++) for (let x = x0; x < cx; x++) { const q = y * N + x; if (own[q] === k) { own[q] = k - 1; moved = true; } }
+    });
     if (moved) { const keep = out.map(u => u.px); out.forEach(u => (u.px = [])); for (let i = 0; i < N * N; i++) if (own[i] >= 0) out[own[i]].px.push(i); out.forEach((u, k) => { if (!u.px.length) u.px = keep[k]; }); }
   }
   return true;

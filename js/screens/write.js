@@ -13,15 +13,15 @@
 //  W5 소리는 언제나 하나만 · 새 일을 하면 앞 소리는 멈춘다
 //  W6 영상 창 안(embedded): 창 안에서 스크롤 없이 다 보이게 — 긴 문장은 토막으로(◀ 1/3 ▶) ·
 //     토막을 다 쓰면 자동으로 다음 토막 · 줄을 다 쓰면 대사를 듣고 자동으로 다음 줄 쓰기 · 아래 ▶ = 이 부분 듣기
-import { t, lang } from "../i18n.js?v=1010.23";
-import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO } from "../text.js?v=1010.23";
-import { episode, chars, charsF } from "../data.js?v=1010.23";
-import { paths } from "../paths.js?v=1010.23";
-import { I, spkHtml } from "../ui.js?v=1010.23";
-import { audioCtx, hold } from "../wake.js?v=1010.23";
-import * as sfx from "../sfx.js?v=1010.23";
-import { scoreFx } from "../scorefx.js?v=1010.23";
-import { units as jamoUnits, baseOf, shapeFix } from "../jamobox.js?v=1010.23"; // 자모 자리 나누기(획순 · 자판 덧칠 · 손글씨 덩어리 — 본부 10-07) // 손글씨 점수 효과 = 말하기와 같은 규칙(본부 10-07)
+import { t, lang } from "../i18n.js?v=1010.32";
+import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO } from "../text.js?v=1010.32";
+import { episode, chars, charsF } from "../data.js?v=1010.32";
+import { paths } from "../paths.js?v=1010.32";
+import { I, spkHtml } from "../ui.js?v=1010.32";
+import { audioCtx, hold } from "../wake.js?v=1010.32";
+import * as sfx from "../sfx.js?v=1010.32";
+import { scoreFx } from "../scorefx.js?v=1010.32";
+import { units as jamoUnits, baseOf, shapeFix } from "../jamobox.js?v=1010.32"; // 자모 자리 나누기(획순 · 자판 덧칠 · 손글씨 덩어리 — 본부 10-07) // 손글씨 점수 효과 = 말하기와 같은 규칙(본부 10-07)
 
 const KEYS = [..."ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎㄲㄸㅃㅆㅉ"], VOW = [..."ㅏㅑㅓㅕㅗㅛㅜㅠㅡㅣ"];
 const VOW2 = [..."ㅐㅒㅔㅖㅘㅙㅚㅝㅞㅟㅢ"]; // 겹모음 줄(본부 10-06) — 칸 하나 · ㅓ+ㅣ 처럼 나눠 쳐도 받음
@@ -147,11 +147,14 @@ export default async function write(app, ep, id, opts = {}) {
     const cut = w.tm && lineSrc ? { clip: lineSrc, start: w.tm.start, end: w.tm.end } : null;
     return w.unit ? { unit: unitSrc(w.unit), fallback: cut } : cut;
   };
-  function toggleSentence() { // W4 · 아래 ▶ = 이 부분 듣기
+  function toggleSentence() { // W4 · 아래 ▶ = 이 부분 듣기 · 자동 중이면 자동 잠깐 멈춤 → 듣기 끝나면 그 글자부터 자동 다시(투덜이 10-10)
     if (!lineSrc || st.s >= segs.length) return;
-    if (st.sent) { st.sent = false; hush(); return markSent(); }
-    stopLoop(); st.sent = true; markSent();
-    run([partStep()]).then(() => { st.sent = false; markSent(); });
+    const again = () => { if (st.resumeAuto && st.alive) { st.resumeAuto = false; autoPart(); } };
+    if (st.sent) { st.sent = false; hush(); markSent(); return again(); }
+    const wasAuto = st.auto; if (wasAuto) { st.auto = false; st.jumpTo = null; st.hand?.stopOrder?.(); st.busy = false; st.done = false; st.queue = []; }
+    stopLoop(); st.sent = true; markSent(); st.resumeAuto = wasAuto || st.resumeAuto; markAuto();
+    const my = (st.sentGen = (st.sentGen || 0) + 1);
+    run([partStep()]).then(ok => { if (st.sentGen !== my) return; st.sent = false; markSent(); if (ok) again(); else if (st.resumeAuto) { st.resumeAuto = false; markAuto(); } }); // 다른 걸 눌러 끊기면 자동 다시 안 함
   }
   app.__wr = { owners: async ch => { await stkReady; const list = strokesOf(ch); return { list, ...inkOwners(ch, list), GN }; }, font: () => `${glyphWeight()} ${glyphFont()}`, reveal: async (ch, n = 200) => { await stkReady; await document.fonts?.load(`${glyphWeight()} 100px ${glyphFont()}`, ch).catch(() => {}); const list = strokesOf(ch); return { list, at: (k, f = 1) => revealOrder(ch, n, list, k, f) }; }, glyphCv: (ch, n = 200) => { const cv = document.createElement("canvas"); cv.width = cv.height = n; glyph(cv.getContext("2d"), n, ch, "#000"); return cv; }, st: () => st, hand: () => st.hand, traceOf: ch => traceOf(ch), centerOf: ch => centerOf(ch), unitsOf: ch => unitsOf(ch), strokesOf: async ch => (await stkReady, strokesOf(ch)), strokeHint: (H, S) => strokeHint(H, S), strokeFit: async ch => { await stkReady; const us = unitsOf(ch), L = strokesOf(ch); return us.map((u, ui) => { const P = L.filter(S => S.unit === ui); let n = 0, k = 0; for (const S of P) { const f = fitOf(u, S.pts), m = S.pts.length - 1; n += m; k += f * m; } return { jamo: u.jamo, fit: n ? k / n : null }; }); }, handScore: (ch, S) => handScore(ch, S), handJudge: () => handJudge(), toggle: toggleSentence, brushPath: (ch, S) => brushPath(ch, S), paintCheck: (ch, k, n) => paintCheck(ch, k, n), busy: () => st.busy || st.done || st.queue.length > 0 || st.sent || st.auto || sfx.playing() }; // busy = 점검 도구가 소리 끝을 기다릴 때
 
@@ -224,7 +227,7 @@ export default async function write(app, ep, id, opts = {}) {
     fitWord(); placeBtns();
     fitWord(); setTimeout(fitWord, 30); // 낱말 글자 단추 = 한 줄(본부 10-06 — 세 단추 때문에 좁아져 꺾이던 것)
   }
-  function goSeg(s) { st.auto = false; markAuto(); resetSounds(); st.busy = false; Object.assign(st, { s, w: 0, c: 0, k: 0, typed: [], part: "", done: false, queue: [], lineEnd: false }); render(); }
+  function goSeg(s) { st.auto = false; st.resumeAuto = false; markAuto(); resetSounds(); st.busy = false; Object.assign(st, { s, w: 0, c: 0, k: 0, typed: [], part: "", done: false, queue: [], lineEnd: false }); render(); }
 
   // ── 손글씨 따라 쓰기 1단계(본부 10-07) — 흐린 회색 글자 위에 손가락·마우스·펜으로 · 판정 = 글자 마스크 덮음 × (1 − 벗어남) ≥ 70%
   //  덮음 = 글자 픽셀 중 펜 자국 근처(펜 굵기 2.4배 안)인 것 · 벗어남 = 펜 픽셀 중 글자(펜 굵기만큼 너그럽게 부풀림) 밖인 것 · 다 썼으면 「✓」 또는 1.2초 손 뗀 채면 자동
@@ -361,9 +364,18 @@ export default async function write(app, ep, id, opts = {}) {
       let hb = null, bd = Infinity; for (const h of holes) { if (used.has(h.id)) continue; const d = Math.hypot(h.cx - ux, h.cy - uy); if (d < bd) { bd = d; hb = h; } }
       if (u.jamo === "ㅎ") { hb = null; bd = Infinity; for (const h of holes) { if (used.has(h.id) || h.cy < uy - 0.02) continue; const d = Math.hypot(h.cx - ux, h.cy - uy); if (d < bd) { bd = d; hb = h; } } } // ㅎ 동그라미 = 꼭지·가로 아래
       if (!hb || bd > (u.jamo === "ㅎ" ? 0.4 : 0.25)) continue; used.add(hb.id);
-      const dist = new Int16Array(N * N).fill(-1), qd = []; for (const p of hb.px) { dist[p] = 0; qd.push(p); }
-      for (let h = 0; h < qd.length; h++) { const p = qd[h], x = p % N, y = (p / N) | 0; if (dist[p] >= D) continue; for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]]) { /* 8방향(대각 쪽 고리 바깥도) */ const nx = x + dx, ny = y + dy; if (nx < 0 || ny < 0 || nx >= N || ny >= N) continue; const j = ny * N + nx; if (dist[j] < 0 && on(j)) { dist[j] = dist[p] + 1; qd.push(j); } } }
-      for (let q = 0; q < N * N; q++) if (dist[q] > 0 && owner[q] !== k) owner[q] = k; }
+      // 고리 = 구멍에서 실제(유클리드) 거리 ≤ 그 고리 두께(고리 바깥 가장자리까지 거리의 중앙값) + 0.5칸(본부 10-10 투덜이 「요」 — 걸음 수·글자 평균 굵기로 잡아 ㅛ 꼭지 머리가 ㅇ 몫이 되던 것)
+      const bnd = hb.px.filter(p => [p - 1, p + 1, p - N, p + N].some(j => j >= 0 && j < N * N && on(j))).map(p => [p % N, (p / N) | 0]);
+      let hx0 = N, hx1 = 0, hy0 = N, hy1 = 0; for (const [x, y] of bnd) { if (x < hx0) hx0 = x; if (x > hx1) hx1 = x; if (y < hy0) hy0 = y; if (y > hy1) hy1 = y; }
+      const R = 3 * D, dist = new Float32Array(N * N).fill(-1), cand = [];
+      for (let y = Math.max(0, hy0 - R); y <= Math.min(N - 1, hy1 + R); y++) for (let x = Math.max(0, hx0 - R); x <= Math.min(N - 1, hx1 + R); x++) { const q = y * N + x; if (!on(q)) continue; let b2 = Infinity; for (const [bx, by] of bnd) { const d2 = (bx - x) ** 2 + (by - y) ** 2; if (d2 < b2) b2 = d2; } dist[q] = Math.sqrt(b2); cand.push(q); }
+      const outerD = cand.filter(q => dist[q] <= 2.5 * D && [q - 1, q + 1, q - N, q + N].some(j => j >= 0 && j < N * N && outside[j])).map(q => dist[q]).sort((p, q) => p - q);
+      const thick = (outerD.length ? outerD[outerD.length >> 1] : D) + 0.5;
+      for (const q of cand) if (dist[q] <= thick && owner[q] !== k) owner[q] = k;
+      // 고리 밖인데 이 ㅇ 몫인 잉크(꼭지 머리 등) = 붙어 있는 이웃 자모에게 돌려줌
+      { let moved = true; for (let it = 0; it < 3 * D && moved; it++) { moved = false; const chg = [];
+          for (const q of cand) { if (owner[q] !== k || dist[q] <= thick + 1) continue; const cnt = new Map(); for (const j of [q - 1, q + 1, q - N, q + N, q - N - 1, q - N + 1, q + N - 1, q + N + 1]) { const o = j >= 0 && j < N * N ? owner[j] : -1; if (o >= 0 && o !== k) cnt.set(o, (cnt.get(o) || 0) + 1); } if (cnt.size) chg.push([q, [...cnt].sort((p, r) => r[1] - p[1])[0][0]]); }
+          for (const [q, o] of chg) { owner[q] = o; moved = true; } } } }
     const out = us.map(u => ({ ...u, px: [] })); for (let q = 0; q < N * N; q++) if (owner[q] >= 0) out[owner[q]].px.push(q);
     // 고리 넓히기가 다른 자모를 절반 넘게 먹으면 그 자모는 원래대로(본부 10-08 「흑」 — ㅎ 동그라미 바로 아래 ㅡ 가 1% 만 남던 것)
     out.forEach((u, k) => { if (u.px.length < us[k].px.length * 0.5) { const keep = new Set(us[k].px); out.forEach((v, j) => { if (j !== k) v.px = v.px.filter(q => !keep.has(q)); }); u.px = us[k].px.slice(); } });
@@ -566,7 +578,7 @@ export default async function write(app, ep, id, opts = {}) {
       let f; if (e.pointerType === "pen" && e.pressure > 0) f = 0.5 + 0.7 * Math.min(1, e.pressure);
       else if (!S || !S.length) f = 1; else { const q = S[S.length - 1], dt = Math.max(1, now - (S.t || now - 16)), v = Math.hypot(p[0] - q[0], p[1] - q[1]) / (dt / 1000); f = 1.2 - 0.7 * Math.min(1, v / 2.5); }
       if (S && S.length) f = S[S.length - 1][2] * 0.6 + f * 0.4; if (S) S.t = now; return [p[0], p[1], Math.max(0.5, Math.min(1.2, f))]; };
-    iv.addEventListener("pointerdown", e => { if (st.busy || st.auto) return; e.preventDefault(); try { iv.setPointerCapture(e.pointerId); } catch {} clearTimeout(H.timer); stopLoop();
+    iv.addEventListener("pointerdown", e => { if (st.auto) return; if (st.busy) { if (!H.passSnd) return; hush(); st.busy = false; H.passSnd = false; } H.drawGen = (H.drawGen || 0) + 1; // 통과 글자 소리 중에 다시 쓰기 = 소리 끊고 첫 획부터 받음(본부 10-10 「100 뒤 다시 쓰면 첫 획이 빠져 68」) e.preventDefault(); try { iv.setPointerCapture(e.pointerId); } catch {} clearTimeout(H.timer); stopLoop();
       if (H.ordPlaying || H.ordAt) { H.stopOrder(); paintGuide(); } // 획순 보는 중·멈춘 채 쓰기 시작 = 획순 그만(회색으로)
       if (H.passed) { H.passed = false; H.strokes = []; H.roles = null; H.orderTold = false; H.mag = 0; markHand(); if (magnetOn()) { paintGuide(); H.magMarks?.(); } } // 통과 뒤 다시 그리면 = 다시 쓰기(더 높은 점수 · 자석은 처음 획부터)
       clearTimeout(H.clr); { const sc = work.querySelector(".hscore"); if (sc) sc.hidden = true; } // 새로 쓰기 시작 = 점수 지움
@@ -643,14 +655,14 @@ export default async function write(app, ep, id, opts = {}) {
     if (r.pct >= 80) { // 통과 — 초록 + 그 글자 소리 · 최고 점수 기억 · 「다음 ▶」/다시 쓰기
       bestPut(st.w, st.c, r.pct); paintSent();
       note.textContent = ""; H.passed = true; H.paintInk(); markHand();
-      st.busy = true; await run([700, c.file || jamoSrc(c.jamo[c.jamo.length - 1])]); st.busy = false;
+      st.busy = true; H.passSnd = true; await run([700, c.file || jamoSrc(c.jamo[c.jamo.length - 1])]); if (H.passSnd) { st.busy = false; H.passSnd = false; }
       return;
     }
     note.textContent = t("h_again");
     H.paintGuide(r);
     setTimeout(() => { if (st.hand === H) H.paintGuide(); }, 900);
     // 꽝(80% 아래)이면 덜 덮은 곳 주황 깜빡 뒤 1.2초에 내 획을 저절로 지움 — 바로 다시 쓰게(투덜이 10-07) · 점수는 남김(새로 쓰기 시작하면 지움)
-    const n0 = H.strokes.length; clearTimeout(H.clr); H.clr = setTimeout(() => { if (st.hand !== H || H.passed || H.cur || H.strokes.length !== n0) return; H.strokes = []; H.roles = null; H.orderTold = false; H.paintInk(); }, 1200);
+    const n0 = H.strokes.length, g0 = H.drawGen; clearTimeout(H.clr); H.clr = setTimeout(() => { if (st.hand !== H || H.passed || H.cur || H.strokes.length !== n0 || H.drawGen !== g0) return; H.strokes = []; H.roles = null; H.orderTold = false; H.paintInk(); }, 1200);
   }
   function handNext() { // 「다음 ▶」
     const H = st.hand; if (!H?.passed || st.busy) return;
@@ -730,13 +742,12 @@ export default async function write(app, ep, id, opts = {}) {
     }
   }
   // 자동 완성(W4) — 지금 토막의 남은 글자를 한 자모씩(손으로 칠 때와 같은 소리·쉼) · 토막이 끝나면 멈춤
-  const markAuto = () => { const b = wb.querySelector("[data-act=auto]"); b.setAttribute("aria-pressed", String(!!st.auto)); b.textContent = st.auto ? "⏹ " + t("btn_stop") : t("autofill"); if (b.isConnected) placeBtns(); }; // 글 길이가 바뀌면 단추 줄 다시 맞춤
+  const markAuto = () => { const b = wb.querySelector("[data-act=auto]"), on = !!(st.auto || st.resumeAuto); b.setAttribute("aria-pressed", String(on)); b.textContent = on ? "⏹ " + t("btn_stop") : t("autofill"); if (b.isConnected) placeBtns(); }; // 글 길이가 바뀌면 단추 줄 다시 맞춤
   const flashKey = j => { const k = work.querySelector(`[data-j="${j}"]`); if (!k) return; k.classList.remove("right"); void k.offsetWidth; k.classList.add("right"); setTimeout(() => k.classList.remove("right"), 400); };
   // 자동 멈춤(본부 10-07 투덜이 「⏹ 다시 눌러도 안 멈춤」) — 누르면 바로: 진행 중 소리·획 칠도 그침 · 하던 글자는 안 끝낸 채(다음 글자로 안 넘어감)
   // 자동을 멈춘 순간 글자가 다 쳐져 있으면(마지막 자모 소리 중) = 그 글자는 끝난 것 → 다음 글자로(투덜이 10-08 폰 「있었거든요」의 「거」:
   //  다 친 글자에 머물러 다음 자모가 없어 자판을 눌러도 오류로 소리가 안 나던 것)
-  const stopAuto = () => { st.auto = false; st.jumpTo = null; st.hand?.stopOrder?.(); hush(); st.busy = false; st.done = false; st.queue = []; markAuto();
-    const c = st.s < segs.length ? words()[st.w]?.chars[st.c] : null; if (c && st.mode !== "hand" && st.k >= c.jamo.length) nextChar(); };
+  const stopAuto = () => { st.auto = false; st.resumeAuto = false; st.jumpTo = null; st.hand?.stopOrder?.(); hush(); st.busy = false; st.done = false; st.queue = []; markAuto(); }; // 누르는 즉시 그 글자에서 멈춤(투덜이 10-10 「넘어가 버림」 — 다 친 글자에 머물면 자판 누를 때 다음 글자부터)
   function nextChar() { // 다음 글자(토막 끝이면 다음 토막 · 줄 끝이면 끝 카드) — 자동으로 친 것은 「직접 씀」 아님
     st.c++; st.k = 0; st.typed = []; st.part = "";
     if (st.c >= words()[st.w].chars.length) { st.w++; st.c = 0; }
@@ -745,11 +756,12 @@ export default async function write(app, ep, id, opts = {}) {
   }
   async function autoPart() {
     resetSounds(); if (st.lineEnd) { Object.assign(st, { w: 0, c: 0, k: 0, typed: [], part: "", done: false, queue: [], lineEnd: false }); render(); } // 줄 끝에서 자동 = 마지막 토막 처음부터
-    st.auto = true; markAuto();
+    st.auto = true; st.resumeAuto = false; markAuto();
     const part = st.s;
-    while (st.auto && st.alive && st.s === part && st.s < segs.length) {
+    while (st.auto && st.alive && st.s === part && st.s < segs.length && !st.lineEnd) { // 지금 토막 끝까지(W4 · 토막 끝에서 멈춤 = 설계)
       if (st.jumpTo) { Object.assign(st, { w: st.jumpTo.w, c: st.jumpTo.c, k: 0, typed: [], part: "", done: false, queue: [], busy: false }); st.jumpTo = null; render(); } // 위 글자 줄에서 고른 글자부터 이어서
       const c = words()[st.w].chars[st.c];
+      if (st.mode !== "hand" && st.k >= c.jamo.length) { await finishChar(c.jamo[c.jamo.length - 1], c); continue; } // 다 친 글자에서 시작(손으로 친 뒤 · 멈춘 자리) = 마무리하고 다음 글자부터
       if (st.mode === "hand") { // 손글씨 자동(본부 10-07) — 그 글자를 획순 칠로 한 획씩 써 주고(획 0.5초) → 글자 소리 → 다음 글자 · 자동으로 쓴 글자는 「직접 씀」 초록 아님
         const H = st.hand; if (!H?.showOrder) break;
         st.busy = true; const done = await H.showOrder({ keep: true }); st.busy = false;
@@ -765,7 +777,7 @@ export default async function write(app, ep, id, opts = {}) {
     st.auto = false; if (st.alive) markAuto();
   }
   async function press(j) { // W2
-    const key0 = j; // 실제로 누른 자판(겹모음을 나눠 쳐 완성하면 j 는 겹모음으로 바뀜)
+    if (st.resumeAuto) { st.resumeAuto = false; markAuto(); } const key0 = j; // 실제로 누른 자판(겹모음을 나눠 쳐 완성하면 j 는 겹모음으로 바뀜)
     if (st.auto) return stopAuto(); // 자동 완성 중 자판 = 멈춤
     if (st.s >= segs.length || st.lineEnd) return; // 줄 끝(마지막 줄에 머묾) = 자판 안 받음 · 위 글자·토막·[다시 연습]으로 다시 씀
     if (st.done) { st.queue.push(j); return; } // 글자 완성 축하 중 = 기억해 두기
@@ -830,7 +842,7 @@ export default async function write(app, ep, id, opts = {}) {
     const tb = e.target.closest("[data-tool]");
     if (tb) { try { localStorage.setItem("malmun.htool", tb.dataset.tool); } catch {} app.querySelectorAll("[data-tool]").forEach(x => x.setAttribute("aria-pressed", String(x.dataset.tool === tb.dataset.tool))); return; } // 도구 고르기(기억) · 이미 그린 획은 그 도구 그대로
     const mb = e.target.closest("[data-mode]");
-    if (mb) { if (st.mode !== mb.dataset.mode) { if (st.auto) stopAuto(); st.hand?.stopOrder?.(); hush(); stopLoop(); st.busy = false; st.done = false; st.queue = []; st.mode = mb.dataset.mode; /* 모드 바꾸기 = 돌던 것(자동·획순·소리) 먼저 멈춤 — 본부 10-08 투덜이: 자판 자동 켠 채 손글씨로 바꾸면 저 혼자 계속 씀 */ try { localStorage.setItem("malmun.wmode", st.mode); } catch {} app.querySelectorAll("[data-mode]").forEach(x => x.setAttribute("aria-pressed", String(x.dataset.mode === st.mode))); st.typed = []; st.k = 0; st.part = ""; render(); } return; }
+    if (mb) { if (st.mode !== mb.dataset.mode) { if (st.auto || st.resumeAuto) stopAuto(); st.hand?.stopOrder?.(); hush(); stopLoop(); st.busy = false; st.done = false; st.queue = []; st.mode = mb.dataset.mode; /* 모드 바꾸기 = 돌던 것(자동·획순·소리) 먼저 멈춤 — 본부 10-08 투덜이: 자판 자동 켠 채 손글씨로 바꾸면 저 혼자 계속 씀 */ try { localStorage.setItem("malmun.wmode", st.mode); } catch {} app.querySelectorAll("[data-mode]").forEach(x => x.setAttribute("aria-pressed", String(x.dataset.mode === st.mode))); st.typed = []; st.k = 0; st.part = ""; render(); } return; }
     const b = e.target.closest("[data-act]");
     if (!b) return;
     const a = b.dataset.act;
@@ -838,14 +850,15 @@ export default async function write(app, ep, id, opts = {}) {
     if (a === "hdone") return handJudge();
     if (a === "hnext") return handNext();
     if (a === "horder") return st.hand?.toggleOrder?.();
-    if (a === "hundo" || a === "hclear") { const H = st.hand; if (!H) return; clearTimeout(H.timer); if (a === "hundo") H.strokes.pop(); else { H.strokes = []; H.roles = null; H.orderTold = false; } if (H.passed) { H.passed = false; markHand(); } const sc = work.querySelector(".hscore"); if (sc) sc.hidden = true; H.paintInk(); note.textContent = ""; return; }
+    if (a === "hundo" || a === "hclear") { const H = st.hand; if (!H) return; clearTimeout(H.timer); clearTimeout(H.clr); H.drawGen = (H.drawGen || 0) + 1; if (H.passSnd) { hush(); st.busy = false; H.passSnd = false; } if (a === "hundo") H.strokes.pop(); else { H.strokes = []; H.roles = null; H.orderTold = false; } H.mag = Math.min(H.mag || 0, H.strokes.length); if (magnetOn()) { H.paintGuide?.(); } /* 자석 = 남은 획부터 다시(본부 10-10 「딱 한 번만 됨」 — 지워도 차례가 앞으로 가 있던 것) */ if (H.passed) { H.passed = false; markHand(); } const sc = work.querySelector(".hscore"); if (sc) sc.hidden = true; H.paintInk(); note.textContent = ""; return; }
     if (a === "sent") toggleSentence();
     else if (a === "word" && st.s < segs.length && !st.busy) { // W4 — 원음에서 이 낱말만
       stopLoop(); st.sent = false; markSent();
       run([wordStep(words()[st.w])]);
     } else if (a === "auto") {
       if (st.auto) return stopAuto();
-      if (st.s < segs.length && !st.busy) autoPart();
+      if (st.resumeAuto) { st.resumeAuto = false; st.sent = false; hush(); markSent(); markAuto(); return; } // 듣기 중(자동이 잠깐 멈춤) 자동 단추 = 자동 끔 · 듣기도 멈춤
+      if (st.s < segs.length) { if (st.busy || st.done) { hush(); st.busy = false; st.done = false; st.queue = []; } autoPart(); } // 소리 중이어도 바로(투덜이 10-10 「친 뒤 누르면 바로 중지」)
     } else if (a === "retry") { goSeg(0); }
   };
 
