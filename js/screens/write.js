@@ -13,15 +13,15 @@
 //  W5 소리는 언제나 하나만 · 새 일을 하면 앞 소리는 멈춘다
 //  W6 영상 창 안(embedded): 창 안에서 스크롤 없이 다 보이게 — 긴 문장은 토막으로(◀ 1/3 ▶) ·
 //     토막을 다 쓰면 자동으로 다음 토막 · 줄을 다 쓰면 대사를 듣고 자동으로 다음 줄 쓰기 · 아래 ▶ = 이 부분 듣기
-import { t, lang } from "../i18n.js?v=1012.2";
-import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO, koq } from "../text.js?v=1012.2";
-import { episode, chars, charsF } from "../data.js?v=1012.2";
-import { paths } from "../paths.js?v=1012.2";
-import { I, spkHtml } from "../ui.js?v=1012.2";
-import { audioCtx, hold } from "../wake.js?v=1012.2";
-import * as sfx from "../sfx.js?v=1012.2";
-import { scoreFx } from "../scorefx.js?v=1012.2";
-import { units as jamoUnits, baseOf, shapeFix } from "../jamobox.js?v=1012.2"; // 자모 자리 나누기(획순 · 자판 덧칠 · 손글씨 덩어리 — 본부 10-07) // 손글씨 점수 효과 = 말하기와 같은 규칙(본부 10-07)
+import { t, lang } from "../i18n.js?v=1012.3";
+import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO, koq } from "../text.js?v=1012.3";
+import { episode, chars, charsF } from "../data.js?v=1012.3";
+import { paths } from "../paths.js?v=1012.3";
+import { I, spkHtml } from "../ui.js?v=1012.3";
+import { audioCtx, hold } from "../wake.js?v=1012.3";
+import * as sfx from "../sfx.js?v=1012.3";
+import { scoreFx } from "../scorefx.js?v=1012.3";
+import { units as jamoUnits, baseOf, shapeFix } from "../jamobox.js?v=1012.3"; // 자모 자리 나누기(획순 · 자판 덧칠 · 손글씨 덩어리 — 본부 10-07) // 손글씨 점수 효과 = 말하기와 같은 규칙(본부 10-07)
 
 const KEYS = [..."ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎㄲㄸㅃㅆㅉ"], VOW = [..."ㅏㅑㅓㅕㅗㅛㅜㅠㅡㅣ"];
 const VOW2 = [..."ㅐㅒㅔㅖㅘㅙㅚㅝㅞㅟㅢ"]; // 겹모음 줄(본부 10-06) — 칸 하나 · ㅓ+ㅣ 처럼 나눠 쳐도 받음
@@ -450,7 +450,15 @@ export default async function write(app, ep, id, opts = {}) {
       const half = Math.min(0.06, u.px.length / Math.max(1, edge) / UN), b0 = u.box, bw = b0[2] - b0[0], bh = b0[3] - b0[1];
       const x0 = b0[0] + Math.min(half, bw / 3), x1 = b0[2] - Math.min(half, bw / 3), y0 = b0[1] + Math.min(half, bh / 3), y1 = b0[3] - Math.min(half, bh / 3), mx = v => (bx1 - bx0 < 0.05 ? (x0 + x1) / 2 : x0 + ((v - bx0) / (bx1 - bx0)) * (x1 - x0)), my = v => (by1 - by0 < 0.05 ? (y0 + y1) / 2 : y0 + ((v - by0) / (by1 - by0)) * (y1 - y0));
       for (const S of base) out.push({ unit: ui, u, role: u.role, jamo: u.jamo, pts: snap(u, S.map(([x, y]) => [mx(x), my(y)])) }); });
+    // ㅝ ㅞ 의 ㅓ 짧은 가로(본부 10-12 획순 칠 ②) — 글꼴이 짧은 가로를 세로 아래쪽(ㅜ 가로 높이)에 그려 자료(세로 가운데)와 어긋남 → 실제 ㅓ 잉크 중 세로 왼편 잉크의 높이·왼끝에 맞춤
+    const fixV = []; { const us = unitsOf(ch); us.forEach((u, ui) => { if (u.jamo !== "ㅓ" || ui === 0 || us[ui - 1].jamo !== "ㅜ" || us[ui - 1].role !== "jung") return;
+        const mine = out.filter(S => S.unit === ui), bar = mine[0], vert = mine[1]; if (!bar || !vert || bar.pts.length !== 2) return;
+        u.set ||= new Set(u.px); let edge = 0; for (const q of u.px) if (!u.set.has(q - 1) || !u.set.has(q + 1) || !u.set.has(q - UN) || !u.set.has(q + UN)) edge++; const th = (2 * u.px.length) / Math.max(1, edge) / UN;
+        const vx = vert.pts[0][0], ys = [], xs = []; for (const q of u.px) { const x = (q % UN + 0.5) / UN, y = (((q / UN) | 0) + 0.5) / UN; if (x < vx - th) { xs.push(x); ys.push(y); } }
+        if (xs.length < 20) return; ys.sort((p2, q2) => p2 - q2); const by = ys[ys.length >> 1], xa = Math.min(...xs) + th / 2; if (vx - xa < th) return;
+        bar.pts = [[xa, by], [vx, by]]; fixV.push([vert, u, vx, th]); }); }
     extendEnds(out, unitsOf(ch));
+    for (const [vert, u, vx, th] of fixV) { let yMax = 0, yMin = 1; for (const q of u.px) { const x = (q % UN + 0.5) / UN, y = (((q / UN) | 0) + 0.5) / UN; if (Math.abs(x - vx) < th / 2) { if (y > yMax) yMax = y; if (y < yMin) yMin = y; } } const P = vert.pts, d = P[P.length - 1][1] > P[0][1]; if (yMax > 0) { if (d) { P[P.length - 1] = [P[P.length - 1][0], Math.max(P[P.length - 1][1], yMax - th / 2)]; } } } /* 세로는 아래 끝까지(짧은 가로가 세로 아래에 붙어 늘이기가 가로에서 멈추던 것 · 「눯」) */
     return out;
   }
   // 획 붙이기(본부 10-07) — 상자 맞춤 뒤 획을 자기 방향에 수직으로 ±12%(상자 기준) 안에서 옮겨 보며 잉크와 가장 많이 겹치는 자리로
@@ -586,7 +594,8 @@ export default async function write(app, ep, id, opts = {}) {
           if (newN && !globalThis.__tL) for (let i0 = 0; i0 < GN * GN; i0++) { if (seen[i0] || G[i0 * 4 + 3] < 128 || D[i0 * 4 + 3] >= 128 || (prev && prev[i0])) continue; const c = [], st = [i0]; seen[i0] = 1; let touch = 0, tPrev = 0, fut = 0, outU = 0;
             while (st.length) { const q = st.pop(); c.push(q); if (fuD && fuD[q * 4 + 3] >= 128) fut++; if (um[q * 4 + 3] < 128) outU++; const x = q % GN; for (const j of [x > 0 ? q - 1 : -1, x < GN - 1 ? q + 1 : -1, q - GN, q + GN]) { if (j < 0 || j >= GN * GN) continue; if (D[j * 4 + 3] >= 128 && !(prev && prev[j])) touch++; else if (prev && prev[j]) tPrev++; if (!seen[j] && G[j * 4 + 3] >= 128 && D[j * 4 + 3] < 128 && !(prev && prev[j])) { seen[j] = 1; st.push(j); } } }
             if (touch >= 6 && touch >= tPrev && fut < c.length * 0.1 && outU < c.length * 0.1 && c.length < newN * 0.6) { let mine = 0, other = 0; for (const q of c) { const o = u200[Math.min(UN - 1, ((q / GN) | 0) * UN / GN | 0) * UN + Math.min(UN - 1, (q % GN) * UN / GN | 0)]; if (o === list[upto].unit) mine++; else if (o >= 0) other++; } /* 같은 자모 몫 잉크만(「쮁」 — 첫 ㅈ 조각을 둘째 ㅈ 획에 붙이던 것) */ const Qc = brushPath(ch, list[upto]), wq = Math.max(...Qc.map(q => q.w)); let cx2 = 0, cy2 = 0; for (const q of c) { cx2 += (q % GN + 0.5) / GN; cy2 += (((q / GN) | 0) + 0.5) / GN; } cx2 /= c.length; cy2 /= c.length; const dQ = Math.min(...Qc.map(q => Math.hypot(q.x - cx2, q.y - cy2)));
-            if (mine >= other && dQ <= 2.5 * wq) { const b0 = compsOf(D).bigN, keep = c.map(q => D[q * 4 + 3]); for (const q of c) D[q * 4 + 3] = G[q * 4 + 3]; if (compsOf(D).bigN > b0) c.forEach((q, t) => (D[q * 4 + 3] = keep[t])); else addL += c.length; } } } } /* 붙여서 큰 조각 수가 늘면 안 붙임(「치」) */
+            let dDone = Infinity; for (let i2 = 0; i2 < upto; i2++) if (list[i2].unit !== list[upto].unit) for (const q of brushPath(ch, list[i2])) dDone = Math.min(dDone, Math.hypot(q.x - cx2, q.y - cy2)); /* 다른 자모의 이미 그은 획에 더 가까우면 그 획 남은 것(「눯」 ㅓ 세로 아래 끝) */
+            if (mine >= other && dQ <= 2.5 * wq && dQ <= dDone) { const b0 = compsOf(D).bigN, keep = c.map(q => D[q * 4 + 3]); for (const q of c) D[q * 4 + 3] = G[q * 4 + 3]; if (compsOf(D).bigN > b0) c.forEach((q, t) => (D[q * 4 + 3] = keep[t])); else addL += c.length; } } } } /* 붙여서 큰 조각 수가 늘면 안 붙임(「치」) */
         let C = compsOf(D); const totPre = C.tot - addL; /* 20% 기준 = 이음·남는 조각 붙이기 전 새 칠 넓이(「폠」 ㅕ 세로 가운데 토막이 기준이 커져 빠지던 것) */
         if (C.bigN > 1 && !globalThis.__tB) { /* 이음(본부 10-12 획순 칠) — 이번 획 붓 길 가운데(실제 잉크 폭)가 다른 자모 잉크를 지나며 조각이 둘로 나뉘면 그 붓 길 잉크도 이번에 칠함(「뼏」 ㅂ 오른기둥 · ㅕ 가로대 자리) · 큰 조각 수가 줄 때만 */
           const bc = document.createElement("canvas"); bc.width = bc.height = GN; const bx = bc.getContext("2d"); brushStroke(bx, ch, list[upto], f, 1 / 1.15); bx.globalCompositeOperation = "destination-in"; bx.drawImage(img, 0, 0);
