@@ -205,18 +205,22 @@ export function shapeFix(out, mask, N, ch = "") {
               if (cnt.size) { own[q] = [...cnt].sort((p2, r2) => r2[1] - p2[1])[0][0]; ch2 = true; moved = true; } } if (!ch2) break; } }
       }
     });
-    // ㅆ ㅉ + ㅗ ㅘ ㅙ ㅚ 「사발」(본부 10-11) — 두 자음 다리 끝이 만나는 아래 볼록 = 자음 몫(가운데 왼쪽 = 첫 자음 · 오른쪽 = 둘째) · ㅗ 는 가장 좁은 목 아래 기둥만
+    // ㅆ ㅉ + ㅗ ㅘ ㅙ ㅚ 「사발」(본부 10-11) — 두 자음 다리 끝이 만나는 아래 볼록 = 자음 몫(가운데 왼쪽 = 첫 자음 · 오른쪽 = 둘째) · ㅗ 는 사발 아래 기둥만
+    //  기둥 = 가로획 위 이 모음 몫 · 사발 = 기둥 위(목이 붙었으면 가장 좁은 목 위 · 떨어진 U 자 글꼴이면 빈 줄 위) 가운데 잉크 줄기 · 가운데 = 사발 맨 아래 3줄 줄기 가운데
     { const chs = out.map((v, j) => j).filter(j => out[j].role === "cho"), vk = out.findIndex(v => v.role === "jung" && v.jamo === "ㅗ");
       if (chs.length === 2 && out[chs[0]].jamo === out[chs[1]].jamo && /[ㅅㅈ]/.test(out[chs[0]].jamo) && vk >= 0) {
         const rowsK = new Map(); for (let q = 0; q < N * N; q++) if (own[q] === vk) { const y = (q / N) | 0; if (!rowsK.has(y)) rowsK.set(y, []); rowsK.get(y).push(q % N); }
-        const ysK = [...rowsK.keys()].sort((a2, b2) => a2 - b2), wOf = y => rowsK.get(y).length;
-        // 기둥 = 위에서부터 내려가며 넓은 띠(가로획) 전까지 · 목 = 기둥 위쪽에서 가장 좁은 줄
-        const yTop = ysK[0], bandY = ysK.find(y => wOf(y) > 0.5 * (x1 - x0 + 1)); if (yTop != null && bandY != null) {
-          const stemYs = ysK.filter(y => y < bandY), ws = stemYs.length ? stemYs.map(wOf).sort((a2, b2) => a2 - b2)[stemYs.length >> 1] : 0; let neck = -1, nw = Infinity;
-          for (const y of stemYs) { if (y > bandY - 3) break; const w = wOf(y); if (w < nw) { nw = w; neck = y; } }
-          if (neck > yTop && nw < 0.6 * ws) { const xs = rowsK.get(neck), cx = Math.round((Math.min(...xs) + Math.max(...xs)) / 2);
-            for (let y = neck - 1; y >= y0; y--) { if (!on(y * N + cx)) break; let l = cx, r3 = cx; while (l > 0 && on(y * N + l - 1)) l--; while (r3 < N - 1 && on(y * N + r3 + 1)) r3++;
-              for (let x = l; x <= r3; x++) { const q = y * N + x, o = own[q]; if (o !== vk && !chs.includes(o)) continue; const to = x < cx ? chs[0] : chs[1]; if (o !== to) { own[q] = to; moved = true; } } } } } } }
+        const ysK = [...rowsK.keys()].sort((a2, b2) => a2 - b2), wOf = y => rowsK.get(y).length, wMax = Math.max(0, ...ysK.map(wOf)), bandY = ysK.find(y => wOf(y) >= 0.8 * wMax && wMax > 0.3 * (x1 - x0 + 1)); /* 가로획 = 이 모음 몫이 가장 넓은 줄(ㅘ ㅙ 는 글자 너비 절반이 안 됨) */
+        const stemYs = bandY == null ? [] : ysK.filter(y => y < bandY - 1);
+        if (stemYs.length >= 3) { const ws = stemYs.map(wOf).sort((a2, b2) => a2 - b2)[stemYs.length >> 1], sx = rowsK.get(stemYs[stemYs.length >> 1]), scx = Math.round((Math.min(...sx) + Math.max(...sx)) / 2);
+          let top = -1, nw = Infinity; for (const y of stemYs) { const w = wOf(y); if (w < nw && y < bandY - 3) { nw = w; top = y; } }
+          if (!(nw < 0.6 * ws)) top = stemYs[0]; /* 목이 없으면 기둥 맨 윗줄 */
+          const runAt = (y, x) => { if (!on(y * N + x)) return null; let l = x, r3 = x; while (l > 0 && on(y * N + l - 1)) l--; while (r3 < N - 1 && on(y * N + r3 + 1)) r3++; return [l, r3]; };
+          let y = top - 1, gap = 0; while (y >= y0 && !on(y * N + scx) && gap < 10) { y--; gap++; } /* U 자 글꼴 = 기둥과 사발 사이 빈 줄 */
+          const bot = []; for (let t = 0; t < 3 && y - t >= y0; t++) { const r = runAt(y - t, scx); if (r) bot.push((r[0] + r[1]) / 2); }
+          if (bot.length && (nw < 0.6 * ws || gap > 0)) { const cx = Math.round(bot.sort((a2, b2) => a2 - b2)[bot.length >> 1]), bw = ws; /* 줄기 너비 상한 = 기둥 너비 3배(사발 맨 아래는 뾰족해서 기준 안 됨) */
+            for (let yy = y; yy >= y0; yy--) { const r = runAt(yy, cx); if (!r || r[1] - r[0] + 1 > 3 * bw) break;
+              for (let x = r[0]; x <= r[1]; x++) { const q = yy * N + x, o = own[q]; if (o !== vk && !chs.includes(o)) continue; const to = x < cx ? chs[0] : chs[1]; if (o !== to) { own[q] = to; moved = true; } } } } } } }
     // 겹모음 오른쪽 ㅣ(ㅐㅔㅒㅖㅚㅟㅢ…) 기둥 왼쪽에 붙은 잉크 = 앞 모음 몫(본부 10-10 경계 그림 「대」 — ㅐ 가운데 가로대가 ㅣ 몫이던 것)
     out.forEach((u, k) => {
       if (u.role !== "jung" || u.jamo !== "ㅣ" || k === 0 || out[k - 1].role !== "jung") return;
