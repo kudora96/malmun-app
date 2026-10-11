@@ -1,10 +1,10 @@
-import { VERSION } from "./version.js?v=1011.30";
+import { VERSION } from "./version.js?v=1012.1";
 // 학습자 언어 — 고르게 하지 않는다(CLAUDE.md).
 // ① 저장된 선택 ② 폰 언어가 22개 중 하나 ③ 폰 시간대로 나라 짐작 ④ 영어
 export const LANGS = [
   ["ne", "नेपाली"], ["bn", "বাংলা"], ["vi", "Tiếng Việt"], ["id", "Bahasa Indonesia"], ["th", "ไทย"],
-  ["mn", "Монгол"], ["ur", "اردو"], ["si", "සිංහල"], ["tl", "Tagalog"], ["uz", "Oʻzbekcha"],
-  ["ky", "Кыргызча"], ["km", "ខ្មែរ"], ["lo", "ລາວ"], ["my", "မြန်မာ"], ["zh", "中文"],
+  ["mn", "Монгол"], ["ur", "اردو"], ["si", "සිංහල"], ["tl", "Filipino"], ["uz", "Oʻzbekcha"],
+  /* ky 보류(원어민 확인 뒤 · 언어부 10-11) */ ["km", "ខ្មែរ"], ["lo", "ລາວ"], ["my", "မြန်မာ"], ["zh", "中文"],
   ["ja", "日本語"], ["ru", "Русский"], ["hi", "हिन्दी"], ["en", "English"], ["es", "Español"], ["fr", "Français"], ["pt", "Português"],
 ];
 const CODES = LANGS.map(l => l[0]);
@@ -63,6 +63,8 @@ export async function setLang(code, remember = false) {
   [fallback, strings] = await Promise.all([load("en"), code === "en" ? Promise.resolve({}) : load(code)]);
   await loadKoUi();
   document.documentElement.lang = code;
+  const FONT = { ur: "Noto+Nastaliq+Urdu:wght@400;700", th: "Noto+Sans+Thai:wght@400;700" }; /* 그 언어일 때만 글꼴 링크(언어부 10-11) */
+  if (FONT[code] && !document.querySelector(`link[data-font="${code}"]`)) { const k = Object.assign(document.createElement("link"), { rel: "stylesheet", href: `https://fonts.googleapis.com/css2?family=${FONT[code]}&display=swap` }); k.dataset.font = code; document.head.append(k); }
   document.documentElement.dir = RTL.has(code) && Object.keys(strings).length ? "rtl" : "ltr"; // 그 언어 글이 실제로 실렸을 때만 오른쪽→왼쪽(언어부 10-11 — 영어 글인데 뒤집히던 것)
 }
 

@@ -1,6 +1,6 @@
 // 편 불러오기 — 공통 + KR층 + 학습자 언어층을 sub_id 로 조인(app_build_spec §3-4)
-import { paths } from "./paths.js?v=1011.30";
-import { VERSION } from "./version.js?v=1011.30";
+import { paths } from "./paths.js?v=1012.1";
+import { VERSION } from "./version.js?v=1012.1";
 
 const cache = new Map();
 // 앱 판 번호를 붙여 받는다 — 새 판이면 옛 데이터를 쓰지 않게(tools/bump_version.py)
@@ -44,9 +44,9 @@ export async function episode(ep, lang) {
     const trSub = new Map((tr?.subtitles || []).map(s => [s.id, s]));
     const trExp = new Map((tr?.explanations || []).map(e => [e.sub_id, e]));
     const bios = new Map((tr?.characters || []).map(c => [c.id, c.bio]));
-    const v9langs = (v9?.langs || []).filter(c => c !== "ko");
+    const v9langs = (v9?.langs || []).filter(c => c !== "ko"), v2 = v9?.schema === 2, vL = v9langs.includes(lang) ? lang : null; // v2 = 언어 중립 규격(언어부 10-11 v9_schema_v2.md)
     const lines = base.subtitles.map((s, n) => {
-      const nv = v9?.lines.find(x => x.n === n + 1) || null;
+      const nv = v9view(v9?.lines.find(x => x.n === n + 1), vL, v2);
       const part = (s.parts || [])[0] || {};
       const k = krBy.get(s.id) || {};
       const x = trExp.get(s.id) || {};
@@ -70,11 +70,28 @@ export async function episode(ep, lang) {
     return {
       id: ep, title: base.title, title_t: tr?.title_t || "", lang: tr ? lang : null, // title_t = 학습자 언어 편 제목(영상 창 제목 줄)
       v9head: v9?.say_head || null, // 「이제 말해 보세요」 머리말 소리(언어마다 하나 · 모든 줄 공통)
-      v9L: v9langs.includes(lang) ? lang : null, // v9 「학습자 언어」 — 그 언어 자료가 없으면 null = 설명은 한국어만(언어부 10-11 S1 ② — 네팔어로 떨어지던 것)
+      v9L: vL, // v9 「학습자 언어」 — 그 언어 자료가 없으면 null = 설명은 한국어만(언어부 10-11 S1 ② — 네팔어로 떨어지던 것)
       characters: (base.characters || []).map(c => ({ ...c, bio: bios.get(c.id) || "" })),
       lines,
     };
   })();
   cache.set(key, p);
   return p;
+}
+
+// v9 줄 하나를 학습자 언어 L 로 펼침(언어부 app_changes.md §1) — v2(schema 2)·v1 둘 다 받음 · 화면 코드는 v1 칸 이름 그대로 씀 · 말풍선 뜻은 gloss[w].mean
+//  L = null(그 언어 자료 없음) → 공용 한국어만 · v2 견주기 줄은 ko_by[L] 의 글·소리·시각을 같이 바꿈 · 공용 시각이 null 이고 언어판도 없으면 한국어 설명 소리 숨김
+function v9view(nv, L, v2) {
+  if (!nv) return null;
+  if (!v2) return { ...nv, gloss: Object.fromEntries(Object.entries(nv.gloss || {}).map(([w, g]) => [w, { rom: g.rom, mean: (L && g[L]) || "" }])) };
+  const kb = (L && nv.ko_by?.[L]) || {}, shared = !(nv.sent || []).some(x => x.ko_s == null), koEx = kb.audio_ex || (shared ? nv.audio?.ko?.ex : null);
+  return {
+    ...nv,
+    tr: nv.sub?.[L] || "",
+    pieces: (nv.pieces || []).map(p => ({ ko: p.ko, rom: p.rom, mean: p.mean_by?.[L] || "" })),
+    text: { ...nv.text, ko: kb.ex != null ? { ex: kb.ex, say: kb.say ?? nv.text?.ko?.say } : nv.text?.ko },
+    audio: { ...nv.audio, ko: { ...nv.audio?.ko, ex: koEx } },
+    sent: (nv.sent || []).map((x, k) => ({ ...x, ko: kb.sent?.[k] ?? x.ko, ko_s: kb.sent_s ? kb.sent_s[k] : x.ko_s })),
+    gloss: Object.fromEntries(Object.entries(nv.gloss || {}).map(([w, g]) => [w, { rom: g.rom, mean: g.by?.[L] || "" }])),
+  };
 }

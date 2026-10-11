@@ -1013,3 +1013,6 @@ button.dim{opacity:.45}
 .write .whead .sub{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis}
 .write .whead .loopnote{flex:0 1 auto}
 .toast.sttnote{width:max-content;text-align:center;line-height:1.45} /* 긴 안내(두 문장) — left:50% 때문에 반 폭으로 접히지 않게 */
+[dir=rtl] .write .work,[dir=rtl] .write .slotrow,[dir=rtl] .write .hand,[dir=rtl] .kb,[dir=rtl] .speak .meter,[dir=rtl] .cmp .cwave,[dir=rtl] .cmp .csyl{direction:ltr} /* 오른쪽→왼쪽 언어(ur)에서도 한글 쓰기·자판·막대·파형은 왼쪽→오른쪽(언어부 10-11 S1 ④) */
+:lang(ur){font-family:"Noto Nastaliq Urdu",system-ui,sans-serif;line-height:2.05} /* 나스탈리크 · 줄 높이 2 이상(언어부 10-11) */
+:lang(th){font-family:"Noto Sans Thai",system-ui,sans-serif}

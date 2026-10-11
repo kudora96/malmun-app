@@ -277,7 +277,7 @@
   { const { endHint } = await import("./js/heard.js?v=" + document.documentElement.dataset.v), { hintText } = await import("./js/screens/speak.js?v=" + document.documentElement.dataset.v), { t: T } = await import("./js/i18n.js?v=" + document.documentElement.dataset.v);
     const Wd = "저도 읽고 싶어요", say = (h, s) => hintText(s, T, (x => x && { ...x, say: Wd })(endHint(Wd, [h])));
     const c = { other: say("안녕하세요", 0), tail: say("저도 읽고", 57), as: say("저도 읽고 시퍼요", 71), miss: say("저도 싶어요", 71), many: say("저두 익고 시퍼요", 43), pass: say("저도 읽고 시퍼요", 85) };
-    ok(/「저도 읽고 싶어요」/.test(c.other) && /「싶어요」/.test(c.tail) && /「싶어요」.*「시퍼요」/.test(c.as) && !/「저도」|「읽고」/.test(c.as.split("—")[0]) && /「읽고」/.test(c.miss) && /「저도」·「읽고」/.test(c.many) && /「싶어요」/.test(c.pass) && c.pass.length < c.as.length,
+    ok(/⁨?"저도 읽고 싶어요"⁩?/.test(c.other) && /⁨?"싶어요"⁩?/.test(c.tail) && /⁨?"싶어요"⁩?.*⁨?"시퍼요"⁩?/.test(c.as) && !/⁨?"저도"⁩?|⁨?"읽고"⁩?/.test(c.as.split("—")[0]) && /⁨?"읽고"⁩?/.test(c.miss) && /⁨?"저도"⁩?·⁨?"읽고"⁩?/.test(c.many) && /⁨?"싶어요"⁩?/.test(c.pass) && c.pass.length < c.as.length,
       "끝남 문구: 다른 말 · 앞부분만(빠진 「싶어요」) · 「싶어요」→「시퍼요」 · 「읽고」 빠짐 · 두 곳 넘게 · 통과+틀림(짧게)", Object.values(c).join(" ‖ ")); }
   ok(maxMsFor("어서 오세요.") === 8000 && maxMsFor("세종대왕이요. 오백 년 전에 왕이 직접 만들었어요. 그때 백성들은 글자를 몰랐거든요. 너무 어려웠어요.") >= 28000, "최대 길이 = max(8, 3 + 0.8×음절)초", maxMsFor("세종대왕이요. 오백 년 전에 왕이 직접 만들었어요. 그때 백성들은 글자를 몰랐거든요. 너무 어려웠어요.") + "ms");
   await open(3); window.__heard = $(".panel .say").textContent;

@@ -10,11 +10,12 @@
 //      같은 음절 되풀이(「이…있어요」「거구구나」 — 들은 말에 더 들어간 음절이 옆 음절과 같거나 첫소리+모음이 같음)도 −0.08(「더듬음」)
 //  · 최종 점수 = 글자 점수(score.js) × f(R): R ≥ 0.85 → 1 · 0.5 ≤ R < 0.85 → 0.90 + 0.10 × (R − 0.5)/0.35 · R < 0.5 → 0.88
 //  녹음·재생은 그대로 — 받은 녹음(blob)을 풀어 재기만
-import { audioCtx } from "./wake.js?v=1011.30";
-import { leadOf, voicedEnd, keepFirstOf } from "./playmine.js?v=1011.30";
-import { speechEnd } from "./recstore.js?v=1011.30";
-import * as sfx from "./sfx.js?v=1011.30";
-import { align } from "./score.js?v=1011.30";
+import { audioCtx } from "./wake.js?v=1012.1";
+import { leadOf, voicedEnd, keepFirstOf } from "./playmine.js?v=1012.1";
+import { speechEnd } from "./recstore.js?v=1012.1";
+import * as sfx from "./sfx.js?v=1012.1";
+import { align } from "./score.js?v=1012.1";
+import { koq } from "./text.js?v=1012.1";
 
 export const FR = 0.02; // 특징 칸 20ms
 const alignCache = new Map();
@@ -368,7 +369,7 @@ export async function rhythmOf({ ep, key, url, text, blob, heard, span, words, s
 }
 
 // 결과 줄 근거 — 「글자 100% · 리듬 78%」 + 리듬이 85% 아래면 가장 많이 깎인 곳 한 곳
-export const rhyText = (h, t) => `${t("rhythm_line", { l: h.L, r: Math.floor(h.R * 100 + 1e-9) })}${h.R < R_FULL && h.worst ? " · " + t("rhy_" + h.worst.kind, { s: `「${h.worst.ch}」` }) : ""}`;
+export const rhyText = (h, t) => `${t("rhythm_line", { l: h.L, r: Math.floor(h.R * 100 + 1e-9) })}${h.R < R_FULL && h.worst ? " · " + t("rhy_" + h.worst.kind, { s: koq(h.worst.ch) }) : ""}`;
 
 // 저장본 점수 판(본부 10-06 — 리듬 넣기 전에 저장한 100점이 남아 새 녹음(96)을 「앞 저장본이 더 높음」으로 밀어냄)
 //  scoreV 2 = 글자 × f(R) 내림 · 옛 판 저장본은 열 때 그 저장된 소리로 리듬을 다시 재 새 점수로 바꿔 저장(옛 값은 score0 에 그대로)

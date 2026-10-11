@@ -13,20 +13,20 @@
 //     못 넘어도 막지 않는다([다음 ▶]) · 음성 인식이 안 되는 곳은 점수 없이 듣고 비교만(녹음은 저장)
 //  S6 녹음은 이 기기 안에만(IndexedDB) — 서버로 보내지 않는다
 //  S7 영상 창 안(embedded): 스크롤 없이 · 줄 이동·닫기는 학습 화면이 한다 · 줄 전체까지 통과하면 다음 줄 말하기로
-import { t, lang } from "../i18n.js?v=1011.30";
-import { esc, sayParts } from "../text.js?v=1011.30";
-import { spkHtml } from "../ui.js?v=1011.30";
-import { episode } from "../data.js?v=1011.30";
-import { paths } from "../paths.js?v=1011.30";
-import { audioCtx, hold, quietWake } from "../wake.js?v=1011.30";
-import * as sfx from "../sfx.js?v=1011.30";
-import { diagEnv, keepDiag } from "../diag.js?v=1011.30";
-import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1011.30";
-import { bestHeard, heardHTML, endHint, scoreOf, bestFull, spanOf, sylsAt } from "../heard.js?v=1011.30"; // 덧붙은 말 빼고 견주기(본부 10-11)
-import { openCompare, playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1011.30";
-import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace, lateFactor, sylAt, karaokeRun } from "../rhythm.js?v=1011.30";
-import { recDel, downloadRec, askPersist } from "../recstore.js?v=1011.30";
-import { logRec, dB, srWhy, srWatch, niceLabel, ALIAS, srOnlyMode, setSrOnly, isAndroid, recordSROnly, srMiss, micSet, seqMode, srOnBlob, devSR, setDevSR, srJudge } from "../recorder.js?v=1011.30";
+import { t, lang } from "../i18n.js?v=1012.1";
+import { esc, sayParts, koq } from "../text.js?v=1012.1";
+import { spkHtml } from "../ui.js?v=1012.1";
+import { episode } from "../data.js?v=1012.1";
+import { paths } from "../paths.js?v=1012.1";
+import { audioCtx, hold, quietWake } from "../wake.js?v=1012.1";
+import * as sfx from "../sfx.js?v=1012.1";
+import { diagEnv, keepDiag } from "../diag.js?v=1012.1";
+import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1012.1";
+import { bestHeard, heardHTML, endHint, scoreOf, bestFull, spanOf, sylsAt } from "../heard.js?v=1012.1"; // 덧붙은 말 빼고 견주기(본부 10-11)
+import { openCompare, playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1012.1";
+import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace, lateFactor, sylAt, karaokeRun } from "../rhythm.js?v=1012.1";
+import { recDel, downloadRec, askPersist } from "../recstore.js?v=1012.1";
+import { logRec, dB, srWhy, srWatch, niceLabel, ALIAS, srOnlyMode, setSrOnly, isAndroid, recordSROnly, srMiss, micSet, seqMode, srOnBlob, devSR, setDevSR, srJudge } from "../recorder.js?v=1012.1";
 
 // 통과 두 단계(본부 10-04 · 투덜이 「원어민은 되지만 외국인은 100% 어렵다」): 80↑ = ☆ 통과(✓ · [저장]) · 95↑ = ★ 완벽
 export const PASS = 80, PERFECT = 95;
@@ -41,14 +41,14 @@ const romOn = () => { try { return localStorage.getItem("malmun.rom") !== "0"; }
 const short = (w, n = 8) => { const a = [...String(w)]; let k = 0, i = 0; for (; i < a.length && k < n; i++) if (/[가-힣]/.test(a[i])) k++; return i < a.length ? a.slice(0, i).join("").trim() + "…" : w; };
 export function hintText(sc, t, hint) {
   if (!hint) return "";
-  const q = w => `「${w}」${romOn() && hint.rom?.[w] ? `(${hint.rom[w]})` : ""}`;
+  const q = w => `${koq(w)}${romOn() && hint.rom?.[w] ? `(${hint.rom[w]})` : ""}`;
   if (hint.kind === "tail") return sc < PASS && hint.tail ? t("why_tail", { tail: q(short(hint.tail)) }) : ""; // 긴 뒷부분은 앞 몇 글자 + …(투덜이 10-07 — 문구가 너무 길어 겹침)
-  if (hint.kind === "other") return sc < PASS ? t("why_other", { say: `「${short(hint.say || "")}」` }) : "";
+  if (hint.kind === "other") return sc < PASS ? t("why_other", { say: koq(short(hint.say || "")) }) : "";
   if (hint.kind !== "words") return "";
   const ws = hint.words, list = ws.slice(0, 2).map(x => q(x.w)).join("·");
   if (sc >= PASS) return t("why_polish", { ws: list });
   if (ws.length > 2) return t("why_many", { ws: list });
-  const parts = ws.map(x => (x.h ? t("why_heard_as", { w: q(x.w), h: `「${short(x.h, 6)}」` }) : t("why_missing", { w: q(x.w) })));
+  const parts = ws.map(x => (x.h ? t("why_heard_as", { w: q(x.w), h: koq(short(x.h, 6)) }) : t("why_missing", { w: q(x.w) })));
   return `${parts.join(" · ")} — ${t("why_redo", { ws: list })}${hint.restOk ? " " + t("why_rest_ok") : ""}`;
 }
 // 시간 규칙(본부 10-04 · 투덜이 승인): 말 사이 쉼 2초 · 🎤 뒤 6초 안에 말 없으면 끝 · 최대 길이 = max(8, 3 + 0.8 × 음절)초
@@ -63,8 +63,8 @@ export function quietLimit(want, heard) {
 export const maxMsFor = say => Math.max(8000, (3 + 0.8 * [...String(say || "")].filter(c => /[가-힣]/.test(c)).length) * 1000);
 
 // ── 닮음 = 음절 정렬(js/score.js · 「들린 말」 빨간 표시와 같은 함수 — 본부 10-04) ──
-import { similarity, align } from "../score.js?v=1011.30";
-import { scoreFx } from "../scorefx.js?v=1011.30"; // 점수별 효과(본부 10-05)
+import { similarity, align } from "../score.js?v=1012.1";
+import { scoreFx } from "../scorefx.js?v=1012.1"; // 점수별 효과(본부 10-05)
 export { similarity };
 
 // ── 내 목소리 저장(S6) ──
@@ -145,8 +145,8 @@ export default async function speak(app, ep, id, opts = {}) {
     const p = cur(), sv = st.saved[p.key];
     $(".say").innerHTML = [...String(p.text)].map(ch => `<span>${esc(ch)}</span>`).join(""); // 글자마다(녹음 중 속도 안내 칠 — 본부 10-07)
     // 「말해 보기」 과제 = 카드와 같게 로마자(작게 · 로마자 꺼지면 숨김) + 뜻(학습자 언어) — 괄호 없음(본부 10-05)
-    const sp = p.task ? sayParts(line.v9?.text?.[lang]?.say) : null, romOn = (() => { try { return localStorage.getItem("malmun.rom") !== "0"; } catch { return true; } })();
-    $(".tr").innerHTML = p.whole ? esc(line.tr || "") : sp ? `${romOn && sp.rom ? `<span class="trrom">${esc(sp.rom)}</span>` : ""}${esc(sp.mean)}` : "";
+    const sp = p.task ? sayParts(line.v9?.text?.[d.v9L]?.say) : null, romOn = (() => { try { return localStorage.getItem("malmun.rom") !== "0"; } catch { return true; } })();
+    $(".tr").innerHTML = p.whole ? esc(line.tr || "") : sp ? `${romOn && sp.rom ? `<span class="trrom" dir="ltr">${esc(sp.rom)}</span>` : ""}${esc(sp.mean)}` : "";
     // 긴 과제(줄 전체)는 창 안에 들어갈 때까지 글자를 줄인다 — 스크롤 없이(S7)
     $(".segnav").innerHTML = parts.length > 1
       ? `<button data-seg="-1" ${st.i ? "" : "disabled"} aria-label="${esc(t("previous"))}">${lbl(t("prev_btn"))}</button><span>${st.i + 1}/${parts.length}${sv?.score >= PASS ? " ✓" : ""}</span><button data-seg="1" ${st.i < parts.length - 1 ? "" : "disabled"} aria-label="${esc(t("next"))}">${lbl(t("next_btn"))}</button>` : "";

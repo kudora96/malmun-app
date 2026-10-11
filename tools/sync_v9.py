@@ -7,17 +7,39 @@ MALMUN = r"D:\gdrive\malmun"
 APP = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
-def sync(ep):
-    src = os.path.join(MALMUN, "04_subtitles", ep, "_v9", f"{ep}_v9_app.json")
+V2 = os.path.join(MALMUN, "09_lang", "out")  # 언어부 v2 정본(migrate_v9) — 09_lang/out/{편}/{편}.v9.v2.json
+
+
+def check_v2(d):
+    """v2 받기 전 검사(v9_schema_v2.md §7 요지) — 언어마다 문장 수·소리↔시각 짝 · 틀리면 멈춤"""
+    bad = []
+    for l in d["lines"]:
+        ns = len(l.get("sent") or [])
+        for lg, kb in (l.get("ko_by") or {}).items():
+            if any(not (0 <= int(k) < ns) for k in (kb.get("sent") or {})): bad.append(f"{l['n']} ko_by.{lg}.sent 번호가 0..{ns - 1} 밖")  # 달라지는 문장만 {"번호": 글}
+            if bool(kb.get("audio_ex")) != bool(kb.get("sent_s")): bad.append(f"{l['n']} ko_by.{lg} audio_ex↔sent_s 짝 없음")
+            if kb.get("sent_s") is not None and len(kb["sent_s"]) != ns: bad.append(f"{l['n']} ko_by.{lg}.sent_s 수")
+    return bad
+
+
+def sync(ep, dry=False):
+    v2src = os.path.join(V2, ep, f"{ep}.v9.v2.json")
+    src = v2src if os.path.exists(v2src) else os.path.join(MALMUN, "04_subtitles", ep, "_v9", f"{ep}_v9_app.json")
     d = json.load(open(src, encoding="utf-8"))
+    if d.get("schema") == 2:
+        bad = check_v2(d)
+        if bad: print("v2 검사 실패 — 쓰지 않음:", *bad[:20], sep="\n  "); sys.exit(1)
     root = os.path.join(MALMUN, d.get("audio_root", f"04_subtitles/{ep}/_preview/").replace("/", os.sep))
     out = os.path.join(APP, "media", "v9", ep)
     os.makedirs(out, exist_ok=True)
     n = 0
+    # v2: 견주기 줄 언어판 한국어 소리(ko_by.{xx}.audio_ex)가 아직 없으면 _todo.audio_copy 의 원본에서 앱 media 로만 복사(드라이브 원본은 안 건드림)
+    cp = {b: a for a, b in (d.get("_todo") or {}).get("audio_copy", [])}
     for l in d["lines"]:
-        for lg in (l.get("audio") or {}).values():
-            for rel in lg.values():
+        rels = [r for lg in (l.get("audio") or {}).values() for r in lg.values() if r] + [kb["audio_ex"] for kb in (l.get("ko_by") or {}).values() if kb.get("audio_ex")]
+        for rel in rels:
                 a, b = os.path.join(root, rel.replace("/", os.sep)), os.path.join(out, rel.replace("/", os.sep))
+                if not os.path.exists(a) and rel in cp: a = os.path.join(root, cp[rel].replace("/", os.sep))
                 if os.path.exists(a):
                     os.makedirs(os.path.dirname(b), exist_ok=True); shutil.copy2(a, b); n += 1
                 else:
@@ -40,11 +62,15 @@ def sync(ep):
             heads[code] = rel
     if heads:
         d["say_head"] = heads
-    with open(os.path.join(APP, "data", ep, f"{ep}.v9.json"), "w", encoding="utf-8") as f:
+    dst = os.path.join(APP, "data", ep, f"{ep}.v9.json")
+    if dry: print(ep, "(dry-run)", src); return d
+    with open(dst + ".tmp", "w", encoding="utf-8") as f:  # 반쯤 쓴 파일 막기 — 임시 → 바꿔치기
         json.dump(d, f, ensure_ascii=False, indent=1)
-    print(ep, len(d["lines"]), "줄 ·", n, "소리")
+    os.replace(dst + ".tmp", dst)
+    print(ep, "v2" if d.get("schema") == 2 else "v1", len(d["lines"]), "줄 ·", n, "소리 ·", os.path.relpath(src, MALMUN))
 
 
 if __name__ == "__main__":
-    for ep in sys.argv[1:] or ["L01-00-01"]:
-        sync(ep)
+    a = [x for x in sys.argv[1:] if not x.startswith("--")]
+    for ep in a or ["L01-00-01"]:
+        sync(ep, dry="--dry-run" in sys.argv)

@@ -13,15 +13,15 @@
 //  W5 소리는 언제나 하나만 · 새 일을 하면 앞 소리는 멈춘다
 //  W6 영상 창 안(embedded): 창 안에서 스크롤 없이 다 보이게 — 긴 문장은 토막으로(◀ 1/3 ▶) ·
 //     토막을 다 쓰면 자동으로 다음 토막 · 줄을 다 쓰면 대사를 듣고 자동으로 다음 줄 쓰기 · 아래 ▶ = 이 부분 듣기
-import { t, lang } from "../i18n.js?v=1011.30";
-import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO } from "../text.js?v=1011.30";
-import { episode, chars, charsF } from "../data.js?v=1011.30";
-import { paths } from "../paths.js?v=1011.30";
-import { I, spkHtml } from "../ui.js?v=1011.30";
-import { audioCtx, hold } from "../wake.js?v=1011.30";
-import * as sfx from "../sfx.js?v=1011.30";
-import { scoreFx } from "../scorefx.js?v=1011.30";
-import { units as jamoUnits, baseOf, shapeFix } from "../jamobox.js?v=1011.30"; // 자모 자리 나누기(획순 · 자판 덧칠 · 손글씨 덩어리 — 본부 10-07) // 손글씨 점수 효과 = 말하기와 같은 규칙(본부 10-07)
+import { t, lang } from "../i18n.js?v=1012.1";
+import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO, koq } from "../text.js?v=1012.1";
+import { episode, chars, charsF } from "../data.js?v=1012.1";
+import { paths } from "../paths.js?v=1012.1";
+import { I, spkHtml } from "../ui.js?v=1012.1";
+import { audioCtx, hold } from "../wake.js?v=1012.1";
+import * as sfx from "../sfx.js?v=1012.1";
+import { scoreFx } from "../scorefx.js?v=1012.1";
+import { units as jamoUnits, baseOf, shapeFix } from "../jamobox.js?v=1012.1"; // 자모 자리 나누기(획순 · 자판 덧칠 · 손글씨 덩어리 — 본부 10-07) // 손글씨 점수 효과 = 말하기와 같은 규칙(본부 10-07)
 
 const KEYS = [..."ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎㄲㄸㅃㅆㅉ"], VOW = [..."ㅏㅑㅓㅕㅗㅛㅜㅠㅡㅣ"];
 const VOW2 = [..."ㅐㅒㅔㅖㅘㅙㅚㅝㅞㅟㅢ"]; // 겹모음 줄(본부 10-06) — 칸 하나 · ㅓ+ㅣ 처럼 나눠 쳐도 받음
@@ -592,7 +592,7 @@ export default async function write(app, ep, id, opts = {}) {
     const nS = Math.max(1, (S.length - 1) * 4), mxv = Math.max(...votes); let ui = votes.indexOf(mxv);
     if (mxv < nS * 0.5) { const mid = S[Math.floor(S.length / 2)], m2 = S.length > 1 ? [(S[0][0] + S[S.length - 1][0]) / 2, (S[0][1] + S[S.length - 1][1]) / 2] : mid; let bd = Infinity; us.forEach((u, k) => { let d = Infinity; for (let i = 0; i < u.px.length; i += 3) { const q = u.px[i], e = Math.hypot(m2[0] - (q % UN) / UN, m2[1] - Math.floor(q / UN) / UN); if (e < d) d = e; } if (d < bd) { bd = d; ui = k; } }); } // 잉크를 절반도 안 지나가면 = 획 가운데에 가장 가까운 자모 잉크
     const role = ROLE[us[ui].role]; H.roles ||= new Set();
-    if (!H.orderTold) { const need = us.find(u => ROLE[u.role] < role && !H.roles.has(ROLE[u.role])); if (need) { H.orderTold = true; H.roles.add(role); return t("h_order_first", { j: `「${need.jamo}」` }); } }
+    if (!H.orderTold) { const need = us.find(u => ROLE[u.role] < role && !H.roles.has(ROLE[u.role])); if (need) { H.orderTold = true; H.roles.add(role); return t("h_order_first", { j: koq(need.jamo) }); } }
     H.roles.add(role);
     const [ex, ey] = S[S.length - 1], dx = ex - sx, dy = ey - sy, len = Math.hypot(dx, dy);
     if (len >= 0.12 && Math.abs(dx) > 2 * Math.abs(dy) && dx < 0) return t("h_dir_lr");

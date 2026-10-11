@@ -6,7 +6,7 @@
   jamo/{name}.mp3           ← 옛 앱 audio/jamo
 
 이미 같은 크기로 올라가 있으면 건너뛴다. 8개씩 동시에 올린다.
-실행: python tools/upload_media.py L01-00-01 [--chars] [--jamo] [--letters] [--charsf] [--sfx]   (먼저 npx wrangler login)
+실행: python tools/upload_media.py L01-00-01 [--chars] [--jamo] [--letters] [--charsf] [--sfx] [--v9=L01-00-01]   (먼저 npx wrangler login)
 """
 import json, os, subprocess, sys, urllib.request
 from concurrent.futures import ThreadPoolExecutor
@@ -77,6 +77,13 @@ def chars_f():
     return [(f"chars_f/{f}", os.path.join(d, f), "audio/mpeg") for f in sorted(set(m.values()))]
 
 
+def v9(ep):
+    """새 설명(v9) 소리 → v9/{ep}/… (sync_v9 가 media/v9 에 모은 것 전부 · 언어판 …_kr_설명.{xx}.mp3 포함 · 언어부 app_changes #34)"""
+    root = os.path.join(APP, "media", "v9", ep)
+    return [(f"v9/{ep}/" + os.path.relpath(os.path.join(dp, f), root).replace(os.sep, "/"), os.path.join(dp, f), "audio/mpeg")
+            for dp, _, fs in os.walk(root) for f in sorted(fs) if f.endswith(".mp3")]
+
+
 def sfx():
     """점수 효과음(투덜이가 귀로 고름 · 본부 10-05) → sfx/score_*.mp3"""
     d = os.path.join(MALMUN, "02_assets", "sfx")
@@ -86,6 +93,7 @@ def sfx():
 if __name__ == "__main__":
     jobs = []
     for a in sys.argv[1:]:
+        if a.startswith("--v9="): jobs += v9(a[5:]); continue
         jobs += chars() if a == "--chars" else jamo() if a == "--jamo" else letters() if a == "--letters" else chars_f() if a == "--charsf" else sfx() if a == "--sfx" else episode(a)
     bad = 0
     with ThreadPoolExecutor(8) as ex:

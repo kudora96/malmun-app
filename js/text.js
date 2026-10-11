@@ -70,5 +70,12 @@ export function vowelLen(ch) {
 
 export const JAMO_AUDIO = { "ㄱ": "giyeok", "ㄲ": "ssang_giyeok", "ㄴ": "nieun", "ㄷ": "digeut", "ㄸ": "ssang_digeut", "ㄹ": "rieul", "ㅁ": "mieum", "ㅂ": "bieup", "ㅃ": "ssang_bieup", "ㅅ": "siot", "ㅆ": "ssang_siot", "ㅇ": "ieung", "ㅈ": "jieut", "ㅉ": "ssang_jieut", "ㅊ": "chieut", "ㅋ": "kieuk", "ㅌ": "tieut", "ㅍ": "pieup", "ㅎ": "hieut", "ㅏ": "a", "ㅐ": "ae", "ㅑ": "ya", "ㅒ": "yae", "ㅓ": "eo", "ㅔ": "e", "ㅕ": "yeo", "ㅖ": "ye", "ㅗ": "o", "ㅘ": "wa", "ㅙ": "wae", "ㅚ": "oe", "ㅛ": "yo", "ㅜ": "u", "ㅝ": "wo", "ㅞ": "we", "ㅟ": "wi", "ㅠ": "yu", "ㅡ": "eu", "ㅢ": "ui", "ㅣ": "i" };
 
+// 학습자 글 속 한국어 자리 — 「」 대신 ASCII 따옴표(타이·나스탈리크 글꼴에 「」 없음 · 학습자 글 따옴표 규칙) + 방향 격리(FSI…PDI · 오른쪽→왼쪽 글에서 순서 안 뒤집힘 · 언어부 10-11)
+export const koq = s => `⁨"${s}"⁩`;
 // 「이제 말해 보세요」 글 나누기(본부 10-05) — 「안내 "한국어" (로마자, 뜻)」 → { intro, ko, rom, mean } · 괄호 없는 꼴도 받음
-export const sayParts = s => { const m = String(s || "").match(/^(.*?)\s*"([^"]+)"\s*(?:\(([^,()]*),\s*([^()]*)\))?\s*[।.]?\s*$/); return m ? { intro: m[1].trim(), ko: m[2], rom: (m[3] || "").trim(), mean: (m[4] || "").trim() } : null; };
+//  괄호 안 로마자 | 뜻 = 한국어 쉼표 수만큼 건너뛴 쉼표(, ،)에서 가름 — 로마자는 소문자 라틴·붙임표만(「아, 글자가」 · 뜻 속 쉼표 둘 다 · 언어부 10-11) · 끝 부호 । . 。 ။ ۔ ។ 받음
+export const sayParts = s => { const m = String(s || "").match(/^(.*?)\s*"([^"]+)"\s*(?:\(([^()]*)\))?\s*[।.。။۔។]?\s*$/); if (!m) return null;
+  const inner = m[3] || "", cs = [...inner.matchAll(/[,،]/g)].map(x => x.index), nk = (m[2].match(/[,،]/g) || []).length; /* 로마자 쉼표 수 ≤ 한국어 쉼표 수 · 로마자 = 라틴 글자만 */
+  let k = -1; for (let i = Math.min(nk, cs.length - 1); i >= 0; i--) if (/^[\sa-z'’\-.,?!]*$/.test(inner.slice(0, cs[i]))) { k = cs[i]; break; }
+  if (k < 0 && cs.length) k = cs[0]; const rom = k < 0 ? inner : inner.slice(0, k), mean = k < 0 ? "" : inner.slice(k + 1);
+  return { intro: m[1].trim(), ko: m[2], rom: rom.replace(/[,.?!،]/g, "").replace(/\s+/g, " ").trim() /* 로마자 속 문장부호(「a-,」「yo-?」「wa-!」)는 뗌 — 언어부 S7 과 같음 */, mean: mean.trim() }; };

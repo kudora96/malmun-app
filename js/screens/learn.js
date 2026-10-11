@@ -10,24 +10,24 @@
 //  R7 영상은 늘 맨 위 · 지금 줄은 영상 바로 아래(앞 줄은 영상 뒤로) — 손으로 목록을 움직이면 4초 동안은 따라가지 않음
 //  R8 듣기 모드(대사→설명 · 설명만)도 R1~R6 그대로(영상 대신 소리 조각) · 모드를 바꾸면 멈춤(▶ 로 시작)
 //  R9 다시 들어오면 마지막 줄이 선택된 채 멈춰 있음
-import * as sfxL from "../sfx.js?v=1011.30"; // 카드 말하기 최대 길이 = 본보기 길이로(10-07)
-import { t, lang, langName } from "../i18n.js?v=1011.30";
-import { esc, renderText, glossCards, sayParts } from "../text.js?v=1011.30";
-import { episode } from "../data.js?v=1011.30";
-import { paths } from "../paths.js?v=1011.30";
-import { Sequence } from "../audio.js?v=1011.30";
-import { I, progress, SPEAKER, spkHtml, uiKoBtn, toggleUiKo } from "../ui.js?v=1011.30";
-import writeView from "./write.js?v=1011.30";
-import { diagEnv, keepDiag } from "../diag.js?v=1011.30";
-import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1011.30";
-import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace, lateFactor, sylAt, paintAt, karaokeRun } from "../rhythm.js?v=1011.30";
-import { playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1011.30";
-import { heardHTML, endHint, scoreOf, bestFull, spanOf, sylsAt } from "../heard.js?v=1011.30"; // 덧붙은 말 빼고 견주기(본부 10-11)
-import { recDel, downloadRec, askPersist } from "../recstore.js?v=1011.30";
-import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1011.30";
-import { scoreFx, stopFx } from "../scorefx.js?v=1011.30"; // 점수별 효과(본부 10-05)
-import { record, recordSROnly, srOnlyMode, setSrOnly, isAndroid, srMiss, micWhy, srWhy, canScore, closeMic, logRec, micOpen, seqMode, srOnBlob, devSR, setDevSR, srJudge, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1011.30";
-import { hold, quietWake } from "../wake.js?v=1011.30";
+import * as sfxL from "../sfx.js?v=1012.1"; // 카드 말하기 최대 길이 = 본보기 길이로(10-07)
+import { t, lang, langName } from "../i18n.js?v=1012.1";
+import { esc, renderText, glossCards, sayParts } from "../text.js?v=1012.1";
+import { episode } from "../data.js?v=1012.1";
+import { paths } from "../paths.js?v=1012.1";
+import { Sequence } from "../audio.js?v=1012.1";
+import { I, progress, SPEAKER, spkHtml, uiKoBtn, toggleUiKo } from "../ui.js?v=1012.1";
+import writeView from "./write.js?v=1012.1";
+import { diagEnv, keepDiag } from "../diag.js?v=1012.1";
+import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1012.1";
+import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace, lateFactor, sylAt, paintAt, karaokeRun } from "../rhythm.js?v=1012.1";
+import { playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1012.1";
+import { heardHTML, endHint, scoreOf, bestFull, spanOf, sylsAt } from "../heard.js?v=1012.1"; // 덧붙은 말 빼고 견주기(본부 10-11)
+import { recDel, downloadRec, askPersist } from "../recstore.js?v=1012.1";
+import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1012.1";
+import { scoreFx, stopFx } from "../scorefx.js?v=1012.1"; // 점수별 효과(본부 10-05)
+import { record, recordSROnly, srOnlyMode, setSrOnly, isAndroid, srMiss, micWhy, srWhy, canScore, closeMic, logRec, micOpen, seqMode, srOnBlob, devSR, setDevSR, srJudge, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1012.1";
+import { hold, quietWake } from "../wake.js?v=1012.1";
 
 const RATES = [1, 0.75, 0.5];
 const pref = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } };
@@ -298,14 +298,15 @@ export default async function learn(app, ep, startId) {
     if (!sn?.length) return bold((x.text?.[code] || x.text?.ko || {}).ex || "");
     // 문장 앞 작은 ▶ 단추는 없앰(투덜이 10-07 「원래 없던 게 생김 · 다 지워야」) — 문장 글을 누르면 그 문장부터 듣기는 그대로(투덜이 결정이 단추 원칙보다 먼저)
     // 낱말마다 감쌈(설명 노래방 칠 · 본부 10-08 — 데바나가리는 낱말 단위라야 글꼴이 안 깨짐) · 따옴표 낱말은 통째로
-    const kw = str => (String(str).match(/"[^"]*"\S*|\S+|\s+/g) || []).map(tk => (/^\s+$/.test(tk) ? tk : `<span class="kw">${qWords(i, tk)}</span>`)).join("");
+    const toks = str => code === "th" && globalThis.Intl?.Segmenter ? [...new Intl.Segmenter("th", { granularity: "word" }).segment(String(str))].map(x => x.segment) : String(str).match(/"[^"]*"\S*|\S+|\s+/g) || []; // 타이어는 띄어쓰기가 없어 낱말 나누기(Intl.Segmenter · 언어부 10-11)
+    const kw = str => toks(str).map(tk => (/^\s+$/.test(tk) ? tk : `<span class="kw">${qWords(i, tk)}</span>`)).join("");
     return sn.map((s, k) => `<span class="sn" data-x="sn" data-s="${k}" data-i="${i}" data-c="${code}"${code === "ko" ? ' lang="ko"' : ""}>${kw(s[code] || "")}</span>`).join(" ");
   }
   // 「이제 말해 보세요」 칸(본부 10-05) — 첫 줄 = 안내(듣기 언어) · 한국어 문장 크게 · 로마자(작게 · 로마자 꺼지면 숨김) · 뜻(작게 · 학습자 언어 항상) · 괄호 없음
   function sayHTML(i, code) {
     const x = L[i].v9, a = sayParts(x.text?.[code]?.say), b = sayParts(x.text?.[v9L]?.say) || a;
     if (!a) return bold((x.text?.[code] || x.text?.ko || {}).say || "");
-    return `<span class="sayin"${code === "ko" ? ' lang="ko"' : ""}>${esc(a.intro)}</span><span class="saybig" lang="ko">${[...String(a.ko)].map(ch => `<span>${esc(ch)}</span>`).join("")}</span>${b?.rom ? `<span class="sayrom rom">${esc(b.rom)}</span>` : ""}${b?.mean && v9L ? `<span class="saymean">${esc(b.mean)}</span>` : ""}`;
+    return `<span class="sayin"${code === "ko" ? ' lang="ko"' : ""}>${esc(a.intro)}</span><span class="saybig" lang="ko" dir="ltr">${[...String(a.ko)].map(ch => `<span>${esc(ch)}</span>`).join("")}</span>${b?.rom ? `<span class="sayrom rom" dir="ltr">${esc(b.rom)}</span>` : ""}${b?.mean && v9L ? `<span class="saymean">${esc(b.mean)}</span>` : ""}`;
   }
   // 지금 문장 번호 = 재생 시각이 들어간 sent 칸
   const sentAt = (i, code, tm) => { const sn = L[i].v9?.sent || []; let k = 0; sn.forEach((s, j) => { if ((s[`${code}_s`] ?? 0) <= tm + 0.05) k = j; }); return k; };
@@ -390,7 +391,7 @@ export default async function learn(app, ep, startId) {
   const hidePop = () => app.querySelectorAll(".v9pop").forEach(p => { p.hidden = true; p.__for = null; });
   function popFor(el) {
     const sn = el.closest(".sn"), i = sn ? +sn.dataset.i : st.panel.i, x = L[i].v9;
-    if (el.dataset.x === "gw") { const w = el.dataset.g, g = x.gloss?.[w] || {}, rom = romOn() && g.rom, gm = v9L ? g[v9L] : null; if (!gm && !rom) return ""; return `<b lang="ko">${esc(w)}</b>${rom ? ` <span class="rom">${esc(g.rom)}</span>` : ""}${gm ? ` · ${esc(gm)}` : ""}`; } /* 뜻 = 학습자 언어(없으면 로마자만 · 언어부 10-11) */ // 뜻·로마자 없으면 말풍선 없음
+    if (el.dataset.x === "gw") { const w = el.dataset.g, g = x.gloss?.[w] || {}, rom = romOn() && g.rom, gm = v9L ? g.mean : null; /* 어댑터가 학습자 언어 뜻을 mean 으로(v2 · 언어부 #19) */ if (!gm && !rom) return ""; return `<b lang="ko">${esc(w)}</b>${rom ? ` <span class="rom">${esc(g.rom)}</span>` : ""}${gm ? ` · ${esc(gm)}` : ""}`; } /* 뜻 = 학습자 언어(없으면 로마자만 · 언어부 10-11) */ // 뜻·로마자 없으면 말풍선 없음
     return "";
   }
   const onDocDown = e => { if (!e.target.closest(".v9pop, [data-x=sn], [data-x=gw]")) hidePop(); };
@@ -834,7 +835,7 @@ export default async function learn(app, ep, startId) {
   };
   v.addEventListener("click", togglePlay);
   app.querySelector("[data-act=uiko]")?.addEventListener("click", e => { e.stopPropagation(); const p = st.panel; if (p) { const w = panel.__wr?.st?.() || panel.querySelector(".write")?.parentElement?.__wr?.st?.(), sp = panel.__sp?._state; try { sessionStorage.setItem("malmun.reopen", JSON.stringify({ ep, at: Date.now(), kind: p.kind, i: p.i, s: w?.s, w: w?.w, c: w?.c, k: w?.k, wrote: w ? [...w.wrote] : [], part: sp?.i })); } catch {} }
-    toggleUiKo(() => import("../main.js?v=1011.30").then(m => m.rerender())); }); // 앱 글 한국어 토글 → 화면 다시 그림(도는 것은 cleanup 이 멈춤) → 열려 있던 창·자리로 다시 엶
+    toggleUiKo(() => import("../main.js?v=1012.1").then(m => m.rerender())); }); // 앱 글 한국어 토글 → 화면 다시 그림(도는 것은 cleanup 이 멈춤) → 열려 있던 창·자리로 다시 엶
   app.querySelector("[data-act=fs]").onclick = () => {
     const w = app.querySelector("#vwrap");
     if (document.fullscreenElement) document.exitFullscreen?.();

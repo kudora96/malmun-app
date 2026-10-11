@@ -42,11 +42,13 @@ def sync_episode(ep):
     if os.path.exists(words):
         shutil.copy2(words, out)
     langs = []
+    v9f = os.path.join(out, f"{ep}.v9.json")  # 새 설명이 있는 편은 그 언어 설명이 있어야 「준비됨」(언어부 app_changes #33 — 설명 없는 언어가 준비됨으로 보이지 않게)
+    v9langs = set(json.load(open(v9f, encoding="utf-8")).get("langs", [])) if os.path.exists(v9f) else None
     for lang in LANGS:
         f = os.path.join(src, f"{ep}.{lang}.json")
         if os.path.exists(f):
             shutil.copy2(f, out)
-            langs.append(lang)
+            if v9langs is None or lang in v9langs: langs.append(lang)
     d = json.load(open(base, encoding="utf-8"))
     subs = d.get("subtitles", [])
     return {"lines": len(subs), "duration": round(max((s["end"] for s in subs), default=0), 1), "langs": langs}
