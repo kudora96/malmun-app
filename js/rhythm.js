@@ -10,11 +10,11 @@
 //      같은 음절 되풀이(「이…있어요」「거구구나」 — 들은 말에 더 들어간 음절이 옆 음절과 같거나 첫소리+모음이 같음)도 −0.08(「더듬음」)
 //  · 최종 점수 = 글자 점수(score.js) × f(R): R ≥ 0.85 → 1 · 0.5 ≤ R < 0.85 → 0.90 + 0.10 × (R − 0.5)/0.35 · R < 0.5 → 0.88
 //  녹음·재생은 그대로 — 받은 녹음(blob)을 풀어 재기만
-import { audioCtx } from "./wake.js?v=1011.26";
-import { leadOf, voicedEnd, keepFirstOf } from "./playmine.js?v=1011.26";
-import { speechEnd } from "./recstore.js?v=1011.26";
-import * as sfx from "./sfx.js?v=1011.26";
-import { align } from "./score.js?v=1011.26";
+import { audioCtx } from "./wake.js?v=1011.28";
+import { leadOf, voicedEnd, keepFirstOf } from "./playmine.js?v=1011.28";
+import { speechEnd } from "./recstore.js?v=1011.28";
+import * as sfx from "./sfx.js?v=1011.28";
+import { align } from "./score.js?v=1011.28";
 
 export const FR = 0.02; // 특징 칸 20ms
 const alignCache = new Map();
@@ -285,7 +285,10 @@ export function rhythmScore({ msyl, ysyl, mbuf, ybuf, ends, heard, groups }) {
 }
 // 늦음(투덜이 10-08 「노래방 색이 다 칠해지고 한참 뒤 또박또박 읽어도 100점 — 시간은 주되 100점은 안 되게 · 80점쯤」)
 //  내 말 끝(녹음 시작부터 · yEnd) − 노래방 칠 끝(본보기 빠르기 · paceEnd) = 늦음 · 여유 = 0.8초 + 칠 길이의 15% · 그 뒤 칠 길이의 50% 더 늦을 때까지 1 → 0.8 로 줄임(최소 0.8)
-export function lateFactor(yEnd, paceEnd) {
+//  단위(본부 10-11 고침): yEnd = 초(내 녹음 소리 안 시각 · 과제 토막 끝 — rhythmOf) · paceMs = 밀리초(paceOf().end 그대로) — 예전엔 초와 밀리초를 그대로 견줘 늦음이 한 번도 안 걸렸음
+//  녹음 소리 안 시각만 씀 — 서버 받아쓰기 응답·마이크 열리는 시간은 안 들어감(녹음 소리 0초 = 녹음 시작)
+export function lateFactor(yEnd, paceMs) {
+  const paceEnd = paceMs / 1000;
   if (!(yEnd > 0) || !(paceEnd > 0)) return { f: 1, late: false };
   const over = yEnd - paceEnd - (0.8 + 0.15 * paceEnd); if (over <= 0) return { f: 1, late: false };
   const f = 1 - 0.2 * Math.min(1, over / (0.5 * paceEnd)); return f >= 0.97 ? { f: 1, late: false } : { f, late: true }; // 조금 늦음(−3점 안)은 봐줌
@@ -295,15 +298,72 @@ export const rhythmFactor = R => (R >= R_FULL ? 1 : R >= 0.5 ? 0.9 + (0.1 * (R -
 // 내림(본부 10-06 — 반올림이면 리듬 89%(R 0.894)인데 100점이 나옴) · 100점 = 글자 100 그리고 R ≥ 0.85 일 때만
 export const withRhythm = (letter, R) => (letter == null || R == null ? letter : Math.floor(letter * rhythmFactor(R) + 1e-9));
 
+// 덧붙은 말이 있을 때 본보기 토막의 내 녹음 구간(본부 10-11) — 리듬·빠르기·비교 화면은 이 구간만
+//  span = heard.js spanOf 결과(j0·j1 = 토막 음절 · m = 들은 음절 수) + words(서버 받아쓰기 [{ w, s, e }] · 있으면)
+//  1) 서버 낱말 시각이 있고 음절 수가 맞으면 그 시각(낱말 안은 음절 수로 나눔)
+//  2) 없으면 말 구간을 음절 수로 나눈 짐작 자리 ±(0.5초 + 25%) 안에서 본보기와 부분 DTW(시작·끝 자유) → 조용한 틈에 붙임
+//  앞에 덧붙은 말이 없으면 시작 = 0 · 뒤에 없으면 끝 = 녹음 끝(자르지 않음) → { s, e } 초 · 못 찾으면 null
+export function findWin({ al, key, mbuf, ybuf, span, words, sylOf }) {
+  if (!span || !(span.m > 0) || (span.j0 === 0 && span.j1 === span.m)) return null;
+  const D = ybuf.duration, lead = span.j0 > 0, tail = span.j1 < span.m;
+  let s = null, e = null;
+  if (words?.length && sylOf) { // 서버 낱말 시각
+    const at = []; for (const w of words) { const k = sylOf(w.w).length; for (let i = 0; i < k; i++) at.push({ s: w.s + ((w.e - w.s) * i) / k, e: w.s + ((w.e - w.s) * (i + 1)) / k }); }
+    if (at.length === span.m && at.every(x => x.e >= x.s && x.e <= D + 0.5)) { s = Math.max(0, at[span.j0].s - 0.05); e = Math.min(D, at[span.j1 - 1].e + 0.08); }
+  }
+  if (s == null) {
+    const msyl = al?.items?.[key]?.syl, m0 = msyl?.length ? msyl[0].s : leadOf(mbuf, 0), m1 = msyl?.length ? msyl[msyl.length - 1].e : speechEnd(mbuf, 0);
+    const y0 = leadOf(ybuf, 0, 0, true), y1 = Math.max(y0 + 0.1, voicedEnd(ybuf, 0)), L = y1 - y0, gs = y0 + (L * span.j0) / span.m, ge = y0 + (L * span.j1) / span.m, mg = 0.5 + 0.25 * (ge - gs);
+    const r0 = lead ? Math.max(0, gs - mg) : 0, r1 = tail ? Math.min(D, ge + mg) : D;
+    const A = feats(mbuf.getChannelData(0), mbuf.sampleRate, Math.max(0, m0 - 0.02), Math.min(mbuf.duration, m1 + 0.02)), B = feats(ybuf.getChannelData(0), ybuf.sampleRate, r0, r1);
+    const w = subDtw(A, B); if (!w) return null;
+    s = r0 + w.a * FR; e = r0 + (w.b + 1) * FR;
+    const q = quietRuns(ybuf, Math.max(0, s - 0.3), Math.min(D, e + 0.3)).filter(x => x.e - x.s >= 0.05); // 낱말 사이 틈에 붙임
+    const qs = q.filter(x => x.e >= s - 0.25 && x.e <= s + 0.1).pop(), qe = q.find(x => x.s >= e - 0.1 && x.s <= e + 0.25);
+    if (qs) s = qs.e - 0.03; else s -= 0.05;
+    if (qe) e = qe.s + 0.05; else e += 0.08;
+  }
+  if (!lead) s = 0; if (!tail) e = D;
+  return e - s > 0.15 ? { s: Math.max(0, s), e: Math.min(D, e) } : null;
+}
+// 부분 DTW — 본보기(A) 전체가 내 녹음(B) 어딘가에 들어 있다고 보고 시작·끝을 자유롭게 → { a, b } (B 칸)
+function subDtw(A, B) {
+  const n = A.length, m = B.length; if (n < 2 || m < 2) return null;
+  const D = new Float32Array((n + 1) * (m + 1)).fill(Infinity), S = new Int32Array((n + 1) * (m + 1)), at = (i, j) => i * (m + 1) + j;
+  for (let j = 0; j <= m; j++) { D[at(0, j)] = 0; S[at(0, j)] = j; }
+  for (let i = 1; i <= n; i++) for (let j = 1; j <= m; j++) {
+    const a = A[i - 1], b = B[j - 1]; let c = 0; for (let q = 0; q < a.length; q++) c += (a[q] - b[q]) ** 2; c = Math.sqrt(c);
+    const d = D[at(i - 1, j - 1)], u = D[at(i - 1, j)] + STEP, l = D[at(i, j - 1)] + STEP;
+    if (d <= u && d <= l) { D[at(i, j)] = c + d; S[at(i, j)] = S[at(i - 1, j - 1)]; } else if (u <= l) { D[at(i, j)] = c + u; S[at(i, j)] = S[at(i - 1, j)]; } else { D[at(i, j)] = c + l; S[at(i, j)] = S[at(i, j - 1)]; }
+  }
+  let bj = 1; for (let j = 2; j <= m; j++) if (D[at(n, j)] < D[at(n, bj)]) bj = j;
+  return { a: S[at(n, bj)], b: bj - 1 };
+}
+// 그 구간만 남긴 소리(앞뒤 0.3초 아주 작은 잡음 · 이음 10ms 페이드) — 리듬·비교 화면 칸은 이 소리로 · 녹음·재생 원본은 그대로
+export function cutWin(buf, w) {
+  if (!w) return buf;
+  const sr = buf.sampleRate, P = Math.round(0.3 * sr), a = Math.max(0, Math.round(w.s * sr)), b = Math.min(buf.length, Math.round(w.e * sr)), F = Math.round(0.01 * sr);
+  const out = new AudioBuffer({ length: b - a + 2 * P, sampleRate: sr, numberOfChannels: 1 }), x = out.getChannelData(0), d = buf.getChannelData(0);
+  let r = 12345; const nz = () => ((r = (r * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff - 0.5) * 2e-5;
+  for (let i = 0; i < x.length; i++) x[i] = nz();
+  for (let i = a; i < b; i++) { const k = i - a, g = Math.min(a === 0 ? 1 : k / F, b === buf.length ? 1 : (b - 1 - i) / F, 1); x[P + k] += d[i] * Math.max(0, g); }
+  out.cut = { off: w.s - 0.3 }; // 잘린 소리 0초 = 원본 off 초
+  return out;
+}
+
 // 점수 낼 때 — 정렬 파일·본보기 소리·내 녹음 → { R, worst } · 못 재면 null(그땐 글자 점수 그대로)
-export async function rhythmOf({ ep, key, url, text, blob, heard }) {
+//  span·words·sylOf(본부 10-11 덧붙은 말) = 있으면 그 토막 구간만 잼 · 결과 win = 그 구간(비교 화면도 같은 구간) · yEnd = 앞에 덧붙은 말이 있으면 토막 첫소리가 🎤 뒤 PACE_L0 에 온 것으로
+export async function rhythmOf({ ep, key, url, text, blob, heard, span, words, sylOf }) {
   if (window.__noRhythm) return null; // 점검 도구(가짜 마이크 소리)용 — 글자 점수만 보는 점검에서 끔
   try {
-    const [al, mbuf, ybuf] = await Promise.all([loadAlign(ep), sfx.load(url), blob.arrayBuffer().then(ab => audioCtx().decodeAudioData(ab))]);
-    if (!mbuf || !ybuf) return null;
+    const [al, mbuf, ybuf0] = await Promise.all([loadAlign(ep), sfx.load(url), blob.arrayBuffer().then(ab => audioCtx().decodeAudioData(ab))]);
+    if (!mbuf || !ybuf0) return null;
+    const win = span ? findWin({ al, key, mbuf, ybuf: ybuf0, span, words, sylOf }) : null, ybuf = cutWin(ybuf0, win);
     const pr = prepare({ al, key, text, mbuf, ybuf });
     if (!pr.aligned) return null; // 본보기 음절 시각이 없으면 리듬은 재지 않음
-    return rhythmScore({ msyl: pr.msyl, ysyl: pr.ysyl, mbuf, ybuf, ends: pr.ends, heard, groups: pr.groups });
+    const r = rhythmScore({ msyl: pr.msyl, ysyl: pr.ysyl, mbuf, ybuf, ends: pr.ends, heard, groups: pr.groups });
+    if (win) { r.win = win; r.yEnd = win.s > 0 ? r.yEnd - pr.ysyl[0].s + PACE_L0 / 1000 : r.yEnd + ybuf.cut.off; }
+    return r;
   } catch { return null; }
 }
 

@@ -5,15 +5,15 @@
 //  · 재생: 본보기 → 0.4초 → 내 목소리 · 재생 위치 세로 막대 + 지금 음절 강조 · 파형·음절 칸을 누르면 그 줄 그 음절부터
 //  녹음·점수 계산·[내 목소리] 재생(playmine.js playMine)은 그대로 — 여기는 그리기·DTW·비교 화면 안 재생만
 //  (본보기는 sfx.play 그대로 · 내 목소리는 playmine 과 같은 방식: decodeAudioData → BufferSource.start(t, offset) → Gain)
-import { prepare, rhythmScore, loadAlign, isSyl, R_FULL } from "./rhythm.js?v=1011.26";
-import { esc } from "./text.js?v=1011.26";
-import { align } from "./score.js?v=1011.26";
-import { audioCtx } from "./wake.js?v=1011.26";
-import { leadOf, gainOf, FADE, FADE_OUT, voicedEnd } from "./playmine.js?v=1011.26";
-import { speechEnd, wavOf } from "./recstore.js?v=1011.26";
-import * as sfx from "./sfx.js?v=1011.26";
+import { prepare, rhythmScore, loadAlign, isSyl, R_FULL, cutWin } from "./rhythm.js?v=1011.28";
+import { esc } from "./text.js?v=1011.28";
+import { align } from "./score.js?v=1011.28";
+import { audioCtx } from "./wake.js?v=1011.28";
+import { leadOf, gainOf, FADE, FADE_OUT, voicedEnd } from "./playmine.js?v=1011.28";
+import { speechEnd, wavOf } from "./recstore.js?v=1011.28";
+import * as sfx from "./sfx.js?v=1011.28";
 
-// host 안에 그린다 → { close() } · o = { ep, key, url(본보기), text(본보기 글), blob(내 녹음), heard(들은 말 글자 · 없으면 색 없음), t(문구) }
+// host 안에 그린다 → { close() } · o = { ep, key, url(본보기), text(본보기 글), blob(내 녹음), heard(들은 말 글자 · 없으면 색 없음), t(문구), win(덧붙은 말이 있을 때 토막 구간 { s, e } · 10-11) }
 // 속도 단계(본부 10-07 · 투덜이 「견본에도 각각」) — 줄마다 자기 속도 · 누를 때마다 1 → 0.9 → 0.75 → 0.6 → 0.5 → 1 · 0.5 아래는 늘이기가 끊겨 뺌 · 고른 값 기억
 export const RATES = [1, 0.9, 0.75, 0.6, 0.5];
 const rateKey = k => `malmun.rate.${k}`;
@@ -35,7 +35,8 @@ export async function openCompare(host, o) {
   const { t } = o, ctx = audioCtx(), st = { alive: true, raf: 0, src: null, timer: 0 };
   setRateWord(t("speed"));
   host.innerHTML = `<div class="cmpw"><p class="cmpmsg">…</p></div>`;
-  const [al, mbuf, ybuf] = await Promise.all([loadAlign(o.ep), sfx.load(o.url), o.blob.arrayBuffer().then(ab => ctx.decodeAudioData(ab)).catch(() => null)]);
+  const [al, mbuf, ybuf0] = await Promise.all([loadAlign(o.ep), sfx.load(o.url), o.blob.arrayBuffer().then(ab => ctx.decodeAudioData(ab)).catch(() => null)]);
+  const ybuf = ybuf0 && o.win ? cutWin(ybuf0, o.win) : ybuf0; /* 덧붙은 말(본부 10-11) = 점수 낸 토막 구간만(o.win · o.heard 도 토막) */
   if (!st.alive) return { close() {} };
   if (!mbuf || !ybuf) { host.innerHTML = `<div class="cmpw"><p class="cmpmsg">${esc(t("cmp_none"))}</p></div>`; return { close() { st.alive = false; } }; }
   // 본보기 음절(정렬 파일 · 없으면 말 구간을 고르게 나눈 임시 칸)

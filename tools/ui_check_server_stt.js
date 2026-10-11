@@ -67,7 +67,7 @@
     // ⓑ 서버 실패 → 이번 방문 받아쓰기만
     document.querySelectorAll(".line")[0].querySelector("[data-act=speak]").click(); await W(1500); document.querySelector("video")?.pause(); window.__heard = $(".panel").__sp._cur().say;
     for (const m of [429, 500, "net", "empty", "timeout"]) {
-      clean(); localStorage.setItem("malmun.sttnote", "1"); window.__srvMode = m; const n0 = calls.length, t0 = performance.now();
+      clean(); localStorage.setItem("malmun.sttnote", "2"); window.__srvMode = m; const n0 = calls.length, t0 = performance.now();
       const b = await once(); const sec = (performance.now() - t0) / 1000;
       ok(calls.length === n0 + 1 && RETRY.test(b.msg) && !/\d+%/.test(b.msg) && !b.fx.length && sessionStorage.getItem("malmun.srmode") === "only" && !localStorage.getItem("malmun.srdev") && (m !== "timeout" || (sec > 11 && sec < 20)),
         `ⓑ 서버 ${m} → 「한 번 더」 · 효과음 없음 · 이번 방문만 받아쓰기만 · malmun.srdev 안 적음`, `「${b.msg.slice(0, 30)}」 · srmode ${sessionStorage.getItem("malmun.srmode")} · srdev ${localStorage.getItem("malmun.srdev")} · ${sec.toFixed(1)}초`);
@@ -81,10 +81,10 @@
     { const n0 = calls.length; window.__srStarts = []; const c1 = await once(), c2 = await once();
       ok(calls.length === n0 && window.__srStarts.includes("녹음소리트랙") && RETRY.test(c1.msg) && RETRY.test(c2.msg) && localStorage.getItem("malmun.srdev") === "sronly", "ⓒ 주소 없음 = 서버 한 번도 안 부름 · 옛 그대로(1번안 → 연속 2번 → sronly)", `서버 ${calls.length - n0}번 · 기억 ${localStorage.getItem("malmun.srdev")}`);
       const sm = await import(`/js/sttserver.js?v=${document.documentElement.dataset.v}`); ok(!sm.sttReady() && /^https:\/\/[^/]+$/.test(sm.STT_URL), "ⓒ 점검 중(__sttURL=off) = 꺼짐 · 기본 STT_URL = 배포 주소(https · 끝 / 없음)", sm.STT_URL); }
-    clean(); window.__sttURL = URL0; localStorage.setItem("malmun.sttnote", "1"); setDevSRraw("sronly"); window.__srvMode = "ok";
+    clean(); window.__sttURL = URL0; localStorage.setItem("malmun.sttnote", "2"); setDevSRraw("sronly"); window.__srvMode = "ok";
     { const n0 = calls.length, g1 = gum; const b = await once(); ok(calls.length === n0 + 1 && gum > g1 && /\d+%/.test(b.msg) && localStorage.getItem("malmun.srdev") === "server", "ⓒ 주소 있음 + 옛 sronly 기억 = 서버부터(녹음 · 점수 · 기억 server)", `「${b.msg.slice(0, 30)}」`); }
     // ⓔ 기다리는 중 닫기
-    clean(); window.__sttURL = URL0; localStorage.setItem("malmun.sttnote", "1"); setDevSRraw("server"); window.__srvMode = "slow";
+    clean(); window.__sttURL = URL0; localStorage.setItem("malmun.sttnote", "2"); setDevSRraw("server"); window.__srvMode = "slow";
     { const n0 = calls.length, f0 = sfxLog.length; $(".panel [data-act=rec]").click(); talk(); for (let k = 0; k < 30 && !$(".panel [data-act=rec]").classList.contains("on"); k++) await W(50); for (let k = 0; k < 120 && $(".panel [data-act=rec]").classList.contains("on"); k++) await W(100);
       for (let k = 0; k < 80 && calls.length === n0; k++) await W(100); await W(300); const during = $(".panel .msg").textContent, recDis = $(".panel [data-act=rec]").disabled || $(".panel [data-act=rec]").getAttribute("aria-disabled") === "true";
       $(".panel [data-act=close]")?.click(); await W(3800);

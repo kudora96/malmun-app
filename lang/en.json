@@ -209,5 +209,5 @@
  "autofill_all": "Auto-fill all",
  "v9_lang_soon": "Explanations in your language are coming soon — Korean only for now.",
  "lang_soon": "soon",
- "stt_server_note": "Your voice is only used to calculate the score and is never stored."
+ "stt_server_note": "Your voice is used only for scoring and is not stored on the server. A few recent recordings stay on this phone (for replay and diagnostics)."
 }
