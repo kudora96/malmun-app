@@ -13,15 +13,15 @@
 //  W5 소리는 언제나 하나만 · 새 일을 하면 앞 소리는 멈춘다
 //  W6 영상 창 안(embedded): 창 안에서 스크롤 없이 다 보이게 — 긴 문장은 토막으로(◀ 1/3 ▶) ·
 //     토막을 다 쓰면 자동으로 다음 토막 · 줄을 다 쓰면 대사를 듣고 자동으로 다음 줄 쓰기 · 아래 ▶ = 이 부분 듣기
-import { t, lang } from "../i18n.js?v=1011.28";
-import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO } from "../text.js?v=1011.28";
-import { episode, chars, charsF } from "../data.js?v=1011.28";
-import { paths } from "../paths.js?v=1011.28";
-import { I, spkHtml } from "../ui.js?v=1011.28";
-import { audioCtx, hold } from "../wake.js?v=1011.28";
-import * as sfx from "../sfx.js?v=1011.28";
-import { scoreFx } from "../scorefx.js?v=1011.28";
-import { units as jamoUnits, baseOf, shapeFix } from "../jamobox.js?v=1011.28"; // 자모 자리 나누기(획순 · 자판 덧칠 · 손글씨 덩어리 — 본부 10-07) // 손글씨 점수 효과 = 말하기와 같은 규칙(본부 10-07)
+import { t, lang } from "../i18n.js?v=1011.29";
+import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO } from "../text.js?v=1011.29";
+import { episode, chars, charsF } from "../data.js?v=1011.29";
+import { paths } from "../paths.js?v=1011.29";
+import { I, spkHtml } from "../ui.js?v=1011.29";
+import { audioCtx, hold } from "../wake.js?v=1011.29";
+import * as sfx from "../sfx.js?v=1011.29";
+import { scoreFx } from "../scorefx.js?v=1011.29";
+import { units as jamoUnits, baseOf, shapeFix } from "../jamobox.js?v=1011.29"; // 자모 자리 나누기(획순 · 자판 덧칠 · 손글씨 덩어리 — 본부 10-07) // 손글씨 점수 효과 = 말하기와 같은 규칙(본부 10-07)
 
 const KEYS = [..."ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎㄲㄸㅃㅆㅉ"], VOW = [..."ㅏㅑㅓㅕㅗㅛㅜㅠㅡㅣ"];
 const VOW2 = [..."ㅐㅒㅔㅖㅘㅙㅚㅝㅞㅟㅢ"]; // 겹모음 줄(본부 10-06) — 칸 하나 · ㅓ+ㅣ 처럼 나눠 쳐도 받음
@@ -159,7 +159,7 @@ export default async function write(app, ep, id, opts = {}) {
     const my = (st.sentGen = (st.sentGen || 0) + 1);
     run([partStep()]).then(ok => { if (st.sentGen !== my) return; st.sent = false; markSent(); if (ok) again(); else if (st.resumeAuto) { st.resumeAuto = false; markAuto(); } }); // 다른 걸 눌러 끊기면 자동 다시 안 함
   }
-  app.__wr = { owners: async ch => { await stkReady; const list = strokesOf(ch); return { list, ...inkOwners(ch, list), GN }; }, font: () => `${glyphWeight()} ${glyphFont()}`, reveal: async (ch, n = 200) => { await stkReady; await document.fonts?.load(`${glyphWeight()} 100px ${glyphFont()}`, ch).catch(() => {}); const list = strokesOf(ch); return { list, at: (k, f = 1) => revealOrder(ch, n, list, k, f) }; }, glyphCv: (ch, n = 200) => { const cv = document.createElement("canvas"); cv.width = cv.height = n; glyph(cv.getContext("2d"), n, ch, "#000"); return cv; }, st: () => st, hand: () => st.hand, traceOf: ch => traceOf(ch), centerOf: ch => centerOf(ch), unitsOf: ch => unitsOf(ch), unitSteps: ch => { const m = pix(UN, x => glyph(x, UN, ch, "#000")), cp = us => us.map(u => ({ jamo: u.jamo, role: u.role, n: u.px.length, px: u.px.slice() })), a = jamoUnits(ch, m, UN), r = ringFix(a, m), s0 = cp(r); shapeFix(r, m, UN); const s1 = cp(r); deCrumb(r); return { raw: cp(a), ring: s0, shape: s1, crumb: cp(r) }; }, strokesOf: async ch => (await stkReady, strokesOf(ch)), strokeHint: (H, S) => strokeHint(H, S), strokeFit: async ch => { await stkReady; const us = unitsOf(ch), L = strokesOf(ch); return us.map((u, ui) => { const P = L.filter(S => S.unit === ui); let n = 0, k = 0; for (const S of P) { const f = fitOf(u, S.pts), m = S.pts.length - 1; n += m; k += f * m; } return { jamo: u.jamo, fit: n ? k / n : null }; }); }, handScore: (ch, S) => handScore(ch, S), handJudge: () => handJudge(), toggle: toggleSentence, brushPath: (ch, S) => brushPath(ch, S), paintCheck: (ch, k, n) => paintCheck(ch, k, n), busy: () => st.busy || st.done || st.queue.length > 0 || st.sent || st.auto || sfx.playing() }; // busy = 점검 도구가 소리 끝을 기다릴 때
+  app.__wr = { owners: async ch => { await stkReady; const list = strokesOf(ch); return { list, ...inkOwners(ch, list), GN }; }, font: () => `${glyphWeight()} ${glyphFont()}`, reveal: async (ch, n = 200) => { await stkReady; await document.fonts?.load(`${glyphWeight()} 100px ${glyphFont()}`, ch).catch(() => {}); const list = strokesOf(ch); return { list, at: (k, f = 1) => revealOrder(ch, n, list, k, f) }; }, glyphCv: (ch, n = 200) => { const cv = document.createElement("canvas"); cv.width = cv.height = n; glyph(cv.getContext("2d"), n, ch, "#000"); return cv; }, st: () => st, hand: () => st.hand, traceOf: ch => traceOf(ch), centerOf: ch => centerOf(ch), unitsOf: ch => unitsOf(ch), unitSteps: ch => { const m = pix(UN, x => glyph(x, UN, ch, "#000")), cp = us => us.map(u => ({ jamo: u.jamo, role: u.role, n: u.px.length, px: u.px.slice() })), a = jamoUnits(ch, m, UN), r = ringFix(a, m), s0 = cp(r); shapeFix(r, m, UN, ch); const s1 = cp(r); deCrumb(r); return { raw: cp(a), ring: s0, shape: s1, crumb: cp(r) }; }, strokesOf: async ch => (await stkReady, strokesOf(ch)), strokeHint: (H, S) => strokeHint(H, S), strokeFit: async ch => { await stkReady; const us = unitsOf(ch), L = strokesOf(ch); return us.map((u, ui) => { const P = L.filter(S => S.unit === ui); let n = 0, k = 0; for (const S of P) { const f = fitOf(u, S.pts), m = S.pts.length - 1; n += m; k += f * m; } return { jamo: u.jamo, fit: n ? k / n : null }; }); }, handScore: (ch, S) => handScore(ch, S), handJudge: () => handJudge(), toggle: toggleSentence, brushPath: (ch, S) => brushPath(ch, S), paintCheck: (ch, k, n) => paintCheck(ch, k, n), busy: () => st.busy || st.done || st.queue.length > 0 || st.sent || st.auto || sfx.playing() }; // busy = 점검 도구가 소리 끝을 기다릴 때
 
   function paintSent() {
     sentEl.innerHTML = `<svg class="spk" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M4 9v6h4l5 4V5L8 9H4z"/><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M16 8.5a5 5 0 0 1 0 7M18.8 6a8.5 8.5 0 0 1 0 12"/></svg>` + (segs[Math.min(st.s, segs.length - 1)] || []).map((w, wi) => `<span class="w ${wi === st.w ? "on" : ""}">${w.chars.map((c, ci) =>
@@ -366,7 +366,12 @@ export default async function write(app, ep, id, opts = {}) {
       us.forEach((u, k) => { const seen = new Set(), comps = [];
         for (const q0 of u.px) { if (seen.has(q0) || own[q0] !== k) continue; const c = [], st = [q0]; seen.add(q0); while (st.length) { const q = st.pop(); c.push(q); const x = q % N; for (const j of [x > 0 ? q - 1 : -1, x < N - 1 ? q + 1 : -1, q - N, q + N]) if (j >= 0 && j < N * N && own[j] === k && !seen.has(j)) { seen.add(j); st.push(j); } } comps.push(c); }
         if (comps.length < 2) return; comps.sort((a, b) => b.length - a.length); const lim = Math.max(40, u.px.length * 0.3);
-        for (const c of comps.slice(1)) { if (c.length >= lim) continue; const cnt = new Map(); for (const q of c) { const x = q % N; for (const j of [x > 0 ? q - 1 : -1, x < N - 1 ? q + 1 : -1, q - N, q + N, x > 0 ? q - N - 1 : -1, x < N - 1 ? q - N + 1 : -1, x > 0 ? q + N - 1 : -1, x < N - 1 ? q + N + 1 : -1]) { const o = j >= 0 && j < N * N ? own[j] : -1; if (o >= 0 && o !== k) cnt.set(o, (cnt.get(o) || 0) + 1); } }
+        for (const c of comps.slice(1)) { if (c.length >= lim) { // 큰 떨어진 덩어리(ㅎ 빼고 · 자음) — 가운데가 제 칸 밖 · 다른 자음 칸 안이면 그 자음(「흃」 받침 ㅎ 꼭지·가로대가 ㄹ 몫이던 것)
+            if (u.jamo === "ㅎ" || u.role === "jung") continue; let sx = 0, sy = 0; for (const q of c) { sx += q % N; sy += (q / N) | 0; } sx /= c.length; sy /= c.length;
+            let gx0 = N, gy0 = N, gx1 = 0, gy1 = 0; for (const v of us) for (const q of v.px) { const x = q % N, y = (q / N) | 0; if (x < gx0) gx0 = x; if (x > gx1) gx1 = x; if (y < gy0) gy0 = y; if (y > gy1) gy1 = y; }
+            const rx = (sx - gx0 + 0.5) / (gx1 - gx0 + 1), ry2 = (sy - gy0 + 0.5) / (gy1 - gy0 + 1), inR = v => v.rect && rx >= v.rect[0] && rx <= v.rect[2] && ry2 >= v.rect[1] && ry2 <= v.rect[3];
+            if (inR(u)) continue; const hits = us.map((v, j) => j).filter(j => j !== k && us[j].role !== "jung" && inR(us[j])); if (hits.length !== 1) continue;
+            for (const q of c) own[q] = hits[0]; moved = true; continue; } const cnt = new Map(); for (const q of c) { const x = q % N; for (const j of [x > 0 ? q - 1 : -1, x < N - 1 ? q + 1 : -1, q - N, q + N, x > 0 ? q - N - 1 : -1, x < N - 1 ? q - N + 1 : -1, x > 0 ? q + N - 1 : -1, x < N - 1 ? q + N + 1 : -1]) { const o = j >= 0 && j < N * N ? own[j] : -1; if (o >= 0 && o !== k) cnt.set(o, (cnt.get(o) || 0) + 1); } }
           if (!cnt.size) continue; const to = [...cnt].sort((a, b) => b[1] - a[1])[0][0]; for (const q of c) own[q] = to; moved = true; } });
       if (!moved) break; changed = true; us.forEach(u => (u.px = [])); for (let i = 0; i < N * N; i++) if (own[i] >= 0) us[own[i]].px.push(i); }
     return changed;
@@ -418,7 +423,7 @@ export default async function write(app, ep, id, opts = {}) {
     for (const [k, rs] of ringSet) { out[k].ring = new Set([...rs].filter(q => owner[q] === k)); out[k].hole = holeOf.get(k); } // 고리 픽셀 · 고리 안 구멍 한 칸(shapeFix 가 「고리 위아래 줄」 가릴 때)
     return out.map((u, k) => (u.px.length || (u.role === "jung" && HV.has(u.jamo)) ? u : us[k])); // 가로 모음은 비어도 됨(뒤 shapeFix 가 띠·기둥을 찾아 줌 · 「훅」) · 자모 칸은 빼지 않음(빼면 뒤 자모가 한 칸씩 밀림 · 본부 10-08)
   }
-  const unitsOf = ch => { const k = ch + "|" + hfontKey(); if (uCache.has(k)) return uCache.get(k); const m = pix(UN, x => glyph(x, UN, ch, "#000")), us = ringFix(jamoUnits(ch, m, UN), m); if ((shapeFix(us, m, UN) | deCrumb(us))) us.forEach(u => { if (!u.px.length) return; let a = UN, b = UN, c = -1, d = -1; for (const q of u.px) { const x = q % UN, y = (q / UN) | 0; if (x < a) a = x; if (x > c) c = x; if (y < b) b = y; if (y > d) d = y; } u.box = [a / UN, b / UN, (c + 1) / UN, (d + 1) / UN]; delete u.set; delete u.half; }); /* ㅇ 고리 보정 뒤 획 모양 한 번 더(「어」「예」 ㅓㅕ 꼭지 뿌리) */ if (gCache.has(ch + "|0|" + hfontKey())) uCache.set(k, us); return us; }; // 글꼴 그림이 저장된(= 글꼴 온) 뒤에만 기억
+  const unitsOf = ch => { const k = ch + "|" + hfontKey(); if (uCache.has(k)) return uCache.get(k); const m = pix(UN, x => glyph(x, UN, ch, "#000")), us = ringFix(jamoUnits(ch, m, UN), m); if ((shapeFix(us, m, UN, ch) | deCrumb(us))) us.forEach(u => { if (!u.px.length) return; let a = UN, b = UN, c = -1, d = -1; for (const q of u.px) { const x = q % UN, y = (q / UN) | 0; if (x < a) a = x; if (x > c) c = x; if (y < b) b = y; if (y > d) d = y; } u.box = [a / UN, b / UN, (c + 1) / UN, (d + 1) / UN]; delete u.set; delete u.half; }); /* ㅇ 고리 보정 뒤 획 모양 한 번 더(「어」「예」 ㅓㅕ 꼭지 뿌리) */ if (gCache.has(ch + "|0|" + hfontKey())) uCache.set(k, us); return us; }; // 글꼴 그림이 저장된(= 글꼴 온) 뒤에만 기억
   // 획순 자료(data/jamo_strokes.json · 본부) → 이 글자 획(0~1 · 쓰는 차례) = 자모 획 점을 그 자모 잉크 상자에 늘려 맞춤
   let STK = null; const stkReady = fetch(`data/jamo_strokes.json?v=${document.documentElement.dataset.v || ""}`).then(r => r.json()).then(d => (STK = d)).catch(() => null);
   // 획 끝 늘이기(투덜이 10-08 「대」 — ㅐ 의 ㅏ 가로획 자료가 0.04 길이라 가로획 잉크 대부분이 다음 ㅣ 몫이 되어 4번째 획이 안 칠해짐)

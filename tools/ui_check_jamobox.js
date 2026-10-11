@@ -63,14 +63,14 @@
         while (st.length) { const [x, y] = st.pop(); for (const [nx, ny] of [[x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]]) { if (nx < a || ny < b || nx > c || ny > d) continue; const i = idx(nx, ny); if (seen[i]) continue; if (nx >= 0 && ny >= 0 && nx < N && ny < N && set[ny * N + nx]) continue; seen[i] = 1; st.push([nx, ny]); } } let h = 0; for (let y = b + 1; y < d; y++) for (let x = a + 1; x < c; x++) if (!set[y * N + x] && !seen[idx(x, y)]) h++; return h >= 6; };
       for (let i = 0; i < list.length; i++) {
         const ch = list[i], us = wr.unitsOf(ch), own = new Int16Array(N * N).fill(-1); us.forEach((u, k) => { for (const q of u.px) own[q] = k; });
-        let s1 = 0, b1 = 0; us.forEach((u, k) => { const set = new Uint8Array(N * N); for (const q of u.px) set[q] = 1; for (const c of comps(set, u.px).slice(1)) { if (!c.some(q => { const x = q % N; return [x > 0 ? q - 1 : -1, x < N - 1 ? q + 1 : -1, q - N, q + N].some(j => j >= 0 && own[j] >= 0 && own[j] !== k); })) continue; if (c.length < u.px.length * 0.3) s1++; else b1++; } });
+        let s1 = 0, b1 = 0; us.forEach((u, k) => { const set = new Uint8Array(N * N); for (const q of u.px) set[q] = 1; for (const c of comps(set, u.px).slice(1)) { if (!c.some(q => { const x = q % N; return [x > 0 ? q - 1 : -1, x < N - 1 ? q + 1 : -1, q - N, q + N].some(j => j >= 0 && own[j] >= 0 && own[j] !== k); })) continue; if (c.length < u.px.length * 0.3) s1++; else if (u.jamo !== "ㅎ") b1++; } }); // ㅎ = 고리와 꼭지·가로가 원래 떨어진 획
         if (s1) small.push(ch); if (b1) big.push(ch);
         const ci = Math.floor((ch.charCodeAt(0) - 0xac00) / 588), ji = (ch.charCodeAt(0) - 0xac00) % 28;
         if ((ci === 11 || ci === 18) && !hasHole(us[0])) noHole.push(ch + "초"); if ((ji === 21 || ji === 27) && !hasHole(us[us.length - 1])) noHole.push(ch + "종");
         if (i % 40 === 39) await W(0);
       }
       ok(!small.length, `부스러기(자모 30% 미만 떨어진 조각) 0 · ${list.length}자`, small.length ? `${small.length}자 · ${small.slice(0, 14).join(" ")}` : "");
-      ok(all ? big.length <= 80 : true, `떨어진 큰 덩어리(ㄲ ㅃ ㅋ 겹침) ${all ? "≤ 80" : "(표본 — 전수에서 ≤ 80)"} · ${list.length}자`, `${big.length}자${big.length ? " · " + big.slice(0, 10).join(" ") : ""}`);
+      ok(all ? big.length <= 2 : big.length <= 1, `떨어진 큰 덩어리(ㅎ 빼고) ${all ? "≤ 2" : "≤ 1(표본)"} · ${list.length}자`, `${big.length}자${big.length ? " · " + big.slice(0, 10).join(" ") : ""}`);
       ok(!noHole.length, `ㅇ ㅎ 가 자기 고리(구멍) 가짐 · ${list.length}자`, noHole.length ? `${noHole.length}자 · ${noHole.slice(0, 14).join(" ")}` : "");
       const share = (ch, a, b, dir) => { const us = wr.unitsOf(ch), own = new Int16Array(N * N).fill(-1); us.forEach((u, k) => { for (const q of u.px) own[q] = k; }); const vb = us[b].box, lines = new Set();
         for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) { const q = y * N + x; if (own[q] !== a) continue; for (const j of [q + 1, q - 1, q + N, q - N]) if (j >= 0 && j < N * N && own[j] === b) lines.add(dir === "row" ? y : x); } return lines.size; };
@@ -99,7 +99,7 @@
       //  제 잉크 85% 미만인데 남의 잉크 < 10% = 획 자료(곧은 선)와 글꼴 곡선 차이(「가」 ㄱ 81%) → 알림만
       const other = badS.filter(x => [...x.matchAll(/(\d+)\/(\d+)/g)].some(m => +m[2] >= 10)), soft = badS.length - other.length;
       const ep = new Set([...document.querySelectorAll(".line")].map(b => b.textContent).join("").replace(/[^가-힣]/g, "")), epBad = other.filter(x => ep.has(x[0]));
-      ok(!epBad.length && other.length <= (all ? 263 : 35), `획 자료 맞춤 — 남의 잉크 10%↑(나눔 잘못) ${all ? "≤ 263" : "≤ 35(표본)"} · 1편 글자 0 · ${list.length}자`, `${other.length}자${epBad.length ? " · 1편 " + epBad.join(" ") : ""}${other.length ? " · " + other.slice(0, 8).join(" ") : ""} · (알림: 제 잉크 85% 미만만 ${soft}자 — 획 자료 곧은 선 vs 글꼴 곡선)`);
+      ok(!epBad.length && other.length <= (all ? 120 : 20), `획 자료 맞춤 — 남의 잉크 10%↑(나눔 잘못) ${all ? "≤ 120" : "≤ 20(표본)"} · 1편 글자 0 · ${list.length}자`, `${other.length}자${epBad.length ? " · 1편 " + epBad.join(" ") : ""}${other.length ? " · " + other.slice(0, 8).join(" ") : ""} · (알림: 제 잉크 85% 미만만 ${soft}자 — 획 자료 곧은 선 vs 글꼴 곡선)`);
     }
     // 자판 칠(본부 10-08) — 1편 글자 전부 · 한 자모씩 칠할 때 친 자모 잉크 덜 칠 < 2% · 안 친 자모로 넘침 < 1%
     { const chs = [...new Set([...document.querySelectorAll(".line")].map(b => b.textContent).join("").replace(/[^가-힣]/g, ""))], badP = []; let wu = 0, wo = 0;
