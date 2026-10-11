@@ -38,8 +38,8 @@
   const report = (kind, x) => { if (probs.length < 12) probs.push({ kind, x, last: acts.slice(-20) }); try { sessionStorage.setItem("__monkey", JSON.stringify({ seed: seed0, probs })); } catch {} };
   // 감시
   let over2 = 0; const mon = setInterval(() => {
-    const n = sounds(); over2 = n >= 2 ? over2 + 100 : 0; if (over2 === 400) report("소리 2개 이상 0.3초+", n);
-    const s = wrSt(), b = $(".panel [data-act=auto]"); if (s && b && /⏹|■/.test(b.textContent) !== !!(s.auto || s.resumeAuto)) report("자동 표시 ≠ 실제", `${b.textContent} / ${s.auto}`);
+    const n = sounds(); over2 = n >= 2 ? over2 + 100 : 0; if (over2 === 400) { const live = {}; for (const e of log) live[e.name] = (live[e.name] || 0) + (e.ev === "시작" ? 1 : -1); report("소리 2개 이상 0.3초+", n + " · " + [...[...els].filter(e => !e.paused && !e.ended && e.currentSrc && !(e.tagName === "VIDEO" && e.muted)).map(e => e.tagName[0] + ":" + decodeURIComponent(e.currentSrc).split("/").slice(-2).join("/").slice(-40)), ...Object.entries(live).filter(([, v]) => v > 0).map(([k, v]) => "sfx:" + String(k).slice(-40) + "×" + v)].join(" , ")); } /* 무슨 소리였는지 같이 적음(10-11) */
+    const s = wrSt(), bs = [...document.querySelectorAll(".panel [data-act=auto], .panel [data-act=autoall]")], shown = bs.filter(b => /⏹|■/.test(b.textContent)).length; if (s && bs.length && (shown > 1 || (shown === 1) !== !!(s.auto || s.resumeAuto || s.allNext))) report("자동 표시 ≠ 실제", `${bs.map(b => b.textContent).join("|")} / ${s.auto}`);
     if (document.documentElement.scrollWidth > innerWidth + 1) report("가로 넘침", document.documentElement.scrollWidth);
   }, 100);
   try {

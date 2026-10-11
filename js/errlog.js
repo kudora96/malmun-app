@@ -3,8 +3,9 @@
 const KEY = "malmun.errlog";
 export function logErr(kind, msg, extra = {}) {
   try {
-    const a = JSON.parse(localStorage.getItem(KEY) || "[]");
-    a.push({ at: new Date().toISOString().slice(11, 19), kind, msg: String(msg).slice(0, 200), ...extra });
+    const a = JSON.parse(localStorage.getItem(KEY) || "[]"), at = new Date().toISOString().slice(11, 19), m = String(msg).slice(0, 200), l = a[a.length - 1];
+    if (l && l.kind === kind && l.msg === m && l.url === extra.url && l.src === extra.src) { l.n = (l.n || 1) + 1; l.at = at; localStorage.setItem(KEY, JSON.stringify(a)); return; } /* 같은 오류가 잇달아 나면 하나로 묶고 횟수만(본부 10-11 갤럭시 version.json ×20) */
+    a.push({ at, kind, msg: m, ...extra });
     localStorage.setItem(KEY, JSON.stringify(a.slice(-20)));
   } catch {}
 }

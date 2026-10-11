@@ -204,5 +204,9 @@
  "h_order_ok": "✓ 순서 맞음",
  "h_order_again": "순서 다시: {n}번",
  "h_magnet_miss": "회색 줄 가까이 그으세요",
- "sr_retry_dev": "한 번 더 말해 주세요."
+ "sr_retry_dev": "한 번 더 말해 주세요.",
+ "autofill_all": "전체 자동 완성",
+ "v9_lang_soon": "이 언어 설명은 준비 중이에요 — 지금은 한국어만.",
+ "lang_soon": "곧",
+ "stt_server_note": "목소리는 점수를 내는 데만 쓰고 절대 저장하지 않아요."
 }

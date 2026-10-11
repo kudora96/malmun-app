@@ -3,7 +3,7 @@
 // 위 칸(.vstage) 안의 모든 칸 중 「보이는데 scrollHeight > clientHeight + 1 이고 스크롤바가 뜰 수 있는(overflow auto/scroll)」 칸 · 위 칸 자체 넘침이 한 번도 없어야 함
 (async () => {
   const W = ms => new Promise(s => setTimeout(s, ms)), res = [], bad = [];
-  HTMLMediaElement.prototype.play = function () { return Promise.resolve(); }; window.__sfxVolume = 0.0001;
+  const play0 = HTMLMediaElement.prototype.play; HTMLMediaElement.prototype.play = function () { return Promise.resolve(); }; /* 끝에 되돌림 — 안 되돌리면 뒤 점검의 <audio>(비교 0.75×)가 소리 없이 멈춤(10-11) */ window.__sfxVolume = 0.0001;
   const line = n => document.querySelectorAll(".line")[n - 1], p = () => document.querySelector(".panel");
   const scan = () => {
     const out = [], vs = document.querySelector(".vstage");
@@ -29,5 +29,6 @@
   await watch("설명 중 다른 줄", () => { line(3).querySelector("[data-act=explain]").click(); });
   await watch("설명 → 다음 줄(▶|)", () => document.querySelector(".ctrl [data-act=next]").click());
   const out = `${bad.length ? "✗" : "✓"} ${innerWidth}x${innerHeight} 스크롤바·넘침 0: ${res.filter(Boolean).length}/${res.length}` + (bad.length ? "\n  " + bad.join("\n  ") : "");
+  HTMLMediaElement.prototype.play = play0;
   console.log(out); return out;
 })();

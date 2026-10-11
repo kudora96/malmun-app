@@ -6,7 +6,8 @@
 // 시간·인식(본부 10-04 투덜이 승인): 말 사이 쉼 2초 · 🎤 뒤 6초 말 없으면 끝 · 최대 길이 = 문장 길이에 맞춤 · 인식이 혼자 끝나면 같은 트랙으로 다시
 // 그때와 다른 점(본부 10-04 「남긴 차이」): ① 윈도우 별칭 장치 「default」「communications」는 절대 안 고름(통신 장치를 열면 윈도우가 다른 소리를 줄임)
 //   ② 「준비 중 → 녹음 중」 표시(첫 소리가 들어오면) ③ 인식 오류 까닭을 돌려줌(onerror 를 삼키지 않음) ④ 진단 기록(이벤트만 듣고 소리 경로는 안 건드림)
-import { audioCtx } from "./wake.js?v=1010.96";
+import { audioCtx } from "./wake.js?v=1011.24";
+import { sttReady, serverSTT, sttNoteOnce } from "./sttserver.js?v=1011.24";
 
 // 시간 규칙(본부 10-04 · 투덜이 「빨리 안 하면 바로 닫힘」): 말 사이 쉼 2초 · 🎤 뒤 6초 안에 말 없으면 끝 · 최대 길이는 부르는 쪽이 정함(문장 길이)
 const QUIET_MS = 2000, START_MS = 6000;
@@ -66,11 +67,49 @@ export const isAndroid = () => /Android/i.test(navigator.userAgent);
 // 기억은 이번 방문(창)만 — 투덜이 10-08 갤럭시: 한 번 바뀌면 영영 녹음이 꺼져 「내 목소리」를 못 들음(진짜 까닭은 구글 앱 마이크 허락이었음) → 다음에 열면 다시 같이 시험
 try { localStorage.removeItem("malmun.srmode"); localStorage.removeItem("malmun.srmiss"); } catch {} // 옛 판이 영구로 남긴 값 지움
 // 기기 받아쓰기 방식 기억(본부 10-10 갤럭시 — 녹음+받아쓰기 동시 불가 기기) — "seq-ok" = 녹음 뒤 그 녹음 소리로 받아쓰기 됨 · "sronly" = 그것도 안 됨 → 받아쓰기만(기기 기억 · 지우기는 진단 화면)
-export const devSR = () => { try { return localStorage.getItem("malmun.srdev"); } catch { return null; } };
-export const setDevSR = v => { try { v ? localStorage.setItem("malmun.srdev", v) : localStorage.removeItem("malmun.srdev"); } catch {} };
-export const srOnlyMode = () => { try { return sessionStorage.getItem("malmun.srmode") === "only" || devSR() === "sronly"; } catch { return false; } };
+//  "sronly" 는 연속 2번 실패 뒤에만(검사부 10-11 — 아래 srJudge)
+//  기억은 7일만(검사부 10-11) — 값은 옛 판처럼 글자 그대로(malmun.srdev · 점검 도구 호환) + 적은 때(malmun.srdev.t) · 7일 지나면 없는 셈(다시 시험)
+//   옛 판 값(적은 때 없음)은 처음 열 때 지움(본부 10-11 · 7일 연장 아님) · setDevSR(null) = 연속 실패 수도 지움
+const DEV_DAYS = 7, DEV_K = "malmun.srdev", DEV_T = "malmun.srdev.t", FAIL_K = "malmun.srfail";
+// 서버 받아쓰기(2안 · 본부 10-11 변경 — 갤럭시 실기기에서 1번안 안 됨) — 주소(STT_URL)가 있으면 안드로이드 기본 = 녹음 → 서버(처음부터) · 1번안(녹음→트랙 받아쓰기)은 진단 화면 시험용만
+//  서버 됨 = 기기 기억 "server"(7일) · 서버 실패(비2xx·429·12초·네트워크·말소리 있는데 빈 글) = 이번 방문만 받아쓰기만(sessionStorage) → 다음 방문에 서버 다시
+//  주소가 없으면(sttReady false) 옛 그대로(1번안 → 연속 2번 실패 → sronly 7일)
+export const serverMode = () => { try { return sttReady() && sessionStorage.getItem("malmun.srmode") !== "only"; } catch { return false; } };
+export const devSR = () => { try { const v = localStorage.getItem(DEV_K); if (!v) return null; const t = +localStorage.getItem(DEV_T) || 0;
+  if (!t) { localStorage.removeItem(DEV_K); return null; } /* 옛 판 값(적은 때 없음 · sronly든 seq-ok든) = 지움 → 1번안 다시 시험(본부 10-11) */
+  if (!(Date.now() - t < DEV_DAYS * 864e5)) { localStorage.removeItem(DEV_K); localStorage.removeItem(DEV_T); return null; } return v; } catch { return null; } };
+export const setDevSR = v => { try { if (v) { localStorage.setItem(DEV_K, v); localStorage.setItem(DEV_T, String(Date.now())); } else { localStorage.removeItem(DEV_K); localStorage.removeItem(DEV_T); sessionStorage.removeItem(FAIL_K); } } catch {} };
+export const srFailCount = () => { try { return +sessionStorage.getItem(FAIL_K) || 0; } catch { return 0; } };
+// 「녹음 → 그 소리로 받아쓰기」 결과 판정(검사부 10-11) — 한 번 실패로 기기를 영구 「받아쓰기만」으로 바꾸던 것 고침
+//  s2 = srOnBlob 결과 · peak = 녹음 최대 크기(0~1) → { ok, retry, switched, count, kind }
+//  ok = 들은 말 있음(트랙으로 들음) → 실패 수 0 · "seq-ok" 기억 · retry = 점수 대신 「한 번 더」 · switched = 연속 2번째 실패 → "sronly" 기억
+//  기기 탓 아님(세지 않음): 중단(aborted) · 인터넷(network = 보통 까닭 문구) · 풀기 실패(decode) · 말 없음(no-speech) · 허락(not-allowed) · 녹음이 거의 무음(−40dB 아래 = 말 안 함)
+//  기기 탓(셈): start(트랙) 예외(track) · 트랙을 안 쓰고 마이크를 들음(notrack) · 말소리는 있는데 들은 말 0(empty)
+const SOFT = { aborted: 1, decode: 1, "no-speech": 1, nospeech: 1 }, NORMAL = { network: 1, "not-allowed": 1, "service-not-allowed": 1, nosr: 1 };
+export function srJudge(s2, peak) {
+  const e = s2?.srErr || "", heard = s2?.heard?.length > 0, noTrack = s2?.info?.trackUsed === false;
+  if (s2?.info?.aborted || e === "aborted") return { ok: false, retry: true, switched: false, kind: "aborted" };
+  if (s2?.info?.server) return srvJudge(s2, peak);
+  if (heard && !noTrack) { try { sessionStorage.removeItem(FAIL_K); } catch {} setDevSR("seq-ok"); return { ok: true, retry: false, switched: false, kind: "ok" }; }
+  const kind = e === "track" ? "track" : noTrack ? "notrack" : SOFT[e] ? e : NORMAL[e] ? e : (peak || 0) > 0.01 ? "empty" : "silent";
+  if (NORMAL[kind] || kind === "silent") return { ok: false, retry: false, switched: false, kind }; // 보통 결과(까닭 문구 · 0%)
+  if (SOFT[kind]) return { ok: false, retry: true, switched: false, kind }; // 「한 번 더」 · 세지 않음
+  const n = srFailCount() + 1; // track · notrack · empty — 연속 2번이면 받아쓰기만(7일 기억)
+  if (n >= 2) { setDevSR("sronly"); try { sessionStorage.removeItem(FAIL_K); } catch {} return { ok: false, retry: true, switched: true, count: n, kind }; }
+  try { sessionStorage.setItem(FAIL_K, String(n)); } catch {}
+  return { ok: false, retry: true, switched: false, count: n, kind };
+}
+// 서버 결과 판정 — 들은 말 있음 = 됨(기기 기억 "server" 7일) · 말소리 없이 빈 글 = 보통 결과(「안 들렸어요」 · 서버 탓 아님) · 그 밖의 실패 = 이번 방문 받아쓰기만 + 「한 번 더」
+function srvJudge(s2, peak) {
+  const heard = s2?.heard?.length > 0, e = s2?.srErr || "";
+  if (heard) { try { sessionStorage.removeItem(FAIL_K); } catch {} setDevSR("server"); return { ok: true, retry: false, switched: false, kind: "server" }; }
+  if (e === "server-empty" && !((peak || 0) > 0.01)) return { ok: false, retry: false, switched: false, kind: "silent" };
+  setSrOnly(true); /* 이번 방문만 · malmun.srdev 는 그대로 */
+  return { ok: false, retry: true, switched: true, server: true, kind: e || "server-error" };
+}
+export const srOnlyMode = () => { try { return sessionStorage.getItem("malmun.srmode") === "only" || (devSR() === "sronly" && !sttReady()); } catch { return false; } }; /* 서버 주소가 있으면 옛 1번안 실패 기억(sronly)은 안 따름 — 서버부터 */
 // 안드로이드 기본 = 녹음만 하고(받아쓰기 동시에 안 켬) 끝나면 그 녹음 소리로 받아쓰기 · 점검 도구는 window.__noSeq 로 옛 「같이」 방식
-export const seqMode = () => /Android/i.test(navigator.userAgent) && !!getSR() && !srOnlyMode() && !window.__noSeq;
+export const seqMode = () => /Android/i.test(navigator.userAgent) && (!!getSR() || serverMode()) && !srOnlyMode() && !window.__noSeq; /* 녹음만 하고 끝난 뒤 받아쓰기(서버 또는 1번안) */
 export const setSrOnly = on => { try { on ? sessionStorage.setItem("malmun.srmode", "only") : sessionStorage.removeItem("malmun.srmode"); sessionStorage.removeItem("malmun.srmiss"); } catch {} };
 // 바꾸기는 「연속 2번」만(본부 10-07 QA — 우물거림·잡음으로 한 번 비어도 녹음·리듬·비교를 영구로 잃지 않게) · 그 사이 한 번이라도 들은 말이 있으면 0 으로
 //  → true = 이번에 받아쓰기만으로 바꿈 · 점검 도구는 window.__noSrSwitch 로 끔
@@ -103,25 +142,48 @@ export function recordSROnly({ maxMs = 8000, onTick = () => {}, onReady = () => 
   return ctl;
 }
 // 녹음 소리(blob)를 받아쓰기에 흘림 — 스피커로는 안 보냄(소리 안 남) · AudioContext → MediaStreamDestination 트랙 → SR.start(트랙) · 녹음 길이 + 1.5초 기다림
-export async function srOnBlob(blob) {
+//  signal(AbortController.signal) = 창·카드 닫기 · 새 녹음 때 끊음 → { srErr: "aborted", info.aborted } · 실패로 세지 않음(검사부 10-11)
+//  info.trackUsed(검사부 10-11) — start(트랙)을 모르는 크롬은 트랙을 버리고 마이크를 들음 → 재생을 시작한 뒤 soundstart·speechstart 가 없으면 false
+//   (소리 이벤트가 아예 안 오는 기기 = audiostart 도 없음 → null 모름 · 판정은 srJudge)
+export async function srOnBlob(blob, { signal } = {}) {
+  if (blob && serverMode()) return srOnServer(blob, { signal });
   const SR = getSR(); if (!SR || !blob) return { heard: [], srErr: "nosr", ev: [] };
+  if (signal?.aborted) return { heard: [], srErr: "aborted", ev: [], info: { aborted: true } };
   const ctx = audioCtx(); let buf; try { if (ctx.state !== "running") await ctx.resume().catch(() => {}); buf = await ctx.decodeAudioData(await blob.arrayBuffer()); } catch { return { heard: [], srErr: "decode", ev: [] }; }
+  if (signal?.aborted) return { heard: [], srErr: "aborted", ev: [], info: { aborted: true } };
   return new Promise(res => {
     const dst = ctx.createMediaStreamDestination(), src = ctx.createBufferSource(); src.buffer = buf; src.connect(dst);
-    const tr = dst.stream.getAudioTracks()[0], heard = [], ev = [], t0 = performance.now(); let srErr = null, done = false, r = null;
-    // 진단(본부 10-10 — 실기기에서 단번에 원인 가르기): 녹음 길이·최대 크기 · 트랙 만들기 · start(트랙) 예외 · 걸린 시간
+    const tr = dst.stream.getAudioTracks()[0], heard = [], ev = [], t0 = performance.now(); let srErr = null, done = false, r = null, playAt = 0, audioAt = 0, soundAt = 0, resAt = 0; const timers = [];
+    // 진단(본부 10-10 — 실기기에서 단번에 원인 가르기): 녹음 길이·최대 크기 · 트랙 만들기 · start(트랙) 예외 · 걸린 시간 · 트랙을 썼나
     let pk = 0; { const d = buf.getChannelData(0); for (let i = 0; i < d.length; i += 4) pk = Math.max(pk, Math.abs(d[i])); }
-    const info = { dur: Math.round(buf.duration * 10) / 10, maxDb: pk > 0 ? Math.round(200 * Math.log10(pk)) / 10 : -120, track: !!tr && tr.readyState, startErr: null, ms: 0 };
-    const fin = () => { if (done) return; done = true; try { r?.stop(); } catch {} setTimeout(() => { try { src.stop(); } catch {} try { tr.stop(); } catch {} info.ms = Math.round(performance.now() - t0); res({ heard, srErr, ev, info }); }, 700); };
-    try { r = new SR(); } catch { res({ heard, srErr: "nosr", ev, info }); return; }
+    const info = { dur: Math.round(buf.duration * 10) / 10, maxDb: pk > 0 ? Math.round(200 * Math.log10(pk)) / 10 : -120, track: !!tr && tr.readyState, startErr: null, ms: 0, trackUsed: null, aborted: false };
+    const fin = (quick) => { if (done) return; done = true; timers.forEach(clearTimeout); signal?.removeEventListener?.("abort", onAbort); try { quick ? r?.abort() : r?.stop(); } catch {}
+      // 트랙을 썼나: 이벤트가 오는 기기(audiostart 있음)인데 재생 시작 뒤 소리 이벤트가 없음 = 마이크를 들은 것(결과가 와도)
+      if (!quick && !info.startErr && playAt && audioAt) info.trackUsed = soundAt >= playAt - 50;
+      if (!quick && info.trackUsed === false && !resAt && pk < 0.01) info.trackUsed = null; // 녹음 자체가 무음이면 소리 이벤트가 없는 게 당연 → 모름
+      const out = () => { try { src.stop(); } catch {} try { tr.stop(); } catch {} info.ms = Math.round(performance.now() - t0); res({ heard, srErr, ev, info }); };
+      quick ? out() : setTimeout(out, 700); };
+    const onAbort = () => { info.aborted = true; srErr = "aborted"; heard.length = 0; fin(true); };
+    signal?.addEventListener?.("abort", onAbort, { once: true });
+    try { r = new SR(); } catch { done = true; signal?.removeEventListener?.("abort", onAbort); res({ heard, srErr: "nosr", ev, info }); return; }
     r.lang = "ko-KR"; r.continuous = false; r.interimResults = false; r.maxAlternatives = 3; // 한 번만(끝 = 트랙 끝 + 1.5초) · 앞 0.3초 무음 뒤 재생(첫 음절 놓치지 않게)
-    r.onresult = e => { const rs = Array.from(e.results, x => Array.from(x)); for (const x of rs) for (const a of x) heard.push(a.transcript); if (rs.length > 1) heard.push(rs.map(x => x[0].transcript).join(" ")); };
-    r.onerror = e => { srErr = e.error || "error"; }; r.onend = () => fin();
+    r.onresult = e => { if (done) return; resAt = resAt || performance.now(); const rs = Array.from(e.results, x => Array.from(x)); for (const x of rs) for (const a of x) heard.push(a.transcript); if (rs.length > 1) heard.push(rs.map(x => x[0].transcript).join(" ")); };
+    r.onerror = e => { if (!done) srErr = e.error || "error"; }; r.onend = () => fin();
+    if (typeof r.addEventListener === "function") { r.addEventListener("audiostart", () => { audioAt = audioAt || performance.now(); }); for (const n of ["soundstart", "speechstart"]) r.addEventListener(n, () => { const now = performance.now(); if (playAt && now >= playAt - 50 && !soundAt) soundAt = now; }); }
     srWatch(r, t0, ev);
     try { r.start(tr); } catch (e) { info.startErr = e?.name || "error"; srErr = "track"; fin(); return; }
-    setTimeout(() => { try { src.start(); } catch {} }, 300);
-    setTimeout(fin, 300 + buf.duration * 1000 + 1500);
+    timers.push(setTimeout(() => { if (done) return; try { src.start(); playAt = performance.now(); ev.push(`play@${Math.round(playAt - t0)}`); } catch {} }, 300));
+    timers.push(setTimeout(() => fin(), 300 + buf.duration * 1000 + 1500));
   });
+}
+// 서버로 받아쓰기 — srOnBlob 과 같은 모양 { heard, srErr, ev, info } · info.server = true · 녹음 소리는 보내기만(앱도 서버도 저장 안 함)
+async function srOnServer(blob, { signal } = {}) {
+  const t0 = performance.now(), ms = () => Math.round(performance.now() - t0), info = { server: true, track: "server", trackUsed: "server", dur: "?", maxDb: "?", startErr: null, ms: 0, aborted: false, words: 0 };
+  if (signal?.aborted) return { heard: [], srErr: "aborted", ev: [], info: { ...info, aborted: true } };
+  sttNoteOnce(); /* 첫 사용 안내 한 번 */
+  try { const o = await serverSTT(blob, { signal }); info.ms = ms(); info.words = o.words.length; info.wordList = o.words; return { heard: [o.text], srErr: null, ev: [`server ok@${info.ms}`], info }; }
+  catch (e) { info.ms = ms(); const ab = e?.code === "aborted" || signal?.aborted; info.aborted = !!ab; info.status = e?.status || 0;
+    return { heard: [], srErr: ab ? "aborted" : "server-" + (e?.code || "error"), ev: [`server ${e?.code || "error"}@${info.ms}`], info }; }
 }
 export function srWatch(sr, t0, ev = []) {
   if (typeof sr.addEventListener !== "function") return ev; // 가짜 인식기(점검) 등

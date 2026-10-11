@@ -1,4 +1,4 @@
-import { VERSION } from "./version.js?v=1010.96";
+import { VERSION } from "./version.js?v=1011.24";
 // 학습자 언어 — 고르게 하지 않는다(CLAUDE.md).
 // ① 저장된 선택 ② 폰 언어가 22개 중 하나 ③ 폰 시간대로 나라 짐작 ④ 영어
 export const LANGS = [
@@ -8,6 +8,8 @@ export const LANGS = [
   ["ja", "日本語"], ["ru", "Русский"], ["hi", "हिन्दी"], ["en", "English"], ["es", "Español"], ["fr", "Français"], ["pt", "Português"],
 ];
 const CODES = LANGS.map(l => l[0]);
+// 준비된 언어(앱 글 lang/{c}.json 이 있는 것 · 언어부 10-11 S1 ①) — 자동 선택·저장값은 이것만 · 나머지는 ?lang= 으로만(시범)
+export const READY = ["ne", "en"];
 const RTL = new Set(["ur"]);
 // 폰 언어 코드가 우리 코드와 다른 것
 const ALIAS = { fil: "tl", nb: "en" };
@@ -33,15 +35,15 @@ function store(get, v) {
 
 export function detectLang() {
   const saved = store(true);
-  if (CODES.includes(saved)) return { lang: saved, how: "saved" };
+  if (READY.includes(saved)) return { lang: saved, how: "saved" };
   for (const tag of navigator.languages || [navigator.language || "en"]) {
     let c = String(tag).toLowerCase().split("-")[0];
     c = ALIAS[c] || c;
-    if (CODES.includes(c) && c !== "en") return { lang: c, how: "phone" };
+    if (READY.includes(c) && c !== "en") return { lang: c, how: "phone" };
   }
   let tz = "";
   try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ""; } catch {}
-  if (TZ[tz]) return { lang: TZ[tz], how: "timezone" };
+  if (READY.includes(TZ[tz])) return { lang: TZ[tz], how: "timezone" };
   return { lang: "en", how: "default" };
 }
 
@@ -61,7 +63,7 @@ export async function setLang(code, remember = false) {
   [fallback, strings] = await Promise.all([load("en"), code === "en" ? Promise.resolve({}) : load(code)]);
   await loadKoUi();
   document.documentElement.lang = code;
-  document.documentElement.dir = RTL.has(code) ? "rtl" : "ltr";
+  document.documentElement.dir = RTL.has(code) && Object.keys(strings).length ? "rtl" : "ltr"; // 그 언어 글이 실제로 실렸을 때만 오른쪽→왼쪽(언어부 10-11 — 영어 글인데 뒤집히던 것)
 }
 
 export const t = (k, vars) => {

@@ -2,7 +2,7 @@
 // 1~끝 줄 × 로마자 끔/켬 × 말해 보기 전/뒤(결과 세 줄 + ★ 저장본·내려받기·지우기 단추 줄을 글로 흉내 · 녹음은 안 함) → 설명 칸 scrollHeight − clientHeight = 0
 (async () => {
   const W = ms => new Promise(s => setTimeout(s, ms)), res = [], bad = [];
-  HTMLMediaElement.prototype.play = function () { return Promise.resolve(); };
+  const play0 = HTMLMediaElement.prototype.play; HTMLMediaElement.prototype.play = function () { return Promise.resolve(); }; /* 끝에 되돌림 — 안 되돌리면 뒤 점검의 <audio>(비교 0.75×)가 소리 없이 멈춤(10-11) */
   const lines = document.querySelectorAll(".line"), p = document.querySelector(".panel");
   const over = () => p.scrollHeight - p.clientHeight;
   const zoom = () => parseFloat([...p.children].find(c => !c.classList.contains("vplay"))?.style.zoom || 1).toFixed(2);
@@ -31,5 +31,6 @@
   }
   const head = `${innerWidth}x${innerHeight} 설명 칸 스크롤 0: ${res.filter(Boolean).length}/${res.length}`;
   const out = (bad.length ? "✗ " : "✓ ") + head + (bad.length ? "\n  " + bad.join("\n  ") : "");
+  HTMLMediaElement.prototype.play = play0;
   console.log(out); return out;
 })();

@@ -461,6 +461,7 @@ a{color:inherit;text-decoration:none}
 .v9bar .closex{flex:none;padding:3px 7px;font-size:11.5px}
 .v9bar.nocw .closex .cw{display:none}
 .v9tip{position:absolute;left:12px;right:12px;top:40px;z-index:5;padding:6px 10px;border-radius:10px;background:var(--ink);color:var(--bg);font-size:12px;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,.2);pointer-events:none}
+.v9soon{margin:4px 10px 0;padding:4px 8px;border-radius:8px;background:var(--panel2,rgba(0,0,0,.05));color:var(--muted,#666);font-size:12px;text-align:center}
 @media (prefers-reduced-motion:reduce){.v9bar .pb.playing{animation:none}}
 .exv.v9{position:relative}
 

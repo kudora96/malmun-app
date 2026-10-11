@@ -1,0 +1,22 @@
+# 말문 서버 받아쓰기 Worker「stt」 — 배포 방법은 DEPLOY.md
+name = "stt"
+main = "src/index.js"
+compatibility_date = "2025-09-01"
+workers_dev = true
+
+# 로그에 요청 내용(녹음) 남기지 않음 — 관찰 로그 끔
+[observability]
+enabled = false
+
+# Workers AI(받아쓰기 모델)
+[ai]
+binding = "AI"
+
+# 하루 상한 세기용 KV — id 는 DEPLOY.md 2단계에서 만든 값으로 바꿔 넣기
+[[kv_namespaces]]
+binding = "CAP"
+id = "5101905674604117b0155c5237f24fbb"
+
+[vars]
+DEV_CAP = "200"    # 기기당 하루 횟수
+ALL_CAP = "20000"  # 전체 하루 횟수(돈 새는 것 막기)

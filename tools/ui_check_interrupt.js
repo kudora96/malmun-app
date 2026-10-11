@@ -43,6 +43,17 @@
     { await openP("write"); const cs = [...document.querySelectorAll(".panel .sent .c")]; autoBtn().click(); await W(900); cs[cs.length - 1]?.click(); await W(400);
       const nows = document.querySelectorAll(".panel .sent .c.now").length, mx = await peak(1200); ok(nows === 1 && mx <= 1, "쓰기 자동 중 → 위 글자 줄 다른 글자 = 지금 글자 하나 · 소리 하나 이하", `지금 글자 ${nows} · 소리 ${mx}`);
       autoBtn().click(); await W(300); await closeP(); }
+    // ── 자동 완성 2종(본부 10-11) — 서로 끼어들면 먼저 것 멈춤 · 모드·토막·✕ = 멈춤 · 마지막 줄 전체 자동 = 저절로 더 안 감 ──
+    { localStorage.setItem("malmun.wmode", "kb"); await openP("write"); const all = () => $(".panel [data-act=autoall]"), lab = () => `${autoBtn()?.textContent}|${all()?.textContent}`;
+      autoBtn().click(); await W(900); all().click(); await W(300); const s1 = wr()?.st(), l1 = lab(); const mx1 = await peak(800);
+      ok(s1?.auto && s1.autoMode === "all" && /⏹/.test(all().textContent) && !/⏹/.test(autoBtn().textContent) && mx1 <= 1, "자동 완성 중 → 전체 자동 = 먼저 것 멈추고 전체만(단추 ⏹ 하나 · 소리 하나 이하)", `${l1} · 소리 ${mx1}`);
+      autoBtn().click(); await W(300); const s2 = wr()?.st(); ok(s2?.auto && s2.autoMode === "line" && /⏹/.test(autoBtn().textContent) && !/⏹/.test(all().textContent), "전체 자동 중 → 자동 완성 = 바꿔서 한 줄만", lab());
+      $(`.panel [data-mode=hand]`).click(); await W(300); const s3 = wr()?.st(), mx3 = await peak(800), [a, b] = await stillFor(3000); ok(!s3.auto && !/⏹/.test(lab()) && mx3 <= 1 && a === b, "자동 중 모드 바꿈 = 멈춤 · 저 혼자 안 씀", `${lab()} · ${a}→${b}`);
+      $(`.panel [data-mode=kb]`).click(); await W(300); all().click(); await W(700); $(".panel [data-seg='1']")?.click(); await W(300); const s4 = wr()?.st(), [c1, c2] = await stillFor(3000); ok(!s4.auto && c1 === c2 && !/⏹/.test(lab()), "전체 자동 중 토막 옮김 = 멈춤", `${c1}→${c2}`);
+      all().click(); await W(700); await closeP(); const mx5 = await peak(1500); ok(!$(".panel .write") && mx5 === 0, "전체 자동 중 ✕ = 소리 0 · 쓰기 창 없음", `소리 ${mx5}`); }
+    { const last = L().length - 1; await openP("write", last); const segs = $(".panel .segnav")?.innerText.match(/\/(\d+)/)?.[1] || 1; for (let s = 1; s < +segs; s++) { $(".panel [data-seg='1']")?.click(); await W(150); }
+      $(".panel [data-act=autoall]").click(); let t = 0; while (t < 40000 && !wr()?.st().lineEnd) { await W(200); t += 200; } await W(3500); const sub = $(".panel .whead .sub")?.textContent, S = wr()?.st();
+      ok(S?.lineEnd && !S.auto && !S.allNext && new RegExp(`^${last + 1} /`).test(sub || "") && !/⏹/.test($(".panel [data-act=autoall]").textContent), "마지막 줄 전체 자동 끝 = 그 자리에 멈춤(다음으로 안 감 · 단추 원래대로)", `${sub} · ${t}ms`); await closeP(); }
     // ── 글자 칸 소리 단추(본부 10-08) — 다시 누름 · 자판 · 자동 ──
     { await openP("write"); const bx = () => $(".panel .stage .box"); const n0 = log.length; bx().click(); await W(150); const heard = log.slice(n0).some(e => e.ev === "시작" && /chars_f/.test(e.name)); bx().click(); const m1 = await peak(900);
       [...document.querySelectorAll(".panel [data-j]")][0].click(); bx().click(); await W(50); [...document.querySelectorAll(".panel [data-j]")][1].click(); const m2 = await peak(900);

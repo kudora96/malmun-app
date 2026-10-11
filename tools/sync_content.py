@@ -11,7 +11,7 @@ import glob, json, os, re, shutil, sys
 MALMUN = os.environ.get("MALMUN_ROOT", r"D:\gdrive\malmun")
 APP = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(APP, "data")
-LANGS = "ne vi id th mn ur si bn tl uz ky km lo my zh ja en es fr pt".split()
+LANGS = "ne vi id th mn ur si bn tl uz ky km lo my zh ja ru hi en es fr pt".split()  # 22개(10-02 ru·hi · 언어부 10-11)
 
 
 def episode_guide():

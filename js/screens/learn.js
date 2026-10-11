@@ -10,24 +10,24 @@
 //  R7 영상은 늘 맨 위 · 지금 줄은 영상 바로 아래(앞 줄은 영상 뒤로) — 손으로 목록을 움직이면 4초 동안은 따라가지 않음
 //  R8 듣기 모드(대사→설명 · 설명만)도 R1~R6 그대로(영상 대신 소리 조각) · 모드를 바꾸면 멈춤(▶ 로 시작)
 //  R9 다시 들어오면 마지막 줄이 선택된 채 멈춰 있음
-import * as sfxL from "../sfx.js?v=1010.96"; // 카드 말하기 최대 길이 = 본보기 길이로(10-07)
-import { t, lang, langName } from "../i18n.js?v=1010.96";
-import { esc, renderText, glossCards, sayParts } from "../text.js?v=1010.96";
-import { episode } from "../data.js?v=1010.96";
-import { paths } from "../paths.js?v=1010.96";
-import { Sequence } from "../audio.js?v=1010.96";
-import { I, progress, SPEAKER, spkHtml, uiKoBtn, toggleUiKo } from "../ui.js?v=1010.96";
-import writeView from "./write.js?v=1010.96";
-import { diagEnv, keepDiag } from "../diag.js?v=1010.96";
-import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1010.96";
-import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace, lateFactor, sylAt, paintAt, karaokeRun } from "../rhythm.js?v=1010.96";
-import { playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1010.96";
-import { bestHeard, heardHTML, endHint } from "../heard.js?v=1010.96";
-import { recDel, downloadRec, askPersist } from "../recstore.js?v=1010.96";
-import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1010.96";
-import { scoreFx, stopFx } from "../scorefx.js?v=1010.96"; // 점수별 효과(본부 10-05)
-import { record, recordSROnly, srOnlyMode, setSrOnly, isAndroid, srMiss, micWhy, srWhy, canScore, closeMic, logRec, micOpen, seqMode, srOnBlob, devSR, setDevSR, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1010.96";
-import { hold, quietWake } from "../wake.js?v=1010.96";
+import * as sfxL from "../sfx.js?v=1011.24"; // 카드 말하기 최대 길이 = 본보기 길이로(10-07)
+import { t, lang, langName } from "../i18n.js?v=1011.24";
+import { esc, renderText, glossCards, sayParts } from "../text.js?v=1011.24";
+import { episode } from "../data.js?v=1011.24";
+import { paths } from "../paths.js?v=1011.24";
+import { Sequence } from "../audio.js?v=1011.24";
+import { I, progress, SPEAKER, spkHtml, uiKoBtn, toggleUiKo } from "../ui.js?v=1011.24";
+import writeView from "./write.js?v=1011.24";
+import { diagEnv, keepDiag } from "../diag.js?v=1011.24";
+import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1011.24";
+import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace, lateFactor, sylAt, paintAt, karaokeRun } from "../rhythm.js?v=1011.24";
+import { playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1011.24";
+import { bestHeard, heardHTML, endHint } from "../heard.js?v=1011.24";
+import { recDel, downloadRec, askPersist } from "../recstore.js?v=1011.24";
+import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1011.24";
+import { scoreFx, stopFx } from "../scorefx.js?v=1011.24"; // 점수별 효과(본부 10-05)
+import { record, recordSROnly, srOnlyMode, setSrOnly, isAndroid, srMiss, micWhy, srWhy, canScore, closeMic, logRec, micOpen, seqMode, srOnBlob, devSR, setDevSR, srJudge, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1011.24";
+import { hold, quietWake } from "../wake.js?v=1011.24";
 
 const RATES = [1, 0.75, 0.5];
 const pref = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } };
@@ -254,8 +254,8 @@ export default async function learn(app, ep, startId) {
   // 아이콘만 있는 단추 없음 · 안쪽 스크롤 없음(폰 375×812 한 화면) · 「이제 말해 보세요」는 카드 안에서 녹음→점수→내 목소리(카드를 떠나지 않음)
   const v9L = d.v9L, v9pref = () => { try { return { snd: "L", txt: "L", ...JSON.parse(pref("malmun.v9") || "{}") }; } catch { return { snd: "L", txt: "L" }; } };
   const v9set = (k, v) => { const P = v9pref(); P[k] = v; pref("malmun.v9", JSON.stringify(P)); };
-  const v9code = k => (k === "ko" ? "ko" : v9L);
-  const v9name = k => (k === "ko" ? "한국어" : langName(v9L));
+  const v9code = k => (k === "ko" || !v9L ? "ko" : v9L); // 학습자 언어 설명이 없으면 한국어만(언어부 10-11)
+  const v9name = k => (k === "ko" || !v9L ? "한국어" : langName(v9L));
   const v9src = (i, k, what) => { const a = L[i].v9?.audio?.[v9code(k)]?.[what]; return a ? paths.v9(ep, a) : null; };
   const bold = s => esc(s).replace(/&quot;([^&]*?)&quot;|"([^"]*?)"/g, (m, a, b) => `<b>"${a ?? b}"</b>`);
   const sayKey = i => `${ep}/${ep}_${String(L[i].id).padStart(2, "0")}_say`; // 말하기 창의 같은 과제와 같은 칸(✓ 공유)
@@ -268,10 +268,10 @@ export default async function learn(app, ep, startId) {
     const k = P.snd, code = v9code(k);
     const lab = (key, ko) => `<span class="glab">${esc(t(key))}${lang === "ko" ? "" : ` <small lang="ko">(${ko})</small>`}</span>`;
     return `<div class="exv v9${romOn() ? "" : " norom"}">
-      <div class="v9bar">${lab("v9_listen", "듣기")}<span class="seg snd">${playBtn("L")}${playBtn("ko")}</span>${x.sent?.length ? `<span class="snum" aria-live="off">1/${x.sent.length}</span>` : ""}<button class="romb" data-x="v9rom" aria-pressed="${romOn()}">${esc(t("v9_rom"))}</button><button class="pb closex" data-x="close" title="${esc(t("close_word"))}" aria-label="${esc(t("close_word"))}"><span class="cx">✕</span><span class="cw"> ${esc(t("close_word"))}</span></button></div>
-      <div class="v9tip" hidden>${esc(t("v9_tip"))}</div><div class="v9pop" hidden></div>
+      <div class="v9bar">${lab("v9_listen", "듣기")}<span class="seg snd">${v9L ? playBtn("L") : ""}${playBtn("ko")}</span>${x.sent?.length ? `<span class="snum" aria-live="off">1/${x.sent.length}</span>` : ""}<button class="romb" data-x="v9rom" aria-pressed="${romOn()}">${esc(t("v9_rom"))}</button><button class="pb closex" data-x="close" title="${esc(t("close_word"))}" aria-label="${esc(t("close_word"))}"><span class="cx">✕</span><span class="cw"> ${esc(t("close_word"))}</span></button></div>
+      ${v9L ? "" : `<div class="v9soon">${esc(t("v9_lang_soon"))}</div>`}<div class="v9tip" hidden>${esc(t("v9_tip"))}</div><div class="v9pop" hidden></div>
       <div class="v9body">
-        ${x.pieces?.length || fx ? `<div class="chips">${(x.pieces || []).map(c => `<span class="chip"><b class="ko" lang="ko">${esc(c.ko)}</b> <i>${c.rom != null ? `<span class="rom">${esc(c.rom)}${c.mean ? ", " : ""}</span>${esc(c.mean || "")}` : esc(c.gloss || "")}</i></span>`).join("")}${fx ? `<span class="fx">= <b>${esc(fx)}</b></span>` : ""}</div>` : ""}
+        ${x.pieces?.length || fx ? `<div class="chips">${(x.pieces || []).map(c => `<span class="chip"><b class="ko" lang="ko">${esc(c.ko)}</b> <i>${c.rom != null ? `<span class="rom">${esc(c.rom)}${c.mean && v9L ? ", " : ""}</span>${v9L ? esc(c.mean || "") : ""}` : v9L ? esc(c.gloss || "") : ""}</i></span>`).join("")}${fx ? `<span class="fx">= <b>${esc(fx)}</b></span>` : ""}</div>` : ""}
         <p data-p="0">${v9Sent(i, code)}</p>${pairHTML(i, code, 0)}
         ${l.say ? `<div class="sayb"><p data-p="1" class="sayp">${sayHTML(i, code)}</p>
           <div class="sbtns" data-keep="${esc(t("keep_short"))}"><button class="mic" data-x="rec">🎤 ${esc(t("speak_now"))}</button><button data-x="model">▶ ${esc(t("model"))}</button><button class="mrate" data-x="mrate" aria-label="${esc(t("speed"))}" aria-pressed="${getRate("m") !== 1}">${rateLabel(getRate("m"))}</button><button data-x="mine" disabled>▶ ${esc(t("my_voice"))}</button><button data-x="keep" title="${esc(t("keep"))}" hidden>${esc(t("keep_short"))}</button><button data-x="savedplay" title="${esc(t("saved_title"))}" hidden>${esc(t("saved_play"))}</button><span class="mini"><button data-x="savedl" class="small" title="${esc(t("download"))}" hidden>⬇ ${esc(t("dl_short"))}</button><button data-x="savedel" class="small" title="${esc(t("del_one"))}" hidden>🗑 ${esc(t("del_short"))}</button></span></div>
@@ -305,7 +305,7 @@ export default async function learn(app, ep, startId) {
   function sayHTML(i, code) {
     const x = L[i].v9, a = sayParts(x.text?.[code]?.say), b = sayParts(x.text?.[v9L]?.say) || a;
     if (!a) return bold((x.text?.[code] || x.text?.ko || {}).say || "");
-    return `<span class="sayin"${code === "ko" ? ' lang="ko"' : ""}>${esc(a.intro)}</span><span class="saybig" lang="ko">${[...String(a.ko)].map(ch => `<span>${esc(ch)}</span>`).join("")}</span>${b?.rom ? `<span class="sayrom rom">${esc(b.rom)}</span>` : ""}${b?.mean ? `<span class="saymean">${esc(b.mean)}</span>` : ""}`;
+    return `<span class="sayin"${code === "ko" ? ' lang="ko"' : ""}>${esc(a.intro)}</span><span class="saybig" lang="ko">${[...String(a.ko)].map(ch => `<span>${esc(ch)}</span>`).join("")}</span>${b?.rom ? `<span class="sayrom rom">${esc(b.rom)}</span>` : ""}${b?.mean && v9L ? `<span class="saymean">${esc(b.mean)}</span>` : ""}`;
   }
   // 지금 문장 번호 = 재생 시각이 들어간 sent 칸
   const sentAt = (i, code, tm) => { const sn = L[i].v9?.sent || []; let k = 0; sn.forEach((s, j) => { if ((s[`${code}_s`] ?? 0) <= tm + 0.05) k = j; }); return k; };
@@ -390,7 +390,7 @@ export default async function learn(app, ep, startId) {
   const hidePop = () => app.querySelectorAll(".v9pop").forEach(p => { p.hidden = true; p.__for = null; });
   function popFor(el) {
     const sn = el.closest(".sn"), i = sn ? +sn.dataset.i : st.panel.i, x = L[i].v9;
-    if (el.dataset.x === "gw") { const w = el.dataset.g, g = x.gloss?.[w] || {}, rom = romOn() && g.rom; if (!g.ne && !rom) return ""; return `<b lang="ko">${esc(w)}</b>${rom ? ` <span class="rom">${esc(g.rom)}</span>` : ""}${g.ne ? ` · ${esc(g.ne)}` : ""}`; } // 뜻·로마자 없으면 말풍선 없음
+    if (el.dataset.x === "gw") { const w = el.dataset.g, g = x.gloss?.[w] || {}, rom = romOn() && g.rom, gm = v9L ? g[v9L] : null; if (!gm && !rom) return ""; return `<b lang="ko">${esc(w)}</b>${rom ? ` <span class="rom">${esc(g.rom)}</span>` : ""}${gm ? ` · ${esc(gm)}` : ""}`; } /* 뜻 = 학습자 언어(없으면 로마자만 · 언어부 10-11) */ // 뜻·로마자 없으면 말풍선 없음
     return "";
   }
   const onDocDown = e => { if (!e.target.closest(".v9pop, [data-x=sn], [data-x=gw]")) hidePop(); };
@@ -497,7 +497,9 @@ export default async function learn(app, ep, startId) {
   }
   // 카드 안 말하기(녹음 → 점수 → 내 목소리) — js/recorder.js
   let sp = null; // { i, ctl, blob, audio, saved }
-  function spStop() { quietWake(false); sp?.ctl?.stop(true); sp?.audio?.pause(); sp?.slow?.pause(); sp = null; closeMic(); } // 카드를 닫을 때 마이크도 닫음(그때처럼 · 카드가 열려 있는 동안은 쥐고 있음)
+  // 시도 번호 + 받아쓰기 끊기(검사부 10-11) — 「확인 중…」 동안 카드를 닫거나 새로 녹음하면 옛 결과는 버림 · srOnBlob 도 멈춤
+  let spAtt = 0, spAbort = null; const spCancel = () => { spAtt++; const a = spAbort; spAbort = null; try { a?.abort(); } catch {} };
+  function spStop() { spCancel(); quietWake(false); sp?.ctl?.stop(true); sp?.audio?.pause(); sp?.slow?.pause(); sp = null; closeMic(); } // 카드를 닫을 때 마이크도 닫음(그때처럼 · 카드가 열려 있는 동안은 쥐고 있음)
   // 소리는 언제나 하나(본부 10-10 막 누르기 — 느린 견본·내 목소리가 나오는 중에 칸 글을 누르면 설명 읽기가 겹치던 것) — 견본(느린)·내 목소리·효과음 멈춤
   const sayPlaying = () => !!(sp?.slow?.playing || (sp?.audio && !sp.audio.paused));
   const hushSay = () => { sp?.slow?.pause(); sp?.audio?.pause(); sfxL.stopAll(); };
@@ -517,6 +519,8 @@ export default async function learn(app, ep, startId) {
   async function spRec(i, btn) {
     const box = panel.querySelector(".sayb"), msg = box.querySelector(".smsg"), lvl = box.querySelector(".lvl"), mineB = box.querySelector("[data-x=mine]");
     if (sp?.ctl) { sp.ctl.stop(); return; } // 녹음 중 다시 누름 = 멈춤(점수는 냄)
+    if (sp?.checking || btn.disabled) return; // 「확인 중…」 = 🎤 무시(검사부 10-11 — 옛 결과가 새 녹음에 섞이던 것)
+    spCancel(); const att = spAtt; // 이 시도 번호
     const playingAtStart = ex.playing || !!(sp?.audio && !sp.audio.paused) || !v.paused; // 진단: 녹음 시작 때 소리가 나오고 있었나
     ex.stop(); clearTimeout(st.gap); st.gap = 0; st.exLoop = null; sp?.audio?.pause(); sp?.slow?.pause(); stopFx(); scoreFx(box.querySelector(".fx"), null); markPlay(); sync(); // 🎤 = 반복·재생·효과음 모두 멈춤
     // 「준비 중」 → 마이크에서 실제 소리가 들어오기 시작하면 「녹음 중」(본부 10-03 — 그 전에 말하면 앞이 비어 버린다)
@@ -549,17 +553,23 @@ export default async function learn(app, ep, startId) {
     if (r.cancelled) { btn.textContent = "🎤 " + t("speak_now"); msg.textContent = ""; return; }
     if (r.error) { btn.textContent = "🎤 " + t("speak_now"); msg.textContent = t(micWhy(r.error)); return; }
     // 녹음 먼저 → 그 녹음 소리로 받아쓰기 · 말소리는 있었는데 들은 말 0 이고 아직 이 기기에서 된 적 없으면 = 이 기기는 안 됨 → 받아쓰기만(기기 기억) · 0점 대신 「한 번 더」(본부 10-10)
-    if (seq && r.blob) { msg.textContent = t("checking"); const s2 = await srOnBlob(r.blob); if (st.panel?.i !== i) return; r.heard = s2.heard; r.srErr = s2.srErr; r.diag = { ...(r.diag || {}), sr: s2.ev, seq: `녹음 ${s2.info?.dur}초 최대 ${s2.info?.maxDb}dB · 트랙 ${s2.info?.track} · start 예외 ${s2.info?.startErr || "없음"} · ${s2.info?.ms}ms · 들음 ${s2.heard.length}` };
-      if (!s2.heard.length && (r.diag?.maxDb ?? -120) > -40 && devSR() !== "seq-ok") { setDevSR("sronly"); btn.textContent = "🎤 " + t("speak_now"); msg.textContent = t("sr_retry_dev"); scoreFx(box.querySelector(".fx"), null); logRec({ where: "card", line: L[i].id, want: L[i].say.ko, ...r.diag, mode: "녹음→받아쓰기 안 됨 → 받아쓰기만", heard: [] }); return; }
-      if (s2.heard.length) setDevSR("seq-ok"); }
+    //  판정 = recorder.js srJudge(검사부 10-11) — 연속 2번 기기 실패라야 받아쓰기만(7일 기억) · 인터넷·중단·말 없음·무음은 세지 않음 · "seq-ok" 여도 실패면 「한 번 더」
+    //  기다리는 동안 🎤 막음(보통 모양) · 끝나면 어느 길이든 풂 · 닫기·새 녹음 = 시도 번호가 바뀜 → 버림
+    if (seq && r.blob) { msg.textContent = t("checking"); const me = sp; me.checking = true; btn.disabled = true; btn.setAttribute("aria-disabled", "true"); btn.classList.remove("on"); btn.textContent = "🎤 " + t("speak_now");
+      const ac = (spAbort = new AbortController()); let s2;
+      try { s2 = await srOnBlob(r.blob, { signal: ac.signal }); } finally { if (spAbort === ac) spAbort = null; me.checking = false; btn.disabled = false; btn.setAttribute("aria-disabled", "false"); }
+      if (att !== spAtt || st.panel?.i !== i || !sp || s2.info?.aborted) return; // 닫힘·새 시도 = 옛 결과 버림
+      const jd = srJudge(s2, 10 ** ((r.diag?.maxDb ?? -120) / 20)); if (!jd.ok && jd.kind === "notrack") s2.heard = []; // 트랙 대신 마이크를 들음 = 들은 말 버림
+      r.heard = s2.heard; r.srErr = s2.srErr; r.diag = { ...(r.diag || {}), sr: s2.ev, seq: `녹음 ${s2.info?.dur}초 최대 ${s2.info?.maxDb}dB · 트랙 ${s2.info?.track} · 트랙 씀 ${s2.info?.trackUsed ?? "?"} · start 예외 ${s2.info?.startErr || "없음"} · ${s2.info?.ms}ms · 들음 ${s2.heard.length} · 판정 ${jd.kind}${jd.count ? ` ${jd.count}/2` : ""} · 기억 ${devSR() || "-"}` };
+      if (jd.retry) { btn.textContent = "🎤 " + t("speak_now"); msg.textContent = t("sr_retry_dev"); scoreFx(box.querySelector(".fx"), null); logRec({ where: "card", line: L[i].id, want: L[i].say.ko, ...r.diag, why: "retry-dev", score: null, kind: jd.kind, mode: jd.switched ? "녹음→받아쓰기 연속 2번 안 됨 → 받아쓰기만" : "녹음→받아쓰기 한 번 더", heard: [] }); return; } }
     const switchedSR = !seq && r.blob && isAndroid() && !srOnlyMode() && canScore() ? srMiss(!r.heard.length && (r.diag?.maxDb ?? -120) > -40) : false; // 연속 2번이면 받아쓰기만으로
     let sc = canScore() && r.heard.length ? Math.max(...r.heard.map(h => similarity(L[i].say.ko, h))) : null;
-    const env = await diagEnv(); // 진단(화면에 안 보임) — 소리 엔진·🔁·녹음 시작 때 재생 중이었는지·출력 장치 + 녹음 소리 자체(malmun_diag · 마지막 3개)
+    const env = await diagEnv(); if (att !== spAtt) return; // 그새 새 시도·닫힘(검사부 10-11) · 진단(화면에 안 보임) — 소리 엔진·🔁·녹음 시작 때 재생 중이었는지·출력 장치 + 녹음 소리 자체(malmun_diag · 마지막 3개)
     logRec({ where: "card", line: L[i].id, want: L[i].say.ko, ...(r.diag?.mode ? {} : { mode: "받아쓰기만" }), ...r.diag, micAfter: micOpen(), heard: [...new Set(r.heard)], score: sc, ...env, playingAtStart });
     if (r.blob) keepDiag(r.blob, { where: "card", why: r.diag?.why, cut: r.diag?.cut, line: L[i].id, score: sc, heard: [...new Set(r.heard)] });
     // 리듬(투덜이 10-06 허락) — 글자 점수 × 리듬 배수(말하기 창과 같은 함수) · 근거는 결과 줄에
     let rhy = null;
-    if (sc > 0 && r.blob) { const rh = await rhythmOf({ ep, key: `${ep}_${String(L[i].id).padStart(2, "0")}_say`, url: L[i].say.src, text: L[i].say.ko, blob: r.blob, heard: bestHeard(L[i].say.ko, r.heard) }); if (st.panel?.i !== i) return; if (rh) { rhy = { L: sc, R: rh.R, worst: rh.worst }; sc = withRhythm(sc, rh.R); const lf = lateFactor(rh.yEnd, pace?.end); if (lf.late) { rhy.late = true; sc = Math.floor(sc * lf.f + 1e-9); } } } // 노래방 칠보다 많이 늦으면 최대 80쯤(투덜이 10-08)
+    if (sc > 0 && r.blob) { const rh = await rhythmOf({ ep, key: `${ep}_${String(L[i].id).padStart(2, "0")}_say`, url: L[i].say.src, text: L[i].say.ko, blob: r.blob, heard: bestHeard(L[i].say.ko, r.heard) }); if (st.panel?.i !== i || att !== spAtt) return; if (rh) { rhy = { L: sc, R: rh.R, worst: rh.worst }; sc = withRhythm(sc, rh.R); const lf = lateFactor(rh.yEnd, pace?.end); if (lf.late) { rhy.late = true; sc = Math.floor(sc * lf.f + 1e-9); } } } // 노래방 칠보다 많이 늦으면 최대 80쯤(투덜이 10-08)
     sp.blob = r.blob; sp.score = sc; sp.rhy = rhy;
     mineB.disabled = false; mineB.classList.toggle("dim", !r.blob); // 방금 녹음 — 언제나 · 받아쓰기만이면 흐리게(누르면 까닭)
     btn.textContent = "🎤 " + t(sc != null && sc >= PASS ? "speak_now" : "try_again");
@@ -663,7 +673,7 @@ export default async function learn(app, ep, startId) {
       playRec(sp.saved.blob); sp.audioKey = "savedplay";
       return;
     }
-    if (k === "srboth") { setSrOnly(false); x.remove(); const m = panel.querySelector(".sayb .smsg"); if (m) m.textContent = t("sr_both_set"); return; } // 다시 같이 시험
+    if (k === "srboth") { setSrOnly(false); setDevSR(null); /* 기기 기억·연속 실패 수도 지움(검사부 10-11) */ x.remove(); const m = panel.querySelector(".sayb .smsg"); if (m) m.textContent = t("sr_both_set"); return; } // 다시 같이 시험
     if (k === "mine" && !sp?.blob && srOnlyMode()) { const m = panel.querySelector(".sayb .smsg"); if (m) m.textContent = t("sr_only_why"); return; } // 받아쓰기만 — 녹음 없음
     if (k === "mine") {
       if (!sp?.blob || sp.ctl) return;
@@ -823,8 +833,8 @@ export default async function learn(app, ep, startId) {
     } else if (a === "spd") { st.rate = (st.rate + 1) % RATES.length; const r = RATES[st.rate]; b.textContent = r + "×"; v.playbackRate = r; seq.setRate(r); ex.setRate(r); }
   };
   v.addEventListener("click", togglePlay);
-  app.querySelector("[data-act=uiko]")?.addEventListener("click", e => { e.stopPropagation(); const p = st.panel; if (p) { const w = panel.__wr?.st?.() || panel.querySelector(".write")?.parentElement?.__wr?.st?.(), sp = panel.__sp?._state; try { sessionStorage.setItem("malmun.reopen", JSON.stringify({ ep, at: Date.now(), kind: p.kind, i: p.i, s: w?.s, w: w?.w, c: w?.c, wrote: w ? [...w.wrote] : [], part: sp?.i })); } catch {} }
-    toggleUiKo(() => import("../main.js?v=1010.96").then(m => m.rerender())); }); // 앱 글 한국어 토글 → 화면 다시 그림(도는 것은 cleanup 이 멈춤) → 열려 있던 창·자리로 다시 엶
+  app.querySelector("[data-act=uiko]")?.addEventListener("click", e => { e.stopPropagation(); const p = st.panel; if (p) { const w = panel.__wr?.st?.() || panel.querySelector(".write")?.parentElement?.__wr?.st?.(), sp = panel.__sp?._state; try { sessionStorage.setItem("malmun.reopen", JSON.stringify({ ep, at: Date.now(), kind: p.kind, i: p.i, s: w?.s, w: w?.w, c: w?.c, k: w?.k, wrote: w ? [...w.wrote] : [], part: sp?.i })); } catch {} }
+    toggleUiKo(() => import("../main.js?v=1011.24").then(m => m.rerender())); }); // 앱 글 한국어 토글 → 화면 다시 그림(도는 것은 cleanup 이 멈춤) → 열려 있던 창·자리로 다시 엶
   app.querySelector("[data-act=fs]").onclick = () => {
     const w = app.querySelector("#vwrap");
     if (document.fullscreenElement) document.exitFullscreen?.();

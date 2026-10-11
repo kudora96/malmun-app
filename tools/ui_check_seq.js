@@ -27,8 +27,10 @@
     ok(/\d+%/.test(a.msg) && localStorage.getItem("malmun.srdev") === "seq-ok" && !!p.__sp._state.blob && !window.__srStarts.includes("동시") && window.__srStarts.includes("녹음소리트랙"),
       "ⓐ 안드로이드: 녹음만 → 끝나면 그 녹음 소리로 받아쓰기 = 점수 · 녹음 그대로 · 기기 기억 seq-ok", `「${a.msg.slice(0, 50)}」 · 받아쓰기 ${window.__srStarts.join("/")} · 기억 ${localStorage.getItem("malmun.srdev")}`);
     // ⓑ
-    localStorage.removeItem("malmun.srdev"); window.__trackOK = false; window.__srStarts = []; const g0 = gum; let b = await once(); const retry = $(".panel .msg").textContent;
-    ok(!/\d+%/.test(b.msg) && /फेरि एक पटक|한 번 더|once more/.test(b.msg) && !b.fx.length && localStorage.getItem("malmun.srdev") === "sronly", "ⓑ 녹음 소리로도 못 들음(말소리 있음) = 0점 대신 「한 번 더 말해 주세요」 · 효과음 없음 · 기기 기억 sronly", `「${retry.slice(0, 40)}」 · 효과 ${b.fx.join(",") || "없음"} · 기억 ${localStorage.getItem("malmun.srdev")}`);
+    localStorage.removeItem("malmun.srdev"); try { sessionStorage.removeItem("malmun.srfail"); } catch {} window.__trackOK = false; window.__srStarts = []; const g0 = gum; let b = await once(); const mem1 = localStorage.getItem("malmun.srdev");
+    ok(!/\d+%/.test(b.msg) && /फेरि एक पटक|한 번 더|once more/.test(b.msg) && !b.fx.length && mem1 !== "sronly", "ⓑ 첫 실패 = 「한 번 더」만 · 기기 기억은 아직 안 바꿈(검사부 10-11 「한 번에 영구」)", `「${b.msg.slice(0, 30)}」 · 기억 ${mem1}`);
+    b = await once(); const retry = $(".panel .msg").textContent;
+    ok(!/\d+%/.test(b.msg) && /फेरि एक पटक|한 번 더|once more/.test(b.msg) && !b.fx.length && localStorage.getItem("malmun.srdev") === "sronly", "ⓑ 연속 두 번 못 들음(말소리 있음) = 0점 대신 「한 번 더 말해 주세요」 · 효과음 없음 · 기기 기억 sronly", `「${retry.slice(0, 40)}」 · 효과 ${b.fx.join(",") || "없음"} · 기억 ${localStorage.getItem("malmun.srdev")}`);
     window.__srStarts = []; const g1 = gum; let paced = false; const watch = setInterval(() => { if ($(".panel .say span.pace")) paced = true; }, 50); b = await once(); clearInterval(watch);
     ok(gum === g1 && /\d+%/.test(b.msg) && window.__srStarts.every(x => x === "트랙없음") && paced, "ⓑ 다음 말하기 = 받아쓰기만(마이크 안 엶) · 점수 · 따라 읽기 칠", `마이크 ${gum - g1}번 · 「${b.msg.slice(0, 40)}」 · 칠 ${paced}`);
     ok(!$(".panel .srboth, .panel [data-act=srboth]"), "ⓑ 학습자 화면에 「다시 같이 확인하기」 단추 없음(진단 화면에만)");

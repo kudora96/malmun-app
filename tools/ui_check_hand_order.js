@@ -75,7 +75,7 @@
     $("[data-act=auto]").click(); await W(400);
     const autoTxt = $("[data-act=auto]").textContent; let painted = false;
     for (let i = 0; i < 400 && wr()?.st().auto; i++) { await W(100); if (!painted && wr().hand()) { const gv = $(".hguide"), d = gv.getContext("2d").getImageData(0, 0, gv.width, gv.height).data; for (let k = 0; k < d.length; k += 16) if (d[k] > 150 && d[k + 1] < 140 && d[k + 2] < 90 && d[k + 3] > 200) { painted = true; break; } } }
-    const S1 = wr().st();
+    const S1 = wr().st(); if (S1.auto) { $("[data-act=auto]").click(); await W(400); } // 자동은 이제 줄 끝까지(본부 10-11) — 다음 항목 전에 멈춤
     ok(/⏹/.test(autoTxt) && painted && (S1.s > seg || !S1.auto) && S1.wrote.size === 0, "ⓑ 손글씨 자동 → 획 주황 칠 보임 · 토막 끝까지 · 자동으로 쓴 글자는 초록 아님", `단추 「${autoTxt}」 · 칠 ${painted} · 토막 ${seg}→${S1.s} · 글자 ${n0} · 직접 씀 ${S1.wrote.size}`);
     // ⓒ 멈춤 — 손글씨
     await W(1500);
