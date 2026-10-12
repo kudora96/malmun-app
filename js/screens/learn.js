@@ -127,13 +127,14 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   // 기준(본부 10-05): 줄 카드 전체(아래끝 포함)가 영상 아래~막대 위에 보일 것 · 아니면 카드 위끝을 영상 바로 아래로(카드가 그 사이보다 길어도 위끝 맞춤)
   // 쓰기 창이 열려 있으면 지금 자막 카드(글 전부 + 아래 메뉴 줄)가 쓰기 창과 아래 막대 사이에 다 들어가게 — 길면 카드 안 글을 줄임(10-06 본부·투덜이)
   function fitCard(i) {
-    items.forEach(li => { li.classList.remove("fitc"); li.style.removeProperty("--kf"); li.style.removeProperty("--tf"); });
+    items.forEach(li => { li.classList.remove("fitc", "tr2", "tr1"); li.style.removeProperty("--kf"); li.style.removeProperty("--tf"); });
     const el = items[i]; if (!el) return; // 네 창(영상·설명·쓰기·말하기) 모두 같은 카드 자리·같은 글 크기(본부 10-06 「한 틀」)
     const avail = ctrlBar.getBoundingClientRect().top - stick.getBoundingClientRect().bottom - 14;
     const ko = el.querySelector(".kotext"), tr = el.querySelector(".tr");
     let kf = parseFloat(getComputedStyle(ko).fontSize), tf = tr ? parseFloat(getComputedStyle(tr).fontSize) : 0;
     el.classList.add("fitc");
     for (let k = 0; k < 16 && el.offsetHeight > avail && kf > 11; k++) { kf -= 1; tf = Math.max(10, tf - 0.7); el.style.setProperty("--kf", kf + "px"); el.style.setProperty("--tf", tf + "px"); }
+    for (const c of ["tr2", "tr1"]) { if (!tr || el.offsetHeight <= avail) break; el.classList.remove("tr2", "tr1"); el.classList.add(c); } // 가장 작은 글로도 넘치면 학습자 말 뜻을 2줄 → 1줄(설명 창에 다 보임 · 검사부 10-12 vi·th·ur 320 — 단추가 아래 막대 뒤로)
   }
   // 영상 창 = 제목 줄 바로 밑에 영상(위 정렬) · 남는 자리(폰)에 지금 대사를 영화 자막처럼 크게(투덜이 10-06 ㅇ) — 화자(작게) · 한국어(굵게) · 로마자(켜짐이면 작게) · 학습자 언어
   //   글 크기 = 그 자리를 채우는 가장 큰 크기(넘치면 줄임 · 스크롤 0) · 대사가 바뀔 때와 창 크기가 바뀔 때만 다시 맞춤 · 자리가 70px 안 되면(넓고 낮은 창) 자막 줄 없음
@@ -490,7 +491,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
       if (L[i].v9) v9Fit(); fitPanel(); panel.classList.remove("fitting"); setTimeout(fitPanel, 300); document.fonts?.ready.then(() => st.panel === mine && fitPanel()); // 글꼴이 늦게 와도 다시 맞춤 // 한 줄에 안 들어가면 (한국어) 괄호 → ✕ 글자 순서로 뺌
       if (L[i].v9) { mine.cleanup = spStop; spInit(i); if (!canScore()) { const g = panel.querySelector(".sayb .smsg"); if (g) g.textContent = t("speak_hint_noscore"); } } // 마이크는 🎤 누를 때만 연다(열면 블루투스가 통화 모드로 바뀌어 설명 소리까지 전화 음질 — 본부 10-03)
       if (autoplay) { ex.play((st.exLoop = exItems(i))); if (L[i].v9) markPlay(sndOf(i)); }
-      setTimeout(() => keepVisible(i), 60); // 카드가 길어도 그 줄이 아래 막대에 가리지 않게
+      setTimeout(() => { if (st.panel === mine) fitCard(i); keepVisible(i); }, 60); setTimeout(() => st.panel === mine && fitCard(i), 350); /* 설명 창이 커진 뒤 지금 줄 카드도 남은 자리에 맞춤(검사부 10-12 vi·th·ur 320 — 단추가 아래 막대 뒤로) */ // 카드가 길어도 그 줄이 아래 막대에 가리지 않게
     } else {
       const view = kind === "speak" ? speakView : writeView; // 줄을 다 쓰면(말하면) 다음 줄의 같은 메뉴로(W6 · S7)
       const cleanup = await view(panel, ep, L[i].id, { embedded: true, task, pos: restore, onNext: k => openPanel(kind, k), onClose: () => closePanel(), navPush, navPop });
