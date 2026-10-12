@@ -186,7 +186,7 @@ async function srOnServer(blob, { signal } = {}) {
   const t0 = performance.now(), ms = () => Math.round(performance.now() - t0), info = { server: true, track: "server", trackUsed: "server", dur: "?", maxDb: "?", startErr: null, ms: 0, aborted: false, words: 0 };
   if (signal?.aborted) return { heard: [], srErr: "aborted", ev: [], info: { ...info, aborted: true } };
   sttNoteOnce(); /* 첫 사용 안내 한 번 */
-  const n = v => Number(v).toLocaleString("en-US"), srvTxt = (ms, tm, code) => `서버 ${code ? code + " " : ""}${n(ms)}ms${tm ? ` = 받기 ${n(tm.up ?? 0)} + AI ${n(tm.ai ?? 0)}` : ""} · 보낸 ${Math.round((blob.size || 0) / 1024)}KB`; // 진단 줄(본부 10-12) — 「서버 6,157ms = 받기 4,100 + AI 1,900」 · 시간 초과 = 보낸 크기·걸린 시간만
+  const n = v => Number(v).toLocaleString("en-US"), srvTxt = (ms, tm, code) => `서버 ${code ? code + " " : ""}${n(ms)}ms${tm ? ` = 오감 ${n(Math.max(0, ms - (tm.total ?? 0)))} + 서버 ${n(tm.total ?? 0)}(AI ${n(tm.ai ?? 0)})` : ""} · 보낸 ${Math.round((blob.size || 0) / 1024)}KB`; // 진단 줄(본부 10-12) — 「서버 6,157ms = 오감 4,400 + 서버 1,760(AI 1,693)」 · 오감 = 폰에서 잰 전체 − 서버 안 시간(올리기·내려받기·거리) — Worker 시계는 I/O 때만 가고 작은 녹음은 Worker 시작 전에 다 받아 있어 서버 up 은 늘 0 근처(본부 10-13) · 시간 초과 = 보낸 크기·걸린 시간만
   try { const o = await serverSTT(blob, { signal }); info.ms = ms(); info.words = o.words.length; info.wordList = o.words; info.srv = srvTxt(info.ms, o.tm); return { heard: [o.text], srErr: null, ev: [`server ok@${info.ms}`], info }; }
   catch (e) { info.ms = ms(); const ab = e?.code === "aborted" || signal?.aborted; info.aborted = !!ab; info.status = e?.status || 0; info.srv = srvTxt(info.ms, e?.tm, e?.code || "error");
     return { heard: [], srErr: ab ? "aborted" : "server-" + (e?.code || "error"), ev: [`server ${e?.code || "error"}@${info.ms}`], info }; }
