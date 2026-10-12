@@ -13,15 +13,15 @@
 //  W5 소리는 언제나 하나만 · 새 일을 하면 앞 소리는 멈춘다
 //  W6 영상 창 안(embedded): 창 안에서 스크롤 없이 다 보이게 — 긴 문장은 토막으로(◀ 1/3 ▶) ·
 //     토막을 다 쓰면 자동으로 다음 토막 · 줄을 다 쓰면 대사를 듣고 자동으로 다음 줄 쓰기 · 아래 ▶ = 이 부분 듣기
-import { t, lang } from "../i18n.js?v=1012.11";
-import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO, koq } from "../text.js?v=1012.11";
-import { episode, chars, charsF } from "../data.js?v=1012.11";
-import { paths } from "../paths.js?v=1012.11";
-import { I, spkHtml } from "../ui.js?v=1012.11";
-import { audioCtx, hold } from "../wake.js?v=1012.11";
-import * as sfx from "../sfx.js?v=1012.11";
-import { scoreFx } from "../scorefx.js?v=1012.11";
-import { units as jamoUnits, baseOf, shapeFix } from "../jamobox.js?v=1012.11"; // 자모 자리 나누기(획순 · 자판 덧칠 · 손글씨 덩어리 — 본부 10-07) // 손글씨 점수 효과 = 말하기와 같은 규칙(본부 10-07)
+import { t, lang } from "../i18n.js?v=1012.10";
+import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO, koq } from "../text.js?v=1012.10";
+import { episode, chars, charsF } from "../data.js?v=1012.10";
+import { paths } from "../paths.js?v=1012.10";
+import { I, spkHtml } from "../ui.js?v=1012.10";
+import { audioCtx, hold } from "../wake.js?v=1012.10";
+import * as sfx from "../sfx.js?v=1012.10";
+import { scoreFx } from "../scorefx.js?v=1012.10";
+import { units as jamoUnits, baseOf, shapeFix } from "../jamobox.js?v=1012.10"; // 자모 자리 나누기(획순 · 자판 덧칠 · 손글씨 덩어리 — 본부 10-07) // 손글씨 점수 효과 = 말하기와 같은 규칙(본부 10-07)
 
 const KEYS = [..."ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎㄲㄸㅃㅆㅉ"], VOW = [..."ㅏㅑㅓㅕㅗㅛㅜㅠㅡㅣ"];
 const VOW2 = [..."ㅐㅒㅔㅖㅘㅙㅚㅝㅞㅟㅢ"]; // 겹모음 줄(본부 10-06) — 칸 하나 · ㅓ+ㅣ 처럼 나눠 쳐도 받음
@@ -201,7 +201,7 @@ export default async function write(app, ep, id, opts = {}) {
     for (let k = 0; k < 8 && gap() < 4; k++) { let moved = false; xs.forEach(x => { const f = parseFloat(getComputedStyle(x).fontSize); if (f > 11) { x.style.fontSize = f - 1 + "px"; moved = true; } }); if (!moved) break; }
   }
   // 머리 줄 한 줄 유지(본부 10-07) — 넘치면 ✕ 닫기 글을 숨기고 ✕ 만
-  function fitHeadW() { const h = work.closest(".write")?.querySelector(".whead") || app.querySelector(".whead"); if (!h) return; h.classList.remove("narrow"); if (h.scrollWidth > h.clientWidth + 1) h.classList.add("narrow"); }
+  function fitHeadW() { const h = work.closest(".write")?.querySelector(".whead") || app.querySelector(".whead"); if (!h) return; const sb = h.querySelector(".sub"), over = () => h.scrollWidth > h.clientWidth + 1 || (sb && sb.scrollWidth > sb.clientWidth + 1); /* 번호 칸이 말줄임으로 잘려도 넘침(ur 「3 / 1…」) */ h.classList.remove("narrow", "n2", "n3", "n4"); for (const c of ["narrow", "n2", "n3", "n4"]) { if (!over()) break; h.classList.add(c); } } // 머리 줄이 넘치면 차례로: ✕ 글 숨김 → 「쓰기」 제목 숨김 → 화자 이름 숨김 → 두 줄로(닫기 단추가 화면 밖으로 밀리지 않게 · 검사부 10-12 vi 375)
   function fitWord() {
     fitSub2(); fitHeadW();
     const row = work.querySelector(".info .word"); if (!row || !row.clientWidth) return;

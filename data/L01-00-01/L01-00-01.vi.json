@@ -1,0 +1,82 @@
+{
+ "clip_id": "L01-00-01",
+ "lang": "vi",
+ "what": "대사 자막층 vi — 언어부 S2 시범(10-11) · Claude 초안 A + 제미나이 초안 B 비교 후 고름(s2_drafts.md) · 원어민 확인 전",
+ "title_t": "\"세종대왕\" — Chữ viết có chủ nhân",
+ "characters": [
+  {
+   "id": "dubu",
+   "bio": "Robot dẫn chương trình"
+  },
+  {
+   "id": "kong",
+   "bio": "Chú mèo con màu trắng"
+  },
+  {
+   "id": "seonsaengnim",
+   "bio": "Cô giáo người Hàn Quốc, 30 tuổi"
+  }
+ ],
+ "subtitles": [
+  {
+   "id": 1,
+   "t": "Xin mời vào. Chào mừng đến với cung \"경복궁\"."
+  },
+  {
+   "id": 2,
+   "t": "Cô ơi! Em đã tạo ra chữ rồi!"
+  },
+  {
+   "id": 3,
+   "t": "Chữ á? Cái này là hình vẽ mà."
+  },
+  {
+   "id": 4,
+   "t": "Không phải chữ ạ? Sao vậy cô?"
+  },
+  {
+   "id": 5,
+   "t": "Chữ viết là một quy ước. Mọi người cùng đọc được thì mới là chữ viết."
+  },
+  {
+   "id": 6,
+   "t": "À, hóa ra chỉ một mình em biết thì không phải là chữ viết."
+  },
+  {
+   "id": 7,
+   "t": "Thế quy ước đó là do ai đặt ra vậy cô?"
+  },
+  {
+   "id": 8,
+   "t": "Là vua \"세종대왕\" đấy. Năm trăm năm trước, đích thân nhà vua đã tạo ra. Hồi đó người dân không biết chữ. Chữ thời ấy khó quá."
+  },
+  {
+   "id": 9,
+   "t": "Oa! Vậy chắc mọi người đã vui lắm cô nhỉ!"
+  },
+  {
+   "id": 10,
+   "t": "Không đâu. Các quan đại thần đã phản đối."
+  },
+  {
+   "id": 11,
+   "t": "Các quan đại thần ạ? Sao lại thế ạ?"
+  },
+  {
+   "id": 12,
+   "t": "Vì thời đó, chỉ những người biết chữ mới có quyền lực."
+  },
+  {
+   "id": 13,
+   "t": "Thế còn chúng em thì sao ạ? Chúng em cũng đọc được không cô?"
+  },
+  {
+   "id": 14,
+   "t": "Nào, nhìn đây nhé. Đây chính là chữ đó. Chữ \"아\" đấy."
+  },
+  {
+   "id": 15,
+   "t": "Hóa ra đó là điều mà vua \"세종대왕\" mong muốn. Một thứ chữ mà bất cứ ai cũng đọc được dễ dàng. Và bất cứ ai đó, giờ đây chính là chúng ta."
+  }
+ ]
+}

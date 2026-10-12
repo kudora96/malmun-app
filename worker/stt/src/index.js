@@ -11,9 +11,17 @@ const TYPES = /^audio\/(webm|mp4|ogg|mpeg|aac|x-m4a|wav)\b/i;
 const allowOrigin = o => (o === "https://kudora96.github.io" || /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(o || "") ? o : "");
 const cors = o => {
   const a = allowOrigin(o);
-  return a ? { "Access-Control-Allow-Origin": a, "Vary": "Origin", "Access-Control-Allow-Methods": "POST, OPTIONS", "Access-Control-Allow-Headers": "Content-Type, X-Dev", "Access-Control-Max-Age": "86400" } : { "Vary": "Origin" };
+  return a ? { "Access-Control-Allow-Origin": a, "Vary": "Origin", "Access-Control-Allow-Methods": "POST, OPTIONS", "Access-Control-Allow-Headers": "Content-Type, X-Dev", "Access-Control-Max-Age": "86400", "Access-Control-Expose-Headers": "Server-Timing" } : { "Vary": "Origin" };
 };
-const json = (o, status, body) => new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store", ...cors(o) } });
+const json = (o, status, body, extra = {}) => new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store", ...cors(o), ...extra } });
+// 걸린 시간(본부 10-12 · 투덜이 「ㅇ」) — 숫자만: up = 녹음 받기 끝까지 · ai = Workers AI · total = 전체(ms) · 녹음·글·기기 번호는 안 남김
+const timing = (up, ai, total) => ({ "Server-Timing": `up;dur=${up}, ai;dur=${ai}, total;dur=${total}` });
+// 날짜별 구간 개수(KV) — tm:{날짜}:{0-3|3-6|6-12|12+} · 30일 뒤 저절로 지워짐 · 실패해도 받아쓰기는 그대로
+async function countBand(env, ms) {
+  if (!env.CAP) return;
+  const day = new Date().toISOString().slice(0, 10), band = ms < 3000 ? "0-3" : ms < 6000 ? "3-6" : ms < 12000 ? "6-12" : "12+", k = `tm:${day}:${band}`;
+  try { const n = +(await env.CAP.get(k)) || 0; await env.CAP.put(k, String(n + 1), { expirationTtl: 2592000 }); } catch {}
+}
 
 // ArrayBuffer → base64(조각으로 · 큰 배열을 한 번에 펼치면 스택이 넘침)
 function b64(buf) {
@@ -34,8 +42,8 @@ async function overCap(env, dev) {
 }
 
 export default {
-  async fetch(req, env) {
-    const o = req.headers.get("Origin") || "", url = new URL(req.url);
+  async fetch(req, env, ctx) {
+    const t0 = Date.now(), o = req.headers.get("Origin") || "", url = new URL(req.url);
     if (req.method === "OPTIONS") return allowOrigin(o) ? new Response(null, { status: 204, headers: cors(o) }) : new Response(null, { status: 403 });
     if (url.pathname === "/health" && req.method === "GET") return json(o, 200, { ok: true });
     if (url.pathname !== "/stt") return json(o, 404, { error: "not found" });
@@ -50,14 +58,16 @@ export default {
     try { buf = await req.arrayBuffer(); } catch { return json(o, 400, { error: "read failed" }); }
     if (!buf.byteLength) return json(o, 400, { error: "empty audio" });
     if (buf.byteLength > MAX_BYTES) return json(o, 413, { error: "too large" });
+    const tUp = Date.now() - t0;
     try { const c = await overCap(env, dev); if (c) return json(o, 429, { error: c === "device" ? "daily limit" : "service busy" }); }
     catch { /* KV 오류 = 상한 못 셈 → 그래도 받아쓰기(학습자 막지 않음) */ }
-    let out;
+    let out; const tA = Date.now();
     try { out = await env.AI.run(MODEL, { audio: b64(buf), language: "ko", task: "transcribe", vad_filter: true }); }
-    catch (e) { return json(o, 502, { error: "stt failed" }); } // 녹음 내용·오류 본문은 남기지 않음
+    catch (e) { const tot = Date.now() - t0; ctx?.waitUntil?.(countBand(env, tot)); return json(o, 502, { error: "stt failed" }, timing(tUp, Date.now() - tA, tot)); } // 녹음 내용·오류 본문은 남기지 않음
     finally { buf = null; }
+    const tAi = Date.now() - tA, tTot = Date.now() - t0; ctx?.waitUntil?.(countBand(env, tTot));
     const words = [];
     for (const sg of out?.segments || []) for (const w of sg?.words || []) { const t = String(w.word || "").trim(); if (t) words.push({ w: t, s: Math.round((+w.start || 0) * 100) / 100, e: Math.round((+w.end || 0) * 100) / 100 }); }
-    return json(o, 200, { text: String(out?.text || "").trim(), words });
+    return json(o, 200, { text: String(out?.text || "").trim(), words }, timing(tUp, tAi, tTot));
   },
 };

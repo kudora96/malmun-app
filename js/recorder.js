@@ -6,8 +6,8 @@
 // 시간·인식(본부 10-04 투덜이 승인): 말 사이 쉼 2초 · 🎤 뒤 6초 말 없으면 끝 · 최대 길이 = 문장 길이에 맞춤 · 인식이 혼자 끝나면 같은 트랙으로 다시
 // 그때와 다른 점(본부 10-04 「남긴 차이」): ① 윈도우 별칭 장치 「default」「communications」는 절대 안 고름(통신 장치를 열면 윈도우가 다른 소리를 줄임)
 //   ② 「준비 중 → 녹음 중」 표시(첫 소리가 들어오면) ③ 인식 오류 까닭을 돌려줌(onerror 를 삼키지 않음) ④ 진단 기록(이벤트만 듣고 소리 경로는 안 건드림)
-import { audioCtx } from "./wake.js?v=1012.11";
-import { sttReady, serverSTT, sttNoteOnce } from "./sttserver.js?v=1012.11";
+import { audioCtx } from "./wake.js?v=1012.10";
+import { sttReady, serverSTT, sttNoteOnce } from "./sttserver.js?v=1012.10";
 
 // 시간 규칙(본부 10-04 · 투덜이 「빨리 안 하면 바로 닫힘」): 말 사이 쉼 2초 · 🎤 뒤 6초 안에 말 없으면 끝 · 최대 길이는 부르는 쪽이 정함(문장 길이)
 const QUIET_MS = 2000, START_MS = 6000;
@@ -186,8 +186,9 @@ async function srOnServer(blob, { signal } = {}) {
   const t0 = performance.now(), ms = () => Math.round(performance.now() - t0), info = { server: true, track: "server", trackUsed: "server", dur: "?", maxDb: "?", startErr: null, ms: 0, aborted: false, words: 0 };
   if (signal?.aborted) return { heard: [], srErr: "aborted", ev: [], info: { ...info, aborted: true } };
   sttNoteOnce(); /* 첫 사용 안내 한 번 */
-  try { const o = await serverSTT(blob, { signal }); info.ms = ms(); info.words = o.words.length; info.wordList = o.words; return { heard: [o.text], srErr: null, ev: [`server ok@${info.ms}`], info }; }
-  catch (e) { info.ms = ms(); const ab = e?.code === "aborted" || signal?.aborted; info.aborted = !!ab; info.status = e?.status || 0;
+  const n = v => Number(v).toLocaleString("en-US"), srvTxt = (ms, tm, code) => `서버 ${code ? code + " " : ""}${n(ms)}ms${tm ? ` = 받기 ${n(tm.up ?? 0)} + AI ${n(tm.ai ?? 0)}` : ""} · 보낸 ${Math.round((blob.size || 0) / 1024)}KB`; // 진단 줄(본부 10-12) — 「서버 6,157ms = 받기 4,100 + AI 1,900」 · 시간 초과 = 보낸 크기·걸린 시간만
+  try { const o = await serverSTT(blob, { signal }); info.ms = ms(); info.words = o.words.length; info.wordList = o.words; info.srv = srvTxt(info.ms, o.tm); return { heard: [o.text], srErr: null, ev: [`server ok@${info.ms}`], info }; }
+  catch (e) { info.ms = ms(); const ab = e?.code === "aborted" || signal?.aborted; info.aborted = !!ab; info.status = e?.status || 0; info.srv = srvTxt(info.ms, e?.tm, e?.code || "error");
     return { heard: [], srErr: ab ? "aborted" : "server-" + (e?.code || "error"), ev: [`server ${e?.code || "error"}@${info.ms}`], info }; }
 }
 export function srWatch(sr, t0, ev = []) {

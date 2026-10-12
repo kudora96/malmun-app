@@ -141,7 +141,7 @@
  "h_brush": "Brush",
  "help_wr_1": "⌨ Keyboard / ✍ Handwriting — choose how to write.",
  "help_wr_2": "Top letter row — tap a letter to start writing from there. Filled letter: the one to write now. Green: already written.",
- "help_wr_3": "Keyboard — press the consonants and vowels in order. The part you typed fills in dark over the faint letter. There are also \"Listen to this part\" and \"Auto-fill\" / \"Auto-fill all\" buttons.",
+ "help_wr_3": "Keyboard — press the consonants and vowels in order. The part you typed fills in dark over the faint letter. There are also \"Listen to this part\" and \"Auto-fill\" / \"Auto-fill all\" buttons. \"Auto-fill\" writes only this line (the words shown above) and stops. \"Auto-fill all\" keeps going to the next lines.",
  "help_wr_4": "Handwriting — trace over the faint letter. Choose ✏️ Pencil, 🖊 Pen or 🖌 Brush. When you finish, press ✓ or lift your finger/mouse for a moment — your score appears.",
  "help_wr_5": "Score — based on how much of the faint letter you covered and how much went outside it. 80% or more ☆, 95% or more ★.",
  "help_wr_6": "Order — shows the stroke order and direction. It tells you if your order is wrong.",
@@ -163,11 +163,14 @@
  "spk_kong": "Kong",
  "h_magnet": "Magnet",
  "h_order_ok": "✓ Order OK",
- "h_order_again": "Order again: stroke {n}",
+ "h_order_again": "Wrong order: stroke {n}",
  "h_magnet_miss": "Draw near the gray stroke",
  "sr_retry_dev": "Please say it once more.",
  "autofill_all": "Auto-fill all",
  "v9_lang_soon": "Explanations in your language are coming soon — Korean only for now.",
  "lang_soon": "soon",
- "stt_server_note": "Your voice is used only for scoring and is not stored on the server. A few recent recordings stay on this phone (for replay and diagnostics)."
+ "stt_server_note": "Your voice is used only for scoring and is not stored on the server. A few recent recordings stay on this phone (for replay and diagnostics).",
+ "why_frame": "{parts} — {redo}{rest}",
+ "n_episodes_one": "{n} episode",
+ "n_lines_one": "{n} line"
 }

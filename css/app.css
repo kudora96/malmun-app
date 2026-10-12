@@ -1049,3 +1049,19 @@ button.dim{opacity:.45}
   #vwrap:fullscreen .cap .ko{font-size:clamp(13px,5.2vh,40px);line-height:1.3}
   #vwrap:fullscreen .cap .tr{font-size:clamp(11px,3.7vh,26px);line-height:1.3}
 }
+/* 오른쪽→왼쪽(ur) — 재생 막대·시간(0:03 / 1:25)·◀ ▶ 단추 줄·「1/15」 번호는 왼쪽→오른쪽 그대로(시간·순서 뜻이 뒤집히지 않게) · 공식 칸은 글 첫 글자 방향(언어부 A9) */
+[dir=rtl] .seek,[dir=rtl] .ctrl,[dir=rtl] .snum,[dir=rtl] .segnav,[dir=rtl] .v9bar .snd{direction:ltr}
+.v9body .chips .fx,.v9body .chips .fx b{unicode-bidi:plaintext}
+/* 오른쪽→왼쪽(ur) — 한국어·로마자 글은 늘 왼쪽→오른쪽(마침표가 앞으로 가거나 제목이 앞에서 잘리던 것 · 시범 ur 10-12) · 칸 안 맞춤은 오른쪽(학습자 글과 같은 쪽) */
+[dir=rtl] [lang="ko"],[dir=rtl] .ko,[dir=rtl] .rom,[dir=rtl] .sayrom,[dir=rtl] .trrom{direction:ltr;unicode-bidi:isolate}
+[dir=rtl] .line [lang="ko"],[dir=rtl] .line .ko{text-align:right}
+[dir=rtl] .v9body p:has(> .sn[data-c="ko"]),[dir=rtl] .v9body .pair:has(.sn[data-c="ko"]){direction:ltr;text-align:left} /* 한국어 설명 문단 = 왼쪽→오른쪽(속 우르두 낱말은 그 안에서 오른쪽→왼쪽) */
+[dir=rtl] .chips .chip{direction:ltr} /* 낱말 칩 = 한국어 · 로마자 · 뜻 차례 그대로 */
+.write .whead.n2 > b{display:none}
+.write .whead.n3 .sub .spkg{display:none}
+.write .whead.n4{flex-wrap:wrap;row-gap:4px}
+/* 쓰기 낱말 줄 — 한국어 낱말은 줄이지 않음 · 넘치면 뜻만 말줄임(검사부 10-12 vi 375 「신하들…」) */
+.write .info .sub2 .wko{flex:none}
+.write .info .sub2 .mean{min-width:0;overflow:hidden;text-overflow:ellipsis}
+/* 오른쪽→왼쪽(ur) — 줄 번호 「1 / 15」·머리 줄 번호는 왼쪽→오른쪽(15 / 1 로 뒤집혀 보이던 것 · 검사부 10-12) */
+[dir=rtl] .vtitle .n,[dir=rtl] .whead .sub,[dir=rtl] .exhead .sub{direction:ltr;unicode-bidi:isolate}

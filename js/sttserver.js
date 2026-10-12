@@ -2,7 +2,7 @@
 //  주소 STT_URL = "" 이면 꺼짐(지금 앱 그대로) · 점검은 window.__sttURL 로 바꿔 끼움 · 경로 POST {주소}/stt
 //  본문 = 녹음 blob 그대로(Content-Type = blob.type) · 머리 칸 X-Dev = 기기 번호(localStorage malmun.devid · 기기당 하루 상한용)
 //  최대 12초 기다림 · 실패(비2xx·429·12초·네트워크·빈 글)는 code 를 붙여 던짐 → recorder.js 가 지금 방식(받아쓰기만)으로
-import { t } from "./i18n.js?v=1012.11";
+import { t } from "./i18n.js?v=1012.10";
 
 export const STT_URL = "https://stt.kudora96.workers.dev"; // 배포 뒤 Worker 주소를 여기에(예: "https://stt.<계정>.workers.dev") — worker/stt/DEPLOY.md
 export const sttURL = () => (window.__sttURL === "off" ? "" : String(window.__sttURL || STT_URL || "").trim().replace(/\/+$/, "")); /* "off" = 점검에서 서버 길 끔(진짜 서버 안 부름) */
@@ -20,6 +20,8 @@ export function deviceId() {
 const fail = (code, extra = {}) => Object.assign(new Error(code), { code, ...extra });
 
 // blob → { text, words:[{w,s,e}], ms } · 실패 = throw { code: aborted | timeout | network | http429 | http500 … | empty | nourl }
+// Worker 「Server-Timing: up;dur=… , ai;dur=… , total;dur=…」 → { up, ai, total }(ms · 본부 10-12)
+const timingOf = r => { const h = r?.headers?.get?.("Server-Timing") || "", o = {}; for (const m of h.matchAll(/(\w+);dur=([\d.]+)/g)) o[m[1]] = Math.round(+m[2]); return o.total != null ? o : null; };
 export async function serverSTT(blob, { signal } = {}) {
   if (!sttReady()) throw fail("nourl");
   if (!blob) throw fail("noblob");
@@ -32,12 +34,13 @@ export async function serverSTT(blob, { signal } = {}) {
     let r;
     try { r = await fetch(sttURL() + "/stt", { method: "POST", body: blob, headers: { "Content-Type": blob.type || "audio/webm", "X-Dev": deviceId() }, signal: ac.signal, cache: "no-store", credentials: "omit" }); }
     catch { throw fail(why || "network"); }
-    let j = null; try { j = await r.json(); } catch { if (why) throw fail(why); }
-    if (!r.ok) throw fail("http" + r.status, { status: r.status, msg: j?.error || "" });
+    const tmg = timingOf(r);
+    let j = null; try { j = await r.json(); } catch { if (why) throw fail(why, { tm: tmg }); }
+    if (!r.ok) throw fail("http" + r.status, { status: r.status, msg: j?.error || "", tm: tmg });
     const text = String(j?.text || "").trim();
-    if (!text) throw fail("empty", { status: r.status });
+    if (!text) throw fail("empty", { status: r.status, tm: tmg });
     const words = Array.isArray(j?.words) ? j.words.filter(x => x && typeof x.w === "string").map(x => ({ w: x.w, s: +x.s || 0, e: +x.e || 0 })) : [];
-    return { text, words, ms: Math.round(performance.now() - t0) };
+    return { text, words, ms: Math.round(performance.now() - t0), tm: tmg };
   } finally { clearTimeout(tm); signal?.removeEventListener?.("abort", onAbort); }
 }
 

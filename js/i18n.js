@@ -1,4 +1,4 @@
-import { VERSION } from "./version.js?v=1012.11";
+import { VERSION } from "./version.js?v=1012.10";
 // 학습자 언어 — 고르게 하지 않는다(CLAUDE.md).
 // ① 저장된 선택 ② 폰 언어가 22개 중 하나 ③ 폰 시간대로 나라 짐작 ④ 영어
 export const LANGS = [
@@ -9,7 +9,9 @@ export const LANGS = [
 ];
 const CODES = LANGS.map(l => l[0]);
 // 준비된 언어(앱 글 lang/{c}.json 이 있는 것 · 언어부 10-11 S1 ①) — 자동 선택·저장값은 이것만 · 나머지는 ?lang= 으로만(시범)
-export const READY = ["ne", "en"];
+const PILOT = ["vi", "th", "ur"]; // 시범 언어(본부 10-12) — 개발 주소(localhost·127.0.0.1)에서만 켬 · 공개 판은 본부 신호 전까지 「곧」
+const DEV_HOST = /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+export const READY = ["ne", "en", ...(DEV_HOST ? PILOT : [])];
 const RTL = new Set(["ur"]);
 // 폰 언어 코드가 우리 코드와 다른 것
 const ALIAS = { fil: "tl", nb: "en" };
@@ -49,7 +51,7 @@ export function detectLang() {
 
 let strings = {}, fallback = {}, koUi = {};
 // 「ने ⇄ 한」 앱 글 한국어 토글(본부 10-08 투덜이) — 켜면 앱 글(lang/*.json)만 {lang}.ko.json(학습자 말 글을 한국어로 옮긴 것)으로 · 배우는 내용(대사·뜻·설명·자막)은 그대로 · 기억 malmun.uiko
-export const KO_UI = ["ne"]; // {lang}.ko.json 이 있는 언어
+export const KO_UI = ["ne", "vi", "th", "ur"]; // {lang}.ko.json 이 있는 언어
 const UIKO = "malmun.uiko";
 export const uiKoOn = () => { try { return KO_UI.includes(lang) && localStorage.getItem(UIKO) === "1"; } catch { return false; } };
 async function loadKoUi() { koUi = uiKoOn() ? await fetch(`lang/${lang}.ko.json?v=${VERSION}`).then(r => (r.ok ? r.json() : {})).catch(() => ({})) : {}; }
@@ -69,6 +71,7 @@ export async function setLang(code, remember = false) {
 }
 
 export const t = (k, vars) => {
+  if (vars && typeof vars.n === "number") { try { const c = new Intl.PluralRules(koUi[k] != null ? "ko" : lang).select(vars.n), kk = `${k}_${c}`; if (koUi[kk] ?? strings[kk] ?? fallback[kk]) k = kk; } catch {} } /* 복수형 — {n} 이 있으면 열쇠_one/_few/_many/_other 가 있을 때 그것(언어부 A5) */
   let s = koUi[k] ?? strings[k] ?? fallback[k] ?? k;
   if (vars) for (const [a, b] of Object.entries(vars)) s = s.replace(`{${a}}`, b);
   return s;

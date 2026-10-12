@@ -19,7 +19,7 @@
     const c = { url: String(u), method: o.method, type: o.headers?.["Content-Type"], dev: o.headers?.["X-Dev"], size: o.body?.size || 0, isBlob: o.body instanceof Blob, aborted: false, mode: window.__srvMode }; calls.push(c);
     return new Promise((res, rej) => {
       const sig = o.signal, ab = () => { c.aborted = true; rej(new DOMException("aborted", "AbortError")); }; if (sig?.aborted) return ab(); sig?.addEventListener("abort", ab, { once: true });
-      const json = (st, b) => new Response(JSON.stringify(b), { status: st, headers: { "Content-Type": "application/json" } });
+      const json = (st, b) => new Response(JSON.stringify(b), { status: st, headers: { "Content-Type": "application/json", "Server-Timing": "up;dur=210, ai;dur=1840, total;dur=2080" } }); // Worker 시간 머리 칸 흉내(본부 10-12)
       const m = c.mode, after = m === "slow" ? 3000 : 300;
       if (m === "timeout") return;
       setTimeout(() => { if (c.aborted) return; if (m === "net") return rej(new TypeError("Failed to fetch"));
@@ -52,7 +52,7 @@
     ok(localStorage.getItem("malmun.srdev") === "server" && +localStorage.getItem("malmun.srdev.t") > Date.now() - 60000, "ⓐ 서버 됨 = 기기 기억 server(7일 · 적은 때 있음)", `기억 ${localStorage.getItem("malmun.srdev")}`);
     ok(!!p.__sp._state.blob && !$(".panel [data-act=mine]").disabled && !$(".panel [data-act=mine]").classList.contains("dim") && !$(".panel [data-act=both]").disabled && !/글자 점수만|अक्षरको अंक मात्र|letter score only/.test(a3.msg) && a3.fx.length === 1, "ⓐ 녹음 그대로 · 내 목소리·비교 켜짐 · 「글자 점수만」 아님 · 점수 효과음 한 번", `blob ${p.__sp._state.blob?.size}B · 효과 ${a3.fx.join(",")}`);
     { $(".panel [data-act=mine]").click(); let pl = false; for (let k = 0; k < 30 && !pl; k++) { await W(100); pl = $(".panel [data-act=mine]").classList.contains("playing") || !!p.__sp._state.mine; } ok(pl, "ⓐ [내 목소리] 누르면 방금 녹음 재생"); await W(300); $(".panel [data-act=mine]").click(); await W(300); }
-    try { const lr = JSON.parse(localStorage.getItem("malmun.lastrec") || "[]").slice(-1)[0] || {}; ok(lr.mode === "녹음→서버" && /server/.test(lr.seq || ""), "ⓐ 진단 기록 = 녹음→서버", `${lr.mode} · ${String(lr.seq || "").slice(0, 60)}`); } catch (e) { ok(false, "ⓐ 진단 기록 읽기 " + e.message); }
+    try { const lr = JSON.parse(localStorage.getItem("malmun.lastrec") || "[]").slice(-1)[0] || {}; ok(lr.mode === "녹음→서버" && /server/.test(lr.seq || ""), "ⓐ 진단 기록 = 녹음→서버", `${lr.mode} · ${String(lr.seq || "").slice(0, 60)}`); ok(/서버 [\d,]+ms = 받기 210 \+ AI 1,840 · 보낸 \d+KB/.test(lr.seq || ""), "ⓐ 진단 기록에 서버 걸린 시간(받기 + AI · Server-Timing · 본부 10-12)", String(lr.seq || "").match(/서버[^·]*·[^·]*/)?.[0] || String(lr.seq || "").slice(-80)); } catch (e) { ok(false, "ⓐ 진단 기록 읽기 " + e.message); }
     // ⓓ 안내 한 번만
     const a4 = await once();
     ok(notes.length === 1 && /저장|stored|सुरक्षित/.test(notes[0]) && /\d+%/.test(a4.msg) && calls.length === 2, "ⓓ 첫 서버 사용 때만 안내 한 번(다음 녹음엔 안 뜸)", `안내 ${notes.length}번 「${(notes[0] || "").slice(0, 40)}」`);
