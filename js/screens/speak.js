@@ -35,7 +35,9 @@ export const starOf = sc => (sc >= PERFECT ? "★" : sc >= PASS ? "☆" : "");
 // 점수 한 줄 + 끝난 까닭(시간 다 됨 · 6초 말 없음 · 못 넘었는데 2초 쉼으로 끝남 — ■ 누름은 안내 없음)
 // 끝난 까닭(본부 10-06): ⏱ 시간 다 됨은 그대로 · 2초 쉼(pause)은 문구에 안 씀 — 대신 들은 내용(hint = heard.js endHint)으로
 // 시간 다 됨 · 끝까지 못 가고 오래 멈춤 = 「천천히 다시」 대신 「조금 더 빨리」(투덜이 10-07 — 긴 줄을 또박또박 읽다 끊김)
-const fastLine = (sc, why, t, hint) => `${sc}% · ${t(why === "time" ? "why_time" : "why_pause_tail")}${hint?.kind === "tail" && hint.tail ? " · " + hintText(sc, t, hint).split(" — ")[0] : ""}`;
+/* 뒷부분 짧은 글 — 열쇠 why_tail_short(다국어부 10-12 · 언어마다 「 — 」로 나뉜다고 기대하지 않게) · 아직 없는 언어는 옛 방식 */
+const tailShort = (sc, t, hint) => t("why_tail_short") === "why_tail_short" ? hintText(sc, t, hint).split(" — ")[0] : hintText(sc, (k, v) => t(k === "why_tail" ? "why_tail_short" : k, v), hint);
+const fastLine = (sc, why, t, hint) => `${sc}% · ${t(why === "time" ? "why_time" : "why_pause_tail")}${hint?.kind === "tail" && hint.tail ? " · " + tailShort(sc, t, hint) : ""}`;
 export const scoreLine = (sc, why, t, hint) => sc < PASS && (why === "time" || (why === "pause" && hint?.kind === "tail")) ? fastLine(sc, why, t, hint) : `${sc}%${sc >= PASS ? " ✓" : ""} · ${starOf(sc) ? starOf(sc) + " " : ""}${t(sc >= PERFECT ? "score_5" : sc >= PASS ? "score_4" : sc >= 60 ? "score_3" : sc >= 40 ? "score_2" : "score_1")}${why === "time" ? " · " + t("why_time") : (h => (h ? " · " + h : ""))(hintText(sc, t, hint))}`;
 // 틀린 곳을 글로(본부 10-06 투덜이 결정) — 낱말은 한글 그대로 「」 · 로마자 켜짐이면 괄호에(있는 낱말만) · 2개까지 · 통과면 짧게
 const romOn = () => { try { return localStorage.getItem("malmun.rom") !== "0"; } catch { return true; } };
@@ -390,8 +392,7 @@ export default async function speak(app, ep, id, opts = {}) {
       // 판정(검사부 10-11) = recorder.js srJudge — 연속 2번 기기 실패라야 받아쓰기만 · 인터넷·중단·말 없음·무음은 세지 않음 · "seq-ok" 여도 실패면 「한 번 더」
       const jd = srJudge(s2, st.diag.peak || 0); st.retryDev = jd.retry; if (!jd.ok && jd.kind === "notrack") heard.length = 0; // 트랙 대신 마이크를 들음 = 들은 말 버림
       st.diag.judge = jd; if (s2.info?.server) st.diag.mode = "녹음→서버"; /* 서버 받아쓰기(2안) */
-      st.diag.seq = `녹음 ${s2.info?.dur}초 최대 ${s2.info?.maxDb}dB · 트랙 ${s2.info?.track} · 트랙 씀 ${s2.info?.trackUsed ?? "?"} · start 예외 ${s2.info?.startErr || "없음"} · ${s2.info?.ms}ms · 들음 ${s2.heard.length} · 판정 ${jd.kind}${jd.count ? ` ${jd.count}/2` : ""} · 기억 ${devSR() || "-"}`; }
-      if (s2.info?.srv) st.diag.seq += " · " + s2.info.srv; // 서버 걸린 시간(받기·AI · 본부 10-12)
+      st.diag.seq = `녹음 ${s2.info?.dur}초 최대 ${s2.info?.maxDb}dB · 트랙 ${s2.info?.track} · 트랙 씀 ${s2.info?.trackUsed ?? "?"} · start 예외 ${s2.info?.startErr || "없음"} · ${s2.info?.ms}ms · 들음 ${s2.heard.length} · 판정 ${jd.kind}${jd.count ? ` ${jd.count}/2` : ""} · 기억 ${devSR() || "-"}`; if (s2.info?.srv) st.diag.seq += " · " + s2.info.srv; /* 서버 걸린 시간(받기·AI · 본부 10-12) */ }
     if (st.retryDev) { st.score = null; st.note = "sr_retry_dev"; st.rhy = null; st.heardHTML = ""; paint(); $(".msg").textContent = t("sr_retry_dev"); scoreFx($(".fx"), null); logRec({ where: "speak", why: "retry-dev", score: null, kind: st.diag.judge?.kind, mode: st.diag.judge?.server ? `서버 안 됨(${st.diag.judge.kind}) ${st.diag.judge.count || 1}번째 → ${st.diag.judge.switched ? "10분 받아쓰기만" : "다음도 서버"}` : st.diag.judge?.switched ? "녹음→받아쓰기 연속 2번 안 됨 → 받아쓰기만" : "녹음→받아쓰기 한 번 더", line: line.id, part: cur().key, heard: [], maxDb: dB(st.diag.peak || 0), sr: st.diag.sr, seq: st.diag.seq, micAfter: st.stream?.getAudioTracks()[0]?.readyState || "닫힘" }); return; } // 못 알아들음 = 0점 대신 「한 번 더」(본부 10-10 · 검사부 10-11 까닭 retry-dev)
     // 녹음+받아쓰기를 같이 했는데 말소리는 있었고 들은 말이 0 → 이 기기(안드로이드)는 받아쓰기만으로 바꿔 기억(본부 10-07)
     //  (판정은 아래 「못 알아들음」 자리에서 — 인식 결과 기다림은 한 번만) // 방금 녹음(원본 그대로) — 언제나 [내 목소리]로

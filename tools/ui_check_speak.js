@@ -1,6 +1,7 @@
 // 말하기 전수 점검(S1~S7) — #/learn/{편} 을 연 채로 실행. 마이크와 음성 인식은 가짜로 바꿔 앱 동작만 본다
 // (가짜 마이크 = 0.8초 동안 삑 소리 뒤 조용 → 「말이 끝나고 1초 조용하면 멈춤」을 확인 · 가짜 인식 = 정해 준 글자를 돌려줌)
 (async () => {
+  const { t: TT } = await import(`/js/i18n.js?v=${document.documentElement.dataset.v}`), TX = (...k) => new RegExp(k.map(x => [...TT(x).split("{")[0].trim()].slice(0, 14).join("").replace(/[^\w\s]/g, "\\$&")).filter(Boolean).join("|"), "i"); /* 지금 언어 글로 맞춤(검사부 10-12 vi) */
   window.__noRhythm = true;
   window.__noSrSwitch = true; try { sessionStorage.removeItem("malmun.srmode"); sessionStorage.removeItem("malmun.srmiss"); } catch {} // 녹음+받아쓰기 방식으로 고정(받아쓰기만 방식은 ui_check_sronly) // 가짜 마이크(삑 소리)로는 리듬을 잴 수 없음 — 글자 점수·화면 흐름만 봄(리듬은 tools/ui_check_rhythm.js)
   const res = [];
@@ -118,20 +119,20 @@
   ok(/^1 \//.test($(".panel .whead .sub")?.textContent || "") && /5\/5✓/.test($(".panel .segnav").innerText.replace(/\s/g, "")) && /100% ✓ · .+/.test($(".panel .msg").textContent), "줄 전체까지 통과·저장 → 그 줄에 그대로(다음 줄로 넘어가지 않음)", $(".panel .whead .sub")?.textContent + " · " + $(".panel .msg").textContent);
   // 점수가 안 나오면 절대 통과·저장 아님(본부 10-04) — 말하기 창
   await open(9);
-  const settle = async () => { for (let k = 0; k < 40 && /Checking|확인 중|जाँच्दै/.test($(".panel .msg")?.textContent || ""); k++) await W(150); };
+  const settle = async () => { for (let k = 0; k < 40 && TX("checking").test($(".panel .msg")?.textContent || ""); k++) await W(150); };
   window.__srNone = true; await say("아무 말"); await waitIdle(); await settle();
-  ok(/again|फेरि|다시/i.test($(".panel .msg").textContent) && /^0% · /.test($(".panel .msg").textContent) && $(".panel [data-act=keep]").hidden && !$(".panel .meter").classList.contains("pass") && !/✓/.test($(".panel .segnav").innerText), "말하기 창: 결과 없음 → 「0% · 잘 못 알아들었어요」 · 통과·✓·[저장] 아님", $(".panel .msg").textContent);
+  ok(TX("sr_none").test($(".panel .msg").textContent) && /^0% · /.test($(".panel .msg").textContent) && $(".panel [data-act=keep]").hidden && !$(".panel .meter").classList.contains("pass") && !/✓/.test($(".panel .segnav").innerText), "말하기 창: 결과 없음 → 「0% · 잘 못 알아들었어요」 · 통과·✓·[저장] 아님", $(".panel .msg").textContent);
   window.__srNone = false; window.__srErr = "audio-capture"; await say("아무 말"); await waitIdle(); await settle();
-  ok(/microphone|माइक्रोफोन|마이크/i.test($(".panel .msg").textContent) && !/✓/.test($(".panel .segnav").innerText), "말하기 창: audio-capture 오류 → 「음성 인식이 마이크를 못 잡았어요」", $(".panel .msg").textContent);
+  ok(TX("sr_audio").test($(".panel .msg").textContent) && !/✓/.test($(".panel .segnav").innerText), "말하기 창: audio-capture 오류 → 「음성 인식이 마이크를 못 잡았어요」", $(".panel .msg").textContent);
   window.__srErr = null;
   // 설명 카드 안 「이제 말해 보세요」도 같게
   line(9).querySelector("[data-act=speak]").click(); await W(500);
   line(10).querySelector("[data-act=explain]").click(); await W(1200); document.querySelector("video").pause();
   const crec = async () => { $(".panel .sayb [data-x=rec]").click(); await W(400); speakFor(700); for (let k = 0; k < 60 && $(".panel .sayb [data-x=rec]").classList.contains("on"); k++) await W(150); await W(700); return $(".panel .sayb .smsg").textContent; };
   window.__srNone = true; let cm = await crec();
-  ok(/again|फेरि|다시/i.test(cm) && /^0% · /.test(cm) && !/✓/.test(cm) && $(".panel .sayb [data-x=keep]").hidden && !$(".panel .sayb [data-x=mine]").disabled, "카드: 결과 없음 → 「0% · 다시」 · [저장] 없음 · 방금 녹음은 [내 목소리]로", cm);
+  ok(TX("sr_none").test(cm) && /^0% · /.test(cm) && !/✓/.test(cm) && $(".panel .sayb [data-x=keep]").hidden && !$(".panel .sayb [data-x=mine]").disabled, "카드: 결과 없음 → 「0% · 다시」 · [저장] 없음 · 방금 녹음은 [내 목소리]로", cm);
   window.__srNone = false; window.__srErr = "audio-capture"; cm = await crec();
-  ok(/microphone|माइक्रोफोन|마이크/i.test(cm) && !$(".panel .sayb").classList.contains("pass"), "카드: audio-capture → 마이크 안내", cm);
+  ok(TX("sr_audio").test(cm) && !$(".panel .sayb").classList.contains("pass"), "카드: audio-capture → 마이크 안내", cm);
   window.__srErr = null; window.__heard = "감사합니다 여러분"; cm = await crec();
   ok(/^\d+%/.test(cm) && !/✓/.test(cm) && $(".panel .sayb [data-x=keep]").hidden, "카드: 엉뚱한 말 → 낮은 점수 · ✓·[저장] 없음", cm);
   window.__heard = $(".panel .sayb .saybig")?.textContent || $(".panel .sayb p").textContent.match(/"([^"]+)"/)[1]; cm = await crec(); // 말해 보세요 칸 = 한국어 문장 크게(본부 10-05)
@@ -253,7 +254,7 @@
   // 말하기 창 = 카드와 같은 기준(본부 10-04) — 1번 줄 5토막 각각 맞음/틀림/빠짐
   window.SpeechRecognition = fakeSR; window.webkitSpeechRecognition = fakeSR; // 앞의 「인식 없는 기기」 시험에서 지운 것 되살림
   await open(1); while (!/(^|\D)1\/5/.test($(".panel .segnav").innerText.replace(/\s/g, ""))) { $(".panel [data-seg='-1']").click(); await W(150); }
-  const settle2 = async () => { for (let k = 0; k < 40 && /Checking|확인 중|जाँच्दै/.test($(".panel .msg")?.textContent || ""); k++) await W(150); };
+  const settle2 = async () => { for (let k = 0; k < 40 && TX("checking").test($(".panel .msg")?.textContent || ""); k++) await W(150); };
   const syl = x => [...x].filter(c => /[가-힣]/.test(c));
   let bad5 = [];
   for (let k = 0; k < 5; k++) {
@@ -290,10 +291,10 @@
   // 2.5초 쉼 → 끊김 + (못 넘었으면) 쉼 안내
   window.__heard = "가나다"; $(".panel [data-act=rec]").click(); await W(300); window.__mic.g.gain.value = 0.3; await W(500); window.__mic.g.gain.value = 0.001; await W(2600);
   const cut = !$(".panel .mic").classList.contains("on"); await waitIdle(); await settle2();
-  ok(cut && /something else|अर्कै|다른 말/.test($(".panel .msg").textContent) && !/stopped in the middle|बीचमा|중간에/.test($(".panel .msg").textContent), "2.5초 쉼 → 끊김 · 문구는 시간 대신 들은 내용(「가나다」 = 다른 말로 들렸어요)", $(".panel .msg").textContent);
+  ok(cut && TX("why_other").test($(".panel .msg").textContent) && !TX("rhy_pause").test($(".panel .msg").textContent), "2.5초 쉼 → 끊김 · 문구는 시간 대신 들은 내용(「가나다」 = 다른 말로 들렸어요)", $(".panel .msg").textContent);
   // 🎤 뒤 6초 말 없음 → 끝 + 「목소리가 안 들렸어요」
   window.__srNone = true; $(".panel [data-act=rec]").click(); await W(300); window.__mic.g.gain.value = 0.001; await W(6600); await waitIdle(); await settle2(); window.__srNone = false;
-  ok(/No voice|आवाज सुनिएन|목소리가 안/.test($(".panel .msg").textContent), "🎤 뒤 6초 말 없음 → 끝 + 「목소리가 안 들렸어요」", $(".panel .msg").textContent);
+  ok(TX("why_nospeech").test($(".panel .msg").textContent), "🎤 뒤 6초 말 없음 → 끝 + 「목소리가 안 들렸어요」", $(".panel .msg").textContent);
   // 3초 머뭇 뒤 말 → 인식이 혼자 끝나도 다시 켜서 점수
   window.__srEnd = true; window.__heard = $(".panel .say").textContent; $(".panel [data-act=rec]").click(); await W(300); window.__mic.g.gain.value = 0.001; await W(3000); window.__mic.g.gain.value = 0.3; await W(700); window.__mic.g.gain.value = 0.001; await waitIdle(); await settle2();
   const lr2 = JSON.parse(localStorage.getItem("malmun.lastrec") || "[]").pop() || {};
