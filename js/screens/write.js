@@ -176,22 +176,25 @@ export default async function write(app, ep, id, opts = {}) {
   function fitSent() {
     const cs = [...sentEl.querySelectorAll(".c")]; if (!cs.length || !sentEl.clientWidth) return;
     cs.forEach(c => { c.style.fontSize = ""; c.style.padding = ""; }); sentEl.style.columnGap = "";
-    sentEl.querySelectorAll(".w").forEach(w => { w.style.gap = ""; });
+    sentEl.querySelectorAll(".w").forEach(w => { w.style.gap = ""; }); segnav.closest(".segrow")?.classList.remove("st1");
     const over = () => sentEl.scrollWidth > sentEl.clientWidth + 1;
     for (let fs = parseFloat(getComputedStyle(cs[0]).fontSize) - 1; over() && fs >= 12; fs -= 1) {
       cs.forEach(c => { c.style.fontSize = fs + "px"; c.style.padding = fs < 21 ? "0 2px" : ""; });
       sentEl.style.columnGap = fs < 21 ? "6px" : ""; if (fs < 17) sentEl.querySelectorAll(".w").forEach(w => { w.style.gap = "1px"; });
     }
+    // 12px 로도 넘치면(320 폭 · 8글자 토막 「그럼 그 약속은 누가」 41px 넘침 · ur 은 글자가 창 밖 · 10-12 언어별 점검) — 🔊 표시 숨김 · 낱말 묶음 여백·글자 단추 여백 줄임 · ◀ ▶ 좁게(st1) → 그래도 넘치면 10px 까지
+    if (!over()) return; segnav.closest(".segrow")?.classList.add("st1"); sentEl.style.columnGap = "3px";
+    for (let fs = 11; over() && fs >= 10; fs -= 1) cs.forEach(c => { c.style.fontSize = fs + "px"; });
   }
   // 세 단추 자리(10-06 투덜이 「게 옆으로 가로로」) — 넓은 쓰기 창(440px↑) = 낱말 단추 바로 옆(모자라면 그 아래 줄로 꺾임) · 좁은 창(폰) = 글자 칸 아래 한 줄
   function placeBtns() { // 세 단추 = 자모 칸(ㄱ □) 오른쪽 같은 줄(투덜이 10-06 「여기다 · 그럼 더 많이 줄어」) — 글자 칸이 두 줄(로마자·뜻 / 자모 칸+단추)로 · 안 들어가면 단추 글 작게 → 두 줄로 좁게 → 자모 칸 작게 · 그래도 안 되면 아래 줄
     const stg = work.querySelector(".stage"), row = stg?.querySelector(".slotrow"); if (!row) return;
     row.append(wb); stg.classList.add("btns-in");
     const sl = row.querySelector(".slots"), bs = [...wb.querySelectorAll("button")];
-    const wrapped = () => row.scrollWidth > row.clientWidth + 1 || bs.some(b => Math.abs(b.getBoundingClientRect().top - bs[0].getBoundingClientRect().top) > 2);
+    const wrapped = () => row.scrollWidth > row.clientWidth + 1 || wb.getBoundingClientRect().right > stg.getBoundingClientRect().right + 1 /* 줄은 맞아도 글자 칸(.stage · 넘침 숨김) 밖으로 나감(10-12 en 320 손글씨 「Auto-fill al」) */ || bs.some(b => Math.abs(b.getBoundingClientRect().top - bs[0].getBoundingClientRect().top) > 2);
     stg.classList.remove("c1", "c2", "c3", "c4");
-    if (wrapped()) { stg.after(wb); stg.classList.remove("btns-in"); wb.classList.add("below"); fitStageH(); return fitKb(); } // 같은 줄에 보통 크기로 안 들어가면 글자 칸 아래 한 줄로(글씨를 줄이지 않음 · 본부 10-12 「작고 두 줄로 꺾임」)
-    wb.classList.remove("below"); fitStageH(); fitKb();
+    if (wrapped()) { stg.after(wb); stg.classList.remove("btns-in"); wb.classList.add("below"); fitStageH(); fitHandBox(); return fitKb(); } // 같은 줄에 보통 크기로 안 들어가면 글자 칸 아래 한 줄로(글씨를 줄이지 않음 · 본부 10-12 「작고 두 줄로 꺾임」)
+    wb.classList.remove("below"); fitStageH(); fitHandBox(); fitKb();
   }
   // 낱말 칸 글자 단추 = 한 줄 · 넘치면 글자 크기·안쪽 여백을 같이 줄임(위 글자 줄과 같은 방식) · 로마자는 아래 줄 따로
   // 로마자·뜻 줄(투덜이 10-07 「단어 듣기」 빈자리) — 크게(로마자 15 · 뜻 17px)에서 칸 폭에 들어갈 때까지 줄임(최소 11px)
@@ -207,6 +210,19 @@ export default async function write(app, ep, id, opts = {}) {
   }
   // 자판이 창 아래로 잘림(다국어부 10-12 320×640 — 아래 단추 줄이 두 줄로 꺾여 자판 마지막 줄 ㅚㅝㅞㅟㅢ 가 24~70px 잘림) — 넘칠 때만 차례로:
   //  ① 아래 단추 셋을 한 줄로(글 작게 · 단추 안에서 두 줄) ② 자판 줄 높이를 30 → 22px 까지 1px 씩
+  // 손글씨 칸이 작으면(10-12 en·ur 320×640 = 88·92px — 아래 단추 셋 두 줄 + 손글씨 단추 넷 글이 옆을 차지) 차례로: ① 아래 단추 셋 한 줄(wt1) ② 도구 단추 그림만 ③ 손글씨 단추 넷 그림만 · 목표 칸 150px
+  function fitHandBox() {
+    const wr = work.closest(".write"), hand = work.querySelector(".hand"), H = st.hand; if (!wr || !hand || !H?.fit) return;
+    wr.classList.remove("wt1"); hand.classList.remove("hic"); work.querySelector(".htools")?.classList.remove("ic2"); H.fit(); stageFix();
+    const small = () => (H.s || 0) < 150;
+    if (small() && wb.classList.contains("below")) { wr.classList.add("wt1"); stageFix(); H.fit(); }
+    if (small()) { work.querySelector(".htools")?.classList.add("ic2"); stageFix(); H.fit(); }
+    if (small()) { hand.classList.add("hic"); H.fit(); }
+    // 칸을 맞춘 뒤 글자 칸 줄이 좁아져 세 단추가 잘리면(넘침 숨김) = 아래 줄로 옮기고 한 번 더(되부름 없이 한 번만)
+    const row = wb.parentElement?.classList.contains("slotrow") ? wb.parentElement : null, stg = work.querySelector(".stage");
+    if (row && stg && (row.scrollWidth > row.clientWidth + 1 || wb.getBoundingClientRect().right > stg.getBoundingClientRect().right + 1)) { stg.after(wb); stg.classList.remove("btns-in"); wb.classList.add("below"); fitStageH(); if (!fitHandBox.again) { fitHandBox.again = true; try { fitHandBox(); } finally { fitHandBox.again = false; } } }
+  }
+  function stageFix() { if (typeof fitStageH === "function") fitStageH(); }
   function fitKb() {
     const wr = work.closest(".write"), kb = work.querySelector(".kb"); if (!wr || !kb) return; wr.classList.remove("wt1", "wt2"); wr.style.removeProperty("--krmin");
     const last = kb.querySelector(".kr:last-child button:last-child"); if (!last || !wr.clientHeight) return;
@@ -221,8 +237,10 @@ export default async function write(app, ep, id, opts = {}) {
   }
   // 머리 줄 한 줄 유지(본부 10-07) — 넘치면 ✕ 닫기 글을 숨기고 ✕ 만
   function fitHeadW() { const h = work.closest(".write")?.querySelector(".whead") || app.querySelector(".whead"); if (!h) return; const sb = h.querySelector(".sub"), over = () => h.scrollWidth > h.clientWidth + 1 || (sb && sb.scrollWidth > sb.clientWidth + 1); /* 번호 칸이 말줄임으로 잘려도 넘침(ur 「3 / 1…」) */ h.classList.remove("narrow", "n2", "n3", "n3b", "n4"); for (const c of ["narrow", "n2", "n3", "n3b", "n4"]) { if (!over()) break; h.classList.add(c); } } // 머리 줄이 넘치면 차례로: ✕ 글 숨김 → 「쓰기」 제목 숨김 → 화자 이름 숨김 → 두 줄로(닫기 단추가 화면 밖으로 밀리지 않게 · 검사부 10-12 vi 375)
+  // 손글씨 도구 단추(연필·펜·붓·자석)가 창 밖으로 나가면(10-12 vi 320 「🧲 Nam châm」 31px) = 그림만(이름은 aria-label)
+  function fitTools() { const ht = work.querySelector(".htools"); if (!ht) return; ht.classList.remove("ic"); const wr = work.closest(".write"); if (!wr) return; const R = wr.getBoundingClientRect(); if ([...ht.querySelectorAll("button")].some(b => { const r = b.getBoundingClientRect(); return r.right > R.right + 0.5 || r.left < R.left - 0.5; }) || ht.scrollWidth > ht.clientWidth + 1) ht.classList.add("ic"); }
   function fitWord() {
-    fitSub2(); fitHeadW(); fitStageH();
+    fitTools(); fitSub2(); fitHeadW(); fitStageH();
     const row = work.querySelector(".info .word"); if (!row || !row.clientWidth) return;
     const bs = [...row.querySelectorAll(".wc")]; bs.forEach(b => { b.style.fontSize = ""; b.style.padding = ""; });
     for (let fs = parseFloat(getComputedStyle(bs[0] || row).fontSize) - 1; row.scrollWidth > row.clientWidth + 1 && fs >= 11; fs -= 1) bs.forEach(b => { b.style.fontSize = fs + "px"; b.style.padding = fs < 16 ? "0 2px" : ""; });
@@ -240,9 +258,9 @@ export default async function write(app, ep, id, opts = {}) {
     }
     const w = words()[st.w], c = w.chars[st.c], jam = c.jamo;
     work.innerHTML = `<div class="stage"><div class="box" role="button" tabindex="0" aria-label="${esc(t("listen_char") || "▶")}"><canvas class="tcv" aria-hidden="true"></canvas><span class="target ko" lang="ko">${esc(c.ch)}</span><span class="typed ko" lang="ko">${esc(compose([...st.typed, st.part].flatMap(jamoParts), vowelLen(c.ch)))}</span></div>
-      <div class="info">${w.rom || w.mean || st.mode === "hand" ? `<div class="sub2">${w.chars.length > 1 ? `<span class="wko ko" lang="ko">${w.chars.map((x, i) => i === st.c ? `<b>${esc(x.ch)}</b>` : esc(x.ch)).join("")}</span>` : ""}${w.rom ? `<span class="rom">${romMark(w.rom, w.chars.length, st.c)}</span>` : ""}${w.mean ? `<span class="mean tr">${esc(w.mean)}</span>` : ""}${st.mode === "hand" ? `<span class="htools" role="group">${Object.entries(TOOLS).map(([k, v]) => `<button data-tool="${k}" aria-pressed="${toolKey() === k}">${v.icon} ${esc(t("h_" + k))}</button>`).join("")}<button class="hmag" data-hmode aria-pressed="${magnetOn()}">🧲 ${esc(t("h_magnet"))}</button></span>` : ""}</div>` : ""}
+      <div class="info">${w.rom || w.mean || st.mode === "hand" ? `<div class="sub2">${w.chars.length > 1 ? `<span class="wko ko" lang="ko">${w.chars.map((x, i) => i === st.c ? `<b>${esc(x.ch)}</b>` : esc(x.ch)).join("")}</span>` : ""}${w.rom ? `<span class="rom">${romMark(w.rom, w.chars.length, st.c)}</span>` : ""}${w.mean ? `<span class="mean tr">${esc(w.mean)}</span>` : ""}${st.mode === "hand" ? `<span class="htools" role="group">${Object.entries(TOOLS).map(([k, v]) => `<button data-tool="${k}" aria-pressed="${toolKey() === k}" aria-label="${esc(t("h_" + k))}">${v.icon}<span class="ml"> ${esc(t("h_" + k))}</span></button>`).join("")}<button class="hmag" data-hmode aria-pressed="${magnetOn()}" aria-label="${esc(t("h_magnet"))}">🧲<span class="ml"> ${esc(t("h_magnet"))}</span></button></span>` : ""}</div>` : ""}
       <div class="slotrow"><div class="slots">${jam.map((j, i) => `<span class="slot ${i < st.k ? "filled" : i === st.k ? "current" : ""}">${i <= st.k ? esc(j) : ""}</span>`).join("")}</div></div></div></div>
-      ${st.mode === "hand" ? `<div class="hand"><div class="hbox"><canvas class="hguide" aria-hidden="true"></canvas><canvas class="hink" aria-label="${esc(t("w_hand"))}"></canvas><b class="hscore" hidden></b><span class="fx" aria-hidden="true"></span></div><div class="hbtns"><button data-act="hdone">✓ ${esc(t("h_done"))}</button><button data-act="horder">✎ ${esc(t("h_order"))}</button><button data-act="hundo">↶ ${esc(t("h_undo"))}</button><button data-act="hclear"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M15.4 3.6a2 2 0 0 1 2.8 0l2.2 2.2a2 2 0 0 1 0 2.8L11 18H6.6l-3-3a2 2 0 0 1 0-2.8z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M9.2 9.8l5 5M6.6 18H21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg> ${esc(t("h_clear"))}</button></div></div>`
+      ${st.mode === "hand" ? `<div class="hand"><div class="hbox"><canvas class="hguide" aria-hidden="true"></canvas><canvas class="hink" aria-label="${esc(t("w_hand"))}"></canvas><b class="hscore" hidden></b><span class="fx" aria-hidden="true"></span></div><div class="hbtns"><button data-act="hdone" aria-label="${esc(t("h_done"))}">✓<span class="ml"> ${esc(t("h_done"))}</span></button><button data-act="horder" aria-label="${esc(t("h_order"))}">✎<span class="ml"> ${esc(t("h_order"))}</span></button><button data-act="hundo" aria-label="${esc(t("h_undo"))}">↶<span class="ml"> ${esc(t("h_undo"))}</span></button><button data-act="hclear" aria-label="${esc(t("h_clear"))}"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M15.4 3.6a2 2 0 0 1 2.8 0l2.2 2.2a2 2 0 0 1 0 2.8L11 18H6.6l-3-3a2 2 0 0 1 0-2.8z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M9.2 9.8l5 5M6.6 18H21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span class="ml"> ${esc(t("h_clear"))}</span></button></div></div>`
         : `<div class="kb" lang="ko">${KB_ROWS.map(r => `<div class="kr">${r.map(j => `<button data-j="${j}">${j}</button>`).join("")}</div>`).join("")}</div>`}`;
     paintBox(c); if (st.lineEnd) { work.querySelector(".box")?.classList.add("ok"); paintBox(c, true); } // 줄 끝 = 마지막 글자 완성 표시 그대로 // 자판 칸 = 회색 글자 위에 친 자모 자리만 진하게(본부 10-07 · 글자가 따로 그려져 어긋나던 것)
     work.classList.toggle("handmode", st.mode === "hand"); // 손글씨 = 위 작은 글자 상자·자모 칸 숨기고 큰 칸을 키움(본부 10-07)
@@ -616,7 +634,7 @@ export default async function write(app, ep, id, opts = {}) {
   function markOrder() { const b = work.querySelector("[data-act=horder]"); if (b) b.setAttribute("aria-pressed", String(!!st.hand?.ordPlaying)); } // ✎ 획순 = 그리는 동안 눌린 모양
   function markHand() { // 통과하면 ✓ 단추 → 「다음 ▶」
     const H = st.hand, b = work.querySelector("[data-act=hdone],[data-act=hnext]"); if (!b) return;
-    b.dataset.act = H?.passed ? "hnext" : "hdone"; b.textContent = H?.passed ? t("next_btn") : "✓ " + t("h_done");
+    b.dataset.act = H?.passed ? "hnext" : "hdone"; if (H?.passed) { b.textContent = t("next_btn"); b.removeAttribute("aria-label"); } else { b.innerHTML = `✓<span class="ml"> ${esc(t("h_done"))}</span>`; b.setAttribute("aria-label", t("h_done")); } H?.fit?.(); // 「다음 ▶」 은 늘 글까지(통과 뒤 누를 단추)
   }
 
   function paintBox(c, ok) {

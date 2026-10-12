@@ -1083,6 +1083,18 @@ button.dim{opacity:.45}
 /* 머리 줄 n3b(10-12) — 두 줄로 꺾기 전에 ⌨ ✍ 그림만(이름은 aria-label) */
 .write .whead.n3b .wmode .ml{display:none}
 .write .whead.n3b .wmode button{min-width:40px}
+/* 위 글자 줄 아주 좁을 때(fitSent st1 · 10-12) — 🔊 표시 숨김 · 낱말 묶음·글자 단추 여백 최소 · ◀ ▶ 좁게 */
+.write .segrow.st1 .sent .spk{display:none}
+.write .segrow.st1 .sent .w{padding:2px 1px 0;gap:1px}
+.write .segrow.st1 .sent .c{padding:0 1px;margin:0 0 2px}
+.write .segrow.st1 .segnav{gap:2px}
+.write .segrow.st1 .segnav button{width:26px}
+/* 손글씨 도구 단추 그림만(fitTools ic · 10-12) */
+.write .htools.ic .ml,.write .htools.ic2 .ml{display:none}
+.write .htools.ic button,.write .htools.ic2 button{min-width:36px}
+/* 손글씨 단추 넷 그림만(fitHandBox hic · 10-12) — 「다음 ▶」 은 글 그대로 */
+.write .hand.hic .hbtns .ml{display:none}
+.write .hand.hic .hbtns button{min-width:40px;padding:4px 6px;font-size:15px}
 
 /* ==== 글자부(획순 칠·자모 칠 표시) ==== */
 
