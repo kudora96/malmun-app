@@ -20,14 +20,15 @@ function fitCore(Q, D, M, r, others) {
   const segD = (P, x, y) => { let b = Infinity; for (let i = 1; i < P.length; i++) { const a = P[i - 1], c = P[i], dx = c.x - a.x, dy = c.y - a.y, l = dx * dx + dy * dy || 1e-12, t = Math.max(0, Math.min(1, ((x - a.x) * dx + (y - a.y) * dy) / l)); b = Math.min(b, Math.hypot(x - a.x - dx * t, y - a.y - dy * t)); } return P.length === 1 ? Math.hypot(x - P[0].x, y - P[0].y) : b; };
   const st = 0.5 / M, eps = 1.6 / M; // 여유 = 회색 밖 칸 가운데까지 거리 − 칸 경계 0.5 − 가장자리 흐림 0.5 − 0.6
   if (Q.length === 1) { let p = { x: Q[0].x, y: Q[0].y }; for (let k = 0; k < 40; k++) { let b = p, bv = at(p.x, p.y); for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const v = at(p.x + dx * st, p.y + dy * st); if (v > bv) { bv = v; b = { x: p.x + dx * st, y: p.y + dy * st }; } } if (b === p) break; p = b; } return [p]; }
-  // ① 능선으로(수직 방향 ±3r 안 가장 깊은 곳 · 같으면 덜 옮긴 쪽)
+  // ① 능선으로(수직 방향 ±min(3r, 칸 3%) 안 가장 깊은 곳 · 같으면 덜 옮긴 쪽 · 붓은 3r 이 칸 18% 라 이웃 점이 다른 획 능선으로 건너뛰어 지그재그 — 쓰기부 10-12)
   let P = Q.map((q, i) => { const a = Q[Math.max(0, i - 2)], c = Q[Math.min(Q.length - 1, i + 2)], L = Math.hypot(c.x - a.x, c.y - a.y) || 1, nx = -(c.y - a.y) / L, ny = (c.x - a.x) / L;
-    let bo = 0, bv = at(q.x, q.y); for (let o = st; o <= 3 * r; o += st) for (const s of [1, -1]) { const v = at(q.x + nx * o * s, q.y + ny * o * s); if (v > bv + 1e-9) { bv = v; bo = o * s; } }
+    let bo = 0, bv = at(q.x, q.y); for (let o = st; o <= Math.min(3 * r, 0.03); o += st) for (const s of [1, -1]) { const v = at(q.x + nx * o * s, q.y + ny * o * s); if (v > bv + 1e-9) { bv = v; bo = o * s; } }
     // 가장 깊은 곳까지 사이가 회색 밖이면(다른 획으로 건너뜀) 안 옮김
     for (let o = 0; Math.abs(o) < Math.abs(bo); o += Math.sign(bo) * st) if (at(q.x + nx * o, q.y + ny * o) <= 0) { bo = 0; break; }
     return { x: q.x + nx * bo, y: q.y + ny * bo }; });
   for (let k = 0; k < 2; k++) for (let i = 1; i < P.length - 1; i++) P[i] = { x: (P[i - 1].x + 2 * P[i].x + P[i + 1].x) / 4, y: (P[i - 1].y + 2 * P[i].y + P[i + 1].y) / 4 };
-  const closed = Math.hypot(P[0].x - P[P.length - 1].x, P[0].y - P[P.length - 1].y) < 0.02;
+  let plen = 0; for (let i = 1; i < Q.length; i++) plen += Math.hypot(Q[i].x - Q[i - 1].x, Q[i].y - Q[i - 1].y);
+  const closed = Math.hypot(P[0].x - P[P.length - 1].x, P[0].y - P[P.length - 1].y) < Math.max(0.02, 0.15 * plen); // 닫힌 획(ㅇ) = 두 끝 거리 < 획 길이 15%(쓰기부 10-12 「생」 붓 받침 ㅇ — 0.02 로는 열린 획이 되어 끝 늘이기가 고리를 여러 바퀴 돌던 것 · hand_dir 와 같은 기준)
   if (!closed) {
     // ② 다른 획 몸통 안에서 끝남 = 그 획 가운데(가장 가까운 점)에서 자름
     const cut = rev => { const A = rev ? P.slice().reverse() : P; for (const O of others) { if (O.length < 2) continue; const hw = Math.max(r, at(A[0].x, A[0].y)) * 1.1; if (segD(O, A[0].x, A[0].y) > hw) continue;
@@ -36,8 +37,9 @@ function fitCore(Q, D, M, r, others) {
     P = cut(false); P = cut(true);
     // ③ 끝 늘이기 — 획 방향 ±50° 부채꼴에서 가장 깊은 다음 점 · 깊이 r 미만이면 멈춤 · 다른 획 가운데로 들어가면 멈춤
     const grow = rev => { const A = rev ? P.slice().reverse() : P; if (A.length < 2) return A; let p = A[0], q = A[Math.min(3, A.length - 1)], dx = p.x - q.x, dy = p.y - q.y, L = Math.hypot(dx, dy) || 1; dx /= L; dy /= L; const add = [];
-      for (let k = 0; k < 400; k++) { let best = null, bv = -1; for (let a = -50; a <= 50; a += 10) { const t = (a * Math.PI) / 180, ux = dx * Math.cos(t) - dy * Math.sin(t), uy = dx * Math.sin(t) + dy * Math.cos(t), x = p.x + ux * 2 * st, y = p.y + uy * 2 * st, v = at(x, y) - Math.abs(a) * 1e-5; if (v > bv) { bv = v; best = { x, y, ux, uy }; } }
-        if (!best || at(best.x, best.y) < r + eps || others.some(O => segD(O, best.x, best.y) < Math.max(r, at(best.x, best.y)) * 1.05)) break;
+      const gMax = Math.ceil(Math.max(2 * r, 0.2 * plen) * M); /* 늘이는 길이 상한 = max(붓 굵기, 획 길이 20%)(쓰기부 10-12 — 붓 회색은 획끼리 붙어 능선을 따라 남의 자리까지 3배 길어지던 것) */
+      for (let k = 0; k < gMax; k++) { let best = null, bv = -1; for (let a = -50; a <= 50; a += 10) { const t = (a * Math.PI) / 180, ux = dx * Math.cos(t) - dy * Math.sin(t), uy = dx * Math.sin(t) + dy * Math.cos(t), x = p.x + ux * 2 * st, y = p.y + uy * 2 * st, v = at(x, y) - Math.abs(a) * 1e-5; if (v > bv) { bv = v; best = { x, y, ux, uy }; } }
+        if (!best || at(best.x, best.y) < r + eps || others.some(O => segD(O, best.x, best.y) < Math.max(r, at(best.x, best.y)) * 1.05) || (A.length > 8 && segD(A.slice(6), best.x, best.y) < r)) break; // 자기 길 몸통(끝 6점 빼고)에 닿으면 멈춤(고리 따라 되돌아오기 막음)
         add.push({ x: best.x, y: best.y }); p = best; dx = dx * 0.6 + best.ux * 0.4; dy = dy * 0.6 + best.uy * 0.4; const l2 = Math.hypot(dx, dy) || 1; dx /= l2; dy /= l2; }
       const B = add.reverse().concat(A); return rev ? B.reverse() : B; };
     P = grow(false); P = grow(true);
@@ -48,7 +50,9 @@ function fitCore(Q, D, M, r, others) {
   }
   // ⑤ 1/200 간격으로 채우고 · 깊이가 r 모자란 점(모서리·가는 곳)은 더 깊은 쪽으로 오름(최대 r) → 점마다 그 자리 깊이 d
   const R = []; for (let i = 0; i < P.length; i++) { if (i) { const a = P[i - 1], b = P[i], n = Math.ceil(Math.hypot(b.x - a.x, b.y - a.y) * 200); for (let k = 1; k < n; k++) R.push({ x: a.x + (b.x - a.x) * k / n, y: a.y + (b.y - a.y) * k / n }); } R.push({ x: P[i].x, y: P[i].y }); }
-  for (const q of R) { let moved = 0; while (moved < r && at(q.x, q.y) < r + eps) { let b = null, bv = at(q.x, q.y); for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1], [0.7071, 0.7071], [-0.7071, 0.7071], [0.7071, -0.7071], [-0.7071, -0.7071]]) { const v = at(q.x + dx * st, q.y + dy * st); if (v > bv + 1e-9) { bv = v; b = [dx, dy]; } } if (!b) break; q.x += b[0] * st; q.y += b[1] * st; moved += st; } q.d = at(q.x, q.y); }
+  for (const q of R) { let moved = 0; while (moved < r && at(q.x, q.y) < r + eps) { let b = null, bv = at(q.x, q.y); for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1], [0.7071, 0.7071], [-0.7071, 0.7071], [0.7071, -0.7071], [-0.7071, -0.7071]]) { const v = at(q.x + dx * st, q.y + dy * st); if (v > bv + 1e-9) { bv = v; b = [dx, dy]; } } if (!b) break; q.x += b[0] * st; q.y += b[1] * st; moved += st; } }
+  for (let k = 0; k < 3; k++) for (let i = 1; i < R.length - 1; i++) R[i] = { x: (R[i - 1].x + 2 * R[i].x + R[i + 1].x) / 4, y: (R[i - 1].y + 2 * R[i].y + R[i + 1].y) / 4 }; // 점마다 따로 오르면 지그재그(쓰기부 10-12 「생」 붓 — 길이가 2배로 부풀던 것) → 고르게 편 뒤 깊이 다시 잼(굵기는 그 깊이로)
+  for (const q of R) q.d = at(q.x, q.y);
   return R; // 오르고도 회색 가장자리·밖인 점 = 굵기 0.4칸(거의 안 보임 · 길은 이어짐)
 }
 
