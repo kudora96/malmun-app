@@ -792,7 +792,13 @@ export default async function write(app, ep, id, opts = {}) {
     const hm = e.target.closest("[data-hmode]");
     if (hm) { try { localStorage.setItem("malmun.hmode", magnetOn() ? "free" : "magnet"); } catch {} hush(); st.hand?.stopOrder?.(); render(); return; } // 반자동 ⇄ 완전 수동(같은 글자 처음부터)
     const tb = e.target.closest("[data-tool]");
-    if (tb) { try { localStorage.setItem("malmun.htool", tb.dataset.tool); } catch {} app.querySelectorAll("[data-tool]").forEach(x => x.setAttribute("aria-pressed", String(x.dataset.tool === tb.dataset.tool))); { const H = st.hand; if (H) { clearTimeout(H.timer); clearTimeout(H.clr); H.paintGuide?.(); H.paintInk?.(); } } return; } /* 도구 바꿈 = 쓰던 글자 그대로 이어 씀(본부 10-12 — 손 뗀 1.2초 채점·꽝 자동 지우기가 돌아 지워지던 것) */ // 회색 길 굵기도 그 도구로 // 도구 고르기(기억) · 이미 그린 획은 그 도구 그대로
+    if (tb) { const same = tb.dataset.tool === toolKey(); try { localStorage.setItem("malmun.htool", tb.dataset.tool); } catch {} app.querySelectorAll("[data-tool]").forEach(x => x.setAttribute("aria-pressed", String(x.dataset.tool === tb.dataset.tool)));
+      const H = st.hand; if (!H || same) return;
+      // 다른 도구 = 그 글자 칸에 쓴 획을 지우고 처음부터(투덜이 10-12 「다른 도구를 고르면 기존 것을 자동으로 지우는 게 좋아」 · 본부) — 점수·자석 차례·통과 표시도 처음으로 · 회색은 새 도구 굵기 · 같은 도구 = 그대로
+      clearTimeout(H.timer); clearTimeout(H.clr); H.follow = null; H.drawGen = (H.drawGen || 0) + 1; if (H.passSnd) { hush(); st.busy = false; H.passSnd = false; }
+      if (!st.auto && (H.ordPlaying || H.ordAt)) H.stopOrder?.();
+      H.strokes = []; H.roles = null; H.orderTold = false; H.mag = 0; H.magWrong = 0; if (H.passed) { H.passed = false; markHand(); }
+      const sc = work.querySelector(".hscore"); if (sc) sc.hidden = true; note.textContent = ""; H.paintGuide?.(); H.paintInk?.(); return; }
     const mb = e.target.closest("[data-mode]");
     if (mb) { if (st.mode !== mb.dataset.mode) { if (st.auto || st.resumeAuto) stopAuto(); st.hand?.stopOrder?.(); hush(); stopLoop(); st.busy = false; st.done = false; st.queue = []; st.mode = mb.dataset.mode; /* 모드 바꾸기 = 돌던 것(자동·획순·소리) 먼저 멈춤 — 본부 10-08 투덜이: 자판 자동 켠 채 손글씨로 바꾸면 저 혼자 계속 씀 */ try { localStorage.setItem("malmun.wmode", st.mode); } catch {} app.querySelectorAll("[data-mode]").forEach(x => x.setAttribute("aria-pressed", String(x.dataset.mode === st.mode))); st.typed = []; st.k = 0; st.part = ""; st.segEnd = false; render(); } return; }
     const b = e.target.closest("[data-act]");

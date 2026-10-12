@@ -43,14 +43,18 @@
       const draw = async P => { ev("pointerdown", P[0]); for (const q of P) ev("pointermove", q); ev("pointerup", P[P.length - 1]); id++; await W(30); };
       const inkN = () => { const d = A(iv); let k = 0; for (let i = 3; i < d.length; i += 16) if (d[i] > 60) k++; return k; };
       window.__sfxLog = [];
+      // ⓒ 도구 바꿈 = 쓴 획 지움(투덜이 10-12 「다른 도구를 고르면 기존 것을 자동으로 지우는 게 좋아」 · 본부) · 같은 도구 = 그대로 · 쓴 것 없으면 그대로 · 점수 칸 비움 · 회색 = 새 도구 굵기
       await draw(wr().brushPath(ch, list[0]).map(q => [q.x, q.y])); await W(300); const k0 = inkN();
-      $(".panel [data-tool=pencil]").click(); await W(3000);
-      const a1 = H.strokes.length === 1 && H.strokes[0].tool === "pen" && inkN() >= k0 * 0.95;
-      $(".panel [data-act=hdone]").click(); await W(300); const failed = !H.passed && !$(".panel .hscore").hidden; $(".panel [data-tool=brush]").click(); await W(2600); /* 꽝 → 1.2초 뒤 자동 지우기 예정 중에 도구 바꿈 */
-      const a3 = failed && H.strokes.length === 1;
-      await draw(wr().brushPath(ch, list[1] || list[0]).map(q => [q.x, q.y])); await W(300);
-      const a2 = H.strokes.length === 2 && H.strokes[1].tool === "brush" && H.strokes[0].tool === "pen";
-      ok(a1 && a2 && a3, "ⓒ 한 번 쓰고 연필·펜·붓을 바꿔도 쓴 것이 남음(그은 도구 모양 그대로) · 채점 꽝 뒤 바꿔도 안 지워짐", `바꾼 뒤 3초 획 ${a1} · 다른 도구 이어 쓰기 ${a2} · 꽝(${failed}) 뒤 남은 획 ${H.strokes.length}`);
+      $(".panel [data-tool=pen]").click(); await W(400); const same = H.strokes.length === 1 && inkN() >= k0 * 0.95; // 같은 도구 다시 = 안 지움
+      $(".panel [data-act=hdone]").click(); await W(300); const scored = !$(".panel .hscore").hidden;
+      const g0 = A($(".panel .hguide")); let gp = 0; for (let i = 3; i < g0.length; i += 16) if (g0[i] > 60) gp++;
+      $(".panel [data-tool=brush]").click(); await W(300);
+      const g1 = A($(".panel .hguide")); let gb = 0; for (let i = 3; i < g1.length; i += 16) if (g1[i] > 60) gb++;
+      const cleared = H.strokes.length === 0 && inkN() === 0 && $(".panel .hscore").hidden && !H.passed;
+      await W(2600); const stay = H.strokes.length === 0; // 꽝 뒤 1.2초 자동 지우기·채점이 늦게 와도 다시 생기지 않음
+      $(".panel [data-tool=pencil]").click(); await W(300); const empty = H.strokes.length === 0; // 쓴 것 없을 때 바꿈 = 그대로(오류 없음)
+      await draw(wr().brushPath(ch, list[0]).map(q => [q.x, q.y])); await W(300); const again = H.strokes.length === 1 && H.strokes[0].tool === "pencil";
+      ok(same && scored && cleared && stay && empty && again && gb > gp, "ⓒ 도구 바꿈 = 쓴 획 0 · 점수 칸 비움 · 회색 굵기 = 새 도구 · 같은 도구 = 그대로 · 바꾼 뒤 새 도구로 다시 씀", `같은 도구 ${same} · 점수 ${scored} · 지움 ${cleared} · 3초 뒤 ${stay} · 빈 칸 바꿈 ${empty} · 다시 ${again} · 회색 펜 ${gp} → 붓 ${gb}`);
       ok(swishes() === 0, "ⓓ 손으로 직접 그을 땐 「스윽」 없음", `${swishes()}`);
       $(".panel [data-act=hclear]")?.click(); await W(200); for (let k = 0; k < 40 && wr().busy(); k++) await W(100); }
     // ⓓ 자동 완성 = 그린 획 수만큼 「스윽」 · 겹침
