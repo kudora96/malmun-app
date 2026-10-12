@@ -37,6 +37,7 @@ def profile_row(c, old):
     if c in FONT: row["font"] = FONT[c]
     if (p.get("line_height_min") or 0) > 0: row["lh"] = p["line_height_min"]
     if (p.get("min_font_px") or 0) > 0: row["minpx"] = p["min_font_px"]
+    if p.get("ui_short"): row["short"] = p["ui_short"]  # 「내 말 ⇄ 한」 토글 이름(본부 10-12 · 언어부 확인 · 2~4자)
     for k in ("stage", "ko_ui"):
         if k in old: row[k] = old[k]
     return row
