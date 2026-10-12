@@ -7,7 +7,8 @@
   window.__sfxVolume = 0.0001;
   const keep = { mode: localStorage.getItem("malmun.wmode"), hmode: localStorage.getItem("malmun.hmode"), best: localStorage.getItem("malmun.hbest"), tool: localStorage.getItem("malmun.htool") };
   const TW = { pencil: 0.04, pen: 0.07, brush: 0.12 };
-  const L = {}; for (const k of ["ne", "en", "ko", "ne.ko"]) { try { L[k] = await (await fetch(`/lang/${k}.json?` + Date.now())).json(); } catch {} }
+  const { lang: LG } = await import(`/js/i18n.js?v=${document.documentElement.dataset.v}`); // 지금 언어 글도(검사부 10-12 — vi 로 돌리면 ne/ko 글로 박혀 틀림)
+  const L = {}; for (const k of [...new Set(["ne", "en", "ko", "ne.ko", LG, LG + ".ko"])]) { try { L[k] = await (await fetch(`/lang/${k}.json?` + Date.now())).json(); } catch {} }
   const isKey = (txt, key) => !!txt && Object.values(L).some(o => o?.[key] === txt);
   const open = async li => { document.querySelectorAll(".panel [data-act=close]").forEach(b => b.click()); await W(300); document.querySelectorAll(".line")[li].querySelector("[data-act=write]").click(); await W(1600); document.querySelector("video")?.pause(); };
   const wr = () => $(".panel .write")?.parentElement?.__wr;
