@@ -90,8 +90,10 @@
           let n = 0, k = 0; for (const S of list.filter(S => S.unit === ui)) for (let i = 1; i < S.pts.length; i++) for (let t = 0; t <= 1; t += 0.1) { const x = S.pts[i - 1][0] + (S.pts[i][0] - S.pts[i - 1][0]) * t, y = S.pts[i - 1][1] + (S.pts[i][1] - S.pts[i - 1][1]) * t; n++; if (inU(x, y)) k++; }
           if (n && k / n < 0.7) fitBad.push(`${ch}의 ${u.jamo} ${Math.round((100 * k) / n)}%`); }); }
       ok(rows.every(r => !r.n0.length), "ⓘ 자료 획 차례대로 그림 → 알림 0(세·종·왕·읽·이)", rows.map(r => `${r.ch}${r.n0.length ? "✗" + r.n0.join("/") : ""}`).join(" "));
-      ok(rows.every(r => r.sw.some(x => /पहिले|먼저|first/.test(x))), "ⓘ 중성부터 그림 → 「क्रम मिलेन: पहिले …」", rows.map(r => `${r.ch}:${r.sw[0] || "없음"}`).join(" · "));
-      ok(rows.every(r => r.hi < 0 || r.rv.some(x => /बायाँ|왼쪽|left/.test(x))), "ⓘ 가로획 오른쪽→왼쪽 → 「दिशा: बायाँबाट दायाँ」", rows.map(r => `${r.ch}:${r.hi < 0 ? "가로획 없음" : r.rv[0] || "없음"}`).join(" · "));
+      const { t: TT } = await import(`/js/i18n.js?v=${document.documentElement.dataset.v}`), rx = k => new RegExp("^" + String(TT(k, { j: "JJJ" })).replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace("JJJ", ".+") + "$"); // 지금 언어 글로(검사부 10-12 vi)
+      const swRx = rx("h_order_first"), lrRx = [rx("h_dir_right"), rx("h_dir_lr")];
+      ok(rows.every(r => r.sw.some(x => swRx.test(x))), "ⓘ 중성부터 그림 → 「क्रम मिलेन: पहिले …」", rows.map(r => `${r.ch}:${r.sw[0] || "없음"}`).join(" · "));
+      ok(rows.every(r => r.hi < 0 || r.rv.some(x => lrRx.some(re => re.test(x)))), "ⓘ 가로획 오른쪽→왼쪽 → 「दिशा: बायाँबाट दायाँ」", rows.map(r => `${r.ch}:${r.hi < 0 ? "가로획 없음" : r.rv[0] || "없음"}`).join(" · "));
       res.push(`· 자료 점 맞춤(획 위 점이 그 자모 잉크 안 70% 미만): ${fitBad.join(" · ") || "없음"}`);
       // 획 붙이기 뒤 자모별 표(본부 10-07) — 24자모 × 세·종·왕·읽·이·했·싶·글·한·국 + 자모가 다 나오게 몇 음절 더
       const tbl = {}; for (const ch of ["세", "종", "왕", "읽", "이", "했", "싶", "글", "한", "국", "뭐", "책", "토", "퓨", "랴", "벼", "끝", "쿄", "의", "됐", "뷔"]) for (const r of await wr().strokeFit(ch)) if (r.fit != null) (tbl[r.jamo] ||= []).push(`${ch}${Math.round(r.fit * 100)}`);

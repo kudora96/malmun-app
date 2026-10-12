@@ -22,6 +22,8 @@ import { audioCtx, hold } from "../wake.js?v=1012.12";
 import * as sfx from "../sfx.js?v=1012.12";
 import { scoreFx } from "../scorefx.js?v=1012.12";
 import { units as jamoUnits, baseOf, shapeFix } from "../jamobox.js?v=1012.12"; // 자모 자리 나누기(획순 · 자판 덧칠 · 손글씨 덩어리 — 본부 10-07) // 손글씨 점수 효과 = 말하기와 같은 규칙(본부 10-07)
+import { createStrokes } from "../strokes.js?v=1012.12"; // 획 자료·획순 칠(글자부)
+import { fitToGuide } from "../strokefit.js?v=1012.12"; // 자석 따라오는 획 길 = 회색 가운데(글자부 10-12)
 
 const KEYS = [..."ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎㄲㄸㅃㅆㅉ"], VOW = [..."ㅏㅑㅓㅕㅗㅛㅜㅠㅡㅣ"];
 const VOW2 = [..."ㅐㅒㅔㅖㅘㅙㅚㅝㅞㅟㅢ"]; // 겹모음 줄(본부 10-06) — 칸 하나 · ㅓ+ㅣ 처럼 나눠 쳐도 받음
@@ -114,7 +116,7 @@ export default async function write(app, ep, id, opts = {}) {
     const jm = ws[st.w]?.chars[st.c]?.jamo || []; if (Number.isInteger(opts.pos.k) && opts.pos.k > 0 && opts.pos.k < jm.length) { st.k = opts.pos.k; st.typed = jm.slice(0, st.k); } /* 반쯤 친 글자의 자모도 그대로(검사부 10-11 토글 뒤 k=0) */
     else if (opts.pos.k === jm.length && jm.length) { if (st.c + 1 < ws[st.w].chars.length) st.c++; else if (st.w + 1 < ws.length) { st.w++; st.c = 0; } else { st.k = jm.length; st.typed = jm.slice(); } } } /* 다 친 직후 토글 = 다음 글자로(토막 끝 글자면 다 친 채로) */ // ने⇄한 토글 뒤 같은 토막·글자(본부 10-08)
   // 쓰기 방법(본부 10-07 투덜이 「ㅇ」) — ⌨ 자판 / ✍ 손글씨 · 고른 것 기억
-  const modeBtns = () => `<span class="wmode" role="group">${[["kb", "⌨ " + t("w_kb")], ["hand", "✍ " + t("w_hand")]].map(([m, l]) => `<button data-mode="${m}" aria-pressed="${st.mode === m}">${esc(l)}</button>`).join("")}</span>`;
+  const modeBtns = () => `<span class="wmode" role="group">${[["kb", "⌨", t("w_kb")], ["hand", "✍", t("w_hand")]].map(([m, ic, l]) => `<button data-mode="${m}" aria-pressed="${st.mode === m}" aria-label="${esc(l)}">${ic}<span class="ml"> ${esc(l)}</span></button>`).join("")}</span>`;
   const lineSrc = line.lineAudio ? paths.audio(ep, line.lineAudio) : null;
   hush();
 
@@ -159,7 +161,7 @@ export default async function write(app, ep, id, opts = {}) {
     const my = (st.sentGen = (st.sentGen || 0) + 1);
     run([partStep()]).then(ok => { if (st.sentGen !== my) return; st.sent = false; markSent(); if (ok) again(); else if (st.resumeAuto) { st.resumeAuto = false; markAuto(); } }); // 다른 걸 눌러 끊기면 자동 다시 안 함
   }
-  app.__wr = { owners: async ch => { await stkReady; const list = strokesOf(ch); return { list, ...inkOwners(ch, list), GN }; }, font: () => `${glyphWeight()} ${glyphFont()}`, reveal: async (ch, n = 200) => { await stkReady; await document.fonts?.load(`${glyphWeight()} 100px ${glyphFont()}`, ch).catch(() => {}); const list = strokesOf(ch); return { list, at: (k, f = 1) => revealOrder(ch, n, list, k, f) }; }, glyphCv: (ch, n = 200) => { const cv = document.createElement("canvas"); cv.width = cv.height = n; glyph(cv.getContext("2d"), n, ch, "#000"); return cv; }, guideCv: (ch, w, n = 200) => { const cv = document.createElement("canvas"); cv.width = cv.height = n; guideGlyph(cv.getContext("2d"), n, ch, w, "#000"); return cv; }, glyphW0: ch => glyphW0(ch), guideGrow: (ch, w) => guideGrow(ch, w), guideW: tk => guideW(tk), st: () => st, hand: () => st.hand, traceOf: ch => traceOf(ch), centerOf: ch => centerOf(ch), unitsOf: ch => unitsOf(ch), unitSteps: ch => { const m = pix(UN, x => glyph(x, UN, ch, "#000")), cp = us => us.map(u => ({ jamo: u.jamo, role: u.role, n: u.px.length, px: u.px.slice() })), a = jamoUnits(ch, m, UN), r = ringFix(a, m), s0 = cp(r); shapeFix(r, m, UN, ch); const s1 = cp(r); deCrumb(r); return { raw: cp(a), ring: s0, shape: s1, crumb: cp(r) }; }, strokesOf: async ch => (await stkReady, strokesOf(ch)), strokeHint: (H, S) => strokeHint(H, S), strokeFit: async ch => { await stkReady; const us = unitsOf(ch), L = strokesOf(ch); return us.map((u, ui) => { const P = L.filter(S => S.unit === ui); let n = 0, k = 0; for (const S of P) { const f = fitOf(u, S.pts), m = S.pts.length - 1; n += m; k += f * m; } return { jamo: u.jamo, fit: n ? k / n : null }; }); }, handScore: (ch, S) => handScore(ch, S), handJudge: () => handJudge(), toggle: toggleSentence, brushPath: (ch, S) => brushPath(ch, S), paintCheck: (ch, k, n) => paintCheck(ch, k, n), busy: () => st.busy || st.done || st.queue.length > 0 || st.sent || st.auto || sfx.playing() }; // busy = 점검 도구가 소리 끝을 기다릴 때
+  app.__wr = { owners: async ch => { await stkReady; const list = strokesOf(ch); return { list, ...inkOwners(ch, list), GN }; }, font: () => `${glyphWeight()} ${glyphFont()}`, reveal: async (ch, n = 200) => { await stkReady; await document.fonts?.load(`${glyphWeight()} 100px ${glyphFont()}`, ch).catch(() => {}); const list = strokesOf(ch); return { list, at: (k, f = 1) => revealOrder(ch, n, list, k, f) }; }, glyphCv: (ch, n = 200) => { const cv = document.createElement("canvas"); cv.width = cv.height = n; glyph(cv.getContext("2d"), n, ch, "#000"); return cv; }, guideCv: (ch, w, n = 200) => { const cv = document.createElement("canvas"); cv.width = cv.height = n; guideGlyph(cv.getContext("2d"), n, ch, w, "#000"); return cv; }, glyphW0: ch => glyphW0(ch), snapCv: async (ch, k, tk) => (await stkReady, snapMask(ch, k, tk)), guideGrow: (ch, w) => guideGrow(ch, w), guideW: tk => guideW(tk), st: () => st, hand: () => st.hand, traceOf: ch => traceOf(ch), centerOf: ch => centerOf(ch), unitsOf: ch => unitsOf(ch), unitSteps: ch => { const m = pix(UN, x => glyph(x, UN, ch, "#000")), cp = us => us.map(u => ({ jamo: u.jamo, role: u.role, n: u.px.length, px: u.px.slice() })), a = jamoUnits(ch, m, UN), r = ringFix(a, m), s0 = cp(r); shapeFix(r, m, UN, ch); const s1 = cp(r); deCrumb(r); return { raw: cp(a), ring: s0, shape: s1, crumb: cp(r) }; }, strokesOf: async ch => (await stkReady, strokesOf(ch)), strokeHint: (H, S) => strokeHint(H, S), strokeFit: async ch => { await stkReady; const us = unitsOf(ch), L = strokesOf(ch); return us.map((u, ui) => { const P = L.filter(S => S.unit === ui); let n = 0, k = 0; for (const S of P) { const f = fitOf(u, S.pts), m = S.pts.length - 1; n += m; k += f * m; } return { jamo: u.jamo, fit: n ? k / n : null }; }); }, handScore: (ch, S) => handScore(ch, S), handJudge: () => handJudge(), toggle: toggleSentence, brushPath: (ch, S) => brushPath(ch, S), paintCheck: (ch, k, n) => paintCheck(ch, k, n), busy: () => st.busy || st.done || st.queue.length > 0 || st.sent || st.auto || sfx.playing() }; // busy = 점검 도구가 소리 끝을 기다릴 때
 
   function paintSent() {
     sentEl.innerHTML = `<svg class="spk" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M4 9v6h4l5 4V5L8 9H4z"/><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M16 8.5a5 5 0 0 1 0 7M18.8 6a8.5 8.5 0 0 1 0 12"/></svg>` + (segs[Math.min(st.s, segs.length - 1)] || []).map((w, wi) => `<span class="w ${wi === st.w ? "on" : ""}">${w.chars.map((c, ci) =>
@@ -188,22 +190,39 @@ export default async function write(app, ep, id, opts = {}) {
     const sl = row.querySelector(".slots"), bs = [...wb.querySelectorAll("button")];
     const wrapped = () => row.scrollWidth > row.clientWidth + 1 || bs.some(b => Math.abs(b.getBoundingClientRect().top - bs[0].getBoundingClientRect().top) > 2);
     stg.classList.remove("c1", "c2", "c3", "c4");
-    if (wrapped()) { stg.after(wb); stg.classList.remove("btns-in"); wb.classList.add("below"); return; } // 같은 줄에 보통 크기로 안 들어가면 글자 칸 아래 한 줄로(글씨를 줄이지 않음 · 본부 10-12 「작고 두 줄로 꺾임」)
-    wb.classList.remove("below");
+    if (wrapped()) { stg.after(wb); stg.classList.remove("btns-in"); wb.classList.add("below"); fitStageH(); return fitKb(); } // 같은 줄에 보통 크기로 안 들어가면 글자 칸 아래 한 줄로(글씨를 줄이지 않음 · 본부 10-12 「작고 두 줄로 꺾임」)
+    wb.classList.remove("below"); fitStageH(); fitKb();
   }
   // 낱말 칸 글자 단추 = 한 줄 · 넘치면 글자 크기·안쪽 여백을 같이 줄임(위 글자 줄과 같은 방식) · 로마자는 아래 줄 따로
   // 로마자·뜻 줄(투덜이 10-07 「단어 듣기」 빈자리) — 크게(로마자 15 · 뜻 17px)에서 칸 폭에 들어갈 때까지 줄임(최소 11px)
   function fitSub2() {
     const r = work.querySelector(".info .sub2"); if (!r || !r.clientWidth) return; const xs = [...r.querySelectorAll(".rom, .mean")]; xs.forEach(x => x.style.removeProperty("font-size"));
     for (let k = 0; k < 8 && r.scrollWidth > r.clientWidth + 1; k++) xs.forEach(x => { const f = parseFloat(getComputedStyle(x).fontSize); if (f > 11) x.style.fontSize = f - 1 + "px"; });
+    if (work.classList.contains("handmode")) { /* 손글씨 = 뜻 줄이 두 줄로 꺾이면(「"세종대왕" ले」 + 도구 단추) 한 줄이 될 때까지 줄임(본부 10-12 토막마다 배치 같게) */
+      const wrapped = () => { const k = [...r.children].filter(x => x.offsetWidth), t0 = k[0]?.getBoundingClientRect(); return !!t0 && k.some(x => x.getBoundingClientRect().top >= t0.bottom - 2); };
+      for (let k = 0; k < 8 && wrapped(); k++) { let moved = false; xs.forEach(x => { const f = parseFloat(getComputedStyle(x).fontSize); if (f > 11) { x.style.fontSize = f - 1 + "px"; moved = true; } }); if (!moved) break; } }
     // 낮은 창(본부 10-07 660×560 — 단추 줄이 자판을 2px 덮음) — 단추 줄과 자판 사이 4px 이 될 때까지 더 줄임(최소 11px)
     const bt = work.querySelector(".wbtns"), kb = work.querySelector(".kb"), gap = () => (bt && kb ? kb.getBoundingClientRect().top - bt.getBoundingClientRect().bottom : 99);
     for (let k = 0; k < 8 && gap() < 4; k++) { let moved = false; xs.forEach(x => { const f = parseFloat(getComputedStyle(x).fontSize); if (f > 11) { x.style.fontSize = f - 1 + "px"; moved = true; } }); if (!moved) break; }
   }
+  // 자판이 창 아래로 잘림(다국어부 10-12 320×640 — 아래 단추 줄이 두 줄로 꺾여 자판 마지막 줄 ㅚㅝㅞㅟㅢ 가 24~70px 잘림) — 넘칠 때만 차례로:
+  //  ① 아래 단추 셋을 한 줄로(글 작게 · 단추 안에서 두 줄) ② 자판 줄 높이를 30 → 22px 까지 1px 씩
+  function fitKb() {
+    const wr = work.closest(".write"), kb = work.querySelector(".kb"); if (!wr || !kb) return; wr.classList.remove("wt1", "wt2"); wr.style.removeProperty("--krmin");
+    const last = kb.querySelector(".kr:last-child button:last-child"); if (!last || !wr.clientHeight) return;
+    const over = () => last.getBoundingClientRect().bottom - wr.getBoundingClientRect().bottom > 0.5 || wr.scrollHeight > wr.clientHeight + 1;
+    if (!over()) return; if (wb.classList.contains("below")) wr.classList.add("wt1"); if (!over()) return;
+    wr.classList.add("wt2"); for (let h = 29; h >= 22 && (wr.style.setProperty("--krmin", h + "px"), over()); h--);
+  }
+  function fitStageH() { // 손글씨 = 위 칸(뜻 줄·단추 줄)이 정해진 높이를 넘치면 그만큼 키움 → 아래 손글씨 칸이 줄어듦(본부 10-12 — 넘친 단추 줄을 손글씨 칸이 덮던 것)
+    const stg = work.querySelector(".stage"); if (!stg) return; stg.style.height = ""; if (!work.classList.contains("handmode")) return;
+    const sr = stg.getBoundingClientRect(), pb = parseFloat(getComputedStyle(stg).paddingBottom) || 0, low = Math.max(...[...stg.querySelectorAll(".info, .wbtns")].map(x => x.getBoundingClientRect().bottom));
+    if (low > sr.bottom - pb + 1) stg.style.height = Math.ceil(sr.height + low - (sr.bottom - pb)) + "px";
+  }
   // 머리 줄 한 줄 유지(본부 10-07) — 넘치면 ✕ 닫기 글을 숨기고 ✕ 만
-  function fitHeadW() { const h = work.closest(".write")?.querySelector(".whead") || app.querySelector(".whead"); if (!h) return; const sb = h.querySelector(".sub"), over = () => h.scrollWidth > h.clientWidth + 1 || (sb && sb.scrollWidth > sb.clientWidth + 1); /* 번호 칸이 말줄임으로 잘려도 넘침(ur 「3 / 1…」) */ h.classList.remove("narrow", "n2", "n3", "n4"); for (const c of ["narrow", "n2", "n3", "n4"]) { if (!over()) break; h.classList.add(c); } } // 머리 줄이 넘치면 차례로: ✕ 글 숨김 → 「쓰기」 제목 숨김 → 화자 이름 숨김 → 두 줄로(닫기 단추가 화면 밖으로 밀리지 않게 · 검사부 10-12 vi 375)
+  function fitHeadW() { const h = work.closest(".write")?.querySelector(".whead") || app.querySelector(".whead"); if (!h) return; const sb = h.querySelector(".sub"), over = () => h.scrollWidth > h.clientWidth + 1 || (sb && sb.scrollWidth > sb.clientWidth + 1); /* 번호 칸이 말줄임으로 잘려도 넘침(ur 「3 / 1…」) */ h.classList.remove("narrow", "n2", "n3", "n3b", "n4"); for (const c of ["narrow", "n2", "n3", "n3b", "n4"]) { if (!over()) break; h.classList.add(c); } } // 머리 줄이 넘치면 차례로: ✕ 글 숨김 → 「쓰기」 제목 숨김 → 화자 이름 숨김 → 두 줄로(닫기 단추가 화면 밖으로 밀리지 않게 · 검사부 10-12 vi 375)
   function fitWord() {
-    fitSub2(); fitHeadW();
+    fitSub2(); fitHeadW(); fitStageH();
     const row = work.querySelector(".info .word"); if (!row || !row.clientWidth) return;
     const bs = [...row.querySelectorAll(".wc")]; bs.forEach(b => { b.style.fontSize = ""; b.style.padding = ""; });
     for (let fs = parseFloat(getComputedStyle(bs[0] || row).fontSize) - 1; row.scrollWidth > row.clientWidth + 1 && fs >= 11; fs -= 1) bs.forEach(b => { b.style.fontSize = fs + "px"; b.style.padding = fs < 16 ? "0 2px" : ""; });
@@ -231,7 +250,7 @@ export default async function write(app, ep, id, opts = {}) {
     fitWord(); placeBtns();
     fitWord(); setTimeout(fitWord, 30); // 낱말 글자 단추 = 한 줄(본부 10-06 — 세 단추 때문에 좁아져 꺾이던 것)
   }
-  function goSeg(s) { st.auto = false; st.resumeAuto = false; st.allNext = false; markAuto(); resetSounds(); st.busy = false; Object.assign(st, { s, w: 0, c: 0, k: 0, typed: [], part: "", done: false, queue: [], lineEnd: false }); render(); }
+  function goSeg(s) { st.segEnd = false; st.auto = false; st.resumeAuto = false; st.allNext = false; markAuto(); resetSounds(); st.busy = false; Object.assign(st, { s, w: 0, c: 0, k: 0, typed: [], part: "", done: false, queue: [], lineEnd: false }); render(); }
 
   // ── 손글씨 따라 쓰기 1단계(본부 10-07) — 흐린 회색 글자 위에 손가락·마우스·펜으로 · 판정 = 글자 마스크 덮음 × (1 − 벗어남) ≥ 70%
   //  덮음 = 글자 픽셀 중 펜 자국 근처(펜 굵기 2.4배 안)인 것 · 벗어남 = 펜 픽셀 중 글자(펜 굵기만큼 너그럽게 부풀림) 밖인 것 · 다 썼으면 「✓」 또는 1.2초 손 뗀 채면 자동
@@ -313,6 +332,14 @@ export default async function write(app, ep, id, opts = {}) {
     if (gCache.has(ch + "|0|" + hfontKey())) growCache.set(key, r); return r;
   }
   function guideGlyph(x, n, ch, w, color, cap = true) { glyph(x, n, ch, color, guideGrow(ch, w, cap)); }
+  // 자석 따라오는 획 길(글자부 js/strokefit.js 10-12) — 붓 길(brushPath)을 회색(그 도구 굵기) 거리 능선으로 옮기고 다른 획을 뚫지 않게 · 마스크 = 화면 회색과 같은 그림(같은 배열을 다시 써야 거리 변환 캐시가 맞음)
+  const gMaskCache = new Map();
+  function guideMask(ch, tk) {
+    const key = ch + "|" + tk + "|" + hfontKey(); if (gMaskCache.has(key)) return gMaskCache.get(key);
+    const d = pix(GN, x => guideGlyph(x, GN, ch, guideW(tk), "#000")), m = new Uint8Array(GN * GN); for (let i = 0; i < GN * GN; i++) m[i] = d[i * 4 + 3];
+    if (gCache.has(ch + "|0|" + hfontKey())) { if (gMaskCache.size > 60) gMaskCache.clear(); gMaskCache.set(key, m); } return m;
+  }
+  function fitPath(ch, list, i, tk) { const Qs = list.map(S => brushPath(ch, S)); if (!Qs[i]?.length) return Qs[i] || []; return fitToGuide({ Q: Qs[i], ch, toolW: TOOLS[tk]?.w ?? PEN, guide: guideMask(ch, tk), N: GN, others: Qs.filter((_, j) => j !== i) }); }
   const pix = (n, fn) => { const cv = document.createElement("canvas"); cv.width = cv.height = n; const x = cv.getContext("2d", { willReadFrequently: true }); fn(x); return x.getImageData(0, 0, n, n).data; };
   // 판정(본부 10-07 투덜이 「비슷해도 넘어가 버림」 → 엄하게)
   //  · 글자 = 획 덩어리(이어진 픽셀 — 「이」면 ㅇ·ㅣ)로 나눠 덩어리마다 덮음 ≥ 75% (한 획 빼먹거나 대충 지나가면 실패)
@@ -352,7 +379,7 @@ export default async function write(app, ep, id, opts = {}) {
     return { rev: tOf(S[0]) - tOf(S[S.length - 1]) > 0.25, msg: t(key) };
   }
   function handScore(ch, strokes, boxPx = st.hand?.s || 260) {
-    const list = STK ? strokesOf(ch) : []; if (!list.length) return handScoreOld(ch, strokes, boxPx);
+    const list = SK.STK ? strokesOf(ch) : []; if (!list.length) return handScoreOld(ch, strokes, boxPx);
     const tw = Math.max(...strokes.map(S => S.w ?? TOOLS[toolKey()].w), TOOLS[toolKey()].w * (strokes.length ? 0 : 1)), gw = tw * GUIDE_K; // 그은 도구 굵기(섞이면 가장 굵은 것) · 회색 길 굵기
     const N = 160, maskD = pix(N, x => guideGlyph(x, N, ch, Math.max(gw, glyphW0(ch)) + tw + 0.02, "#000", false)), ink = pix(N, x => inkPath(x, N, strokes, 0)); // 벗어남 = 회색 글자(+ 도구 굵기 · 칸 1%) 밖 잉크(본부 10-12 회색 = 글꼴 모양) · 연필처럼 회색이 글꼴보다 가늘어도 채점 구역은 글꼴 굵기 아래로 안 줄임(바른 획 점수 그대로 · 검사부 10-12)
     const segs = []; for (const S of strokes) { if (S.length === 1) segs.push([S[0], S[0]]); for (let i = 1; i < S.length; i++) segs.push([S[i - 1], S[i]]); }
@@ -385,293 +412,9 @@ export default async function write(app, ep, id, opts = {}) {
     const pct = Math.max(0, Math.min(100, Math.floor(raw * 100 + 1e-9)));
     return { score: raw, pct: ok ? pct : Math.min(pct, 79), ok, comps: cov, low, avg, cover: avg, outside, miss, N, T };
   }
-  // 점검 도구용 — 글자 가운데 선(거리 변환 능선 점들) = 조심스럽게 가운데를 따라 그린 사람
-  const centerOf = ch => { const N = 160, mask = pix(N, x => glyph(x, N, ch, "#000")), on = i => mask[i * 4 + 3] > 128, d = new Float32Array(N * N);
-    for (let i = 0; i < N * N; i++) d[i] = on(i) ? 1e9 : 0;
-    for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) { const i = y * N + x; if (!d[i]) continue; if (x) d[i] = Math.min(d[i], d[i - 1] + 1); if (y) d[i] = Math.min(d[i], d[i - N] + 1); }
-    for (let y = N - 1; y >= 0; y--) for (let x = N - 1; x >= 0; x--) { const i = y * N + x; if (!d[i]) continue; if (x < N - 1) d[i] = Math.min(d[i], d[i + 1] + 1); if (y < N - 1) d[i] = Math.min(d[i], d[i + N] + 1); }
-    const out = []; for (let y = 1; y < N - 1; y++) for (let x = 1; x < N - 1; x++) { const i = y * N + x; if (d[i] < 2) continue; let top = true; for (const j of [i - 1, i + 1, i - N, i + N]) if (d[j] > d[i]) top = false; if (top) out.push([[(x + 0.5) / N, (y + 0.5) / N]]); }
-    return out; };
-  // 점검 도구용 — 글자 마스크를 가로줄로 훑은 획(정규화 0~1)
-  const traceOf = ch => { const N = 160, mask = pix(N, x => glyph(x, N, ch, "#000")), step = Math.max(2, Math.round(PEN * N * 0.8)), out = [];
-    for (let y = Math.floor(step / 2); y < N; y += step) { let x0 = -1; for (let x = 0; x <= N; x++) { const on = x < N && mask[(y * N + x) * 4 + 3] > 128; if (on && x0 < 0) x0 = x; if (!on && x0 >= 0) { out.push([[(x0 + 0.5) / N, (y + 0.5) / N], [(x - 0.5) / N, (y + 0.5) / N]]); x0 = -1; } } }
-    return out; };
-  // 자모 자리(js/jamobox.js) — 같은 글꼴 마스크로 · 글꼴이 바뀌면 다시
-  const UN = 200, uCache = new Map();
-  // ㅇ 고리 바로잡기(투덜이 10-08 「왕」) — 글꼴이 ㅇ 아래와 ㅗ 꼭지를 이어 그리면 자모 나누기가 ㅇ 아래 반을 ㅗ 에 줌 → 획순이 ㅇ 위 → 아래 두 번
-  //  ㅇ 자모마다 가장 가까운 「구멍」(글자 밖과 이어지지 않은 빈 곳)을 찾아, 그 구멍에서 획 굵기만큼 안의 잉크 = ㅇ 몫으로 되돌림
-  // 부스러기 정리(본부 10-10 전수 1,257자) — 자모 안에서 본체와 안 이어진 작은 조각(< max(40칸, 그 자모 30%)) = 가장 많이 맞닿은 이웃 자모 몫 · 바뀌면 true
-  function deCrumb(us) {
-    const N = UN, own = new Int16Array(N * N).fill(-1); us.forEach((u, k) => { for (const q of u.px) own[q] = k; }); let changed = false;
-    for (let pass = 0; pass < 3; pass++) { let moved = false;
-      us.forEach((u, k) => { const seen = new Set(), comps = [];
-        for (const q0 of u.px) { if (seen.has(q0) || own[q0] !== k) continue; const c = [], st = [q0]; seen.add(q0); while (st.length) { const q = st.pop(); c.push(q); const x = q % N; for (const j of [x > 0 ? q - 1 : -1, x < N - 1 ? q + 1 : -1, q - N, q + N]) if (j >= 0 && j < N * N && own[j] === k && !seen.has(j)) { seen.add(j); st.push(j); } } comps.push(c); }
-        if (comps.length < 2) return; comps.sort((a, b) => b.length - a.length); const lim = Math.max(40, u.px.length * 0.3);
-        for (const c of comps.slice(1)) { if (c.length >= lim) { // 큰 떨어진 덩어리(ㅎ 빼고 · 자음) — 가운데가 제 칸 밖 · 다른 자음 칸 안이면 그 자음(「흃」 받침 ㅎ 꼭지·가로대가 ㄹ 몫이던 것)
-            if (u.jamo === "ㅎ" || u.role === "jung") continue; let sx = 0, sy = 0; for (const q of c) { sx += q % N; sy += (q / N) | 0; } sx /= c.length; sy /= c.length;
-            let gx0 = N, gy0 = N, gx1 = 0, gy1 = 0; for (const v of us) for (const q of v.px) { const x = q % N, y = (q / N) | 0; if (x < gx0) gx0 = x; if (x > gx1) gx1 = x; if (y < gy0) gy0 = y; if (y > gy1) gy1 = y; }
-            const rx = (sx - gx0 + 0.5) / (gx1 - gx0 + 1), ry2 = (sy - gy0 + 0.5) / (gy1 - gy0 + 1), inR = v => v.rect && rx >= v.rect[0] && rx <= v.rect[2] && ry2 >= v.rect[1] && ry2 <= v.rect[3];
-            if (inR(u)) continue; const hits = us.map((v, j) => j).filter(j => j !== k && us[j].role !== "jung" && inR(us[j])); if (hits.length !== 1) continue;
-            for (const q of c) own[q] = hits[0]; moved = true; continue; } const cnt = new Map(); for (const q of c) { const x = q % N; for (const j of [x > 0 ? q - 1 : -1, x < N - 1 ? q + 1 : -1, q - N, q + N, x > 0 ? q - N - 1 : -1, x < N - 1 ? q - N + 1 : -1, x > 0 ? q + N - 1 : -1, x < N - 1 ? q + N + 1 : -1]) { const o = j >= 0 && j < N * N ? own[j] : -1; if (o >= 0 && o !== k) cnt.set(o, (cnt.get(o) || 0) + 1); } }
-          if (!cnt.size) continue; const to = [...cnt].sort((a, b) => b[1] - a[1])[0][0]; for (const q of c) own[q] = to; moved = true; } });
-      if (!moved) break; changed = true; us.forEach(u => (u.px = [])); for (let i = 0; i < N * N; i++) if (own[i] >= 0) us[own[i]].px.push(i); }
-    return changed;
-  }
-  const HV = new Set("ㅗㅛㅜㅠㅡ");
-  function ringFix(us, m) {
-    const N = UN, on = i => m[i * 4 + 3] > 128, idx = us.map((u, k) => (u.jamo === "ㅇ" || u.jamo === "ㅎ" ? k : -1)).filter(k => k >= 0); // ㅎ 도 동그라미(「호」 — ㅎ 고리가 ㅗ 몫이 되던 것) if (!idx.length) return us;
-    const outside = new Uint8Array(N * N), st0 = [];
-    for (let i = 0; i < N; i++) for (const q of [i, (N - 1) * N + i, i * N, i * N + N - 1]) if (!on(q) && !outside[q]) { outside[q] = 1; st0.push(q); }
-    while (st0.length) { const q = st0.pop(), x = q % N, y = (q / N) | 0; for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const nx = x + dx, ny = y + dy; if (nx < 0 || ny < 0 || nx >= N || ny >= N) continue; const j = ny * N + nx; if (!outside[j] && !on(j)) { outside[j] = 1; st0.push(j); } } }
-    const hole = new Int32Array(N * N).fill(-1), holes = [];
-    for (let q = 0; q < N * N; q++) { if (on(q) || outside[q] || hole[q] >= 0) continue; const id = holes.length, px = [], s = [q]; hole[q] = id;
-      while (s.length) { const p = s.pop(); px.push(p); const x = p % N, y = (p / N) | 0; for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const nx = x + dx, ny = y + dy; if (nx < 0 || ny < 0 || nx >= N || ny >= N) continue; const j = ny * N + nx; if (hole[j] < 0 && !on(j) && !outside[j]) { hole[j] = id; s.push(j); } } }
-      if (px.length >= 6) { let sx = 0, sy = 0; for (const p of px) { sx += p % N; sy += (p / N) | 0; } holes.push({ id, px, cx: sx / px.length / N, cy: sy / px.length / N }); } }
-    if (!holes.length) return us;
-    let area = 0, edge = 0; for (let q = 0; q < N * N; q++) { if (!on(q)) continue; area++; const x = q % N, y = (q / N) | 0; if (!x || !y || x === N - 1 || y === N - 1 || !on(q - 1) || !on(q + 1) || !on(q - N) || !on(q + N)) edge++; }
-    const D = Math.ceil(((2 * area) / Math.max(1, edge)) * 1.05), owner = new Int16Array(N * N).fill(-1); us.forEach((u, k) => { for (const q of u.px) owner[q] = k; });
-    const used = new Set(), ringSet = new Map(), holeOf = new Map();
-    for (const k of idx) { const u = us[k]; let sx = 0, sy = 0; for (const q of u.px) { sx += q % N; sy += (q / N) | 0; } const ux = sx / u.px.length / N, uy = sy / u.px.length / N;
-      let hb = null, bd = Infinity; for (const h of holes) { if (used.has(h.id)) continue; const d = Math.hypot(h.cx - ux, h.cy - uy); if (d < bd) { bd = d; hb = h; } }
-      if (u.jamo === "ㅎ") { hb = null; bd = Infinity; for (const h of holes) { if (used.has(h.id) || h.cy < uy - 0.02) continue; const d = Math.hypot(h.cx - ux, h.cy - uy); if (d < bd) { bd = d; hb = h; } } } // ㅎ 동그라미 = 꼭지·가로 아래
-      if (!hb || bd > (u.jamo === "ㅎ" ? 0.4 : 0.25)) continue; used.add(hb.id); holeOf.set(k, hb.px[0]);
-      // 고리 = 구멍에서 실제(유클리드) 거리 ≤ 그 고리 두께(고리 바깥 가장자리까지 거리의 중앙값) + 0.5칸(본부 10-10 투덜이 「요」 — 걸음 수·글자 평균 굵기로 잡아 ㅛ 꼭지 머리가 ㅇ 몫이 되던 것)
-      const bnd = hb.px.filter(p => [p - 1, p + 1, p - N, p + N].some(j => j >= 0 && j < N * N && on(j))).map(p => [p % N, (p / N) | 0]);
-      let hx0 = N, hx1 = 0, hy0 = N, hy1 = 0; for (const [x, y] of bnd) { if (x < hx0) hx0 = x; if (x > hx1) hx1 = x; if (y < hy0) hy0 = y; if (y > hy1) hy1 = y; }
-      const R = 3 * D, dist = new Float32Array(N * N).fill(-1), cand = [];
-      for (let y = Math.max(0, hy0 - R); y <= Math.min(N - 1, hy1 + R); y++) for (let x = Math.max(0, hx0 - R); x <= Math.min(N - 1, hx1 + R); x++) { const q = y * N + x; if (!on(q)) continue; let b2 = Infinity; for (const [bx, by] of bnd) { const d2 = (bx - x) ** 2 + (by - y) ** 2; if (d2 < b2) b2 = d2; } dist[q] = Math.sqrt(b2); cand.push(q); }
-      const outerD = cand.filter(q => dist[q] <= 2.5 * D && [q - 1, q + 1, q - N, q + N].some(j => j >= 0 && j < N * N && outside[j])).map(q => dist[q]).sort((p, q) => p - q);
-      const thick = (outerD.length ? outerD[outerD.length >> 1] : D) + 0.5;
-      // 고리 바깥 타원(본부 10-10 「왕」「호」「오」 — 고리 = 바깥 타원 안 띠만 · 기둥은 모음 몫) = 구멍 가운데서 사방 180줄로 나가 잉크가 끝나는 곳 · 기둥·가로획으로 길게 빠진 줄(중앙값 1.25배 넘음)은 빼고 타원 맞춤(최소제곱 Ax²+Cy²+Dx+Ey=1)
-      const ecx = (hx0 + hx1) / 2, ecy = (hy0 + hy1) / 2, rays = [];
-      for (let a = 0; a < 180; a++) { const t = (a / 180) * 2 * Math.PI, dx = Math.cos(t), dy = Math.sin(t); let inInk = false, r = 0, hit = -1; for (; r < N; r += 0.5) { const x = Math.round(ecx + dx * r), y = Math.round(ecy + dy * r); if (x < 0 || y < 0 || x >= N || y >= N) break; const o = on(y * N + x); if (o) inInk = true; else if (inInk) { hit = r; break; } } if (hit > 0) rays.push([dx, dy, hit]); }
-      const rm = rays.map(r => r[2]).sort((p, q) => p - q)[rays.length >> 1] || 0, pts = rays.filter(r => r[2] <= rm * 1.25).map(([dx, dy, r]) => [dx * r, dy * r]);
-      let inEll = () => true, eTop = hy0 - thick;
-      if (pts.length >= 40) { const M = Array.from({ length: 4 }, () => new Float64Array(5)); for (const [x, y] of pts) { const v = [x * x, y * y, x, y]; for (let r = 0; r < 4; r++) { for (let c = 0; c < 4; c++) M[r][c] += v[r] * v[c]; M[r][4] += v[r]; } }
-        for (let c = 0; c < 4; c++) { let pv = c; for (let r = c + 1; r < 4; r++) if (Math.abs(M[r][c]) > Math.abs(M[pv][c])) pv = r; [M[c], M[pv]] = [M[pv], M[c]]; for (let r = 0; r < 4; r++) if (r !== c && M[c][c]) { const f = M[r][c] / M[c][c]; for (let k2 = c; k2 < 5; k2++) M[r][k2] -= f * M[c][k2]; } }
-        const [A, C, Dx, Ey] = M.map((r, i) => r[4] / r[i]);
-        if (A > 0 && C > 0) { const x0 = -Dx / (2 * A), y0 = -Ey / (2 * C), G = 1 + A * x0 * x0 + C * y0 * y0, ax = Math.sqrt(G / A) + 0.3, ay = Math.sqrt(G / C) + 0.3;
-          inEll = q => ((q % N - ecx - x0) / ax) ** 2 + ((((q / N) | 0) - ecy - y0) / ay) ** 2 <= 1; eTop = ecy + y0 - ay; } }
-      const rs = new Set(); for (const q of cand) if (dist[q] <= thick && inEll(q)) { owner[q] = k; rs.add(q); } ringSet.set(k, rs);
-      // 고리 밖인데 이 ㅇ 몫인 잉크(꼭지 머리 등) = 붙어 있는 이웃 자모에게 돌려줌
-      { let moved = true; for (let it = 0; it < 3 * D && moved; it++) { moved = false; const chg = [];
-          for (const q of cand) { if (owner[q] !== k || (dist[q] <= thick + 1 && inEll(q)) || (u.jamo === "ㅎ" && (q / N | 0) < eTop)) continue; /* ㅎ 꼭지·가로(고리 위)는 ㅎ 몫 그대로(「혹」) */ const cnt = new Map(); for (const j of [q - 1, q + 1, q - N, q + N, q - N - 1, q - N + 1, q + N - 1, q + N + 1]) { const o = j >= 0 && j < N * N ? owner[j] : -1; if (o >= 0 && o !== k) cnt.set(o, (cnt.get(o) || 0) + 1); } if (cnt.size) chg.push([q, [...cnt].sort((p, r) => r[1] - p[1])[0][0]]); }
-          for (const [q, o] of chg) { owner[q] = o; moved = true; } } } }
-    const out = us.map(u => ({ ...u, px: [] })); for (let q = 0; q < N * N; q++) if (owner[q] >= 0) out[owner[q]].px.push(q);
-    // 고리 넓히기가 다른 자모를 80% 넘게 먹으면 그 자모는 원래대로(본부 10-08 「흑」 — ㅎ 동그라미 바로 아래 ㅡ 가 1% 만 남던 것 · 10-10 「호」 고리 통째가 ㅗ 몫이면 절반 넘게 넘어가는 게 맞음)
-    out.forEach((u, k) => { if (u.px.length < us[k].px.length * 0.2 && !(u.role === "jung" && HV.has(u.jamo))) { const keep = new Set(us[k].px); out.forEach((v, j) => { if (j !== k) v.px = v.px.filter(q => !keep.has(q)); }); u.px = us[k].px.slice(); } });
-    for (const u of out) { if (!u.px.length) continue; let a = N, b = N, c = -1, d = -1; for (const q of u.px) { const x = q % N, y = (q / N) | 0; if (x < a) a = x; if (x > c) c = x; if (y < b) b = y; if (y > d) d = y; } u.box = [a / N, b / N, (c + 1) / N, (d + 1) / N]; }
-    for (const [k, rs] of ringSet) { out[k].ring = new Set([...rs].filter(q => owner[q] === k)); out[k].hole = holeOf.get(k); } // 고리 픽셀 · 고리 안 구멍 한 칸(shapeFix 가 「고리 위아래 줄」 가릴 때)
-    return out.map((u, k) => (u.px.length || (u.role === "jung" && HV.has(u.jamo)) ? u : us[k])); // 가로 모음은 비어도 됨(뒤 shapeFix 가 띠·기둥을 찾아 줌 · 「훅」) · 자모 칸은 빼지 않음(빼면 뒤 자모가 한 칸씩 밀림 · 본부 10-08)
-  }
-  const unitsOf = ch => { const k = ch + "|" + hfontKey(); if (uCache.has(k)) return uCache.get(k); const m = pix(UN, x => glyph(x, UN, ch, "#000")), us = ringFix(jamoUnits(ch, m, UN), m); if ((shapeFix(us, m, UN, ch) | deCrumb(us))) us.forEach(u => { if (!u.px.length) return; let a = UN, b = UN, c = -1, d = -1; for (const q of u.px) { const x = q % UN, y = (q / UN) | 0; if (x < a) a = x; if (x > c) c = x; if (y < b) b = y; if (y > d) d = y; } u.box = [a / UN, b / UN, (c + 1) / UN, (d + 1) / UN]; delete u.set; delete u.half; }); /* ㅇ 고리 보정 뒤 획 모양 한 번 더(「어」「예」 ㅓㅕ 꼭지 뿌리) */ if (gCache.has(ch + "|0|" + hfontKey())) uCache.set(k, us); return us; }; // 글꼴 그림이 저장된(= 글꼴 온) 뒤에만 기억
-  // 획순 자료(data/jamo_strokes.json · 본부) → 이 글자 획(0~1 · 쓰는 차례) = 자모 획 점을 그 자모 잉크 상자에 늘려 맞춤
-  let STK = null; const stkReady = fetch(`data/jamo_strokes.json?v=${document.documentElement.dataset.v || ""}`).then(r => r.json()).then(d => (STK = d)).catch(() => null);
-  // 획 끝 늘이기(투덜이 10-08 「대」 — ㅐ 의 ㅏ 가로획 자료가 0.04 길이라 가로획 잉크 대부분이 다음 ㅣ 몫이 되어 4번째 획이 안 칠해짐)
-  //  열린 획의 두 끝을 그 방향으로 글자 잉크가 이어지는 데까지 늘임 · 다른 획 몸통(굵기 절반 90% 안)에 닿으면 거기서 멈춤
-  const segDist = (P, x, y) => { let bd = Infinity; for (let a = 1; a < P.length; a++) { const ax = P[a - 1][0], ay = P[a - 1][1], dx = P[a][0] - ax, dy = P[a][1] - ay, ll = dx * dx + dy * dy || 1e-9, r = Math.max(0, Math.min(1, ((x - ax) * dx + (y - ay) * dy) / ll)); bd = Math.min(bd, Math.hypot(x - ax - dx * r, y - ay - dy * r)); } return P.length === 1 ? Math.hypot(x - P[0][0], y - P[0][1]) : bd; };
-  function extendEnds(list, us) {
-    const ownU = new Int16Array(UN * UN).fill(-1); us.forEach((u, k) => { for (const q of u.px) ownU[q] = k; });
-    const at = (x, y) => { const cx = Math.round(x * UN - 0.5), cy = Math.round(y * UN - 0.5); return cx >= 0 && cy >= 0 && cx < UN && cy < UN ? ownU[cy * UN + cx] : -1; };
-    for (const S of list) { const P = S.pts; if (P.length < 2) continue; const a0 = P[0], z = P[P.length - 1]; if (Math.hypot(a0[0] - z[0], a0[1] - z[1]) < 0.02) continue; // 닫힌 획(ㅇ) 제외
-      for (const end of [0, P.length - 1]) { const q = P[end], prev = P[end === 0 ? 1 : P.length - 2], L = Math.hypot(q[0] - prev[0], q[1] - prev[1]); if (L < 1e-6) continue;
-        const dx = (q[0] - prev[0]) / L, dy = (q[1] - prev[1]) / L, step = 0.5 / UN; let best = q;
-        const near0 = new Set(list.filter(T => T !== S && segDist(T.pts, q[0], q[1]) < 0.9 * halfOf(T))); // 늘이기 시작할 때 이미 몸통 안인 획(「대」 ㅏ 짧은 가로 = ㅏ 세로에 붙어 시작)은 멈춤 기준에서 뺌
-        for (let k = 1; k < UN; k++) { const x = q[0] + dx * step * k, y = q[1] + dy * step * k, o = at(x, y); if (o < 0 || o < S.unit) break; // 잉크 끝 · 먼저 쓴 자모(ㅗ 꼭지가 ㅇ 안으로) 에선 멈춤
-          if (list.some(T => T !== S && !near0.has(T) && segDist(T.pts, x, y) < 0.9 * halfOf(T))) break; best = [x, y]; }
-        P[end] = best; } }
-  }
-  function strokesOf(ch) {
-    if (!STK) return [];
-    const out = [];
-    unitsOf(ch).forEach((u, ui) => { const base = STK.base?.[u.jamo]; if (!base) return;
-      const pts = base.flat(), bx0 = Math.min(...pts.map(p => p[0])), bx1 = Math.max(...pts.map(p => p[0])), by0 = Math.min(...pts.map(p => p[1])), by1 = Math.max(...pts.map(p => p[1]));
-      // 자료 점 = 획 가운데 선 → 잉크 상자를 획 굵기 절반만큼 안으로(굵기 ≈ 2 × 넓이 / 둘레)
-      u.set ||= new Set(u.px); let edge = 0; for (const q of u.px) if (!u.set.has(q - 1) || !u.set.has(q + 1) || !u.set.has(q - UN) || !u.set.has(q + UN)) edge++;
-      const half = Math.min(0.06, u.px.length / Math.max(1, edge) / UN), b0 = u.box, bw = b0[2] - b0[0], bh = b0[3] - b0[1];
-      const x0 = b0[0] + Math.min(half, bw / 3), x1 = b0[2] - Math.min(half, bw / 3), y0 = b0[1] + Math.min(half, bh / 3), y1 = b0[3] - Math.min(half, bh / 3), mx = v => (bx1 - bx0 < 0.05 ? (x0 + x1) / 2 : x0 + ((v - bx0) / (bx1 - bx0)) * (x1 - x0)), my = v => (by1 - by0 < 0.05 ? (y0 + y1) / 2 : y0 + ((v - by0) / (by1 - by0)) * (y1 - y0));
-      for (const S of base) out.push({ unit: ui, u, role: u.role, jamo: u.jamo, pts: snap(u, S.map(([x, y]) => [mx(x), my(y)])) }); });
-    // ㅝ ㅞ 의 ㅓ 짧은 가로(본부 10-12 획순 칠 ②) — 글꼴이 짧은 가로를 세로 아래쪽(ㅜ 가로 높이)에 그려 자료(세로 가운데)와 어긋남 → 실제 ㅓ 잉크 중 세로 왼편 잉크의 높이·왼끝에 맞춤
-    const fixV = []; { const us = unitsOf(ch); us.forEach((u, ui) => { if (u.jamo !== "ㅓ" || ui === 0 || us[ui - 1].jamo !== "ㅜ" || us[ui - 1].role !== "jung") return;
-        const mine = out.filter(S => S.unit === ui), bar = mine[0], vert = mine[1]; if (!bar || !vert || bar.pts.length !== 2) return;
-        u.set ||= new Set(u.px); let edge = 0; for (const q of u.px) if (!u.set.has(q - 1) || !u.set.has(q + 1) || !u.set.has(q - UN) || !u.set.has(q + UN)) edge++; const th = (2 * u.px.length) / Math.max(1, edge) / UN;
-        const vx = vert.pts[0][0], ys = [], xs = []; for (const q of u.px) { const x = (q % UN + 0.5) / UN, y = (((q / UN) | 0) + 0.5) / UN; if (x < vx - th) { xs.push(x); ys.push(y); } }
-        if (xs.length < 20) return; ys.sort((p2, q2) => p2 - q2); const by = ys[ys.length >> 1], xa = Math.min(...xs) + th / 2; if (vx - xa < th) return;
-        bar.pts = [[xa, by], [vx, by]]; fixV.push([vert, u, vx, th]); }); }
-    { const us = unitsOf(ch); us.forEach((u, ui) => { if (u.role !== "jung" || !/[ㅕㅖ]/.test(u.jamo)) return; /* ㅕ ㅖ 두 가로 = 실제 잉크 띠 높이로(본부 10-12 획순 칠 ③ 「혤」 — 자료 둘째 가로가 두 띠 사이 빈 줄에 놓여 붓이 첫 가로 위로 가던 것) */
-        const mine = out.filter(S => S.unit === ui), vert = mine.find(S => S.pts.length === 2 && Math.abs(S.pts[1][1] - S.pts[0][1]) > 3 * Math.abs(S.pts[1][0] - S.pts[0][0])), bars = mine.filter(S => S.pts.length === 2 && Math.abs(S.pts[1][0] - S.pts[0][0]) > 3 * Math.abs(S.pts[1][1] - S.pts[0][1])); if (!vert || bars.length !== 2) return;
-        u.set ||= new Set(u.px); const vx = Math.floor(vert.pts[0][0] * UN), bands = []; let cur = null;
-        let ve = -1; for (let y = 0; y < UN; y++) { if (!u.set.has(y * UN + vx)) continue; let x = vx; while (x > 0 && u.set.has(y * UN + x - 1)) x--; if (x > ve) ve = x; } if (ve < 0) return; /* 세로 왼끝 = 줄마다 왼끝 중 가장 오른쪽(가로 없는 줄) */
-        for (let y = 0; y < UN; y++) { let n = 0; for (let x = ve - 1; x >= Math.max(0, ve - 40); x--) { if (u.set.has(y * UN + x)) n++; else break; } if (n >= 6) { if (cur && cur[1] === y - 1) cur[1] = y; else bands.push((cur = [y, y])); } else cur = null; }
-        if (bands.length !== 2) return; bars.sort((p2, q2) => p2.pts[0][1] - q2.pts[0][1]);
-        bars.forEach((S, i) => { const [a, b] = bands[i], yy = S.pts[0][1] * UN; if (yy >= a - 0.5 && yy <= b + 1.5) return; const c = (a + b + 1) / 2 / UN; S.pts = S.pts.map(p2 => [p2[0], c]); }); }); }
-    extendEnds(out, unitsOf(ch));
-    { const us = unitsOf(ch); if (us[0]?.jamo === "ㅈ" && us[1]?.jamo === "ㅈ" && us[0].role === "cho" && us[1].role === "cho") { /* ㅉ 첫 ㅈ 오른다리(2획) 붓은 가로대 아래에서 시작(본부 10-12 ① 「찃」 — 맞닿은 가로대 칸을 세로로 지나며 셋째 획을 둘로 가르던 것 · 맞닿은 칸은 둘째 ㅈ 차례) */
-        const L0 = out.filter(S => S.unit === 0), bar = L0[0], leg = L0[1]; if (bar && leg && leg.pts.length >= 2) { const u = us[0]; u.set ||= new Set(u.px); let edge = 0; for (const q of u.px) if (!u.set.has(q - 1) || !u.set.has(q + 1) || !u.set.has(q - UN) || !u.set.has(q + UN)) edge++; const th = (2 * u.px.length) / Math.max(1, edge) / UN;
-          { const B = bar.pts; if (B.length >= 3) { const c = B[1], cs = new Set([...us[0].px, ...us[1].px]), on2 = (x, y) => cs.has(Math.floor(y * UN) * UN + Math.floor(x * UN)); let x = c[0]; while (x < 1 && on2(x + 0.5 / UN, c[1])) x += 0.5 / UN; if (x - c[0] > th * 0.5) bar.pts = [B[0], [x - th / 2, c[1]], c, ...B.slice(2)]; } } /* 가로대가 꺾는 곳 너머로 이어진 끝까지 갔다가 돌아와 꺾음(첫 ㅈ 가로대 오른끝 · 「찃」) */
-          const yb = bar.pts[0][1] + th, P = leg.pts; if (P[0][1] < yb && P[P.length - 1][1] > yb) { let k = 1; while (k < P.length && P[k][1] < yb) k++; const a0 = P[k - 1], b0 = P[k], r = (yb - a0[1]) / Math.max(1e-6, b0[1] - a0[1]); leg.pts = [[a0[0] + (b0[0] - a0[0]) * r, yb], ...P.slice(k)]; } } } }
-    for (const [vert, u, vx, th] of fixV) { let yMax = 0, yMin = 1; for (const q of u.px) { const x = (q % UN + 0.5) / UN, y = (((q / UN) | 0) + 0.5) / UN; if (Math.abs(x - vx) < th / 2) { if (y > yMax) yMax = y; if (y < yMin) yMin = y; } } const P = vert.pts, d = P[P.length - 1][1] > P[0][1]; if (yMax > 0) { if (d) { P[P.length - 1] = [P[P.length - 1][0], Math.max(P[P.length - 1][1], yMax - th / 2)]; } } } /* 세로는 아래 끝까지(짧은 가로가 세로 아래에 붙어 늘이기가 가로에서 멈추던 것 · 「눯」) */
-    return out;
-  }
-  // 획 붙이기(본부 10-07) — 상자 맞춤 뒤 획을 자기 방향에 수직으로 ±12%(상자 기준) 안에서 옮겨 보며 잉크와 가장 많이 겹치는 자리로
-  //  가로획 = 위아래 · 세로획 = 좌우 · 비스듬·꺾인·둥근 획 = 두 방향 모두 · 같으면 덜 옮긴 쪽
-  const inkIn = (u, x, y) => { u.set ||= new Set(u.px); const cx = Math.round(x * UN), cy = Math.round(y * UN); for (const [dx, dy] of [[0, 0], [3, 0], [-3, 0], [0, 3], [0, -3]]) if (u.set.has((cy + dy) * UN + cx + dx)) return true; return false; };
-  const fitOf = (u, P) => { let n = 0, k = 0; for (let i = 1; i < P.length; i++) for (let f = 0; f <= 1; f += 0.125) { n++; if (inkIn(u, P[i - 1][0] + (P[i][0] - P[i - 1][0]) * f, P[i - 1][1] + (P[i][1] - P[i - 1][1]) * f)) k++; } return n ? k / n : 0; };
-  function snap(u, P) {
-    if (P.length < 2) return P;
-    const bw = u.box[2] - u.box[0], bh = u.box[3] - u.box[1], dx = P[P.length - 1][0] - P[0][0], dy = P[P.length - 1][1] - P[0][1];
-    const horiz = P.length === 2 && Math.abs(dx) > 3 * Math.abs(dy), vert = P.length === 2 && Math.abs(dy) > 3 * Math.abs(dx);
-    const xs = horiz ? [0] : Array.from({ length: 13 }, (_, i) => (i - 6) * 0.02 * bw), ys = vert ? [0] : Array.from({ length: 13 }, (_, i) => (i - 6) * 0.02 * bh);
-    let best = [0, 0], bf = fitOf(u, P) + 1e-9;
-    for (const ox of xs) for (const oy of ys) { if (!ox && !oy) continue; const f = fitOf(u, P.map(([x, y]) => [x + ox, y + oy])); if (f > bf + 1e-6 || (Math.abs(f - bf) < 1e-6 && Math.hypot(ox, oy) < Math.hypot(...best))) { bf = f; best = [ox, oy]; } }
-    return P.map(([x, y]) => [x + best[0], y + best[1]]);
-  }
-  // 획순 칠(본부 10-07 투덜이 「획 그림이 회색 글자와 어긋남」) — 주황 선을 따로 긋지 않고 회색 글자 자체를 그 획 차례대로 주황으로 드러냄
-  //  그 자모 잉크(jamobox 덩어리)만 · 글꼴 잉크로 자름 → 모양은 늘 글꼴과 같음 · 옆 자모는 안 건드림
-  //  upto = 다 칠한 획 수 · f = 지금 획 진행(0~1) → { cv: 주황 칠 캔버스(n×n), ends: 획마다 { a: 시작 잉크 점, b: 끝 잉크 점, dir } (0~1) }
-  const OR_FILL = "#c8641a", OR_MARK = "#7a3410";
-  const nearInk = (u, [px, py]) => { let bd = Infinity, best = [px, py]; for (let i = 0; i < u.px.length; i++) { const q = u.px[i], x = (q % UN + 0.5) / UN, y = (Math.floor(q / UN) + 0.5) / UN, d = (x - px) ** 2 + (y - py) ** 2; if (d < bd) { bd = d; best = [x, y]; } } return best; };
-  //  잉크 나누기(본부 10-07 「칠하는 중 톱니·빈틈」) — 글자 그림(400px · 글꼴 그대로 부드러운 가장자리)의 잉크 점마다 그 자모(jamobox) 획 중 가장 가까운 획 + 그 획 위 자리(0~1)
-  //  칠 = 글꼴 잉크 알파 × 진행 앞머리 부드럽게(획 길이 4%) → 빈틈·톱니 없음 · 한 획이 끝나면 그 획 몫 잉크 전부
-  const ownCache = new Map(), SOFT = 0.04;
-  const halfOf = S => { const u = S.u; if (!u) return 0; if (u.half == null) { u.set ||= new Set(u.px); let e = 0; for (const q of u.px) if (!u.set.has(q - 1) || !u.set.has(q + 1) || !u.set.has(q - UN) || !u.set.has(q + UN)) e++; u.half = u.px.length / Math.max(1, e) / UN; } return u.half * 1.15; }; // 그 자모 획 굵기 절반(0~1) · 조금 넉넉히
-  function inkOwners(ch, list) {
-    const k = ch + "|" + hfontKey() + "|" + list.length; if (ownCache.has(k)) return ownCache.get(k);
-    const us = unitsOf(ch), img = glyphImg(ch), ga = img.getContext("2d").getImageData(0, 0, GN, GN).data, own = new Int16Array(GN * GN).fill(-1), pos = new Float32Array(GN * GN), alpha = new Uint8ClampedArray(GN * GN);
-    const u200 = new Int16Array(UN * UN).fill(-1); us.forEach((u, ui) => { for (const q of u.px) u200[q] = ui; });
-    const unitAt = (x, y) => { const cx = Math.min(UN - 1, (x * UN / GN) | 0), cy = Math.min(UN - 1, (y * UN / GN) | 0); for (let r = 0; r <= 3; r++) for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) { if (Math.max(Math.abs(dx), Math.abs(dy)) !== r) continue; const X = cx + dx, Y = cy + dy; if (X >= 0 && Y >= 0 && X < UN && Y < UN && u200[Y * UN + X] >= 0) return u200[Y * UN + X]; } return -1; };
-    const segs = list.map(S => { const P = S.pts, L = [0]; for (let q = 1; q < P.length; q++) L.push(L[q - 1] + Math.hypot(P[q][0] - P[q - 1][0], P[q][1] - P[q - 1][1])); return { P, L, tot: L[L.length - 1] || 1 }; });
-    const byUnit = us.map((u, ui) => list.map((S, si) => (S.unit === ui ? si : -1)).filter(v => v >= 0));
-    for (let y = 0; y < GN; y++) for (let x = 0; x < GN; x++) { const q = y * GN + x, a = ga[q * 4 + 3]; if (a < 8) continue; alpha[q] = a;
-      const ui = unitAt(x, y), mine = ui >= 0 ? byUnit[ui] : []; const cand = mine.length ? mine : list.map((_, si) => si); // 자모를 못 찾은 가장자리 점 = 모든 획 중 가까운 것
-      const px = (x + 0.5) / GN, py = (y + 0.5) / GN; let bd = Infinity, bs = -1, bt = 0, es = -1, et = 0;
-      // 겹치는 곳(ㅏ 의 ㅣ·짧은 가로 만나는 자리 등) = 먼저 긋는 획 몫(투덜이 10-08 — 가장 가까운 획으로만 나누면 ㅣ 안에 회색 삼각형이 남음)
-      // 가장 가까운 획 = 그 자모 획 중에서 · 「먼저 긋는 획 몸통 안」 = 모든 획에서(투덜이 10-08 「왕」 — 글꼴이 ㅇ 아래와 ㅗ 꼭지를 이어 그려 ㅇ 아랫부분이 ㅗ 자모 몫이 되어 ㅇ 을 위 → 아래 두 번에 칠함)
-      const inCand = new Set(cand);
-      for (let si = 0; si < list.length; si++) { const { P, L, tot } = segs[si], hw = halfOf(list[si]), mineS = inCand.has(si);
-        if (P.length === 1) { const d = Math.hypot(px - P[0][0], py - P[0][1]); if (mineS && d < bd) { bd = d; bs = si; bt = 0; } if (d <= hw && (es < 0 || si < es)) { es = si; et = 0; } continue; }
-        for (let a2 = 1; a2 < P.length; a2++) { const ax = P[a2 - 1][0], ay = P[a2 - 1][1], dx = P[a2][0] - ax, dy = P[a2][1] - ay, ll = dx * dx + dy * dy || 1e-9, r0 = ((px - ax) * dx + (py - ay) * dy) / ll, r = Math.max(0, Math.min(1, r0)), d = Math.hypot(px - ax - dx * r, py - ay - dy * r), tt = (L[a2 - 1] + r * Math.sqrt(ll)) / tot;
-          if (mineS && d < bd - 1e-9) { bd = d; bs = si; bt = tt; }
-          const body = (a2 > 1 || r0 >= 0) && (a2 < P.length - 1 || r0 <= 1); // 획 몸통 안(둥근 끝 제외 — 끝이 옆 획을 파먹지 않게)
-          if (body && d <= hw && (es < 0 || si < es)) { es = si; et = tt; } } }
-      if (es >= 0) { bs = es; bt = et; }
-      own[q] = bs; pos[q] = bt; }
-    // 닫힌 획(ㅇ · ㅎ 의 동그라미) = 가운데를 도는 각도로 칠 자리(투덜이 10-08 「왕」 — 가장 가까운 변으로 나누면 위 반 → 아래 반으로 칠해짐)
-    list.forEach((S, si) => { const P = S.pts; if (P.length < 5 || Math.hypot(P[0][0] - P[P.length - 1][0], P[0][1] - P[P.length - 1][1]) > 0.02) return;
-      const xs = P.map(p => p[0]), ys = P.map(p => p[1]), cx = (Math.min(...xs) + Math.max(...xs)) / 2, cy = (Math.min(...ys) + Math.max(...ys)) / 2, rx = Math.max(1e-3, (Math.max(...xs) - Math.min(...xs)) / 2), ry = Math.max(1e-3, (Math.max(...ys) - Math.min(...ys)) / 2);
-      const ang = (x, y) => Math.atan2((y - cy) / ry, (x - cx) / rx), T2 = Math.PI * 2, mod = v => ((v % T2) + T2) % T2, a0 = ang(...P[0]), dec = mod(a0 - ang(...P[1])) < Math.PI; // 자료가 도는 방향
-      for (let q = 0; q < GN * GN; q++) if (own[q] === si) { const t = ang((q % GN + 0.5) / GN, (Math.floor(q / GN) + 0.5) / GN); pos[q] = (dec ? mod(a0 - t) : mod(t - a0)) / T2; } });
-    const o = { own, pos, alpha }; if (gCache.has(ch + "|0|" + hfontKey())) ownCache.set(k, o); return o; // 글꼴 온 뒤에만 기억
-  }
-  // 칠 앞머리 자리(0~1 좌표) — 획 점 줄 위 f 지점(붓끝 점)
-  const pointAt = (S, f) => { const P = S.pts; if (P.length < 2) return P[0]; let tot = 0; const L = []; for (let k = 1; k < P.length; k++) { const d = Math.hypot(P[k][0] - P[k - 1][0], P[k][1] - P[k - 1][1]); L.push(d); tot += d; } let left = tot * f;
-    for (let k = 1; k < P.length; k++) { if (left <= L[k - 1]) { const r = L[k - 1] ? left / L[k - 1] : 0; return [P[k - 1][0] + (P[k][0] - P[k - 1][0]) * r, P[k - 1][1] + (P[k][1] - P[k - 1][1]) * r]; } left -= L[k - 1]; } return P[P.length - 1]; };
-  // 획순 칠 = 붓 그리기(본부 10-08 투덜이 「요」 — 잉크 점마다 주인 정하기는 획이 붙는 곳마다 모호 → 「폴리곤으로 다 칠해야」)
-  //  획마다 획 가운데 선을 따라 둥근 붓(굵기 = 그 자모 획 굵기 × 1.3)으로 진행만큼 그림 → 제 자모 잉크(+2칸)로 자르고 → 글꼴 잉크로 잘라 주황
-  //  한 번 칠한 곳은 계속 주황(겹친 곳 = 먼저 지나간 획) · 마지막 획이 끝나면 글자 잉크 전부 주황(회색 0) · 자판 칠·손글씨 점수는 지금 나눔 그대로
-  const unitMaskCache = new Map();
-  function unitMask(ch, ui) { // 그 자모 잉크 + 둘레 2칸(UN 기준) → GN 캔버스
-    const k = ch + "|" + hfontKey() + "|" + ui; if (unitMaskCache.has(k)) return unitMaskCache.get(k);
-    const us = unitsOf(ch), role = us[ui]?.role, m = document.createElement("canvas"); m.width = m.height = UN; const mx = m.getContext("2d"), id = mx.createImageData(UN, UN);
-    for (const u of us) if (u.role === role) for (const q of u.px) id.data[q * 4 + 3] = 255; mx.putImageData(id, 0, 0); // 같은 자리 자모 모두(겹모음 ㅐ = ㅏ+ㅣ)
-    const out = document.createElement("canvas"); out.width = out.height = GN; const ox = out.getContext("2d"), d = GN / UN;
-    for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) if (dx * dx + dy * dy <= 5) ox.drawImage(m, dx * d, dy * d, GN, GN);
-    { const me = us[ui], tw = us.find((u, j) => j !== ui && u.role === role && u.jamo === me?.jamo && /[ㄱㄷㅂㅅ]/.test(u.jamo) && Math.abs(j - ui) === 1); /* 쌍자음(ㅃ 등) = 짝 자모 잉크는 빼냄(본부 10-12 획순 칠 ③ 「뼷」 — 첫 ㅂ 가운데 가로 붓 끝이 둘레 2칸으로 둘째 ㅂ 왼기둥 가장자리를 칠하던 것 · ㅉ 은 따로 다룸) */
-      if (tw) { const t = document.createElement("canvas"); t.width = t.height = UN; const tx = t.getContext("2d"), td = tx.createImageData(UN, UN); for (const q of tw.px) td.data[q * 4 + 3] = 255; tx.putImageData(td, 0, 0); ox.globalCompositeOperation = "destination-out"; ox.imageSmoothingEnabled = false; ox.drawImage(t, 0, 0, GN, GN); ox.globalCompositeOperation = "source-over"; } }
-    if (gCache.has(ch + "|0|" + hfontKey())) unitMaskCache.set(k, out); return out;
-  }
-  // 붓 길(본부 10-08) — 자료 선을 그 자리 잉크 한가운데로 옮기고(선에 수직으로 제 자모 잉크 폭을 재어 가운데) · 붓 굵기 = 그 자리 잉크 폭 × 1.15(획 굵기 3배 넘으면 = 다른 획과 겹친 곳 → 획 굵기로)
-  const pathCache = new Map();
-  function brushPath(ch, S) {
-    const key = ch + "|" + hfontKey() + "|" + S.unit + "|" + S.pts.map(p => p.map(v => v.toFixed(3)).join(",")).join(";"); if (pathCache.has(key)) return pathCache.get(key);
-    const u = S.u; halfOf(S); u.set ||= new Set(u.px); const hw = u.half || 0.03, P = S.pts, raw = [];
-    const inU = (x, y) => { const X = Math.floor(x * UN), Y = Math.floor(y * UN); return X >= 0 && Y >= 0 && X < UN && Y < UN && u.set.has(Y * UN + X); };
-    const st = 0.5 / UN, lim = 4 * hw, span = (x, y, nx, ny) => { let a = 0, b = 0; while (a < lim && inU(x - nx * (a + st), y - ny * (a + st))) a += st; while (b < lim && inU(x + nx * (b + st), y + ny * (b + st))) b += st; return [a, b]; };
-    if (P.length < 2) raw.push({ x: P[0][0], y: P[0][1], nx: 0, ny: 0, off: 0, wd: 2 * hw });
-    else for (let k = 1; k < P.length; k++) { const ax = P[k - 1][0], ay = P[k - 1][1], dx = P[k][0] - ax, dy = P[k][1] - ay, L = Math.hypot(dx, dy); if (L < 1e-6) continue; const nx = -dy / L, ny = dx / L, steps = Math.max(1, Math.ceil(L * UN));
-      for (let i = 0; i <= steps; i++) { if (k > 1 && i === 0) continue; const px = ax + dx * (i / steps), py = ay + dy * (i / steps), r = { x: px, y: py, nx, ny, off: null, wd: null };
-        if (inU(px, py)) { const [a, b] = span(px, py, nx, ny); r.off = (b - a) / 2; r.wd = a + b; }
-        else { for (let d = st; d < 2 * hw && r.off == null; d += st) for (const sg of [1, -1]) { const qx = px + nx * d * sg, qy = py + ny * d * sg; if (r.off == null && inU(qx, qy)) { const [a, b] = span(qx, qy, nx, ny); r.off = d * sg + (b - a) / 2; r.wd = a + b; } } } // 선이 잉크 밖 = 가까운 쪽 잉크로
-        raw.push(r); } }
-    // 보통 굵기 = 잰 폭의 중앙값 · 다른 획과 만나는 곳(폭이 보통의 1.5배 넘음)·잉크 밖은 가운데를 옮기지 않고 앞뒤 자리를 이어 씀(「대」 ㅣ 붓 길이 가로대 쪽으로 휘어 가로대 끝을 가리던 것)
-    const ws = raw.filter(r => r.wd != null).map(r => r.wd).sort((p, q) => p - q), med = Math.min(ws[ws.length >> 1] || 2 * hw, 2 * hw * 1.6), good = r => r.wd != null && r.wd <= med * 1.5; // 보통 굵기 상한 = 그 자모 획 굵기 × 1.6(「예」 짧은 꼭지는 세로획 안 표본이 많아 중앙값이 세로 길이가 되던 것)
-    let last = null; for (const r of raw) { if (good(r)) last = r.off; else r.off2 = last; } last = null; for (let i = raw.length - 1; i >= 0; i--) { const r = raw[i]; if (good(r)) last = r.off; else r.off = r.off2 ?? last ?? 0; }
-    const out = raw.map(r => ({ x: r.x + r.nx * (r.off || 0), y: r.y + r.ny * (r.off || 0), w: Math.max(2 * hw, Math.min(r.wd ?? med, med)) * 1.15 }));
-    { const ws2 = out.map(q => q.w).sort((p, q) => p - q), m2 = ws2[ws2.length >> 1] || 2 * hw * 1.15; out.forEach(q => (q.w = Math.min(q.w, m2 * 1.3))); }
-    for (let r = 0; r < 2; r++) for (let i = 1; i < out.length - 1; i++) { out[i].x = (out[i - 1].x + 2 * out[i].x + out[i + 1].x) / 4; out[i].y = (out[i - 1].y + 2 * out[i].y + out[i + 1].y) / 4; } // 부드럽게
-    let tot = 0; out.forEach((q, i) => { if (i) tot += Math.hypot(q.x - out[i - 1].x, q.y - out[i - 1].y); q.t = tot; }); out.tot = tot || 1e-6;
-    if (gCache.has(ch + "|0|" + hfontKey())) pathCache.set(key, out); return out;
-  }
-  function brushStroke(ctx, ch, S, f, k = 1) { // 획 앞쪽 f 만큼 · 자리마다 그 자리 굵기 둥근 붓(제 자모 잉크로 잘리니 겉모양은 글꼴 그대로) · k = 굵기 배수(1/1.15 = 실제 잉크 폭)
-    const Q = brushPath(ch, S); if (!Q.length) return; const lim = Q.tot * Math.max(0, Math.min(1, f));
-    ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.strokeStyle = ctx.fillStyle = "#000";
-    if (Q.length === 1) { ctx.beginPath(); ctx.arc(Q[0].x * GN, Q[0].y * GN, (Q[0].w * k * GN) / 2, 0, Math.PI * 2); ctx.fill(); return; }
-    for (let i = 1; i < Q.length && Q[i - 1].t <= lim; i++) { const A = Q[i - 1], B = Q[i], r = B.t > lim ? (lim - A.t) / Math.max(1e-9, B.t - A.t) : 1;
-      ctx.beginPath(); ctx.lineWidth = Math.max(A.w, B.w) * k * GN; ctx.moveTo(A.x * GN, A.y * GN); ctx.lineTo((A.x + (B.x - A.x) * r) * GN + 0.01, (A.y + (B.y - A.y) * r) * GN); ctx.stroke(); }
-  }
-  const revPrev = new Map(); // 획순 칠 앞 장면(글자|글꼴|획 수|획 번호 → 칠한 칸) — 한 덩어리 거르기용
-  function revealOrder(ch, n, list, upto, f) {
-    const us = unitsOf(ch), img = glyphImg(ch), all = upto >= list.length || (upto === list.length - 1 && f >= 1);
-    const m = document.createElement("canvas"); m.width = m.height = GN; const mx = m.getContext("2d");
-    if (all) mx.drawImage(img, 0, 0); // 마지막 획까지 = 글자 잉크 전부
-    else {
-      const sc = document.createElement("canvas"); sc.width = sc.height = GN; const sx = sc.getContext("2d");
-      for (let si = 0; si <= Math.min(upto, list.length - 1); si++) { const fr = si < upto ? 1 : f; if (fr <= 0) continue;
-        sx.globalCompositeOperation = "source-over"; sx.clearRect(0, 0, GN, GN); brushStroke(sx, ch, list[si], fr);
-        sx.globalCompositeOperation = "destination-in"; sx.drawImage(unitMask(ch, list[si].unit), 0, 0); // 같은 자리(초성·중성·종성) 자모 잉크 근처만 — 「대」 ㅐ 가로대 끝(나눔에서 ㅣ 몫)은 칠하고 다른 자모로는 안 넘어감
-        mx.drawImage(sc, 0, 0); }
-      // 아직 안 그은 획 자리(그 획 붓 길 · 실제 잉크 폭)는 칠하지 않음 — 이미 그은 획과 겹치는 곳(만나는 자리)은 그대로(본부 10-08 「요」 ㅇ 이 꼭지 윗부분 · 꼭지가 가로획 안까지 미리 칠하던 것)
-      let fuD = null; if (upto + 1 < list.length) { const fu = document.createElement("canvas"); fu.width = fu.height = GN; const fx = fu.getContext("2d"), dn = document.createElement("canvas"); dn.width = dn.height = GN; const dx2 = dn.getContext("2d");
-        for (let j = upto + (f > 0 ? 1 : 0); j < list.length; j++) if (j > upto || f <= 0) brushStroke(fx, ch, list[j], 1, 1.1); // 안 그은 획 자리 = 붓 폭보다 조금 넓게(가장자리 실선 조각 안 남게)
-        for (let i = 0; i <= Math.min(upto, list.length - 1); i++) brushStroke(dx2, ch, list[i], i < upto ? 1 : f, 1 / 1.15);
-        /* 붙는 끝(본부 10-12 획순 칠) — 이미 그은 획의 끝이 같은 자모의 안 그은 획 자리 안에 있으면(ㅕ 가로대 끝 → 세로, ㅌ 가운데 가로 끝 → 왼기둥) 그 겹친 곳은 안 그은 획 몫으로 남김(나중 획이 끊기지 않고 한 덩어리로 칠해짐) */
-        for (let j = upto + (f > 0 ? 1 : 0); j < list.length; j++) { if (!(j > upto || f <= 0)) continue; let Fj = null;
-          for (let i = 0; i <= Math.min(upto, list.length - 1); i++) { if (list[i].unit !== list[j].unit || (i === upto && f < 1)) continue; const Q = brushPath(ch, list[i]); if (Q.length < 2) continue; { const Pw = brushPath(ch, list[j]), wj = Pw.map(q => q.w).sort((p2, q2) => p2 - q2)[Pw.length >> 1] / 1.15, hz = P2 => Math.abs(P2[P2.length - 1][0] - P2[0][0]) > Math.abs(P2[P2.length - 1][1] - P2[0][1]); if (!hz(list[i].pts) && hz(list[j].pts) && wj > 0.25 * Q.tot && us[list[i].unit + 1]?.jamo !== us[list[i].unit].jamo) continue; } /* 쌍자음 첫 자모(ㅃ 첫 ㅂ — 아랫가로 끝이 둘째 ㅂ 쪽으로 나옴)는 그대로 */ /* 짧은 세로 끝이 굵은 나중 가로에 닿으면(겹친 곳이 세로 길이 25%↑) 그 겹친 곳은 세로 몫(「뼌」 둘째 ㅂ 오른세로 아래 1/3) */
-            const Pj = brushPath(ch, list[j]), hw = Math.max(...Pj.map(q => q.w)) * 1.1 / 2;
-            const inJ = (q, q2) => Pj.some((r, ri) => { if (!(Math.hypot(r.x - q.x, r.y - q.y) <= hw && r.t > 0.2 * Pj.tot && r.t < 0.8 * Pj.tot)) return false; const r2 = Pj[Math.min(Pj.length - 1, ri + 1)], r1 = Pj[Math.max(0, ri - 1)], ax = r2.x - r1.x, ay = r2.y - r1.y, bx = q.x - q2.x, by = q.y - q2.y, cs = Math.abs(ax * bx + ay * by) / (Math.hypot(ax, ay) * Math.hypot(bx, by) || 1); return cs < 0.7; }); /* 나중 획 몸통 가운데(양 끝 10% 빼고)에 거의 수직으로 붙은 끝만(「른」 나란히 겹친 ㄹ 획은 아님) */
-            const k5 = Math.min(5, Q.length - 1), nearJ = Q.filter(q => Pj.some(r => Math.hypot(r.x - q.x, r.y - q.y) <= hw)).length; const ju = us[list[i].unit], shortOK = ju?.role === "jung" && /[ㅓㅕㅔㅖ]/.test(ju.jamo) && Math.abs(Q[Q.length - 1].x - Q[0].x) > Math.abs(Q[Q.length - 1].y - Q[0].y) && Math.abs(Pj[Pj.length - 1].y - Pj[0].y) > Math.abs(Pj[Pj.length - 1].x - Pj[0].x); /* ㅓ ㅕ 짧은 가로가 세로에 붙는 끝은 짧아도 세로 몫으로(본부 10-12 획순 칠 ③ 「폡」「몣」「쏌」 — 넓은 첫 자음 옆 ㅕ 가로가 짧아 세로를 위아래로 가르던 것) */
-            if ((!shortOK && (nearJ > 0.4 * Q.length || Q.tot < 5 * hw)) || (!inJ(Q[0], Q[k5]) && !inJ(Q[Q.length - 1], Q[Q.length - 1 - k5]))) continue; /* 짧은 획(ㅊ ㅎ 꼭지)은 그대로 */
-            if (!Fj) { Fj = document.createElement("canvas"); Fj.width = Fj.height = GN; brushStroke(Fj.getContext("2d"), ch, list[j], 1, 1 / 1.15); } /* 나중 획이 실제로 칠할 폭만(「빶」 — 넓게 잡아 둘째 ㅂ 왼아래 귀퉁이가 끝까지 회색) */
-            dx2.globalCompositeOperation = "destination-out"; dx2.drawImage(Fj, 0, 0); dx2.globalCompositeOperation = "source-over"; } }
-        fx.globalCompositeOperation = "destination-out"; fx.drawImage(dn, 0, 0);
-        mx.globalCompositeOperation = "destination-out"; mx.drawImage(fu, 0, 0); mx.globalCompositeOperation = "source-over"; fuD = fx.getImageData(0, 0, GN, GN).data; }
-      { const id = mx.getImageData(0, 0, GN, GN), D = id.data; for (let y = 1; y < GN - 1; y++) for (let x = 1; x < GN - 1; x++) { const i = (y * GN + x) * 4 + 3; if (D[i] < 128 && D[i - 4] >= 128 && D[i + 4] >= 128 && D[i - GN * 4] >= 128 && D[i + GN * 4] >= 128) D[i] = 255; } mx.putImageData(id, 0, 0); } // 한 점 바늘구멍 메움
-      mx.globalCompositeOperation = "destination-in"; mx.drawImage(img, 0, 0); // 글꼴 잉크로 자름(모양 = 글꼴)
-      // 한 획 = 한 덩어리(본부 10-11 ④) — 이번 획에 새로 칠한 곳 중 큰 덩어리와 떨어진 작은 조각(새 넓이 20% 미만)은 지금 안 칠함(마지막 장면에 글자 전부로 칠해짐) · 앞 장면은 기억
-      mx.globalCompositeOperation = "source-over";
-      if (upto < list.length) { const key = `${ch}|${hfontKey()}|${list.map(S => S.unit + ":" + S.pts.map(p2 => p2.map(v => v.toFixed(3)).join(",")).join(";")).join("/")}|${upto - 1}`; /* 앞 장면 열쇠 = 획 자료 전체(글꼴이 늦게 와 다른 획 자료로 만든 앞 장면을 다시 쓰지 않게 · 본부 10-12 「뼏」 실행마다 다름) */ let prev = upto > 0 ? revPrev.get(key) : null;
-        if (upto > 0 && !prev) { const pc = revealOrder(ch, GN, list, upto - 1, 1).cv.getContext("2d").getImageData(0, 0, GN, GN).data; prev = new Uint8Array(GN * GN); prev.a = new Uint8Array(GN * GN); for (let i = 0; i < GN * GN; i++) { prev[i] = pc[i * 4 + 3] >= 128 ? 1 : 0; prev.a[i] = pc[i * 4 + 3]; } if (revPrev.size > 400) revPrev.clear(); if (gCache.has(ch + "|0|" + hfontKey())) revPrev.set(key, prev); } /* 글꼴 온 뒤에만 기억(다른 기억들과 같음) */ /* prev.a = 앞 장면 알파(반투명 가장자리 그대로 두기) */
-        const id = mx.getImageData(0, 0, GN, GN), D = id.data;
-        const compsOf = A => { const nw = new Int32Array(GN * GN).fill(-1), sizes = []; let tot = 0; for (let i = 0; i < GN * GN; i++) { if (nw[i] >= 0 || A[i * 4 + 3] < 128 || (prev && prev[i])) continue; const id2 = sizes.length, st = [i]; nw[i] = id2; let c = 0; while (st.length) { const q = st.pop(); c++; const x = q % GN; for (const j of [x > 0 ? q - 1 : -1, x < GN - 1 ? q + 1 : -1, q - GN, q + GN]) if (j >= 0 && j < GN * GN && nw[j] < 0 && A[j * 4 + 3] >= 128 && !(prev && prev[j])) { nw[j] = id2; st.push(j); } } sizes.push(c); tot += c; } return { nw, sizes, tot, bigN: sizes.filter(c => c >= tot * 0.2).length }; };
-        let addL = 0; { /* 남는 조각(본부 10-12 획순 칠 ①②) — 아직 안 칠한 잉크 덩어리가 이번 획 새 칠에 닿아 있고, 안 그은 획 자리도 아니고, 같은 자리(초성·중성·종성) 잉크면 지금 같이 칠함(나중에 외딴 조각으로 칠해지지 않게 · 「침」 ㅊ 가로대 오른끝 · 「퀎」 ㅝ 의 ㅓ 짧은 가로) */
-          const u200 = new Int16Array(UN * UN).fill(-1); us.forEach((u, ui) => { for (const q of u.px) u200[q] = ui; });
-          const G = img.getContext("2d").getImageData(0, 0, GN, GN).data, um = unitMask(ch, list[upto].unit).getContext("2d").getImageData(0, 0, GN, GN).data, seen = new Uint8Array(GN * GN); let newN = 0; for (let i = 0; i < GN * GN; i++) if (D[i * 4 + 3] >= 128 && !(prev && prev[i])) newN++;
-          const inF = q => fuD && fuD[q * 4 + 3] >= 128, cuJ = list[upto].unit, vorJ = (us[cuJ]?.jamo === "ㅈ" && us[cuJ + 1]?.jamo === "ㅈ" && us[cuJ].role === "cho") ? (() => { const Qc = brushPath(ch, list[upto]), Fs = list.filter((S, j) => j > upto).map(S => brushPath(ch, S)), d = (P, x, y) => { let b = Infinity; for (const q of P) { const e = (q.x - x) ** 2 + (q.y - y) ** 2; if (e < b) b = e; } return b; };
-            return q => { const x = (q % GN + 0.5) / GN, y = (((q / GN) | 0) + 0.5) / GN, dc = d(Qc, x, y); return Fs.every(P => d(P, x, y) > dc); }; })() : null; /* ㅉ 첫 ㅈ 차례: 나중 획 길보다 지금 획 길에 가까운 잉크는 「안 그은 획 자리」로 안 셈 · 조각은 그런 잉크와 자리 밖 잉크로만(「찃」 첫 ㅈ 가로대 오른끝) */ /* 안 그은 획 자리는 조각에서 뺌(「침」 ㅊ 가로대 오른끝이 오른다리 자리와 이어져 통째로 빠지던 것) */
-          const okV = q => !vorJ || !inF(q) || vorJ(q);
-          if (newN) for (let i0 = 0; i0 < GN * GN; i0++) { if (seen[i0] || G[i0 * 4 + 3] < 128 || D[i0 * 4 + 3] >= 128 || (prev && prev[i0]) || !okV(i0)) continue; const c = [], st = [i0]; seen[i0] = 1; let touch = 0, tPrev = 0, fut = 0, outU = 0;
-            while (st.length) { const q = st.pop(); c.push(q); if (fuD && fuD[q * 4 + 3] >= 128 && !(vorJ && vorJ(q))) fut++; if (um[q * 4 + 3] < 128) outU++; const x = q % GN; for (const j of [x > 0 ? q - 1 : -1, x < GN - 1 ? q + 1 : -1, q - GN, q + GN]) { if (j < 0 || j >= GN * GN) continue; if (D[j * 4 + 3] >= 128 && !(prev && prev[j])) touch++; else if (prev && prev[j]) tPrev++; if (!seen[j] && G[j * 4 + 3] >= 128 && D[j * 4 + 3] < 128 && !(prev && prev[j]) && okV(j)) { seen[j] = 1; st.push(j); } } }
-            if (touch >= 6 && touch >= tPrev && fut < c.length * 0.1 && outU < c.length * 0.1 && c.length < newN * 0.6) { let mine = 0, other = 0; for (const q of c) { const o = u200[Math.min(UN - 1, ((q / GN) | 0) * UN / GN | 0) * UN + Math.min(UN - 1, (q % GN) * UN / GN | 0)]; if (o === list[upto].unit) mine++; else if (o >= 0) other++; } /* 같은 자모 몫 잉크만(「쮁」 — 첫 ㅈ 조각을 둘째 ㅈ 획에 붙이던 것) */ const Qc = brushPath(ch, list[upto]), wq = Math.max(...Qc.map(q => q.w)); let cx2 = 0, cy2 = 0; for (const q of c) { cx2 += (q % GN + 0.5) / GN; cy2 += (((q / GN) | 0) + 0.5) / GN; } cx2 /= c.length; cy2 /= c.length; const dQ = Math.min(...Qc.map(q => Math.hypot(q.x - cx2, q.y - cy2)));
-            let dDone = Infinity; for (let i2 = 0; i2 < upto; i2++) if (list[i2].unit !== list[upto].unit) for (const q of brushPath(ch, list[i2])) dDone = Math.min(dDone, Math.hypot(q.x - cx2, q.y - cy2)); /* 다른 자모의 이미 그은 획에 더 가까우면 그 획 남은 것(「눯」 ㅓ 세로 아래 끝) */
-            if (mine >= other && (dQ <= 2.5 * wq || (fut === 0 && touch >= 20 && dQ <= 5 * wq)) && dQ <= dDone) { /* 이번 칠에 넓게 붙고 안 그은 획 자리와 안 겹치는 조각은 조금 멀어도(획 길 밖 가로대 끝 · 「침」 ㅊ 가로대 오른끝) */ const C0 = compsOf(D), keep = c.map(q => D[q * 4 + 3]); for (const q of c) D[q * 4 + 3] = G[q * 4 + 3]; const C1 = compsOf(D); if (C1.sizes.length > C0.sizes.length) c.forEach((q, t) => (D[q * 4 + 3] = keep[t])); else addL += c.length; } } } } /* 붙여서 따로 떨어진 조각이 하나 늘면 안 붙임 */
-        let C = compsOf(D); const totPre = C.tot - addL; /* 20% 기준 = 이음·남는 조각 붙이기 전 새 칠 넓이(「폠」 ㅕ 세로 가운데 토막이 기준이 커져 빠지던 것) */
-        if (C.bigN > 1) { /* 이음(본부 10-12 획순 칠) — 이번 획 붓 길 가운데(실제 잉크 폭)가 다른 자모 잉크를 지나며 조각이 둘로 나뉘면 그 붓 길 잉크도 이번에 칠함(「뼏」 ㅂ 오른기둥 · ㅕ 가로대 자리) · 큰 조각 수가 줄 때만 */
-          const bc = document.createElement("canvas"); bc.width = bc.height = GN; const bx = bc.getContext("2d"); brushStroke(bx, ch, list[upto], f, 1 / 1.15); bx.globalCompositeOperation = "destination-in"; bx.drawImage(img, 0, 0);
-          const B = bx.getImageData(0, 0, GN, GN).data, D2 = new Uint8ClampedArray(D); for (let i = 0; i < GN * GN; i++) if (B[i * 4 + 3] >= 128 && D2[i * 4 + 3] < 128 && !(fuD && fuD[i * 4 + 3] >= 128)) D2[i * 4 + 3] = B[i * 4 + 3]; /* 안 그은 획 자리는 이어도 안 칠함(「폠」 ㅕ 가로대가 세로 안까지) */
-          const C2 = compsOf(D2); if (C2.bigN < C.bigN) { D.set(D2); C = C2; } }
-        if (C.sizes.length > 1) { const big = C.sizes.indexOf(Math.max(...C.sizes)), farB = new Uint8Array(C.sizes.length).fill(1), wc = document.createElement("canvas"); wc.width = wc.height = GN; brushStroke(wc.getContext("2d"), ch, list[upto], Math.max(f, 0.01), 1.5); const WB = wc.getContext("2d").getImageData(0, 0, GN, GN).data;
-          for (let i = 0; i < GN * GN; i++) { const g = C.nw[i]; if (g >= 0 && farB[g] && WB[i * 4 + 3] >= 128) farB[g] = 0; } /* 이번 획 붓 자리(1.5배)에 하나도 안 걸친 조각 = 앞 획 남은 조각 → 60% 미만이면 미룸(「폠」 ㅍ 아랫가로 왼끝이 ㅓ 차례에 외딴 조각) */
-          const tP = new Uint8Array(C.sizes.length); if (prev) for (let i = 0; i < GN * GN; i++) { const g = C.nw[i]; if (g < 0 || tP[g] || C.sizes[g] < 450) continue; const x = i % GN; for (const j of [x > 0 ? i - 1 : -1, x < GN - 1 ? i + 1 : -1, i - GN, i + GN]) if (j >= 0 && j < GN * GN && prev[j]) { tP[g] = 1; break; } } /* 앞 칠에 붙은 큰 조각(450칸↑)은 지금 칠함(「폠」 ㅍ 아랫가로 왼끝 · 미루면 나중 획에 외딴 조각) */
-          for (let i = 0; i < GN * GN; i++) { const g = C.nw[i]; if (g >= 0 && g !== big && (C.sizes[g] < 60 || (!(tP[g] && !farB[g]) && C.sizes[g] < totPre * (farB[g] ? 0.6 : 0.2)))) /* 붙인 남는 조각은 기준에서 뺌(「치」) · 60칸 미만 티끌은 늘 미룸(「쨧」) */ D[i * 4 + 3] = 0; } }
-        for (let i = 0; i < GN * GN; i++) { const al = D[i * 4 + 3]; if (!al || al >= 128 || (prev && (prev[i] || (f <= 0 && prev.a[i])))) continue; const x = i % GN; let ok = false; for (const j of [x > 0 ? i - 1 : -1, x < GN - 1 ? i + 1 : -1, i - GN, i + GN, i - GN - 1, i - GN + 1, i + GN - 1, i + GN + 1]) if (j >= 0 && j < GN * GN && D[j * 4 + 3] >= 128 && !(prev && prev[j])) { ok = true; break; } if (!ok) D[i * 4 + 3] = 0; } /* 새 칠 덩어리에 안 붙은 반투명 가장자리 점은 지움(줄인 그림에서 외딴 점이 되던 것 · 「쨧」) */
-        if (prev) { const G2 = img.getContext("2d").getImageData(0, 0, GN, GN).data; for (let i = 0; i < GN * GN; i++) { if (prev[i] && D[i * 4 + 3] < 128) D[i * 4 + 3] = G2[i * 4 + 3]; else if (f <= 0 && prev.a[i] > D[i * 4 + 3]) D[i * 4 + 3] = prev.a[i]; } } /* 반투명 가장자리는 「획 시작 전(f=0)」 장면에서만 앞 장면 그대로(hand_order ⓔ) */ /* 앞 장면에 칠한 곳은 그대로(이음·남는 조각으로 더 칠한 곳이 다음 장면에 빠지지 않게 · hand_order ⓔ) */
-        mx.putImageData(id, 0, 0); }
-    }
-    const cv = document.createElement("canvas"); cv.width = cv.height = n; const cx = cv.getContext("2d"); cx.imageSmoothingEnabled = true; cx.imageSmoothingQuality = "high"; cx.drawImage(m, 0, 0, n, n);
-    cx.globalCompositeOperation = "source-in"; cx.fillStyle = OR_FILL; cx.fillRect(0, 0, n, n);
-    const ends = list.map(S => { const u = us[S.unit], P = S.pts, a = u ? nearInk(u, P[0]) : P[0], b = u ? nearInk(u, P[P.length - 1]) : P[P.length - 1], q = P[Math.max(0, P.length - 2)], z = P[P.length - 1]; return { a, b, dir: [z[0] - q[0], z[1] - q[1]] }; });
-    return { cv, ends, tip: upto < list.length && f < 1 ? pointAt(list[upto], f) : null };
-  }
+  // 획 자료·자모 칸·획순 칠 = 글자부 js/strokes.js(10-12 떼어 냄) — 이 화면의 글꼴 그림·마스크를 넘겨 같은 픽셀로
+  const SK = createStrokes({ glyph, glyphImg, pix, hfontKey, gCache, compsOf, PEN, GN });
+  const { centerOf, traceOf, UN, uCache, deCrumb, ringFix, unitsOf, stkReady, strokesOf, fitOf, snap, OR_MARK, ownCache, unitMaskCache, pathCache, brushPath, brushStroke, revPrev, revealOrder } = SK;
   const ROLE = { cho: 0, jung: 1, jong: 2 };
   // 학습자 획 하나 → 순서·방향 알림(점수와 별개 · 깎지 않음 · 본부 10-07)
   function strokeHint(H, S) {
@@ -687,11 +430,46 @@ export default async function write(app, ep, id, opts = {}) {
     const role = ROLE[us[ui].role]; H.roles ||= new Set();
     if (!H.orderTold) { const need = us.find(u => ROLE[u.role] < role && !H.roles.has(ROLE[u.role])); if (need) { H.orderTold = true; H.roles.add(role); return t("h_order_first", { j: koq(need.jamo) }); } }
     H.roles.add(role);
-    { const list = STK ? strokesOf(H.ch) : []; if (list.length) { const j = matchData(H.ch, S, list, ((S.w ?? TOOLS[toolKey()].w) * GUIDE_K) / 2 + 0.008); if (j < 0) return ""; const d = strokeDir(H.ch, S, list[j]); return d.rev ? d.msg : ""; } } /* 방향 = 덮은 자료 획의 시작 → 끝(본부 10-12) · 자료 없으면 아래 옛 어림 */
+    { const list = SK.STK ? strokesOf(H.ch) : []; if (list.length) { const j = matchData(H.ch, S, list, ((S.w ?? TOOLS[toolKey()].w) * GUIDE_K) / 2 + 0.008); if (j < 0) return ""; const d = strokeDir(H.ch, S, list[j]); return d.rev ? d.msg : ""; } } /* 방향 = 덮은 자료 획의 시작 → 끝(본부 10-12) · 자료 없으면 아래 옛 어림 */
     const [ex, ey] = S[S.length - 1], dx = ex - sx, dy = ey - sy, len = Math.hypot(dx, dy);
     if (len >= 0.12 && Math.abs(dx) > 2 * Math.abs(dy) && dx < 0) return t("h_dir_lr");
     if (len >= 0.12 && Math.abs(dy) > 2 * Math.abs(dx) && dy < 0) return t("h_dir_tb");
     return "";
+  }
+  // 자석으로 붙은 획 = 회색(글꼴 모양) 안의 바른 획으로 「착」(본부 10-12 투덜이 「최종적으로 회색 안에 예쁘게 다 들어가야」)
+  //  0~k 번 획 칠(revealOrder · 글꼴 잉크)을 씨앗으로, 회색이 글자보다 굵은 곳은 가장 가까운 글자 잉크 몫으로 넓힘 · 회색 밖 0 · 굵기 = 회색 굵기
+  const snapCache = new Map();
+  function snapMask(ch, k, tk) {
+    const key = ch + "|" + hfontKey() + "|" + k + "|" + tk; if (snapCache.has(key)) return snapCache.get(key);
+    const N = GN, list = strokesOf(ch), R = revealOrder(ch, N, list, k, 1).cv.getContext("2d").getImageData(0, 0, N, N).data, G = glyphImg(ch).getContext("2d").getImageData(0, 0, N, N).data;
+    const gc = document.createElement("canvas"); gc.width = gc.height = N; const gx = gc.getContext("2d"); guideGlyph(gx, N, ch, guideW(tk), "#000"); const gi = gx.getImageData(0, 0, N, N), D = gi.data;
+    const lab = new Int8Array(N * N).fill(-1), q = new Int32Array(N * N); let h = 0, e = 0;
+    for (let i = 0; i < N * N; i++) if (G[i * 4 + 3] > 128) { lab[i] = R[i * 4 + 3] > 128 ? 1 : 0; q[e++] = i; }
+    while (h < e) { const i = q[h++], x = i % N; for (const j of [x > 0 ? i - 1 : -1, x < N - 1 ? i + 1 : -1, i - N, i + N]) if (j >= 0 && j < N * N && lab[j] < 0 && D[j * 4 + 3] > 0) { lab[j] = lab[i]; q[e++] = j; } }
+    for (let i = 0; i < N * N; i++) if (lab[i] !== 1) D[i * 4 + 3] = 0;
+    gx.putImageData(gi, 0, 0);
+    if (snapCache.size > 80) snapCache.clear(); if (gCache.has(ch + "|0|" + hfontKey())) snapCache.set(key, gc); return gc;
+  }
+  // 「스윽」(본부 10-12) — 자석·자동 완성으로 획이 그려질 때만(손으로 그을 땐 없음) · 흰소음 + 대역 필터 · 연필 = 높고 사각 · 펜 = 중간 · 붓 = 낮고 넓게 · 획 길이만큼 짧게(최대 0.3초) · __sfxLog 시작/끝
+  // 연필 = 결이 있는 소리(흰소음을 불규칙하게 끊었다 이음 → 사각사각) · 펜 = 고른 흰소음(매끈) · 붓 = 낮고 넓게
+  //  tok = 자석이 획을 착 붙일 때 「스윽」 끝에 짧은 「톡」(흰소음 15ms · 낮은 통과 · 딩동보다 훨씬 작게 — 오실레이터를 안 써서 딩동 세기와 섞이지 않음)
+  const noiseBufs = {};
+  function noiseOf(ctx, kind) {
+    if (noiseBufs[kind]) return noiseBufs[kind]; const sr = ctx.sampleRate, b = ctx.createBuffer(1, sr, sr), a = b.getChannelData(0);
+    let gate = 1; for (let i = 0; i < a.length; i++) { if (kind === "grain" && i % Math.round(sr / 90) === 0) gate = 0.25 + 0.75 * Math.random(); a[i] = (Math.random() * 2 - 1) * (kind === "grain" ? gate : 1); }
+    return (noiseBufs[kind] = b);
+  }
+  function swish(len = 0.3, tk = toolKey(), tok = false) {
+    try { const ctx = audioCtx(), vol = window.__sfxVolume ?? 1, d = Math.min(0.3, 0.12 + 0.3 * len);
+      const P = { pencil: [5200, 1.6, 0.16], pen: [2600, 1.0, 0.2], brush: [900, 0.5, 0.24] }[tk] || [2600, 1, 0.2], src = ctx.createBufferSource(), bp = ctx.createBiquadFilter(), g = ctx.createGain(), t0 = ctx.currentTime + 0.005;
+      src.buffer = noiseOf(ctx, tk === "pencil" ? "grain" : "plain"); bp.type = "bandpass"; bp.frequency.value = P[0]; bp.Q.value = P[1]; src.connect(bp); bp.connect(g); g.connect(ctx.destination);
+      g.gain.setValueAtTime(0.0001, t0); g.gain.linearRampToValueAtTime(P[2] * vol, t0 + d * 0.35); g.gain.linearRampToValueAtTime(0.0001, t0 + d);
+      const name = "swish/" + tk; window.__sfxLog?.push({ t: Math.round(performance.now()), ev: "시작", name }); src.onended = () => window.__sfxLog?.push({ t: Math.round(performance.now()), ev: "끝", name });
+      src.start(t0, Math.random() * 0.6, d);
+      if (tok) { const s2 = ctx.createBufferSource(), lp = ctx.createBiquadFilter(), g2 = ctx.createGain(), t1 = t0 + d; s2.buffer = noiseOf(ctx, "plain"); lp.type = "lowpass"; lp.frequency.value = 1800; s2.connect(lp); lp.connect(g2); g2.connect(ctx.destination);
+        g2.gain.setValueAtTime(0.35 * vol, t1); g2.gain.exponentialRampToValueAtTime(0.0001, t1 + 0.015 + 0.03);
+        s2.onended = () => window.__sfxLog?.push({ t: Math.round(performance.now()), ev: "끝", name: "tok" }); setTimeout(() => window.__sfxLog?.push({ t: Math.round(performance.now()), ev: "시작", name: "tok" }), d * 1000); s2.start(t1, 0, 0.05); }
+    } catch {}
   }
   function setupHand(c) {
     const hand = work.querySelector(".hand"), box = hand.querySelector(".hbox"), gv = box.querySelector(".hguide"), iv = box.querySelector(".hink"), bt = hand.querySelector(".hbtns");
@@ -704,8 +482,10 @@ export default async function write(app, ep, id, opts = {}) {
       if (missN) { const { miss, N } = missN, k = n / N; x.fillStyle = "#e08a1e"; for (const i of miss) x.fillRect((i % N) * k, Math.floor(i / N) * k, k + 0.5, k + 0.5); } // 덜 덮은 곳 주황
       else H.magMarks?.(); }; // 자석 = 다음 획 번호(회색 판을 다시 그릴 때마다 · 칸 크기 맞춤에도 남게)
     const paintInk = (color) => { const x = iv.getContext("2d"), n = iv.width; x.clearRect(0, 0, n, n); const F = H.follow;
-      const list = F ? H.strokes.filter(S => S !== H.cur).concat(F.prog >= 0 ? [Object.assign(F.Q.slice(0, F.prog + 1).map(q => [q.x, q.y, 1]), { tool: F.tool, w: F.w })] : []) : H.strokes;
+      const list = (F ? H.strokes.filter(S => S !== H.cur) : H.strokes).filter(S => !S.snap);
+      const sn = H.strokes.filter(S => S.snap); if (sn.length && SK.STK) { const tc = document.createElement("canvas"); tc.width = tc.height = n; const tx = tc.getContext("2d"); tx.drawImage(snapMask(c.ch, sn.length - 1, toolKey()), 0, 0, n, n); tx.globalCompositeOperation = "source-in"; tx.fillStyle = color || (H.passed ? col("--okc") : TOOLS[sn[sn.length - 1].tool]?.color || "#000"); tx.fillRect(0, 0, n, n); x.drawImage(tc, 0, 0); } /* 자석으로 붙은 획 = 회색 안 바른 획(본부 10-12) */
       inkPath(x, n, list, 0, color || (H.passed ? col("--okc") : null), true);
+      if (F && F.prog >= 0) { const tc = document.createElement("canvas"); tc.width = tc.height = n; const tx = tc.getContext("2d"); inkPath(tx, n, [Object.assign(F.Q.slice(0, F.prog + 1).map(q => [q.x, q.y, Math.min(1, (q.w ?? F.w) / F.w)]), { tool: F.tool, w: F.w })], 0, color || null, true); tx.globalCompositeOperation = "destination-in"; guideGlyph(tx, n, c.ch, guideW(F.tool), "#000"); x.drawImage(tc, 0, 0); } /* 자석 따라오는 획 = 회색 안만(글자부 권고 10-12 · 길은 strokefit) */
       if (F && F.finger && F.prog >= 0 && !F.lost) { const q = F.Q[F.prog]; x.save(); x.strokeStyle = OR_MARK; x.globalAlpha = 0.8; x.lineWidth = Math.max(1, n / 250); x.setLineDash([n / 70, n / 90]); x.beginPath(); x.moveTo(F.finger[0] * n, F.finger[1] * n); x.lineTo(q.x * n, q.y * n); x.stroke(); x.restore(); } }; // 자석 따라오는 중 = 붙은 만큼만 획 + 손가락까지 가는 점선(본부 10-11) // 도구마다 제 색 · 통과 = 초록 // 통과 = 초록(다시 그려도)
     const fit = () => { if (!hand.isConnected) return; const cs = getComputedStyle(hand), px = v => parseFloat(cs[v]) || 0, gap = px("columnGap") || 10; // 칸 크기 = 안쪽 여백 빼고(본부 10-07 왼쪽 끝 3px 에 붙던 것)
       const iw = hand.clientWidth - px("paddingLeft") - px("paddingRight"), ih = hand.clientHeight - px("paddingTop") - px("paddingBottom");
@@ -731,15 +511,19 @@ export default async function write(app, ep, id, opts = {}) {
       const tk = toolKey(); H.cur = Object.assign([pt(e, null)], { tool: tk, w: TOOLS[tk].w }); H.strokes.push(H.cur); paintInk(); });
     iv.addEventListener("pointermove", e => { if (!H.cur) return; e.preventDefault(); const evs = e.getCoalescedEvents?.() || []; for (const ev of evs.length ? evs : [e]) H.cur.push(pt(ev, H.cur)); if (magnetOn()) magFollow(H.cur[H.cur.length - 1]); paintInk(); });
     // 실시간 자석(본부 10-11 「포토샵 마그네틱 올가미처럼」) — 지금 차례 획 위에서 손가락과 가장 가까운 점이 앞으로만 따라옴 · 칸 12% 넘게 떨어지면 따라오기 멈춤
-    const magFollow = p => { const T = H.magList?.[H.mag]; if (!T) return; let F = H.follow; if (!F) { const Q = brushPath(c.ch, T); if (!Q.length) return; F = H.follow = { Q, prog: -1, lost: false, tool: H.cur.tool, w: H.cur.w }; }
+    const magFollow = p => { const T = H.magList?.[H.mag]; if (!T) return; let F = H.follow; if (!F) { const Q = fitPath(c.ch, H.magList, H.mag, H.cur.tool); if (!Q.length) return; F = H.follow = { Q, prog: -1, lost: false, tool: H.cur.tool, w: H.cur.w }; }
       F.finger = [p[0], p[1]]; if (F.lost) return; let bi = -1, bd = Infinity; for (let i = Math.max(0, F.prog); i < F.Q.length; i++) { if (F.prog >= 0 && F.Q[i].t - F.Q[F.prog].t > 0.2) break; /* 앞으로 칸 20% 안만(ㅇ 을 거꾸로 돌면 끝 쪽으로 건너뛰던 것 · 본부 10-12) */ const d = Math.hypot(F.Q[i].x - p[0], F.Q[i].y - p[1]); if (d < bd) { bd = d; bi = i; } }
-      if (bd > 0.12) { if (F.prog >= 0) F.lost = true; return; } if (F.prog < 0 && bi > F.Q.length * 0.3) return; F.prog = Math.max(F.prog, bi); };
+      if (bd > 0.12) { if (F.prog >= 0) F.lost = true; return; } if (F.prog < 0 && bi > F.Q.length * 0.3) return;
+      if (F.prog >= 0) { const t0 = F.Q[F.prog].t; let kb = Infinity, kt = t0; for (let i = F.prog - 1; i >= 0 && t0 - F.Q[i].t <= 0.25; i--) { const d = Math.hypot(F.Q[i].x - p[0], F.Q[i].y - p[1]); if (d < kb) { kb = d; kt = F.Q[i].t; } }
+        if (kb < bd - 0.02 && t0 - kt > 0.04) { F.lost = true; return; } } /* 손가락이 지나온 쪽(뒤 25%)에 더 가까움 = 거꾸로 감 → 따라오기 그만(쓰기부 10-12 「자」 ㅈ 거꾸로가 50% 넘게 따라와 붙던 것) */
+      F.prog = Math.max(F.prog, bi); };
     const up = () => { if (!H.cur) return; const S = H.cur; H.cur = null; clearTimeout(H.timer); const F = H.follow; H.follow = null;
-      if (magnetOn()) { if (F && F.prog >= F.Q.length * 0.85) return magnetUp(S, true); return magnetUp(S); } /* 끝까지(85%↑) 따라왔으면 그 획 완성 */ H.timer = setTimeout(() => st.hand === H && handJudge(), 1200);
+      if (magnetOn()) { if (F && F.prog >= F.Q.length * 0.5) return magnetUp(S, true); return magnetUp(S); } /* 절반(50%↑) 따라왔으면 나머지 채움(본부 10-12 · 전 85%) · 그 획 완성 */ H.timer = setTimeout(() => st.hand === H && handJudge(), 1200);
       const msg = strokeHint(H, S); if (msg) bubble(msg); }; // 획순·방향 알림(짧은 말풍선)
     const bubble = msg => { let b = box.querySelector(".hbubble"); if (!b) { b = document.createElement("b"); b.className = "hbubble"; box.append(b); } b.textContent = msg; b.hidden = false; H.hints = (H.hints || []).concat(msg); clearTimeout(H.bt); H.bt = setTimeout(() => (b.hidden = true), 2500); };
     // 획순 보기(본부 10-07) — 회색 글자를 획 차례대로 주황으로 칠해 드러냄(획 0.5초 · revealOrder) · 시작점 번호 원 · 끝에 작은 화살촉(글자 안) → 다 칠하면 1초 뒤 회색으로
     //  keep = 자동 손글씨(다 칠한 채로 남음 = 「써진」 상태) · 다시 누르거나 멈추면 그 자리에서 그침 → true = 끝까지 칠함
+    const clipG = cv => { const n = cv.width, k = c.ch + "|" + n + "|" + toolKey() + "|" + hfontKey(); if (H.gk !== k) { H.gk = k; H.gm = document.createElement("canvas"); H.gm.width = H.gm.height = n; guideGlyph(H.gm.getContext("2d"), n, c.ch, guideW(), "#000"); } const cx = cv.getContext("2d"); cx.save(); cx.globalCompositeOperation = "destination-in"; cx.drawImage(H.gm, 0, 0); cx.restore(); return cv; }; /* 획순·자동 완성 칠 = 회색 모양 안으로(본부 10-12) */
     H.showOrder = async ({ keep = false, from = null } = {}) => { // from = { i, f } 멈춘 자리부터 이어서(투덜이 10-08)
       H.ordPlaying = true; H.ordKeep = keep; markOrder();
       if (!keep && !from && H.strokes.length) { clearTimeout(H.timer); clearTimeout(H.clr); H.strokes = []; H.roles = null; H.orderTold = false; if (H.passed) { H.passed = false; markHand(); } const sc = work.querySelector(".hscore"); if (sc) sc.hidden = true; paintInk(); } // 획순 보기 = 내가 그린 것 지움(투덜이 10-08)
@@ -755,15 +539,15 @@ export default async function write(app, ep, id, opts = {}) {
           x.fillStyle = OR_MARK; x.beginPath(); x.arc(px, py, r, 0, Math.PI * 2); x.fill(); x.fillStyle = "#fff"; x.font = `700 ${Math.round(r * 1.3)}px sans-serif`; x.textAlign = "center"; x.textBaseline = "middle"; x.fillText(String(i + 1), px, py + 0.5); } };
       const i0 = from ? Math.min(from.i, list.length - 1) : 0;
       for (let i = i0; i < list.length; i++) {
-        const t0 = performance.now() - (from && i === i0 ? from.f * 500 : 0);
-        await new Promise(res => { const step = () => { if (H.anim !== my || st.hand !== H) return res(); const f = Math.min(1, (performance.now() - t0) / 500); H.ordAt = { i, f }; const R = revealOrder(c.ch, gv.width, list, i, f); paintGuide(); x.drawImage(R.cv, 0, 0); marks(R.ends, i, f);
+        const t0 = performance.now() - (from && i === i0 ? from.f * 500 : 0); if (keep && !(from && i === i0)) swish(brushPath(c.ch, list[i]).tot); /* 자동 완성 = 획마다 「스윽」 */
+        await new Promise(res => { const step = () => { if (H.anim !== my || st.hand !== H) return res(); const f = Math.min(1, (performance.now() - t0) / 500); H.ordAt = { i, f }; const R = revealOrder(c.ch, gv.width, list, i, f); paintGuide(); x.drawImage(clipG(R.cv), 0, 0); marks(R.ends, i, f);
           if (R.tip) { const n = gv.width; x.fillStyle = OR_MARK; x.beginPath(); x.arc(R.tip[0] * n, R.tip[1] * n, PEN * n * 0.28, 0, Math.PI * 2); x.fill(); } /* 칠 앞머리 = 작은 둥근 붓끝 점 */ if (f >= 1) return res(); setTimeout(step, 16); }; step(); }); // 60번/초(rAF 는 창이 가려지면 멈춤)
         if (H.anim !== my || st.hand !== H) return false;
       }
       H.ordAt = null; H.ordPlaying = false; markOrder();
       H.orderShown = list.length;
       if (!keep && c.file && st.hand === H && !st.auto) run([c.file]); // 다 그리면 그 글자 소리(「고」) 한 번(투덜이 10-08) · 자동 쓰기는 따로 소리
-      if (keep) { paintGuide(); x.drawImage(revealOrder(c.ch, gv.width, list, list.length, 1).cv, 0, 0); return true; } // 자동 = 다 칠한 글자로 남김(번호·화살 없이)
+      if (keep) { paintGuide(); x.drawImage(clipG(revealOrder(c.ch, gv.width, list, list.length, 1).cv), 0, 0); return true; } // 자동 = 다 칠한 글자로 남김(번호·화살 없이)
       await new Promise(r => setTimeout(r, 1000)); if (H.anim === my && st.hand === H) paintGuide(); return true;
     };
     H.stopOrder = (pause = false) => { H.anim = (H.anim || 0) + 1; H.ordPlaying = false; if (!pause) { H.ordAt = null; } markOrder(); }; // pause = 그 자리에 칠한 채로 멈춤(다시 누르면 이어서)
@@ -779,7 +563,7 @@ export default async function write(app, ep, id, opts = {}) {
     if (magnetOn()) stkReady.then(() => { if (st.hand !== H) return; H.magList = strokesOf(c.ch); paintGuide(); magMarks(); });
     const magnetUp = (S, followed = false) => {
       if (!H.magList?.length) { H.strokes.pop(); paintInk(); return; }
-      if (followed) { H.strokes.pop(); const Q = brushPath(c.ch, H.magList[H.mag]); H.strokes.push(Object.assign(Q.map(q => [q.x, q.y, 1]), { tool: S.tool, w: S.w })); H.mag++; paintInk(); paintGuide(); return magDone(); } // 실시간으로 다 따라온 획
+      if (followed) { H.strokes.pop(); const Q = brushPath(c.ch, H.magList[H.mag]); H.strokes.push(Object.assign(Q.map(q => [q.x, q.y, 1]), { tool: S.tool, w: S.w, snap: true })); swish(Q.tot, S.tool, true); H.mag++; paintInk(); paintGuide(); return magDone(); } // 실시간으로 다 따라온 획
       const segD = (Q, x, y) => { let b = Infinity; for (let i = 1; i < Q.length; i++) { const a = Q[i - 1], c2 = Q[i], dx = c2.x - a.x, dy = c2.y - a.y, l = dx * dx + dy * dy || 1e-12, r = Math.max(0, Math.min(1, ((x - a.x) * dx + (y - a.y) * dy) / l)); b = Math.min(b, Math.hypot(x - a.x - dx * r, y - a.y - dy * r)); } return Q.length === 1 ? Math.hypot(x - Q[0].x, y - Q[0].y) : b; };
       const lineD = (x, y) => { let b = Infinity; for (let i = 0; i < S.length; i++) { const a = S[Math.max(0, i - 1)], c2 = S[i], dx = c2[0] - a[0], dy = c2[1] - a[1], l = dx * dx + dy * dy || 1e-12, r = Math.max(0, Math.min(1, ((x - a[0]) * dx + (y - a[1]) * dy) / l)); b = Math.min(b, Math.hypot(x - a[0] - dx * r, y - a[1] - dy * r)); } return b; };
       let best = -1, bs = Infinity; H.magList.forEach((T, j) => { const Q = brushPath(c.ch, T); if (!Q.length) return; const md = S.reduce((a, p) => a + segD(Q, p[0], p[1]), 0) / S.length, step = Math.max(1, Math.floor(Q.length / 30)); let k = 0, n = 0; for (let i = 0; i < Q.length; i += step) { n++; if (lineD(Q[i].x, Q[i].y) < 0.12) k++; }
@@ -788,7 +572,7 @@ export default async function write(app, ep, id, opts = {}) {
       if (best < 0) { paintInk(); paintGuide(); magMarks(); bubble(t("h_magnet_miss")); return; }
       if (best !== H.mag) { paintInk(); paintGuide(); magMarks(); bubble(t("h_order_again", { n: H.mag + 1 })); H.magWrong = (H.magWrong || 0) + 1; return; } // 순서 다시(그 획 번호)
       { const dv = strokeDir(c.ch, S, H.magList[best]); if (dv.rev) { paintInk(); paintGuide(); magMarks(); bubble(dv.msg); H.magWrong = (H.magWrong || 0) + 1; return; } } /* 거꾸로 그은 획 = 안 붙음 + 방향 알림(본부 10-12) */
-      const Q = brushPath(c.ch, H.magList[best]); H.strokes.push(Object.assign(Q.map(q => [q.x, q.y, 1]), { tool: S.tool, w: S.w })); H.mag++; paintInk(); paintGuide(); magDone();
+      const Q = brushPath(c.ch, H.magList[best]); H.strokes.push(Object.assign(Q.map(q => [q.x, q.y, 1]), { tool: S.tool, w: S.w, snap: true })); swish(Q.tot, S.tool, true); H.mag++; paintInk(); paintGuide(); magDone();
     };
     const magDone = () => { // 획 하나 붙은 뒤 — 다음 번호 강조(잠깐 크게) · 다 붙으면 「✓ 순서 맞음」
       if (H.mag < H.magList.length) { H.magPulse = performance.now(); const my = H.magPulse; const tick = () => { if (H.magPulse !== my || st.hand !== H) return; paintGuide(); if (performance.now() - my < 700) setTimeout(tick, 33); else { H.magPulse = 0; paintGuide(); } }; tick(); }
@@ -869,6 +653,7 @@ export default async function write(app, ep, id, opts = {}) {
   }
 
   async function finishChar(j, c, src = jamoSrc(j)) { // W3 · 손글씨는 글자 소리(src)
+    if (!st.alive) return; // 닫힌 창 = 소리 없음
     st.busy = true; st.done = true;
     work.querySelector(".box")?.classList.add("ok"); paintBox(c, true);
     // 글자 완성 = 딩동 → 마지막 자모 → 그 글자 소리 → 다음 글자(투덜이 10-08 — 자판·자동 완성도 · 손글씨는 이미 글자 소리 · 한 번 되돌렸다가 「나쁘지 않아, 지금처럼」으로 유지)
@@ -880,12 +665,16 @@ export default async function write(app, ep, id, opts = {}) {
     const w = words()[st.w];
     if (st.c >= w.chars.length) { st.w++; st.c = 0; }
     if (st.w >= words().length) { // 토막 끝 → 다음 토막(자동)
+      if (st.auto && st.autoMode === "line") { st.w = words().length - 1; st.c = words()[st.w].chars.length - 1; st.k = c.jamo.length; st.typed = c.jamo.slice(); st.part = ""; st.segEnd = true; st.lineEnd = st.s + 1 >= segs.length; st.done = true; st.queue = []; return segDone(); } // [자동 완성] = 지금 토막 끝에서 멈춤(투덜이 「그 단락」 = 토막 · 본부 10-12)
       // 줄 끝 = 마지막 토막·마지막 글자에 머묾(완성 표시) — 「문장 완성!」 카드 없음 · 토막 번호 넘침(7/6) 없음(투덜이 10-08·10-10 「분명히 없애기로 했어」)
       if (st.s + 1 >= segs.length) { st.w = words().length - 1; st.c = words()[st.w].chars.length - 1; st.k = c.jamo.length; st.typed = c.jamo.slice(); st.part = ""; st.lineEnd = true; st.done = true; st.queue = []; return lineDone(); }
       st.s++; st.w = 0;
     }
     render();
     const q = st.queue.splice(0); q.forEach(k => press(k)); // 축하 중에 누른 키 — 차례대로(또 글자가 끝나면 다시 기억됨)
+  }
+  async function segDone() { // [자동 완성] 토막 끝 — 그 토막 소리 한 번 · 그 자리에 머묾(다음 토막·다음 줄로 안 감) · 자판을 누르면 다음 토막부터
+    st.auto = false; markAuto(); render(); st.sent = true; markSent(); await run([partStep()]); st.sent = false; markSent(); st.done = false;
   }
   async function lineDone() { // 줄 끝 → 대사 듣고 → 다음 줄(자동) · 자동 완성으로 끝냈으면 대사 소리 없이(W4 · 투덜이 10-08 「멈추는 카드 없애자 · 끊김 싫다」로 원래대로) · 마지막 줄은 그 자리에 머묾
     const wasAuto = st.auto, mode = st.autoMode; st.auto = false;
@@ -909,23 +698,25 @@ export default async function write(app, ep, id, opts = {}) {
   //  다 친 글자에 머물러 다음 자모가 없어 자판을 눌러도 오류로 소리가 안 나던 것)
   const stopAuto = () => { st.autoGen = (st.autoGen || 0) + 1; st.auto = false; st.resumeAuto = false; st.allNext = false; st.jumpTo = null; st.hand?.stopOrder?.(); hush(); st.busy = false; st.done = false; st.queue = []; markAuto(); }; // 누르는 즉시 그 글자에서 멈춤(투덜이 10-10 「넘어가 버림」 — 다 친 글자에 머물면 자판 누를 때 다음 글자부터)
   function nextChar() { // 다음 글자(토막 끝이면 다음 토막 · 줄 끝이면 끝 카드) — 자동으로 친 것은 「직접 씀」 아님
+    st.segEnd = false;
     st.c++; st.k = 0; st.typed = []; st.part = "";
     if (st.c >= words()[st.w].chars.length) { st.w++; st.c = 0; }
     if (st.w >= words().length) { st.s++; st.w = 0; }
     render();
   }
   async function autoPart(mode = "line") {
-    resetSounds(); if (st.lineEnd) { Object.assign(st, { s: 0, w: 0, c: 0, k: 0, typed: [], part: "", done: false, queue: [], lineEnd: false }); render(); } // 줄 끝에서 자동 = 그 줄 처음부터(본부 10-11)
+    resetSounds(); if (st.segEnd && mode === "line") { Object.assign(st, { w: 0, c: 0, k: 0, typed: [], part: "", done: false, queue: [], lineEnd: false, segEnd: false }); render(); } /* 토막 끝에서 다시 [자동 완성] = 같은 토막 처음부터 */ else if (st.lineEnd) { Object.assign(st, { s: 0, w: 0, c: 0, k: 0, typed: [], part: "", done: false, queue: [], lineEnd: false, segEnd: false }); render(); }
+    st.segEnd = false; // 줄 끝에서 자동 = 그 줄 처음부터(본부 10-11)
     const gen = (st.autoGen = (st.autoGen || 0) + 1); // 번호표(투덜이 10-12 「띵띵」) — 멈추거나 다른 자동 단추로 바뀌면 옛 고리는 깨어나도 바로 끝남(두 고리가 같이 치던 것)
     st.auto = true; st.autoMode = mode; st.resumeAuto = false; st.allNext = false; markAuto();
-    while (st.auto && st.autoGen === gen && st.alive && st.s < segs.length && !st.lineEnd) { // 줄 끝까지(본부 10-11 — 토막 끝에서 안 멈춤) · 줄 끝은 lineDone(한 줄 = 멈춤 · 전체 = 다음 줄)
+    while (st.auto && st.autoGen === gen && st.alive && st.s < segs.length && !st.lineEnd && !st.segEnd) { // 줄 끝까지(본부 10-11 — 토막 끝에서 안 멈춤) · 줄 끝은 lineDone(한 줄 = 멈춤 · 전체 = 다음 줄)
       if (st.jumpTo) { Object.assign(st, { w: st.jumpTo.w, c: st.jumpTo.c, k: 0, typed: [], part: "", done: false, queue: [], busy: false }); st.jumpTo = null; render(); } // 위 글자 줄에서 고른 글자부터 이어서
       const c = words()[st.w].chars[st.c];
       if (st.mode !== "hand" && st.k >= c.jamo.length) { await finishChar(c.jamo[c.jamo.length - 1], c); continue; } // 다 친 글자에서 시작(손으로 친 뒤 · 멈춘 자리) = 마무리하고 다음 글자부터
       if (st.mode === "hand") { // 손글씨 자동(본부 10-07) — 그 글자를 획순 칠로 한 획씩 써 주고(획 0.5초) → 글자 소리 → 다음 글자 · 자동으로 쓴 글자는 「직접 씀」 초록 아님
         const H = st.hand; if (!H?.showOrder) break;
         st.busy = true; const done = await H.showOrder({ keep: true }); st.busy = false;
-        if (!done || !st.auto || st.jumpTo) continue;
+        if (!st.alive || st.autoGen !== gen) break; /* 창을 닫는 사이 끝난 획순 = 글자 소리 없이 끝(앱개발부 10-12 막 누르기 소리 겹침) */ if (!done || !st.auto || st.jumpTo) continue;
         const last = c.jamo[c.jamo.length - 1]; st.typed = c.jamo.slice(); st.k = c.jamo.length; st.part = "";
         await finishChar(last, c, c.file || jamoSrc(last)); continue;
       }
@@ -990,10 +781,10 @@ export default async function write(app, ep, id, opts = {}) {
     if (cb) { // W1
       if (st.s >= segs.length) { hush(); st.s = segs.length - 1; } // 줄 끝 카드에서 위 글자 = 마지막 토막 그 글자로(본부 10-08)
       const w = +cb.dataset.w, ci = +cb.dataset.c, c = words()[w].chars[ci];
-      if (st.auto) { st.jumpTo = { w, c: ci }; cb.blur(); hush(); st.hand?.stopOrder?.(); Object.assign(st, { w, c: ci, k: 0, typed: [], part: "", done: false, queue: [], lineEnd: false }); render(); return; } // 자동 완성 중 위 글자 누름 = 그 글자로 옮겨 거기부터 자동 이어서(본부 10-06 투덜이) · 앞 글자는 초록 · 지금 테두리 · 뒤는 기본
+      if (st.auto) { st.jumpTo = { w, c: ci }; cb.blur(); hush(); st.hand?.stopOrder?.(); Object.assign(st, { w, c: ci, k: 0, typed: [], part: "", done: false, queue: [], lineEnd: false, segEnd: false }); render(); return; } // 자동 완성 중 위 글자 누름 = 그 글자로 옮겨 거기부터 자동 이어서(본부 10-06 투덜이) · 앞 글자는 초록 · 지금 테두리 · 뒤는 기본
       // 누른 글자로 바로 가서 쓰기(본부 10-07 투덜이 — 자판·손글씨 둘 다 · 건너뛴 글자는 「안 씀」 그대로 · 나중에 눌러 돌아와 씀) + 그 글자 소리 한 번
       cb.blur(); hush(); stopLoop(); st.sent = false; markSent();
-      Object.assign(st, { w, c: ci, k: 0, typed: [], part: "", done: false, queue: [], busy: false, lineEnd: false }); render();
+      Object.assign(st, { w, c: ci, k: 0, typed: [], part: "", done: false, queue: [], busy: false, lineEnd: false, segEnd: false }); render();
       if (st.mode === "hand") st.hand?.showOrder?.(); // 손글씨 = 글자를 누르면 획순이 바로 그려지고 다 그리면 글자 소리(투덜이 10-08)
       else if (c.file) run([c.file]); else note.textContent = t("no_char_audio", { c: c.ch });
       return;
@@ -1001,9 +792,15 @@ export default async function write(app, ep, id, opts = {}) {
     const hm = e.target.closest("[data-hmode]");
     if (hm) { try { localStorage.setItem("malmun.hmode", magnetOn() ? "free" : "magnet"); } catch {} hush(); st.hand?.stopOrder?.(); render(); return; } // 반자동 ⇄ 완전 수동(같은 글자 처음부터)
     const tb = e.target.closest("[data-tool]");
-    if (tb) { try { localStorage.setItem("malmun.htool", tb.dataset.tool); } catch {} app.querySelectorAll("[data-tool]").forEach(x => x.setAttribute("aria-pressed", String(x.dataset.tool === tb.dataset.tool))); st.hand?.paintGuide?.(); return; } // 회색 길 굵기도 그 도구로 // 도구 고르기(기억) · 이미 그린 획은 그 도구 그대로
+    if (tb) { const same = tb.dataset.tool === toolKey(); try { localStorage.setItem("malmun.htool", tb.dataset.tool); } catch {} app.querySelectorAll("[data-tool]").forEach(x => x.setAttribute("aria-pressed", String(x.dataset.tool === tb.dataset.tool)));
+      const H = st.hand; if (!H || same) return;
+      // 다른 도구 = 그 글자 칸에 쓴 획을 지우고 처음부터(투덜이 10-12 「다른 도구를 고르면 기존 것을 자동으로 지우는 게 좋아」 · 본부) — 점수·자석 차례·통과 표시도 처음으로 · 회색은 새 도구 굵기 · 같은 도구 = 그대로
+      clearTimeout(H.timer); clearTimeout(H.clr); H.follow = null; H.drawGen = (H.drawGen || 0) + 1; if (H.passSnd) { hush(); st.busy = false; H.passSnd = false; }
+      if (!st.auto && (H.ordPlaying || H.ordAt)) H.stopOrder?.();
+      H.strokes = []; H.roles = null; H.orderTold = false; H.mag = 0; H.magWrong = 0; if (H.passed) { H.passed = false; markHand(); }
+      const sc = work.querySelector(".hscore"); if (sc) sc.hidden = true; note.textContent = ""; H.paintGuide?.(); H.paintInk?.(); return; }
     const mb = e.target.closest("[data-mode]");
-    if (mb) { if (st.mode !== mb.dataset.mode) { if (st.auto || st.resumeAuto) stopAuto(); st.hand?.stopOrder?.(); hush(); stopLoop(); st.busy = false; st.done = false; st.queue = []; st.mode = mb.dataset.mode; /* 모드 바꾸기 = 돌던 것(자동·획순·소리) 먼저 멈춤 — 본부 10-08 투덜이: 자판 자동 켠 채 손글씨로 바꾸면 저 혼자 계속 씀 */ try { localStorage.setItem("malmun.wmode", st.mode); } catch {} app.querySelectorAll("[data-mode]").forEach(x => x.setAttribute("aria-pressed", String(x.dataset.mode === st.mode))); st.typed = []; st.k = 0; st.part = ""; render(); } return; }
+    if (mb) { if (st.mode !== mb.dataset.mode) { if (st.auto || st.resumeAuto) stopAuto(); st.hand?.stopOrder?.(); hush(); stopLoop(); st.busy = false; st.done = false; st.queue = []; st.mode = mb.dataset.mode; /* 모드 바꾸기 = 돌던 것(자동·획순·소리) 먼저 멈춤 — 본부 10-08 투덜이: 자판 자동 켠 채 손글씨로 바꾸면 저 혼자 계속 씀 */ try { localStorage.setItem("malmun.wmode", st.mode); } catch {} app.querySelectorAll("[data-mode]").forEach(x => x.setAttribute("aria-pressed", String(x.dataset.mode === st.mode))); st.typed = []; st.k = 0; st.part = ""; st.segEnd = false; render(); } return; }
     const b = e.target.closest("[data-act]");
     if (!b) return;
     const a = b.dataset.act;
@@ -1032,5 +829,5 @@ export default async function write(app, ep, id, opts = {}) {
   // 이 줄에서 쓸 소리를 미리 받아 풀어 둔다(대사 · 낱말·토막 · 글자 · 자판 자모) — 누르는 순간 바로 나오게
   sfx.preload([lineSrc, ...allWords.map(w => unitSrc(w.unit)), ...segs.map(g => unitSrc(g.unit)),
     ...allWords.flatMap(w => w.chars.map(c => c.file)), ...[...KEYS, ...VOW, ...VOW2].map(jamoSrc)]);
-  return () => { release(); st.alive = false; hush(); st.hand?.ro?.disconnect(); clearTimeout(st.hand?.timer); delete app.__wr; };
+  return () => { release(); st.alive = false; st.autoGen = (st.autoGen || 0) + 1; st.auto = false; st.resumeAuto = false; st.allNext = false; st.hand?.stopOrder?.(); hush(); st.hand?.ro?.disconnect(); clearTimeout(st.hand?.timer); delete app.__wr; };
 }

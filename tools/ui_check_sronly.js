@@ -3,6 +3,7 @@
 // ⓐ 안드로이드: 녹음+받아쓰기 → 말소리는 있는데 들은 말 0 → 받아쓰기만으로 바뀜(기억) · 안내 ⓑ 다음 말하기 = 마이크 안 엶 · 글자 점수 · 「글자 점수만」 · 내 목소리·비교 흐림 → 누르면 까닭
 // ⓒ 카드도 받아쓰기만 · ⓓ PC(안드로이드 아님)는 같은 실패에도 안 바뀜
 (async () => {
+  const { t: TT } = await import(`/js/i18n.js?v=${document.documentElement.dataset.v}`), TX = (...k) => new RegExp(k.map(x => [...TT(x).split("{")[0].trim()].slice(0, 14).join("").replace(/[^\w\s]/g, "\\$&")).filter(Boolean).join("|") || "(?!)", "i"); /* 지금 언어 글로 맞춤(검사부 10-12 vi) */
   window.__noRhythm = true;
   const W = ms => new Promise(s => setTimeout(s, ms)), $ = s => document.querySelector(s), res = [], ok = (c, m, x = "") => res.push(`${c ? "✓" : "✗"} ${m}${x ? " · " + x : ""}`);
   window.__sfxVolume = 0.0001;
@@ -26,14 +27,14 @@
     const once = async () => { $(".panel [data-act=rec]").click(); await W(500); talk(); for (let k = 0; k < 100 && $(".panel [data-act=rec]").classList.contains("on"); k++) await W(100); for (let k = 0; k < 80 && !/%/.test($(".panel .msg").textContent); k++) await W(100); await W(300); return $(".panel .msg").textContent; };
     const m0 = await once(), one = sessionStorage.getItem("malmun.srmode") !== "only";
     const m1 = await once(), btn = $(".panel [data-act=srboth]");
-    ok(one && sessionStorage.getItem("malmun.srmode") === "only" && /0%/.test(m1) && /बोली पहिचान|recognition|받아쓰기/i.test(m1) && !!btn, "ⓐ 안드로이드: 말소리 있는데 들은 말 0 — 1번은 그대로 · 연속 2번이면 받아쓰기만으로(기억) · 안내 + 「다시 같이 시험」 단추", `1번 뒤 그대로 ${one} · 「${m1}」 · 단추 ${!!btn}`);
+    ok(one && sessionStorage.getItem("malmun.srmode") === "only" && /0%/.test(m1) && TX("sr_only_switched").test(m1) && !!btn, "ⓐ 안드로이드: 말소리 있는데 들은 말 0 — 1번은 그대로 · 연속 2번이면 받아쓰기만으로(기억) · 안내 + 「다시 같이 시험」 단추", `1번 뒤 그대로 ${one} · 「${m1}」 · 단추 ${!!btn}`);
     btn?.click(); await W(200); ok(sessionStorage.getItem("malmun.srmode") !== "only", "ⓐ 「다시 같이 시험」 누르면 받아쓰기만 꺼짐"); sessionStorage.setItem("malmun.srmode", "only");
     // ⓑ
     const g0 = gum; $(".panel [data-act=rec]").click(); for (let k = 0; k < 80 && $(".panel [data-act=rec]").classList.contains("on"); k++) await W(100); for (let k = 0; k < 80 && !/%/.test($(".panel .msg").textContent); k++) await W(100); await W(300);
     const m2 = $(".panel .msg").textContent, mb = $(".panel [data-act=mine]");
     const dim = mb.classList.contains("dim") && $(".panel [data-act=both]").classList.contains("dim");
     mb.click(); await W(200); const m3 = $(".panel .msg").textContent;
-    ok(gum === g0 && /^\d+%/.test(m2) && /글자 점수만|अक्षरको अंक मात्र|अक्षर अंक मात्र|letter score only/.test(m2) && dim && /리듬|लय|rhythm/i.test(m3), "ⓑ 받아쓰기만: 마이크 안 엶 · 글자 점수 · 「글자 점수만」 · 내 목소리·비교 흐림 → 누르면 까닭", `마이크 ${gum - g0}번 · 「${m2}」 · 흐림 ${dim} · 「${m3}」`);
+    ok(gum === g0 && /^\d+%/.test(m2) && TX("sr_only_note").test(m2) && dim && TX("sr_only_why").test(m3), "ⓑ 받아쓰기만: 마이크 안 엶 · 글자 점수 · 「글자 점수만」 · 내 목소리·비교 흐림 → 누르면 까닭", `마이크 ${gum - g0}번 · 「${m2}」 · 흐림 ${dim} · 「${m3}」`);
     // ⓔ 받아쓰기만에서도 끝 규칙 같게 — 🎤 뒤 말 없음(인식이 혼자 끝나도 다시 켜며 6초) → 「목소리가 안 들렸어요」 · 3초 머뭇(인식이 한 번 끝남) 뒤 말 → 점수
     { window.__srSilent = Infinity; const t0 = performance.now(); $(".panel [data-act=rec]").click(); await W(300); for (let k = 0; k < 120 && $(".panel [data-act=rec]").classList.contains("on"); k++) await W(100); for (let k = 0; k < 40 && !/%/.test($(".panel .msg").textContent); k++) await W(100);
       const sec = (performance.now() - t0) / 1000, mn = $(".panel .msg").textContent; window.__srSilent = 1;
@@ -47,7 +48,7 @@
     if (!cb) ok(false, "ⓒ 카드 말해 보기 단추 없음");
     else { window.__heard = $(".panel .sayb .saybig")?.textContent || ""; const g1 = gum; cb.click(); await W(300); for (let k = 0; k < 80 && cb.classList.contains("on"); k++) await W(100); for (let k = 0; k < 80 && !/%/.test($(".panel .sayb .smsg").textContent); k++) await W(100); await W(300);
       const cm = $(".panel .sayb .smsg").textContent, mine = $(".panel .sayb [data-x=mine]");
-      ok(gum === g1 && /^\d+%/.test(cm) && /글자 점수만|अक्षरको अंक मात्र|अक्षर अंक मात्र|letter score only/.test(cm) && mine.classList.contains("dim"), "ⓒ 카드도 받아쓰기만 · 글자 점수 · 내 목소리 흐림", `마이크 ${gum - g1}번 · 「${cm}」`); }
+      ok(gum === g1 && /^\d+%/.test(cm) && TX("sr_only_note").test(cm) && mine.classList.contains("dim"), "ⓒ 카드도 받아쓰기만 · 글자 점수 · 내 목소리 흐림", `마이크 ${gum - g1}번 · 「${cm}」`); }
     document.querySelectorAll(".line")[9].querySelector("[data-act=explain]").click(); await W(600);
     // ⓓ PC
     sessionStorage.removeItem("malmun.srmode"); setUA(false);

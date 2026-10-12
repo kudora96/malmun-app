@@ -4,6 +4,7 @@
 // ⓑ 서버 429·500·20초·네트워크·빈 글 → 「한 번 더」 · 연속 2번이면 10분 동안 받아쓰기만(sessionStorage malmun.srvoff) · malmun.srdev 에 sronly 안 적음
 // ⓒ 주소 없음 → 서버 한 번도 안 부름 · 옛 그대로(연속 2번 → sronly) · 주소 있으면 옛 sronly 기억이 있어도 서버부터 ⓓ 첫 사용 안내 한 번만 ⓔ 기다리는 중 닫기 = 끊김 · 늦은 점수·효과음 없음
 (async () => {
+  const { t: TT } = await import(`/js/i18n.js?v=${document.documentElement.dataset.v}`), TX = (...k) => new RegExp(k.map(x => [...TT(x).split("{")[0].trim()].slice(0, 14).join("").replace(/[^\w\s]/g, "\\$&")).filter(Boolean).join("|") || "(?!)", "i"); /* 지금 언어 글로 맞춤(검사부 10-12 vi) */
   window.__noRhythm = true;
   const W = ms => new Promise(s => setTimeout(s, ms)), $ = s => document.querySelector(s), res = [], ok = (c, m, x = "") => res.push(`${c ? "✓" : "✗"} ${m}${x ? " · " + x : ""}`);
   window.__sfxVolume = 0.0001; delete window.__noSeq;
@@ -30,7 +31,7 @@
   };
   const notes = []; const mo = new MutationObserver(ms => { for (const m of ms) for (const n of m.addedNodes) if (n.classList?.contains("sttnote")) notes.push(n.textContent); }); mo.observe(document.body, { childList: true });
   const clean = () => { try { for (const k of ["malmun.srdev", "malmun.srdev.t", "malmun.lastrec", "malmun.sttnote"]) localStorage.removeItem(k); for (const k of ["malmun.srmode", "malmun.srfail", "malmun.srsrv", "malmun.srmiss", "malmun.srvfail", "malmun.srvoff"]) sessionStorage.removeItem(k); } catch {} };
-  const RETRY = /फेरि एक पटक|한 번 더|once more/;
+  const RETRY = TX("sr_retry_dev");
   try {
     clean();
     let gum = 0, mic = null, recOn = 0; const ctxP = import(`/js/wake.js?v=${document.documentElement.dataset.v}`).then(m => m.audioCtx());
@@ -50,17 +51,17 @@
     ok(/\d+%/.test(a3.msg) && calls.length === 1 && c3.method === "POST" && c3.url === URL0 + "/stt" && c3.isBlob && c3.size > 0 && /^audio\//.test(c3.type || "") && /^[A-Za-z0-9-]{8,64}$/.test(c3.dev || "") && c3.dev === localStorage.getItem("malmun.devid") && !window.__srStarts.length && gum > g0,
       "ⓐ 첫 녹음부터 = 녹음(마이크 엶) → 서버 POST {주소}/stt(녹음 그대로 · Content-Type · X-Dev) → 점수 · 폰 받아쓰기 안 씀", `「${a3.msg.slice(0, 40)}」 · ${c3.type} ${c3.size}B · 받아쓰기 ${window.__srStarts.join("/") || "없음"}`);
     ok(localStorage.getItem("malmun.srdev") === "server" && +localStorage.getItem("malmun.srdev.t") > Date.now() - 60000, "ⓐ 서버 됨 = 기기 기억 server(7일 · 적은 때 있음)", `기억 ${localStorage.getItem("malmun.srdev")}`);
-    ok(!!p.__sp._state.blob && !$(".panel [data-act=mine]").disabled && !$(".panel [data-act=mine]").classList.contains("dim") && !$(".panel [data-act=both]").disabled && !/글자 점수만|अक्षरको अंक मात्र|letter score only/.test(a3.msg) && a3.fx.length === 1, "ⓐ 녹음 그대로 · 내 목소리·비교 켜짐 · 「글자 점수만」 아님 · 점수 효과음 한 번", `blob ${p.__sp._state.blob?.size}B · 효과 ${a3.fx.join(",")}`);
+    ok(!!p.__sp._state.blob && !$(".panel [data-act=mine]").disabled && !$(".panel [data-act=mine]").classList.contains("dim") && !$(".panel [data-act=both]").disabled && !TX("sr_only_note").test(a3.msg) && a3.fx.length === 1, "ⓐ 녹음 그대로 · 내 목소리·비교 켜짐 · 「글자 점수만」 아님 · 점수 효과음 한 번", `blob ${p.__sp._state.blob?.size}B · 효과 ${a3.fx.join(",")}`);
     { $(".panel [data-act=mine]").click(); let pl = false; for (let k = 0; k < 30 && !pl; k++) { await W(100); pl = $(".panel [data-act=mine]").classList.contains("playing") || !!p.__sp._state.mine; } ok(pl, "ⓐ [내 목소리] 누르면 방금 녹음 재생"); await W(300); $(".panel [data-act=mine]").click(); await W(300); }
     try { const lr = JSON.parse(localStorage.getItem("malmun.lastrec") || "[]").slice(-1)[0] || {}; ok(lr.mode === "녹음→서버" && /server/.test(lr.seq || ""), "ⓐ 진단 기록 = 녹음→서버", `${lr.mode} · ${String(lr.seq || "").slice(0, 60)}`); ok(/서버 [\d,]+ms = 받기 210 \+ AI 1,840 · 보낸 \d+KB/.test(lr.seq || ""), "ⓐ 진단 기록에 서버 걸린 시간(받기 + AI · Server-Timing · 본부 10-12)", String(lr.seq || "").match(/서버[^·]*·[^·]*/)?.[0] || String(lr.seq || "").slice(-80)); } catch (e) { ok(false, "ⓐ 진단 기록 읽기 " + e.message); }
     // ⓓ 안내 한 번만
     const a4 = await once();
-    ok(notes.length === 1 && /저장|stored|सुरक्षित/.test(notes[0]) && /\d+%/.test(a4.msg) && calls.length === 2, "ⓓ 첫 서버 사용 때만 안내 한 번(다음 녹음엔 안 뜸)", `안내 ${notes.length}번 「${(notes[0] || "").slice(0, 40)}」`);
+    ok(notes.length === 1 && TX("stt_server_note").test(notes[0]) && /\d+%/.test(a4.msg) && calls.length === 2, "ⓓ 첫 서버 사용 때만 안내 한 번(다음 녹음엔 안 뜸)", `안내 ${notes.length}번 「${(notes[0] || "").slice(0, 40)}」`);
     $(".panel [data-act=close]")?.click(); await W(500);
     // ⓐ 카드도 서버(기기 기억 server)
     { const li = [...document.querySelectorAll(".line")].findIndex(l => l.querySelector("[data-act=explain]")); document.querySelectorAll(".line")[li].querySelector("[data-act=explain]").click(); await W(1600); document.querySelector("video")?.pause();
       const rb = $(".panel .sayb [data-x=rec]"); const n0 = calls.length;
-      if (rb) { window.__heard = $(".panel .saybig")?.textContent || window.__heard; window.__srStarts = []; rb.click(); talk(); for (let k = 0; k < 30 && !rb.classList.contains("on"); k++) await W(50); for (let k = 0; k < 120 && rb.classList.contains("on"); k++) await W(100); for (let k = 0; k < 300 && !/\d+%|फेरि एक पटक|한 번 더|once more/.test($(".panel .sayb .smsg").textContent); k++) await W(100); await W(500);
+      if (rb) { window.__heard = $(".panel .saybig")?.textContent || window.__heard; window.__srStarts = []; rb.click(); talk(); for (let k = 0; k < 30 && !rb.classList.contains("on"); k++) await W(50); for (let k = 0; k < 120 && rb.classList.contains("on"); k++) await W(100); for (let k = 0; k < 300 && !new RegExp("[0-9]+%|" + TX("sr_retry_dev").source, "i").test($(".panel .sayb .smsg").textContent); k++) await W(100); await W(500);
         const m = $(".panel .sayb .smsg").textContent, mine = $(".panel .sayb [data-x=mine]");
         ok(/\d+%/.test(m) && calls.length === n0 + 1 && !window.__srStarts.length && !mine.disabled && !mine.classList.contains("dim"), "ⓐ 카드도 서버 → 점수 · 내 목소리 켜짐", `「${m.slice(0, 40)}」 · 서버 ${calls.length - n0}번`); }
       else ok(false, "ⓐ 카드 🎤 단추 없음");

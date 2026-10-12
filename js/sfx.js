@@ -8,6 +8,7 @@ import { audioCtx } from "./wake.js?v=1012.12";
 
 const cache = new Map(); // url → Promise<AudioBuffer|null>(null = 파일 없음)
 const live = new Set();  // 지금 나는 소리
+let gen = 0; // stopAll 번호표 — 받는 중(load)에 멈춤이 오면 다 받은 뒤에도 안 틂(검사부 10-12 vi 막 누르기: 쓰기 자동 글자 소리가 설명 소리와 겹침)
 const nameOf = url => decodeURIComponent(url.split("?")[0].split("/").slice(-2).join("/"));
 const note = (ev, url, extra) => window.__sfxLog?.push({ t: Math.round(performance.now()), ev, name: nameOf(url), ...extra }); // 점검 도구용
 
@@ -24,8 +25,9 @@ export const preload = urls => Promise.all([...new Set(urls.filter(Boolean))].ma
 // 틀기 — 다 나오면 true · 파일이 없으면 false · 중간에 멈춰도 true(없음이 아니므로)
 // opt: { offset 초, dur 초, fade 초(앞뒤 살짝 줄이기 — 원음 잘라 틀 때) }
 export async function play(url, { offset = 0, dur, fade = 0 } = {}) {
-  const buf = await load(url);
+  const my = gen, buf = await load(url);
   if (!buf) return false;
+  if (my !== gen) return true; // 받는 사이 멈춤 = 멈춘 것(없음 아님)
   const ctx = audioCtx();
   const src = ctx.createBufferSource(), g = ctx.createGain();
   src.buffer = buf; src.connect(g); g.connect(ctx.destination);
@@ -49,6 +51,7 @@ export async function play(url, { offset = 0, dur, fade = 0 } = {}) {
   });
 }
 export function stopAll() {
+  gen++;
   for (const h of live) { h.stopped = true; try { h.src.stop(); } catch {} }
 }
 export const playing = () => live.size > 0;
