@@ -104,6 +104,7 @@
  "subs_peek": "Xem",
  "w_tip": "Chạm vào chữ để nghe âm",
  "why_tail": "Chưa nghe rõ phần cuối: {tail} — hãy nói đến hết câu nhé",
+ "why_tail_short": "Chưa nghe rõ phần cuối: {tail}",
  "why_other": "Nghe giống câu khác — hãy nghe mẫu {say} rồi nói lại nhé",
  "why_heard_as": "{w} nghe như {h}",
  "why_missing": "Chưa nghe thấy {w}",
