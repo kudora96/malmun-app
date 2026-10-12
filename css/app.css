@@ -1016,3 +1016,6 @@ button.dim{opacity:.45}
 [dir=rtl] .write .work,[dir=rtl] .write .slotrow,[dir=rtl] .write .hand,[dir=rtl] .kb,[dir=rtl] .speak .meter,[dir=rtl] .cmp .cwave,[dir=rtl] .cmp .csyl{direction:ltr} /* 오른쪽→왼쪽 언어(ur)에서도 한글 쓰기·자판·막대·파형은 왼쪽→오른쪽(언어부 10-11 S1 ④) */
 :lang(ur){font-family:"Noto Nastaliq Urdu",system-ui,sans-serif;line-height:2.05} /* 나스탈리크 · 줄 높이 2 이상(언어부 10-11) */
 :lang(th){font-family:"Noto Sans Thai",system-ui,sans-serif}
+/* 자판 화면 단추 셋(이 부분 듣기 · 자동 완성 · 전체 자동 완성) — 자모 칸 옆에 보통 크기로 안 들어가면 글자 칸 아래 한 줄(본부 10-12) · 글씨 13px · 한 줄 글씨 · 모자라면 단추가 다음 줄로 */
+.write .wbtns.below,.write.embedded .wbtns.below{flex:none;flex-wrap:wrap;gap:6px;padding:6px 12px 2px}
+.write .wbtns.below button,.write.embedded .wbtns.below button{flex:1 1 auto;min-width:0;white-space:nowrap;font-size:13px;line-height:1.2;min-height:36px;padding:6px 10px}

@@ -1,10 +1,10 @@
-import { t } from "../i18n.js?v=1012.6";
-import { esc } from "../text.js?v=1012.6";
-import { catalog } from "../data.js?v=1012.6";
-import { langChip, openLangSheet, progress, uiKoBtn, toggleUiKo } from "../ui.js?v=1012.6";
-import { rerender } from "../main.js?v=1012.6";
-import { VERSION } from "../version.js?v=1012.6";
-import { recCount, recDelEpisode } from "../recstore.js?v=1012.6";
+import { t } from "../i18n.js?v=1012.8";
+import { esc } from "../text.js?v=1012.8";
+import { catalog } from "../data.js?v=1012.8";
+import { langChip, openLangSheet, progress, uiKoBtn, toggleUiKo } from "../ui.js?v=1012.8";
+import { rerender } from "../main.js?v=1012.8";
+import { VERSION } from "../version.js?v=1012.8";
+import { recCount, recDelEpisode } from "../recstore.js?v=1012.8";
 
 const mmss = s => `${Math.floor(s / 60)}:${String(Math.round(s % 60)).padStart(2, "0")}`;
 
