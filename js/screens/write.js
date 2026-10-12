@@ -13,15 +13,15 @@
 //  W5 소리는 언제나 하나만 · 새 일을 하면 앞 소리는 멈춘다
 //  W6 영상 창 안(embedded): 창 안에서 스크롤 없이 다 보이게 — 긴 문장은 토막으로(◀ 1/3 ▶) ·
 //     토막을 다 쓰면 자동으로 다음 토막 · 줄을 다 쓰면 대사를 듣고 자동으로 다음 줄 쓰기 · 아래 ▶ = 이 부분 듣기
-import { t, lang } from "../i18n.js?v=1012.4";
-import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO, koq } from "../text.js?v=1012.4";
-import { episode, chars, charsF } from "../data.js?v=1012.4";
-import { paths } from "../paths.js?v=1012.4";
-import { I, spkHtml } from "../ui.js?v=1012.4";
-import { audioCtx, hold } from "../wake.js?v=1012.4";
-import * as sfx from "../sfx.js?v=1012.4";
-import { scoreFx } from "../scorefx.js?v=1012.4";
-import { units as jamoUnits, baseOf, shapeFix } from "../jamobox.js?v=1012.4"; // 자모 자리 나누기(획순 · 자판 덧칠 · 손글씨 덩어리 — 본부 10-07) // 손글씨 점수 효과 = 말하기와 같은 규칙(본부 10-07)
+import { t, lang } from "../i18n.js?v=1012.5";
+import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO, koq } from "../text.js?v=1012.5";
+import { episode, chars, charsF } from "../data.js?v=1012.5";
+import { paths } from "../paths.js?v=1012.5";
+import { I, spkHtml } from "../ui.js?v=1012.5";
+import { audioCtx, hold } from "../wake.js?v=1012.5";
+import * as sfx from "../sfx.js?v=1012.5";
+import { scoreFx } from "../scorefx.js?v=1012.5";
+import { units as jamoUnits, baseOf, shapeFix } from "../jamobox.js?v=1012.5"; // 자모 자리 나누기(획순 · 자판 덧칠 · 손글씨 덩어리 — 본부 10-07) // 손글씨 점수 효과 = 말하기와 같은 규칙(본부 10-07)
 
 const KEYS = [..."ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎㄲㄸㅃㅆㅉ"], VOW = [..."ㅏㅑㅓㅕㅗㅛㅜㅠㅡㅣ"];
 const VOW2 = [..."ㅐㅒㅔㅖㅘㅙㅚㅝㅞㅟㅢ"]; // 겹모음 줄(본부 10-06) — 칸 하나 · ㅓ+ㅣ 처럼 나눠 쳐도 받음
@@ -572,7 +572,7 @@ export default async function write(app, ep, id, opts = {}) {
         for (let i = 0; i <= Math.min(upto, list.length - 1); i++) brushStroke(dx2, ch, list[i], i < upto ? 1 : f, 1 / 1.15);
         /* 붙는 끝(본부 10-12 획순 칠) — 이미 그은 획의 끝이 같은 자모의 안 그은 획 자리 안에 있으면(ㅕ 가로대 끝 → 세로, ㅌ 가운데 가로 끝 → 왼기둥) 그 겹친 곳은 안 그은 획 몫으로 남김(나중 획이 끊기지 않고 한 덩어리로 칠해짐) */
         for (let j = upto + (f > 0 ? 1 : 0); j < list.length; j++) { if (!(j > upto || f <= 0)) continue; let Fj = null;
-          for (let i = 0; i <= Math.min(upto, list.length - 1); i++) { if (list[i].unit !== list[j].unit || (i === upto && f < 1)) continue; const Q = brushPath(ch, list[i]); if (Q.length < 2) continue;
+          for (let i = 0; i <= Math.min(upto, list.length - 1); i++) { if (list[i].unit !== list[j].unit || (i === upto && f < 1)) continue; const Q = brushPath(ch, list[i]); if (Q.length < 2) continue; { const Pw = brushPath(ch, list[j]), wj = Pw.map(q => q.w).sort((p2, q2) => p2 - q2)[Pw.length >> 1] / 1.15, hz = P2 => Math.abs(P2[P2.length - 1][0] - P2[0][0]) > Math.abs(P2[P2.length - 1][1] - P2[0][1]); if (!hz(list[i].pts) && hz(list[j].pts) && wj > 0.25 * Q.tot && us[list[i].unit + 1]?.jamo !== us[list[i].unit].jamo) continue; } /* 쌍자음 첫 자모(ㅃ 첫 ㅂ — 아랫가로 끝이 둘째 ㅂ 쪽으로 나옴)는 그대로 */ /* 짧은 세로 끝이 굵은 나중 가로에 닿으면(겹친 곳이 세로 길이 25%↑) 그 겹친 곳은 세로 몫(「뼌」 둘째 ㅂ 오른세로 아래 1/3) */
             const Pj = brushPath(ch, list[j]), hw = Math.max(...Pj.map(q => q.w)) * 1.1 / 2;
             const inJ = (q, q2) => Pj.some((r, ri) => { if (!(Math.hypot(r.x - q.x, r.y - q.y) <= hw && r.t > 0.2 * Pj.tot && r.t < 0.8 * Pj.tot)) return false; const r2 = Pj[Math.min(Pj.length - 1, ri + 1)], r1 = Pj[Math.max(0, ri - 1)], ax = r2.x - r1.x, ay = r2.y - r1.y, bx = q.x - q2.x, by = q.y - q2.y, cs = Math.abs(ax * bx + ay * by) / (Math.hypot(ax, ay) * Math.hypot(bx, by) || 1); return cs < 0.7; }); /* 나중 획 몸통 가운데(양 끝 10% 빼고)에 거의 수직으로 붙은 끝만(「른」 나란히 겹친 ㄹ 획은 아님) */
             const k5 = Math.min(5, Q.length - 1), nearJ = Q.filter(q => Pj.some(r => Math.hypot(r.x - q.x, r.y - q.y) <= hw)).length; if (nearJ > 0.4 * Q.length || Q.tot < 5 * hw || (!inJ(Q[0], Q[k5]) && !inJ(Q[Q.length - 1], Q[Q.length - 1 - k5]))) continue; /* 짧은 획(ㅊ ㅎ 꼭지)은 그대로 */
