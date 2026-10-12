@@ -1,4 +1,4 @@
-import { t, lang, langName, LANGS, READY, setLang, KO_UI, uiKoOn, setUiKo } from "./i18n.js?v=1012.12";
+import { t, lang, langName, LANGS, READY, setLang, KO_UI, uiKoOn, setUiKo, langShort } from "./i18n.js?v=1012.12";
 import { VERSION } from "./version.js?v=1012.12";
 import { esc } from "./text.js?v=1012.12";
 
@@ -16,7 +16,7 @@ export const I = {
 export const langChip = () => `<button class="chip" data-act="lang" aria-label="${esc(t("lang_title"))}">${I.globe}<span>${esc(langName(lang))}</span></button>`;
 
 // 「ने ⇄ 한」 토글(본부 10-08) — 소리 없는 토글이어도 단추 모양 · 켜짐 = 「한」 쪽 강조 · 누르면 앱 글만 바뀌고 화면 다시 그림
-export const uiKoBtn = () => (KO_UI.includes(lang) ? `<button class="chip uiko" data-act="uiko" aria-pressed="${uiKoOn()}" aria-label="${esc(langName(lang))} ⇄ 한국어"><span class="a" lang="${lang}">${esc(langName(lang).slice(0, 2))}</span>⇄<span class="b" lang="ko">한</span></button>` : "");
+export const uiKoBtn = () => (KO_UI.includes(lang) ? `<button class="chip uiko" data-act="uiko" aria-pressed="${uiKoOn()}" aria-label="${esc(langName(lang))} ⇄ 한국어"><span class="a" lang="${lang}">${esc(langShort(lang))}</span>⇄<span class="b" lang="ko">한</span></button>` : "");
 export async function toggleUiKo(after) { await setUiKo(!uiKoOn()); after?.(); }
 export function openLangSheet(onPick) {
   const root = document.getElementById("sheet-root");
