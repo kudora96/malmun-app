@@ -1,4 +1,5 @@
 import { VERSION } from "./version.js?v=1012.10";
+import { LANG_INFO } from "./langs.js?v=1012.10";
 // 학습자 언어 — 고르게 하지 않는다(CLAUDE.md).
 // ① 저장된 선택 ② 폰 언어가 22개 중 하나 ③ 폰 시간대로 나라 짐작 ④ 영어
 export const LANGS = [
@@ -9,10 +10,12 @@ export const LANGS = [
 ];
 const CODES = LANGS.map(l => l[0]);
 // 준비된 언어(앱 글 lang/{c}.json 이 있는 것 · 언어부 10-11 S1 ①) — 자동 선택·저장값은 이것만 · 나머지는 ?lang= 으로만(시범)
-const PILOT = ["vi", "th", "ur"]; // 시범 언어(본부 10-12) — 개발 주소(localhost·127.0.0.1)에서만 켬 · 공개 판은 본부 신호 전까지 「곧」
 const DEV_HOST = /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
-export const READY = ["ne", "en", ...(DEV_HOST ? PILOT : [])];
-const RTL = new Set(["ur"]);
+// 언어마다 다른 값(단계·방향·글꼴·줄 높이)은 js/langs.js 한 곳 — tools/sync_lang.py 가 언어부 프로필에서 씀(다국어부 10-12 · 언어를 더할 때 이 파일은 안 고침)
+// stage: ready = 공개 · pilot = 개발 주소(localhost·127.0.0.1)에서만(시범 언어 · 공개 판은 본부 신호 전까지 「곧」)
+const stageOf = c => LANG_INFO[c]?.stage;
+export const READY = CODES.filter(c => stageOf(c) === "ready" || (DEV_HOST && stageOf(c) === "pilot"));
+const RTL = new Set(CODES.filter(c => LANG_INFO[c]?.dir === "rtl"));
 // 폰 언어 코드가 우리 코드와 다른 것
 const ALIAS = { fil: "tl", nb: "en" };
 const TZ = {
@@ -51,7 +54,7 @@ export function detectLang() {
 
 let strings = {}, fallback = {}, koUi = {};
 // 「ने ⇄ 한」 앱 글 한국어 토글(본부 10-08 투덜이) — 켜면 앱 글(lang/*.json)만 {lang}.ko.json(학습자 말 글을 한국어로 옮긴 것)으로 · 배우는 내용(대사·뜻·설명·자막)은 그대로 · 기억 malmun.uiko
-export const KO_UI = ["ne", "vi", "th", "ur"]; // {lang}.ko.json 이 있는 언어
+export const KO_UI = CODES.filter(c => LANG_INFO[c]?.ko_ui); // {lang}.ko.json 이 있는 언어(js/langs.js)
 const UIKO = "malmun.uiko";
 export const uiKoOn = () => { try { return KO_UI.includes(lang) && localStorage.getItem(UIKO) === "1"; } catch { return false; } };
 async function loadKoUi() { koUi = uiKoOn() ? await fetch(`lang/${lang}.ko.json?v=${VERSION}`).then(r => (r.ok ? r.json() : {})).catch(() => ({})) : {}; }
@@ -65,8 +68,9 @@ export async function setLang(code, remember = false) {
   [fallback, strings] = await Promise.all([load("en"), code === "en" ? Promise.resolve({}) : load(code)]);
   await loadKoUi();
   document.documentElement.lang = code;
-  const FONT = { ur: "Noto+Nastaliq+Urdu:wght@400;700", th: "Noto+Sans+Thai:wght@400;700" }; /* 그 언어일 때만 글꼴 링크(언어부 10-11) */
-  if (FONT[code] && !document.querySelector(`link[data-font="${code}"]`)) { const k = Object.assign(document.createElement("link"), { rel: "stylesheet", href: `https://fonts.googleapis.com/css2?family=${FONT[code]}&display=swap` }); k.dataset.font = code; document.head.append(k); }
+  const info = LANG_INFO[code] || {}; /* 그 언어일 때만 글꼴 링크 · 줄 높이는 --lang-lh(css 다국어부 구역) */
+  if (info.font && !document.querySelector(`link[data-font="${code}"]`)) { const k = Object.assign(document.createElement("link"), { rel: "stylesheet", href: `https://fonts.googleapis.com/css2?family=${info.font.replace(/ /g, "+")}:wght@400;700&display=swap` }); k.dataset.font = code; document.head.append(k); }
+  document.documentElement.style.setProperty("--lang-lh", info.lh || "");
   document.documentElement.dir = RTL.has(code) && Object.keys(strings).length ? "rtl" : "ltr"; // 그 언어 글이 실제로 실렸을 때만 오른쪽→왼쪽(언어부 10-11 — 영어 글인데 뒤집히던 것)
 }
 
