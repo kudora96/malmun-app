@@ -3,7 +3,7 @@
 // ⓐ 안드로이드: 녹음+받아쓰기 → 말소리는 있는데 들은 말 0 → 받아쓰기만으로 바뀜(기억) · 안내 ⓑ 다음 말하기 = 마이크 안 엶 · 글자 점수 · 「글자 점수만」 · 내 목소리·비교 흐림 → 누르면 까닭
 // ⓒ 카드도 받아쓰기만 · ⓓ PC(안드로이드 아님)는 같은 실패에도 안 바뀜
 (async () => {
-  const { t: TT } = await import(`/js/i18n.js?v=${document.documentElement.dataset.v}`), TX = (...k) => new RegExp(k.map(x => [...TT(x).split("{")[0].trim()].slice(0, 14).join("").replace(/[^\w\s]/g, "\\$&")).filter(Boolean).join("|"), "i"); /* 지금 언어 글로 맞춤(검사부 10-12 vi) */
+  const { t: TT } = await import(`/js/i18n.js?v=${document.documentElement.dataset.v}`), TX = (...k) => new RegExp(k.map(x => [...TT(x).split("{")[0].trim()].slice(0, 14).join("").replace(/[^\w\s]/g, "\\$&")).filter(Boolean).join("|") || "(?!)", "i"); /* 지금 언어 글로 맞춤(검사부 10-12 vi) */
   window.__noRhythm = true;
   const W = ms => new Promise(s => setTimeout(s, ms)), $ = s => document.querySelector(s), res = [], ok = (c, m, x = "") => res.push(`${c ? "✓" : "✗"} ${m}${x ? " · " + x : ""}`);
   window.__sfxVolume = 0.0001;

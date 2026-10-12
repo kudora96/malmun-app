@@ -4,7 +4,7 @@
 // ⓑ 서버 429·500·20초·네트워크·빈 글 → 「한 번 더」 · 연속 2번이면 10분 동안 받아쓰기만(sessionStorage malmun.srvoff) · malmun.srdev 에 sronly 안 적음
 // ⓒ 주소 없음 → 서버 한 번도 안 부름 · 옛 그대로(연속 2번 → sronly) · 주소 있으면 옛 sronly 기억이 있어도 서버부터 ⓓ 첫 사용 안내 한 번만 ⓔ 기다리는 중 닫기 = 끊김 · 늦은 점수·효과음 없음
 (async () => {
-  const { t: TT } = await import(`/js/i18n.js?v=${document.documentElement.dataset.v}`), TX = (...k) => new RegExp(k.map(x => [...TT(x).split("{")[0].trim()].slice(0, 14).join("").replace(/[^\w\s]/g, "\\$&")).filter(Boolean).join("|"), "i"); /* 지금 언어 글로 맞춤(검사부 10-12 vi) */
+  const { t: TT } = await import(`/js/i18n.js?v=${document.documentElement.dataset.v}`), TX = (...k) => new RegExp(k.map(x => [...TT(x).split("{")[0].trim()].slice(0, 14).join("").replace(/[^\w\s]/g, "\\$&")).filter(Boolean).join("|") || "(?!)", "i"); /* 지금 언어 글로 맞춤(검사부 10-12 vi) */
   window.__noRhythm = true;
   const W = ms => new Promise(s => setTimeout(s, ms)), $ = s => document.querySelector(s), res = [], ok = (c, m, x = "") => res.push(`${c ? "✓" : "✗"} ${m}${x ? " · " + x : ""}`);
   window.__sfxVolume = 0.0001; delete window.__noSeq;

@@ -2,7 +2,7 @@
 // 가짜 받아쓰기 = 녹음(MediaRecorder)이 도는 중이면 아무것도 못 들음(동시 불가 기기) · 트랙으로 받으면 window.__trackOK 일 때만 들음 · 트랙 없이(받아쓰기만)는 늘 들음
 // ⓐ 트랙 받아쓰기 됨: 점수 남 · 녹음 그대로(내 목소리) · 기기 기억 seq-ok ⓑ 안 됨: 0점 대신 「한 번 더」 · 효과음 없음 · 기기 기억 sronly → 다음 = 받아쓰기만(마이크 안 엶) · 점수 · 따라 읽기 칠 ⓒ 카드도 ⓐ
 (async () => {
-  const { t: TT } = await import(`/js/i18n.js?v=${document.documentElement.dataset.v}`), TX = (...k) => new RegExp(k.map(x => [...TT(x).split("{")[0].trim()].slice(0, 14).join("").replace(/[^\w\s]/g, "\\$&")).filter(Boolean).join("|"), "i"); /* 지금 언어 글로 맞춤(검사부 10-12 vi) */
+  const { t: TT } = await import(`/js/i18n.js?v=${document.documentElement.dataset.v}`), TX = (...k) => new RegExp(k.map(x => [...TT(x).split("{")[0].trim()].slice(0, 14).join("").replace(/[^\w\s]/g, "\\$&")).filter(Boolean).join("|") || "(?!)", "i"); /* 지금 언어 글로 맞춤(검사부 10-12 vi) */
   window.__noRhythm = true;
   const W = ms => new Promise(s => setTimeout(s, ms)), $ = s => document.querySelector(s), res = [], ok = (c, m, x = "") => res.push(`${c ? "✓" : "✗"} ${m}${x ? " · " + x : ""}`);
   window.__sfxVolume = 0.0001; delete window.__noSeq;
