@@ -8,7 +8,7 @@
 //  뚫 쿯 줋 굻 = ㅜ 기둥 아랫변이 받침 ㄹ 몫 · 뀺 = ㅂ 이 ㅠ 오른다리를 통째로 · 굷 = 받침 윗변이 ㄹ 몫 (1011-23)
 //  (1011-25) 눓 풇 욿 숧 굸 굾 뭃 꾻 훓 = ㅜ 다리 끝 띠가 받침 몫 · 쿬 꿄 쿣 훐 훇 붏 뿛 뚼 = ㅜ 다리 밑을 받침이 먹음 · 퓞 뜂 뮚 쉾 쥢 쮮 뷦 쀲 웂 = ㅜ 색이 ㅄ 의 ㅂ 오른기둥 안으로
 //  뼢 퀫 퀭 휺 = 낱개 1px 실선 · (wip 판정) 귥 귬 쥾 늆 = ㅠ 오른다리 끝이 받침 몫 · 둟 쑳 쭓 춣 = ㅜ 기둥 끝·밑이 받침 몫 · 툔 룐 = ㅛ 통째가 받침 ㄴ 몫 · 볊 볋 튼 픤 = 낱개 — 자세히는 D:\malmun_work\qa\jamo_fix\override_list.md
-export const OLD96 = new Set([..."뚫쿯줋굻뀺굷" + "눓풇욿숧굸굾뭃꾻훓" + "쿬꿄쿣훐훇붏뿛뚼" + "퓞뜂뮚쉾쥢쮮뷦쀲웂" + "뼢퀫퀭휺" + "귥귬쥾늆둟쑳쭓춣툔룐볊볋튼픤"]);
+export const OLD96 = new Set([..."뚫쿯줋굻뀺굷" + "눓풇욿숧굸굾뭃" + "붏뿛" /* 퓞뜂뮚쉾쥢쮮뷦쀲웂(Q4) · 뼢퀫퀭(Q6) = 10-12 규칙으로 고쳐 표에서 뺌 · 꾻훓(Q2) 쿬꿄쿣훐훇뚼(Q3) 휺(Q6) = 글자부 10-12 「ㅜ ㅠ 띠에 닿는 곳 곧게」 규칙으로 고쳐 뺌 */ + "귥귬쥾늆둟쑳쭓춣툔룐볊볋튼픤"]);
 const CHO = [..."ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ"], JUNG = [..."ㅏㅐㅑㅒㅓㅔㅕㅖㅗㅘㅙㅚㅛㅜㅝㅞㅟㅠㅡㅢㅣ"], JONG = ["", ..."ㄱㄲㄳㄴㄵㄶㄷㄹㄺㄻㄼㄽㄾㄿㅀㅁㅂㅄㅅㅆㅇㅈㅊㅋㅌㅍㅎ"];
 export const PARTS = { ㄲ: ["ㄱ", "ㄱ"], ㄸ: ["ㄷ", "ㄷ"], ㅃ: ["ㅂ", "ㅂ"], ㅆ: ["ㅅ", "ㅅ"], ㅉ: ["ㅈ", "ㅈ"], ㄳ: ["ㄱ", "ㅅ"], ㄵ: ["ㄴ", "ㅈ"], ㄶ: ["ㄴ", "ㅎ"], ㄺ: ["ㄹ", "ㄱ"], ㄻ: ["ㄹ", "ㅁ"], ㄼ: ["ㄹ", "ㅂ"], ㄽ: ["ㄹ", "ㅅ"], ㄾ: ["ㄹ", "ㅌ"], ㄿ: ["ㄹ", "ㅍ"], ㅀ: ["ㄹ", "ㅎ"], ㅄ: ["ㅂ", "ㅅ"], ㅐ: ["ㅏ", "ㅣ"], ㅒ: ["ㅑ", "ㅣ"], ㅔ: ["ㅓ", "ㅣ"], ㅖ: ["ㅕ", "ㅣ"], ㅘ: ["ㅗ", "ㅏ"], ㅙ: ["ㅗ", "ㅐ"], ㅚ: ["ㅗ", "ㅣ"], ㅝ: ["ㅜ", "ㅓ"], ㅞ: ["ㅜ", "ㅔ"], ㅟ: ["ㅜ", "ㅣ"], ㅢ: ["ㅡ", "ㅣ"] };
 export const baseOf = j => (PARTS[j] ? PARTS[j].flatMap(baseOf) : [j]); // ㅙ → ㅗ ㅏ ㅣ
@@ -105,7 +105,25 @@ export function shapeFix(out, mask, N, ch = "") {
     for (let k = 0; k + 1 < out.length; k++) { const a = out[k], b = out[k + 1]; if (a.jamo !== b.jamo || a.role !== b.role || a.role === "jung") continue;
       const cnt = new Int32Array(N); let ax = 0, an = 0, bx = 0, bn = 0; for (let q = 0; q < N * N; q++) { const o = own[q]; if (o === k || o === k + 1) { cnt[q % N]++; if (o === k) { ax += q % N; an++; } else { bx += q % N; bn++; } } }
       if (!an || !bn) continue; ax /= an; bx /= bn; if (bx <= ax) continue; let gap = -1; for (let x = Math.round(ax); x <= Math.round(bx); x++) if (!cnt[x]) { gap = x; break; }
+      if (gap < 0 && /[ㅅㅈ]/.test(a.jamo) && an < 0.45 * bn) { /* 첫 자음 몫이 둘째의 45% 미만(본부 10-12 「쬔」 — 첫 ㅈ 두 다리가 통째로 둘째 ㅈ 몫) = 두 자음 윗부분(위 30% 줄) 사이 빈 세로줄로 아래까지 가름 */
+        let ya = N, yb = -1; for (let q = 0; q < N * N; q++) if (own[q] === k || own[q] === k + 1) { const y = (q / N) | 0; if (y < ya) ya = y; if (y > yb) yb = y; }
+        const yt = ya + Math.floor(0.3 * (yb - ya + 1)), c2 = new Int32Array(N); for (let q = ya * N; q <= yt * N + N - 1; q++) if (own[q] === k || own[q] === k + 1) c2[q % N]++;
+        for (let x = Math.round(ax); x <= Math.round(bx); x++) if (!c2[x]) { gap = x; break; } }
+      if (gap < 0 && a.jamo === "ㅅ" && a.role === "cho") { /* ㅆ 빈 세로줄 없음 = 첫 ㅅ 오른 삐침과 둘째 ㅅ 왼 삐침이 아래에서 만나는 「V」(글자부 10-12 「씐」 — 첫 ㅅ 오른 삐침 거의 다 둘째 ㅅ 색) = V 맨 아래 3줄 잉크 가운데 세로줄로 가름 */
+        let ya = N, yb = -1; for (let q = 0; q < N * N; q++) if (own[q] === k || own[q] === k + 1) { const y = (q / N) | 0; if (y < ya) ya = y; if (y > yb) yb = y; }
+        const yt = ya + Math.floor(0.3 * (yb - ya + 1)), c2 = new Int32Array(N); for (let q = ya * N; q <= yt * N + N - 1; q++) if (own[q] === k || own[q] === k + 1) c2[q % N]++;
+        const segs = []; for (let x = x0; x <= x1; x++) if (c2[x]) { if (segs.length && segs.at(-1)[1] === x - 1) segs.at(-1)[1] = x; else segs.push([x, x]); }
+        if (segs.length >= 2) { const s1 = segs[0][1], s2 = segs.at(-1)[0]; let yv = -1; for (let y = yt + 1; y <= yb; y++) { let has = false; for (let x = s1 + 1; x < s2; x++) { const q = y * N + x; if (on(q) && (own[q] === k || own[q] === k + 1)) { has = true; break; } } if (has) yv = y; else if (yv >= 0) break; } /* V 맨 아래 = 두 기둥 사이 잉크가 위에서부터 이어지다 끊기는 줄(아래 모음 띠의 떨어진 자음 몫 점은 아님 · 「쒜」) */
+          if (yv > yt) { const cs = []; for (let y = yv; y > yv - 3; y--) { let l = -1, r2 = -1; for (let x = s1 + 1; x < s2; x++) if (on(y * N + x)) { if (l < 0) l = x; r2 = x; } if (l >= 0) cs.push((l + r2) / 2); }
+            const cx = cs.reduce((p2, v) => p2 + v, 0) / cs.length, g2 = Math.round(cx); let m10 = 0, m01 = 0; for (let q = 0; q < N * N; q++) { const x = q % N; if (own[q] === k && x > g2) m01++; else if (own[q] === k + 1 && x < g2) m10++; }
+            if (cx > ax && cx < bx && m10 >= 3 * m01) gap = g2; } } } /* 첫 ㅅ 몫을 되찾는 쪽일 때만(「쑥」 — 이미 첫 ㅅ 오른 삐침이 제 색이면 그대로) */
       if (gap < 0) continue; for (let q = 0; q < N * N; q++) { const x = q % N; if (own[q] === k && x > gap) { own[q] = k + 1; moved = true; } else if (own[q] === k + 1 && x < gap) { own[q] = k; moved = true; } } }
+    // 겹받침(ㄳ ㅄ 등) 앞 받침 오른 세로 끝 2~3열이 뒷 받침 몫인 것 = 앞 받침 몫(본부 10-12 「쬆」「쬢」「쐓」 — ㅂ·ㄱ 오른 기둥 끝 세로 띠가 ㅅ 색)
+    for (let k = 0; k + 1 < out.length; k++) { if (out[k].role !== "jong" || out[k + 1].role !== "jong" || out[k].jamo === out[k + 1].jamo) continue;
+      let ya = N, yb = -1; for (let q = 0; q < N * N; q++) if (own[q] === k) { const y = (q / N) | 0; if (y < ya) ya = y; if (y > yb) yb = y; } if (yb < 0) continue; const hh = yb - ya + 1, colN = (x, o) => { let c = 0; for (let y = ya; y <= yb; y++) if (own[y * N + x] === o) c++; return c; };
+      let xs = -1; for (let x = x0 + 1; x <= x1; x++) if (colN(x - 1, k) >= 0.6 * hh && colN(x, k + 1) >= 0.6 * hh) { xs = x; break; }
+      if (xs < 0) continue; let xe = xs; while (xe + 1 <= x1 && xe - xs < 4 && colN(xe + 1, k + 1) >= 0.6 * hh) xe++; if (xe - xs >= 4) continue; /* 5열 이상 = 띠 아님 */
+      for (let x = xs; x <= xe; x++) for (let y = ya; y <= yb; y++) { const q = y * N + x; if (own[q] === k + 1) { own[q] = k; moved = true; } } }
     out.forEach((u, k) => {
       if (u.role !== "jung") return;
       const r = u.rect;
@@ -215,18 +233,28 @@ export function shapeFix(out, mask, N, ch = "") {
         for (let o = 0; o < out.length; o++) { if (out[o].role !== "cho" || !out[o].ring?.size) continue;
           const rt = y => { for (let x = cx - 1; x >= x0; x--) { const q = y * N + x; if (own[q] === o && on(q)) return x; } return null; }, tch = y => { const x = rt(y); return x != null && own[y * N + x + 1] === k; };
           for (let y = y0; y <= y1; y++) { if (!tch(y)) continue; let yb2 = y; while (yb2 + 1 <= y1 && tch(yb2 + 1)) yb2++; const ya2 = y; y = yb2;
-            const pts = []; let na = 0, nb2 = 0; for (let t = 1; t <= 8; t++) { for (const [yy, s] of [[ya2 - t, 0], [yb2 + t, 1]]) { if (yy < y0 || yy > y1 || tch(yy)) continue; const x = rt(yy); if (x == null) continue; pts.push([yy, x]); if (s) nb2++; else na++; } }
+            const pts = []; let na = 0, nb2 = 0; for (let t = 4; t <= 11; t++) { /* 가로 바로 위·아래 3줄(어깨)은 곡선 재는 데 안 씀 */ for (const [yy, s] of [[ya2 - t, 0], [yb2 + t, 1]]) { if (yy < y0 || yy > y1 || tch(yy)) continue; const x = rt(yy); if (x == null) continue; pts.push([yy, x]); if (s) nb2++; else na++; } }
             if (na < 3 || nb2 < 3) continue; /* 위·아래 모두 바깥선이 보일 때만 */
             const m0 = (ya2 + yb2) / 2; let S = [0, 0, 0, 0, 0], T = [0, 0, 0]; for (const [yy, x] of pts) { const d = yy - m0; S[0]++; S[1] += d; S[2] += d * d; S[3] += d * d * d; S[4] += d * d * d * d; T[0] += x; T[1] += x * d; T[2] += x * d * d; }
             const A = [[S[0], S[1], S[2]], [S[1], S[2], S[3]], [S[2], S[3], S[4]]], det = M => M[0][0] * (M[1][1] * M[2][2] - M[1][2] * M[2][1]) - M[0][1] * (M[1][0] * M[2][2] - M[1][2] * M[2][0]) + M[0][2] * (M[1][0] * M[2][1] - M[1][1] * M[2][0]), D0 = det(A); if (Math.abs(D0) < 1e-9) continue;
             const cf = [0, 1, 2].map(c => det(A.map((row, i) => row.map((v, j) => (j === c ? T[i] : v)))) / D0); /* 2차 곡선 맞춤(크라메르) */
-            for (let yy = ya2; yy <= yb2; yy++) { const d = yy - m0, cap = Math.floor(cf[0] + cf[1] * d + cf[2] * d * d + 0.5); for (let x = cap + 1; x < cx; x++) { const q = yy * N + x; if (own[q] === o) { own[q] = k; moved = true; } else if (own[q] === k) break; } } } }
+            const capAt = yy => { const d = yy - m0; return Math.floor(cf[0] + cf[1] * d + cf[2] * d * d + 0.5); };
+            for (let yy = ya2; yy <= yb2; yy++) { const cap = capAt(yy); for (let x = cap + 1; x < cx; x++) { const q = yy * N + x; if (own[q] === o) { own[q] = k; moved = true; } else if (own[q] === k) break; } }
+            for (let t = 1; t <= 3; t++) for (const [yy, dy] of [[ya2 - t, 1], [yb2 + t, -1]]) { if (yy < y0 || yy > y1) continue; const cap = capAt(yy), sh = []; for (let x = cap + 1; x < cx; x++) { const q = yy * N + x; if (own[q] === o && own[q + dy * N] === k) sh.push(q); } if (sh.length >= 2) { for (const q of sh) own[q] = k; moved = true; } } } } /* 어깨 한 줄에 1칸뿐이면 돌기라 안 함(글자부 10-12 「혠」 ㅕ 꼭지 밑 1칸 돌기) */ /* 어깨(본부 10-12 「엥」「엒」 가로 위·아래 모서리 2~3칸) = 같은 곡선 밖이고 가로에서 이어진 칸만 모음 몫 */
       }
     });
     // ㅆ ㅉ + ㅗ ㅘ ㅙ ㅚ 「사발」(본부 10-11) — 두 자음 다리 끝이 만나는 아래 볼록 = 자음 몫(가운데 왼쪽 = 첫 자음 · 오른쪽 = 둘째) · ㅗ 는 사발 아래 기둥만
     //  기둥 = 가로획 위 이 모음 몫 · 사발 = 기둥 위(목이 붙었으면 가장 좁은 목 위 · 떨어진 U 자 글꼴이면 빈 줄 위) 가운데 잉크 줄기 · 가운데 = 사발 맨 아래 3줄 줄기 가운데
     { const chs = out.map((v, j) => j).filter(j => out[j].role === "cho"), vk = out.findIndex(v => v.role === "jung" && v.jamo === "ㅗ");
       if (chs.length === 2 && out[chs[0]].jamo === out[chs[1]].jamo && /[ㅅㅈ]/.test(out[chs[0]].jamo) && vk >= 0) {
+        { /* ㅗ 기둥이 통째로 자음 몫인 글꼴(본부 10-12 「쐓」) = ㅗ 몫 바로 위 줄에서 ㅗ 에 닿은 자음 몫 줄기를 위로 따라가며(가로 너비 35% 이하 줄만) ㅗ 몫으로 · 이미 ㅗ 기둥이 있으면 안 함 */
+          const r0 = new Map(); for (let q = 0; q < N * N; q++) if (own[q] === vk) { const y = (q / N) | 0; r0.set(y, (r0.get(y) || 0) + 1); }
+          const wM = Math.max(0, ...r0.values()), by = [...r0.keys()].sort((a2, b2) => a2 - b2).find(y => r0.get(y) >= 0.8 * wM), upN = by == null ? 0 : [...r0.keys()].filter(y => y < by - 1).reduce((a2, y) => a2 + r0.get(y), 0);
+          if (by != null && upN < 40 && wM > 0.3 * (x1 - x0 + 1)) { let cur = new Set(); for (let y = by - 1; y >= by - 3 && y >= y0; y--) for (let x = x0; x <= x1; x++) { const q = y * N + x; if (chs.includes(own[q]) && (own[q + N] === vk || cur.has(q + N))) cur.add(q); }
+            const runW = (y, x) => { let l = x, r3 = x; while (l > x0 && on(y * N + l - 1)) l--; while (r3 < x1 && on(y * N + r3 + 1)) r3++; return r3 - l + 1; }; const take = new Set(cur);
+            let y = Math.min(...[...cur].map(q => (q / N) | 0)) - 1; let front = [...cur].filter(q => ((q / N) | 0) === y + 1);
+            while (front.length && y >= y0) { const nx = []; for (const q of front) { const j = q - N; if (j >= 0 && chs.includes(own[j]) && !take.has(j) && runW(y, j % N) <= 0.35 * wM) { take.add(j); nx.push(j); } } /* 같은 줄 옆으로 이어진 자음 몫(너비 안) */ for (const q of [...nx]) { let x = q % N; for (const d of [-1, 1]) { let xx = x + d; while (xx >= x0 && xx <= x1 && chs.includes(own[y * N + xx]) && !take.has(y * N + xx) && runW(y, xx) <= 0.35 * wM) { take.add(y * N + xx); nx.push(y * N + xx); xx += d; } } } front = nx; y--; }
+            if (take.size >= 60) { for (const q of take) own[q] = vk; moved = true; } } }
         const rowsK = new Map(); for (let q = 0; q < N * N; q++) if (own[q] === vk) { const y = (q / N) | 0; if (!rowsK.has(y)) rowsK.set(y, []); rowsK.get(y).push(q % N); }
         const ysK = [...rowsK.keys()].sort((a2, b2) => a2 - b2), wOf = y => rowsK.get(y).length, wMax = Math.max(0, ...ysK.map(wOf)), bandY = ysK.find(y => wOf(y) >= 0.8 * wMax && wMax > 0.3 * (x1 - x0 + 1)); /* 가로획 = 이 모음 몫이 가장 넓은 줄(ㅘ ㅙ 는 글자 너비 절반이 안 됨) */
         const stemYs = bandY == null ? [] : ysK.filter(y => y < bandY - 1);
@@ -236,9 +264,26 @@ export function shapeFix(out, mask, N, ch = "") {
           const runAt = (y, x) => { if (!on(y * N + x)) return null; let l = x, r3 = x; while (l > 0 && on(y * N + l - 1)) l--; while (r3 < N - 1 && on(y * N + r3 + 1)) r3++; return [l, r3]; };
           let y = top - 1, gap = 0; while (y >= y0 && !on(y * N + scx) && gap < 10) { y--; gap++; } /* U 자 글꼴 = 기둥과 사발 사이 빈 줄 */
           const bot = []; for (let t = 0; t < 3 && y - t >= y0; t++) { const r = runAt(y - t, scx); if (r) bot.push((r[0] + r[1]) / 2); }
-          if (bot.length && (nw < 0.6 * ws || gap > 0)) { const cx = Math.round(bot.sort((a2, b2) => a2 - b2)[bot.length >> 1]), bw = ws; /* 줄기 너비 상한 = 기둥 너비 3배(사발 맨 아래는 뾰족해서 기준 안 됨) */
+          if (bot.length && (nw < 0.6 * ws || gap > 0)) { let cx = Math.round(bot.sort((a2, b2) => a2 - b2)[bot.length >> 1]); const bw = ws; /* 줄기 너비 상한 = 기둥 너비 3배(사발 맨 아래는 뾰족해서 기준 안 됨) */
+            { /* 경계 = 사발 줄 전체 가운데 평균(글자부 C · 「쫏」「쐬」 — 맨 아래 3줄 가운데로 잡아 위 줄들에서 왼쪽이 2~3px 좁던 것) · 평균 치우침 0.75px 미만이면 그대로(홀수 폭 1px 는 반올림 한계) */
+              const cs = []; for (let yy = y; yy >= y0; yy--) { const r = runAt(yy, cx); if (!r || r[1] - r[0] + 1 > 3 * bw) break; cs.push((r[0] + r[1] + 1) / 2); }
+              if (cs.length >= 3) { const mc = cs.reduce((a2, b2) => a2 + b2, 0) / cs.length; if (Math.abs(cx - mc) >= 0.75) cx = Math.round(mc); } }
             for (let yy = y; yy >= y0; yy--) { const r = runAt(yy, cx); if (!r || r[1] - r[0] + 1 > 3 * bw) break;
               for (let x = r[0]; x <= r[1]; x++) { const q = yy * N + x, o = own[q]; if (o !== vk && !chs.includes(o)) continue; const to = x < cx ? chs[0] : chs[1]; if (o !== to) { own[q] = to; moved = true; } } } } } } }
+    // ㄸ + ㅗ ㅘ ㅙ ㅚ — ㅗ 기둥 윗머리(ㄷ 아래 가로 밑으로 나온 1~2줄)가 ㄷ 몫이던 것 = ㅗ 몫(글자부 C · 「뙬」「뙗」「똿」「똰」「뙃」) · ㄸ 아래 가로는 ㄷ 몫 그대로(본부 결정)
+    //  기둥 = 가로획 위로 이어진 이 모음 몫 줄 · 기둥 맨 윗줄 위로 4줄까지: 기둥 왼끝(또는 오른끝) 바로 바깥이 빈칸이고 기둥 너비 80%↑ 잉크인 줄 = 기둥 머리
+    //  머리 줄에서 그 빈칸 쪽 ㄷ 몫은 ㅗ 몫 · 반대쪽 ㄷ 몫은 바로 위가 빈칸인 것만(맞은편 ㄷ 아래 가로 밑줄은 그대로)
+    { const chs = out.map((v, j) => j).filter(j => out[j].role === "cho"), vk = out.findIndex(v => v.role === "jung" && v.jamo === "ㅗ");
+      if (chs.length === 2 && out[chs[0]].jamo === "ㄷ" && out[chs[1]].jamo === "ㄷ" && vk >= 0) {
+        const rowsK = new Map(); for (let q = 0; q < N * N; q++) if (own[q] === vk) { const y = (q / N) | 0; if (!rowsK.has(y)) rowsK.set(y, []); rowsK.get(y).push(q % N); }
+        const ysK = [...rowsK.keys()].sort((a2, b2) => a2 - b2), wOf = y => rowsK.get(y).length, wMax = Math.max(0, ...ysK.map(wOf)), bandY = ysK.find(y => wOf(y) >= 0.8 * wMax && wMax > 0.3 * (x1 - x0 + 1));
+        if (bandY != null) { let top = bandY - 1; while (rowsK.has(top - 1)) top--; const stemYs = ysK.filter(y => y >= top && y < bandY - 1);
+          if (stemYs.length >= 3) { const sx = rowsK.get(stemYs[stemYs.length >> 1]), sl = Math.min(...sx), sr = Math.max(...sx), sw = sr - sl + 1;
+            if (sw < 0.5 * wMax) { const hr = []; for (let y = top - 1; y >= Math.max(y0, top - 4); y--) {
+                const eL = on(y * N + sl) && !on(y * N + sl - 1), eR = on(y * N + sr) && !on(y * N + sr + 1); if (!eL && !eR) break;
+                let n = 0; for (let x = sl; x <= sr; x++) if (on(y * N + x)) n++; if (n < 0.8 * sw) break; hr.push([y, eL, eR]); }
+              if (hr.length) { const yA = hr.at(-1)[0] - 3; let bL = N, rR = -1; for (let x = x0; x <= x1; x++) { const o = own[yA * N + x]; if (o === chs[1] && x < bL) bL = x; if (o === chs[0] && x > rR) rR = x; } /* 머리 2줄 위(이음매 잔 조각 피함)의 둘째 ㄷ 왼끝 · 첫 ㄷ 오른끝 = 맞은편 ㄷ 가로 경계(「똒」 — 둘째 ㄷ 아래 가로 모서리는 그대로) */
+                for (const [y, eL, eR] of hr) for (let x = sl; x <= sr; x++) { const q = y * N + x, o = own[q]; if (!on(q) || o === vk || !chs.includes(o)) continue; if ((eL && (o === chs[0] || x < bL)) || (eR && (o === chs[1] || x > rR))) { own[q] = vk; moved = true; } } } } } } } }
     // 겹모음 오른쪽 ㅣ(ㅐㅔㅒㅖㅚㅟㅢ…) 기둥 왼쪽에 붙은 잉크 = 앞 모음 몫(본부 10-10 경계 그림 「대」 — ㅐ 가운데 가로대가 ㅣ 몫이던 것)
     out.forEach((u, k) => {
       if (u.role !== "jung" || u.jamo !== "ㅣ" || k === 0 || out[k - 1].role !== "jung") return;
@@ -247,6 +292,78 @@ export function shapeFix(out, mask, N, ch = "") {
       if (cx < 0) return;
       for (let y = y0; y <= y1; y++) for (let x = x0; x < cx; x++) { const q = y * N + x; if (own[q] === k) { own[q] = k - 1; moved = true; } }
     });
+    // ㅟ ㅝ ㅞ 의 ㅜ 다리가 받침 윗가로에 붙은 글꼴 = 받침 윗가로 위 받침 몫(ㅜ 가로 아랫줄·다리) 중 ㅜ 에 이어진 것은 ㅜ 몫(본부 10-12 획순 칠 「쉼」「윔」「뮘」 — ㅜ 다리가 ㅁ 몫이라 ㅁ 획 자료가 위로 늘어남)
+    { const vk = out.findIndex((v, j) => v.role === "jung" && v.jamo === "ㅜ" && out[j + 1]?.role === "jung"), jk = out.findIndex(v => v.role === "jong");
+      if (vk >= 0 && jk >= 0 && /^[ㄱㄷㄹㅁㅋㅌㅍ]$/.test(out[jk].jamo) && out[jk + 1]?.role !== "jong") {
+        const rowsJ = new Map(); for (let q = 0; q < N * N; q++) if (own[q] === jk) { const y = (q / N) | 0; rowsJ.set(y, (rowsJ.get(y) || 0) + 1); }
+        const wMax = Math.max(0, ...rowsJ.values()), yTop = [...rowsJ.keys()].sort((a2, b2) => a2 - b2).find(y => rowsJ.get(y) >= 0.8 * wMax); /* 받침 윗가로 = 받침 몫이 넓이 80%↑ 인 첫 줄 */
+        if (yTop != null) { const seen = new Uint8Array(N * N), st = []; for (let q = 0; q < yTop * N; q++) { if (own[q] !== jk) continue; const x = q % N; if ([x > 0 ? q - 1 : -1, x < N - 1 ? q + 1 : -1, q - N, q + N].some(j => j >= 0 && own[j] === vk)) { seen[q] = 1; st.push(q); } }
+          const cc = []; while (st.length) { const q = st.pop(), x = q % N; cc.push(q); for (const j of [x > 0 ? q - 1 : -1, x < N - 1 ? q + 1 : -1, q - N, q + N]) if (j >= 0 && j < yTop * N && !seen[j] && own[j] === jk) { seen[j] = 1; st.push(j); } }
+          const ys = cc.map(q => (q / N) | 0); if (cc.length >= 60 && Math.max(...ys) - Math.min(...ys) >= 6) { for (const q of cc) own[q] = vk; moved = true; } } } } /* 다리 모양(6줄↑ · 60칸↑)일 때만 — 받침 윗줄 한 줄·낱 점은 그대로 */
+    // ㅜ ㅠ 기둥 끝이 받침 ㅂ(ㅄ) 오른기둥 안으로 들어간 것 = ㅂ 몫(본부 10-12 대체 표 Q4 「퓞」「쉾」 — ㅜ 색이 ㅂ 오른기둥 안 약 11칸)
+    { const vk = out.findIndex(v => v.role === "jung" && /[ㅜㅠ]/.test(v.jamo)), jk = out.findIndex(v => v.role === "jong");
+      if (vk >= 0 && jk >= 0 && out[jk].jamo === "ㅂ" && out[jk + 1]?.role === "jong") { let ya = N, xa = N, xb = -1; for (let q = 0; q < N * N; q++) if (own[q] === jk) { const x = q % N, y = (q / N) | 0; if (y < ya) ya = y; if (x < xa) xa = x; if (x > xb) xb = x; }
+        if (ya < N) for (let q = (ya + 1) * N; q < N * N; q++) { const x = q % N; if (own[q] === vk && x >= xa && x <= xb + 2) { own[q] = jk; moved = true; } } } }
+    // ㅇ ㅎ + ㅓㅔㅕㅖ 고리–가로 맞닿은 곳(글자부 10-12 묶음 A · 검사부 s6 판정) = 고리 바깥 곡선(타원 맞춤) 안만 고리 몫 · 곡선 밖은 가로획 몫
+    //  타원 = 가로에 안 닿은 바깥 테두리 점(왼끝·오른끝·위·아래)으로 맞춘 축 나란한 타원 · 고리에서 이어진 잉크 줄만 · 어깨(가로와 안 이어진 줄)는 위·아래가 가로 몫일 때만
+    { const sj = split(ch); const o = out.findIndex(v => v.role === "cho" && v.ring?.size && v.hole != null);
+      if (sj && /[ㅇㅎ]/.test(sj.cho) && /[ㅓㅔㅕㅖ]/.test(sj.jung) && o >= 0 && hl[out[o].hole] >= 0) {
+        const hb = hbox[hl[out[o].hole]], hid = hl[out[o].hole], [hx0, hy0, hx1, hy1] = hb, cyh = (hy0 + hy1) >> 1;
+        let T = 0; for (let x = hx0 - 1; x >= 0 && own[cyh * N + x] === o; x--) T++;
+        const ry0 = Math.max(0, hy0 - T - 3), ry1 = Math.min(N - 1, hy1 + T + 3), pts = [], runs = new Map();
+        const holeRow = y => { let a2 = -1, b2 = -1; for (let x = hx0; x <= hx1; x++) if (hl[y * N + x] === hid) { if (a2 < 0) a2 = x; b2 = x; } return a2 < 0 ? null : [a2, b2]; };
+        for (let y = ry0; y <= ry1; y++) { let xl = -1, xr = -1; for (let x = 0; x < Math.min(N, hx1 + T + 8); x++) if (own[y * N + x] === o) { if (xl < 0) xl = x; xr = x; } if (xl < 0) continue;
+          if (xl > 0 && !on(y * N + xl - 1)) pts.push([xl, y + 0.5]);
+          const hr = holeRow(y); let x; if (hr) x = hr[1] + 1; else { x = -1; for (let xx = xl; xx <= Math.min(xr, hx1 + T + 4); xx++) if (own[y * N + xx] === o) x = xx; if (x < 0) continue; while (x > 0 && on(y * N + x - 1)) x--; }
+          if (!on(y * N + x)) continue; const st = x; while (x < N - 1 && on(y * N + x + 1)) x++; runs.set(y, [st, x]);
+          if (own[y * N + x] === o && !on(y * N + x + 1)) pts.push([x + 1, y + 0.5]); }
+        for (let x = hx0; x <= hx1; x++) { let t = hy0 - 1; while (t >= ry0 && own[t * N + x] === o) t--; if (t < hy0 - 1 && t >= 0 && !on(t * N + x)) pts.push([x + 0.5, t + 1]);
+          let b = hy1 + 1; while (b <= ry1 && own[b * N + x] === o) b++; if (b > hy1 + 1 && b < N && !on(b * N + x)) pts.push([x + 0.5, b]); }
+        // 최소제곱 a x² + c y² + d x + e y = 1
+        const M = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]], R = [0, 0, 0, 0]; for (const [x, y] of pts) { const f = [x * x, y * y, x, y]; for (let i = 0; i < 4; i++) { R[i] += f[i]; for (let j = 0; j < 4; j++) M[i][j] += f[i] * f[j]; } }
+        let sol = null; if (pts.length >= 20) { const A2 = M.map((row, i) => [...row, R[i]]); let okS = true; for (let i = 0; i < 4 && okS; i++) { let p = i; for (let j = i + 1; j < 4; j++) if (Math.abs(A2[j][i]) > Math.abs(A2[p][i])) p = j; if (Math.abs(A2[p][i]) < 1e-12) { okS = false; break; } [A2[i], A2[p]] = [A2[p], A2[i]]; for (let j = 0; j < 4; j++) if (j !== i) { const f = A2[j][i] / A2[i][i]; for (let c = i; c < 5; c++) A2[j][c] -= f * A2[i][c]; } } if (okS) sol = A2.map((row, i) => row[4] / row[i]); }
+        const xrAt = y => { const [a2, c2, d2_, e2] = sol, kk = c2 * y * y + e2 * y - 1, disc = d2_ * d2_ - 4 * a2 * kk; return disc < 0 ? null : (-d2_ + Math.sign(a2) * Math.sqrt(disc)) / (2 * a2); }; /* 큰 쪽 근 = 오른쪽 */
+        let fitOk = !!sol && sol[0] * sol[1] > 0; if (fitOk) { let s = 0, n = 0; for (const [x, y] of pts) if (x > hx1) { const b = xrAt(y); if (b == null) continue; s += Math.abs(x - b); n++; } fitOk = n >= 6 && s / n <= 1; }
+        if (fitOk) { const jIdx = q => { const v = own[q]; return v >= 0 && out[v].role === "jung" ? v : -1; };
+          const zone = new Set(); for (const [y, [st, en]] of runs) { let r0 = false, rj = false; for (let x = st; x <= en; x++) { const v = own[y * N + x]; if (v === o) r0 = true; else if (v >= 0) rj = true; } if (r0 && rj) zone.add(y); }
+          const cleanR = new Map(); for (const [y, [st, en]] of runs) if (!zone.has(y) && own[y * N + en] === o) cleanR.set(y, en + 1); /* 가로에 안 닿은 줄의 고리 오른끝(경계) */
+          const capC = y => { let u = null, d = null; for (let t = 1; t <= 12 && (u == null || d == null); t++) { if (u == null && cleanR.has(y - t)) u = cleanR.get(y - t); if (d == null && cleanR.has(y + t)) d = cleanR.get(y + t); } return u == null || d == null ? Infinity : Math.max(u, d); }; /* 가로 줄 고리 = 위·아래 맨 가까운 고리 끝 중 큰 쪽 넘지 않음(곡선 꼭짓점 볼록 안 만듦 · 「얺」) */
+          for (const [y, [st, en]] of runs) { if (!zone.has(y)) continue; const b = xrAt(y + 0.5); if (b == null) continue; let jr = -1; for (let x = en; x >= st; x--) if (jIdx(y * N + x) >= 0) { jr = jIdx(y * N + x); break; } if (jr < 0) continue;
+            for (let x = st; x <= en; x++) { const q = y * N + x, v = own[q]; if (x + 1 < b && x + 1 <= capC(y)) { if (v >= 0 && out[v].role === "jung") { own[q] = o; moved = true; } } else if (x + 0.5 >= b && v === o) { own[q] = jr; moved = true; } } /* 가로 → 고리 = 픽셀 가운데가 곡선 안 0.5칸↑일 때만(곡선 꼭짓점 1칸 볼록 안 만듦 · 「억」) */ }
+          for (const [y, [st, en]] of runs) { if (!zone.has(y)) continue; const b = xrAt(y + 0.5); if (b == null) continue; /* 오목 홈 메움 = 같은 열 위·아래 4줄 안에 고리가 있고 곡선 밖이 아닌 가로 몫은 고리(「에」 ㅇ 오른끝 열 가운데 4줄 파랑) */
+            for (let x = st; x <= en && x + 0.5 < b; x++) { const q = y * N + x; if (own[q] < 0 || out[own[q]].role !== "jung") continue; let up = false, dn = false; for (let t = 1; t <= 4; t++) { if (own[q - t * N] === o) up = true; if (own[q + t * N] === o) dn = true; } if (up && dn) { own[q] = o; moved = true; } } }
+          // 어깨 = 가로와 안 이어진 줄의 곡선 밖 고리 픽셀 중 위·아래가 가로 몫인 것(가로에서 바깥쪽으로 3줄까지)
+          for (let pass = 0; pass < 3; pass++) for (const [y, [st, en]] of runs) { if (zone.has(y)) continue; const b = xrAt(y + 0.5); if (b == null) continue;
+            for (let x = Math.max(st, Math.ceil(b - 0.5)); x <= en; x++) { const q = y * N + x; if (own[q] !== o || x + 0.5 < b) continue; const jv = jIdx(q - N) >= 0 ? jIdx(q - N) : jIdx(q + N); if (jv >= 0) { own[q] = jv; moved = true; } } } } } }
+    // ㅜ ㅠ 띠에 닿는 곳 곧게(글자부 10-12) — ① 다리 끝이 받침 획에 내려앉은 곳(「웂」「뜂」「뮚」 다리 밑동 톱니 · 「꾻」「쿬」「훇」 다리 끝을 받침이 먹음)
+    //  다리를 따라 내려가다 잉크 줄이 다리보다 2칸↑ 넓어지는 줄(닿는 줄)부터, 다리 너비를 다 못 덮게 되는 줄(받는 획만 남은 줄) 앞까지 = 닿는 곳
+    //  닿는 곳 = 받는 획 너비(그 아래 줄) 안은 받침 몫 · 밖으로 나온 다리(3칸↑)는 모음 몫 · 닿는 곳이 다리 너비 60% 넘게 길면(「휺」 ㅎ 꼭지와 나란히) 안 함
+    //  ② 초성 세로획 아래끝이 띠 윗변에 붙은 곳(「퀫」「퀭」 — ㅜ 가로 윗가장자리 오른쪽이 ㅋ 색) = 세로획보다 넓어지는 줄부터 띠까지 모음 몫
+    { const runsAt = (y, a, b) => { let ra = N, rb = -1; for (let x = Math.max(0, a); x <= Math.min(N - 1, b); x++) if (on(y * N + x)) { let l = x, r3 = x; while (l > 0 && on(y * N + l - 1)) l--; while (r3 < N - 1 && on(y * N + r3 + 1)) r3++; if (l < ra) ra = l; if (r3 > rb) rb = r3; x = r3; } return rb < 0 ? null : [ra, rb]; };
+      out.forEach((v, vk) => { if (v.role !== "jung" || !/[ㅜㅠ]/.test(v.jamo)) return;
+        const cR = new Map(); for (let q = 0; q < N * N; q++) if (own[q] === vk) { const y = (q / N) | 0; cR.set(y, (cR.get(y) || 0) + 1); }
+        const wM = Math.max(0, ...cR.values()); if (wM < 0.3 * W) return; const bTop = [...cR.keys()].sort((a2, b2) => a2 - b2).find(y => cR.get(y) >= 0.6 * wM); let bBot = bTop; while ((cR.get(bBot + 1) || 0) >= 0.6 * wM) bBot++;
+        // ① 다리
+        let yl = -1, legs = []; for (let y = bBot + 1; y <= Math.min(y1, bBot + 12) && yl < 0; y++) { const rs = []; for (let x = x0; x <= x1; x++) if (own[y * N + x] === vk) { if (rs.length && rs.at(-1)[1] === x - 1) rs.at(-1)[1] = x; else rs.push([x, x]); } if (rs.length && rs.every(r2 => r2[1] - r2[0] + 1 <= 0.35 * wM)) { yl = y; legs = rs.filter(r2 => r2[1] - r2[0] >= 2); } }
+        for (const g of legs) { let r0 = runsAt(yl, g[0], g[1]); if (!r0) continue; let [ll, lr] = r0, yj = -1;
+          for (let y = yl + 1; y <= y1; y++) { const r2 = runsAt(y, ll - 1, lr + 1); if (!r2) break; if (r2[0] < ll - 1 || r2[1] > lr + 1) { yj = y; break; } if (r2[1] - r2[0] + 1 >= 0.8 * (r0[1] - r0[0] + 1)) [ll, lr] = r2; } /* 다리 끝 모서리가 좁아지는 줄은 다리 너비를 줄이지 않음(「쮮」 — 좁아진 너비로 재 받침 기둥 머리에 다리 색 4칸) */
+          if (yj < 0) continue; const lw = lr - ll + 1; let yr = -1, sp = null;
+          for (let y = yj; y <= Math.min(y1 + 1, yj + lw); y++) { const r2 = y <= y1 ? runsAt(y, ll, lr) : null; if (!r2) { yr = y; sp = runsAt(y - 1, ll, lr); /* 다리 칸 아래가 빔 = 받침 가로 위에 앉음 · 다만 닿는 줄 옆 받침 기둥이 아래로 이어지면(「눤」 — 다리 끝이 ㄴ 기둥 머리 옆) 그 기둥만 받는 획 */ if (sp && y <= y1) { let pl = N, pr = -1; for (let x = sp[0]; x <= sp[1]; x++) if (on(y * N + x)) { let l = x, r3 = x; while (r3 + 1 <= sp[1] && on(y * N + r3 + 1)) r3++; if (r3 >= ll - 2 && l <= lr + 2 || Math.min(Math.abs(r3 - ll), Math.abs(l - lr)) <= 2) { if (l < pl) pl = l; if (r3 > pr) pr = r3; } x = r3; } if (pr >= 0) sp = [pl, pr]; } break; } if (r2[1] < lr - 1 || r2[0] > ll + 1) { yr = y; sp = r2; break; } }
+          if (yr < 0 || !sp || yr - yj > 0.6 * lw) { /* 닿는 곳이 길면(받침 꼭지와 나란히 · 「휺」) = 다리 옆 받침 몫 1~2칸 실선만 모음 몫 */
+            for (let y = yj; y <= y1; y++) { let any = false; for (let x = ll; x <= lr; x++) if (own[y * N + x] === vk) { any = true; break; } if (!any) break;
+              for (const [x, d] of [[ll - 1, -1], [lr + 1, 1]]) { const w = []; let xx = x; while (own[y * N + xx] === vk && Math.abs(xx - x) < 3) xx += d; for (let t = 0; t < 3 && on(y * N + xx); t++, xx += d) w.push(y * N + xx); if (w.length && w.length <= 2 && w.every(q => own[q] >= 0 && out[own[q]].role === "jong")) { for (const q of w) own[q] = vk; moved = true; } } }
+            continue; }
+          const cnt = new Map(), ys = Math.min(yr, y1); for (let x = sp[0]; x <= sp[1]; x++) { const o = own[ys * N + x]; if (o >= 0 && o !== vk && out[o].role === "jong") cnt.set(o, (cnt.get(o) || 0) + 1); } if (!cnt.size) continue; const jk = [...cnt].sort((p2, r2) => r2[1] - p2[1])[0][0];
+          const jr0 = runsAt(yj, ll, lr), top = out[jk].jamo === "ㅁ" || (jr0 && (jr0[0] < Math.min(ll, sp[0]) - 2 || jr0[1] > Math.max(lr, sp[1]) + 2)); /* 닿는 줄 받침 획이 다리·받는 획 밖으로 더 뻗음 = 다리 밑을 가로지르는 가로획(「췲」 ㄹ 윗가로 — 가운데를 모음 몫으로 하면 왼쪽 토막이 떨어져 나감) */ /* ㅁ 윗가로에 내려앉은 다리 = 닿는 줄 전부 ㅁ 몫(「뀳」 — 윗가로 두께만큼만 닿아 아래 줄로는 가로 끝을 못 잼) */ for (let y = yj; y < Math.max(yr, yj + 1); y++) { let outN = 0; for (let x = ll; x <= lr; x++) if ((x < sp[0] || x > sp[1]) && on(y * N + x)) outN++;
+            for (let x = Math.min(ll, sp[0]); x <= Math.max(lr, sp[1]); x++) { const q = y * N + x, o = own[q]; if (!on(q) || (o !== vk && o !== jk)) continue; const to = (x >= sp[0] && x <= sp[1]) || top ? jk : x >= ll && x <= lr ? (outN >= 3 ? vk : jk) : o; if (to !== o) { own[q] = to; moved = true; } } } }
+        // ② 초성 세로획
+        out.forEach((c, ck) => { if (c.role !== "cho") return; const yv = bTop - 8; if (yv < y0) return;
+          const seen = new Set(); for (let x = x0; x <= x1; x++) { const q = yv * N + x; if (own[q] !== ck || seen.has(x)) continue; const r0 = runsAt(yv, x, x); for (let t = r0[0]; t <= r0[1]; t++) seen.add(t); if (r0[1] - r0[0] + 1 > 0.3 * wM) continue;
+            let [a, b] = r0, yj = -1, ok = false; for (let y = yv + 1; y < bTop; y++) { const r2 = runsAt(y, a - 1, b + 1); if (!r2) break; if (yj < 0 && (r2[0] < a - 1 || r2[1] > b + 1)) yj = y; if (yj < 0) [a, b] = r2; if (y === bTop - 1) ok = true; }
+            if (yj < 0 || !ok || bTop - yj > 6) continue; let touch = 0; { const r2 = runsAt(bTop - 1, a - 1, b + 1); for (let x2 = r2[0]; x2 <= r2[1]; x2++) if (own[bTop * N + x2] === vk) touch++; } if (touch < 3) continue;
+            const take = []; for (let y = yj; y < bTop; y++) { const r2 = runsAt(y, a - 1, b + 1); for (let x2 = r2[0]; x2 <= r2[1]; x2++) if (own[y * N + x2] === ck) take.push(y * N + x2); }
+            for (const q of take) own[q] = vk; if (take.length) moved = true;
+            for (let it = 0; it < 4; it++) { let ch2 = false; for (let y = yj - 4; y < yj; y++) for (let x2 = x0; x2 <= x1; x2++) { const q = y * N + x2; if (own[q] !== ck || (x2 >= a - 1 && x2 <= b + 1)) continue; if (own[q + N] === vk || own[q - 1] === vk || own[q + 1] === vk) { own[q] = vk; ch2 = true; moved = true; } } if (!ch2) break; } } }); }); }
     if (moved) { const keep = out.map(u => u.px);
       // 빈 칸 = 제 칸 자리 잉크를 가장 많이 가진 다른 자음에게서 제 칸 가운데에 더 가까운 픽셀을 받음(「흓」 — ㅡ 가 띠를 찾아가 빈 ㄱ 이 옛 픽셀로 돌아가 ㅡ 와 겹치던 것 · ㄳ 통째가 ㅅ 몫)
       const rel = q => [((q % N) - x0 + 0.5) / W, (((q / N) | 0) - y0 + 0.5) / Hh], ctr = r => [(r[0] + r[2]) / 2, (r[1] + r[3]) / 2], d2 = (a2, b2) => (a2[0] - b2[0]) ** 2 + (a2[1] - b2[1]) ** 2;
