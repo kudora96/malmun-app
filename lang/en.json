@@ -103,6 +103,7 @@
  "subs_peek": "Show",
  "w_tip": "Tap a letter — you hear it",
  "why_tail": "The end wasn’t heard: {tail} — say it all the way through",
+ "why_tail_short": "The end wasn’t heard: {tail}",
  "why_other": "It sounded like something else — listen to the model {say} and repeat it",
  "why_heard_as": "{w} sounded like {h}",
  "why_missing": "{w} wasn’t heard",
