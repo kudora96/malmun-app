@@ -30,15 +30,31 @@
     const lens = [...document.querySelectorAll(".line")].map((l, i) => [i, (l.querySelector(".ko")?.textContent || l.textContent).replace(/[^가-힣]/g, "").length]).filter(([i]) => i < document.querySelectorAll(".line").length - 1).sort((a, b) => a[1] - b[1]);
     const short = lens[0][0];
     for (MODE of ["kb", "hand"]) { const watchM = watchPos, tag = MODE === "kb" ? "[자판]" : "[손글씨]";
-    // ⓐ [자동 완성] → 줄 끝 → 5초 그대로
-    await openWrite(short); const sub0 = sub();
-    btn("line").click(); let g = 0; while (!S().lineEnd && g++ < 1500) await W(200);
-    const atEnd = S().lineEnd; let g2 = 0; await W(300); while (S().sent && g2++ < 200) await W(100); const heardLine = g2 > 0; const w5 = await watchM(5000); // 대사가 끝난 뒤 5초(본부 10-12 — W6 자동 넘김이 대사 뒤에 오므로)
+    // ⓐ [자동 완성] → 지금 토막 끝 → 5초 그대로(본부 10-12 「그 단락」 = 토막)
+    await openWrite(short); const sub0 = sub(), s0 = S().s;
+    btn("line").click(); let g = 0; while (!S().segEnd && g++ < 1500) await W(200);
+    const atEnd = S().segEnd && S().s === s0; let g2 = 0; await W(300); while (S().sent && g2++ < 200) await W(100); const heardLine = g2 > 0; const w5 = await watchM(5000); // 대사가 끝난 뒤 5초(본부 10-12 — W6 자동 넘김이 대사 뒤에 오므로)
     ok(atEnd && sub() === sub0 && !S().auto && !S().allNext && !shown().length && heardLine && w5.flashes === 0 && w5.dings === 0 && w5.worst === 0 && sounds() === 0,
-      tag + " ⓐ [자동 완성] = 줄 끝에서 멈춤 · 5초 동안 다음 줄로 안 감 · 자동 꺼짐 · 소리 없음", `${sub0} → ${sub()} · 줄끝 ${atEnd} · 자동 ${S().auto} · 단추 ${shown().join(",") || "없음"} · 대사 ${heardLine} · 걸음 ${w5.flashes} · 딩동 ${w5.dings}`);
-    // 다시 누르면 같은 줄 처음부터
-    btn("line").click(); await W(700); ok(S().auto && S().autoMode === "line" && S().s === 0 && !S().lineEnd && sub() === sub0, tag + " ⓐ 줄 끝에서 다시 [자동 완성] = 같은 줄 처음부터", `${pos()} · ${sub()}`);
+      tag + " ⓐ [자동 완성] = 지금 토막 끝에서 멈춤 · 토막 소리 한 번 · 5초 동안 다음 토막·줄로 안 감 · 자동 꺼짐", `${sub0} → ${sub()} · 토막끝 ${atEnd} · 자동 ${S().auto} · 단추 ${shown().join(",") || "없음"} · 대사 ${heardLine} · 걸음 ${w5.flashes} · 딩동 ${w5.dings}`);
+    // 다시 누르면 같은 토막 처음부터
+    btn("line").click(); await W(700); ok(S().auto && S().autoMode === "line" && S().s === s0 && S().w === 0 && !S().segEnd && sub() === sub0, tag + " ⓐ 토막 끝에서 다시 [자동 완성] = 같은 토막 처음부터", `${pos()} · ${sub()}`);
     btn("line").click(); await W(400); await closeP();
+    // ⓒ 여러 토막 줄(2번 줄 「선생님! / 저 글자 만들었어요!」) × 토막 1/2·2/2 × 시작 자리(첫 글자 · 가운데 글자 자모 하나 · 마지막 글자 자모 하나) → 그 토막 끝에서 멈춤 · 5초 그대로(투덜이 10-12)
+    if (MODE === "kb") for (const seg of [0, 1]) for (const at of ["first", "mid", "last"]) {
+      await openWrite(1); if (seg) { $(".panel .segnav [data-seg=\"1\"]")?.click(); await W(700); }
+      const subC = sub(), sC = S().s;
+      if (at !== "first") { // 미리 한 번 돌려 그 토막 글자 자리 목록을 알고 → 다시 처음부터 돌리다 목표 글자 자모 하나 친 순간 멈춤
+        const seen = []; btn("line").click(); let g0 = 0; while (!S().segEnd && g0++ < 900) { const k = `${S().w}.${S().c}`; if (seen[seen.length - 1] !== k) seen.push(k); await W(100); }
+        let g1 = 0; while (S().sent && g1++ < 150) await W(100);
+        const tgt = at === "last" ? seen[seen.length - 1] : seen[Math.floor(seen.length / 2)];
+        btn("line").click(); let g2 = 0; while (!(`${S().w}.${S().c}` === tgt && S().k >= 1) && g2++ < 900) await W(30);
+        btn("line").click(); await W(600);
+      }
+      const pBefore = pos(); btn("line").click(); let g3 = 0; while (!S().segEnd && g3++ < 900) await W(200);
+      const end = S().segEnd && S().s === sC; let g4 = 0; while (S().sent && g4++ < 150) await W(100); const st5 = await watchPos(5000);
+      ok(end && S().s === sC && sub() === subC && !S().auto && st5.flashes === 0 && st5.dings === 0, `[자판] ⓒ 2번 줄 토막 ${seg + 1}/2 · 시작 ${at} → 그 토막 끝에서 멈춤 · 5초 동안 토막 번호 그대로`, `${pBefore} → ${pos()} · 토막 ${sC}→${S().s} · 걸음 ${st5.flashes}`);
+      await closeP();
+    }
     // ⓑ 바꿔 누르기 4가지
     for (const [a, b] of [["all", "line"], ["line", "all"], ["all", "all"], ["line", "line"]]) {
       await openWrite(0); const subA = sub();

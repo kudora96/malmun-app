@@ -103,6 +103,7 @@
  "subs_peek": "보기",
  "w_tip": "글자를 누르면 소리가 나요",
  "why_tail": "뒷부분이 안 들렸어요: {tail} — 끝까지 말해 보세요",
+ "why_tail_short": "뒷부분이 안 들렸어요: {tail}",
  "why_other": "다른 말로 들렸어요 — 본보기 {say} 듣고 따라 해 보세요",
  "why_heard_as": "{w} 부분이 {h}처럼 들렸어요",
  "why_missing": "{w} 부분이 안 들렸어요",
