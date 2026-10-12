@@ -18,9 +18,11 @@
 ## 1. 언어부 쪽 「넘겨도 됨」 조건 (sync_lang 이 먼저 확인 · 하나라도 안 되면 그 언어는 건너뜀)
 
 1. `state_{xx}.json` 에 S6·S7·S8 끝 · `report_{xx}.md` 마지막 줄에 ✗ 없음
-2. `09_lang/ui/check_ui.py {xx}` ✗0 — 앱 en.json 열쇠 전부 · 자리 `{n}` `{c}` 같은 묶음 · ASCII `"` 만
+2. `python 09_lang/ui/check_ui.py 09_lang/ui/todo_{xx}.json` ✗0(언어부) — 앱 en.json 열쇠 전부 · 자리 `{n}` `{c}` 같은 묶음 · ASCII `"` 만 · 넘길 파일 = `--export` 결과 `09_lang/ui/out/{xx}/`(같은 것을 `09_lang/{xx}/` 에도)
+   - sync_lang 도 자리 묶음을 다시 견줌(다르면 그 언어 건너뜀)
 3. out v2 의 `langs` 에 xx · 앱 sync_v9 검사(check_v2) 통과
-4. 프로필 `profiles/{xx}.json` 에 `dir` · `font_note` · `line_height_min` · `min_font_px`
+4. 프로필 `profiles/{xx}.json` 의 `status` 가 「보류」가 아님(ky 건너뜀) · `dir` · `line_height_min` · `min_font_px`(빈 값 = 앱 기본값)
+- ne 는 `09_lang/ne/` 가 없음 → 앱 글만 `ui/out/ne/` 에서 · 대사층·설명은 04_subtitles·out v2(sync_content·sync_v9)
 
 ## 2. 다국어부: `python tools/sync_lang.py <편> <xx[,yy,…]|all> [--dry]`
 
@@ -28,8 +30,8 @@
 
 | 하는 일 | 원본 → 앱 |
 |---|---|
-| 앱 글 | `09_lang/{xx}/lang_{xx}.json` → `lang/{xx}.json` |
-| 앱 글 한국어판(ने ⇄ 한 토글) | `09_lang/{xx}/lang_{xx}.ko.json` → `lang/{xx}.ko.json` |
+| 앱 글 | `09_lang/ui/out/{xx}/lang_{xx}.json`(없으면 `09_lang/{xx}/`) → `lang/{xx}.json` |
+| 앱 글 한국어판(ने ⇄ 한 토글) | 같은 자리 `lang_{xx}.ko.json` → `lang/{xx}.ko.json` |
 | 대사 번역층 | `09_lang/{xx}/{ep}.{xx}.json` → `data/{ep}/{ep}.{xx}.json` |
 | 언어 표 | 프로필 → `js/langs.js` 의 `{xx}` 칸 `{dir, font, lh, minpx, ko_ui, stage}` |
 | 설명(v9 v2) | `sync_v9.py {ep}` 한 번(모든 언어가 든 out v2 · 없는 소리는 단추 숨김 = 글만 단계) |
@@ -37,6 +39,9 @@
 
 - `stage`: `pilot`(개발 주소에서만 · 지구 목록·자동 선택에 들어감) → `ready`(공개 · **본부 신호 때만** 바꿈). 처음 넣을 때는 늘 `pilot`.
 - i18n.js 는 `js/langs.js` 를 읽어 READY·RTL·글꼴 링크·KO_UI·줄 높이(`--lang-lh`)를 정한다(10-12 옮김 끝 · 공개로 바꾸기 = `sync_lang.py --ready xx`).
+- **앱에서 고친 글 보호**: 앱 쪽 값 ≠ 원본 값인 열쇠가 있으면 그 언어는 **덮지 않고** 표(열쇠 · 앱 값 · 원본 값)로 보여 줌(⏸) → 언어부에 「열쇠·값」을 보내 원본(todo)을 맞춘 뒤 다시 · 일부러 덮을 땐 `--force`.
+- **화면 글 고침은 한 곳**: 앱개발부·다국어부가 화면 글을 바꾸고 싶으면 앱 lang/*.json 을 직접 고치지 않고 언어부에 「열쇠·언어·값」 메시지 → 언어부 todo → 내보냄 → sync_lang(언어부 제안 10-12).
+- **열쇠 정본** = 다국어부 사본(C:\malmun-app-lang)의 `lang/en.json` — 열쇠가 생기거나 바뀌면 다국어부가 언어부에 알림(언어부 template 이 이것을 따름).
 - 결과 한 줄씩: `vi ✓ 글 161/161 · 번역층 15줄 · v2 ✓ · 소리 31/31` / `km ⏭ S6 ✗2` 처럼.
 
 ## 3. 언어 점검 (다국어부 · 넣은 언어마다)

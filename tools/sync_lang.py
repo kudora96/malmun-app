@@ -1,5 +1,6 @@
 # 언어 넣기(다국어부 10-12) — 언어부 자료(09_lang)를 앱으로 · 절차 = docs/lang_ingest.md
-#   python tools/sync_lang.py <편> <xx[,yy]|all> [--dry]   → 넣을 수 있는 언어만 넣고 한 줄씩 보고
+#   python tools/sync_lang.py <편> <xx[,yy]|all> [--dry] [--force]   → 넣을 수 있는 언어만 넣고 한 줄씩 보고
+#     앱 글이 언어부 원본과 다른 열쇠가 있으면 그 언어는 덮지 않고 표로 보여 줌(앱에서 고친 글 보호 · --force 면 덮음)
 #   python tools/sync_lang.py --table                       → js/langs.js(언어 표)만 프로필에서 다시 씀
 #   python tools/sync_lang.py --ready xx[,yy]               → 공개 단계로(본부 신호 때만)
 # 하는 일: lang_{xx}.json(.ko.json) → lang/ · {편}.{xx}.json → data/{편}/ · 프로필 → js/langs.js(방향·글꼴·줄 높이·단계)
@@ -46,9 +47,21 @@ def table_from_profiles(info):
     return {c: profile_row(c, info.get(c, {})) for c in codes}
 
 
+def ui_src(c, ko=False):
+    """앱 글 원본 — 언어부 check_ui --export 결과 09_lang/ui/out/{xx}/ 가 정본(없으면 09_lang/{xx}/ 사본)"""
+    f = f"lang_{c}.ko.json" if ko else f"lang_{c}.json"
+    for d in (os.path.join(LANG, "ui", "out", c), os.path.join(LANG, c)):
+        if os.path.exists(os.path.join(d, f)): return os.path.join(d, f)
+    return None
+
+
 def ready_to_send(ep, c):
     """언어부 「넘겨도 됨」 조건(lang_ingest §1) — 까닭 목록(빈 목록 = 됨)"""
     why, d = [], os.path.join(LANG, c)
+    prof = json.load(open(os.path.join(LANG, "profiles", f"{c}.json"), encoding="utf-8"))
+    if str(prof.get("status", "")).startswith("보류"): return ["프로필 status 보류"]
+    if c == "ne":  # ne = 앱 첫 언어 · 09_lang/ne/ 없음 → 앱 글만(대사층·설명은 04_subtitles·out v2 → sync_content·sync_v9)
+        return [] if ui_src(c) else ["ui/out/ne/lang_ne.json 없음"]
     st = os.path.join(d, f"state_{c}.json")
     if not os.path.exists(st): return ["state 없음"]
     s = json.load(open(st, encoding="utf-8"))
@@ -59,8 +72,8 @@ def ready_to_send(ep, c):
     if os.path.exists(rep):
         last = [l for l in open(rep, encoding="utf-8") if l.strip()][-1:]
         if last and "✗" in last[0]: why.append("report 끝 줄 ✗")
-    for f in (f"lang_{c}.json", f"{ep}.{c}.json"):
-        if not os.path.exists(os.path.join(d, f)): why.append(f"{f} 없음")
+    if not ui_src(c): why.append(f"lang_{c}.json 없음")
+    if not os.path.exists(os.path.join(d, f"{ep}.{c}.json")): why.append(f"{ep}.{c}.json 없음")
     v2 = os.path.join(LANG, "out", ep, f"{ep}.v9.v2.json")
     if os.path.exists(v2) and c not in json.load(open(v2, encoding="utf-8")).get("langs", []): why.append("v2 langs 에 없음")
     return why
@@ -69,12 +82,19 @@ def ready_to_send(ep, c):
 def check_ui(c):
     """앱 en.json 열쇠·자리 견주기 — (빠진 열쇠, 자리 다른 열쇠)"""
     en = json.load(open(os.path.join(APP, "lang", "en.json"), encoding="utf-8"))
-    xx = json.load(open(os.path.join(LANG, c, f"lang_{c}.json"), encoding="utf-8"))
+    xx = json.load(open(ui_src(c), encoding="utf-8"))
     ph = lambda s: sorted(set(re.findall(r"\{\w+\}", str(s))))
     base = lambda k: re.sub(r"_(zero|one|two|few|many|other)$", "", k)
     miss = [k for k in en if k not in xx and not k.startswith("_")]
     bad = [k for k in xx if base(k) in en and ph(xx[k]) != ph(en[base(k)]) and not k.startswith("_")]
     return miss, bad, len(en)
+
+
+def app_edits(a, b):
+    """앱 쪽 값 ≠ 언어부 원본 값인 열쇠(앱에서 바로 고친 글이 덮여 되돌려지지 않게 · 언어부 10-12) — [(열쇠, 앱 값, 원본 값)]"""
+    if not os.path.exists(b): return []
+    x, y = json.load(open(a, encoding="utf-8")), json.load(open(b, encoding="utf-8"))
+    return [(k, y[k], x.get(k)) for k in y if not k.startswith("_") and y[k] != x.get(k)]
 
 
 def copy(a, b, dry):
@@ -84,8 +104,8 @@ def copy(a, b, dry):
 
 
 def main(argv):
-    dry = "--dry" in argv
-    argv = [a for a in argv if a != "--dry"]
+    dry, force = "--dry" in argv, "--force" in argv
+    argv = [a for a in argv if a not in ("--dry", "--force")]
     info = read_table()
     if argv[:1] == ["--table"]:
         write_table(table_from_profiles(info)); print("js/langs.js ✓"); return
@@ -97,18 +117,20 @@ def main(argv):
     info = table_from_profiles(info)
     out = []
     for c in codes:
-        if c in ("ko", "en", "ky"): continue
+        if c in ("ko", "en"): continue
         why = ready_to_send(ep, c)
         if not why:
             miss, bad, n = check_ui(c)
             if bad: why.append(f"자리 다름 {len(bad)}: {', '.join(bad[:5])}")
         if why:
             out.append(f"{c} ⏭ " + " · ".join(why)); continue
-        d = os.path.join(LANG, c)
-        copy(os.path.join(d, f"lang_{c}.json"), os.path.join(APP, "lang", f"{c}.json"), dry)
-        ko = os.path.join(d, f"lang_{c}.ko.json")
-        if os.path.exists(ko): copy(ko, os.path.join(APP, "lang", f"{c}.ko.json"), dry); info[c]["ko_ui"] = True
-        copy(os.path.join(d, f"{ep}.{c}.json"), os.path.join(APP, "data", ep, f"{ep}.{c}.json"), dry)
+        pairs = [(ui_src(c), os.path.join(APP, "lang", f"{c}.json"))] + ([(ui_src(c, True), os.path.join(APP, "lang", f"{c}.ko.json"))] if ui_src(c, True) else [])
+        if c != "ne": pairs.append((os.path.join(LANG, c, f"{ep}.{c}.json"), os.path.join(APP, "data", ep, f"{ep}.{c}.json")))
+        diff = [(os.path.basename(b), *e) for a, b in pairs if os.sep + "lang" + os.sep in b for e in app_edits(a, b)]
+        if diff and not force:  # 앱에서 고친 글 → 언어부 todo 로 먼저 보내고(열쇠·값), 원본이 맞춰지면 다시 · 일부러 덮을 땐 --force
+            out.append(f"{c} ⏸ 앱 값 ≠ 원본 {len(diff)}개 — 덮지 않음(언어부에 보내거나 --force):" + "".join(f"\n    {f} {k}: 앱 「{str(y)[:50]}」 · 원본 「{str(x)[:50]}」" for f, k, y, x in diff[:20])); continue
+        for a, b in pairs: copy(a, b, dry)
+        if len(pairs) > 1 and pairs[1][0].endswith(".ko.json"): info[c]["ko_ui"] = True
         info[c].setdefault("stage", "pilot")
         out.append(f"{c} ✓ 글 {n - len(miss)}/{n}" + (f"(en 으로 {len(miss)})" if miss else "") + f" · {info[c]['dir']}" + (f" · {info[c]['font']}" if info[c].get("font") else "") + f" · {info[c]['stage']}")
     if not dry:
