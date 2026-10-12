@@ -6,8 +6,8 @@
 // 시간·인식(본부 10-04 투덜이 승인): 말 사이 쉼 2초 · 🎤 뒤 6초 말 없으면 끝 · 최대 길이 = 문장 길이에 맞춤 · 인식이 혼자 끝나면 같은 트랙으로 다시
 // 그때와 다른 점(본부 10-04 「남긴 차이」): ① 윈도우 별칭 장치 「default」「communications」는 절대 안 고름(통신 장치를 열면 윈도우가 다른 소리를 줄임)
 //   ② 「준비 중 → 녹음 중」 표시(첫 소리가 들어오면) ③ 인식 오류 까닭을 돌려줌(onerror 를 삼키지 않음) ④ 진단 기록(이벤트만 듣고 소리 경로는 안 건드림)
-import { audioCtx } from "./wake.js?v=1012.5";
-import { sttReady, serverSTT, sttNoteOnce } from "./sttserver.js?v=1012.5";
+import { audioCtx } from "./wake.js?v=1012.6";
+import { sttReady, serverSTT, sttNoteOnce } from "./sttserver.js?v=1012.6";
 
 // 시간 규칙(본부 10-04 · 투덜이 「빨리 안 하면 바로 닫힘」): 말 사이 쉼 2초 · 🎤 뒤 6초 안에 말 없으면 끝 · 최대 길이는 부르는 쪽이 정함(문장 길이)
 const QUIET_MS = 2000, START_MS = 6000;
@@ -109,7 +109,8 @@ function srvJudge(s2, peak) {
 }
 export const srOnlyMode = () => { try { return sessionStorage.getItem("malmun.srmode") === "only" || (devSR() === "sronly" && !sttReady()); } catch { return false; } }; /* 서버 주소가 있으면 옛 1번안 실패 기억(sronly)은 안 따름 — 서버부터 */
 // 안드로이드 기본 = 녹음만 하고(받아쓰기 동시에 안 켬) 끝나면 그 녹음 소리로 받아쓰기 · 점검 도구는 window.__noSeq 로 옛 「같이」 방식
-export const seqMode = () => /Android/i.test(navigator.userAgent) && (!!getSR() || serverMode()) && !srOnlyMode() && !window.__noSeq; /* 녹음만 하고 끝난 뒤 받아쓰기(서버 또는 1번안) */
+export const isIOS = () => /iPhone|iPad|iPod/i.test(navigator.userAgent) || (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1); /* 아이패드는 맥처럼 보임 */
+export const seqMode = () => (/Android/i.test(navigator.userAgent) ? !!getSR() || serverMode() : isIOS() && serverMode()) && !srOnlyMode() && !window.__noSeq; /* 아이폰도 2안(녹음 mp4 → 서버 · 사파리는 마이크 동시 사용에서 한쪽이 멈춤 · 앱개발부 10-12) — 서버 없으면 아이폰은 옛 그대로 */ /* 녹음만 하고 끝난 뒤 받아쓰기(서버 또는 1번안) */
 export const setSrOnly = on => { try { on ? sessionStorage.setItem("malmun.srmode", "only") : sessionStorage.removeItem("malmun.srmode"); sessionStorage.removeItem("malmun.srmiss"); } catch {} };
 // 바꾸기는 「연속 2번」만(본부 10-07 QA — 우물거림·잡음으로 한 번 비어도 녹음·리듬·비교를 영구로 잃지 않게) · 그 사이 한 번이라도 들은 말이 있으면 0 으로
 //  → true = 이번에 받아쓰기만으로 바꿈 · 점검 도구는 window.__noSrSwitch 로 끔

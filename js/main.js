@@ -1,13 +1,13 @@
-import { detectLang, setLang, LANGS, t } from "./i18n.js?v=1012.5";
-import { VERSION } from "./version.js?v=1012.5";
-import welcome from "./screens/welcome.js?v=1012.5";
-import list from "./screens/list.js?v=1012.5";
-import learn from "./screens/learn.js?v=1012.5";
-import explain from "./screens/explain.js?v=1012.5";
-import write from "./screens/write.js?v=1012.5";
-import speak from "./screens/speak.js?v=1012.5";
-import diag from "./screens/diag.js?v=1012.5";
-import "./errlog.js?v=1012.5"; // 오류 기록(진단 화면용 · 기록만)
+import { detectLang, setLang, LANGS, t } from "./i18n.js?v=1012.6";
+import { VERSION } from "./version.js?v=1012.6";
+import welcome from "./screens/welcome.js?v=1012.6";
+import list from "./screens/list.js?v=1012.6";
+import learn from "./screens/learn.js?v=1012.6";
+import explain from "./screens/explain.js?v=1012.6";
+import write from "./screens/write.js?v=1012.6";
+import speak from "./screens/speak.js?v=1012.6";
+import diag from "./screens/diag.js?v=1012.6";
+import "./errlog.js?v=1012.6"; // 오류 기록(진단 화면용 · 기록만)
 
 const app = document.getElementById("app");
 const routes = { "": welcome, list, learn, explain, write, speak, diag }; // diag = 진단 화면(본부 10-07 폰)

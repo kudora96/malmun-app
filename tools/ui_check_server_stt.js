@@ -15,6 +15,7 @@
   // 가짜 서버 — 모드: ok · 429 · 500 · timeout(답 없음 → 앱 12초) · net(네트워크 오류) · empty(빈 글) · slow(3초 뒤 ok)
   window.fetch = (u, o = {}) => {
     if (!String(u).startsWith(URL0)) return keep.fetch(u, o);
+    if (/\/health$/.test(String(u))) return Promise.resolve(new Response('{"ok":true}', { status: 200, headers: { "Content-Type": "application/json" } })); // 데우기(warmSTT)는 받아쓰기 요청이 아님 — 세지 않음
     const c = { url: String(u), method: o.method, type: o.headers?.["Content-Type"], dev: o.headers?.["X-Dev"], size: o.body?.size || 0, isBlob: o.body instanceof Blob, aborted: false, mode: window.__srvMode }; calls.push(c);
     return new Promise((res, rej) => {
       const sig = o.signal, ab = () => { c.aborted = true; rej(new DOMException("aborted", "AbortError")); }; if (sig?.aborted) return ab(); sig?.addEventListener("abort", ab, { once: true });

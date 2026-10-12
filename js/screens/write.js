@@ -13,15 +13,15 @@
 //  W5 소리는 언제나 하나만 · 새 일을 하면 앞 소리는 멈춘다
 //  W6 영상 창 안(embedded): 창 안에서 스크롤 없이 다 보이게 — 긴 문장은 토막으로(◀ 1/3 ▶) ·
 //     토막을 다 쓰면 자동으로 다음 토막 · 줄을 다 쓰면 대사를 듣고 자동으로 다음 줄 쓰기 · 아래 ▶ = 이 부분 듣기
-import { t, lang } from "../i18n.js?v=1012.5";
-import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO, koq } from "../text.js?v=1012.5";
-import { episode, chars, charsF } from "../data.js?v=1012.5";
-import { paths } from "../paths.js?v=1012.5";
-import { I, spkHtml } from "../ui.js?v=1012.5";
-import { audioCtx, hold } from "../wake.js?v=1012.5";
-import * as sfx from "../sfx.js?v=1012.5";
-import { scoreFx } from "../scorefx.js?v=1012.5";
-import { units as jamoUnits, baseOf, shapeFix } from "../jamobox.js?v=1012.5"; // 자모 자리 나누기(획순 · 자판 덧칠 · 손글씨 덩어리 — 본부 10-07) // 손글씨 점수 효과 = 말하기와 같은 규칙(본부 10-07)
+import { t, lang } from "../i18n.js?v=1012.6";
+import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO, koq } from "../text.js?v=1012.6";
+import { episode, chars, charsF } from "../data.js?v=1012.6";
+import { paths } from "../paths.js?v=1012.6";
+import { I, spkHtml } from "../ui.js?v=1012.6";
+import { audioCtx, hold } from "../wake.js?v=1012.6";
+import * as sfx from "../sfx.js?v=1012.6";
+import { scoreFx } from "../scorefx.js?v=1012.6";
+import { units as jamoUnits, baseOf, shapeFix } from "../jamobox.js?v=1012.6"; // 자모 자리 나누기(획순 · 자판 덧칠 · 손글씨 덩어리 — 본부 10-07) // 손글씨 점수 효과 = 말하기와 같은 규칙(본부 10-07)
 
 const KEYS = [..."ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎㄲㄸㅃㅆㅉ"], VOW = [..."ㅏㅑㅓㅕㅗㅛㅜㅠㅡㅣ"];
 const VOW2 = [..."ㅐㅒㅔㅖㅘㅙㅚㅝㅞㅟㅢ"]; // 겹모음 줄(본부 10-06) — 칸 하나 · ㅓ+ㅣ 처럼 나눠 쳐도 받음
@@ -829,7 +829,7 @@ export default async function write(app, ep, id, opts = {}) {
   }
   async function lineDone() { // 줄 끝 → 대사 듣고 → 다음 줄(자동) · 자동 완성으로 끝냈으면 대사 소리 없이(W4 · 투덜이 10-08 「멈추는 카드 없애자 · 끊김 싫다」로 원래대로) · 마지막 줄은 그 자리에 머묾
     const wasAuto = st.auto, mode = st.autoMode; st.auto = false;
-    if (wasAuto && mode === "line") { markAuto(); render(); return; } // [자동 완성] = 이 줄 끝에서 멈춤(다음 줄로 안 감 · 본부 10-11)
+    if (wasAuto && mode === "line") { markAuto(); render(); st.sent = true; markSent(); await run([lineSrc]); st.sent = false; markSent(); return; } // [자동 완성] = 대사 한 번 듣고 이 줄에 머묾 · W6 자동 넘김 없음(본부 10-12)
     const all = wasAuto && mode === "all" && li < d.lines.length - 1; st.allNext = all; markAuto(); render(); // [전체] = 대사 듣고 다음 줄로 이어서(마지막 줄이면 멈춤)
     st.sent = true; markSent();
     const ok = await run([lineSrc, 900]);
@@ -847,7 +847,7 @@ export default async function write(app, ep, id, opts = {}) {
   // 자동 멈춤(본부 10-07 투덜이 「⏹ 다시 눌러도 안 멈춤」) — 누르면 바로: 진행 중 소리·획 칠도 그침 · 하던 글자는 안 끝낸 채(다음 글자로 안 넘어감)
   // 자동을 멈춘 순간 글자가 다 쳐져 있으면(마지막 자모 소리 중) = 그 글자는 끝난 것 → 다음 글자로(투덜이 10-08 폰 「있었거든요」의 「거」:
   //  다 친 글자에 머물러 다음 자모가 없어 자판을 눌러도 오류로 소리가 안 나던 것)
-  const stopAuto = () => { st.auto = false; st.resumeAuto = false; st.allNext = false; st.jumpTo = null; st.hand?.stopOrder?.(); hush(); st.busy = false; st.done = false; st.queue = []; markAuto(); }; // 누르는 즉시 그 글자에서 멈춤(투덜이 10-10 「넘어가 버림」 — 다 친 글자에 머물면 자판 누를 때 다음 글자부터)
+  const stopAuto = () => { st.autoGen = (st.autoGen || 0) + 1; st.auto = false; st.resumeAuto = false; st.allNext = false; st.jumpTo = null; st.hand?.stopOrder?.(); hush(); st.busy = false; st.done = false; st.queue = []; markAuto(); }; // 누르는 즉시 그 글자에서 멈춤(투덜이 10-10 「넘어가 버림」 — 다 친 글자에 머물면 자판 누를 때 다음 글자부터)
   function nextChar() { // 다음 글자(토막 끝이면 다음 토막 · 줄 끝이면 끝 카드) — 자동으로 친 것은 「직접 씀」 아님
     st.c++; st.k = 0; st.typed = []; st.part = "";
     if (st.c >= words()[st.w].chars.length) { st.w++; st.c = 0; }
@@ -856,8 +856,9 @@ export default async function write(app, ep, id, opts = {}) {
   }
   async function autoPart(mode = "line") {
     resetSounds(); if (st.lineEnd) { Object.assign(st, { s: 0, w: 0, c: 0, k: 0, typed: [], part: "", done: false, queue: [], lineEnd: false }); render(); } // 줄 끝에서 자동 = 그 줄 처음부터(본부 10-11)
+    const gen = (st.autoGen = (st.autoGen || 0) + 1); // 번호표(투덜이 10-12 「띵띵」) — 멈추거나 다른 자동 단추로 바뀌면 옛 고리는 깨어나도 바로 끝남(두 고리가 같이 치던 것)
     st.auto = true; st.autoMode = mode; st.resumeAuto = false; st.allNext = false; markAuto();
-    while (st.auto && st.alive && st.s < segs.length && !st.lineEnd) { // 줄 끝까지(본부 10-11 — 토막 끝에서 안 멈춤) · 줄 끝은 lineDone(한 줄 = 멈춤 · 전체 = 다음 줄)
+    while (st.auto && st.autoGen === gen && st.alive && st.s < segs.length && !st.lineEnd) { // 줄 끝까지(본부 10-11 — 토막 끝에서 안 멈춤) · 줄 끝은 lineDone(한 줄 = 멈춤 · 전체 = 다음 줄)
       if (st.jumpTo) { Object.assign(st, { w: st.jumpTo.w, c: st.jumpTo.c, k: 0, typed: [], part: "", done: false, queue: [], busy: false }); st.jumpTo = null; render(); } // 위 글자 줄에서 고른 글자부터 이어서
       const c = words()[st.w].chars[st.c];
       if (st.mode !== "hand" && st.k >= c.jamo.length) { await finishChar(c.jamo[c.jamo.length - 1], c); continue; } // 다 친 글자에서 시작(손으로 친 뒤 · 멈춘 자리) = 마무리하고 다음 글자부터
@@ -871,8 +872,9 @@ export default async function write(app, ep, id, opts = {}) {
       const j = c.jamo[st.k];
       st.typed.push(j); st.k++; render(); flashKey(j);
       if (st.k >= c.jamo.length) await finishChar(j, c);
-      else { st.busy = true; await run(["ok", jamoSrc(j), 150]); st.busy = false; }
+      else { st.busy = true; await run(["ok", jamoSrc(j), 150]); if (st.autoGen === gen) st.busy = false; }
     }
+    if (st.autoGen !== gen) return; // 새 고리가 이어받음 — 그 고리 표시를 건드리지 않음
     st.auto = false; if (st.alive) markAuto();
   }
   async function press(j) { // W2
@@ -956,7 +958,7 @@ export default async function write(app, ep, id, opts = {}) {
       run([wordStep(words()[st.w])]);
     } else if (a === "auto" || a === "autoall") { // 자동 2종(본부 10-11) — 같은 단추 = 멈춤 · 다른 단추 = 먼저 것 멈추고 새 것
       const mode = a === "auto" ? "line" : "all", mine = st.autoMode === mode;
-      if (st.allNext) { st.allNext = false; st.sent = false; hush(); markSent(); markAuto(); if (mode === "all") return; } // 줄 끝 대사 중(다음 줄로 넘어가기 전) = 넘어가지 않음
+      if (st.allNext) { st.allNext = false; st.sent = false; hush(); markSent(); markAuto(); return; } // 줄 끝 대사 중(다음 줄로 넘어가기 전) = 넘어가지 않고 멈춤(어느 단추든) // 줄 끝 대사 중(다음 줄로 넘어가기 전) = 넘어가지 않음
       else if (st.auto) { stopAuto(); if (mine) return; }
       else if (st.resumeAuto) { st.resumeAuto = false; st.sent = false; hush(); markSent(); markAuto(); if (mine) return; } // 듣기 중(자동이 잠깐 멈춤) 같은 단추 = 자동 끔 · 듣기도 멈춤
       if (st.s < segs.length) { if (st.busy || st.done) { hush(); st.busy = false; st.done = false; st.queue = []; } autoPart(mode); } // 소리 중이어도 바로(투덜이 10-10 「친 뒤 누르면 바로 중지」)

@@ -2,7 +2,7 @@
 //  주소 STT_URL = "" 이면 꺼짐(지금 앱 그대로) · 점검은 window.__sttURL 로 바꿔 끼움 · 경로 POST {주소}/stt
 //  본문 = 녹음 blob 그대로(Content-Type = blob.type) · 머리 칸 X-Dev = 기기 번호(localStorage malmun.devid · 기기당 하루 상한용)
 //  최대 12초 기다림 · 실패(비2xx·429·12초·네트워크·빈 글)는 code 를 붙여 던짐 → recorder.js 가 지금 방식(받아쓰기만)으로
-import { t } from "./i18n.js?v=1012.5";
+import { t } from "./i18n.js?v=1012.6";
 
 export const STT_URL = "https://stt.kudora96.workers.dev"; // 배포 뒤 Worker 주소를 여기에(예: "https://stt.<계정>.workers.dev") — worker/stt/DEPLOY.md
 export const sttURL = () => (window.__sttURL === "off" ? "" : String(window.__sttURL || STT_URL || "").trim().replace(/\/+$/, "")); /* "off" = 점검에서 서버 길 끔(진짜 서버 안 부름) */
@@ -43,6 +43,9 @@ export async function serverSTT(blob, { signal } = {}) {
 
 const NOTE_V = "2";
 // 첫 서버 사용 때 한 번만 안내(언어별 stt_server_note) · 기억 localStorage malmun.sttnote · 알림 모양은 앱 .toast 그대로
+// 서버 데우기(본부 10-12 — 첫 요청이 느림 · 1.7~6.2초) — 말하기 화면에 들어올 때 /health 한 번(5분에 한 번까지 · 녹음 안 보냄 · AI 안 부름)
+let warmAt = 0;
+export function warmSTT() { if (!sttReady() || Date.now() - warmAt < 300000) return; warmAt = Date.now(); fetch(sttURL() + "/health", { cache: "no-store", credentials: "omit" }).catch(() => {}); }
 export function sttNoteOnce() {
   try { if (localStorage.getItem("malmun.sttnote") === NOTE_V) return false; localStorage.setItem("malmun.sttnote", NOTE_V); } catch { return false; } /* 문구가 바뀌면 NOTE_V 를 올려 본 사람에게도 한 번 더(본부 10-11 「폰에 녹음이 남음」 정정 = "2") */
   const d = Object.assign(document.createElement("div"), { className: "toast sttnote", textContent: t("stt_server_note") });

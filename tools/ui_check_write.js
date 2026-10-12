@@ -84,8 +84,9 @@
   ok(w8.seen.length >= 1 && !badShape.length && wst()?.lineEnd && $(".panel .whead .sub")?.textContent === subBefore && $(".panel [data-act=auto]").getAttribute("aria-pressed") === "false",
     "자동 완성 → 남은 글자를 한 자모씩 다 쳐서 줄 끝까지(토막 넘어) · 저절로 멈춤 · 다음 줄로 안 감(본부 10-11)", `${w8.seen.join(" ")}${badShape.length ? " · 틀린 모양 " + badShape.join(" ") : ""} · 토막 ${segBefore} → ${$(".panel .segnav").innerText.replace(/\s/g, "")} · 줄 ${subBefore} → ${$(".panel .whead .sub")?.textContent}`);
   { $(".panel [data-act=auto]").click(); await W(400); const S = wst(); ok(S?.auto && S.s === 0 && !S.lineEnd, "줄 끝에서 자동 완성 다시 = 그 줄 처음(1번째 토막)부터", `토막 ${S?.s} · 자동 ${S?.auto}`); $(".panel [data-act=auto]").click(); await W(300); }
-  const autoSounds = log.slice(atAuto).filter(e => e.ev === "시작").map(e => e.name);
-  ok(autoSounds.length > 0 && autoSounds.every(n => /^j\//.test(n) || /\/j_/.test(n) || /chars_f\/u[0-9A-F]{4}\.mp3$/.test(n)) && autoSounds.some(n => /chars_f\/u/.test(n)), "자동 완성 → 자음·모음 소리 + 글자 완성 때 글자 소리(단어·문장 소리 없음 · 투덜이 10-08)", autoSounds.join(","));
+  const autoAll = log.slice(atAuto).filter(e => e.ev === "시작").map(e => e.name), isLine = n => /_sub_|(^|\/)audio\//.test(n), lineAt = autoAll.findIndex(isLine), autoSounds = lineAt < 0 ? autoAll : autoAll.slice(0, lineAt); // 줄 끝 대사 한 번(본부 10-12)은 따로
+  ok(lineAt === -1 || autoAll.filter(isLine).length <= 1, "자동 완성 → 줄 끝 대사는 한 번만(본부 10-12)", autoAll.slice(lineAt).join(","));
+  ok(autoSounds.length > 0 && autoSounds.every(n => /^j\//.test(n) || /\/j_/.test(n) || /chars_f\/u[0-9A-F]{4}\.mp3$/.test(n)) && autoSounds.some(n => /chars_f\/u/.test(n)), "자동 완성 → 자음·모음 소리 + 글자 완성 때 글자 소리(쓰는 동안 단어·문장 소리 없음 · 투덜이 10-08)", `다른 소리: ${autoSounds.filter(n => !(/^j\//.test(n) || /\/j_/.test(n) || /chars_f\/u[0-9A-F]{4}\.mp3$/.test(n))).join(",") || "없음"} · ${autoSounds.length}개`);
   $(".panel [data-act=auto]").click(); await W(1500); $(".panel [data-act=auto]").click(); await W(200);
   ok($(".panel [data-act=auto]").getAttribute("aria-pressed") === "false", "자동 완성 중 다시 누름 → 멈춤");
   await idle(8000);
