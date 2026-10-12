@@ -102,13 +102,15 @@ export function shapeFix(out, mask, N, ch = "") {
     const touchHole = b => { let h = 0; for (const [y, xs, xe] of b.runs) { const m0 = xs + ((xe - xs) >> 2), m1 = xe - ((xe - xs) >> 2); for (let x = m0; x <= m1; x++) for (let t = 1; t <= 2; t++) { if (y === b.y0 && holeAt((y - t) * N + x)) h++; if (y === b.y1 && holeAt((y + t) * N + x)) h++; } } return h >= 3; };
     const prot = (o, q) => !!out[o].ring?.has(q); // 고리 픽셀(ringFix 가 잡은 ㅇ ㅎ 띠)은 안 건드림
     // 쌍자음(ㄲ ㄸ ㅃ ㅆ ㅉ · 같은 자모 두 칸 나란히) — 두 칸 잉크 사이에 빈 세로줄이 있으면 그 줄이 경계(「꿔」 첫 ㄱ 세로획 오른쪽 반이 둘째 ㄱ 몫이던 것) · 빈 줄 없으면 그대로
+    let reDbl = false; const dbl = () => { /* 글자부 D 10-12: 쌍자음 가름을 함수로(세로 모음이 둘째 자음을 통째로 가졌다 돌려준 뒤 다시 가름 · 「뻛」) */
     for (let k = 0; k + 1 < out.length; k++) { const a = out[k], b = out[k + 1]; if (a.jamo !== b.jamo || a.role !== b.role || a.role === "jung") continue;
       const cnt = new Int32Array(N); let ax = 0, an = 0, bx = 0, bn = 0; for (let q = 0; q < N * N; q++) { const o = own[q]; if (o === k || o === k + 1) { cnt[q % N]++; if (o === k) { ax += q % N; an++; } else { bx += q % N; bn++; } } }
       if (!an || !bn) continue; ax /= an; bx /= bn; if (bx <= ax) continue; let gap = -1; for (let x = Math.round(ax); x <= Math.round(bx); x++) if (!cnt[x]) { gap = x; break; }
-      if (gap < 0 && /[ㅅㅈ]/.test(a.jamo) && an < 0.45 * bn) { /* 첫 자음 몫이 둘째의 45% 미만(본부 10-12 「쬔」 — 첫 ㅈ 두 다리가 통째로 둘째 ㅈ 몫) = 두 자음 윗부분(위 30% 줄) 사이 빈 세로줄로 아래까지 가름 */
+      if (gap < 0 && /[ㅅㅈ]/.test(a.jamo) && (an < 0.45 * bn || (a.jamo === "ㅈ" && a.role === "cho" && an < bn))) { /* 글자부 D 10-12: ㅉ 은 45% 넘어도(「찌」「쩍」「짠」 — 두 ㅈ 다리가 아래에서 붙어 빈 세로줄이 없고 첫 ㅈ 가로 오른끝·오른다리가 둘째 ㅈ 몫) · 45%↑ 이면 첫 ㅈ 몫을 되찾는 쪽일 때만(아래) */ /* 첫 자음 몫이 둘째의 45% 미만(본부 10-12 「쬔」 — 첫 ㅈ 두 다리가 통째로 둘째 ㅈ 몫) = 두 자음 윗부분(위 30% 줄) 사이 빈 세로줄로 아래까지 가름 */
         let ya = N, yb = -1; for (let q = 0; q < N * N; q++) if (own[q] === k || own[q] === k + 1) { const y = (q / N) | 0; if (y < ya) ya = y; if (y > yb) yb = y; }
         const yt = ya + Math.floor(0.3 * (yb - ya + 1)), c2 = new Int32Array(N); for (let q = ya * N; q <= yt * N + N - 1; q++) if (own[q] === k || own[q] === k + 1) c2[q % N]++;
-        for (let x = Math.round(ax); x <= Math.round(bx); x++) if (!c2[x]) { gap = x; break; } }
+        for (let x = Math.round(ax); x <= Math.round(bx); x++) if (!c2[x]) { gap = x; break; }
+        if (gap >= 0 && an >= 0.45 * bn) { let m10 = 0, m01 = 0; for (let q = 0; q < N * N; q++) { const x = q % N; if (own[q] === k && x > gap) m01++; else if (own[q] === k + 1 && x < gap) m10++; } if (!(m10 > 0 && m10 >= 3 * m01)) gap = -1; } }
       if (gap < 0 && a.jamo === "ㅅ" && a.role === "cho") { /* ㅆ 빈 세로줄 없음 = 첫 ㅅ 오른 삐침과 둘째 ㅅ 왼 삐침이 아래에서 만나는 「V」(글자부 10-12 「씐」 — 첫 ㅅ 오른 삐침 거의 다 둘째 ㅅ 색) = V 맨 아래 3줄 잉크 가운데 세로줄로 가름 */
         let ya = N, yb = -1; for (let q = 0; q < N * N; q++) if (own[q] === k || own[q] === k + 1) { const y = (q / N) | 0; if (y < ya) ya = y; if (y > yb) yb = y; }
         const yt = ya + Math.floor(0.3 * (yb - ya + 1)), c2 = new Int32Array(N); for (let q = ya * N; q <= yt * N + N - 1; q++) if (own[q] === k || own[q] === k + 1) c2[q % N]++;
@@ -117,7 +119,8 @@ export function shapeFix(out, mask, N, ch = "") {
           if (yv > yt) { const cs = []; for (let y = yv; y > yv - 3; y--) { let l = -1, r2 = -1; for (let x = s1 + 1; x < s2; x++) if (on(y * N + x)) { if (l < 0) l = x; r2 = x; } if (l >= 0) cs.push((l + r2) / 2); }
             const cx = cs.reduce((p2, v) => p2 + v, 0) / cs.length, g2 = Math.round(cx); let m10 = 0, m01 = 0; for (let q = 0; q < N * N; q++) { const x = q % N; if (own[q] === k && x > g2) m01++; else if (own[q] === k + 1 && x < g2) m10++; }
             if (cx > ax && cx < bx && m10 >= 3 * m01) gap = g2; } } } /* 첫 ㅅ 몫을 되찾는 쪽일 때만(「쑥」 — 이미 첫 ㅅ 오른 삐침이 제 색이면 그대로) */
-      if (gap < 0) continue; for (let q = 0; q < N * N; q++) { const x = q % N; if (own[q] === k && x > gap) { own[q] = k + 1; moved = true; } else if (own[q] === k + 1 && x < gap) { own[q] = k; moved = true; } } }
+      if (gap < 0) continue; for (let q = 0; q < N * N; q++) { const x = q % N; if (own[q] === k && x > gap) { own[q] = k + 1; moved = true; } else if (own[q] === k + 1 && x < gap) { own[q] = k; moved = true; } } } };
+    dbl();
     // 겹받침(ㄳ ㅄ 등) 앞 받침 오른 세로 끝 2~3열이 뒷 받침 몫인 것 = 앞 받침 몫(본부 10-12 「쬆」「쬢」「쐓」 — ㅂ·ㄱ 오른 기둥 끝 세로 띠가 ㅅ 색)
     for (let k = 0; k + 1 < out.length; k++) { if (out[k].role !== "jong" || out[k + 1].role !== "jong" || out[k].jamo === out[k + 1].jamo) continue;
       let ya = N, yb = -1; for (let q = 0; q < N * N; q++) if (own[q] === k) { const y = (q / N) | 0; if (y < ya) ya = y; if (y > yb) yb = y; } if (yb < 0) continue; const hh = yb - ya + 1, colN = (x, o) => { let c = 0; for (let y = ya; y <= yb; y++) if (own[y * N + x] === o) c++; return c; };
@@ -148,6 +151,7 @@ export function shapeFix(out, mask, N, ch = "") {
         const tick = b => { const xs = Math.min(...b.runs.map(r2 => r2[1])), xe = Math.max(...b.runs.map(r2 => r2[2])), m0 = xs + ((xe - xs) >> 2), m1 = xe - ((xe - xs) >> 2); for (let t = 2; t <= 4; t++) { const yy = b.y0 - t; if (yy < 0) return false; let n2 = 0, nm = 0; for (let x = xs; x <= xe; x++) if (on(yy * N + x)) { n2++; if (x >= m0 && x <= m1) nm++; } if (!nm || nm < 0.6 * n2 || n2 > 0.3 * (xe - xs + 1)) return false; } return true; }; // 위 2~4줄이 다 가운데 좁은 잉크
         // 아래 가운데에 좁은 잉크가 달린 띠 = 아래로 꼭지가 내려간 띠(「복」 ㅂ 아래 가로 밑에 ㅗ 꼭지) — ㅗ ㅛ 띠는 꼭지가 위로
         const tickDown = b => { const xs = Math.min(...b.runs.map(r2 => r2[1])), xe = Math.max(...b.runs.map(r2 => r2[2])), m0 = xs + ((xe - xs) >> 2), m1 = xe - ((xe - xs) >> 2); for (let t = 2; t <= 4; t++) { const yy = b.y1 + t; if (yy >= N) return false; let n2 = 0, nm = 0; for (let x = xs; x <= xe; x++) if (on(yy * N + x)) { n2++; if (x >= m0 && x <= m1) nm++; } if (!nm || nm < 0.6 * n2 || n2 > 0.3 * (xe - xs + 1)) return false; } return true; };
+        if (up && !okB.filter(b => stem(b) > 0).filter((b, i, a) => !(i === 0 && /[ㅊㅎ]/.test(out.find(v => v.role === "cho")?.jamo || "") && tick(b) && a.length)).length) okB.push(...bands.filter(b => { const c = (ry(b.y0) + ry(b.y1)) / 2; return c > r[3] + 0.02 && c <= r[3] + 0.1 && !touchHole(b) && stem(b) > 0; })); /* 글자부 D 10-12 「롼」: 초성이 키 커서(ㄹ 등) ㅗ 띠가 칸 아래 끝보다 더 내려간 받침 글자 — 칸 안 띠에 기둥이 하나도 없으면 칸 아래 0.1 안 기둥 달린 띠도 후보(ㄹ 가운데 가로를 ㅗ 띠로 잡던 것 · 「촌」 초성 ㅊ ㅎ 의 맨 위 꼭지 달린 띠는 기둥 띠로 안 셈) */
         let cand = okB; if (!up) { const nt = cand.filter(b => !tick(b)); if (nt.length) cand = nt; } else { const nt = cand.filter(b => !tickDown(b)); if (nt.length) cand = nt; }
         let bb = null, bs = -1, bd = Infinity; for (const b of cand) { const c = (ry(b.y0) + ry(b.y1)) / 2; const sv = stem(b), d = Math.abs(c - tgt); if (sv > bs || (sv === bs && d < bd)) { bs = sv; bd = d; bb = b; } }
         if (down) { const ws = cand.filter(b => stem(b) > 0 && (ry(b.y0) + ry(b.y1)) / 2 <= r[3]); if (ws.length > 1) bb = ws.reduce((p2, b) => (b.y0 > p2.y0 ? b : p2)); } // ㅜ ㅠ = 기둥 달린 띠 중 모음 칸 안 맨 아래(「쥔」 — ㅈ 윗가로 밑 꼭짓점을 기둥으로 봐 ㅈ 가로를 ㅜ 띠로 고르던 것)
@@ -220,7 +224,12 @@ export function shapeFix(out, mask, N, ch = "") {
         // 기둥 왼쪽 이 모음 몫 = 기둥에서 같은 줄로 왼쪽으로 이어진 꼭지만(꼭지 두께의 2.2배 넘는 세로 획에서 멈춤) · 나머지는 맞닿은 이웃(「경」 — ㄱ 오른쪽 위 모서리가 ㅕ 몫)
         { const reach = new Uint8Array(N * N), ringC = out.some(v => v.role === "cho" && v.ring?.size); for (let y = y0; y <= y1; y++) { if (own[y * N + cx] !== k) continue; const v0 = Math.max(vr[y * N + cx - 1] || 0, vr[y * N + cx - 2] || 0) || 1; for (let x = cx - 1; x >= x0; x--) { const q = y * N + x; if (own[q] !== k || (!ringC && x < cx - 2 && vr[q] > 2.2 * v0 && vr[q] >= 0.15 * Hh)) break; reach[q] = 1; } } /* 초성이 ㅇ ㅎ 고리면 세로 길이로 안 멈춤(고리 띠에서 멈춤 · 본부 10-12 「영」「여」 ㅕ 가로 왼끝이 고리 옆 세로줄에 걸려 ㅇ 몫이던 것) */
           for (let it = 0; it < N; it++) { let ch2 = false; for (let y = y0; y <= y1; y++) for (let x = x0; x < cx; x++) { const q = y * N + x; if (own[q] !== k || reach[q]) continue; const cnt = new Map(); for (const j of [x > 0 ? q - 1 : -1, q + 1, q - N, q + N, x > 0 ? q - N - 1 : -1, q - N + 1, x > 0 ? q + N - 1 : -1, q + N + 1]) { const o = j >= 0 && j < N * N ? own[j] : -1; if (o >= 0 && o !== k && out[o].role !== "jung") cnt.set(o, (cnt.get(o) || 0) + 1); }
-              if (cnt.size) { own[q] = [...cnt].sort((p2, r2) => r2[1] - p2[1])[0][0]; ch2 = true; moved = true; } } if (!ch2) break; } }
+              if (cnt.size) { own[q] = [...cnt].sort((p2, r2) => r2[1] - p2[1])[0][0]; ch2 = true; moved = true; } } if (!ch2) break; }
+          /* 글자부 D 10-12 「뻛」: 남은 이 모음 몫(기둥 왼쪽 · 꼭지 아님) 덩어리가 자음 몫과 안 맞닿아 못 돌려준 것(ㅃ 둘째 ㅂ 통째가 ㅓ 몫 — 첫 ㅂ 오른기둥만 둘째 ㅂ 몫) = 덩어리 가운데에서 가장 가까운 초성 칸 · 쌍자음이면 가름 다시 */
+          if (out[k - 1]?.role === "cho") { /* 초성 바로 뒤 모음만(겹모음 오른쪽 ㅣ 는 아님 — 「빼」 ㅏ 기둥이 아직 ㅣ 몫인 때라 ㅏ 기둥을 초성에게 주던 것) */ const seen = new Uint8Array(N * N); for (let q0 = 0; q0 < N * N; q0++) { const x00 = q0 % N; if (seen[q0] || own[q0] !== k || reach[q0] || x00 >= cx) continue; const c = [], s2 = [q0]; seen[q0] = 1; while (s2.length) { const q = s2.pop(); c.push(q); const x = q % N; for (const j of [x > 0 ? q - 1 : -1, x < N - 1 ? q + 1 : -1, q - N, q + N]) if (j >= 0 && j < N * N && !seen[j] && own[j] === k && !reach[j] && j % N < cx) { seen[j] = 1; s2.push(j); } }
+              if (c.length < 0.02 * W * Hh) continue; let sx = 0, sy = 0; for (const q of c) { sx += ((q % N) - x0 + 0.5) / W; sy += (((q / N) | 0) - y0 + 0.5) / Hh; } sx /= c.length; sy /= c.length;
+              let to = -1, bd = Infinity; out.forEach((v, j) => { if (v.role !== "cho") return; const f = v.rect, inside = sx >= f[0] && sx <= f[2] && sy >= f[1] && sy <= f[3], d = (((f[0] + f[2]) / 2 - sx) ** 2 + ((f[1] + f[3]) / 2 - sy) ** 2) * (inside ? 1 : 4); if (d < bd) { bd = d; to = j; } });
+              if (to >= 0 && sy <= out[to].rect[3] + 0.05) { for (const q of c) own[q] = to; moved = true; reDbl = true; } } } }
         // 가로 왼끝이 초성 비스듬한 획에 닿는 곳 = 그 획 오른쪽 가장자리를 가로 위·아래 줄에서 이어 그은 선으로 가름(본부 10-12 「게」「겠」 ㅓ 가로 왼끝 아래가 ㄱ 몫 · 수직으로 자르던 것)
         { const tb = []; for (let y = y0; y <= y1; y++) { let x = cx; if (own[y * N + x] !== k) { tb.push(null); continue; } while (x > x0 && own[y * N + x - 1] === k) x--; const o = own[y * N + x - 1]; tb.push(x > x0 && on(y * N + x - 1) && o >= 0 && o !== k && out[o].role === "cho" && !prot(o, y * N + x - 1) && x < cx - 2 ? [x, o] : null); }
           const edgeAt = (y, bx, o) => { if (y < y0 || y > y1) return null; for (let x = Math.min(x1, bx + 10); x >= Math.max(x0, bx - 30); x--) { const q = y * N + x; if (on(q) && own[q] === o) return x; } return null; };
@@ -243,6 +252,7 @@ export function shapeFix(out, mask, N, ch = "") {
             for (let t = 1; t <= 3; t++) for (const [yy, dy] of [[ya2 - t, 1], [yb2 + t, -1]]) { if (yy < y0 || yy > y1) continue; const cap = capAt(yy), sh = []; for (let x = cap + 1; x < cx; x++) { const q = yy * N + x; if (own[q] === o && own[q + dy * N] === k) sh.push(q); } if (sh.length >= 2) { for (const q of sh) own[q] = k; moved = true; } } } } /* 어깨 한 줄에 1칸뿐이면 돌기라 안 함(글자부 10-12 「혠」 ㅕ 꼭지 밑 1칸 돌기) */ /* 어깨(본부 10-12 「엥」「엒」 가로 위·아래 모서리 2~3칸) = 같은 곡선 밖이고 가로에서 이어진 칸만 모음 몫 */
       }
     });
+    if (reDbl) dbl();
     // ㅆ ㅉ + ㅗ ㅘ ㅙ ㅚ 「사발」(본부 10-11) — 두 자음 다리 끝이 만나는 아래 볼록 = 자음 몫(가운데 왼쪽 = 첫 자음 · 오른쪽 = 둘째) · ㅗ 는 사발 아래 기둥만
     //  기둥 = 가로획 위 이 모음 몫 · 사발 = 기둥 위(목이 붙었으면 가장 좁은 목 위 · 떨어진 U 자 글꼴이면 빈 줄 위) 가운데 잉크 줄기 · 가운데 = 사발 맨 아래 3줄 줄기 가운데
     { const chs = out.map((v, j) => j).filter(j => out[j].role === "cho"), vk = out.findIndex(v => v.role === "jung" && v.jamo === "ㅗ");
