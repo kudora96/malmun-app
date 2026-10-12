@@ -10,3 +10,4 @@ media/
 tools/_audit/
 tools/_rec/
 _hq_tmp/
+tools/_dbg.js
