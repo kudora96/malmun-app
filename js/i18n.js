@@ -81,3 +81,5 @@ export const t = (k, vars) => {
   return s;
 };
 export const langName = c => (LANGS.find(l => l[0] === c) || [c, c])[1];
+// 「내 말 ⇄ 한」 토글용 짧은 이름(본부 10-12) — 언어부 프로필 ui_short → js/langs.js short · 없으면 로마자 두 글자 코드(이름 앞 글자 자르기는 「ไท」처럼 뜻이 엉뚱해짐)
+export const langShort = c => LANG_INFO[c]?.short || (c === "ne" ? "ने" : c.toUpperCase());
