@@ -1073,6 +1073,15 @@ button.dim{opacity:.45}
 /* ==== 앱개발부(공용 · 말하기·배우기·영상·설명) ==== */
 
 /* ==== 쓰기부(쓰기 화면 · .write …) ==== */
+/* 작은 창 자판 맞춤(fitKb · 10-12 320×640) — wt1 = 아래 단추 셋 한 줄 · wt2 = 자판 줄 높이 --krmin */
+.write.wt1 .wbtns.below,.write.wt1.embedded .wbtns.below{flex-wrap:nowrap;gap:4px;padding:4px 8px 2px}
+.write.wt1 .wbtns.below button,.write.wt1.embedded .wbtns.below button{flex:1 1 0;white-space:normal;font-size:11px;line-height:1.15;min-height:30px;padding:3px 4px}
+.write.wt2 .kb,.write.wt2.embedded .kb{gap:3px;padding-top:3px}
+.write.wt2 .kb .kr,.write.wt2 .kb .kr button,.write.wt2.embedded .kb .kr button{min-height:var(--krmin,30px)}
+.write.wt2 .kb .kr{gap:3px}
+/* 머리 줄 n3b(10-12) — 두 줄로 꺾기 전에 ⌨ ✍ 그림만(이름은 aria-label) */
+.write .whead.n3b .wmode .ml{display:none}
+.write .whead.n3b .wmode button{min-width:40px}
 
 /* ==== 글자부(획순 칠·자모 칠 표시) ==== */
 

@@ -116,7 +116,7 @@ export default async function write(app, ep, id, opts = {}) {
     const jm = ws[st.w]?.chars[st.c]?.jamo || []; if (Number.isInteger(opts.pos.k) && opts.pos.k > 0 && opts.pos.k < jm.length) { st.k = opts.pos.k; st.typed = jm.slice(0, st.k); } /* 반쯤 친 글자의 자모도 그대로(검사부 10-11 토글 뒤 k=0) */
     else if (opts.pos.k === jm.length && jm.length) { if (st.c + 1 < ws[st.w].chars.length) st.c++; else if (st.w + 1 < ws.length) { st.w++; st.c = 0; } else { st.k = jm.length; st.typed = jm.slice(); } } } /* 다 친 직후 토글 = 다음 글자로(토막 끝 글자면 다 친 채로) */ // ने⇄한 토글 뒤 같은 토막·글자(본부 10-08)
   // 쓰기 방법(본부 10-07 투덜이 「ㅇ」) — ⌨ 자판 / ✍ 손글씨 · 고른 것 기억
-  const modeBtns = () => `<span class="wmode" role="group">${[["kb", "⌨ " + t("w_kb")], ["hand", "✍ " + t("w_hand")]].map(([m, l]) => `<button data-mode="${m}" aria-pressed="${st.mode === m}">${esc(l)}</button>`).join("")}</span>`;
+  const modeBtns = () => `<span class="wmode" role="group">${[["kb", "⌨", t("w_kb")], ["hand", "✍", t("w_hand")]].map(([m, ic, l]) => `<button data-mode="${m}" aria-pressed="${st.mode === m}" aria-label="${esc(l)}">${ic}<span class="ml"> ${esc(l)}</span></button>`).join("")}</span>`;
   const lineSrc = line.lineAudio ? paths.audio(ep, line.lineAudio) : null;
   hush();
 
@@ -190,8 +190,8 @@ export default async function write(app, ep, id, opts = {}) {
     const sl = row.querySelector(".slots"), bs = [...wb.querySelectorAll("button")];
     const wrapped = () => row.scrollWidth > row.clientWidth + 1 || bs.some(b => Math.abs(b.getBoundingClientRect().top - bs[0].getBoundingClientRect().top) > 2);
     stg.classList.remove("c1", "c2", "c3", "c4");
-    if (wrapped()) { stg.after(wb); stg.classList.remove("btns-in"); wb.classList.add("below"); return fitStageH(); } // 같은 줄에 보통 크기로 안 들어가면 글자 칸 아래 한 줄로(글씨를 줄이지 않음 · 본부 10-12 「작고 두 줄로 꺾임」)
-    wb.classList.remove("below"); fitStageH();
+    if (wrapped()) { stg.after(wb); stg.classList.remove("btns-in"); wb.classList.add("below"); fitStageH(); return fitKb(); } // 같은 줄에 보통 크기로 안 들어가면 글자 칸 아래 한 줄로(글씨를 줄이지 않음 · 본부 10-12 「작고 두 줄로 꺾임」)
+    wb.classList.remove("below"); fitStageH(); fitKb();
   }
   // 낱말 칸 글자 단추 = 한 줄 · 넘치면 글자 크기·안쪽 여백을 같이 줄임(위 글자 줄과 같은 방식) · 로마자는 아래 줄 따로
   // 로마자·뜻 줄(투덜이 10-07 「단어 듣기」 빈자리) — 크게(로마자 15 · 뜻 17px)에서 칸 폭에 들어갈 때까지 줄임(최소 11px)
@@ -205,13 +205,22 @@ export default async function write(app, ep, id, opts = {}) {
     const bt = work.querySelector(".wbtns"), kb = work.querySelector(".kb"), gap = () => (bt && kb ? kb.getBoundingClientRect().top - bt.getBoundingClientRect().bottom : 99);
     for (let k = 0; k < 8 && gap() < 4; k++) { let moved = false; xs.forEach(x => { const f = parseFloat(getComputedStyle(x).fontSize); if (f > 11) { x.style.fontSize = f - 1 + "px"; moved = true; } }); if (!moved) break; }
   }
+  // 자판이 창 아래로 잘림(다국어부 10-12 320×640 — 아래 단추 줄이 두 줄로 꺾여 자판 마지막 줄 ㅚㅝㅞㅟㅢ 가 24~70px 잘림) — 넘칠 때만 차례로:
+  //  ① 아래 단추 셋을 한 줄로(글 작게 · 단추 안에서 두 줄) ② 자판 줄 높이를 30 → 22px 까지 1px 씩
+  function fitKb() {
+    const wr = work.closest(".write"), kb = work.querySelector(".kb"); if (!wr || !kb) return; wr.classList.remove("wt1", "wt2"); wr.style.removeProperty("--krmin");
+    const last = kb.querySelector(".kr:last-child button:last-child"); if (!last || !wr.clientHeight) return;
+    const over = () => last.getBoundingClientRect().bottom - wr.getBoundingClientRect().bottom > 0.5 || wr.scrollHeight > wr.clientHeight + 1;
+    if (!over()) return; if (wb.classList.contains("below")) wr.classList.add("wt1"); if (!over()) return;
+    wr.classList.add("wt2"); for (let h = 29; h >= 22 && (wr.style.setProperty("--krmin", h + "px"), over()); h--);
+  }
   function fitStageH() { // 손글씨 = 위 칸(뜻 줄·단추 줄)이 정해진 높이를 넘치면 그만큼 키움 → 아래 손글씨 칸이 줄어듦(본부 10-12 — 넘친 단추 줄을 손글씨 칸이 덮던 것)
     const stg = work.querySelector(".stage"); if (!stg) return; stg.style.height = ""; if (!work.classList.contains("handmode")) return;
     const sr = stg.getBoundingClientRect(), pb = parseFloat(getComputedStyle(stg).paddingBottom) || 0, low = Math.max(...[...stg.querySelectorAll(".info, .wbtns")].map(x => x.getBoundingClientRect().bottom));
     if (low > sr.bottom - pb + 1) stg.style.height = Math.ceil(sr.height + low - (sr.bottom - pb)) + "px";
   }
   // 머리 줄 한 줄 유지(본부 10-07) — 넘치면 ✕ 닫기 글을 숨기고 ✕ 만
-  function fitHeadW() { const h = work.closest(".write")?.querySelector(".whead") || app.querySelector(".whead"); if (!h) return; const sb = h.querySelector(".sub"), over = () => h.scrollWidth > h.clientWidth + 1 || (sb && sb.scrollWidth > sb.clientWidth + 1); /* 번호 칸이 말줄임으로 잘려도 넘침(ur 「3 / 1…」) */ h.classList.remove("narrow", "n2", "n3", "n4"); for (const c of ["narrow", "n2", "n3", "n4"]) { if (!over()) break; h.classList.add(c); } } // 머리 줄이 넘치면 차례로: ✕ 글 숨김 → 「쓰기」 제목 숨김 → 화자 이름 숨김 → 두 줄로(닫기 단추가 화면 밖으로 밀리지 않게 · 검사부 10-12 vi 375)
+  function fitHeadW() { const h = work.closest(".write")?.querySelector(".whead") || app.querySelector(".whead"); if (!h) return; const sb = h.querySelector(".sub"), over = () => h.scrollWidth > h.clientWidth + 1 || (sb && sb.scrollWidth > sb.clientWidth + 1); /* 번호 칸이 말줄임으로 잘려도 넘침(ur 「3 / 1…」) */ h.classList.remove("narrow", "n2", "n3", "n3b", "n4"); for (const c of ["narrow", "n2", "n3", "n3b", "n4"]) { if (!over()) break; h.classList.add(c); } } // 머리 줄이 넘치면 차례로: ✕ 글 숨김 → 「쓰기」 제목 숨김 → 화자 이름 숨김 → 두 줄로(닫기 단추가 화면 밖으로 밀리지 않게 · 검사부 10-12 vi 375)
   function fitWord() {
     fitSub2(); fitHeadW(); fitStageH();
     const row = work.querySelector(".info .word"); if (!row || !row.clientWidth) return;
