@@ -10,25 +10,25 @@
 //  R7 영상은 늘 맨 위 · 지금 줄은 영상 바로 아래(앞 줄은 영상 뒤로) — 손으로 목록을 움직이면 4초 동안은 따라가지 않음
 //  R8 듣기 모드(대사→설명 · 설명만)도 R1~R6 그대로(영상 대신 소리 조각) · 모드를 바꾸면 멈춤(▶ 로 시작)
 //  R9 다시 들어오면 마지막 줄이 선택된 채 멈춰 있음
-import { warmSTT } from "../sttserver.js?v=1012.8";
-import * as sfxL from "../sfx.js?v=1012.8"; // 카드 말하기 최대 길이 = 본보기 길이로(10-07)
-import { t, lang, langName } from "../i18n.js?v=1012.8";
-import { esc, renderText, glossCards, sayParts } from "../text.js?v=1012.8";
-import { episode } from "../data.js?v=1012.8";
-import { paths } from "../paths.js?v=1012.8";
-import { Sequence } from "../audio.js?v=1012.8";
-import { I, progress, SPEAKER, spkHtml, uiKoBtn, toggleUiKo } from "../ui.js?v=1012.8";
-import writeView from "./write.js?v=1012.8";
-import { diagEnv, keepDiag } from "../diag.js?v=1012.8";
-import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1012.8";
-import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace, lateFactor, sylAt, paintAt, karaokeRun } from "../rhythm.js?v=1012.8";
-import { playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1012.8";
-import { heardHTML, endHint, scoreOf, bestFull, spanOf, sylsAt } from "../heard.js?v=1012.8"; // 덧붙은 말 빼고 견주기(본부 10-11)
-import { recDel, downloadRec, askPersist } from "../recstore.js?v=1012.8";
-import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1012.8";
-import { scoreFx, stopFx } from "../scorefx.js?v=1012.8"; // 점수별 효과(본부 10-05)
-import { record, recordSROnly, srOnlyMode, setSrOnly, isAndroid, srMiss, micWhy, srWhy, canScore, closeMic, logRec, micOpen, seqMode, srOnBlob, devSR, setDevSR, srJudge, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1012.8";
-import { hold, quietWake } from "../wake.js?v=1012.8";
+import { warmSTT } from "../sttserver.js?v=1012.9";
+import * as sfxL from "../sfx.js?v=1012.9"; // 카드 말하기 최대 길이 = 본보기 길이로(10-07)
+import { t, lang, langName } from "../i18n.js?v=1012.9";
+import { esc, renderText, glossCards, sayParts } from "../text.js?v=1012.9";
+import { episode } from "../data.js?v=1012.9";
+import { paths } from "../paths.js?v=1012.9";
+import { Sequence } from "../audio.js?v=1012.9";
+import { I, progress, SPEAKER, spkHtml, uiKoBtn, toggleUiKo } from "../ui.js?v=1012.9";
+import writeView from "./write.js?v=1012.9";
+import { diagEnv, keepDiag } from "../diag.js?v=1012.9";
+import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1012.9";
+import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace, lateFactor, sylAt, paintAt, karaokeRun } from "../rhythm.js?v=1012.9";
+import { playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1012.9";
+import { heardHTML, endHint, scoreOf, bestFull, spanOf, sylsAt } from "../heard.js?v=1012.9"; // 덧붙은 말 빼고 견주기(본부 10-11)
+import { recDel, downloadRec, askPersist } from "../recstore.js?v=1012.9";
+import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1012.9";
+import { scoreFx, stopFx } from "../scorefx.js?v=1012.9"; // 점수별 효과(본부 10-05)
+import { record, recordSROnly, srOnlyMode, setSrOnly, isAndroid, srMiss, micWhy, srWhy, canScore, closeMic, logRec, micOpen, seqMode, srOnBlob, devSR, setDevSR, srJudge, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1012.9";
+import { hold, quietWake } from "../wake.js?v=1012.9";
 
 const RATES = [1, 0.75, 0.5];
 const pref = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } };
@@ -37,7 +37,7 @@ const LEAD = 0.35;  // 자막은 목소리보다 0.35초 먼저 영상 아래에
 const SCROLL_MS = 220; // 줄을 영상 아래로 올리는 시간 — 먼저 와 있어야 해서 짧게
 const FS = '<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>';
 
-export default async function learn(app, ep, startId) {
+export default async function learn(app, ep, startId, opts = {}) { /* opts.explain = 그 줄 설명 창을 연 채로(#/explain 주소 · 책 QR) */
   const d = await episode(ep, lang);
   if (seqMode()) warmSTT(); // 카드 말해 보기도 서버 받아쓰기 — 미리 데움(본부 10-12)
   setRateWord(t("speed")); // 속도 단추 글 「गति 1×」
@@ -48,19 +48,22 @@ export default async function learn(app, ep, startId) {
   const seq = new Sequence();
   let ready = false;
 
-  app.innerHTML = `<section class="scr learn">
+  const subsOn = () => pref("malmun.fullsub") !== "0"; /* 영상 자막 켬/끔(투덜이 10-12) */
+  app.innerHTML = `<section class="scr learn${subsOn() ? "" : " nosub"}">
     <div class="stick">
     <div class="vstage">
     <div class="vmain"><div class="vtitle"><div class="tt"><b class="ko" lang="ko">${esc(d.title || "")}</b>${d.title_t ? `<span class="sub">${esc(d.title_t)}</span>` : ""}</div>${uiKoBtn()}<span class="n"></span></div>
     <div class="varea"><div class="video" id="vwrap"><video playsinline preload="metadata" poster="${paths.poster(ep)}" src="${paths.video(ep)}"></video>
       <span class="vplay" aria-hidden="true">${I.play}</span>
       <div class="cap" aria-live="polite"></div>
-      <button class="vfs" data-act="fs" aria-label="${esc(t("fullscreen"))}">${FS}</button></div></div><div class="vsub" hidden aria-hidden="true"><div class="in"></div></div></div>
+      <button class="vfs" data-act="fs" aria-label="${esc(t("fullscreen"))}">${FS}</button>
+      <button class="vsubt" data-act="subs" aria-pressed="${subsOn()}" aria-label="${esc(t("subs_aria"))}" title="${esc(t("subs_aria"))}"><span class="cc" aria-hidden="true">CC</span><span class="w">${esc(t("subs"))}</span></button>
+      <div class="fstip" role="status" hidden><span class="who">${spkHtml("선생님")}</span><p>${esc(t("subs_tip"))}</p><button class="x" data-act="tipx" aria-label="${esc(t("close_word"))}">✕</button></div></div></div><div class="vsub" hidden aria-hidden="true"><div class="in"></div></div></div>
     <div class="panel" hidden></div>
     </div>
     <div class="seek" data-off><span class="t0">0:00</span><div class="trk" aria-label="seek"><div class="rail"><i></i></div></div><span class="t1">0:00</span></div>
     </div>
-    <ol class="lines">${L.map((l, i) => `<li class="line sp-${SPEAKER[l.speaker] || "x"} ${l.speaker === "선생님" ? "" : "right"}" data-i="${i}">
+    <ol class="lines">${L.map((l, i) => `<li class="line sp-${SPEAKER[l.speaker] || "x"} ${l.speaker === "선생님" ? "" : "right"}" data-i="${i}" data-peek="👁 ${esc(t("subs_peek"))}">
       <span class="who">${spkHtml(l.speaker)}</span>
       <p class="kotext ko" lang="ko">${esc(l.ko)}</p>
       ${l.tr ? `<p class="tr">${esc(l.tr)}</p>` : ""}
@@ -91,6 +94,7 @@ export default async function learn(app, ep, startId) {
   function select(i, { scroll = true, force = false } = {}) {
     i = Math.max(0, Math.min(L.length - 1, i));
     if (i !== st.cur) {
+      items.forEach(li => li.classList.remove("peek")); /* 자막 끔 때 잠깐 본 카드 = 다음 줄로 가면 다시 흐림 */
       items[st.cur]?.classList.remove("cur");
       items[st.cur]?.querySelector(".expl").classList.remove("on");
       st.cur = i;
@@ -760,7 +764,7 @@ export default async function learn(app, ep, startId) {
   function flip() {
     app.querySelector(".modetip").hidden = true;
     if (st.panel?.kind === "explain") { // 카드가 접히며 목록이 위로 당겨지므로 자리를 다시 본다(본부 10-05 — 지금 줄이 아래 막대 뒤로 가던 것)
-      const i = st.panel.i; closePanel(); if (st.mode !== "video") setMode("video"); playFrom(i);
+      const i = st.panel.i; closePanel(); if (st.mode !== "video") setMode("video"); playFrom(i); fullTip();
       requestAnimationFrame(() => keepVisible(st.cur, { force: true }));
       [500, 1200, 2500].forEach(ms => setTimeout(() => keepVisible(st.cur), ms)); return;
     }
@@ -808,6 +812,10 @@ export default async function learn(app, ep, startId) {
     const sx = e.target.closest(".expl [data-x=gw], .expl [data-x=sn]"); if (sx) { if (sx.dataset.x === "gw") return v9Pop(sx, popFor(sx)); hidePop(); return playFromSent(sx); } // 듣기 모드 설명 글 — 낱말 뜻 · 문장 = 그 문장부터
     const li = e.target.closest(".line");
     if (!li) return;
+    // 자막 끔 + 영상 창 = 흐린 대사 글(또는 👁 표시)을 누르면 그 카드만 또렷하게 ⇄ 다시 흐림(본부 10-12) · 줄 이동·재생은 안 함
+    if (!st.panel && app.querySelector(".learn").classList.contains("nosub") && !e.target.closest("button") && (e.target.closest(".kotext, .tr") || e.clientY - li.getBoundingClientRect().top < 30 && li.getBoundingClientRect().right - e.clientX < 110)) {
+      const on = !li.classList.contains("peek"); items.forEach(x => x.classList.remove("peek")); li.classList.toggle("peek", on); return;
+    }
     const i = +li.dataset.i, m = e.target.closest("[data-act=explain],[data-act=write],[data-act=speak]");
     // 설명·쓰기 = 위 창을 영상 ⇄ 그 메뉴로 바꾸는 토글(설명은 열면 바로 읽어 줌)
     if (m) return st.panel?.kind === m.dataset.act && st.panel.i === i ? closePanel() : openPanel(m.dataset.act, i, { autoplay: m.dataset.act === "explain" });
@@ -837,13 +845,31 @@ export default async function learn(app, ep, startId) {
   };
   v.addEventListener("click", togglePlay);
   app.querySelector("[data-act=uiko]")?.addEventListener("click", e => { e.stopPropagation(); const p = st.panel; if (p) { const w = panel.__wr?.st?.() || panel.querySelector(".write")?.parentElement?.__wr?.st?.(), sp = panel.__sp?._state; try { sessionStorage.setItem("malmun.reopen", JSON.stringify({ ep, at: Date.now(), kind: p.kind, i: p.i, s: w?.s, w: w?.w, c: w?.c, k: w?.k, wrote: w ? [...w.wrote] : [], part: sp?.i })); } catch {} }
-    toggleUiKo(() => import("../main.js?v=1012.8").then(m => m.rerender())); }); // 앱 글 한국어 토글 → 화면 다시 그림(도는 것은 cleanup 이 멈춤) → 열려 있던 창·자리로 다시 엶
+    toggleUiKo(() => import("../main.js?v=1012.9").then(m => m.rerender())); }); // 앱 글 한국어 토글 → 화면 다시 그림(도는 것은 cleanup 이 멈춤) → 열려 있던 창·자리로 다시 엶
   app.querySelector("[data-act=fs]").onclick = () => {
     const w = app.querySelector("#vwrap");
     if (document.fullscreenElement) document.exitFullscreen?.();
     else if (w.requestFullscreen) w.requestFullscreen().catch(() => v.webkitEnterFullscreen?.());
     else v.webkitEnterFullscreen?.();
   };
+  // 자막 켬/끔(영상 창 · 전체 화면 안에서도 보이게 #vwrap 안) — 끄면 전체 화면 자막·영상 밑 큰 자막·줄 카드 글을 가림(소리는 그대로)
+  const fsTip = app.querySelector(".fstip"); let tipT = 0;
+  const hideTip = () => { clearTimeout(tipT); fsTip.hidden = true; };
+  app.querySelector("[data-act=subs]").onclick = e => {
+    const on = !subsOn(); pref("malmun.fullsub", on ? "1" : "0");
+    e.currentTarget.setAttribute("aria-pressed", String(on)); app.querySelector(".learn").classList.toggle("nosub", !on); items.forEach(x => x.classList.remove("peek"));
+    if (!on) hideTip();
+  };
+  app.querySelector("[data-act=tipx]").onclick = hideTip;
+  // 선생님 말풍선 — 전체 영상·전체 화면을 열 때 처음 3번만 · 8초 뒤 저절로 닫힘 · 자막이 이미 꺼져 있으면 안 띄움
+  function fullTip() {
+    if (!subsOn() || !fsTip) return;
+    const n = +(pref("malmun.fullsubtip") || 0); if (n >= 3) return;
+    pref("malmun.fullsubtip", String(n + 1));
+    fsTip.hidden = false; clearTimeout(tipT); tipT = setTimeout(() => { fsTip.hidden = true; }, 8000);
+  }
+  const onFsChange = () => { if (document.fullscreenElement === app.querySelector("#vwrap")) fullTip(); };
+  document.addEventListener("fullscreenchange", onFsChange);
   const onKey = e => { if (e.code !== "Space" || /^(INPUT|BUTTON|TEXTAREA|A)$/.test(e.target.tagName)) return; e.preventDefault(); togglePlay(); };
   document.addEventListener("keydown", onKey);
 
@@ -861,6 +887,7 @@ export default async function learn(app, ep, startId) {
   v.addEventListener("loadedmetadata", () => { if (v.paused && !st.once) v.currentTime = L[st.cur].start; }, { once: true });
   sync();
   if (reopen) openPanel(reopen.kind, reopen.i, { restore: reopen }); // ने⇄한 토글 전 창·자리
+  else if (opts.explain) openPanel("explain", st.cur, { autoplay: true }); /* #/explain/{편}/{줄} = 그 줄 v9 설명 창(첫 터치 전엔 소리가 막힐 수 있음 — ▶ 로 시작) */
   const release = hold(); // 소리 장치 깨워 두기(첫소리 먹힘 방지)
-  return () => { clearInterval(edgeT); clearInterval(litT); clearInterval(seekTimer); clearInterval(hlTimer); document.removeEventListener("pointerdown", onDocDown, true); removeEventListener("popstate", onPop); clearTimeout(st.animEnd); release(); st.panel?.cleanup?.(); ex.stop(); removeEventListener("resize", pad); removeEventListener("resize", onFit); clearInterval(timer); clearTimeout(st.gap); document.removeEventListener("keydown", onKey); seq.stop(); v.pause(); v.removeAttribute("src"); v.load(); };
+  return () => { clearTimeout(tipT); document.removeEventListener("fullscreenchange", onFsChange); clearInterval(edgeT); clearInterval(litT); clearInterval(seekTimer); clearInterval(hlTimer); document.removeEventListener("pointerdown", onDocDown, true); removeEventListener("popstate", onPop); clearTimeout(st.animEnd); release(); st.panel?.cleanup?.(); ex.stop(); removeEventListener("resize", pad); removeEventListener("resize", onFit); clearInterval(timer); clearTimeout(st.gap); document.removeEventListener("keydown", onKey); seq.stop(); v.pause(); v.removeAttribute("src"); v.load(); };
 }

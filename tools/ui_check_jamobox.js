@@ -45,8 +45,9 @@
             const colH = x => { let run = 0, best = 0, top = 0, bt = 0; for (let y = y0; y <= y1; y++) { if (own[y * N + x] === k) { if (!run) top = y; run++; if (run > best) { best = run; bt = top; } } else run = 0; } return [best, bt]; };
             let cx = -1, cy = [0, 0]; { const cs = []; for (let x = x0; x <= x1; x++) cs.push([x, ...colH(x)]); const mx = Math.max(...cs.map(c => c[1])); if (mx >= 0.45 * Hd) { const f = cs.find(c => c[1] >= 0.85 * mx); cx = f[0]; cy = [f[2], f[2] + f[1] - 1]; } } // 기둥 = 가장 긴 세로 줄(앱과 같음 · 10-10)
             if (cx < 0) return;
-            let n = 0; for (let y = cy[0]; y <= cy[1]; y++) { const run = []; for (let x = cx - 1; x >= x0 && own[y * N + x] >= 0; x--) { let v = 0; for (let t = y; t >= y0 && own[t * N + x] >= 0; t--) v++; for (let t = y + 1; t <= y1 && own[t * N + x] >= 0; t++) v++; if (v >= 0.2 * Hd) break; if (!run.length) run.v0 = v || 1; if (run.length >= 2 && v > 2.2 * run.v0 && v >= 0.15 * Hd) break; run.push(y * N + x); } /* 꼭지 두께 2.2배 넘는 세로 획에서 멈춤(앱과 같음 · 「경」 ㄱ 세로는 ㄱ 몫) */ if (run.length && run.length <= 0.3 * Wd) n += run.filter(q => us[own[q]].role === "cho").length; }
-            if (n > 0) badV.push(`${ch}(${u.jamo} ${n})`);
+            let n = 0, tl = 0, tt = 0; for (let y = cy[0]; y <= cy[1]; y++) { const run = []; for (let x = cx - 1; x >= x0 && own[y * N + x] >= 0; x--) { let v = 0; for (let t = y; t >= y0 && own[t * N + x] >= 0; t--) v++; for (let t = y + 1; t <= y1 && own[t * N + x] >= 0; t++) v++; if (v >= 0.2 * Hd) break; if (!run.length) run.v0 = v || 1; if (run.length >= 2 && v > 2.2 * run.v0 && v >= 0.15 * Hd) break; run.push(y * N + x); } /* 꼭지 두께 2.2배 넘는 세로 획에서 멈춤(앱과 같음 · 「경」 ㄱ 세로는 ㄱ 몫) */ if (run.length && run.length <= 0.3 * Wd) { let e = run.length; while (e > 0 && us[own[run[e - 1]]].role === "cho") e--; n += run.slice(0, e).filter(q => us[own[q]].role === "cho").length; tl += run.length - e; tt += run.length; } }
+            /* 꼭지 왼끝에 이어 붙은 초성 몫(ㅇ 고리 곡선 · ㄱ 비스듬한 획과 맞닿는 곳 · 본부 10-12 「영」「겠」)은 꼭지 35% 까지 허용 · 꼭지 중간에 낀 초성 몫은 ✗ */
+            if (n > 0 || tl > 0.35 * tt) badV.push(`${ch}(${u.jamo} ${n}${tl ? "+끝" + tl + "/" + tt : ""})`);
           }
         });
         if (i % 40 === 39) await W(0);

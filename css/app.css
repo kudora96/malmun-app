@@ -1019,3 +1019,33 @@ button.dim{opacity:.45}
 /* 자판 화면 단추 셋(이 부분 듣기 · 자동 완성 · 전체 자동 완성) — 자모 칸 옆에 보통 크기로 안 들어가면 글자 칸 아래 한 줄(본부 10-12) · 글씨 13px · 한 줄 글씨 · 모자라면 단추가 다음 줄로 */
 .write .wbtns.below,.write.embedded .wbtns.below{flex:none;flex-wrap:wrap;gap:6px;padding:6px 12px 2px}
 .write .wbtns.below button,.write.embedded .wbtns.below button{flex:1 1 auto;min-width:0;white-space:nowrap;font-size:13px;line-height:1.2;min-height:36px;padding:6px 10px}
+/* 영상 자막 켬/끔 + 선생님 말풍선(투덜이 10-12) — 둘 다 #vwrap 안(전체 화면에서도 보임) · 단추는 ⛶ 왼쪽 · 말풍선은 영상 위쪽(아래 단추들을 가리지 않게) */
+.learn .vsubt{position:absolute;right:52px;bottom:8px;height:36px;max-width:calc(100% - 68px);display:inline-flex;align-items:center;gap:6px;padding:0 10px;border-radius:8px;border:1px solid rgba(255,255,255,.6);color:#fff;background:rgba(0,0,0,.5);font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden}
+.learn .vsubt .w{overflow:hidden;text-overflow:ellipsis}
+.learn .vsubt .cc{border:1.5px solid currentColor;border-radius:3px;padding:0 3px;font-size:10px;line-height:14px;font-family:var(--f-ui)}
+.learn .vsubt[aria-pressed=false]{background:rgba(0,0,0,.72);border-style:dashed;color:rgba(255,255,255,.75)}
+.learn .vsubt .cc{position:relative}
+.learn .vsubt[aria-pressed=false] .cc::after{content:"";position:absolute;left:-3px;right:-3px;top:50%;border-top:2px solid #ff8a7a;transform:rotate(-25deg)} /* 끔 = 빗금 */
+.learn .vsubt[aria-pressed=true] .cc{background:#fff;color:#000}
+.learn .fstip{position:absolute;left:8px;top:8px;z-index:3;max-width:min(calc(100% - 16px),440px);box-sizing:border-box;padding:7px 36px 8px 11px;border-radius:12px;background:var(--card);color:var(--ink);box-shadow:0 4px 14px rgba(0,0,0,.35);font-size:12.5px;line-height:1.45;text-align:left}
+.learn .fstip::after{content:"";position:absolute;left:18px;top:100%;border:7px solid transparent;border-top-color:var(--card)}
+.learn .fstip .who{display:block;font-size:11px;font-weight:700;color:var(--hi)}
+.learn .fstip .who .spkg{font-weight:500;color:var(--mute)}
+.learn .fstip p{margin:0}
+.learn .fstip .x{position:absolute;top:6px;right:6px;width:26px;height:26px;display:grid;place-items:center;border-radius:7px;border:1px solid var(--line);background:var(--bg2);color:var(--ink);font-size:12px;line-height:1}
+#vwrap:fullscreen .fstip{left:16px;top:16px;font-size:clamp(14px,1.6vw,20px);max-width:min(calc(100% - 32px),560px)}
+#vwrap:fullscreen .fstip .who{font-size:clamp(12px,1.2vw,16px)}
+#vwrap:fullscreen .cap{bottom:max(6%,56px)} /* 자막이 아래 단추(⛶·자막)와 겹치지 않게 */
+/* 자막 끔 = 전체 화면 자막 · 영상 밑 큰 자막 · (영상 창일 때) 줄 카드 한국어·학습자 언어 글을 가림 — 자리는 그대로(흐림) */
+.learn.nosub .cap{display:none!important}
+.learn.nosub .vsub .in{visibility:hidden}
+.learn.nosub:has(.vstage>.panel[hidden]) .lines .line:not(.peek) :is(.kotext,.tr){filter:blur(7px);user-select:none}
+/* 흐린 카드 = 오른쪽 위 작은 「👁 보기」(누르면 그 카드만 또렷 · 다시 누르거나 다음 줄이면 다시 흐림) */
+.learn.nosub:has(.vstage>.panel[hidden]) .lines .line{position:relative}
+.learn.nosub:has(.vstage>.panel[hidden]) .lines .line:not(.peek)::after{content:attr(data-peek);position:absolute;top:6px;right:8px;padding:1px 8px;border-radius:999px;background:var(--bg2);color:var(--mute);font-size:11px;line-height:18px;pointer-events:none}
+#vwrap:fullscreen .cap{width:max-content;max-width:min(90%,calc(100% - 32px))} /* left:50% 때문에 반 폭으로 접히던 것 — 내용 폭(최대 90% · 양옆 16px) · 본부 10-12 375 세로 4줄 */
+@media (orientation:landscape) and (max-height:520px){ /* 가로 폰 전체 화면 — 자막을 화면 높이에 맞춰 작게 · 아래(단추 줄 바로 위)에 붙임 · 가장 긴 줄도 높이 30% 안(본부 10-12) */
+  #vwrap:fullscreen .cap{bottom:52px;gap:1px;padding:5px 14px;max-width:min(92%,calc(100% - 32px))}
+  #vwrap:fullscreen .cap .ko{font-size:clamp(13px,5.2vh,40px);line-height:1.3}
+  #vwrap:fullscreen .cap .tr{font-size:clamp(11px,3.7vh,26px);line-height:1.3}
+}
