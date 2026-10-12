@@ -1,7 +1,7 @@
 // 서버 받아쓰기(2안) 점검(본부 10-11) — #/learn/L01-00-01 을 연 채로 · 가짜 안드로이드·마이크·받아쓰기 + 가짜 서버(window.fetch 를 그 주소만 가로챔 · window.__sttURL)
 // 가짜 받아쓰기 = 녹음 소리 트랙으로는 못 들음(1번안 안 되는 기기) · 트랙 없이(받아쓰기만)는 늘 들음
 // ⓐ 안드로이드 + 주소 = 처음부터 녹음 → 서버(1번안 안 씀 · 본부 10-11 변경) → 점수 · 녹음 그대로 · 내 목소리 · 기기 기억 server · 카드도 서버
-// ⓑ 서버 429·500·12초·네트워크·빈 글 → 「한 번 더」 · 이번 방문 받아쓰기만(sessionStorage) · malmun.srdev 에 sronly 안 적음 · 다음 = 받아쓰기만 점수
+// ⓑ 서버 429·500·20초·네트워크·빈 글 → 「한 번 더」 · 연속 2번이면 10분 동안 받아쓰기만(sessionStorage malmun.srvoff) · malmun.srdev 에 sronly 안 적음
 // ⓒ 주소 없음 → 서버 한 번도 안 부름 · 옛 그대로(연속 2번 → sronly) · 주소 있으면 옛 sronly 기억이 있어도 서버부터 ⓓ 첫 사용 안내 한 번만 ⓔ 기다리는 중 닫기 = 끊김 · 늦은 점수·효과음 없음
 (async () => {
   window.__noRhythm = true;
@@ -12,7 +12,7 @@
   const setUA = android => { if (android) Object.defineProperty(navigator, "userAgent", { configurable: true, get: () => "Mozilla/5.0 (Linux; Android 14; SM-S921N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0 Mobile Safari/537.36" }); else delete navigator.userAgent; };
   const sfxLog = (window.__sfxLog = []);
   const calls = []; window.__srvMode = "ok";
-  // 가짜 서버 — 모드: ok · 429 · 500 · timeout(답 없음 → 앱 12초) · net(네트워크 오류) · empty(빈 글) · slow(3초 뒤 ok)
+  // 가짜 서버 — 모드: ok · 429 · 500 · timeout(답 없음 → 앱 20초) · net(네트워크 오류) · empty(빈 글) · slow(3초 뒤 ok)
   window.fetch = (u, o = {}) => {
     if (!String(u).startsWith(URL0)) return keep.fetch(u, o);
     if (/\/health$/.test(String(u))) return Promise.resolve(new Response('{"ok":true}', { status: 200, headers: { "Content-Type": "application/json" } })); // 데우기(warmSTT)는 받아쓰기 요청이 아님 — 세지 않음
@@ -29,7 +29,7 @@
     });
   };
   const notes = []; const mo = new MutationObserver(ms => { for (const m of ms) for (const n of m.addedNodes) if (n.classList?.contains("sttnote")) notes.push(n.textContent); }); mo.observe(document.body, { childList: true });
-  const clean = () => { try { for (const k of ["malmun.srdev", "malmun.srdev.t", "malmun.lastrec", "malmun.sttnote"]) localStorage.removeItem(k); for (const k of ["malmun.srmode", "malmun.srfail", "malmun.srsrv", "malmun.srmiss"]) sessionStorage.removeItem(k); } catch {} };
+  const clean = () => { try { for (const k of ["malmun.srdev", "malmun.srdev.t", "malmun.lastrec", "malmun.sttnote"]) localStorage.removeItem(k); for (const k of ["malmun.srmode", "malmun.srfail", "malmun.srsrv", "malmun.srmiss", "malmun.srvfail", "malmun.srvoff"]) sessionStorage.removeItem(k); } catch {} };
   const RETRY = /फेरि एक पटक|한 번 더|once more/;
   try {
     clean();
@@ -65,16 +65,24 @@
         ok(/\d+%/.test(m) && calls.length === n0 + 1 && !window.__srStarts.length && !mine.disabled && !mine.classList.contains("dim"), "ⓐ 카드도 서버 → 점수 · 내 목소리 켜짐", `「${m.slice(0, 40)}」 · 서버 ${calls.length - n0}번`); }
       else ok(false, "ⓐ 카드 🎤 단추 없음");
       $(".panel [data-x=close], .panel [data-act=close]")?.click(); await W(400); }
-    // ⓑ 서버 실패 → 이번 방문 받아쓰기만
+    // ⓑ 서버 실패(본부 10-12 고침) — 첫 실패 = 「한 번 더」 + 다음에도 서버 · 연속 2번 = 10분 동안 받아쓰기만(malmun.srvoff) · malmun.srdev 안 적음 · 10분 지나면 다시 서버
     document.querySelectorAll(".line")[0].querySelector("[data-act=speak]").click(); await W(1500); document.querySelector("video")?.pause(); window.__heard = $(".panel").__sp._cur().say;
+    const off = () => +(sessionStorage.getItem("malmun.srvoff") || 0) > 0;
     for (const m of [429, 500, "net", "empty", "timeout"]) {
       clean(); localStorage.setItem("malmun.sttnote", "2"); window.__srvMode = m; const n0 = calls.length, t0 = performance.now();
       const b = await once(); const sec = (performance.now() - t0) / 1000;
-      ok(calls.length === n0 + 1 && RETRY.test(b.msg) && !/\d+%/.test(b.msg) && !b.fx.length && sessionStorage.getItem("malmun.srmode") === "only" && !localStorage.getItem("malmun.srdev") && (m !== "timeout" || (sec > 11 && sec < 20)),
-        `ⓑ 서버 ${m} → 「한 번 더」 · 효과음 없음 · 이번 방문만 받아쓰기만 · malmun.srdev 안 적음`, `「${b.msg.slice(0, 30)}」 · srmode ${sessionStorage.getItem("malmun.srmode")} · srdev ${localStorage.getItem("malmun.srdev")} · ${sec.toFixed(1)}초`);
+      ok(calls.length === n0 + 1 && RETRY.test(b.msg) && !/\d+%/.test(b.msg) && !b.fx.length && !off() && sessionStorage.getItem("malmun.srvfail") === "1" && !localStorage.getItem("malmun.srdev") && (m !== "timeout" || (sec > 19 && sec < 28)),
+        `ⓑ 서버 ${m} 첫 실패 → 「한 번 더」 · 효과음 없음 · 아직 받아쓰기만 아님(다음도 서버) · malmun.srdev 안 적음`, `「${b.msg.slice(0, 30)}」 · srvfail ${sessionStorage.getItem("malmun.srvfail")} · ${sec.toFixed(1)}초`);
+      if (m === "timeout") continue; // 20초 × 2 는 길어서 한 번만
+      const b1 = await once();
+      ok(calls.length === n0 + 2 && RETRY.test(b1.msg) && off() && !localStorage.getItem("malmun.srdev"), `ⓑ 서버 ${m} 연속 두 번 → 10분 동안 받아쓰기만(srvoff)`, `서버 ${calls.length - n0}번 · srvoff ${off()}`);
       if (m === 429) { window.__srStarts = []; const g1 = gum, n1 = calls.length; const b2 = await once();
-        ok(gum === g1 && calls.length === n1 && /\d+%/.test(b2.msg) && window.__srStarts.every(x => x === "트랙없음"), "ⓑ 다음 = 지금 방식(받아쓰기만 · 마이크 안 엶 · 서버 안 부름) · 점수", `「${b2.msg.slice(0, 40)}」`); }
+        ok(gum === g1 && calls.length === n1 && /\d+%/.test(b2.msg) && window.__srStarts.every(x => x === "트랙없음"), "ⓑ 그다음 = 받아쓰기만(마이크 안 엶 · 서버 안 부름) · 점수", `「${b2.msg.slice(0, 40)}」`);
+        sessionStorage.setItem("malmun.srvoff", String(Date.now() - 11 * 60000)); window.__srvMode = "ok"; const n2 = calls.length; const b3 = await once();
+        ok(calls.length === n2 + 1 && /\d+%/.test(b3.msg), "ⓑ 10분 지나면 다시 서버(같은 탭에 계속 받아쓰기만으로 남지 않음)", `서버 ${calls.length - n2}번 · 「${b3.msg.slice(0, 30)}」`); }
     }
+    // 한 번 실패 뒤 성공 = 실패 수 지움
+    { clean(); localStorage.setItem("malmun.sttnote", "2"); window.__srvMode = 500; await once(); window.__srvMode = "ok"; const b = await once(); ok(/\d+%/.test(b.msg) && !sessionStorage.getItem("malmun.srvfail") && !off(), "ⓑ 실패 한 번 → 다음 성공 = 실패 수 지움 · 서버 그대로", `srvfail ${sessionStorage.getItem("malmun.srvfail")}`); }
     // 다음 방문 흉내(sessionStorage 비움) · 기기 기억 server 면 서버 다시 시도
     clean(); setDevSRraw("server"); window.__srvMode = "ok"; { const n0 = calls.length; const b = await once(); ok(calls.length === n0 + 1 && /\d+%/.test(b.msg), "ⓑ 다음 방문(기억 server) = 서버 다시 시도"); }
     // ⓒ 주소 없음

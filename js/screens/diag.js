@@ -1,16 +1,19 @@
 // 진단 화면 #/diag(본부 10-07 「PC 에선 되는데 폰에선 안 됨」) — 투덜이가 폰에서 열어 사진 한 장 · 「복사」로 글째 보냄
 //  기기 · 받아쓰기(인식만 / 녹음+인식 동시) · 마이크(허락 · 실제 적용된 설정 · 장치) · 녹음 형식(지원 · 3초 녹음을 풀 수 있나)
 //  소리(AudioContext 상태 · 「가」 소리 · 효과음 · 음성 창고 읽기) · 최근 오류 20개 — 앱 동작은 안 바꿈(시험은 이 화면 안에서만)
-import { VERSION } from "../version.js?v=1012.9";
-import { esc } from "../text.js?v=1012.9";
-import { paths } from "../paths.js?v=1012.9";
-import { charsF } from "../data.js?v=1012.9";
-import { audioCtx } from "../wake.js?v=1012.9";
-import * as sfx from "../sfx.js?v=1012.9";
-import { srOnlyMode, setSrOnly, devSR, setDevSR, seqMode, srFailCount, serverMode } from "../recorder.js?v=1012.9";
-import { sttReady, sttURL, serverSTT } from "../sttserver.js?v=1012.9";
-import { diagCount, clearDiag } from "../diag.js?v=1012.9";
-import { errLog, clearErr } from "../errlog.js?v=1012.9";
+import { VERSION } from "../version.js?v=1012.11";
+import { esc } from "../text.js?v=1012.11";
+import { paths } from "../paths.js?v=1012.11";
+import { charsF } from "../data.js?v=1012.11";
+import { audioCtx } from "../wake.js?v=1012.11";
+import * as sfx from "../sfx.js?v=1012.11";
+import { srOnlyMode, setSrOnly, devSR, setDevSR, seqMode, srFailCount, serverMode } from "../recorder.js?v=1012.11";
+import { sttReady, sttURL, serverSTT } from "../sttserver.js?v=1012.11";
+import { diagCount, clearDiag } from "../diag.js?v=1012.11";
+import { errLog, clearErr } from "../errlog.js?v=1012.11";
+
+// 같은 오류(종류·글·주소·자리)는 한 줄로 묶음 — 화면·복사 글 같이(본부 10-12 · 띄엄띄엄 쌓인 version.json 실패 20개)
+const errGroups = () => { const g = new Map(); for (const e of errLog()) { const k = [e.kind, e.msg, e.url || "", e.src || "", e.line || ""].join("|"), o = g.get(k); if (o) { o.n += e.n || 1; o.at = e.at; } else g.set(k, { ...e, n: e.n || 1 }); } return [...g.values()].reverse(); };
 
 export default async function diag(app) {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -21,7 +24,8 @@ export default async function diag(app) {
   const mrTypes = window.MediaRecorder ? types.filter(x => MediaRecorder.isTypeSupported?.(x)).join(", ") || "(없음)" : "MediaRecorder 없음";
   let micPerm = "?"; try { micPerm = (await navigator.permissions?.query({ name: "microphone" }))?.state || "?"; } catch { micPerm = "query 안 됨"; }
   // 받아쓰기만 = 이번 방문만(sessionStorage malmun.srmode) 인지 기기 기억(localStorage malmun.srdev · 7일) 인지 갈라 적음(검사부 10-11)
-  const srSess = (() => { try { return sessionStorage.getItem("malmun.srmode") === "only"; } catch { return false; } })(), srHow = devSR() === "sronly" ? "기기 기억 7일" : srSess ? "이번 방문만" : "";
+  const srOff = (() => { try { const t = +sessionStorage.getItem("malmun.srvoff") || 0; return t && Date.now() - t < 600000 ? Math.ceil((600000 - (Date.now() - t)) / 60000) : 0; } catch { return 0; } })(); /* 서버 연속 2번 실패 → 10분 받아쓰기만(본부 10-12) */
+  const srSess = (() => { try { return sessionStorage.getItem("malmun.srmode") === "only"; } catch { return false; } })(), srHow = devSR() === "sronly" ? "기기 기억 7일" : srOff ? `서버 연속 실패 → ${srOff}분 더 받아쓰기만` : srSess ? "이번 방문만" : "";
   const base = {
     "판": VERSION, "주소": location.href.replace(/[?#].*$/, ""), "브라우저": navigator.userAgent, "화면": `${screen.width}×${screen.height} · 창 ${innerWidth}×${innerHeight} · dpr ${devicePixelRatio}`,
     "받아쓰기 방식": srOnlyMode() ? `받아쓰기만(${srHow}${devSR() === "sronly" ? " — 녹음 소리로 받아쓰기가 연속 2번 안 됨" : ""})` : seqMode() && serverMode() ? `녹음 → 서버 받아쓰기(2안 · 안드로이드 기본 · ${devSR() === "server" ? "이 기기에서 됨 확인 · 기기 기억 7일" : "아직 확인 전"} · 실패하면 이번 방문만 받아쓰기만)` : seqMode() ? `녹음 먼저 → 그 소리로 받아쓰기(${devSR() === "seq-ok" ? "이 기기에서 됨 확인 · 기기 기억 7일" : "아직 확인 전"} · 연속 실패 ${srFailCount()}/2 · 이번 방문만)` : "녹음+받아쓰기 같이", "서버 받아쓰기": sttReady() ? `켜짐 · ${sttURL()}` : "꺼짐(주소 없음)", "받아쓰기 있음": SR ? (window.SpeechRecognition ? "SpeechRecognition" : "webkitSpeechRecognition") : "없음", "마이크 허락": micPerm,
@@ -64,7 +68,7 @@ export default async function diag(app) {
   app.querySelector(".diag").addEventListener("click", async e => {
     const b = e.target.closest("[data-t]"); if (!b) return;
     const a = b.dataset.t; try { audioCtx().resume?.(); } catch {}
-    if (a === "copy") { const txt = [...app.querySelectorAll(".dtab tr")].map(tr => tr.innerText.replace(/\t/, ": ")).join("\n") + "\n최근 녹음:\n" + recRows().join("\n") + "\n뒤로:\n" + (() => { try { return JSON.parse(localStorage.getItem("malmun.navlog") || "[]").join("\n"); } catch { return ""; } })() + "\n오류:\n" + errLog().map(e => JSON.stringify(e)).join("\n");
+    if (a === "copy") { const txt = [...app.querySelectorAll(".dtab tr")].map(tr => tr.innerText.replace(/\t/, ": ")).join("\n") + "\n최근 녹음:\n" + recRows().join("\n") + "\n뒤로:\n" + (() => { try { return JSON.parse(localStorage.getItem("malmun.navlog") || "[]").join("\n"); } catch { return ""; } })() + "\n오류:\n" + errGroups().map(e => `${e.kind} ${e.msg}${e.url ? " · " + e.url : ""}${e.n > 1 ? ` × ${e.n}회 · 마지막 ${e.at}` : ` · ${e.at}`}`).join("\n"); /* 복사 글도 같은 오류 한 줄로(본부 10-12) */
       try { await navigator.clipboard.writeText(txt); msg("복사했어요"); } catch { msg("복사 안 됨 — 사진으로 보내 주세요"); } return; }
     if (a === "clr") { if (running) return; clearErr(); paint(); return; }
     if (a === "cleardiag") { if (running) return; await clearDiag(); const n = app.querySelector(".dkeepn"); if (n) n.textContent = String(await diagCount()); msg("진단 녹음을 지웠어요"); return; }

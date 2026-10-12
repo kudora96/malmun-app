@@ -10,25 +10,25 @@
 //  R7 영상은 늘 맨 위 · 지금 줄은 영상 바로 아래(앞 줄은 영상 뒤로) — 손으로 목록을 움직이면 4초 동안은 따라가지 않음
 //  R8 듣기 모드(대사→설명 · 설명만)도 R1~R6 그대로(영상 대신 소리 조각) · 모드를 바꾸면 멈춤(▶ 로 시작)
 //  R9 다시 들어오면 마지막 줄이 선택된 채 멈춰 있음
-import { warmSTT } from "../sttserver.js?v=1012.9";
-import * as sfxL from "../sfx.js?v=1012.9"; // 카드 말하기 최대 길이 = 본보기 길이로(10-07)
-import { t, lang, langName } from "../i18n.js?v=1012.9";
-import { esc, renderText, glossCards, sayParts } from "../text.js?v=1012.9";
-import { episode } from "../data.js?v=1012.9";
-import { paths } from "../paths.js?v=1012.9";
-import { Sequence } from "../audio.js?v=1012.9";
-import { I, progress, SPEAKER, spkHtml, uiKoBtn, toggleUiKo } from "../ui.js?v=1012.9";
-import writeView from "./write.js?v=1012.9";
-import { diagEnv, keepDiag } from "../diag.js?v=1012.9";
-import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1012.9";
-import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace, lateFactor, sylAt, paintAt, karaokeRun } from "../rhythm.js?v=1012.9";
-import { playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1012.9";
-import { heardHTML, endHint, scoreOf, bestFull, spanOf, sylsAt } from "../heard.js?v=1012.9"; // 덧붙은 말 빼고 견주기(본부 10-11)
-import { recDel, downloadRec, askPersist } from "../recstore.js?v=1012.9";
-import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1012.9";
-import { scoreFx, stopFx } from "../scorefx.js?v=1012.9"; // 점수별 효과(본부 10-05)
-import { record, recordSROnly, srOnlyMode, setSrOnly, isAndroid, srMiss, micWhy, srWhy, canScore, closeMic, logRec, micOpen, seqMode, srOnBlob, devSR, setDevSR, srJudge, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1012.9";
-import { hold, quietWake } from "../wake.js?v=1012.9";
+import { warmSTT } from "../sttserver.js?v=1012.11";
+import * as sfxL from "../sfx.js?v=1012.11"; // 카드 말하기 최대 길이 = 본보기 길이로(10-07)
+import { t, lang, langName } from "../i18n.js?v=1012.11";
+import { esc, renderText, glossCards, sayParts } from "../text.js?v=1012.11";
+import { episode } from "../data.js?v=1012.11";
+import { paths } from "../paths.js?v=1012.11";
+import { Sequence } from "../audio.js?v=1012.11";
+import { I, progress, SPEAKER, spkHtml, uiKoBtn, toggleUiKo } from "../ui.js?v=1012.11";
+import writeView from "./write.js?v=1012.11";
+import { diagEnv, keepDiag } from "../diag.js?v=1012.11";
+import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1012.11";
+import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace, lateFactor, sylAt, paintAt, karaokeRun } from "../rhythm.js?v=1012.11";
+import { playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1012.11";
+import { heardHTML, endHint, scoreOf, bestFull, spanOf, sylsAt } from "../heard.js?v=1012.11"; // 덧붙은 말 빼고 견주기(본부 10-11)
+import { recDel, downloadRec, askPersist } from "../recstore.js?v=1012.11";
+import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1012.11";
+import { scoreFx, stopFx } from "../scorefx.js?v=1012.11"; // 점수별 효과(본부 10-05)
+import { record, recordSROnly, srOnlyMode, setSrOnly, isAndroid, srMiss, micWhy, srWhy, canScore, closeMic, logRec, micOpen, seqMode, srOnBlob, devSR, setDevSR, srJudge, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1012.11";
+import { hold, quietWake } from "../wake.js?v=1012.11";
 
 const RATES = [1, 0.75, 0.5];
 const pref = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } };
@@ -568,7 +568,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
       if (att !== spAtt || st.panel?.i !== i || !sp || s2.info?.aborted) return; // 닫힘·새 시도 = 옛 결과 버림
       const jd = srJudge(s2, 10 ** ((r.diag?.maxDb ?? -120) / 20)); if (!jd.ok && jd.kind === "notrack") s2.heard = []; // 트랙 대신 마이크를 들음 = 들은 말 버림
       r.heard = s2.heard; r.words = s2.info?.wordList || null; r.srErr = s2.srErr; r.diag = { ...(r.diag || {}), sr: s2.ev, seq: `녹음 ${s2.info?.dur}초 최대 ${s2.info?.maxDb}dB · 트랙 ${s2.info?.track} · 트랙 씀 ${s2.info?.trackUsed ?? "?"} · start 예외 ${s2.info?.startErr || "없음"} · ${s2.info?.ms}ms · 들음 ${s2.heard.length} · 판정 ${jd.kind}${jd.count ? ` ${jd.count}/2` : ""} · 기억 ${devSR() || "-"}` };
-      if (jd.retry) { btn.textContent = "🎤 " + t("speak_now"); msg.textContent = t("sr_retry_dev"); scoreFx(box.querySelector(".fx"), null); logRec({ where: "card", line: L[i].id, want: L[i].say.ko, ...r.diag, why: "retry-dev", score: null, kind: jd.kind, mode: jd.switched ? "녹음→받아쓰기 연속 2번 안 됨 → 받아쓰기만" : "녹음→받아쓰기 한 번 더", heard: [] }); return; } }
+      if (jd.retry) { btn.textContent = "🎤 " + t("speak_now"); msg.textContent = t("sr_retry_dev"); scoreFx(box.querySelector(".fx"), null); logRec({ where: "card", line: L[i].id, want: L[i].say.ko, ...r.diag, why: "retry-dev", score: null, kind: jd.kind, mode: jd.server ? `서버 안 됨(${jd.kind}) ${jd.count || 1}번째 → ${jd.switched ? "10분 받아쓰기만" : "다음도 서버"}` : jd.switched ? "녹음→받아쓰기 연속 2번 안 됨 → 받아쓰기만" : "녹음→받아쓰기 한 번 더" /* 실제 횟수·까닭대로(본부 10-12) */, heard: [] }); return; } }
     const switchedSR = !seq && r.blob && isAndroid() && !srOnlyMode() && canScore() ? srMiss(!r.heard.length && (r.diag?.maxDb ?? -120) > -40) : false; // 연속 2번이면 받아쓰기만으로
     let sc = canScore() && r.heard.length ? scoreOf(L[i].say.ko, r.heard) : null; // 덧붙은 말(앞뒤 다른 말)은 빼고 본보기와 맞는 토막만(본부 10-11)
     const env = await diagEnv(); if (att !== spAtt) return; // 그새 새 시도·닫힘(검사부 10-11) · 진단(화면에 안 보임) — 소리 엔진·🔁·녹음 시작 때 재생 중이었는지·출력 장치 + 녹음 소리 자체(malmun_diag · 마지막 3개)
@@ -845,7 +845,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   };
   v.addEventListener("click", togglePlay);
   app.querySelector("[data-act=uiko]")?.addEventListener("click", e => { e.stopPropagation(); const p = st.panel; if (p) { const w = panel.__wr?.st?.() || panel.querySelector(".write")?.parentElement?.__wr?.st?.(), sp = panel.__sp?._state; try { sessionStorage.setItem("malmun.reopen", JSON.stringify({ ep, at: Date.now(), kind: p.kind, i: p.i, s: w?.s, w: w?.w, c: w?.c, k: w?.k, wrote: w ? [...w.wrote] : [], part: sp?.i })); } catch {} }
-    toggleUiKo(() => import("../main.js?v=1012.9").then(m => m.rerender())); }); // 앱 글 한국어 토글 → 화면 다시 그림(도는 것은 cleanup 이 멈춤) → 열려 있던 창·자리로 다시 엶
+    toggleUiKo(() => import("../main.js?v=1012.11").then(m => m.rerender())); }); // 앱 글 한국어 토글 → 화면 다시 그림(도는 것은 cleanup 이 멈춤) → 열려 있던 창·자리로 다시 엶
   app.querySelector("[data-act=fs]").onclick = () => {
     const w = app.querySelector("#vwrap");
     if (document.fullscreenElement) document.exitFullscreen?.();

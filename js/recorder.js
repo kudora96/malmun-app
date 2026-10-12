@@ -6,8 +6,8 @@
 // 시간·인식(본부 10-04 투덜이 승인): 말 사이 쉼 2초 · 🎤 뒤 6초 말 없으면 끝 · 최대 길이 = 문장 길이에 맞춤 · 인식이 혼자 끝나면 같은 트랙으로 다시
 // 그때와 다른 점(본부 10-04 「남긴 차이」): ① 윈도우 별칭 장치 「default」「communications」는 절대 안 고름(통신 장치를 열면 윈도우가 다른 소리를 줄임)
 //   ② 「준비 중 → 녹음 중」 표시(첫 소리가 들어오면) ③ 인식 오류 까닭을 돌려줌(onerror 를 삼키지 않음) ④ 진단 기록(이벤트만 듣고 소리 경로는 안 건드림)
-import { audioCtx } from "./wake.js?v=1012.9";
-import { sttReady, serverSTT, sttNoteOnce } from "./sttserver.js?v=1012.9";
+import { audioCtx } from "./wake.js?v=1012.11";
+import { sttReady, serverSTT, sttNoteOnce } from "./sttserver.js?v=1012.11";
 
 // 시간 규칙(본부 10-04 · 투덜이 「빨리 안 하면 바로 닫힘」): 말 사이 쉼 2초 · 🎤 뒤 6초 안에 말 없으면 끝 · 최대 길이는 부르는 쪽이 정함(문장 길이)
 const QUIET_MS = 2000, START_MS = 6000;
@@ -74,7 +74,11 @@ const DEV_DAYS = 7, DEV_K = "malmun.srdev", DEV_T = "malmun.srdev.t", FAIL_K = "
 // 서버 받아쓰기(2안 · 본부 10-11 변경 — 갤럭시 실기기에서 1번안 안 됨) — 주소(STT_URL)가 있으면 안드로이드 기본 = 녹음 → 서버(처음부터) · 1번안(녹음→트랙 받아쓰기)은 진단 화면 시험용만
 //  서버 됨 = 기기 기억 "server"(7일) · 서버 실패(비2xx·429·12초·네트워크·말소리 있는데 빈 글) = 이번 방문만 받아쓰기만(sessionStorage) → 다음 방문에 서버 다시
 //  주소가 없으면(sttReady false) 옛 그대로(1번안 → 연속 2번 실패 → sronly 7일)
-export const serverMode = () => { try { return sttReady() && sessionStorage.getItem("malmun.srmode") !== "only"; } catch { return false; } };
+// 서버 실패 기억(본부 10-12 갤럭시 「점수만·녹음 안 됨」) — 연속 2번 실패해야 바꿈 · 바꾼 것은 10분만(sessionStorage 는 같은 탭이면 며칠도 남아서 · 한 번 실패로 그 탭이 계속 받아쓰기만이던 것)
+const SRV_FAIL = "malmun.srvfail", SRV_OFF = "malmun.srvoff", SRV_OFF_MS = 600000;
+try { if (sttReady() && sessionStorage.getItem("malmun.srmode") === "only" && !sessionStorage.getItem("malmun.srmode.v2")) sessionStorage.removeItem("malmun.srmode"); sessionStorage.setItem("malmun.srmode.v2", "1"); } catch {} /* 옛 판이 서버 한 번 실패로 남긴 「받아쓰기만」(같은 탭에 며칠씩 남던 것)을 새 판 첫 열기에 한 번 지움 — 서버가 있으면 안드로이드는 1번안을 안 써서 이 값이 필요 없음(본부 10-12) */
+const srvOff = () => { try { const t = +sessionStorage.getItem(SRV_OFF) || 0; return t > 0 && Date.now() - t < SRV_OFF_MS; } catch { return false; } };
+export const serverMode = () => { try { return sttReady() && sessionStorage.getItem("malmun.srmode") !== "only" && !srvOff(); } catch { return false; } };
 export const devSR = () => { try { const v = localStorage.getItem(DEV_K); if (!v) return null; const t = +localStorage.getItem(DEV_T) || 0;
   if (!t) { localStorage.removeItem(DEV_K); return null; } /* 옛 판 값(적은 때 없음 · sronly든 seq-ok든) = 지움 → 1번안 다시 시험(본부 10-11) */
   if (!(Date.now() - t < DEV_DAYS * 864e5)) { localStorage.removeItem(DEV_K); localStorage.removeItem(DEV_T); return null; } return v; } catch { return null; } };
@@ -102,16 +106,16 @@ export function srJudge(s2, peak) {
 // 서버 결과 판정 — 들은 말 있음 = 됨(기기 기억 "server" 7일) · 말소리 없이 빈 글 = 보통 결과(「안 들렸어요」 · 서버 탓 아님) · 그 밖의 실패 = 이번 방문 받아쓰기만 + 「한 번 더」
 function srvJudge(s2, peak) {
   const heard = s2?.heard?.length > 0, e = s2?.srErr || "";
-  if (heard) { try { sessionStorage.removeItem(FAIL_K); } catch {} setDevSR("server"); return { ok: true, retry: false, switched: false, kind: "server" }; }
+  if (heard) { try { sessionStorage.removeItem(FAIL_K); sessionStorage.removeItem(SRV_FAIL); sessionStorage.removeItem(SRV_OFF); } catch {} setDevSR("server"); return { ok: true, retry: false, switched: false, kind: "server" }; }
   if (e === "server-empty" && !((peak || 0) > 0.01)) return { ok: false, retry: false, switched: false, kind: "silent" };
-  setSrOnly(true); /* 이번 방문만 · malmun.srdev 는 그대로 */
-  return { ok: false, retry: true, switched: true, server: true, kind: e || "server-error" };
+  let n = 1; try { n = (+sessionStorage.getItem(SRV_FAIL) || 0) + 1; if (n >= 2) { sessionStorage.setItem(SRV_OFF, String(Date.now())); sessionStorage.removeItem(SRV_FAIL); } else sessionStorage.setItem(SRV_FAIL, String(n)); } catch {}
+  return { ok: false, retry: true, switched: n >= 2, server: true, count: n, kind: e || "server-error" }; /* 첫 실패 = 「한 번 더」 + 다음에도 서버 · 연속 2번 = 10분 동안 받아쓰기만 · malmun.srdev 는 그대로 */
 }
-export const srOnlyMode = () => { try { return sessionStorage.getItem("malmun.srmode") === "only" || (devSR() === "sronly" && !sttReady()); } catch { return false; } }; /* 서버 주소가 있으면 옛 1번안 실패 기억(sronly)은 안 따름 — 서버부터 */
+export const srOnlyMode = () => { try { return sessionStorage.getItem("malmun.srmode") === "only" || srvOff() || (devSR() === "sronly" && !sttReady()); } catch { return false; } }; /* 서버 주소가 있으면 옛 1번안 실패 기억(sronly)은 안 따름 — 서버부터 */
 // 안드로이드 기본 = 녹음만 하고(받아쓰기 동시에 안 켬) 끝나면 그 녹음 소리로 받아쓰기 · 점검 도구는 window.__noSeq 로 옛 「같이」 방식
 export const isIOS = () => /iPhone|iPad|iPod/i.test(navigator.userAgent) || (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1); /* 아이패드는 맥처럼 보임 */
 export const seqMode = () => (/Android/i.test(navigator.userAgent) ? !!getSR() || serverMode() : isIOS() && serverMode()) && !srOnlyMode() && !window.__noSeq; /* 아이폰도 2안(녹음 mp4 → 서버 · 사파리는 마이크 동시 사용에서 한쪽이 멈춤 · 앱개발부 10-12) — 서버 없으면 아이폰은 옛 그대로 */ /* 녹음만 하고 끝난 뒤 받아쓰기(서버 또는 1번안) */
-export const setSrOnly = on => { try { on ? sessionStorage.setItem("malmun.srmode", "only") : sessionStorage.removeItem("malmun.srmode"); sessionStorage.removeItem("malmun.srmiss"); } catch {} };
+export const setSrOnly = on => { try { on ? sessionStorage.setItem("malmun.srmode", "only") : sessionStorage.removeItem("malmun.srmode"); sessionStorage.removeItem("malmun.srmiss"); if (!on) { sessionStorage.removeItem(SRV_FAIL); sessionStorage.removeItem(SRV_OFF); } } catch {} };
 // 바꾸기는 「연속 2번」만(본부 10-07 QA — 우물거림·잡음으로 한 번 비어도 녹음·리듬·비교를 영구로 잃지 않게) · 그 사이 한 번이라도 들은 말이 있으면 0 으로
 //  → true = 이번에 받아쓰기만으로 바꿈 · 점검 도구는 window.__noSrSwitch 로 끔
 export function srMiss(missed) {
