@@ -1092,3 +1092,5 @@ button.dim{opacity:.45}
 .v9body p[data-p="0"],.line .expl>p:first-child,.v9body .pairln,.line .expl .pairln{line-height:max(22px,calc(var(--lang-lh,0) * 1em))}
 /* 쓰기 낱말 줄 뜻·로마자 칸(말줄임 칸) — 나스탈리크 위아래 꼬리가 칸 위아래에서 깎이지 않게 칸만 위아래로 넓힘(자리는 그대로 · 10-12 ur 1280 점검) */
 :lang(ur) .write .info .sub2 :is(.mean,.rom){padding-block:5px;margin-block:-5px}
+/* 시간 막대 글 「⏱ 0:03 / 0:10 · 남은 시간」 — 오른쪽→왼쪽에서 숫자 사이 「 / 」 가 뒤집혀 0:10 / 0:03 으로 보이던 것(A9) · 칸 전체를 왼쪽→오른쪽(속 우르두 글은 그 안에서 제 방향) */
+[dir=rtl] .tbar .tt{direction:ltr;unicode-bidi:isolate}
