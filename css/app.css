@@ -654,6 +654,7 @@ a{color:inherit;text-decoration:none}
 .line.fitc{padding-top:6px;padding-bottom:6px}
 .line.fitc .acts{margin-top:4px;gap:4px}
 .line.fitc .acts button{padding-top:4px;padding-bottom:4px;font-size:11.5px}
+.line.fitc.tr2 .tr,.line.fitc.tr1 .tr{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}.line.fitc.tr1 .tr{-webkit-line-clamp:1}
 .write .kb .kr,.write .kb .kr button,.write.embedded .kb .kr button{min-height:30px}
 .learn .panel.write{height:min(500px,calc(100dvh - 98px - clamp(120px,26dvh,210px)))} /* 자막 카드 자리 26% — 660×560 에서도 자판 다섯 줄 · 카드는 fitCard 가 글 줄여 맞춤 */
 @media (max-height:720px){.learn .panel.write{height:min(500px,calc(100dvh - 98px - clamp(120px,26dvh,210px)))}}
@@ -1083,6 +1084,18 @@ button.dim{opacity:.45}
 /* 머리 줄 n3b(10-12) — 두 줄로 꺾기 전에 ⌨ ✍ 그림만(이름은 aria-label) */
 .write .whead.n3b .wmode .ml{display:none}
 .write .whead.n3b .wmode button{min-width:40px}
+/* 위 글자 줄 아주 좁을 때(fitSent st1 · 10-12) — 🔊 표시 숨김 · 낱말 묶음·글자 단추 여백 최소 · ◀ ▶ 좁게 */
+.write .segrow.st1 .sent .spk{display:none}
+.write .segrow.st1 .sent .w{padding:2px 1px 0;gap:1px}
+.write .segrow.st1 .sent .c{padding:0 1px;margin:0 0 2px}
+.write .segrow.st1 .segnav{gap:2px}
+.write .segrow.st1 .segnav button{width:26px}
+/* 손글씨 도구 단추 그림만(fitTools ic · 10-12) */
+.write .htools.ic .ml,.write .htools.ic2 .ml{display:none}
+.write .htools.ic button,.write .htools.ic2 button{min-width:36px}
+/* 손글씨 단추 넷 그림만(fitHandBox hic · 10-12) — 「다음 ▶」 은 글 그대로 */
+.write .hand.hic .hbtns .ml{display:none}
+.write .hand.hic .hbtns button{min-width:40px;padding:4px 6px;font-size:15px}
 
 /* ==== 글자부(획순 칠·자모 칠 표시) ==== */
 
