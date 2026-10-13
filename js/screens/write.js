@@ -904,9 +904,10 @@ export default async function write(app, ep, id, opts = {}) {
     app.querySelectorAll("[data-act=close]").forEach(x => { x.setAttribute("aria-label", L("close_btn")); x.innerHTML = `✕<span class="lt">${esc(String(L("close_btn")).replace(/^✕\s*/, " "))}</span>`; });
     const hb = $(".helpbox"); if (hb) hb.innerHTML = helpHtml();
     const hc = wb.querySelector("[data-act=hearch]"); if (hc) hc.textContent = L("w_hear_char"); markAuto();
-    sentEl.querySelector("[data-act=line]")?.setAttribute("aria-label", L("w_line")); const tip = $(".wtip"); if (tip && !tip.hidden) tip.textContent = L("w_line_tip");
+    paintSent(); /* 위 글자 줄 · ◀ ▶ 이름 · 🔊 이름 */ const tip = $(".wtip"); if (tip && !tip.hidden) tip.textContent = L("w_line_tip");
     work.querySelectorAll("[data-tool]").forEach(x => span(x, "h_" + x.dataset.tool)); span(work.querySelector("[data-hmode]"), "h_magnet");
     for (const [a, k] of [["horder", "h_order"], ["hundo", "h_undo"], ["hclear", "h_clear"]]) span(work.querySelector(`[data-act=${a}]`), k);
+    work.querySelector(".stage .box")?.setAttribute("aria-label", L("listen_char") || "▶"); work.querySelector(".hink")?.setAttribute("aria-label", L("w_hand"));
     markHand(); markOrder(); setNote();
     const sc = work.querySelector(".hscore"); if (sc && !sc.hidden && st.hand?.passed && magnetOn()) sc.textContent = L("h_order_ok");
     fitHeadW(); placeBtns(); fitWord();

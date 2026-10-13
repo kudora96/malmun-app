@@ -69,10 +69,18 @@
     ok(st0 && st0.name.endsWith(wantId + ".mp3") && end0 && !ev.some(e => e.name.includes("_sub_t1")), name, desc(at0));
   };
   ok(!$(".panel [data-act=word]"), "「단어 듣기」 단추 없음(투덜이 10-07 — 「이 부분 듣기」가 다 읽음 · 글자 소리는 위 글자 줄)");
-  await unitCheck(".panel [data-act=sent]", units.lines["1"].parts[0].id, `이 부분 듣기 → 따로 만든 토막 「${units.lines["1"].parts[0].say}」 소리(줄 전체 아님)`);
-  $(".panel [data-act=sent]").click(); await W(200); ok($(".panel [data-act=sent]").getAttribute("aria-pressed") === "true", "이 부분 듣기 켜짐");
-  $(".panel [data-act=sent]").click(); await W(200); ok($(".panel [data-act=sent]").getAttribute("aria-pressed") === "false", "다시 누르면 멈춤");
-  $(".ctrl [data-act=play]").click(); await W(200); ok($(".panel [data-act=sent]").getAttribute("aria-pressed") === "true", "아래 ▶ = 이 부분 듣기"); $(".ctrl [data-act=play]").click(); await W(200);
+  await unitCheck(".panel [data-act=line]", units.lines["1"].parts[0].id, `🔊 이 줄 듣기 → 따로 만든 토막 「${units.lines["1"].parts[0].say}」 소리(줄 전체 아님)`);
+  $(".panel [data-act=line]").click(); await W(200); ok($(".panel [data-act=line]").getAttribute("aria-pressed") === "true", "🔊 이 줄 듣기 켜짐(눌린 모양)");
+  $(".panel [data-act=line]").click(); await W(200); ok($(".panel [data-act=line]").getAttribute("aria-pressed") === "false", "다시 누르면 멈춤");
+  $(".ctrl [data-act=play]").click(); await W(200); ok($(".panel [data-act=line]").getAttribute("aria-pressed") === "true", "아래 ▶ = 이 줄 듣기"); $(".ctrl [data-act=play]").click(); await W(200);
+  { const lb = $(".panel [data-act=line]"), cs = lb && getComputedStyle(lb); ok(lb?.tagName === "BUTTON" && parseFloat(cs.borderTopWidth) > 0 && !!lb.getAttribute("aria-label"), "🔊 = 단추 모양(테두리 · 이름 있음 · 투덜이 10-13)", `${lb?.tagName} · 테두리 ${cs?.borderTopWidth} · 「${lb?.getAttribute("aria-label")}」`); }
+  // [이 글자 듣기](투덜이 10-13 재정정) — 누를 때마다 지금 글자(아래 칸) 소리 한 번 · 켜고 끄기 아님 · 소리 중 또 누르면 처음부터 한 번(겹침 없음)
+  { await idle(4000); const hc = $(".panel [data-act=hearch]"), ch0 = $(".panel .box .target")?.textContent || "", want = "u" + (ch0.codePointAt(0) || 0).toString(16).toUpperCase() + ".mp3";
+    let at0 = log.length; hc.click(); await idle(4000); let ev = log.slice(at0).filter(e => e.ev === "시작");
+    const one = ev.length === 1 && ev[0].name.endsWith(want) && hc.getAttribute("aria-pressed") !== "true";
+    at0 = log.length; hc.click(); await W(120); hc.click(); await idle(4000); ev = log.slice(at0); const starts = ev.filter(e => e.ev === "시작");
+    let live = 0, worst = 0; for (const e of ev) { live += e.ev === "시작" ? 1 : e.ev === "끝" || e.ev === "멈춤" ? -1 : 0; worst = Math.max(worst, live); }
+    ok(one && starts.length === 2 && starts.every(e => e.name.endsWith(want)) && worst <= 1, "[이 글자 듣기] = 지금 글자 소리 한 번 · 두 번 빨리 누르면 처음부터 다시(겹침 0 · 토글 아님)", `「${ch0}」 ${want} · 한 번 ${one} · 두 번 ${starts.map(e => e.name.split("/").pop()).join(",")} · 겹침 ${worst}`); }
   // 자동 완성 — 지금 토막의 남은 글자를 한 자모씩 · 글자마다 모양이 맞나 · 토막이 끝나면 멈춤 · 다시 누르면 멈춤
   const watchShapes = () => { const seen = []; const mo = new MutationObserver(() => { const b = $(".panel .box.ok"); if (b) { const k = b.querySelector(".target").textContent + "=" + b.querySelector(".typed").textContent; if (seen[seen.length - 1] !== k) seen.push(k); } }); mo.observe($(".panel .write"), { subtree: true, childList: true, attributes: true }); return { seen, stop: () => mo.disconnect() }; };
   let segBefore = $(".panel .segnav").innerText.replace(/\s/g, ""), sBefore = $(".panel .write")?.parentElement?.__wr?.st?.().s;
