@@ -1110,11 +1110,14 @@ button.dim{opacity:.45}
 :lang(si){font-family:"Noto Sans Sinhala",var(--f-ui)}
 :lang(zh){font-family:"Noto Sans SC",var(--f-ui)}
 :lang(ja){font-family:"Noto Sans JP",var(--f-ui)}
+:is(:lang(mn),:lang(ky)){font-family:"Noto Sans",var(--f-ui)} /* 키릴 확장 ү ө ң — Noto Sans KR 에 없음(10-13 17개 언어 미리 점검) */
 /* 한국어·로마자·번호는 학습자 글꼴을 쓰지 않음 — 나스탈리크 등의 큰 위아래 폭이 한국어 줄까지 키워 잘리고, 한글이 나스탈리크에 없어 시스템 글꼴로 바뀌던 것(10-12 점검) */
-:is(:lang(ur),:lang(th),:lang(km),:lang(lo),:lang(my),:lang(si),:lang(zh),:lang(ja)) :is(.ko,[lang="ko"],.rom,.sayrom,.trrom,.wko,.slot,.snum,.seek,.vtitle .n){font-family:var(--f-ui)}
+:is(:lang(ur),:lang(th),:lang(km),:lang(lo),:lang(my),:lang(si),:lang(zh),:lang(ja),:lang(mn),:lang(ky)) :is(.ko,[lang="ko"],.rom,.sayrom,.trrom,.wko,.slot,.snum,.seek,.vtitle .n){font-family:var(--f-ui)}
 /* 줄 높이 = 원래 값과 언어 표 최소 lh(--lang-lh) 중 큰 것 — 학습자 글이 든 칸 중 px 로 박힌 곳 */
 .v9body p[data-p="0"],.line .expl>p:first-child,.v9body .pairln,.line .expl .pairln{line-height:max(22px,calc(var(--lang-lh,0) * 1em))}
 /* 쓰기 낱말 줄 뜻·로마자 칸(말줄임 칸) — 나스탈리크 위아래 꼬리가 칸 위아래에서 깎이지 않게 칸만 위아래로 넓힘(자리는 그대로 · 10-12 ur 1280 점검) */
-:lang(ur) .write .info .sub2 :is(.mean,.rom){padding-block:5px;margin-block:-5px}
+:is(:lang(ur),:lang(my)) .write .info .sub2 :is(.mean,.rom){padding-block:5px;margin-block:-5px}
 /* 시간 막대 글 「⏱ 0:03 / 0:10 · 남은 시간」 — 오른쪽→왼쪽에서 숫자 사이 「 / 」 가 뒤집혀 0:10 / 0:03 으로 보이던 것(A9) · 칸 전체를 왼쪽→오른쪽(속 우르두 글은 그 안에서 제 방향) */
 [dir=rtl] .tbar .tt{direction:ltr;unicode-bidi:isolate}
+/* 미얀마 글자 위아래 겹침 부호 — 한 줄 칸(제목 아래 줄·CC 단추 글)에서 깎이지 않게 칸만 위아래로 넓힘(자리는 그대로 · 10-13 17개 언어 미리 점검) */
+:lang(my) :is(.vtitle .sub,.vsubt .w,.whead .sub){padding-block:4px;margin-block:-4px}
