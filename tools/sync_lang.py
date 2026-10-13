@@ -1,6 +1,6 @@
 # 언어 넣기(다국어부 10-12) — 언어부 자료(09_lang)를 앱으로 · 절차 = docs/lang_ingest.md
 #   python tools/sync_lang.py <편> <xx[,yy]|all> [--dry] [--force]   → 넣을 수 있는 언어만 넣고 한 줄씩 보고
-#     앱 글이 언어부 원본과 다른 열쇠가 있으면 그 언어는 덮지 않고 표로 보여 줌(앱에서 고친 글 보호 · --force 면 덮음)
+#     앱 글이 언어부 원본과 다른 열쇠가 있으면 그 언어는 덮지 않고 표로 보여 줌(앱에서 고친 글 보호 · --accept 열쇠,열쇠 = 그 열쇠만 허락 · --force = 다 덮음)
 #   python tools/sync_lang.py --table                       → js/langs.js(언어 표)만 프로필에서 다시 씀
 #   python tools/sync_lang.py --ready xx[,yy]               → 공개 단계로(본부 신호 때만)
 # 하는 일: lang_{xx}.json(.ko.json) → lang/ · {편}.{xx}.json → data/{편}/ · 프로필 → js/langs.js(방향·글꼴·줄 높이·단계)
@@ -106,6 +106,8 @@ def copy(a, b, dry):
 
 def main(argv):
     dry, force = "--dry" in argv, "--force" in argv
+    acc = set(argv[argv.index("--accept") + 1].split(",")) if "--accept" in argv else set()  # 이번에 바뀌기로 한 열쇠(언어부가 새 값을 낸 것) — 이것만 덮기 허락
+    if "--accept" in argv: del argv[argv.index("--accept"):argv.index("--accept") + 2]
     argv = [a for a in argv if a not in ("--dry", "--force")]
     info = read_table()
     if argv[:1] == ["--table"]:
@@ -127,7 +129,7 @@ def main(argv):
             out.append(f"{c} ⏭ " + " · ".join(why)); continue
         pairs = [(ui_src(c), os.path.join(APP, "lang", f"{c}.json"))] + ([(ui_src(c, True), os.path.join(APP, "lang", f"{c}.ko.json"))] if ui_src(c, True) else [])
         if c != "ne": pairs.append((os.path.join(LANG, c, f"{ep}.{c}.json"), os.path.join(APP, "data", ep, f"{ep}.{c}.json")))
-        diff = [(os.path.basename(b), *e) for a, b in pairs if os.sep + "lang" + os.sep in b for e in app_edits(a, b)]
+        diff = [(os.path.basename(b), *e) for a, b in pairs if os.sep + "lang" + os.sep in b for e in app_edits(a, b) if e[0] not in acc]
         if diff and not force:  # 앱에서 고친 글 → 언어부 todo 로 먼저 보내고(열쇠·값), 원본이 맞춰지면 다시 · 일부러 덮을 땐 --force
             out.append(f"{c} ⏸ 앱 값 ≠ 원본 {len(diff)}개 — 덮지 않음(언어부에 보내거나 --force):" + "".join(f"\n    {f} {k}: 앱 「{str(y)[:50]}」 · 원본 「{str(x)[:50]}」" for f, k, y, x in diff[:20])); continue
         for a, b in pairs: copy(a, b, dry)
@@ -137,7 +139,7 @@ def main(argv):
     if not dry:
         write_table(info)
         for tool in ("sync_v9.py", "sync_content.py"):
-            r = subprocess.run([sys.executable, os.path.join(APP, "tools", tool)] + ([ep] if tool == "sync_v9.py" else []), capture_output=True, text=True, encoding="utf-8", errors="replace")
+            r = subprocess.run([sys.executable, os.path.join(APP, "tools", tool)] + ([ep] if tool == "sync_v9.py" else []), capture_output=True, text=True, encoding="utf-8", errors="replace", env={**os.environ, "PYTHONIOENCODING": "utf-8"})
             out.append(f"{tool} {'✓' if r.returncode == 0 else '✗ ' + (r.stderr or r.stdout)[-300:]}")
     print("\n".join(out))
 
