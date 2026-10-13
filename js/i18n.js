@@ -57,8 +57,22 @@ let strings = {}, fallback = {}, koUi = {};
 export const KO_UI = CODES.filter(c => LANG_INFO[c]?.ko_ui); // {lang}.ko.json 이 있는 언어(js/langs.js)
 const UIKO = "malmun.uiko";
 export const uiKoOn = () => { try { return KO_UI.includes(lang) && localStorage.getItem(UIKO) === "1"; } catch { return false; } };
-async function loadKoUi() { koUi = uiKoOn() ? await fetch(`lang/${lang}.ko.json?v=${VERSION}`).then(r => (r.ok ? r.json() : {})).catch(() => ({})) : {}; }
+// {lang}.ko.json 은 언어마다 한 번만 받아 기억(앱개발부 10-13 안 A — 토글 「즉시」) · 받아 둔 뒤엔 setUiKo 가 기다림 없이 koUi 를 바꿈(await 앞에서)
+const koGot = {}, koWait = {};
+export function preloadKoUi(c = lang) {
+  if (!KO_UI.includes(c)) return Promise.resolve({});
+  return (koWait[c] ||= fetch(`lang/${c}.ko.json?v=${VERSION}`).then(r => (r.ok ? r.json() : {})).catch(() => ({})).then(j => (koGot[c] = j)));
+}
+async function loadKoUi() {
+  if (!uiKoOn()) { koUi = {}; return; }
+  const c = lang;
+  if (koGot[c]) { koUi = koGot[c]; return; }
+  const j = await preloadKoUi(c);
+  if (lang === c && uiKoOn()) koUi = j; // 기다리는 새 언어·토글이 바뀌었으면 옛 결과 버림
+}
 export async function setUiKo(on) { try { localStorage.setItem(UIKO, on ? "1" : "0"); } catch {} await loadKoUi(); }
+// 지금 쓸 수 있는 화면 글 열쇠 전부(앱개발부 retext — 바꾸기 전·뒤 t(k) 견줘 그 자리에서 글 바꾸기)
+export const uiKeys = () => Object.keys({ ...fallback, ...strings, ...koUi });
 export let lang = "en";
 
 export async function setLang(code, remember = false) {
