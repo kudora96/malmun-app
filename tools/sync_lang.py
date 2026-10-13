@@ -14,7 +14,8 @@ APP = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TABLE = os.path.join(APP, "js", "langs.js")
 # Google Fonts 이름 — 앱 본문 글꼴(Noto Sans KR · index.html 의 Devanagari·Bengali)로 안 되는 글자만
 FONT = {"ur": "Noto Nastaliq Urdu", "th": "Noto Sans Thai", "km": "Noto Sans Khmer", "lo": "Noto Sans Lao",
-        "my": "Noto Sans Myanmar", "si": "Noto Sans Sinhala", "zh": "Noto Sans SC", "ja": "Noto Sans JP"}
+        "my": "Noto Sans Myanmar", "si": "Noto Sans Sinhala", "zh": "Noto Sans SC", "ja": "Noto Sans JP",
+        "mn": "Noto Sans", "ky": "Noto Sans"}  # mn·ky 키릴 확장(ү ө ң)은 Noto Sans KR 에 없음(10-13 점검)
 
 
 def read_table():
