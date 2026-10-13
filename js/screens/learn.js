@@ -12,7 +12,8 @@
 //  R9 다시 들어오면 마지막 줄이 선택된 채 멈춰 있음
 import { warmSTT } from "../sttserver.js?v=1012.13";
 import * as sfxL from "../sfx.js?v=1012.13"; // 카드 말하기 최대 길이 = 본보기 길이로(10-07)
-import { t, lang, langName } from "../i18n.js?v=1012.13";
+import { t, lang, langName, KO_UI, uiKoOn, setUiKo, preloadKoUi } from "../i18n.js?v=1012.13";
+import { snapshot, retext, setTx } from "../retext.js?v=1012.13";
 import { esc, renderText, glossCards, sayParts } from "../text.js?v=1012.13";
 import { episode } from "../data.js?v=1012.13";
 import { paths } from "../paths.js?v=1012.13";
@@ -268,6 +269,15 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   const v9L = d.v9L, v9pref = () => { try { return { snd: "L", txt: "L", ...JSON.parse(pref("malmun.v9") || "{}") }; } catch { return { snd: "L", txt: "L" }; } };
   const sndOf = i => { const s0 = v9pref().snd; return s0 === "L" && !L[i]?.v9?.audio?.[v9L]?.ex ? "ko" : s0; }; // 학습자 말 설명 소리가 아직 없는 줄(시범 언어 글만 단계) = 한국어 소리로(시각도 한국어 · 언어부 10-12)
   const v9set = (k, v) => { const P = v9pref(); P[k] = v; pref("malmun.v9", JSON.stringify(P)); };
+  // 언어 하나(본부 10-13 투덜이 지적 ① · 안 A) — 앱 글 한국어(ने⇄한 = uiKo) = 설명 소리·본문도 한국어 · 학습자 말이면 모두 학습자 말
+  //  머리 토글·설명 창 ▶ 어느 쪽을 눌러도 같이 · 다시 그리지 않고 그 자리에서 글만(retext) → 소리·녹음·채점 안 끊김 · ko.json 은 미리 받아 둠
+  const koMode = KO_UI.includes(lang);
+  if (koMode) { preloadKoUi(); const w0 = uiKoOn() ? "ko" : "L"; if (v9pref().snd !== w0) v9set("snd", w0); if (v9pref().txt !== w0) v9set("txt", w0); }
+  async function uiLang(ko) {
+    if (!koMode || ko === uiKoOn()) return;
+    const before = snapshot(); await setUiKo(ko); retext(before, document.body);
+    document.querySelectorAll("[data-act=uiko]").forEach(b => b.setAttribute("aria-pressed", String(uiKoOn())));
+  }
   const v9code = k => (k === "ko" || !v9L ? "ko" : v9L); // 학습자 언어 설명이 없으면 한국어만(언어부 10-11)
   const v9name = k => (k === "ko" || !v9L ? "한국어" : langName(v9L));
   const v9src = (i, k, what) => { const a = L[i].v9?.audio?.[v9code(k)]?.[what]; return a ? paths.v9(ep, a) : null; };
@@ -588,14 +598,15 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     if (sc > 0 && r.blob) { const spn = spanOf(L[i].say.ko, bestFull(L[i].say.ko, r.heard)), rh = await rhythmOf({ ep, key: `${ep}_${String(L[i].id).padStart(2, "0")}_say`, url: L[i].say.src, text: L[i].say.ko, blob: r.blob, heard: spn.text, span: spn, words: r.words, sylOf: x => sylsAt(x).out }); /* 덧붙은 말 = 리듬·빠르기는 토막 구간만(본부 10-11) */ if (st.panel?.i !== i || att !== spAtt) return; if (rh) { rhy = { L: sc, R: rh.R, worst: rh.worst }; sc = withRhythm(sc, rh.R); const lf = lateFactor(rh.yEnd, pace?.end); if (lf.late) { rhy.late = true; sc = Math.floor(sc * lf.f + 1e-9); } } } // 노래방 칠보다 많이 늦으면 최대 80쯤(투덜이 10-08)
     sp.blob = r.blob; sp.score = sc; sp.rhy = rhy;
     mineB.disabled = false; mineB.classList.toggle("dim", !r.blob); // 방금 녹음 — 언제나 · 받아쓰기만이면 흐리게(누르면 까닭)
-    btn.textContent = "🎤 " + t(sc != null && sc >= PASS ? "speak_now" : "try_again");
+    setTx(btn, () => "🎤 " + t(sc != null && sc >= PASS ? "speak_now" : "try_again"));
     // 점수가 안 나오면 절대 통과·저장 아님(본부 10-04 — 엉뚱한 말도 그냥 넘어가던 것) · 왜 안 나왔는지 짧게
     // 점수는 언제나 % — 못 알아들었으면 「0% · 까닭」 · 80% 넘으면 [저장]
     box.querySelector("[data-x=keep]").hidden = !(sc != null && sc >= PASS);
-    msg.textContent = switchedSR ? `0% · ${t("sr_only_switched")}` : sc == null ? (canScore() ? `0% · ${t(r.why === "nospeech" ? "why_nospeech" : srWhy(r.srErr))}` : t("speak_hint_noscore")) : scoreLine(sc, r.why, t, (h => h && { ...h, say: L[i].say.ko, rom: Object.fromEntries([...(L[i].v9?.pieces || []).map(p => [p.ko, p.rom]), ...Object.entries(L[i].v9?.gloss || {}).map(([k, g]) => [k, g.rom])].filter(([k, r]) => k && r)) })(endHint(L[i].say.ko, r.heard))); // 두 단계 통과 ☆/★ + 끝난 까닭
-    if (rhy && sc != null) msg.textContent += " · " + rhyText(rhy, t);
-    if (rhy?.late && sc != null) msg.textContent += " · " + t("why_late");
-    if (!r.blob && sc != null) msg.textContent += " · " + t("sr_only_note");
+    setTx(msg, () => { let m = switchedSR ? `0% · ${t("sr_only_switched")}` : sc == null ? (canScore() ? `0% · ${t(r.why === "nospeech" ? "why_nospeech" : srWhy(r.srErr))}` : t("speak_hint_noscore")) : scoreLine(sc, r.why, t, (h => h && { ...h, say: L[i].say.ko, rom: Object.fromEntries([...(L[i].v9?.pieces || []).map(p => [p.ko, p.rom]), ...Object.entries(L[i].v9?.gloss || {}).map(([k, g]) => [k, g.rom])].filter(([k, r]) => k && r)) })(endHint(L[i].say.ko, r.heard))); // 두 단계 통과 ☆/★ + 끝난 까닭
+      if (rhy && sc != null) m += " · " + rhyText(rhy, t);
+      if (rhy?.late && sc != null) m += " · " + t("why_late");
+      if (!r.blob && sc != null) m += " · " + t("sr_only_note");
+      return m; }); // 언어를 바꾸면 이 글을 새 언어로 다시 씀(retext · 안 A)
     box.classList.toggle("pass", sc != null && sc >= PASS);
     scoreFx(box.querySelector(".fx"), sc ?? (canScore() && !switchedSR ? 0 : null), { busy: () => !!sp?.ctl }); // 점수가 뜨는 순간 효과 한 번 · 아무 말도 없었어도 꽝(투덜이 10-08)
     const bh = bestFull(L[i].say.ko, r.heard); // 들린 말(덧붙은 말은 흐린 회색) — 점수를 낸 그 인식 결과 · 틀린 음절 빨간 밑줄 · 빠진 자리 _
@@ -614,7 +625,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   function v9Click(x) {
     const i = st.panel.i, k = x.dataset.x;
     if (k === "txt") { // 글 언어 — 편 전체 · 기억 · 소리는 그대로 이어서
-      v9set("txt", x.dataset.v);
+      v9set("txt", x.dataset.v); uiLang(x.dataset.v === "ko"); // 언어 하나(안 A)
       const pl = ex.playing, snd = panel.querySelector(".v9bar .pb[aria-pressed=true]")?.dataset.v;
       const tc = v9code(x.dataset.v), tx = L[i].v9.text?.[tc] || L[i].v9.text?.ko || {}, fx = L[i].v9.formula_by?.[tc] || L[i].v9.formula;
       panel.querySelectorAll(".v9bar [data-x=txt]").forEach(b => b.setAttribute("aria-selected", String(b === x)));
@@ -626,10 +637,11 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     if (k === "ex") { // ▶ 언어 — 그 언어로 설명 읽기 · 같은 단추 다시 = 멈춤/이어서 · 누른 언어를 기억(듣기 모드도)
       const v = x.dataset.v, on = x.getAttribute("aria-pressed") === "true";
       hushSay();
-      if (on && ex.playing) { ex.pause(); return sync(); }
-      if (on && ex.q.length) { ex.resume(); return sync(); }
+      const langChange = koMode && (v === "ko") !== uiKoOn(); // 언어 하나(안 A) — 눌린 것처럼 보여도(시범 언어 = 한국어 소리로 대신) 언어가 바뀌면 멈춤이 아니라 바꿈
+      if (!langChange && on && ex.playing) { ex.pause(); return sync(); }
+      if (!langChange && on && ex.q.length) { ex.resume(); return sync(); }
       const cur = ex.q[ex.i], going = ex.q.length && cur && (ex.playing || ex.a.currentTime > 0);
-      v9set("snd", v); clearTimeout(st.gap); st.gap = 0; v9Text(i, v);
+      v9set("snd", v); v9set("txt", v); uiLang(v === "ko"); clearTimeout(st.gap); st.gap = 0; v9Text(i, v); /* 언어 하나(안 A) — 화면 글도 같이 */
       const items = v9Items(i, { line: false, k: v }); if (!items.length) return;
       st.exLoop = items; markPlay(v);
       if (going && cur.p === 0 && L[i].v9.sent?.length) { // 듣는 중 언어 바꿈 = 같은 문장 번호부터 다른 언어로(본부 10-05)
@@ -853,8 +865,15 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     } else if (a === "spd") { st.rate = (st.rate + 1) % RATES.length; const r = RATES[st.rate]; b.textContent = r + "×"; v.playbackRate = r; seq.setRate(r); ex.setRate(r); }
   };
   v.addEventListener("click", togglePlay);
-  app.querySelector("[data-act=uiko]")?.addEventListener("click", e => { e.stopPropagation(); const p = st.panel; if (p) { const w = panel.__wr?.st?.() || panel.querySelector(".write")?.parentElement?.__wr?.st?.(), sp = panel.__sp?._state; try { sessionStorage.setItem("malmun.reopen", JSON.stringify({ ep, at: Date.now(), kind: p.kind, i: p.i, s: w?.s, w: w?.w, c: w?.c, k: w?.k, wrote: w ? [...w.wrote] : [], part: sp?.i })); } catch {} }
-    toggleUiKo(() => import("../main.js?v=1012.13").then(m => m.rerender())); }); // 앱 글 한국어 토글 → 화면 다시 그림(도는 것은 cleanup 이 멈춤) → 열려 있던 창·자리로 다시 엶
+  // 머리 「ने⇄한」 = 언어 하나(안 A) — 다시 그리지 않음 · 설명 창이 열려 있으면 설명 소리·본문도 그 언어로(듣는 중이면 같은 문장부터)
+  app.querySelector("[data-act=uiko]")?.addEventListener("click", async e => {
+    e.stopPropagation(); const ko = !uiKoOn(), w = ko ? "ko" : "L";
+    await uiLang(ko); v9set("snd", w); v9set("txt", w);
+    const p = st.panel; if (p?.kind !== "explain" || !L[p.i]?.v9) return;
+    panel.querySelectorAll(".v9bar [data-x=txt]").forEach(x => x.setAttribute("aria-selected", String(x.dataset.v === w)));
+    const b = panel.querySelector(`.v9bar [data-x=ex][data-v="${w}"]`);
+    if (b && ex.playing && b.getAttribute("aria-pressed") !== "true") v9Click(b); else v9Text(p.i, w);
+  });
   app.querySelector("[data-act=fs]").onclick = () => {
     const w = app.querySelector("#vwrap");
     if (document.fullscreenElement) document.exitFullscreen?.();
