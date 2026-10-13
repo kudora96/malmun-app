@@ -38,7 +38,7 @@
       ok(heard, "멈춘 뒤 자판 누름 = 소리 남(정상)", `소리 기록 ${log.length - n0}`); await closeP(); }
     { localStorage.setItem("malmun.wmode", "hand"); await openP("write"); $(".panel [data-act=horder]")?.click(); await W(500); $(".panel [data-mode=kb]").click(); await W(300);
       const mx = await peak(800), [a, b] = await stillFor(3000); ok(mx <= 1 && a === b && !!$(".panel .kb"), "획순 칠 중 → 자판 모드 = 칠 멈춤 · 자판 화면 · 저 혼자 안 씀", `자리 ${a}→${b}`); await closeP(); }
-    { localStorage.setItem("malmun.wmode", "kb"); await openP("write"); $(".panel [data-act=sent]")?.click(); await W(500); const k = [...document.querySelectorAll(".panel [data-j]")][0]; k?.click(); await W(200);
+    { localStorage.setItem("malmun.wmode", "kb"); await openP("write"); $(".panel [data-act=line]")?.click(); await W(500); const k = [...document.querySelectorAll(".panel [data-j]")][0]; k?.click(); await W(200);
       const mx = await peak(1500); ok(mx <= 1, "이 부분 듣기 중 → 자판 누름 = 소리 하나 이하", `소리 최대 ${mx}`); await closeP(); }
     { await openP("write"); const cs = [...document.querySelectorAll(".panel .sent .c")]; autoBtn().click(); await W(900); cs[cs.length - 1]?.click(); await W(400);
       const nows = document.querySelectorAll(".panel .sent .c.now").length, mx = await peak(1200); ok(nows === 1 && mx <= 1, "쓰기 자동 중 → 위 글자 줄 다른 글자 = 지금 글자 하나 · 소리 하나 이하", `지금 글자 ${nows} · 소리 ${mx}`);
@@ -67,9 +67,9 @@
     { await openP("write"); autoBtn().click(); let t = 0; while (t < 6000 && !(wr()?.st().done)) { await W(30); t += 30; } await W(150); const at = pos(); autoBtn().click(); await W(1500); const [x, y] = await stillFor(2000);
       ok(at.split(".").slice(1, 3).join(".") === x.split(".").slice(1, 3).join(".") && x === y && !wr()?.st().auto, "자동 중 글자 완성 소리 때 자동 단추 = 그 글자에서 바로 멈춤(넘어감 0)", `${at}→${x}→${y}`);
       const k1 = [...document.querySelectorAll(".panel [data-j]")][0]; const n0 = log.length; k1?.click(); await W(900); ok(log.slice(n0).some(e => e.ev === "시작"), "그 자리(다 친 글자)에서 자판 = 소리 남(다음 글자로)", pos()); await closeP(); }
-    { await openP("write"); autoBtn().click(); await W(900); $(".panel [data-act=sent]")?.click(); await W(300); const off = !wr()?.st().auto, lab = /⏹|■/.test(autoBtn()?.textContent || ""), p0 = pos(); let t = 0; while (t < 12000 && !wr()?.st().auto) { await W(200); t += 200; } const back = !!wr()?.st().auto;
+    { await openP("write"); autoBtn().click(); await W(900); $(".panel [data-act=line]")?.click(); await W(300); const off = !wr()?.st().auto, lab = /⏹|■/.test(autoBtn()?.textContent || ""), p0 = pos(); let t = 0; while (t < 12000 && !wr()?.st().auto) { await W(200); t += 200; } const back = !!wr()?.st().auto;
       ok(off && lab && back, "자동 중 이 부분 듣기 = 자동 잠깐 멈춤(단추는 멈추기) → 듣기 끝나면 그 글자부터 자동 다시", `멈춤 ${off} · 단추 ${lab} · 다시 ${back} (${t}ms) · ${p0}`); if (wr()?.st().auto) autoBtn().click(); await W(300);
-      autoBtn().click(); await W(900); $(".panel [data-act=sent]")?.click(); await W(300); autoBtn().click(); await W(300); const mx = await peak(800); await W(4000);
+      autoBtn().click(); await W(900); $(".panel [data-act=line]")?.click(); await W(300); autoBtn().click(); await W(300); const mx = await peak(800); await W(4000);
       ok(!wr()?.st().auto && !wr()?.st().sent && !/⏹|■/.test(autoBtn()?.textContent || "") && mx === 0, "듣기 중 자동 단추 = 자동 끔 · 듣기도 멈춤 · 다시 안 켜짐", `소리 ${mx}`); await closeP(); }
     // ── 말하기 ──
     { await openP("speak"); const m = $(".panel [data-act=model]"); m.click(); await W(400); await closeP(); const mx = await peak(1200); ok(mx === 0, "말하기 견본 중 → ✕ = 소리 0", `소리 ${mx}`); }

@@ -82,6 +82,7 @@ async function run(steps) {
 }
 
 let autoAllNext = null; // 전체 자동 완성이 다음 줄로 넘어갈 때 { ep, id, t } — 새 쓰기 화면이 이어받아 바로 자동
+const helpHtml = () => [1, 2, 3, 4, 5, 6, 7].map(k => "help_wr_" + k).filter(k => t(k) !== k).map(k => `<p>${esc(t(k))}</p>`).join("") + `<p class="x">${esc(t("help_close"))}</p>`; // 7 = 🔊 이 줄 듣기(10-13 · 열쇠가 있을 때만)
 export default async function write(app, ep, id, opts = {}) {
   const [d, idx, cf] = await Promise.all([episode(ep, lang), chars(), charsF(ep)]);
   // 글자·자모 소리: 공용 아나운서(chars_f) 먼저 · 없으면 지금 글자 소리 · 자모는 옛 jamo 이름
@@ -125,19 +126,20 @@ export default async function write(app, ep, id, opts = {}) {
       ? `<div class="whead"><b>${esc(t("write"))}</b><span class="sub">${li + 1} / ${d.lines.length} · ${spkHtml(line.speaker)}</span>${modeBtns()}<button class="whelp" data-act="help" aria-label="${esc(t("help"))}">${esc(t("help_btn"))}</button><button class="whelp wclose" data-act="close" aria-label="${esc(t("close_btn"))}">✕<span class="lt">${esc(String(t("close_btn")).replace(/^✕\s*/, " "))}</span></button><span class="loopnote" aria-live="polite"></span></div>`
       : `<div class="bar"><a class="iconbtn" href="#/learn/${ep}/${line.id}" aria-label="${esc(t("back"))}">${I.back}</a>
       <div class="grow"><div class="t">${esc(t("write"))}</div><div class="sub">${li + 1} / ${d.lines.length} · ${spkHtml(line.speaker)}</div></div>${modeBtns()}<button class="whelp" data-act="help" aria-label="${esc(t("help"))}">${esc(t("help_btn"))}</button></div><div class="loopnote" aria-live="polite"></div>`}
-    <div class="segrow"><div class="sent" lang="ko"></div><div class="segnav"></div><div class="wtip" hidden>${esc(t("w_tip"))}</div></div>
+    <div class="segrow"><div class="sent" lang="ko"></div><div class="segnav"></div><div class="wtip" hidden></div></div>
     <div class="work"></div>
-    <div class="helpbox" hidden>${[1, 2, 3, 4, 5, 6].map(k => `<p>${esc(t("help_wr_" + k))}</p>`).join("")}<p class="x">${esc(t("help_close"))}</p></div>
-    <div class="wbtns"><button data-act="sent">${esc(t("listen_part"))}</button><button data-act="auto">${esc(t("autofill"))}</button><button data-act="autoall">${esc(t("autofill_all"))}</button></div>
+    <div class="helpbox" hidden>${helpHtml()}</div>
+    <div class="wbtns"><button data-act="hearch">${esc(t("w_hear_char"))}</button><button data-act="auto">${esc(t("autofill"))}</button><button data-act="autoall">${esc(t("autofill_all"))}</button></div>
   </section>`;
 
   const $ = s => app.querySelector(s);
   const note = $(".loopnote"), work = $(".work"), sentEl = $(".sent"), segnav = $(".segnav");
   const words = () => segs[st.s] || [];
+  function hideLineTip() { clearTimeout(st.tipT); const tip = $(".wtip"); if (tip) tip.hidden = true; sentEl.classList.remove("flash"); }
   const setNote = () => { note.textContent = st.loopAt ? t("loop_on", { c: st.loopAt.ch }) : ""; }; // 처음 안내는 말풍선(본부 10-06)
   // 단어 듣기·이 부분 듣기·자동 완성 = 위 글자 칸 오른쪽에 세로로(본부 10-06 투덜이 — 아래 줄이 자판 마지막 줄과 겹침) · 그릴 때마다 그 자리로 옮김
   const wb = $(".wbtns");
-  const markSent = () => wb.querySelector("[data-act=sent]").setAttribute("aria-pressed", String(st.sent));
+  const markSent = () => sentEl.querySelector("[data-act=line]")?.setAttribute("aria-pressed", String(st.sent)); // 🔊 이 줄 듣기 = 듣는 동안 눌린 모양(투덜이 10-13)
   function stopLoop() { if (!st.loopAt) return; st.loopAt = null; hush(); paintSent(); setNote(); }
   function resetSounds() { stopLoop(); hush(); st.sent = false; markSent(); }
 
@@ -152,6 +154,14 @@ export default async function write(app, ep, id, opts = {}) {
     const cut = w.tm && lineSrc ? { clip: lineSrc, start: w.tm.start, end: w.tm.end } : null;
     return w.unit ? { unit: unitSrc(w.unit), fallback: cut } : cut;
   };
+  function hearChar() { // [이 글자 듣기](투덜이 10-13 「누를 때마다 소리가 나면 돼 — 켜고 끄는 거 아니야」) — 지금 쓰는 글자(아래 칸) 소리 한 번 · 또 누르면 처음부터 한 번(겹침 없음)
+    const c = st.s < segs.length ? words()[st.w]?.chars[st.c] : null; if (!c?.file) return;
+    const again = () => { if (st.resumeAuto && st.alive) { st.resumeAuto = false; autoPart(st.autoMode); } };
+    const wasAuto = st.auto; if (wasAuto) { st.auto = false; st.jumpTo = null; st.hand?.stopOrder?.(); st.busy = false; st.done = false; st.queue = []; }
+    stopLoop(); if (st.sent) { st.sent = false; markSent(); } st.resumeAuto = wasAuto || st.resumeAuto; markAuto();
+    const my = (st.sentGen = (st.sentGen || 0) + 1);
+    run([c.file]).then(ok => { if (st.sentGen !== my) return; if (ok) again(); else if (st.resumeAuto) { st.resumeAuto = false; markAuto(); } });
+  }
   function toggleSentence() { // W4 · 아래 ▶ = 이 부분 듣기 · 자동 중이면 자동 잠깐 멈춤 → 듣기 끝나면 그 글자부터 자동 다시(투덜이 10-10)
     if (!lineSrc || st.s >= segs.length) return;
     const again = () => { if (st.resumeAuto && st.alive) { st.resumeAuto = false; autoPart(st.autoMode); } };
@@ -164,7 +174,7 @@ export default async function write(app, ep, id, opts = {}) {
   app.__wr = { owners: async ch => { await stkReady; const list = strokesOf(ch); return { list, ...inkOwners(ch, list), GN }; }, font: () => `${glyphWeight()} ${glyphFont()}`, reveal: async (ch, n = 200) => { await stkReady; await document.fonts?.load(`${glyphWeight()} 100px ${glyphFont()}`, ch).catch(() => {}); const list = strokesOf(ch); return { list, at: (k, f = 1) => revealOrder(ch, n, list, k, f) }; }, glyphCv: (ch, n = 200) => { const cv = document.createElement("canvas"); cv.width = cv.height = n; glyph(cv.getContext("2d"), n, ch, "#000"); return cv; }, guideCv: (ch, w, n = 200) => { const cv = document.createElement("canvas"); cv.width = cv.height = n; guideGlyph(cv.getContext("2d"), n, ch, w, "#000"); return cv; }, glyphW0: ch => glyphW0(ch), snapCv: async (ch, k, tk) => (await stkReady, snapMask(ch, k, tk)), guideGrow: (ch, w) => guideGrow(ch, w), guideW: tk => guideW(tk), st: () => st, hand: () => st.hand, traceOf: ch => traceOf(ch), centerOf: ch => centerOf(ch), unitsOf: ch => unitsOf(ch), unitSteps: ch => { const m = pix(UN, x => glyph(x, UN, ch, "#000")), cp = us => us.map(u => ({ jamo: u.jamo, role: u.role, n: u.px.length, px: u.px.slice() })), a = jamoUnits(ch, m, UN), r = ringFix(a, m), s0 = cp(r); shapeFix(r, m, UN, ch); const s1 = cp(r); deCrumb(r); return { raw: cp(a), ring: s0, shape: s1, crumb: cp(r) }; }, strokesOf: async ch => (await stkReady, strokesOf(ch)), strokeHint: (H, S) => strokeHint(H, S), strokeFit: async ch => { await stkReady; const us = unitsOf(ch), L = strokesOf(ch); return us.map((u, ui) => { const P = L.filter(S => S.unit === ui); let n = 0, k = 0; for (const S of P) { const f = fitOf(u, S.pts), m = S.pts.length - 1; n += m; k += f * m; } return { jamo: u.jamo, fit: n ? k / n : null }; }); }, handScore: (ch, S) => handScore(ch, S), fitPath: async (ch, i, tk) => { await stkReady; return fitPath(ch, strokesOf(ch), i, tk); }, handJudge: () => handJudge(), toggle: toggleSentence, brushPath: (ch, S) => brushPath(ch, S), paintCheck: (ch, k, n) => paintCheck(ch, k, n), busy: () => st.busy || st.done || st.queue.length > 0 || st.sent || st.auto || sfx.playing() }; // busy = 점검 도구가 소리 끝을 기다릴 때
 
   function paintSent() {
-    sentEl.innerHTML = `<svg class="spk" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M4 9v6h4l5 4V5L8 9H4z"/><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M16 8.5a5 5 0 0 1 0 7M18.8 6a8.5 8.5 0 0 1 0 12"/></svg>` + (segs[Math.min(st.s, segs.length - 1)] || []).map((w, wi) => `<span class="w ${wi === st.w ? "on" : ""}">${w.chars.map((c, ci) =>
+    sentEl.innerHTML = `<button class="spk spkb" data-act="line" aria-label="${esc(t("w_line"))}" aria-pressed="${st.sent}"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M4 9v6h4l5 4V5L8 9H4z"/><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M16 8.5a5 5 0 0 1 0 7M18.8 6a8.5 8.5 0 0 1 0 12"/></svg></button>` + (segs[Math.min(st.s, segs.length - 1)] || []).map((w, wi) => `<span class="w ${wi === st.w ? "on" : ""}">${w.chars.map((c, ci) =>
       `<button class="c ko ${c.file ? "" : "noaudio"} ${st.wrote.has(wkey(Math.min(st.s, segs.length - 1), wi, ci)) ? "done" : ""} ${st.loopAt && st.loopAt.w === wi && st.loopAt.c === ci ? "loop" : ""} ${wi === st.w && ci === st.c && st.s < segs.length ? "now" : ""}" data-w="${wi}" data-c="${ci}" ${c.file ? "" : 'aria-disabled="true"'}>${esc(c.ch)}</button>`).join("")}</span>`).join("");
     segnav.innerHTML = segs.length > 1
       ? `<button data-seg="-1" ${st.s ? "" : "disabled"} aria-label="${esc(t("previous"))}">◀</button><span>${st.s + 1}/${segs.length}</span><button data-seg="1" ${st.s < segs.length - 1 ? "" : "disabled"} aria-label="${esc(t("next"))}">▶</button>`
@@ -397,6 +407,22 @@ export default async function write(app, ep, id, opts = {}) {
     const b1 = Q.find(q => q.t >= Q.tot * 0.4) || b /* 처음 40% 방향 = 꺾인 획(ㄱ)은 첫 꺾기 전 방향 · 검사부 10-12 */, dx = b1.x - a.x, dy = b1.y - a.y, key = Math.abs(dy) >= Math.abs(dx) ? (dy > 0 ? "h_dir_down" : "h_dir_up") : dx > 0 ? "h_dir_right" : "h_dir_left";
     return { rev: tOf(S[0]) - tOf(S[S.length - 1]) > 0.25, msg: t(key) };
   }
+  // 회색(그 도구 굵기) ∪ 글자 모양 밖까지 거리(칸 비율) — 200 칸 거리 지도(둘레 3-4 거리) · 글자·도구·글꼴마다 한 번
+  const outCache = new Map();
+  function outDist(ch, tk) {
+    const key = ch + "|" + tk + "|" + hfontKey(); if (outCache.has(key)) return outCache.get(key);
+    const M = 200, g = pix(M, x => { guideGlyph(x, M, ch, guideW(tk), "#000"); glyph(x, M, ch, "#000"); }), D = new Float32Array(M * M), s2 = Math.SQRT2;
+    for (let i = 0; i < M * M; i++) D[i] = g[i * 4 + 3] > 128 ? 0 : 1e9;
+    for (let y = 0; y < M; y++) for (let x = 0; x < M; x++) { const i = y * M + x; if (x) D[i] = Math.min(D[i], D[i - 1] + 1); if (y) D[i] = Math.min(D[i], D[i - M] + 1); if (x && y) D[i] = Math.min(D[i], D[i - M - 1] + s2); if (y && x < M - 1) D[i] = Math.min(D[i], D[i - M + 1] + s2); }
+    for (let y = M - 1; y >= 0; y--) for (let x = M - 1; x >= 0; x--) { const i = y * M + x; if (x < M - 1) D[i] = Math.min(D[i], D[i + 1] + 1); if (y < M - 1) D[i] = Math.min(D[i], D[i + M] + 1); if (x < M - 1 && y < M - 1) D[i] = Math.min(D[i], D[i + M + 1] + s2); if (y < M - 1 && x) D[i] = Math.min(D[i], D[i + M - 1] + s2); }
+    const f = (x, y) => D[Math.max(0, Math.min(M - 1, Math.round(y * M - 0.5))) * M + Math.max(0, Math.min(M - 1, Math.round(x * M - 0.5)))] / M;
+    if (gCache.has(ch + "|0|" + hfontKey())) { if (outCache.size > 60) outCache.clear(); outCache.set(key, f); } return f;
+  }
+  function shapeOf(ch, strokes, tk, flen) {
+    const dO = outDist(ch, tk), tol = 0.012; let maxE = 0, stray = 0, tot = 0;
+    for (const S of strokes) for (let i = 0; i < S.length; i++) { const p = S[i], ds = i ? Math.hypot(p[0] - S[i - 1][0], p[1] - S[i - 1][1]) : 0; tot += ds; const e = dO(p[0], p[1]) - tol; if (e > 0) { stray += ds; maxE = Math.max(maxE, e); } }
+    const lr = tot / (flen || 1), sf = stray / (tot || 1); return { pen: 4 * maxE + 2 * sf + 0.5 * Math.max(0, lr - 1.3), maxE, stray: sf, lr };
+  }
   function handScore(ch, strokes, boxPx = st.hand?.s || 260) {
     const list = SK.STK ? strokesOf(ch) : []; if (!list.length) return handScoreOld(ch, strokes, boxPx);
     const tw = Math.max(...strokes.map(S => S.w ?? TOOLS[toolKey()].w), TOOLS[toolKey()].w * (strokes.length ? 0 : 1)), gw = tw * GUIDE_K; // 그은 도구 굵기(섞이면 가장 굵은 것) · 회색 길 굵기
@@ -414,8 +440,12 @@ export default async function write(app, ep, id, opts = {}) {
       return k ? n / k : 0; });
     let p = 0, out = 0; for (let i = 3; i < ink.length; i += 4) if (ink[i] > 128) { p++; if (maskD[i] <= 128) out++; }
     const low = Math.min(...cov), avg = cov.reduce((a, b) => a + b, 0) / cov.length, outside = p ? out / p : 1, ok = low >= COMP_MIN; /* 덩어리마다 75%(위 규칙 · 10-12 「은」 펜 비껴 그림 70% 로 통과하던 것) */
-    const keep = Math.max(0, 1 - 2 * Math.max(0, outside - 0.02)), pct /* 잉크 2% 까지 벗어남은 봐줌 = 획 끝 둥근 펜 끝이 글자 끝을 살짝 넘는 것(「전」 연필 1.6% → 96) · 펜 굵기만큼 비껴 그림은 그대로 실패 */ = Math.max(0, Math.min(100, Math.floor((ok ? 1 : avg) * keep * 100 + 1e-9)));
-    return { score: pct / 100, pct: ok ? pct : Math.min(pct, 79), ok, comps: cov, low, avg, cover: avg, outside, miss, N, T: 0, dir: dirBad.size ? dir : "" };
+    const keep = Math.max(0, 1 - 2 * Math.max(0, outside - 0.02)); /* 잉크 2% 까지 벗어남은 봐줌 = 획 끝 둥근 펜 끝이 글자 끝을 살짝 넘는 것(「전」 연필 1.6% → 96) · 펜 굵기만큼 비껴 그림은 그대로 실패 */
+    // 모양(투덜이 10-13 「나」 비뚤고 굵은데 99 · 「누」 100 — 「좋은 점수가 나올 게 아닌데」) — 학습자 획 가운데 선이 회색(∪ 글자 모양) 밖으로 얼마나 나갔나
+    //  벌점 = 4 × 가장 멀리 나간 거리(칸 비율 · 1.2% 봐줌) + 2 × 밖으로 나간 길이 비율 + 0.5 × (그은 길이 ÷ 회색 길 길이 − 1.3 · 덧칠·여러 번 그음) · 0.22 까지는 봐줌(바른 획 100 그대로 · 「전」 연필 자료 길 0.21) → 모양 = 1 − 1.5 × 넘은 만큼
+    const flen = list.reduce((a, S, si) => a + (fitPath(ch, list, si, stk).tot || 0), 0), sh = shapeOf(ch, strokes, stk, flen), shape = Math.max(0, Math.min(1, 1 - 1.5 * Math.max(0, sh.pen - 0.22)));
+    const pct = Math.max(0, Math.min(100, Math.floor((ok ? 1 : avg) * keep * shape * 100 + 1e-9)));
+    return { score: pct / 100, pct: ok ? pct : Math.min(pct, 79), ok, comps: cov, low, avg, cover: avg, outside, shape, sh, miss, N, T: 0, dir: dirBad.size ? dir : "" };
   }
   function handScoreOld(ch, strokes, boxPx = st.hand?.s || 260) {
     const N = 160, k = N / boxPx, mask = pix(N, x => glyph(x, N, ch, "#000")), maskD = pix(N, x => glyph(x, N, ch, "#000", PEN * 2));
@@ -539,7 +569,7 @@ export default async function write(app, ep, id, opts = {}) {
         if (kb < bd - 0.02 && t0 - kt > 0.04) { F.lost = true; return; } } /* 손가락이 지나온 쪽(뒤 25%)에 더 가까움 = 거꾸로 감 → 따라오기 그만(쓰기부 10-12 「자」 ㅈ 거꾸로가 50% 넘게 따라와 붙던 것) */
       F.prog = Math.max(F.prog, bi); };
     const up = () => { if (!H.cur) return; const S = H.cur; H.cur = null; clearTimeout(H.timer); const F = H.follow; H.follow = null;
-      if (magnetOn()) { if (F && F.prog >= F.Q.length * 0.5) return magnetUp(S, true); return magnetUp(S); } /* 절반(50%↑) 따라왔으면 나머지 채움(본부 10-12 · 전 85%) · 그 획 완성 */ H.timer = setTimeout(() => st.hand === H && handJudge(), 1200);
+      if (magnetOn()) { if (F && F.prog >= F.Q.length * 0.5) return magnetUp(S, true); return magnetUp(S); } /* 절반(50%↑) 따라왔으면 나머지 채움(본부 10-12 · 전 85%) · 그 획 완성 */ H.timer = setTimeout(() => st.hand === H && handJudge(), 1200); jamoSay(H);
       const msg = strokeHint(H, S); if (msg) bubble(msg); }; // 획순·방향 알림(짧은 말풍선)
     const bubble = msg => { let b = box.querySelector(".hbubble"); if (!b) { b = document.createElement("b"); b.className = "hbubble"; box.append(b); } b.textContent = msg; b.hidden = false; H.hints = (H.hints || []).concat(msg); clearTimeout(H.bt); H.bt = setTimeout(() => (b.hidden = true), 2500); };
     // 획순 보기(본부 10-07) — 회색 글자를 획 차례대로 주황으로 칠해 드러냄(획 0.5초 · revealOrder) · 시작점 번호 원 · 끝에 작은 화살촉(글자 안) → 다 칠하면 1초 뒤 회색으로
@@ -596,6 +626,7 @@ export default async function write(app, ep, id, opts = {}) {
       const Q = brushPath(c.ch, H.magList[best]); H.strokes.push(Object.assign(Q.map(q => [q.x, q.y, 1]), { tool: S.tool, w: S.w, snap: true })); swish(Q.tot, S.tool, true); H.mag++; paintInk(); paintGuide(); magDone();
     };
     const magDone = () => { // 획 하나 붙은 뒤 — 다음 번호 강조(잠깐 크게) · 다 붙으면 「✓ 순서 맞음」
+      if (H.mag < (H.magList?.length || 0)) setTimeout(() => st.hand === H && jamoSay(H), 300); // 자모 하나가 다 붙으면 그 자모 소리(스윽 뒤)
       if (H.mag < H.magList.length) { H.magPulse = performance.now(); const my = H.magPulse; const tick = () => { if (H.magPulse !== my || st.hand !== H) return; paintGuide(); if (performance.now() - my < 700) setTimeout(tick, 33); else { H.magPulse = 0; paintGuide(); } }; tick(); }
       if (H.mag >= H.magList.length) { H.passed = true; paintInk(); markHand(); const sc = work.querySelector(".hscore"); if (sc) { sc.textContent = t("h_order_ok"); sc.className = "hscore ok"; sc.hidden = false; } note.textContent = ""; // 「✓ 순서 맞음」 · 점수·최고 기록·효과음 없음
         st.busy = true; run([400, c.file || jamoSrc(c.jamo[c.jamo.length - 1])]).then(() => { st.busy = false; }); }
@@ -606,6 +637,17 @@ export default async function write(app, ep, id, opts = {}) {
   const bestKey = (w, c) => `${ep}/${line.id}/${st.s}.${w}.${c}`;
   const bestGet = (w, c) => { try { return JSON.parse(localStorage.getItem("malmun.hbest") || "{}")[bestKey(w, c)] ?? null; } catch { return null; } };
   const bestPut = (w, c, v) => { try { const o = JSON.parse(localStorage.getItem("malmun.hbest") || "{}"), k = bestKey(w, c); if (!(o[k] >= v)) { o[k] = v; localStorage.setItem("malmun.hbest", JSON.stringify(o)); } } catch {} };
+  // 자모 하나의 획을 다 맞게 그음 = 그 자모 소리(투덜이 10-13 「손으로 쓸 때도 소리」 · 자동 완성과 같은 소리) — 자모마다 한 번 · 자석으로 붙여도 같음
+  function jamoSay(H) {
+    if (!H || st.auto || H.passed || !SK.STK) return; const ch = H.ch, list = strokesOf(ch), us = unitsOf(ch); if (!list.length || !us.length) return;
+    const tw = Math.max(...H.strokes.map(S => S.w ?? TOOLS[toolKey()].w)), gw = tw * GUIDE_K, stk = Object.keys(TOOLS).find(k => Math.abs(TOOLS[k].w - tw) < 1e-6) || toolKey();
+    const segs = []; for (const S of H.strokes) { if (S.length === 1) segs.push([S[0], S[0]]); for (let i = 1; i < S.length; i++) segs.push([S[i - 1], S[i]]); }
+    const near = (x, y) => segs.some(([a, c]) => { const dx = c[0] - a[0], dy = c[1] - a[1], l = dx * dx + dy * dy || 1e-12, r = Math.max(0, Math.min(1, ((x - a[0]) * dx + (y - a[1]) * dy) / l)); return Math.hypot(x - a[0] - dx * r, y - a[1] - dy * r) <= gw / 2 + 0.008; });
+    const done = s0 => { const Q = fitPath(ch, list, s0, stk), step = Math.max(1, Math.floor(Q.length / 30)); let n = 0, k = 0; for (let i = 0; i < Q.length; i += step) { k++; if (near(Q[i].x, Q[i].y)) n++; } return k && n / k >= COMP_MIN; };
+    H.said ||= new Set(); let say = null;
+    us.forEach((u, ui) => { if (H.said.has(ui)) return; const mine = list.map((S, si) => [S, si]).filter(([S]) => S.unit === ui); if (mine.length && mine.every(([, si]) => done(si))) { H.said.add(ui); say = u.jamo; } });
+    if (!say) return; const src = jamoSrc(say); if (src && !st.busy) run([src]);
+  }
   async function handJudge() {
     const H = st.hand; if (!H || !H.strokes.length || st.busy || st.s >= segs.length || st.lineEnd || H.passed || magnetOn()) return; // 자석 = 점수 없음(순서만)
     clearTimeout(H.timer);
@@ -616,7 +658,7 @@ export default async function write(app, ep, id, opts = {}) {
     if (r.pct >= 80) { // 통과 — 초록 + 그 글자 소리 · 최고 점수 기억 · 「다음 ▶」/다시 쓰기
       bestPut(st.w, st.c, r.pct); paintSent();
       note.textContent = ""; H.passed = true; H.paintInk(); markHand();
-      st.busy = true; H.passSnd = true; await run([700, c.file || jamoSrc(c.jamo[c.jamo.length - 1])]); if (H.passSnd) { st.busy = false; H.passSnd = false; }
+      st.busy = true; H.passSnd = true; await run(["ok", 150, c.file || jamoSrc(c.jamo[c.jamo.length - 1])]); if (H.passSnd) { st.busy = false; H.passSnd = false; } // 통과 = 딩동 → 그 글자 소리(투덜이 10-13 · 자동 완성과 같은 차례)
       return;
     }
     note.textContent = r.dir || t("h_again"); if (r.dir) H.bubble?.(r.dir); /* 거꾸로 그은 획 = 방향 알림(본부 10-12) */
@@ -818,7 +860,7 @@ export default async function write(app, ep, id, opts = {}) {
       // 다른 도구 = 그 글자 칸에 쓴 획을 지우고 처음부터(투덜이 10-12 「다른 도구를 고르면 기존 것을 자동으로 지우는 게 좋아」 · 본부) — 점수·자석 차례·통과 표시도 처음으로 · 회색은 새 도구 굵기 · 같은 도구 = 그대로
       clearTimeout(H.timer); clearTimeout(H.clr); H.follow = null; H.drawGen = (H.drawGen || 0) + 1; if (H.passSnd) { hush(); st.busy = false; H.passSnd = false; }
       if (!st.auto && (H.ordPlaying || H.ordAt)) H.stopOrder?.();
-      H.strokes = []; H.roles = null; H.orderTold = false; H.mag = 0; H.magWrong = 0; if (H.passed) { H.passed = false; markHand(); }
+      H.strokes = []; H.roles = null; H.orderTold = false; H.mag = 0; H.magWrong = 0; H.said = null; if (H.passed) { H.passed = false; markHand(); }
       const sc = work.querySelector(".hscore"); if (sc) sc.hidden = true; note.textContent = ""; H.paintGuide?.(); H.paintInk?.(); return; }
     const mb = e.target.closest("[data-mode]");
     if (mb) { if (st.mode !== mb.dataset.mode) { if (st.auto || st.resumeAuto) stopAuto(); st.hand?.stopOrder?.(); hush(); stopLoop(); st.busy = false; st.done = false; st.queue = []; st.mode = mb.dataset.mode; /* 모드 바꾸기 = 돌던 것(자동·획순·소리) 먼저 멈춤 — 본부 10-08 투덜이: 자판 자동 켠 채 손글씨로 바꾸면 저 혼자 계속 씀 */ try { localStorage.setItem("malmun.wmode", st.mode); } catch {} app.querySelectorAll("[data-mode]").forEach(x => x.setAttribute("aria-pressed", String(x.dataset.mode === st.mode))); st.typed = []; st.k = 0; st.part = ""; st.segEnd = false; render(); } return; }
@@ -829,8 +871,9 @@ export default async function write(app, ep, id, opts = {}) {
     if (a === "hdone") return handJudge();
     if (a === "hnext") return handNext();
     if (a === "horder") return st.hand?.toggleOrder?.();
-    if (a === "hundo" || a === "hclear") { const H = st.hand; if (!H) return; H.follow = null; clearTimeout(H.timer); clearTimeout(H.clr); H.drawGen = (H.drawGen || 0) + 1; if (H.passSnd) { hush(); st.busy = false; H.passSnd = false; } if (a === "hundo") H.strokes.pop(); else { H.strokes = []; H.roles = null; H.orderTold = false; } H.mag = Math.min(H.mag || 0, H.strokes.length); if (magnetOn()) { H.paintGuide?.(); } /* 자석 = 남은 획부터 다시(본부 10-10 「딱 한 번만 됨」 — 지워도 차례가 앞으로 가 있던 것) */ if (H.passed) { H.passed = false; markHand(); } const sc = work.querySelector(".hscore"); if (sc) sc.hidden = true; H.paintInk(); note.textContent = ""; return; }
-    if (a === "sent") toggleSentence();
+    if (a === "hundo" || a === "hclear") { const H = st.hand; if (!H) return; H.follow = null; clearTimeout(H.timer); clearTimeout(H.clr); H.drawGen = (H.drawGen || 0) + 1; if (H.passSnd) { hush(); st.busy = false; H.passSnd = false; } if (a === "hundo") H.strokes.pop(); else { H.strokes = []; H.roles = null; H.orderTold = false; } H.said = null; H.mag = Math.min(H.mag || 0, H.strokes.length); if (magnetOn()) { H.paintGuide?.(); } /* 자석 = 남은 획부터 다시(본부 10-10 「딱 한 번만 됨」 — 지워도 차례가 앞으로 가 있던 것) */ if (H.passed) { H.passed = false; markHand(); } const sc = work.querySelector(".hscore"); if (sc) sc.hidden = true; H.paintInk(); note.textContent = ""; return; }
+    if (a === "line") { hideLineTip(); toggleSentence(); }
+    else if (a === "hearch") hearChar();
     else if (a === "word" && st.s < segs.length && !st.busy) { // W4 — 원음에서 이 낱말만
       stopLoop(); st.sent = false; markSent();
       run([wordStep(words()[st.w])]);
@@ -845,10 +888,30 @@ export default async function write(app, ep, id, opts = {}) {
 
   setNote(); render();
   if (autoAllNext && autoAllNext.ep === ep && String(autoAllNext.id) === String(id) && Date.now() - autoAllNext.t < 8000) { autoAllNext = null; setTimeout(() => { if (st.alive && !st.auto) autoPart("all"); }, 300); } else autoAllNext = null; // 전체 자동 완성 이어서(본부 10-11)
-  try { if (localStorage.getItem("malmun.wtip") !== "1") { localStorage.setItem("malmun.wtip", "1"); const tip = $(".wtip"); tip.hidden = false; sentEl.classList.add("flash"); setTimeout(() => { tip.hidden = true; sentEl.classList.remove("flash"); }, 3500); } } catch {}
+  try { const nTip = +(localStorage.getItem("malmun.wlinetip") || 0); if (nTip < 2) { localStorage.setItem("malmun.wlinetip", String(nTip + 1)); const tip = $(".wtip"); tip.textContent = t("w_line_tip"); tip.hidden = false; sentEl.classList.add("flash"); st.tipT = setTimeout(hideLineTip, 4000); } } catch {} // 🔊 = 이 줄 듣기 말풍선 처음 2번(투덜이 10-13)
   const release = hold();
   // 이 줄에서 쓸 소리를 미리 받아 풀어 둔다(대사 · 낱말·토막 · 글자 · 자판 자모) — 누르는 순간 바로 나오게
   sfx.preload([lineSrc, ...allWords.map(w => unitSrc(w.unit)), ...segs.map(g => unitSrc(g.unit)),
     ...allWords.flatMap(w => w.chars.map(c => c.file)), ...[...KEYS, ...VOW, ...VOW2].map(jamoSrc)]);
-  return () => { release(); st.alive = false; st.autoGen = (st.autoGen || 0) + 1; st.auto = false; st.resumeAuto = false; st.allNext = false; st.hand?.stopOrder?.(); hush(); st.hand?.ro?.disconnect(); clearTimeout(st.hand?.timer); delete app.__wr; };
+  // 앱 글 언어가 바뀜(앱개발부 10-13 안 A · 「malmun:uilang」) — 화면을 다시 그리지 않고 쓰기 창 안 앱 글만 그 자리에서 바꿈 · 자동·손글씨 칠·소리·쓰던 자리·획 그대로
+  function retext() {
+    if (!st.alive) return; const L = k => t(k), span = (el, k) => { if (!el) return; el.setAttribute("aria-label", L(k)); const m = el.querySelector(".ml"); if (m) m.textContent = " " + L(k); };
+    const h = app.querySelector(".whead"), bar = app.querySelector(".bar");
+    if (h) { const b = h.querySelector(":scope > b"); if (b) b.textContent = L("write"); const sb = h.querySelector(".sub"); if (sb) sb.innerHTML = `${li + 1} / ${d.lines.length} · ${spkHtml(line.speaker)}`; }
+    if (bar) { const tt = bar.querySelector(".t"), sb = bar.querySelector(".sub"), bk = bar.querySelector(".iconbtn"); if (tt) tt.textContent = L("write"); if (sb) sb.innerHTML = `${li + 1} / ${d.lines.length} · ${spkHtml(line.speaker)}`; bk?.setAttribute("aria-label", L("back")); }
+    app.querySelectorAll("[data-mode]").forEach(x => span(x, x.dataset.mode === "kb" ? "w_kb" : "w_hand"));
+    app.querySelectorAll("[data-act=help]").forEach(x => { x.textContent = L("help_btn"); x.setAttribute("aria-label", L("help")); });
+    app.querySelectorAll("[data-act=close]").forEach(x => { x.setAttribute("aria-label", L("close_btn")); x.innerHTML = `✕<span class="lt">${esc(String(L("close_btn")).replace(/^✕\s*/, " "))}</span>`; });
+    const hb = $(".helpbox"); if (hb) hb.innerHTML = helpHtml();
+    const hc = wb.querySelector("[data-act=hearch]"); if (hc) hc.textContent = L("w_hear_char"); markAuto();
+    paintSent(); /* 위 글자 줄 · ◀ ▶ 이름 · 🔊 이름 */ const tip = $(".wtip"); if (tip && !tip.hidden) tip.textContent = L("w_line_tip");
+    work.querySelectorAll("[data-tool]").forEach(x => span(x, "h_" + x.dataset.tool)); span(work.querySelector("[data-hmode]"), "h_magnet");
+    for (const [a, k] of [["horder", "h_order"], ["hundo", "h_undo"], ["hclear", "h_clear"]]) span(work.querySelector(`[data-act=${a}]`), k);
+    work.querySelector(".stage .box")?.setAttribute("aria-label", L("listen_char") || "▶"); work.querySelector(".hink")?.setAttribute("aria-label", L("w_hand"));
+    markHand(); markOrder(); setNote();
+    const sc = work.querySelector(".hscore"); if (sc && !sc.hidden && st.hand?.passed && magnetOn()) sc.textContent = L("h_order_ok");
+    fitHeadW(); placeBtns(); fitWord();
+  }
+  const onUiLang = () => retext(); window.addEventListener("malmun:uilang", onUiLang);
+  return () => { window.removeEventListener("malmun:uilang", onUiLang); release(); st.alive = false; st.autoGen = (st.autoGen || 0) + 1; st.auto = false; st.resumeAuto = false; st.allNext = false; st.hand?.stopOrder?.(); hush(); st.hand?.ro?.disconnect(); clearTimeout(st.hand?.timer); delete app.__wr; };
 }
