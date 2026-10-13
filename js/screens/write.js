@@ -418,10 +418,23 @@ export default async function write(app, ep, id, opts = {}) {
     const f = (x, y) => D[Math.max(0, Math.min(M - 1, Math.round(y * M - 0.5))) * M + Math.max(0, Math.min(M - 1, Math.round(x * M - 0.5)))] / M;
     if (gCache.has(ch + "|0|" + hfontKey())) { if (outCache.size > 60) outCache.clear(); outCache.set(key, f); } return f;
   }
-  function shapeOf(ch, strokes, tk, flen) {
-    const dO = outDist(ch, tk), tol = 0.012; let maxE = 0, stray = 0, tot = 0;
-    for (const S of strokes) for (let i = 0; i < S.length; i++) { const p = S[i], ds = i ? Math.hypot(p[0] - S[i - 1][0], p[1] - S[i - 1][1]) : 0; tot += ds; const e = dO(p[0], p[1]) - tol; if (e > 0) { stray += ds; maxE = Math.max(maxE, e); } }
-    const lr = tot / (flen || 1), sf = stray / (tot || 1); return { pen: 4 * maxE + 2 * sf + 0.5 * Math.max(0, lr - 1.3), maxE, stray: sf, lr };
+  // 손 떨림 고르기(검사부 10-13 — 점마다 ±0.75% 떨면 길이가 2~3배로 부풀어 「덧칠·밖」 벌점 · 바르게 썼는데 60점) — 이동 평균(창 = 칸의 약 2% 를 실제로 나아가는 점 수) 두 번
+  function smoothS(S) {
+    const n = S.length; if (n < 5) return S.map(p => [p[0], p[1]]); const k = 5, adv = []; for (let i = 0; i < n; i++) { const a = S[Math.max(0, i - k)], b = S[Math.min(n - 1, i + k)], m = Math.min(n - 1, i + k) - Math.max(0, i - k); adv.push(m ? Math.hypot(b[0] - a[0], b[1] - a[1]) / m : 0); }
+    const med = adv.slice().sort((x, y) => x - y)[n >> 1] || 0.005, w = Math.max(1, Math.min(12, Math.round(0.02 / Math.max(med, 0.0015))));
+    let P = S.map(p => [p[0], p[1]]); for (let r = 0; r < 2; r++) P = P.map((p, i) => { if (i === 0 || i === n - 1) return p; const lo = Math.max(0, i - w), hi = Math.min(n - 1, i + w); let x = 0, y = 0; for (let j = lo; j <= hi; j++) { x += P[j][0]; y += P[j][1]; } return [x / (hi - lo + 1), y / (hi - lo + 1)]; });
+    return P;
+  }
+  // 모양 벌점 — 고른 학습자 선으로: ① 회색∪글자 밖 거리·나간 길이 ② 가운데 어긋남(바른 길 = 회색 가운데 길 ∪ 자료 길에서 칸 4.5% 넘게 · 도구 굵기와 상관없음 → 붓으로 휘어 그어도 연필·펜처럼 깎임 · 검사부 10-13) ③ 덧칠(길이 비율)
+  const cenCache = new Map(); // 글자 가운데 선(글꼴 잉크 능선) = 바른 길에 넣음 — 이 글꼴 ㄱ 꼬리처럼 자료 길과 4.5% 넘게 다른 곳도 회색 가운데를 따라 쓰면 바름
+  const cenPaths = ch => { const key = ch + "|" + hfontKey(); if (cenCache.has(key)) return cenCache.get(key); const v = centerOf(ch).map(S => S.map(p => ({ x: p[0], y: p[1] }))); if (gCache.has(ch + "|0|" + hfontKey())) { if (cenCache.size > 60) cenCache.clear(); cenCache.set(key, v); } return v; };
+  function shapeOf(ch, strokes, tk, flen, paths = []) {
+    const dO = outDist(ch, tk), tol = 0.012, cTol = 0.045; let maxE = 0, stray = 0, tot = 0, maxC = 0, strayC = 0;
+    const cd = (x, y) => { let b = Infinity; for (const Q of paths) { if (Q.length === 1) { const d = Math.hypot(x - Q[0].x, y - Q[0].y); if (d < b) b = d; } } for (const Q of paths) for (let i = 1; i < Q.length; i++) { const a = Q[i - 1], c = Q[i], dx = c.x - a.x, dy = c.y - a.y, l = dx * dx + dy * dy || 1e-12, r = Math.max(0, Math.min(1, ((x - a.x) * dx + (y - a.y) * dy) / l)); const d = Math.hypot(x - a.x - dx * r, y - a.y - dy * r); if (d < b) b = d; } return b; };
+    for (const S0 of strokes) { const S = smoothS(S0); for (let i = 0; i < S.length; i++) { const p = S[i], ds = i ? Math.hypot(p[0] - S[i - 1][0], p[1] - S[i - 1][1]) : 0; tot += ds; const e = dO(p[0], p[1]) - tol; if (e > 0) { stray += ds; maxE = Math.max(maxE, e); }
+      if (paths.length && i % 2 === 0) { const c = cd(p[0], p[1]) - cTol; if (c > 0) { strayC += ds * 2; maxC = Math.max(maxC, c); } } } }
+    const lr = tot / (flen || 1), sf = stray / (tot || 1), sc = Math.min(1, strayC / (tot || 1));
+    return { pen: 4 * maxE + 2 * sf + 0.5 * Math.max(0, lr - 1.3) + 3 * maxC + 1.5 * sc, maxE, stray: sf, lr, maxC, strayC: sc };
   }
   function handScore(ch, strokes, boxPx = st.hand?.s || 260) {
     const list = SK.STK ? strokesOf(ch) : []; if (!list.length) return handScoreOld(ch, strokes, boxPx);
@@ -443,7 +456,7 @@ export default async function write(app, ep, id, opts = {}) {
     const keep = Math.max(0, 1 - 2 * Math.max(0, outside - 0.02)); /* 잉크 2% 까지 벗어남은 봐줌 = 획 끝 둥근 펜 끝이 글자 끝을 살짝 넘는 것(「전」 연필 1.6% → 96) · 펜 굵기만큼 비껴 그림은 그대로 실패 */
     // 모양(투덜이 10-13 「나」 비뚤고 굵은데 99 · 「누」 100 — 「좋은 점수가 나올 게 아닌데」) — 학습자 획 가운데 선이 회색(∪ 글자 모양) 밖으로 얼마나 나갔나
     //  벌점 = 4 × 가장 멀리 나간 거리(칸 비율 · 1.2% 봐줌) + 2 × 밖으로 나간 길이 비율 + 0.5 × (그은 길이 ÷ 회색 길 길이 − 1.3 · 덧칠·여러 번 그음) · 0.22 까지는 봐줌(바른 획 100 그대로 · 「전」 연필 자료 길 0.21) → 모양 = 1 − 1.5 × 넘은 만큼
-    const flen = list.reduce((a, S, si) => a + (fitPath(ch, list, si, stk).tot || 0), 0), sh = shapeOf(ch, strokes, stk, flen), shape = Math.max(0, Math.min(1, 1 - 1.5 * Math.max(0, sh.pen - 0.22)));
+    const fps = list.map((S, si) => fitPath(ch, list, si, stk)), flen = fps.reduce((a, Q) => a + (Q.tot || 0), 0), sh = shapeOf(ch, strokes, stk, flen, fps.concat(list.map(S => brushPath(ch, S)), cenPaths(ch))), shape = Math.max(0, Math.min(1, 1 - 1.5 * Math.max(0, sh.pen - 0.22)));
     const pct = Math.max(0, Math.min(100, Math.floor((ok ? 1 : avg) * keep * shape * 100 + 1e-9)));
     return { score: pct / 100, pct: ok ? pct : Math.min(pct, 79), ok, comps: cov, low, avg, cover: avg, outside, shape, sh, miss, N, T: 0, dir: dirBad.size ? dir : "" };
   }
