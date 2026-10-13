@@ -1085,11 +1085,16 @@ button.dim{opacity:.45}
 .write .whead.n3b .wmode .ml{display:none}
 .write .whead.n3b .wmode button{min-width:40px}
 /* 위 글자 줄 아주 좁을 때(fitSent st1 · 10-12) — 🔊 표시 숨김 · 낱말 묶음·글자 단추 여백 최소 · ◀ ▶ 좁게 */
-.write .segrow.st1 .sent .spk{display:none}
+.write .segrow.st1 .sent .spkb{width:26px;height:26px}
 .write .segrow.st1 .sent .w{padding:2px 1px 0;gap:1px}
 .write .segrow.st1 .sent .c{padding:0 1px;margin:0 0 2px}
 .write .segrow.st1 .segnav{gap:2px}
 .write .segrow.st1 .segnav button{width:26px}
+/* 🔊 = 이 줄 듣기 단추(투덜이 10-13 · 누르면 소리 = 단추 모양) · 듣는 동안 눌린 모양 */
+.write .sent .spkb{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;flex:none;margin-right:2px;padding:0;border:1px solid var(--line);border-radius:9px;background:var(--card);box-shadow:0 2px 0 var(--line);color:var(--ink);opacity:1;cursor:pointer}
+.write .sent .spkb:active{transform:translateY(2px);box-shadow:none}
+.write .sent .spkb[aria-pressed=true]{background:var(--hi);border-color:var(--hi);color:var(--on-hi);box-shadow:none}
+.write .sent .spkb svg{width:20px;height:20px}
 /* 손글씨 도구 단추 그림만(fitTools ic · 10-12) */
 .write .htools.ic .ml,.write .htools.ic2 .ml{display:none}
 .write .htools.ic button,.write .htools.ic2 button{min-width:36px}

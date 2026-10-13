@@ -1,6 +1,6 @@
 // 손글씨 바른 획 점수 전수(본부 10-12 「ㄱ·ㅈ+ㅓ 계열 바른 획 96~99」) — #/learn/L01-00-01 을 연 채로 · 편의 모든 글자 × 연필·펜·붓
 // ⓐ 자료 획 길(brushPath) 그대로 그음 = 100 ⓑ 회색 가운데 길(글자부 strokefit · 앱 fitPath) 그대로 = 100 ⓒ 글자 가운데 선(centerOf · 조심스러운 학습자) = 100
-// ⓓ 펜 굵기만큼 옆으로 비껴 그음(연필·펜) = 거의 다 80 아래(글자 모양상 가로획이 많아 겹치는 몇 자만 예외 · 5% 이하)
+// ⓓ 펜 굵기만큼 옆으로 비껴 그음(연필·펜) = 거의 다 80 아래(글자 모양상 가로획이 많아 겹치는 몇 자만 예외 · 5% 이하) ⓔ 투덜이 10-13 비뚤고 넘친 「나」「누」 = 80 아래
 (async () => {
   const W = ms => new Promise(s => setTimeout(s, ms)), $ = s => document.querySelector(s), res = [], ok = (c, m, x = "") => res.push(`${c ? "✓" : "✗"} ${m}${x ? " · " + x : ""}`);
   window.__sfxVolume = 0.0001;
@@ -27,6 +27,11 @@
       }
       if (n % 10 === 0) await W(0); // 화면 숨 돌림
     }
+    // ⓔ 투덜이 10-13 폰 그림 재현(D:\malmun_work\hq_inboxA3_투덜이·3.png) — 비뚤고 넘친 「나」(붓 · 그때 99) · 「누」(펜 · 그때 100) = 80 아래(통과 못 함)
+    const dens = P => { const o = []; for (let i = 1; i < P.length; i++) { const k = Math.ceil(Math.hypot(P[i][0] - P[i - 1][0], P[i][1] - P[i - 1][1]) * 100); for (let m = 0; m < k; m++) o.push([P[i - 1][0] + (P[i][0] - P[i - 1][0]) * m / k, P[i - 1][1] + (P[i][1] - P[i - 1][1]) * m / k]); } o.push(P[P.length - 1]); return o; };
+    const ugly = [["나", "brush", [[[0.188, 0.19], [0.177, 0.661], [0.67, 0.626]], [[0.681, 0.156], [0.624, 0.993]], [[0.658, 0.443], [0.99, 0.443]]]], ["누", "pen", [[[0.302, 0.167], [0.302, 0.388], [0.826, 0.395]], [[0.105, 0.558], [0.884, 0.535]], [[0.535, 0.574], [0.547, 0.749], [0.488, 1.0]]]]];
+    const bs = []; for (const [ch, tk, S] of ugly) { await wr.strokesOf(ch); bs.push([ch, wr.handScore(ch, S.map(P => Object.assign(dens(P), { tool: tk, w: TW[tk] }))).pct]); }
+    ok(bs.every(([, v]) => v < 80), "ⓔ 비뚤고 넘친 글씨(투덜이 그림 재현) = 80 아래", bs.map(([c, v]) => `${c} ${v}`).join(" · "));
     ok(n >= 90, `글자 ${n}자 × 도구 3 잼`, `${chars.length}자 중 획 자료 있는 것`);
     ok(!bad.a.length, "ⓐ 자료 획 길 그대로 = 100", bad.a.join(" "));
     ok(!bad.b.length, "ⓑ 회색 가운데 길 그대로 = 100", bad.b.join(" "));
