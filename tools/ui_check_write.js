@@ -79,7 +79,7 @@
     let at0 = log.length; hc.click(); await idle(4000); let ev = log.slice(at0).filter(e => e.ev === "시작");
     const one = ev.length === 1 && ev[0].name.endsWith(want) && hc.getAttribute("aria-pressed") !== "true";
     at0 = log.length; hc.click(); await W(120); hc.click(); await idle(4000); ev = log.slice(at0); const starts = ev.filter(e => e.ev === "시작");
-    let live = 0, worst = 0; for (const e of ev) { live += e.ev === "시작" ? 1 : e.ev === "끝" || e.ev === "멈춤" ? -1 : 0; worst = Math.max(worst, live); }
+    const iv = []; for (const e of ev) { if (e.ev === "시작") iv.push({ a: e.t, b: Infinity }); else if (e.ev === "끝" || e.ev === "멈춤") { const o = iv.find(x => x.b === Infinity); if (o) o.b = e.t; } } let worst = 1; for (let i = 1; i < iv.length; i++) if (iv[i].a < iv[i - 1].b - 40) worst = 2; /* 멈춤 기록은 onended 라 몇 ms 늦게 남음 → 시각으로 견줌(40ms 여유) */
     ok(one && starts.length === 2 && starts.every(e => e.name.endsWith(want)) && worst <= 1, "[이 글자 듣기] = 지금 글자 소리 한 번 · 두 번 빨리 누르면 처음부터 다시(겹침 0 · 토글 아님)", `「${ch0}」 ${want} · 한 번 ${one} · 두 번 ${starts.map(e => e.name.split("/").pop()).join(",")} · 겹침 ${worst}`); }
   // 자동 완성 — 지금 토막의 남은 글자를 한 자모씩 · 글자마다 모양이 맞나 · 토막이 끝나면 멈춤 · 다시 누르면 멈춤
   const watchShapes = () => { const seen = []; const mo = new MutationObserver(() => { const b = $(".panel .box.ok"); if (b) { const k = b.querySelector(".target").textContent + "=" + b.querySelector(".typed").textContent; if (seen[seen.length - 1] !== k) seen.push(k); } }); mo.observe($(".panel .write"), { subtree: true, childList: true, attributes: true }); return { seen, stop: () => mo.disconnect() }; };
