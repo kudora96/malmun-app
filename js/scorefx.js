@@ -18,7 +18,9 @@ export function scoreFx(slot, sc, { busy = () => false } = {}) {
   clearTimeout(slot.__t); slot.className = "fx"; slot.innerHTML = "";
   const k = tierOf(sc); if (!k) return;
   void slot.offsetWidth; // 같은 단계가 연달아 나와도 움직임을 처음부터
-  const sparks = k === "perfect" ? Array.from({ length: 8 }, (_, j) => `<i style="--a:${j * 45}deg"></i>`).join("") : "";
+  // 완벽 = 색종이(본부 10-13 — 가운데에서 같은 간격으로 퍼지는 햇살 모양은 욱일기처럼 보일 수 있어 뺌) · 각도·거리 들쭉날쭉 · 태극 빨강·파랑 + 금색
+  const CONF = [[18, 22, "#cd2e3a"], [77, 30, "#0047a0"], [131, 17, "var(--star)"], [166, 27, "#cd2e3a"], [212, 24, "#0047a0"], [249, 31, "var(--star)"], [296, 19, "#cd2e3a"], [338, 26, "#0047a0"]];
+  const sparks = k === "perfect" ? CONF.map(([a, d, c], j) => `<i style="--a:${a}deg;--d:${d}px;--c:${c};--r:${(j * 53) % 90}deg"></i>`).join("") : "";
   slot.innerHTML = `<b${k === "miss" ? ' lang="ko"' : ""}>${ICON[k]}</b>${LABEL[k] ? `<span>${t(LABEL[k])}</span>` : ""}${sparks}`;
   slot.classList.add("on", k);
   slot.__t = setTimeout(() => { slot.className = "fx"; slot.innerHTML = ""; }, SHOW_MS[k]);
