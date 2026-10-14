@@ -24,6 +24,16 @@
     const s2 = log.filter(e => e.ev === "시작").map(e => e.name), dings = (osc - o0) / 2, swish = s2.filter(n => /^swish/.test(n)).length;
     const charHex = "u" + ch.codePointAt(0).toString(16).toUpperCase() + ".mp3";
     ok(s1.length >= 1 && /j_|\/j\//.test(s1[0]) && H.passed && dings >= 1 && s2.some(n => n.endsWith(charHex)) && !swish, "ⓐ 손으로: 첫 자모 다 그음 = 그 자모 소리 · 통과 = 딩동 → 글자 소리 · 스윽 없음", `${ch} · ㅇ 뒤 ${s1.join(",") || "없음"} · 끝 ${s2.slice(-2).join(",")} · 딩동 ${dings} · 통과 ${H.passed}`);
+    // ⓒ 칸 밖에서 손 뗌(투덜이 10-14 PC 마우스 「자석이 갑자기 안 먹고 획이 그대로 남음」 — 손 뗌 잡기가 주석에 묻혀 있던 것) — 자석: 획마다 칸 밖(문서)에서 놓아도 붙음 → 통과 · 자유: 획이 끝나 남지 않고 채점됨
+    for (const hm of ["magnet", "free"]) {
+      localStorage.setItem("malmun.hmode", hm); localStorage.setItem("malmun.wmode", "hand"); await open(4); const cz = [...document.querySelectorAll(".panel .sent .c")].find(b => b.textContent === "자"); cz?.click(); await W(1500); wr()?.hand()?.stopOrder?.(); await idle();
+      const H2 = wr().hand(), L2 = await wr().strokesOf(H2.ch); for (let k = 0; k < 30 && hm === "magnet" && !H2.magList; k++) await W(100);
+      const iv3 = $(".panel .hink"), R3 = iv3.getBoundingClientRect(), pe = (el, t, x, y) => el.dispatchEvent(new PointerEvent(t, { bubbles: true, cancelable: true, pointerId: 1, pointerType: "mouse", isPrimary: true, buttons: t === "pointerup" ? 0 : 1, clientX: R3.left + x * R3.width, clientY: R3.top + y * R3.height }));
+      let stuck = 0; for (let i = 0; i < L2.length; i++) { const Q = await wr().fitPath(H2.ch, i, "pen"); pe(iv3, "pointerdown", Q[0].x, Q[0].y); Q.forEach(q => pe(iv3, "pointermove", q.x, q.y)); pe(document.body, "pointerup", 1.3, -0.1); await W(450); if (H2.cur) stuck++; pe(iv3, "pointermove", 0.5, 0.5); }
+      await W(2200); const loose = H2.strokes.filter(S => !S.snap).length;
+      ok(!stuck && H2.passed && (hm === "free" || !loose), `ⓒ [${hm === "magnet" ? "자석" : "자유"}] 칸 밖에서 손 떼도 획이 끝남 · ${hm === "magnet" ? "붙음 → 「순서 맞음」" : "채점 → 통과"}`, `${H2.ch} · 안 끝난 획 ${stuck} · 안 붙은 획 ${hm === "magnet" ? loose : "-"} · 통과 ${H2.passed} · 「${$(".panel .hscore")?.textContent || ""}」`);
+    }
+    localStorage.setItem("malmun.hmode", "free");
     // ⓑ 앱 글 언어 바뀜
     localStorage.setItem("malmun.lang", "ne"); await i18n.setLang("ne"); await i18n.setUiKo(false);
     const appText = () => { const sc = $(".panel .scr.write"); if (!sc) return ""; const c = sc.cloneNode(true); c.querySelectorAll(".sent, .info .wko, .typed, .target, .slots, .kb, .hbox, .info .rom, .info .mean, .hscore").forEach(x => x.remove()); return c.innerText + " " + [...c.querySelectorAll("[aria-label]")].map(x => x.getAttribute("aria-label")).join(" "); };

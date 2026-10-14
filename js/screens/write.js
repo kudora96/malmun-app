@@ -568,7 +568,7 @@ export default async function write(app, ep, id, opts = {}) {
       let f; if (e.pointerType === "pen" && e.pressure > 0) f = 0.5 + 0.7 * Math.min(1, e.pressure);
       else if (!S || !S.length) f = 1; else { const q = S[S.length - 1], dt = Math.max(1, now - (S.t || now - 16)), v = Math.hypot(p[0] - q[0], p[1] - q[1]) / (dt / 1000); f = 1.2 - 0.7 * Math.min(1, v / 2.5); }
       if (S && S.length) f = S[S.length - 1][2] * 0.6 + f * 0.4; if (S) S.t = now; return [p[0], p[1], Math.max(0.5, Math.min(1.2, f))]; };
-    iv.addEventListener("pointerdown", e => { if (st.auto) return; if (st.busy) { if (!H.passSnd) return; hush(); st.busy = false; H.passSnd = false; } H.drawGen = (H.drawGen || 0) + 1; // 통과 글자 소리 중에 다시 쓰기 = 소리 끊고 첫 획부터 받음(본부 10-10 「100 뒤 다시 쓰면 첫 획이 빠져 68」) e.preventDefault(); try { iv.setPointerCapture(e.pointerId); } catch {} clearTimeout(H.timer); stopLoop();
+    iv.addEventListener("pointerdown", e => { if (st.auto) return; if (st.busy) { if (!H.passSnd) return; hush(); st.busy = false; H.passSnd = false; } H.drawGen = (H.drawGen || 0) + 1; /* 통과 글자 소리 중에 다시 쓰기 = 소리 끊고 첫 획부터 받음(본부 10-10 「100 뒤 다시 쓰면 첫 획이 빠져 68」) */ if (H.cur) up(); /* 손 뗌을 못 받은 채 남은 획 = 먼저 마무리 */ e.preventDefault(); try { iv.setPointerCapture(e.pointerId); } catch {} clearTimeout(H.timer); stopLoop(); // 투덜이 10-14 PC 마우스 「자석이 갑자기 안 먹음」 — 이 줄이 앞 // 주석에 묻혀 손 뗌 잡기(setPointerCapture)가 없었음 → 칸 밖에서 놓으면 획이 안 끝나 자석이 안 붙고 그대로 남음
       if (H.ordPlaying || H.ordAt) { H.stopOrder(); paintGuide(); } // 획순 보는 중·멈춘 채 쓰기 시작 = 획순 그만(회색으로)
       if (H.passed) { H.passed = false; H.strokes = []; H.roles = null; H.orderTold = false; H.mag = 0; markHand(); if (magnetOn()) { paintGuide(); H.magMarks?.(); } } // 통과 뒤 다시 그리면 = 다시 쓰기(더 높은 점수 · 자석은 처음 획부터)
       clearTimeout(H.clr); { const sc = work.querySelector(".hscore"); if (sc) sc.hidden = true; } // 새로 쓰기 시작 = 점수 지움
@@ -617,7 +617,7 @@ export default async function write(app, ep, id, opts = {}) {
     H.stopOrder = (pause = false) => { H.anim = (H.anim || 0) + 1; H.ordPlaying = false; if (!pause) { H.ordAt = null; } markOrder(); }; // pause = 그 자리에 칠한 채로 멈춤(다시 누르면 이어서)
     // ✎ 획순 단추 = 그리기 ⇄ 멈춤 ⇄ 이어서(투덜이 10-08 — 다시 누르면 처음부터 다시 그리던 것)
     H.toggleOrder = () => { if (H.ordPlaying) return H.stopOrder(true); const at = H.ordAt; H.showOrder(at ? { from: at } : {}); };
-    iv.addEventListener("pointerup", up); iv.addEventListener("pointercancel", up);
+    iv.addEventListener("pointerup", up); iv.addEventListener("pointercancel", up); iv.addEventListener("lostpointercapture", up); H.up = up; // 칸 밖에서 놓아도 끝냄(창 전체 손 뗌도 아래 onWinUp)
     // 반자동(자석) — 순서 번호·시작점이 먼저 떠서 기다림 → 회색 획 근처를 대충 그으면 그 획 가운데 선으로 빨려 들어가 그려짐(굵기 = 고른 도구) · 순서가 틀리면 안 붙고 「순서 다시: N번」
     H.mag = 0; H.magList = null;
     const magMarks = () => { if (!magnetOn() || !H.magList || st.hand !== H) return; const x = gv.getContext("2d"), n = gv.width, lw = PEN * n;
@@ -926,5 +926,6 @@ export default async function write(app, ep, id, opts = {}) {
     fitHeadW(); placeBtns(); fitWord();
   }
   const onUiLang = () => retext(); window.addEventListener("malmun:uilang", onUiLang);
-  return () => { window.removeEventListener("malmun:uilang", onUiLang); release(); st.alive = false; st.autoGen = (st.autoGen || 0) + 1; st.auto = false; st.resumeAuto = false; st.allNext = false; st.hand?.stopOrder?.(); hush(); st.hand?.ro?.disconnect(); clearTimeout(st.hand?.timer); delete app.__wr; };
+  const onWinUp = () => { if (st.hand?.cur) st.hand.up?.(); }; window.addEventListener("pointerup", onWinUp, true); window.addEventListener("pointercancel", onWinUp, true); // 손글씨 획 = 창 어디에서 놓아도 끝남(투덜이 10-14)
+  return () => { window.removeEventListener("malmun:uilang", onUiLang); window.removeEventListener("pointerup", onWinUp, true); window.removeEventListener("pointercancel", onWinUp, true); release(); st.alive = false; st.autoGen = (st.autoGen || 0) + 1; st.auto = false; st.resumeAuto = false; st.allNext = false; st.hand?.stopOrder?.(); hush(); st.hand?.ro?.disconnect(); clearTimeout(st.hand?.timer); delete app.__wr; };
 }
