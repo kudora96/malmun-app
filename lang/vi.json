@@ -3,6 +3,7 @@
  "lang_title": "Ngôn ngữ",
  "lang_hint": "Được chọn theo cài đặt điện thoại của bạn. Bạn có thể đổi bất cứ lúc nào.",
  "uiko_back_tip": "Chạm {b} bất cứ lúc nào để quay lại ngôn ngữ của bạn.",
+ "diag_title": "Chẩn đoán",
  "hello": "Xin chào!",
  "welcome_say": "Bắt đầu học tiếng Hàn từ bảng chữ cái cùng Dubu, Kong và cô giáo tại cung điện Gyeongbokgung.",
  "start": "Bắt đầu",
@@ -177,5 +178,10 @@
  "stt_server_note": "Giọng của bạn chỉ dùng để chấm điểm và không được lưu trên máy chủ. Một vài bản ghi âm gần đây được giữ lại trên điện thoại này (để nghe lại và kiểm tra lỗi).",
  "why_frame": "{parts} — {redo}{rest}",
  "n_episodes_one": "{n} tập",
- "n_lines_one": "{n} câu"
+ "n_lines_one": "{n} câu",
+ "diag_hint": "Hãy gửi một ảnh chụp màn hình, hoặc chạm \"복사\" (Sao chép).",
+ "diag_keep": "Bản ghi âm chẩn đoán trên điện thoại này (tối đa 3 · không bao giờ gửi ra ngoài điện thoại · cũng bị xóa bằng nút xóa tất cả trong danh sách):",
+ "diag_h_rec": "5 bản ghi âm nói gần nhất",
+ "diag_h_nav": "Nhật ký quay lại",
+ "diag_h_err": "Lỗi gần đây"
 }
