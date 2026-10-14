@@ -4,6 +4,7 @@
 import { VERSION } from "../version.js?v=1014.2";
 import { esc } from "../text.js?v=1014.2";
 import { uiKoBtn } from "../ui.js?v=1014.2";
+import { uiKoOn } from "../i18n.js?v=1014.2";
 import { paths } from "../paths.js?v=1014.2";
 import { charsF } from "../data.js?v=1014.2";
 import { audioCtx } from "../wake.js?v=1014.2";
@@ -16,10 +17,20 @@ import { errLog, clearErr } from "../errlog.js?v=1014.2";
 // 같은 오류(종류·글·주소·자리)는 한 줄로 묶음 — 화면·복사 글 같이(본부 10-12 · 띄엄띄엄 쌓인 version.json 실패 20개)
 const errGroups = () => { const g = new Map(); for (const e of errLog()) { const k = [e.kind, e.msg, e.url || "", e.src || "", e.line || ""].join("|"), o = g.get(k); if (o) { o.n += e.n || 1; o.at = e.at; } else g.set(k, { ...e, n: e.n || 1 }); } return [...g.values()].reverse(); };
 
+// 화면 글 = ⇄한 켬이면 한국어 · 끔이면 영어(본부 10-14 투덜이 「모든 창에 ⇄한」 · 기술 화면이라 학습자 말 번역 없이 영어) · 「복사」 글·시험 결과는 늘 한국어(본부가 읽음)
+const EN = { "진단": "Diagnostics", "사진 한 장 또는 「복사」로 보내 주세요": "Send one screenshot, or use Copy", "닫기": "Close", "판": "Version", "주소": "URL", "브라우저": "Browser", "화면": "Screen",
+  "받아쓰기 방식": "Speech recognition mode", "서버 받아쓰기": "Server STT", "받아쓰기 있음": "SpeechRecognition", "마이크 허락": "Mic permission", "녹음 형식": "Recording formats",
+  "받아쓰기만": "STT only", "녹음+받아쓰기": "Rec + STT", "녹음→그 소리 받아쓰기": "Rec → STT of it", "받아쓰기→녹음": "STT → rec", "녹음→서버 받아쓰기": "Rec → server STT", "마이크 설정": "Mic settings", "녹음 풀기": "Decode recording", "「가」 소리": "Sound 「가」", "효과음": "Sound effect", "음성 창고": "Audio storage",
+  "받아쓰기만 시험(5초 · 「안녕하세요」라고 말해 보세요)": "Test STT only (5 s · say 「안녕하세요」)", "녹음+받아쓰기 동시 시험(5초)": "Test rec + STT together (5 s)", "녹음 3초 → 그 녹음 소리로 받아쓰기(동시 아님)": "Rec 3 s → STT of that recording", "받아쓰기 먼저(5초) → 끝난 뒤 녹음 3초": "STT first (5 s) → then rec 3 s",
+  "녹음 3초 → 서버 받아쓰기(2안)": "Rec 3 s → server STT", "마이크 열기 · 설정 보기": "Open mic · show settings", "3초 녹음 → 풀기 시험": "Rec 3 s → decode test", "「가」 소리 틀기": "Play 「가」", "효과음 틀기": "Play sound effect", "음성 창고 읽기 시험": "Audio storage read test",
+  "이 폰에 남은 진단 녹음:": "Diagnostic recordings on this phone:", "개(최대 3개 · 폰 밖으로 보내지 않음 · 목록의 「모두 지우기」로도 지워짐)": "(max 3 · never leave the phone · also cleared by 「Delete all」 in the list)", "진단 녹음 지우기": "Delete diagnostic recordings",
+  "최근 말하기 녹음 5개": "Last 5 speaking recordings", "뒤로 가기 기록": "Back navigation log", "최근 오류": "Recent errors", "개": "", "없음": "None", "복사": "Copy", "오류 지우기": "Clear errors", "1번 길(녹음 → 그 소리로 받아쓰기) 다시 시험 · 기기 기억 지우기": "Retry path 1 (rec → STT of it) · forget device setting" };
+const L = s => (uiKoOn() ? s : EN[s] ?? s);
+
 export default async function diag(app) {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   const res = {}; // 시험 결과(칸 이름 → 글)
-  const row = (k, v) => `<tr><th>${esc(k)}</th><td data-k="${esc(k)}">${esc(v ?? "")}</td></tr>`;
+  const row = (k, v) => `<tr><th>${esc(L(k))}</th><td data-k="${esc(k)}">${esc(v ?? "")}</td></tr>`;
   const set = (k, v) => { res[k] = v; const td = app.querySelector(`td[data-k="${CSS.escape(k)}"]`); if (td) td.textContent = v; };
   const types = ["audio/webm;codecs=opus", "audio/webm", "audio/mp4", "audio/mp4;codecs=mp4a.40.2", "audio/ogg;codecs=opus", "audio/aac"];
   const mrTypes = window.MediaRecorder ? types.filter(x => MediaRecorder.isTypeSupported?.(x)).join(", ") || "(없음)" : "MediaRecorder 없음";
@@ -40,12 +51,12 @@ export default async function diag(app) {
     return a.slice().reverse().map(x => [String(x.at || "").slice(11, 19), x.where, `방식 ${x.mode || "?"}`, `끝 ${x.why || "?"}${x.cut ? "(" + x.cut + ")" : ""}`, ev(x), `들음 「${(x.heard || []).slice(-1)[0] || "없음"}」`, `점수 ${x.score ?? "-"}`, `녹음 최대 ${x.maxDb ?? "?"}dB`, x.play || "재생 전", `마이크 뒤 ${x.micAfter || "?"}`, x.seq ? `1번 길: ${x.seq}` : "", `${x.mic || ""} · ${x.set || ""}`, `ctx ${x.ctxRate || "?"}Hz ${x.ctxState || ""}`].join(" | ")); };
   const paint = () => {
     const errs = errLog();
-    app.innerHTML = `<section class="scr diag"><div class="bar"><div class="grow"><div class="t">진단 · Diagnostics</div><div class="sub">사진 한 장 또는 「복사」로 보내 주세요</div></div>${uiKoBtn()}<a class="dback" href="#/list">✕ 닫기</a></div>
+    app.innerHTML = `<section class="scr diag"><div class="bar"><div class="grow"><div class="t">${esc(L("진단"))}</div><div class="sub">${esc(L("사진 한 장 또는 「복사」로 보내 주세요"))}</div></div>${uiKoBtn()}<a class="dback" href="#/list">✕ ${esc(L("닫기"))}</a></div>
       <table class="dtab">${Object.entries(base).map(([k, v]) => row(k, v)).join("")}${Object.values(keys).map(k => row(k, res[k] ?? "—")).join("")}</table>
-      <div class="dbtns">${tests.map(([a, l]) => `<button data-t="${a}">${esc(l)}</button>`).join("")}</div>
-      <p class="dkeep">이 폰에 남은 진단 녹음: <b class="dkeepn">…</b>개(최대 3개 · 폰 밖으로 보내지 않음 · 목록의 「모두 지우기」로도 지워짐) <button data-t="cleardiag">진단 녹음 지우기</button></p><h3>최근 말하기 녹음 5개</h3><ol class="derr drec">${recRows().map(x => `<li>${esc(x)}</li>`).join("") || "<li>없음</li>"}</ol>
-      <h3>뒤로 가기 기록</h3><ol class="derr">${(() => { try { return JSON.parse(localStorage.getItem("malmun.navlog") || "[]"); } catch { return []; } })().slice().reverse().map(x => `<li>${esc(x)}</li>`).join("") || "<li>없음</li>"}</ol><h3>최근 오류 ${errs.length}개</h3><ol class="derr">${(() => { const g = new Map(); for (const e of errs) { const k = [e.kind, e.msg, e.url || "", e.src || "", e.line || ""].join("|"), o = g.get(k); if (o) { o.n += e.n || 1; o.at = e.at; } else g.set(k, { ...e, n: e.n || 1 }); } return [...g.values()].reverse(); })().map(e => `<li>${esc(`${e.kind} ${e.msg}${e.url ? " · " + e.url : ""}${e.src ? " · " + e.src + ":" + e.line : ""}${e.n > 1 ? ` × ${e.n}회 · 마지막 ${e.at}` : ` · ${e.at}`}`)}</li>`).join("") /* 같은 오류는 한 줄로 묶음(× N회 · 마지막 시각 · 본부 10-12) */ || "<li>없음</li>"}</ol>
-      <div class="dbtns"><button data-t="copy">복사</button>${srOnlyMode() || devSR() || /Android/i.test(navigator.userAgent) ? '<button data-t="srboth">1번 길(녹음 → 그 소리로 받아쓰기) 다시 시험 · 기기 기억 지우기</button>' : ""}<button data-t="clr">오류 지우기</button></div><p class="dmsg"></p></section>`;
+      <div class="dbtns">${tests.map(([a, l]) => `<button data-t="${a}">${esc(L(l))}</button>`).join("")}</div>
+      <p class="dkeep">${esc(L("이 폰에 남은 진단 녹음:"))} <b class="dkeepn">…</b>${esc(L("개(최대 3개 · 폰 밖으로 보내지 않음 · 목록의 「모두 지우기」로도 지워짐)"))} <button data-t="cleardiag">${esc(L("진단 녹음 지우기"))}</button></p><h3>${esc(L("최근 말하기 녹음 5개"))}</h3><ol class="derr drec">${recRows().map(x => `<li>${esc(x)}</li>`).join("") || `<li>${esc(L("없음"))}</li>`}</ol>
+      <h3>${esc(L("뒤로 가기 기록"))}</h3><ol class="derr">${(() => { try { return JSON.parse(localStorage.getItem("malmun.navlog") || "[]"); } catch { return []; } })().slice().reverse().map(x => `<li>${esc(x)}</li>`).join("") || `<li>${esc(L("없음"))}</li>`}</ol><h3>${esc(L("최근 오류"))} ${errs.length}${esc(L("개"))}</h3><ol class="derr">${(() => { const g = new Map(); for (const e of errs) { const k = [e.kind, e.msg, e.url || "", e.src || "", e.line || ""].join("|"), o = g.get(k); if (o) { o.n += e.n || 1; o.at = e.at; } else g.set(k, { ...e, n: e.n || 1 }); } return [...g.values()].reverse(); })().map(e => `<li>${esc(`${e.kind} ${e.msg}${e.url ? " · " + e.url : ""}${e.src ? " · " + e.src + ":" + e.line : ""}${e.n > 1 ? ` × ${e.n}회 · 마지막 ${e.at}` : ` · ${e.at}`}`)}</li>`).join("") /* 같은 오류는 한 줄로 묶음(× N회 · 마지막 시각 · 본부 10-12) */ || `<li>${esc(L("없음"))}</li>`}</ol>
+      <div class="dbtns"><button data-t="copy">${esc(L("복사"))}</button>${srOnlyMode() || devSR() || /Android/i.test(navigator.userAgent) ? `<button data-t="srboth">${esc(L("1번 길(녹음 → 그 소리로 받아쓰기) 다시 시험 · 기기 기억 지우기"))}</button>` : ""}<button data-t="clr">${esc(L("오류 지우기"))}</button></div><p class="dmsg"></p></section>`;
     diagCount().then(n => { const b = app.querySelector(".dkeepn"); if (b) b.textContent = String(n); }); /* 진단 녹음 개수(본부 10-11) */
   };
   paint();
@@ -66,8 +77,8 @@ export default async function diag(app) {
     catch (e) { ev.push(`start(track) 예외 ${e.name}`); try { r.start(); how = "start()"; } catch (e2) { return done(`start 예외 ${e2.name} ${e2.message}`); } }
     setTimeout(() => { try { r.stop(); } catch {} setTimeout(() => done(`${how} · 들음 「${heard || "없음"}」 · ${ev.join(" ")}`), 800); }, ms);
   });
-  app.querySelector(".diag").addEventListener("click", async e => {
-    const b = e.target.closest("[data-t]"); if (!b) return;
+  const onClick = async e => { // 단추 = app 한 곳에서 받음(⇄한 뒤 다시 그려도 안 끊김)
+    const b = e.target.closest(".scr.diag [data-t]"); if (!b) return;
     const a = b.dataset.t; try { audioCtx().resume?.(); } catch {}
     if (a === "copy") { const txt = [...app.querySelectorAll(".dtab tr")].map(tr => tr.innerText.replace(/\t/, ": ")).join("\n") + "\n최근 녹음:\n" + recRows().join("\n") + "\n뒤로:\n" + (() => { try { return JSON.parse(localStorage.getItem("malmun.navlog") || "[]").join("\n"); } catch { return ""; } })() + "\n오류:\n" + errGroups().map(e => `${e.kind} ${e.msg}${e.url ? " · " + e.url : ""}${e.n > 1 ? ` × ${e.n}회 · 마지막 ${e.at}` : ` · ${e.at}`}`).join("\n"); /* 복사 글도 같은 오류 한 줄로(본부 10-12) */
       try { await navigator.clipboard.writeText(txt); msg("복사했어요"); } catch { msg("복사 안 됨 — 사진으로 보내 주세요"); } return; }
@@ -116,6 +127,10 @@ export default async function diag(app) {
       msg("끝");
     } catch (er) { set(keys[a], `실패 ${er.name || ""} ${er.message || er}`); msg("실패"); }
     finally { stopMic(); running = false; lock(false); }
-  });
-  return () => {};
+  };
+  app.addEventListener("click", onClick);
+  // ⇄한 → 화면 글만 다시 그림(시험 결과 res 는 그대로 · 도는 중이면 단추 다시 막음)
+  const onUi = () => { if (!app.querySelector(".scr.diag")) return removeEventListener("malmun:uilang", onUi); paint(); if (running) lock(true); };
+  addEventListener("malmun:uilang", onUi);
+  return () => { removeEventListener("malmun:uilang", onUi); app.removeEventListener("click", onClick); };
 }

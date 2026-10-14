@@ -163,12 +163,13 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     const kind = st.panel?.kind; if (kind !== "explain" && kind !== "speak") return;
     const kids = [...panel.children].filter(c => !c.classList.contains("vplay"));
     // 설명 = 칸을 꽉 채우는 가장 큰 크기(짧은 줄은 키우고 긴 줄은 줄임 · 15px → 최대 20px · 칩·간격도 같은 비율 — 본부 10-06) · 말하기 = 넘칠 때만 줄임
-    const fits = z => { kids.forEach(c => (c.style.zoom = String(z))); return panel.scrollHeight <= panel.clientHeight; };
+    const uk = panel.querySelector(".v9bar .chip.uiko"), ukH = z => uk && (uk.style.minHeight = `${(32 / z).toFixed(1)}px`); // ⇄한 = 줄여도 화면에서 32px(본부 1014.2 누르기 쉽게)
+    const fits = z => { kids.forEach(c => (c.style.zoom = String(z))); ukH(z); return panel.scrollHeight <= panel.clientHeight; };
     let lo = 0.5, hi = kind === "explain" ? 1.33 : 1;
     if (fits(hi)) lo = hi; else for (let k = 0; k < 8; k++) { const m = (lo + hi) / 2; if (fits(m)) lo = m; else hi = m; }
     lo = Math.floor(lo * 1000) / 1000;
-    kids.forEach(c => (lo === 1 ? c.style.removeProperty("zoom") : (c.style.zoom = String(lo))));
-    for (let k = 0; k < 8 && panel.scrollHeight > panel.clientHeight && lo > 0.4; k++) { lo -= 0.015; kids.forEach(c => (c.style.zoom = lo.toFixed(3))); } // 그래도 1px 이라도 넘치면 조금씩 더
+    kids.forEach(c => (lo === 1 ? c.style.removeProperty("zoom") : (c.style.zoom = String(lo)))); ukH(lo);
+    for (let k = 0; k < 8 && panel.scrollHeight > panel.clientHeight && lo > 0.4; k++) { lo -= 0.015; kids.forEach(c => (c.style.zoom = lo.toFixed(3))); ukH(lo); } // 그래도 1px 이라도 넘치면 조금씩 더
     st.fitH = kids.reduce((a, c) => a + c.offsetHeight, 0); // 맞춘 때의 내용 높이 — 바뀌면(로마자 켬/끔 · 말해 본 결과 · 단추 줄) 다시 맞춤
   }
   function keepVisible(i, { force = false } = {}) {
