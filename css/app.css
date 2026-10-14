@@ -1130,3 +1130,12 @@ button.dim{opacity:.45}
 [dir=rtl] .tbar .tt{direction:ltr;unicode-bidi:isolate}
 /* 미얀마 글자 위아래 겹침 부호 — 한 줄 칸(제목 아래 줄·CC 단추 글)에서 깎이지 않게 칸만 위아래로 넓힘(자리는 그대로 · 10-13 17개 언어 미리 점검) */
 :lang(my) :is(.vtitle .sub,.vsubt .w,.whead .sub){padding-block:4px;margin-block:-4px}
+/* 「모국어 ⇄ 한」 단추 = 모든 화면 머리 줄 오른쪽 묶음 맨 앞(본부 10-14) — 처음 화면·언어 창 자리 */
+.welcome .top{gap:6px;align-items:center}
+.sheet h2{display:flex;align-items:center;gap:8px}
+.sheet h2 .chip.uiko{margin-inline-start:auto}
+.toast.uikotip{max-width:min(92vw,360px);text-align:center}
+/* 오른쪽→왼쪽 언어(ur)에서 앱 글을 한국어로 바꾸면 — 화면 짜임(오른쪽→왼쪽)은 그대로 두고, 글 덩이마다 제 방향(한국어 문장 「.」 이 앞으로 튀지 않게 · 본부 10-14) */
+:root.uiko[dir=rtl] :is(p,h1,h2,h3,li,small,label,.sub,.say,.tr,.toast,.modetip,.fstip,button > span:only-child){unicode-bidi:plaintext}
+/* 말해 보세요 속도 알약(.mrate) — 나스탈리크 꼬리가 알약 위아래에서 깎이지 않게(알약 크기는 그대로 · 10-14 ur 375·1280) */
+:lang(ur) :is(.v9body,.speak) .sbtns .mrate{overflow:visible}

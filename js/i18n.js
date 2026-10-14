@@ -64,6 +64,7 @@ export function preloadKoUi(c = lang) {
   return (koWait[c] ||= fetch(`lang/${c}.ko.json?v=${VERSION}`).then(r => (r.ok ? r.json() : {})).catch(() => ({})).then(j => (koGot[c] = j)));
 }
 async function loadKoUi() {
+  document.documentElement.classList.toggle("uiko", uiKoOn()); // 한국어 앱 글 = 문단마다 제 방향(css 다국어부 · ur 처럼 오른쪽→왼쪽 언어에서 한국어 문장 부호가 뒤집히지 않게)
   if (!uiKoOn()) { koUi = {}; return; }
   const c = lang;
   if (koGot[c]) { koUi = koGot[c]; return; }
@@ -80,7 +81,7 @@ export async function setLang(code, remember = false) {
   if (remember) store(false, code);
   const load = c => fetch(`lang/${c}.json?v=${VERSION}`).then(r => (r.ok ? r.json() : {})).catch(() => ({}));
   [fallback, strings] = await Promise.all([load("en"), code === "en" ? Promise.resolve({}) : load(code)]);
-  await loadKoUi();
+  await loadKoUi(); preloadKoUi(code); // 한국어 토글 글은 미리 받아 둠(누르면 바로 · 기다리지 않음)
   document.documentElement.lang = code;
   const info = LANG_INFO[code] || {}; /* 그 언어일 때만 글꼴 링크 · 줄 높이는 --lang-lh(css 다국어부 구역) */
   if (info.font && !document.querySelector(`link[data-font="${code}"]`)) { const k = Object.assign(document.createElement("link"), { rel: "stylesheet", href: `https://fonts.googleapis.com/css2?family=${info.font.replace(/ /g, "+")}:wght@400;700&display=swap` }); k.dataset.font = code; document.head.append(k); }
@@ -94,6 +95,8 @@ export const t = (k, vars) => {
   if (vars) for (const [a, b] of Object.entries(vars)) s = s.replace(`{${a}}`, b);
   return s;
 };
+// 모국어 글(한국어 토글과 상관없이) — 한국어로 바꾼 직후 「돌아오는 길」 안내처럼 학습자가 꼭 읽어야 하는 글(본부 10-14 ④)
+export const tL = (k, vars) => { let s = strings[k] ?? fallback[k] ?? k; if (vars) for (const [a, b] of Object.entries(vars)) s = s.replace(`{${a}}`, b); return s; };
 export const langName = c => (LANGS.find(l => l[0] === c) || [c, c])[1];
 // 「내 말 ⇄ 한」 토글용 짧은 이름(본부 10-12) — 언어부 프로필 ui_short → js/langs.js short · 없으면 로마자 두 글자 코드(이름 앞 글자 자르기는 「ไท」처럼 뜻이 엉뚱해짐)
 export const langShort = c => LANG_INFO[c]?.short || (c === "ne" ? "ने" : c.toUpperCase());

@@ -1,6 +1,7 @@
 {
  "lang_title": "Language",
  "lang_hint": "Picked from your phone settings. You can change it any time.",
+ "uiko_back_tip": "Tap {b} any time to switch back to your language",
  "hello": "Hello!",
  "welcome_say": "Start Korean from the alphabet with Dubu, Kong and the teacher at Gyeongbokgung Palace.",
  "start": "Start",
