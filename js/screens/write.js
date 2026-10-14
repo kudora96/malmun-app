@@ -650,7 +650,7 @@ export default async function write(app, ep, id, opts = {}) {
     const magDone = () => { // 획 하나 붙은 뒤 — 다음 번호 강조(잠깐 크게) · 다 붙으면 「✓ 순서 맞음」
       if (H.mag < (H.magList?.length || 0)) setTimeout(() => st.hand === H && jamoSay(H), 300); // 자모 하나가 다 붙으면 그 자모 소리(스윽 뒤)
       if (H.mag < H.magList.length) { H.magPulse = performance.now(); const my = H.magPulse; const tick = () => { if (H.magPulse !== my || st.hand !== H) return; paintGuide(); if (performance.now() - my < 700) setTimeout(tick, 33); else { H.magPulse = 0; paintGuide(); } }; tick(); }
-      if (H.mag >= H.magList.length) { H.passed = true; paintInk(); markHand(); const sc = work.querySelector(".hscore"); if (sc) { sc.textContent = t("h_order_ok"); sc.className = "hscore ok"; sc.hidden = false; } note.textContent = ""; // 「✓ 순서 맞음」 · 점수·최고 기록·효과음 없음
+      if (H.mag >= H.magList.length) { H.passed = true; paintInk(); markHand(); const sc = work.querySelector(".hscore"); if (sc) { sc.textContent = t("h_order_ok"); sc.className = "hscore ok"; fitScore(sc); sc.hidden = false; } note.textContent = ""; // 「✓ 순서 맞음」 · 점수·최고 기록·효과음 없음
         st.busy = true; run([400, c.file || jamoSrc(c.jamo[c.jamo.length - 1])]).then(() => { st.busy = false; }); }
     };
     H.paintInk = paintInk; H.paintGuide = paintGuide; H.col = col; H.fit = fit; H.bubble = bubble; // fit = 점검용(칸 크기 다시)
@@ -677,21 +677,23 @@ export default async function write(app, ep, id, opts = {}) {
   }
   // 손 뗀 뒤 자동 채점 = 모든 획을 다 그었을 때만(투덜이 10-14 「쓰는 도중에 갑자기 꽝」 — 획 사이에 1.2초 넘게 생각하면 덜 쓴 글자를 채점하던 것) · 덜 썼으면 ✓ 채점 단추로만
   const readyToJudge = H => { const r = strokesDone(H); return !!r && r.done.every(Boolean); };
+  // 점수 칸 글 = 한 줄 · 칸 폭에 맞춰 글자 줄임(아이폰 390 「✓ 순서 맞음」이 두 줄이 되어 위가 잘리던 것 · 투덜이 10-14) → 단추 줄 다시 맞춤
+  function fitScore(sc) { if (!sc) return; sc.style.removeProperty("font-size"); for (let f = 15; f >= 10 && sc.scrollWidth > sc.clientWidth + 1; f--) sc.style.fontSize = f + "px"; st.hand?.fit?.(); }
   function startTimer(H) {
     if (!H || H.tStart || st.auto || H.passed || magnetOn() || !SK.STK) return; const n = strokesOf(H.ch).length || 3; H.tLimit = (4 + 2.5 * n) * 1000; H.tStart = performance.now();
     const bar = work.querySelector(".htime"); bar?.classList.add("on"); clearInterval(H.tInt);
-    const tick = () => { if (st.hand !== H || !H.tStart) return clearInterval(H.tInt); const left = Math.max(0, H.tLimit - (performance.now() - H.tStart)); if (bar) { bar.querySelector("i").style.width = (100 * left / H.tLimit).toFixed(1) + "%"; bar.querySelector("b").textContent = Math.ceil(left / 1000); bar.classList.toggle("low", left < 3000); }
+    const tick = () => { if (!st.alive || st.hand !== H || !H.tStart) return clearInterval(H.tInt); const left = Math.max(0, H.tLimit - (performance.now() - H.tStart)); if (bar) { bar.querySelector("i").style.width = (100 * left / H.tLimit).toFixed(1) + "%"; bar.querySelector("b").textContent = Math.ceil(left / 1000); bar.classList.toggle("low", left < 3000); }
       if (left <= 0) { stopTimer(H); if (H.cur) H.tDue = true; else if (H.strokes.length && !H.passed) handJudge(); } };
     tick(); H.tInt = setInterval(tick, 100);
   }
   function stopTimer(H) { if (!H) return; clearInterval(H.tInt); H.tStart = null; H.tDue = false; work.querySelector(".htime")?.classList.remove("on", "low"); }
   async function handJudge() {
-    const H = st.hand; if (!H || !H.strokes.length || st.busy || st.s >= segs.length || st.lineEnd || H.passed || magnetOn()) return; // 자석 = 점수 없음(순서만)
+    const H = st.hand; if (!st.alive || !H || !H.strokes.length || st.busy || st.s >= segs.length || st.lineEnd || H.passed || magnetOn()) return; // 자석 = 점수 없음(순서만) · 닫힌 창 = 채점 없음(검사부 10-14 덜 쓴 채 닫고 다시 열면 꽝)
     stopTimer(H);
     clearTimeout(H.timer);
     const c = words()[st.w].chars[st.c], r = handScore(c.ch, H.strokes, H.s); H.last = r;
     const star = r.pct >= 95 ? "★" : r.pct >= 80 ? "☆" : "", sc = work.querySelector(".hscore");
-    if (sc) { sc.textContent = `${r.pct}%${star ? " " + star : ""}`; sc.className = "hscore " + (r.pct >= 80 ? "ok" : "bad"); sc.hidden = false; }
+    if (sc) { sc.textContent = `${r.pct}%${star ? " " + star : ""}`; sc.className = "hscore " + (r.pct >= 80 ? "ok" : "bad"); sc.hidden = false; fitScore(sc); }
     scoreFx(work.querySelector(".hbox .fx"), r.pct);
     if (r.pct >= 80) { // 통과 — 초록 + 그 글자 소리 · 최고 점수 기억 · 「다음 ▶」/다시 쓰기
       bestPut(st.w, st.c, r.pct); paintSent();
@@ -949,10 +951,10 @@ export default async function write(app, ep, id, opts = {}) {
     for (const [a, k] of [["horder", "h_order"], ["hundo", "h_undo"], ["hclear", "h_clear"]]) span(work.querySelector(`[data-act=${a}]`), k);
     work.querySelector(".stage .box")?.setAttribute("aria-label", L("listen_char") || "▶"); work.querySelector(".hink")?.setAttribute("aria-label", L("w_hand"));
     markHand(); markOrder(); setNote();
-    const sc = work.querySelector(".hscore"); if (sc && !sc.hidden && st.hand?.passed && magnetOn()) sc.textContent = L("h_order_ok");
+    const sc = work.querySelector(".hscore"); if (sc && !sc.hidden && st.hand?.passed && magnetOn()) { sc.textContent = L("h_order_ok"); fitScore(sc); }
     fitHeadW(); placeBtns(); fitWord();
   }
   const onUiLang = () => retext(); window.addEventListener("malmun:uilang", onUiLang);
   const onWinUp = () => { if (st.hand?.cur) st.hand.up?.(); }; window.addEventListener("pointerup", onWinUp, true); window.addEventListener("pointercancel", onWinUp, true); // 손글씨 획 = 창 어디에서 놓아도 끝남(투덜이 10-14)
-  return () => { window.removeEventListener("malmun:uilang", onUiLang); window.removeEventListener("pointerup", onWinUp, true); window.removeEventListener("pointercancel", onWinUp, true); release(); st.alive = false; st.autoGen = (st.autoGen || 0) + 1; st.auto = false; st.resumeAuto = false; st.allNext = false; st.hand?.stopOrder?.(); hush(); st.hand?.ro?.disconnect(); clearTimeout(st.hand?.timer); delete app.__wr; };
+  return () => { window.removeEventListener("malmun:uilang", onUiLang); window.removeEventListener("pointerup", onWinUp, true); window.removeEventListener("pointercancel", onWinUp, true); release(); st.alive = false; { const H0 = st.hand; if (H0) { clearInterval(H0.tInt); H0.tStart = null; H0.tDue = false; clearTimeout(H0.timer); clearTimeout(H0.clr); clearTimeout(H0.adv); } } drawEnd(); /* 닫을 때 시간 막대·채점 예약·넘김 예약·쓰는 소리 모두 멈춤(검사부 10-14 「있」 ㅇ 만 쓰고 닫았다 다시 열면 15초 안에 꽝) */ st.autoGen = (st.autoGen || 0) + 1; st.auto = false; st.resumeAuto = false; st.allNext = false; st.hand?.stopOrder?.(); hush(); st.hand?.ro?.disconnect(); clearTimeout(st.hand?.timer); delete app.__wr; };
 }
