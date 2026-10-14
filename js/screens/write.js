@@ -17,7 +17,7 @@ import { t, lang } from "../i18n.js?v=1013.1";
 import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO, koq } from "../text.js?v=1013.1";
 import { episode, chars, charsF } from "../data.js?v=1013.1";
 import { paths } from "../paths.js?v=1013.1";
-import { I, spkHtml } from "../ui.js?v=1013.1";
+import { I, spkHtml, uiKoBtn } from "../ui.js?v=1013.1";
 import { audioCtx, hold } from "../wake.js?v=1013.1";
 import * as sfx from "../sfx.js?v=1013.1";
 import { scoreFx } from "../scorefx.js?v=1013.1";
@@ -123,9 +123,9 @@ export default async function write(app, ep, id, opts = {}) {
 
   app.innerHTML = `<section class="scr write ${opts.embedded ? "embedded" : ""}">
     ${opts.embedded
-      ? `<div class="whead"><b>${esc(t("write"))}</b><span class="sub">${li + 1} / ${d.lines.length} · ${spkHtml(line.speaker)}</span>${modeBtns()}<button class="whelp" data-act="help" aria-label="${esc(t("help"))}">${esc(t("help_btn"))}</button><button class="whelp wclose" data-act="close" aria-label="${esc(t("close_btn"))}">✕<span class="lt">${esc(String(t("close_btn")).replace(/^✕\s*/, " "))}</span></button><span class="loopnote" aria-live="polite"></span></div>`
+      ? `<div class="whead"><b>${esc(t("write"))}</b><span class="sub">${li + 1} / ${d.lines.length} · ${spkHtml(line.speaker)}</span>${modeBtns()}${uiKoBtn()}<button class="whelp" data-act="help" aria-label="${esc(t("help"))}">${esc(t("help_btn"))}</button><button class="whelp wclose" data-act="close" aria-label="${esc(t("close_btn"))}">✕<span class="lt">${esc(String(t("close_btn")).replace(/^✕\s*/, " "))}</span></button><span class="loopnote" aria-live="polite"></span></div>`
       : `<div class="bar"><a class="iconbtn" href="#/learn/${ep}/${line.id}" aria-label="${esc(t("back"))}">${I.back}</a>
-      <div class="grow"><div class="t">${esc(t("write"))}</div><div class="sub">${li + 1} / ${d.lines.length} · ${spkHtml(line.speaker)}</div></div>${modeBtns()}<button class="whelp" data-act="help" aria-label="${esc(t("help"))}">${esc(t("help_btn"))}</button></div><div class="loopnote" aria-live="polite"></div>`}
+      <div class="grow"><div class="t">${esc(t("write"))}</div><div class="sub">${li + 1} / ${d.lines.length} · ${spkHtml(line.speaker)}</div></div>${modeBtns()}${uiKoBtn()}<button class="whelp" data-act="help" aria-label="${esc(t("help"))}">${esc(t("help_btn"))}</button></div><div class="loopnote" aria-live="polite"></div>`}
     <div class="segrow"><div class="sent" lang="ko"></div><div class="segnav"></div><div class="wtip" hidden></div></div>
     <div class="work"></div>
     <div class="helpbox" hidden>${helpHtml()}</div>
@@ -238,7 +238,7 @@ export default async function write(app, ep, id, opts = {}) {
     const last = kb.querySelector(".kr:last-child button:last-child"); if (!last || !wr.clientHeight) return;
     const over = () => last.getBoundingClientRect().bottom - wr.getBoundingClientRect().bottom > 0.5 || wr.scrollHeight > wr.clientHeight + 1;
     if (!over()) return; if (wb.classList.contains("below")) wr.classList.add("wt1"); if (!over()) return;
-    wr.classList.add("wt2"); for (let h = 29; h >= 22 && (wr.style.setProperty("--krmin", h + "px"), over()); h--);
+    wr.classList.add("wt2"); for (let h = 29; h >= 20 && (wr.style.setProperty("--krmin", h + "px"), over()); h--); // ur 320 나스탈리크 머리 줄·뜻 줄이 높아 22px 로도 4px 넘치던 것(10-14) → 20px 까지
   }
   function fitStageH() { // 손글씨 = 위 칸(뜻 줄·단추 줄)이 정해진 높이를 넘치면 그만큼 키움 → 아래 손글씨 칸이 줄어듦(본부 10-12 — 넘친 단추 줄을 손글씨 칸이 덮던 것)
     const stg = work.querySelector(".stage"); if (!stg) return; stg.style.height = ""; if (!work.classList.contains("handmode")) return;
@@ -246,7 +246,7 @@ export default async function write(app, ep, id, opts = {}) {
     if (low > sr.bottom - pb + 1) stg.style.height = Math.ceil(sr.height + low - (sr.bottom - pb)) + "px";
   }
   // 머리 줄 한 줄 유지(본부 10-07) — 넘치면 ✕ 닫기 글을 숨기고 ✕ 만
-  function fitHeadW() { const h = work.closest(".write")?.querySelector(".whead") || app.querySelector(".whead"); if (!h) return; const sb = h.querySelector(".sub"), over = () => h.scrollWidth > h.clientWidth + 1 || (sb && sb.scrollWidth > sb.clientWidth + 1); /* 번호 칸이 말줄임으로 잘려도 넘침(ur 「3 / 1…」) */ h.classList.remove("narrow", "n2", "n3", "n3b", "n4"); for (const c of ["narrow", "n2", "n3", "n3b", "n4"]) { if (!over()) break; h.classList.add(c); } } // 머리 줄이 넘치면 차례로: ✕ 글 숨김 → 「쓰기」 제목 숨김 → 화자 이름 숨김 → 두 줄로(닫기 단추가 화면 밖으로 밀리지 않게 · 검사부 10-12 vi 375)
+  function fitHeadW() { const h = work.closest(".write")?.querySelector(".whead") || app.querySelector(".whead"); if (!h) return; const sb = h.querySelector(".sub"), over = () => h.scrollWidth > h.clientWidth + 1 || (sb && sb.scrollWidth > sb.clientWidth + 1); /* 번호 칸이 말줄임으로 잘려도 넘침(ur 「3 / 1…」) */ const hp = h.querySelector("[data-act=help]"); if (hp) hp.textContent = t("help_btn"); h.classList.remove("narrow", "n2", "n3", "n3b", "n3c", "n4"); for (const c of ["narrow", "n2", "n3", "n3b", "n3c", "n4"]) { if (!over()) break; h.classList.add(c); if (c === "n3c" && hp) hp.textContent = "?"; /* 두 줄로 꺾기 전 ? 방법 = 「?」 만(이름은 aria-label · 10-14 모국어⇄한 단추가 들어와 폰에서 두 줄이 되던 것) */ } } // 머리 줄이 넘치면 차례로: ✕ 글 숨김 → 「쓰기」 제목 숨김 → 화자 이름 숨김 → 두 줄로(닫기 단추가 화면 밖으로 밀리지 않게 · 검사부 10-12 vi 375)
   // 손글씨 도구 단추(연필·펜·붓·자석)가 창 밖으로 나가면(10-12 vi 320 「🧲 Nam châm」 31px) = 그림만(이름은 aria-label)
   function fitTools() { const ht = work.querySelector(".htools"); if (!ht) return; ht.classList.remove("ic"); const wr = work.closest(".write"); if (!wr) return; const R = wr.getBoundingClientRect(); if ([...ht.querySelectorAll("button")].some(b => { const r = b.getBoundingClientRect(); return r.right > R.right + 0.5 || r.left < R.left - 0.5; }) || ht.scrollWidth > ht.clientWidth + 1) ht.classList.add("ic"); }
   function fitWord() {
