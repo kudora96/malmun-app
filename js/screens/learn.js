@@ -12,13 +12,13 @@
 //  R9 다시 들어오면 마지막 줄이 선택된 채 멈춰 있음
 import { warmSTT } from "../sttserver.js?v=1014.1";
 import * as sfxL from "../sfx.js?v=1014.1"; // 카드 말하기 최대 길이 = 본보기 길이로(10-07)
-import { t, lang, langName, KO_UI, uiKoOn, setUiKo, preloadKoUi } from "../i18n.js?v=1014.1";
-import { snapshot, retext, setTx } from "../retext.js?v=1014.1";
+import { t, lang, langName, KO_UI, uiKoOn, preloadKoUi } from "../i18n.js?v=1014.1";
+import { setTx } from "../retext.js?v=1014.1";
 import { esc, renderText, glossCards, sayParts } from "../text.js?v=1014.1";
 import { episode } from "../data.js?v=1014.1";
 import { paths } from "../paths.js?v=1014.1";
 import { Sequence } from "../audio.js?v=1014.1";
-import { I, progress, SPEAKER, spkHtml, uiKoBtn, toggleUiKo } from "../ui.js?v=1014.1";
+import { I, progress, SPEAKER, spkHtml, uiKoBtn, switchUiKo } from "../ui.js?v=1014.1";
 import writeView from "./write.js?v=1014.1";
 import { diagEnv, keepDiag } from "../diag.js?v=1014.1";
 import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1014.1";
@@ -273,11 +273,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   //  머리 토글·설명 창 ▶ 어느 쪽을 눌러도 같이 · 다시 그리지 않고 그 자리에서 글만(retext) → 소리·녹음·채점 안 끊김 · ko.json 은 미리 받아 둠
   const koMode = KO_UI.includes(lang);
   if (koMode) { preloadKoUi(); const w0 = uiKoOn() ? "ko" : "L"; if (v9pref().snd !== w0) v9set("snd", w0); if (v9pref().txt !== w0) v9set("txt", w0); }
-  async function uiLang(ko) {
-    if (!koMode || ko === uiKoOn()) return;
-    const before = snapshot(); await setUiKo(ko); retext(before, document.body);
-    document.querySelectorAll("[data-act=uiko]").forEach(b => b.setAttribute("aria-pressed", String(uiKoOn())));
-  }
+  async function uiLang(ko) { st.uiBar = true; try { await switchUiKo(ko); } finally { st.uiBar = false; } } // 설명 막대 고르기 → 앱 글도(되돌아오기 안내 포함) · 소리·본문은 그 손잡이가 맞춤
   const v9code = k => (k === "ko" || !v9L ? "ko" : v9L); // 학습자 언어 설명이 없으면 한국어만(언어부 10-11)
   const v9name = k => (k === "ko" || !v9L ? "한국어" : langName(v9L));
   const v9src = (i, k, what) => { const a = L[i].v9?.audio?.[v9code(k)]?.[what]; return a ? paths.v9(ep, a) : null; };
@@ -292,7 +288,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     const k = sndOf(i), code = v9code(k);
     const lab = (key, ko) => `<span class="glab">${esc(t(key))}${lang === "ko" ? "" : ` <small lang="ko">(${ko})</small>`}</span>`;
     return `<div class="exv v9${romOn() ? "" : " norom"}">
-      <div class="v9bar">${lab("v9_listen", "듣기")}<span class="seg snd">${v9L && x.audio?.[v9L]?.ex ? playBtn("L") : ""}${playBtn("ko")}</span>${x.sent?.length ? `<span class="snum" aria-live="off">1/${x.sent.length}</span>` : ""}<button class="romb" data-x="v9rom" aria-pressed="${romOn()}">${esc(t("v9_rom"))}</button><button class="pb closex" data-x="close" title="${esc(t("close_word"))}" aria-label="${esc(t("close_word"))}"><span class="cx">✕</span><span class="cw"> ${esc(t("close_word"))}</span></button></div>
+      <div class="v9bar">${lab("v9_listen", "듣기")}<span class="seg snd">${v9L && x.audio?.[v9L]?.ex ? playBtn("L") : ""}${playBtn("ko")}</span>${x.sent?.length ? `<span class="snum" aria-live="off">1/${x.sent.length}</span>` : ""}${uiKoBtn()}<button class="romb" data-x="v9rom" aria-pressed="${romOn()}">${esc(t("v9_rom"))}</button><button class="pb closex" data-x="close" title="${esc(t("close_word"))}" aria-label="${esc(t("close_word"))}"><span class="cx">✕</span><span class="cw"> ${esc(t("close_word"))}</span></button></div>
       ${v9L ? "" : `<div class="v9soon">${esc(t("v9_lang_soon"))}</div>`}<div class="v9tip" hidden>${esc(t("v9_tip"))}</div><div class="v9pop" hidden></div>
       <div class="v9body">
         ${x.pieces?.length || fx ? `<div class="chips">${(x.pieces || []).map(c => `<span class="chip"><b class="ko" lang="ko">${esc(c.ko)}</b> <i>${c.rom != null ? `<span class="rom">${esc(c.rom)}${c.mean && v9L ? ", " : ""}</span>${v9L ? esc(c.mean || "") : ""}` : v9L ? esc(c.gloss || "") : ""}</i></span>`).join("")}${fx ? `<span class="fx">= <b>${esc(fx)}</b></span>` : ""}</div>` : ""}
@@ -712,7 +708,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   // (설명 진행 막대·끌어 옮기기는 없앰 — 본부 10-05 · 이동은 문장 누르기 · 맨 위 줄 「n/N」)
   // 위 창 누르기 = 멈춤/재생(설명) · 한글 대조·학습자 말 단추는 그대로
   panel.addEventListener("click", e => {
-    if (st.panel?.kind !== "explain") return;
+    if (st.panel?.kind !== "explain" || e.target.closest("[data-act=uiko]")) return; // ⇄한 은 ui.js 문서 한 곳이 받음(멈춤⇄다시로 새지 않게)
     const x = e.target.closest("[data-x]");
     if (e.target.closest(".sayb")) { if (x) v9Click(x); else if (!sp?.ctl) togglePlay(); return; } // 말하기 칸 단추 밖 = 멈춤⇄다시(본부 10-08 투덜이 · 녹음 중은 빼고)
     if (x && st.panel.i != null && L[st.panel.i].v9) return v9Click(x);
@@ -865,15 +861,17 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     } else if (a === "spd") { st.rate = (st.rate + 1) % RATES.length; const r = RATES[st.rate]; b.textContent = r + "×"; v.playbackRate = r; seq.setRate(r); ex.setRate(r); }
   };
   v.addEventListener("click", togglePlay);
-  // 머리 「ने⇄한」 = 언어 하나(안 A) — 다시 그리지 않음 · 설명 창이 열려 있으면 설명 소리·본문도 그 언어로(듣는 중이면 같은 문장부터)
-  app.querySelector("[data-act=uiko]")?.addEventListener("click", async e => {
-    e.stopPropagation(); const ko = !uiKoOn(), w = ko ? "ko" : "L";
-    await uiLang(ko); v9set("snd", w); v9set("txt", w);
+  // 「ने⇄한」 = 언어 하나(안 A) — 어느 화면·창의 단추든(ui.js 문서 한 곳이 받음 · 다국어부 10-14) 앱 글이 바뀌면 설명 소리·본문도 그 언어로(듣는 중이면 같은 문장부터) · 설명 막대 안 고르기(uiLang)는 제 손잡이가 이미 맞춤
+  const onUiLang = () => {
+    if (!app.querySelector(".scr.learn")) return removeEventListener("malmun:uilang", onUiLang);
+    if (st.uiBar) return; const w = uiKoOn() ? "ko" : "L";
+    v9set("snd", w); v9set("txt", w);
     const p = st.panel; if (p?.kind !== "explain" || !L[p.i]?.v9) return;
     panel.querySelectorAll(".v9bar [data-x=txt]").forEach(x => x.setAttribute("aria-selected", String(x.dataset.v === w)));
     const b = panel.querySelector(`.v9bar [data-x=ex][data-v="${w}"]`);
     if (b && ex.playing && b.getAttribute("aria-pressed") !== "true") v9Click(b); else v9Text(p.i, w);
-  });
+  };
+  addEventListener("malmun:uilang", onUiLang);
   app.querySelector("[data-act=fs]").onclick = () => {
     const w = app.querySelector("#vwrap");
     if (document.fullscreenElement) document.exitFullscreen?.();
@@ -917,5 +915,5 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   if (reopen) openPanel(reopen.kind, reopen.i, { restore: reopen }); // ने⇄한 토글 전 창·자리
   else if (opts.explain) openPanel("explain", st.cur, { autoplay: true }); /* #/explain/{편}/{줄} = 그 줄 v9 설명 창(첫 터치 전엔 소리가 막힐 수 있음 — ▶ 로 시작) */
   const release = hold(); // 소리 장치 깨워 두기(첫소리 먹힘 방지)
-  return () => { clearTimeout(tipT); document.removeEventListener("fullscreenchange", onFsChange); clearInterval(edgeT); clearInterval(litT); clearInterval(seekTimer); clearInterval(hlTimer); document.removeEventListener("pointerdown", onDocDown, true); removeEventListener("popstate", onPop); clearTimeout(st.animEnd); release(); st.panel?.cleanup?.(); ex.stop(); removeEventListener("resize", pad); removeEventListener("resize", onFit); clearInterval(timer); clearTimeout(st.gap); document.removeEventListener("keydown", onKey); seq.stop(); v.pause(); v.removeAttribute("src"); v.load(); };
+  return () => { clearTimeout(tipT); document.removeEventListener("fullscreenchange", onFsChange); clearInterval(edgeT); clearInterval(litT); clearInterval(seekTimer); clearInterval(hlTimer); document.removeEventListener("pointerdown", onDocDown, true); removeEventListener("popstate", onPop); removeEventListener("malmun:uilang", onUiLang); clearTimeout(st.animEnd); release(); st.panel?.cleanup?.(); ex.stop(); removeEventListener("resize", pad); removeEventListener("resize", onFit); clearInterval(timer); clearTimeout(st.gap); document.removeEventListener("keydown", onKey); seq.stop(); v.pause(); v.removeAttribute("src"); v.load(); };
 }

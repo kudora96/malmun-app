@@ -3,6 +3,7 @@
 //  소리(AudioContext 상태 · 「가」 소리 · 효과음 · 음성 창고 읽기) · 최근 오류 20개 — 앱 동작은 안 바꿈(시험은 이 화면 안에서만)
 import { VERSION } from "../version.js?v=1014.1";
 import { esc } from "../text.js?v=1014.1";
+import { uiKoBtn } from "../ui.js?v=1014.1";
 import { paths } from "../paths.js?v=1014.1";
 import { charsF } from "../data.js?v=1014.1";
 import { audioCtx } from "../wake.js?v=1014.1";
@@ -39,7 +40,7 @@ export default async function diag(app) {
     return a.slice().reverse().map(x => [String(x.at || "").slice(11, 19), x.where, `방식 ${x.mode || "?"}`, `끝 ${x.why || "?"}${x.cut ? "(" + x.cut + ")" : ""}`, ev(x), `들음 「${(x.heard || []).slice(-1)[0] || "없음"}」`, `점수 ${x.score ?? "-"}`, `녹음 최대 ${x.maxDb ?? "?"}dB`, x.play || "재생 전", `마이크 뒤 ${x.micAfter || "?"}`, x.seq ? `1번 길: ${x.seq}` : "", `${x.mic || ""} · ${x.set || ""}`, `ctx ${x.ctxRate || "?"}Hz ${x.ctxState || ""}`].join(" | ")); };
   const paint = () => {
     const errs = errLog();
-    app.innerHTML = `<section class="scr diag"><div class="bar"><div class="grow"><div class="t">진단 · Diagnostics</div><div class="sub">사진 한 장 또는 「복사」로 보내 주세요</div></div><a class="dback" href="#/list">✕ 닫기</a></div>
+    app.innerHTML = `<section class="scr diag"><div class="bar"><div class="grow"><div class="t">진단 · Diagnostics</div><div class="sub">사진 한 장 또는 「복사」로 보내 주세요</div></div>${uiKoBtn()}<a class="dback" href="#/list">✕ 닫기</a></div>
       <table class="dtab">${Object.entries(base).map(([k, v]) => row(k, v)).join("")}${Object.values(keys).map(k => row(k, res[k] ?? "—")).join("")}</table>
       <div class="dbtns">${tests.map(([a, l]) => `<button data-t="${a}">${esc(l)}</button>`).join("")}</div>
       <p class="dkeep">이 폰에 남은 진단 녹음: <b class="dkeepn">…</b>개(최대 3개 · 폰 밖으로 보내지 않음 · 목록의 「모두 지우기」로도 지워짐) <button data-t="cleardiag">진단 녹음 지우기</button></p><h3>최근 말하기 녹음 5개</h3><ol class="derr drec">${recRows().map(x => `<li>${esc(x)}</li>`).join("") || "<li>없음</li>"}</ol>

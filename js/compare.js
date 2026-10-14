@@ -5,7 +5,7 @@
 //  · 재생: 본보기 → 0.4초 → 내 목소리 · 재생 위치 세로 막대 + 지금 음절 강조 · 파형·음절 칸을 누르면 그 줄 그 음절부터
 //  녹음·점수 계산·[내 목소리] 재생(playmine.js playMine)은 그대로 — 여기는 그리기·DTW·비교 화면 안 재생만
 //  (본보기는 sfx.play 그대로 · 내 목소리는 playmine 과 같은 방식: decodeAudioData → BufferSource.start(t, offset) → Gain)
-import { prepare, rhythmScore, loadAlign, isSyl, R_FULL, cutWin } from "./rhythm.js?v=1014.1";
+import { prepare, rhythmScore, loadAlign, isSyl, R_FULL, cutWin, snapSyl } from "./rhythm.js?v=1014.1";
 import { esc, koq } from "./text.js?v=1014.1";
 import { align } from "./score.js?v=1014.1";
 import { audioCtx } from "./wake.js?v=1014.1";
@@ -73,6 +73,10 @@ export async function openCompare(host, o) {
     if (room < T * 0.8) spanX = yStop - yLead + 0.08 + T * 0.8;
     const endAll = yLead + Math.max(base, spanX); let t0 = yStop + 0.08; const sc = (endAll - t0) / T;
     md.forEach((d, i) => { const k = tail + i; ysyl[k] = { ch: ysyl0[k].ch, s: t0, e: t0 + d * sc }; t0 += d * sc; }); }
+  // 내 음절 칸 = 내 파형 소리 덩어리에 맞춤(본부 10-14 · rhythm.js snapSyl) — 들은 음절(끊긴 녹음이면 앞 tail 개)만 · 못 찾으면 DTW 칸 그대로
+  { const n = cut ? tail : W.length, ok = k => !o.heard || marks[k] === "ok";
+    const sn = snapSyl(ybuf, msyl.slice(0, n).map(x => Math.max(0.03, x.e - x.s)), yLead, yStop, ysyl0.map(x => x.s), ysyl0.map((_, k) => k > 0 && ok(k - 1) && ok(k)));
+    if (sn) { if (ysyl === ysyl0) ysyl = ysyl0.map(x => ({ ...x })); sn.forEach((x, k) => { ysyl[k] = { ch: ysyl0[k].ch, s: x.s, e: x.e }; }); } }
   const span = Math.max(mStop - mLead, yStop - yLead, 0.5, spanX);
   const pos = (s, e, lead) => `left:${(100 * (s - lead)) / span}%;width:${(100 * Math.max(0.02, e - s)) / span}%`;
   const cell = (x, k, lead, mine) => `<span data-k="${k}" class="cel ${marks[k]}${mine && cut && k >= tail ? " ghost" : ""}${worstSet.has(k) ? " rworst" : ""}" style="${pos(x.s, x.e, lead)}"><span class="tx">${mine && marks[k] === "bad" && heardCh[k] ? `<small class="want">${esc(x.ch)}</small><span class="got">${esc(heardCh[k])}</span>` : esc(x.ch)}</span>${worstK === k ? `<b class="wtip">${rtip}</b>` : ""}</span>`;
