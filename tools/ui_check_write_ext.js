@@ -43,7 +43,7 @@
       ok(shown && !over, "ⓔ 점수 표시가 손글씨 칸 밖(겹침 0)", `점수 ${Math.round(sr.left)},${Math.round(sr.top)} · 칸 ${Math.round(hb.left)}~${Math.round(hb.right)},${Math.round(hb.top)}~${Math.round(hb.bottom)}`); }
     // ⓑ 앱 글 언어 바뀜
     localStorage.setItem("malmun.lang", "ne"); await i18n.setLang("ne"); await i18n.setUiKo(false);
-    const appText = () => { const sc = $(".panel .scr.write"); if (!sc) return ""; const c = sc.cloneNode(true); c.querySelectorAll(".sent, .info .wko, .typed, .target, .slots, .kb, .hbox, .info .rom, .info .mean, .hscore").forEach(x => x.remove()); return c.innerText + " " + [...c.querySelectorAll("[aria-label]")].map(x => x.getAttribute("aria-label")).join(" "); };
+    const appText = () => { const sc = $(".panel .scr.write"); if (!sc) return ""; const c = sc.cloneNode(true); c.querySelectorAll(".sent, .info .wko, .typed, .target, .slots, .kb, .hbox, .info .rom, .info .mean, .hscore, .uiko").forEach(x => x.remove()); return c.innerText + " " + [...c.querySelectorAll("[aria-label]")].map(x => x.getAttribute("aria-label")).join(" "); };
     for (const mode of ["kb", "hand"]) {
       localStorage.setItem("malmun.wmode", mode); await open(1); const sc0 = $(".panel .scr.write");
       if (mode === "hand") { const F = await wr().fitPath(wr().hand().ch, 0, "pen"); const iv2 = $(".panel .hink"); const e2 = (t, [x, y]) => { const r = iv2.getBoundingClientRect(); iv2.dispatchEvent(new PointerEvent(t, { bubbles: true, cancelable: true, pointerId: 90, pointerType: "touch", isPrimary: true, clientX: r.left + x * r.width, clientY: r.top + y * r.height })); }; const P = F.map(q => [q.x, q.y]); e2("pointerdown", P[0]); P.forEach(q => e2("pointermove", q)); e2("pointerup", P[P.length - 1]); await W(200); }
