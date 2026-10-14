@@ -14,7 +14,7 @@
       location.hash = "#/list"; await W(400); location.hash = "#/learn/L01-00-01"; await W(2500);
       let src = await (await fetch(`/tools/ui_check_${n}.js?` + Date.now())).text();
       if (n === "speak") src = src.replace(/history\.back\(\)/g, 'window.dispatchEvent(new PopStateEvent("popstate",{state:null}))'); // 말하기 점검만(뒤로 가기 점검은 진짜 history.back)
-      const r = String(await Promise.race([eval(src), W(n === "speak" ? 600000 : n === "autoswitch" ? 900000 : /^(write|autoswitch|handwrite|hand_order|hand_dir|hand_snap|hand_layout|interrupt|server_stt)$/.test(n) ? 480000 : 240000).then(() => "✗ 시간 초과")]));
+      const r = String(await Promise.race([eval(src), W(n === "speak" ? 600000 : n === "autoswitch" || n === "write_ext" ? 900000 : /^(write|write_ext|autoswitch|handwrite|hand_order|hand_dir|hand_snap|hand_layout|interrupt|server_stt)$/.test(n) ? 480000 : 240000).then(() => "✗ 시간 초과")]));
       const lines = r.split("\n"), bad = lines.filter(l => /^✗/.test(l.trim()));
       out.done.push(`${n}: ${lines.filter(l => /^✓/.test(l.trim())).length}✓ ${bad.length}✗`);
       bad.forEach(b => out.fails.push(`${n} · ${b.slice(0, 220)}`));

@@ -1136,8 +1136,11 @@ button.dim{opacity:.45}
 .write .hand.stack .hbtns .htime{flex-basis:100%}
 /* 점수 표시 = 손글씨 칸 밖 단추 줄 맨 앞(투덜이 10-14 「40%」가 「글」 ㄱ 첫 가로와 겹침) · 자리는 늘 잡아 둠(점수가 떠도 칸 크기 안 바뀜) */
 .write .hbtns .hscore{position:static;display:block;align-self:stretch;text-align:center;padding:2px 8px;border-radius:999px;font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.35;min-height:1.35em;background:var(--card);box-shadow:0 1px 0 var(--line);pointer-events:none}
-.write .hbtns .hscore[hidden]{display:block;visibility:hidden}
-.write .hbtns .hscore{white-space:nowrap;overflow:visible;max-width:100%;box-sizing:border-box;line-height:normal;height:auto;min-height:1.35em} /* 나스탈리크 등 키 큰 글이 잘리지 않게(검사부 10-14 ur 320 「✓ ترتیب درست」 31px > 24px) · 폭은 fitScore 가 글자 줄임 */
+.write .hbtns .hscore[hidden],.write .hbtns .htime{display:block!important;visibility:hidden} /* 자리는 늘 잡아 둠 — 채점 때 단추 줄·칸이 안 움직이게(투덜이 10-14 「채점할 때 화면이 흔들려 눈이 아파」 · 전역 [hidden] 이 이겨 자리가 0 이던 것) */
+.write .hbtns .htime.on{visibility:visible}
+html:lang(ur) .write .hbtns .hscore{height:2.75em}
+.write .hand .hbtns .hscore,.write .hand .hbtns .htime{contain:inline-size;min-width:0;max-width:none;width:auto;justify-self:stretch;align-self:stretch} /* 점수 글이 단추 줄 폭을 안 바꿈(320 두 칸 배치에서 2px 흔들림) */ /* 나스탈리크 키 큰 글 자리 */
+.write .hbtns .hscore{white-space:nowrap;overflow:visible;max-width:100%;box-sizing:border-box;line-height:normal;height:1.9em;min-height:0;display:flex;align-items:center;justify-content:center} /* 높이 고정(글이 떠도 단추 줄 안 밀림 · 10-14) · 나스탈리크 등 키 큰 글이 잘리지 않게(검사부 10-14 ur 320 「✓ ترتیب درست」 31px > 24px) · 폭은 fitScore 가 글자 줄임 */
 /* 위 글자 줄(배우는 한국어) = 학습자 언어 줄높이를 물려받지 않음(ur 나스탈리크 줄높이로 글자 단추가 53px → 줄 밖 5px 로 ⇄한 과 겹침 · 검사부 10-14) */
 .write .sent,.write .sent .w,.write .sent .c{line-height:1.25}
 /* 아이폰 사파리가 글자를 저절로 키우지 않게(쓰기 화면 · 10-14 「✓ 순서 맞음」 위가 잘림) */

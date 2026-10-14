@@ -2,7 +2,7 @@
 // ⓐ 손으로 쓸 때 소리 — 「이」 ㅇ 획을 맞게 그으면 ㅇ 소리 · ㅣ 까지 그어 통과 = 딩동 → 「이」 글자 소리 · 「스윽」 없음
 // ⓑ 앱 글 언어 바뀜(malmun:uilang · 앱개발부 안 A) — ne 쓰기 창(자판·손글씨)을 연 채로 한국어 앱 글 ⇄ 네팔어 앱 글 → 쓰기 창 앱 글이 그 언어로만(배우는 한국어 글자 칸 제외) · 쓰던 자리·획 그대로 · 화면 다시 안 그림
 (async () => {
-  const W = ms => new Promise(s => setTimeout(s, ms)), $ = s => document.querySelector(s), res = [], ok = (c, m, x = "") => res.push(`${c ? "✓" : "✗"} ${m}${x ? " · " + x : ""}`);
+  const W = ms => new Promise(s => setTimeout(s, ms)), $ = s => document.querySelector(s), res = [], ok = (c, m, x = "") => res.push(`${c ? "✓" : "✗"} ${m}${x ? " · " + x : ""}`); window.__wxRes = res;
   window.__sfxVolume = 0.0001; const log = (window.__sfxLog = []);
   let osc = 0; const oS = OscillatorNode.prototype.start; OscillatorNode.prototype.start = function (...a) { osc++; return oS.apply(this, a); };
   const keep = { mode: localStorage.getItem("malmun.wmode"), hmode: localStorage.getItem("malmun.hmode"), lang: localStorage.getItem("malmun.lang") };
@@ -74,6 +74,17 @@
       localStorage.setItem("malmun.htool", "pencil"); await openCh(Math.max(0, liOf("이")), "이"); log.length = 0; $(".panel [data-act=auto]").click(); await W(1500); got["자동 pencil"] = log.some(e => e.name === "swish/pencil"); $(".panel [data-act=auto]").click(); await W(300);
       ok(Object.values(got).every(Boolean), "ⓙ 쓰는 효과음 — 손으로 긋기·순서·자동 · 연필·펜·붓 모두", Object.entries(got).map(([k, v]) => `${k} ${v ? "○" : "✗"}`).join(" · ")); }
     localStorage.setItem("malmun.htool", "pen");
+    // ⓚ 다시 쓸 때도 쓰는 소리(투덜이 10-14 「한 번 쓰고 다시 쓸 때 가끔 소리가 안 남」) — 경우마다 한 획 긋고 draw/ 「효과음」 1번 이상
+    { const res2 = []; const stroke = async () => { const H = wr().hand(); const L = await wr().strokesOf(H.ch); const Q = await wr().fitPath(H.ch, Math.min(L.length - 1, 1), "pen"); log.length = 0; await drawP(Q.map(q => [q.x, q.y]), 3); return log.filter(e => /^draw\//.test(e.name || "")).length; };
+      const li9 = Math.max(0, liOf("있")); await openCh(li9, "있"); res2.push(["첫 획", await stroke()]);
+      $(".panel [data-act=hclear]").click(); await W(200); res2.push(["지우기 뒤", await stroke()]);
+      $(".panel [data-act=hundo]").click(); await W(200); res2.push(["되돌리기 뒤", await stroke()]);
+      $(".panel [data-tool=brush]").click(); await W(200); res2.push(["도구 바꾼 뒤", await stroke()]); $(".panel [data-tool=pen]").click(); await W(200);
+      $(".panel [data-act=hnext]").click(); await W(1500); res2.push(["다음 ▶ 뒤", await stroke()]);
+      $(".panel [data-act=auto]").click(); await W(1300); $(".panel [data-act=auto]").click(); await W(500); res2.push(["자동 멈춘 뒤", await stroke()]);
+      { await openCh(li9, "있"); const H = wr().hand(); const L = await wr().strokesOf(H.ch); for (let i = 0; i < L.length; i++) { const Q = await wr().fitPath(H.ch, i, "pen"); await drawP(Q.map(q => [q.x + 0.2, q.y])); } await W(1800); await W(1400); res2.push(["꽝 뒤 저절로 지운 다음", await stroke()]); }
+      $(".panel [data-act=close]").click(); await W(500); await openCh(li9, "있"); res2.push(["창 닫았다 연 뒤", await stroke()]);
+      ok(res2.every(([, n]) => n >= 1), "ⓚ 다시 쓸 때마다 쓰는 소리(지우기·되돌리기·도구·다음·자동 뒤·꽝 뒤·다시 열기)", res2.map(([k, n]) => `${k} ${n}`).join(" · ")); }
     // ⓑ 앱 글 언어 바뀜
     localStorage.setItem("malmun.lang", "ne"); await i18n.setLang("ne"); await i18n.setUiKo(false);
     const appText = () => { const sc = $(".panel .scr.write"); if (!sc) return ""; const c = sc.cloneNode(true); c.querySelectorAll(".sent, .info .wko, .typed, .target, .slots, .kb, .hbox, .info .rom, .info .mean, .hscore, .uiko").forEach(x => x.remove()); return c.innerText + " " + [...c.querySelectorAll("[aria-label]")].map(x => x.getAttribute("aria-label")).join(" "); };

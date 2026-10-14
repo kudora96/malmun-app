@@ -684,7 +684,7 @@ export default async function write(app, ep, id, opts = {}) {
   // 손 뗀 뒤 자동 채점 = 모든 획을 다 그었을 때만(투덜이 10-14 「쓰는 도중에 갑자기 꽝」 — 획 사이에 1.2초 넘게 생각하면 덜 쓴 글자를 채점하던 것) · 덜 썼으면 ✓ 채점 단추로만
   const readyToJudge = H => { const r = strokesDone(H); return !!r && r.done.every(Boolean); };
   // 점수 칸 글 = 한 줄 · 칸 폭에 맞춰 글자 줄임(아이폰 390 「✓ 순서 맞음」이 두 줄이 되어 위가 잘리던 것 · 투덜이 10-14) → 단추 줄 다시 맞춤
-  function fitScore(sc) { if (!sc) return; sc.style.removeProperty("font-size"); for (let f = 15; f >= 10 && sc.scrollWidth > sc.clientWidth + 1; f--) sc.style.fontSize = f + "px"; st.hand?.fit?.(); }
+  function fitScore(sc) { if (!sc) return; sc.style.removeProperty("font-size"); for (let f = 15; f >= 10 && sc.scrollWidth > sc.clientWidth + 1; f--) sc.style.fontSize = f + "px"; } // 칸 다시 맞추지 않음(채점 때 화면 안 흔들림 · 자리는 css 로 미리 잡음)
   function startTimer(H) {
     if (!H || H.tStart || st.auto || H.passed || magnetOn() || !SK.STK) return; const n = strokesOf(H.ch).length || 3; H.tLimit = (4 + 2.5 * n) * 1000; H.tStart = performance.now();
     const bar = work.querySelector(".htime"); bar?.classList.add("on"); clearInterval(H.tInt);
