@@ -1090,6 +1090,17 @@ button.dim{opacity:.45}
 .write.wt2 .kb,.write.wt2.embedded .kb{gap:3px;padding-top:3px}
 .write.wt2 .kb .kr,.write.wt2 .kb .kr button,.write.wt2.embedded .kb .kr button{min-height:var(--krmin,30px)}
 .write.wt2 .kb .kr{gap:3px}
+/* 따로 연 쓰기 머리 줄(.bar · fitBarW · 10-14) — 제목·번호는 한 줄로 줄임표 · b1 ⌨✍ 그림만 · b3 화자 숨김 · b4 「쓰기」 제목 숨김 */
+.write > .bar .grow .t,.write > .bar .grow .sub{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.write > .bar.b1 .wmode .ml{display:none}
+.write > .bar.b1 .wmode button{min-width:40px}
+.write > .bar.b3 .sub .sp{display:none}
+.write > .bar.b4 .grow .t{display:none}
+.write > .bar.b4{gap:6px;padding-left:10px;padding-right:10px}
+.write > .bar.b4 .grow{flex:none}
+/* 🔊 말풍선은 글자 줄 아래로(ur 320 처음에 머리 줄 ⇄한 을 덮던 것 · 검사부 10-14) */
+.write .segrow .wtip{top:100%;bottom:auto;margin:4px 0 0}
+.write .segrow .wtip::before{top:auto;bottom:100%;border-top-color:transparent;border-bottom-color:var(--ink)}
 /* 머리 줄 n3d(10-14) — 두 줄로 꺾기 전 마지막: 화자(· 선생님) 숨김 · 번호 「3 / 15」 만(ur 320 머리 줄 두 줄 → 손글씨 칸 129) */
 .write .whead.n3d .sub .sp{display:none}
 /* 머리 줄 n3b(10-12) — 두 줄로 꺾기 전에 ⌨ ✍ 그림만(이름은 aria-label) */
