@@ -1,6 +1,7 @@
 {
  "lang_title": "Language",
  "lang_hint": "Picked from your phone settings. You can change it any time.",
+ "uiko_back_tip": "Tap {b} any time to switch back to your language",
  "hello": "Hello!",
  "welcome_say": "Start Korean from the alphabet with Dubu, Kong and the teacher at Gyeongbokgung Palace.",
  "start": "Start",
@@ -27,7 +28,6 @@
  "btn_close": "Close",
  "fullscreen": "Full screen",
  "listen_line": "Play this line",
- "listen_part": "Listen to this part",
  "w_hear_char": "Hear this letter",
  "w_line": "Hear this line",
  "w_line_tip": "Tap to hear this line",
@@ -104,7 +104,6 @@
  "subs_aria": "Subtitles on/off",
  "subs_tip": "Finished studying? Now listen to the original without subtitles. That is your real skill!",
  "subs_peek": "Show",
- "w_tip": "Tap a letter — you hear it",
  "why_tail": "The end wasn’t heard: {tail} — say it all the way through",
  "why_tail_short": "The end wasn’t heard: {tail}",
  "why_other": "It sounded like something else — listen to the model {say} and repeat it",

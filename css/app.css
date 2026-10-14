@@ -418,11 +418,11 @@ a{color:inherit;text-decoration:none}
 .fx.on{animation-name:fxOut;animation-duration:.3s;animation-delay:1.1s;animation-fill-mode:forwards}
 .fx.perfect.on{animation-delay:1.5s}
 .fx.miss.on{animation:fxShake .4s ease-in-out,fxOut .3s 1.1s forwards}
-.fx i{position:absolute;left:10px;top:50%;width:5px;height:5px;margin:-2.5px;border-radius:50%;background:var(--star);opacity:0;animation:fxSpark .8s ease-out both;transform:rotate(var(--a)) translateX(0)}
+.fx i{position:absolute;left:10px;top:50%;width:6px;height:4px;margin:-2px -3px;border-radius:1px;background:var(--c,var(--star));opacity:0;animation:fxSpark .8s ease-out both;transform:rotate(var(--a)) translateX(0)}
 @keyframes fxBurst{0%{transform:scale(.2);opacity:0}45%{transform:scale(1.35);opacity:1}100%{transform:scale(1)}}
 @keyframes fxPop{0%{transform:translateY(6px) scale(.4);opacity:0}100%{transform:none;opacity:1}}
 @keyframes fxShake{0%,100%{transform:translateX(0)}20%{transform:translateX(-4px)}40%{transform:translateX(4px)}60%{transform:translateX(-3px)}80%{transform:translateX(2px)}}
-@keyframes fxSpark{0%{opacity:1;transform:rotate(var(--a)) translateX(0)}100%{opacity:0;transform:rotate(var(--a)) translateX(26px)}}
+@keyframes fxSpark{0%{opacity:1;transform:rotate(var(--a)) translateX(0) rotate(var(--r,0deg))}100%{opacity:0;transform:rotate(var(--a)) translateX(var(--d,26px)) rotate(calc(var(--r,0deg) + 160deg))}} /* 색종이(10-13) */
 @keyframes fxOut{to{opacity:0}}
 @media (prefers-reduced-motion:reduce){.fx,.fx b,.fx.on,.fx.miss.on{animation:none!important}.fx i{display:none}}
 
@@ -430,6 +430,10 @@ a{color:inherit;text-decoration:none}
 .v9body .sbtns{flex-wrap:nowrap;gap:4px}
 .v9body .sbtns button{padding:4px 8px;font-size:12px;white-space:nowrap;flex:none}
 .v9body .sbtns button.small,.v9body .sbtns [data-x=savedplay]{padding:3px 6px;font-size:11px}
+/* 긴 한 낱말 언어(ru 등 · 다국어부 10-13 probe) — 한 줄에 들어가면 그대로 한 줄 · 넘치면 줄바꿈 · 단추 하나가 줄보다 길면 말줄임(밖으로 안 나감) */
+.v9body .sbtns{flex-wrap:wrap;row-gap:4px}.v9body .sbtns button{max-width:100%;overflow:hidden;text-overflow:ellipsis}
+.speak .sbtns button{min-width:0;overflow-wrap:anywhere;hyphens:auto}
+.speak .whead b{flex:none;max-width:calc(100% - 40px);overflow-wrap:break-word}.speak .whead .sub{flex:none}
 .speak .keeprow{flex-wrap:nowrap}
 .speak .keeprow button{white-space:nowrap}
 /* ⬇·🗑 = 저장됨 단추 옆 위아래 작은 묶음(한 줄에 들어가게) */
@@ -1133,3 +1137,12 @@ button.dim{opacity:.45}
 [dir=rtl] .tbar .tt{direction:ltr;unicode-bidi:isolate}
 /* 미얀마 글자 위아래 겹침 부호 — 한 줄 칸(제목 아래 줄·CC 단추 글)에서 깎이지 않게 칸만 위아래로 넓힘(자리는 그대로 · 10-13 17개 언어 미리 점검) */
 :lang(my) :is(.vtitle .sub,.vsubt .w,.whead .sub){padding-block:4px;margin-block:-4px}
+/* 「모국어 ⇄ 한」 단추 = 모든 화면 머리 줄 오른쪽 묶음 맨 앞(본부 10-14) — 처음 화면·언어 창 자리 */
+.welcome .top{gap:6px;align-items:center}
+.sheet h2{display:flex;align-items:center;gap:8px}
+.sheet h2 .chip.uiko{margin-inline-start:auto}
+.toast.uikotip{max-width:min(92vw,360px);text-align:center}
+/* 오른쪽→왼쪽 언어(ur)에서 앱 글을 한국어로 바꾸면 — 화면 짜임(오른쪽→왼쪽)은 그대로 두고, 글 덩이마다 제 방향(한국어 문장 「.」 이 앞으로 튀지 않게 · 본부 10-14) */
+:root.uiko[dir=rtl] :is(p,h1,h2,h3,li,small,label,.sub,.say,.tr,.toast,.modetip,.fstip,button > span:only-child){unicode-bidi:plaintext}
+/* 말해 보세요 속도 알약(.mrate) — 나스탈리크 꼬리가 알약 위아래에서 깎이지 않게(알약 크기는 그대로 · 10-14 ur 375·1280) */
+:lang(ur) :is(.v9body,.speak) .sbtns .mrate{overflow:visible}

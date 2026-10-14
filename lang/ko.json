@@ -1,6 +1,7 @@
 {
  "lang_title": "언어",
  "lang_hint": "폰 설정에서 자동으로 골랐어요. 언제든 바꿀 수 있어요.",
+ "uiko_back_tip": "{b} 단추를 누르면 언제든 원래 말로 돌아와요",
  "hello": "안녕하세요!",
  "welcome_say": "두부 · 콩 · 선생님과 함께 경복궁에서 한글부터 시작해요.",
  "start": "시작하기",
@@ -27,7 +28,6 @@
  "btn_close": "닫기",
  "fullscreen": "화면만 보기",
  "listen_line": "이 줄 듣기",
- "listen_part": "이 부분 듣기",
  "w_hear_char": "이 글자 듣기",
  "w_line": "이 줄 듣기",
  "w_line_tip": "눌러서 이 줄 듣기",
@@ -104,7 +104,6 @@
  "subs_aria": "자막 켜기/끄기",
  "subs_tip": "다 배웠다면 자막 없이 원음으로 들어 보세요. 그게 진짜 실력이에요!",
  "subs_peek": "보기",
- "w_tip": "글자를 누르면 소리가 나요",
  "why_tail": "뒷부분이 안 들렸어요: {tail} — 끝까지 말해 보세요",
  "why_tail_short": "뒷부분이 안 들렸어요: {tail}",
  "why_other": "다른 말로 들렸어요 — 본보기 {say} 듣고 따라 해 보세요",

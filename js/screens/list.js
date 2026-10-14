@@ -1,7 +1,7 @@
 import { t } from "../i18n.js?v=1013.1";
 import { esc } from "../text.js?v=1013.1";
 import { catalog } from "../data.js?v=1013.1";
-import { langChip, openLangSheet, progress, uiKoBtn, toggleUiKo } from "../ui.js?v=1013.1";
+import { langChip, openLangSheet, progress, uiKoBtn } from "../ui.js?v=1013.1";
 import { rerender } from "../main.js?v=1013.1";
 import { VERSION } from "../version.js?v=1013.1";
 import { recCount, recDelEpisode } from "../recstore.js?v=1013.1";
@@ -29,7 +29,9 @@ export default async function list(app, unit = "L01-00") {
     <p class="ver">v${esc(VERSION)}</p>
   </section>`;
   app.querySelector("[data-act=lang]").onclick = () => openLangSheet(rerender);
-  const uk = app.querySelector("[data-act=uiko]"); if (uk) uk.onclick = () => toggleUiKo(rerender);
+  // 「ने⇄한」 누르기는 ui.js 문서 한 곳이 받음(앱 전체 같이) · 목록은 {n} 칸 글이 많아 바뀐 뒤 다시 그림(소리 없음 · 본부 10-14)
+  const onUi = () => { if (!app.querySelector(".scr.list")) return window.removeEventListener("malmun:uilang", onUi); rerender(); };
+  window.addEventListener("malmun:uilang", onUi);
   // 이 편 녹음 모두 지우기(녹음이 있을 때만 보임 · 한 번 묻고 · 진단 녹음도 같이)
   const da = app.querySelector(".delall button");
   if (da) {
