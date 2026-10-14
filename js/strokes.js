@@ -138,6 +138,9 @@ export function createStrokes({ glyph, glyphImg, pix, hfontKey, gCache, compsOf,
           { const B = bar.pts; if (B.length >= 3) { const c = B[1], cs = new Set([...us[0].px, ...us[1].px]), on2 = (x, y) => cs.has(Math.floor(y * UN) * UN + Math.floor(x * UN)); let x = c[0]; while (x < 1 && on2(x + 0.5 / UN, c[1])) x += 0.5 / UN; if (x - c[0] > th * 0.5) bar.pts = [B[0], [x - th / 2, c[1]], c, ...B.slice(2)]; } } /* 가로대가 꺾는 곳 너머로 이어진 끝까지 갔다가 돌아와 꺾음(첫 ㅈ 가로대 오른끝 · 「찃」) */
           const yb = bar.pts[0][1] + th, P = leg.pts; if (P[0][1] < yb && P[P.length - 1][1] > yb) { let k = 1; while (k < P.length && P[k][1] < yb) k++; const a0 = P[k - 1], b0 = P[k], r = (yb - a0[1]) / Math.max(1e-6, b0[1] - a0[1]); leg.pts = [[a0[0] + (b0[0] - a0[0]) * r, yb], ...P.slice(k)]; } } } }
     for (const [vert, u, vx, th] of fixV) { let yMax = 0, yMin = 1; for (const q of u.px) { const x = (q % UN + 0.5) / UN, y = (((q / UN) | 0) + 0.5) / UN; if (Math.abs(x - vx) < th / 2) { if (y > yMax) yMax = y; if (y < yMin) yMin = y; } } const P = vert.pts, d = P[P.length - 1][1] > P[0][1]; if (yMax > 0) { if (d) { P[P.length - 1] = [P[P.length - 1][0], Math.max(P[P.length - 1][1], yMax - th / 2)]; } } } /* 세로는 아래 끝까지(짧은 가로가 세로 아래에 붙어 늘이기가 가로에서 멈추던 것 · 「눯」) */
+    if (OWN_PTS[ch] && useOwn(ch)) { for (const [k, P] of Object.entries(OWN_PTS[ch])) if (out[k]) out[k].pts = P.map(p => p.slice()); // 획 점 바로잡기(도우미 K)
+      const m = pix(UN, x => glyph(x, UN, ch, "#000")), px = []; let a = UN, b = UN, c = -1, d = -1; for (let q = 0; q < UN * UN; q++) if (m[q * 4 + 3] > 128) { px.push(q); const x = q % UN, y = (q / UN) | 0; if (x < a) a = x; if (x > c) c = x; if (y < b) b = y; if (y > d) d = y; }
+      const all = { jamo: "*", role: "all", px, box: [a / UN, b / UN, (c + 1) / UN, (d + 1) / UN] }; for (const S of out) S.u = all; } // 붓 길 = 글자 잉크 전체 가운데로(자모 칸이 이웃 잉크를 잘못 잡은 글자라 칸으로 자르지 않음)
     return out;
   }
   // 획 붙이기(본부 10-07) — 상자 맞춤 뒤 획을 자기 방향에 수직으로 ±12%(상자 기준) 안에서 옮겨 보며 잉크와 가장 많이 겹치는 자리로
@@ -224,7 +227,7 @@ export function createStrokes({ glyph, glyphImg, pix, hfontKey, gCache, compsOf,
     const ws = raw.filter(r => r.wd != null).map(r => r.wd).sort((p, q) => p - q), med = Math.min(ws[ws.length >> 1] || 2 * hw, 2 * hw * 1.6), good = r => r.wd != null && r.wd <= med * 1.5; // 보통 굵기 상한 = 그 자모 획 굵기 × 1.6(「예」 짧은 꼭지는 세로획 안 표본이 많아 중앙값이 세로 길이가 되던 것)
     let last = null; for (const r of raw) { if (good(r)) last = r.off; else r.off2 = last; } last = null; for (let i = raw.length - 1; i >= 0; i--) { const r = raw[i]; if (good(r)) last = r.off; else r.off = r.off2 ?? last ?? 0; }
     const out = raw.map(r => ({ x: r.x + r.nx * (r.off || 0), y: r.y + r.ny * (r.off || 0), w: Math.max(2 * hw, Math.min(r.wd ?? med, med)) * 1.15 }));
-    { const ws2 = out.map(q => q.w).sort((p, q) => p - q), m2 = ws2[ws2.length >> 1] || 2 * hw * 1.15; out.forEach(q => (q.w = Math.min(q.w, m2 * 1.3))); }
+    { const ws2 = out.map(q => q.w).sort((p, q) => p - q), m2 = ws2[ws2.length >> 1] || 2 * hw * 1.15; const m4 = ws2[ws2.length >> 2] || m2; out.forEach(q => (q.w = u.role === "all" ? m4 : Math.min(q.w, m2 * 1.3))); } // 주인 지도 글자(도우미 K · 칸 = 글자 잉크 전체) = 획 굵기 하나 = 아래 1/4 값(만나는 곳에서 굵어진 폭이 이웃 획을 먹지 않게)
     for (let r = 0; r < 2; r++) for (let i = 1; i < out.length - 1; i++) { out[i].x = (out[i - 1].x + 2 * out[i].x + out[i + 1].x) / 4; out[i].y = (out[i - 1].y + 2 * out[i].y + out[i + 1].y) / 4; } // 부드럽게
     let tot = 0; out.forEach((q, i) => { if (i) tot += Math.hypot(q.x - out[i - 1].x, q.y - out[i - 1].y); q.t = tot; }); out.tot = tot || 1e-6;
     if (gCache.has(ch + "|0|" + hfontKey())) pathCache.set(key, out); return out;
@@ -242,10 +245,62 @@ export function createStrokes({ glyph, glyphImg, pix, hfontKey, gCache, compsOf,
   const NO_FILL = new Set([..."끝명춤"]); // 글자별 손질 표(본부 10-14 검사부 지적 · 도우미 J) — 획 끝 메움을 끔: 「끝」 획 자료에 ㅡ 가 없어 ㅡ 잉크를 ㄱ 몫으로 미리 칠함 · 「명」 ㅁ 오른쪽 메움이 ㅕ 가로 자리로 들쭉날쭉 번짐 · 「춤」 획 자료가 비뚤어 ㅊ 꼭지 왼가에 가는 줄
   const FILL_FU = new Set([..."까깐깨께짜쪽경랐와겠견결겼곁끝놀랬별병왔"]); // 글자별 손질 표(본부 10-14 · 글자부 도우미 J) — 쌍자음 첫 ㄱ·ㅈ 꺾인 귀퉁이 · 다른 자모 다음 획 둥근 끝에 걸친 앞 자모 가장자리(「결」 ㄱ 꺾인 곳 · 「와」 ㅇ 아래)가 앱이 남긴 안 그은 자리(fuD)에 막혀 늦게 칠해지던 것 → 이 글자들만 fuD 막음을 같은 칸 남은 획에만(점검 (c)·(b) 지키는 것 확인한 글자만)
   const revPrev = new Map(); // 획순 칠 앞 장면(글자|글꼴|획 수|획 번호 → 칠한 칸) — 한 덩어리 거르기용
+  // 주인 지도 덮개(본부 10-14 · 글자부 도우미 K) — 아래 글자만: 글꼴 잉크 픽셀마다 주인 획을 정한 지도로 칠함(획 k 끝 장면 = 주인 ≤ k 잉크 전부 · 진행 중 = 그 획 몫을 붓 길 따라)
+  //  주인 = 그 점과 같은 잉크 덩어리를 지나는 획 중 획 몸통(붓 길 · 실제 잉크 폭 · 끝 반듯)이 가장 가까운 획(획 끝 메움·측정과 같은 기준) · 기본 글꼴(gothic500)일 때만 · 다른 글꼴은 원래 칠
+  const OWN_MAP = new Set([..."명끝춤머며트통배베같환혼"]), ownMapCache = new Map();
+  // 글꼴 지문(기본 글꼴 gothic500 · 400px 잉크 상자 x0 y0 x1 y1 · 잉크 넓이) — 상자 ±2px · 넓이 ±2% 안일 때만 덮개(다른 글꼴·다른 그림이면 원래 칠)
+  const OWN_FP = { "명": [71, 37, 329, 363, 41158], "끝": [41, 31, 358, 365, 48205], "춤": [49, 36, 350, 365, 44964], "머": [70, 36, 329, 364, 34859], "며": [70, 36, 329, 364, 37027], "트": [32, 51, 368, 347, 41492], "통": [49, 34, 355, 363, 47136], "배": [68, 37, 336, 364, 41867], "베": [68, 37, 336, 364, 41886], "같": [47, 37, 353, 365, 39566], "환": [43, 35, 358, 369, 44678], "혼": [46, 34, 352, 369, 42107] }, fpCache = new Map();
+  const useOwn = ch => { if (!OWN_MAP.has(ch) || hfontKey() !== "gothic500") return false; const k = ch + "|" + hfontKey(); if (fpCache.has(k)) return fpCache.get(k);
+    const G = img2a(glyphImg(ch)), F = OWN_FP[ch]; let x0 = GN, y0 = GN, x1 = -1, y1 = -1, n = 0; for (let i = 0; i < GN * GN; i++) if (G[i] >= 128) { n++; const x = i % GN, y = (i / GN) | 0; if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+    const ok = !!F && Math.abs(x0 - F[0]) <= 2 && Math.abs(y0 - F[1]) <= 2 && Math.abs(x1 + 1 - F[2]) <= 2 && Math.abs(y1 + 1 - F[3]) <= 2 && Math.abs(n - F[4]) <= F[4] * 0.02;
+    if (gCache.has(ch + "|0|" + hfontKey())) fpCache.set(k, ok); return ok; };
+  // 획 점 바로잡기(글자 지문이 맞을 때만 · 0~1 · 획 차례 0부터) — 자모 칸이 이웃 자모 잉크까지 잡아 자료 점이 어긋난 것 · 나중 획 시작 = 앞 획 잉크 가장자리(둥근 끝이 앞 획 귀퉁이를 파먹지 않고 · 앞 획 몫과 반듯하게 갈림)
+  const OWN_PTS = {
+    "명": { 1: [[0.18, 0.189], [0.51, 0.189], [0.51, 0.5175]], 2: [[0.18, 0.4825], [0.51, 0.4825]], 3: [[0.5575, 0.254], [0.7275, 0.254]], 4: [[0.5575, 0.416], [0.7275, 0.416]] }, // ㅁ 칸이 ㅕ 가로 잉크까지 잡아 ㅁ 오른세로·아랫가로 자료가 ㅕ 자리로 늘어나 있던 것
+    "머": { 3: [[0.5525, 0.421], [0.7275, 0.421]] }, "며": { 3: [[0.5525, 0.321], [0.7275, 0.321]], 4: [[0.5525, 0.541], [0.7275, 0.541]] }, // ㅓ ㅕ 가로 = ㅁ 오른세로 가장자리 → 세로 왼가(세로 칸은 세로 몫)
+    "끝": { 0: [[0.175, 0.1175], [0.415, 0.1175], [0.3775, 0.375]], 1: [[0.5175, 0.1175], [0.752, 0.1175], [0.7225, 0.375]], 2: [[0.1025, 0.416], [0.8925, 0.416]], 3: [[0.2025, 0.57], [0.8, 0.57]], 4: [[0.3, 0.7215], [0.7775, 0.7215]], 5: [[0.251, 0.5325], [0.251, 0.8725], [0.805, 0.8725]] }, // ㅡ 자료가 ㅌ 윗가로에 · ㅌ 가운데 가로 둘 · ㄲ 둘째 ㄱ 비뚤
+    "춤": { 0: [[0.496, 0.09], [0.496, 0.17]], 1: [[0.2, 0.206], [0.795, 0.206], [0.4975, 0.206], [0.4975, 0.26], [0.45, 0.31], [0.4, 0.356], [0.35, 0.3825], [0.3, 0.399], [0.225, 0.414], [0.18, 0.41]], 2: [[0.5, 0.27], [0.55, 0.31], [0.6, 0.361], [0.65, 0.385], [0.7, 0.4], [0.775, 0.415], [0.82, 0.403]], 4: [[0.496, 0.575], [0.496, 0.655]], 5: [[0.2575, 0.655], [0.2575, 0.91]], 6: [[0.2125, 0.69], [0.735, 0.69], [0.735, 0.91]], 7: [[0.2125, 0.875], [0.78, 0.875]] }, // ㅊ 꼭지 자료가 가로대를 따라 비뚤 · ㅅ 굽은 획 · ㅜ 다리 = 가로 아래~ㅁ 위
+    "트": { 1: [[0.2875, 0.3725], [0.795, 0.3725]], 2: [[0.235, 0.1275], [0.235, 0.584], [0.8225, 0.584]] }, // ㅌ 가운데 가로 = 세로 오른가에서 시작
+    "통": { 1: [[0.315, 0.2575], [0.775, 0.2575]], 2: [[0.2675, 0.085], [0.2675, 0.3975], [0.8, 0.3975]], 3: [[0.5025, 0.435], [0.5025, 0.505]] }, // ㅗ 꼭지 = ㅌ 아래~ㅗ 가로 위
+    "배": { 2: [[0.255, 0.395], [0.4, 0.395]], 3: [[0.255, 0.671], [0.4, 0.671]], 5: [[0.6575, 0.446], [0.7525, 0.446]] }, // ㅂ 가로 = 두 세로 사이 · ㅏ 가로 = 세로 오른가에서
+    "베": { 2: [[0.255, 0.399], [0.4, 0.399]], 3: [[0.255, 0.67], [0.4, 0.67]], 4: [[0.485, 0.434], [0.5875, 0.434]] }, // ㅓ 가로 = ㅂ 오른가에서
+    "같": { 0: [[0.1525, 0.186], [0.5, 0.186], [0.4825, 0.25], [0.4625, 0.3], [0.43, 0.35], [0.3775, 0.4], [0.3175, 0.4375], [0.2375, 0.475], [0.155, 0.5]], 2: [[0.7625, 0.3125], [0.88, 0.3125]], 3: [[0.2325, 0.601], [0.765, 0.601]], 4: [[0.325, 0.7375], [0.7575, 0.7375]], 5: [[0.279, 0.5675], [0.279, 0.876], [0.785, 0.876]] }, // ㄱ 굽은 획 · ㅌ 가운데 가로 = 세로 오른가에서
+    "환": { 0: [[0.37, 0.0875], [0.37, 0.165]], 3: [[0.37, 0.52], [0.37, 0.58]], 6: [[0.775, 0.4175], [0.893, 0.4175]] }, // ㅎ 꼭지 자료가 가로대를 따라 · ㅗ 꼭지 = 고리 아래~가로 위
+    "혼": { 0: [[0.496, 0.09], [0.496, 0.165]], 3: [[0.496, 0.525], [0.496, 0.585]] }
+  };
+  function ownMap(ch, list) {
+    const key = ch + "|" + hfontKey() + "|" + list.map(S => S.unit + ":" + S.pts.map(p => p.map(v => v.toFixed(3)).join(",")).join(";")).join("/"); if (ownMapCache.has(key)) return ownMapCache.get(key);
+    const N = GN, G = img2a(glyphImg(ch)), BP = list.map(S => brushPath(ch, S)), own = new Int16Array(N * N).fill(-1), pos = new Float32Array(N * N);
+    const bodyD = (Q, px, py) => { if (Q.length === 1) return Math.hypot(Q[0].x - px, Q[0].y - py) - Q[0].w / 2.3; let b = Infinity;
+      for (let s = 1; s < Q.length; s++) { const A = Q[s - 1], B = Q[s], dx = B.x - A.x, dy = B.y - A.y, ll = dx * dx + dy * dy; if (ll < 1e-12) continue; const tc = Math.max(0, Math.min(1, ((px - A.x) * dx + (py - A.y) * dy) / ll)), d = Math.hypot(px - A.x - dx * tc, py - A.y - dy * tc) - (A.w + (B.w - A.w) * tc) / 2.3; if (d < b) b = d; }
+      if (Math.hypot(Q[0].x - Q[Q.length - 1].x, Q[0].y - Q[Q.length - 1].y) > Q[0].w || Q.tot < 4 * Q[0].w) for (const [E, F] of [[Q[0], Q.find(q => q.t >= Q[0].t + Q[0].w) || Q[Q.length - 1]], [Q[Q.length - 1], [...Q].reverse().find(q => q.t <= Q[Q.length - 1].t - Q[Q.length - 1].w) || Q[0]]]) { const ex = E.x - F.x, ey = E.y - F.y, el = Math.hypot(ex, ey); if (el < 1e-9) continue; const o = ((px - E.x) * ex + (py - E.y) * ey) / el; if (o > 0) b = Math.max(b, o); } // 닫힌 획(ㅇ 고리)은 끝 없음
+      return b; };
+    const capD = (Q, px, py) => { if (Q.length === 1) return Math.hypot(Q[0].x - px, Q[0].y - py) - Q[0].w / 2.3; let b = Infinity; for (let s = 1; s < Q.length; s++) { const A = Q[s - 1], B = Q[s], dx = B.x - A.x, dy = B.y - A.y, ll = dx * dx + dy * dy; if (ll < 1e-12) continue; const tc = Math.max(0, Math.min(1, ((px - A.x) * dx + (py - A.y) * dy) / ll)), d = Math.hypot(px - A.x - dx * tc, py - A.y - dy * tc) - (A.w + (B.w - A.w) * tc) / 2.3; if (d < b) b = d; } return b; };
+    const tAt = (Q, px, py) => { if (Q.length < 2) return 0; let tm = Infinity, b = Infinity, tb = 0; for (const q of Q) { const d = Math.hypot(q.x - px, q.y - py); if (d <= q.w / 2 && q.t < tm) tm = q.t; if (d < b) { b = d; tb = q.t; } } return (tm < Infinity ? tm : tb) / Math.max(1e-9, Q.tot); }; // 칠 자리 = 붓(둥근 붓 반지름 안)이 그 점에 처음 닿는 때(ㅊ 가로대를 되돌아 내려오는 붓 길 · 「춤」)
+    const lab = new Int32Array(N * N); { let nl = 0; for (let i0 = 0; i0 < N * N; i0++) { if (lab[i0] || G[i0] < 128) continue; lab[i0] = ++nl; const st = [i0]; while (st.length) { const q = st.pop(), x = q % N; for (const j of [x > 0 ? q - 1 : -1, x < N - 1 ? q + 1 : -1, q - N, q + N]) if (j >= 0 && j < N * N && !lab[j] && G[j] >= 128) { lab[j] = nl; st.push(j); } } } }
+    const labS = BP.map(Q => { const L2 = new Set(); for (const q of Q) { const x = Math.min(N - 1, Math.max(0, Math.floor(q.x * N))), y = Math.min(N - 1, Math.max(0, Math.floor(q.y * N))); if (lab[y * N + x]) L2.add(lab[y * N + x]); } return L2; });
+    const labOf = i => { if (lab[i]) return lab[i]; const x = i % N, y = (i / N) | 0; for (let r = 1; r <= 2; r++) for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) { const X = x + dx, Y = y + dy; if (X >= 0 && Y >= 0 && X < N && Y < N && lab[Y * N + X]) return lab[Y * N + X]; } return 0; }; // 반투명 가장자리 = 붙은 잉크 덩어리
+    const fix = OWN_FIX[ch];
+    for (let i = 0; i < N * N; i++) { if (!G[i]) continue; const px = (i % N + 0.5) / N, py = (((i / N) | 0) + 0.5) / N, lb = labOf(i), any = lb && labS.some(S2 => S2.has(lb)); let bd = Infinity, bs = -1;
+      for (let si = 0; si < BP.length && bs < 0; si++) if (bodyD(BP[si], px, py) <= 0.6 / N) bs = si; // 먼저 긋는 획 몸통(실제 잉크 폭 · 끝 반듯) 안 = 그 획 몫
+      if (bs < 0) BP.forEach((Q, si) => { if (any && !labS[si].has(lb)) return; const d = bodyD(Q, px, py); if (d < bd) { bd = d; bs = si; } }); // 어느 몸통에도 안 든 잉크(꺾인 바깥 귀퉁이 등) = 몸통이 가장 가까운 획
+      if (fix) bs = fix(px, py, bs); own[i] = bs; pos[i] = bs >= 0 ? tAt(BP[bs], px, py) : 0; }
+    const o = { own, pos, G }; if (gCache.has(ch + "|0|" + hfontKey())) ownMapCache.set(key, o); return o;
+  }
+  const img2a = cv => { const d = cv.getContext("2d").getImageData(0, 0, GN, GN).data, a = new Uint8Array(GN * GN); for (let i = 0; i < GN * GN; i++) a[i] = d[i * 4 + 3]; return a; };
+  const OWN_FIX = { // 글자별 손 경계(필요할 때만) — (x, y, 주인) → 주인 · 좌표 = 기본 글꼴 400px 기준(지문이 맞을 때만 씀)
+    "끝": (x, y, o) => (o === 2 && y < 150.5 / 400 ? (x < 0.5 ? 0 : 1) : o) // ㄲ 비스듬한 세로 발끝 = ㅡ 윗변까지 ㄱ 몫(반듯한 끝이 기울어 ㅡ 위에 회색 세모가 남던 것)
+  };
+  function revealOwn(mx, ch, list, upto, f) {
+    const { own, pos, G } = ownMap(ch, list), id = mx.createImageData(GN, GN), D = id.data, SF = 0.03;
+    for (let i = 0; i < GN * GN; i++) { const o = own[i]; if (!G[i] || o < 0) continue; let a = 0; if (o < upto || (o === upto && f >= 1)) a = 1; else if (o === upto && f > 0) a = Math.max(0, Math.min(1, (f - pos[i]) / SF + 1)); if (a > 0) D[i * 4 + 3] = Math.round(G[i] * a); }
+    mx.putImageData(id, 0, 0);
+  }
   function revealOrder(ch, n, list, upto, f) {
     const us = unitsOf(ch), img = glyphImg(ch), all = upto >= list.length || (upto === list.length - 1 && f >= 1);
     const m = document.createElement("canvas"); m.width = m.height = GN; const mx = m.getContext("2d");
     if (all) mx.drawImage(img, 0, 0); // 마지막 획까지 = 글자 잉크 전부
+    else if (useOwn(ch)) revealOwn(mx, ch, list, upto, f); // 주인 지도 덮개(도우미 K)
     else {
       const sc = document.createElement("canvas"); sc.width = sc.height = GN; const sx = sc.getContext("2d");
       for (let si = 0; si <= Math.min(upto, list.length - 1); si++) { const fr = si < upto ? 1 : f; if (fr <= 0) continue;
