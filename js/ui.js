@@ -1,7 +1,7 @@
-import { t, tL, lang, langName, LANGS, READY, setLang, KO_UI, uiKoOn, setUiKo, langShort, preloadKoUi } from "./i18n.js?v=1014.1";
-import { snapshot, retext } from "./retext.js?v=1014.1";
-import { VERSION } from "./version.js?v=1014.1";
-import { esc } from "./text.js?v=1014.1";
+import { t, tL, lang, langName, LANGS, READY, setLang, KO_UI, uiKoOn, setUiKo, langShort, preloadKoUi } from "./i18n.js?v=1014.2";
+import { snapshot, retext } from "./retext.js?v=1014.2";
+import { VERSION } from "./version.js?v=1014.2";
+import { esc } from "./text.js?v=1014.2";
 
 const svg = (d, fill) => `<svg class="ico" viewBox="0 0 24 24" ${fill ? 'fill="currentColor"' : 'fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"'} aria-hidden="true">${d}</svg>`;
 export const I = {
