@@ -1107,6 +1107,13 @@ button.dim{opacity:.45}
 /* 손글씨 도구 단추 그림만(fitTools ic · 10-12) */
 .write .htools.ic .ml,.write .htools.ic2 .ml{display:none}
 .write .htools.ic button,.write .htools.ic2 button{min-width:36px}
+/* 점수 표시 = 손글씨 칸 밖 단추 줄 맨 앞(투덜이 10-14 「40%」가 「글」 ㄱ 첫 가로와 겹침) · 자리는 늘 잡아 둠(점수가 떠도 칸 크기 안 바뀜) */
+.write .hbtns .hscore{position:static;display:block;align-self:stretch;text-align:center;padding:2px 8px;border-radius:999px;font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.35;min-height:1.35em;background:var(--card);box-shadow:0 1px 0 var(--line);pointer-events:none}
+.write .hbtns .hscore[hidden]{display:block;visibility:hidden}
+.write .hbtns .hscore.ok{color:var(--okc)}
+.write .hbtns .hscore.bad{color:var(--badc)}
+.write .hand.two .hbtns .hscore{grid-column:1/-1}
+.write .hand.stack .hbtns .hscore{flex-basis:100%}
 /* 손글씨 단추 넷 그림만(fitHandBox hic · 10-12) — 「다음 ▶」 은 글 그대로 */
 .write .hand.hic .hbtns .ml{display:none}
 .write .hand.hic .hbtns button{min-width:40px;padding:4px 6px;font-size:15px}
