@@ -34,6 +34,13 @@
       ok(!stuck && H2.passed && (hm === "free" || !loose), `ⓒ [${hm === "magnet" ? "자석" : "자유"}] 칸 밖에서 손 떼도 획이 끝남 · ${hm === "magnet" ? "붙음 → 「순서 맞음」" : "채점 → 통과"}`, `${H2.ch} · 안 끝난 획 ${stuck} · 안 붙은 획 ${hm === "magnet" ? loose : "-"} · 통과 ${H2.passed} · 「${$(".panel .hscore")?.textContent || ""}」`);
     }
     localStorage.setItem("malmun.hmode", "free");
+    // ⓓ 획 사이에 천천히(2.5초) = 다 쓰기 전에는 채점 안 함 · 마지막 획 뒤 1.2초에 자동 채점(투덜이 10-14 「쓰는 도중에 갑자기 꽝」) ⓔ 점수 표시가 손글씨 칸과 안 겹침(10-14 「40%」가 「글」 ㄱ 위)
+    { localStorage.setItem("malmun.wmode", "hand"); await open(4); const cg = [...document.querySelectorAll(".panel .sent .c")].find(b => b.textContent === "글"); cg?.click(); await W(1500); wr()?.hand()?.stopOrder?.(); await idle();
+      const H3 = wr().hand(), L3 = await wr().strokesOf(H3.ch), iv4 = $(".panel .hink"), R4 = iv4.getBoundingClientRect(), pe = (t, x, y) => iv4.dispatchEvent(new PointerEvent(t, { bubbles: true, cancelable: true, pointerId: 2, pointerType: "mouse", isPrimary: true, buttons: t === "pointerup" ? 0 : 1, clientX: R4.left + x * R4.width, clientY: R4.top + y * R4.height }));
+      let early = 0; for (let i = 0; i < L3.length; i++) { const Q = await wr().fitPath(H3.ch, i, "pen"); pe("pointerdown", Q[0].x, Q[0].y); Q.forEach(q => pe("pointermove", q.x, q.y)); pe("pointerup", Q[Q.length - 1].x, Q[Q.length - 1].y); if (i < L3.length - 1) { await W(2500); if (!$(".panel .hscore").hidden) early++; } }
+      await W(2200); const sc = $(".panel .hscore"), shown = !sc.hidden, hb = $(".panel .hbox").getBoundingClientRect(), sr = sc.getBoundingClientRect(), over = sr.right > hb.left && sr.left < hb.right && sr.bottom > hb.top && sr.top < hb.bottom;
+      ok(!early && shown && H3.passed, "ⓓ 획 사이 2.5초씩 쉬어도 다 쓰기 전 채점 없음 · 다 쓰면 자동 채점", `${H3.ch} ${L3.length}획 · 이른 채점 ${early} · 끝 「${sc.textContent}」 · 통과 ${H3.passed}`);
+      ok(shown && !over, "ⓔ 점수 표시가 손글씨 칸 밖(겹침 0)", `점수 ${Math.round(sr.left)},${Math.round(sr.top)} · 칸 ${Math.round(hb.left)}~${Math.round(hb.right)},${Math.round(hb.top)}~${Math.round(hb.bottom)}`); }
     // ⓑ 앱 글 언어 바뀜
     localStorage.setItem("malmun.lang", "ne"); await i18n.setLang("ne"); await i18n.setUiKo(false);
     const appText = () => { const sc = $(".panel .scr.write"); if (!sc) return ""; const c = sc.cloneNode(true); c.querySelectorAll(".sent, .info .wko, .typed, .target, .slots, .kb, .hbox, .info .rom, .info .mean, .hscore").forEach(x => x.remove()); return c.innerText + " " + [...c.querySelectorAll("[aria-label]")].map(x => x.getAttribute("aria-label")).join(" "); };

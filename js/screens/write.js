@@ -270,7 +270,7 @@ export default async function write(app, ep, id, opts = {}) {
     work.innerHTML = `<div class="stage"><div class="box" role="button" tabindex="0" aria-label="${esc(t("listen_char") || "▶")}"><canvas class="tcv" aria-hidden="true"></canvas><span class="target ko" lang="ko">${esc(c.ch)}</span><span class="typed ko" lang="ko">${esc(compose([...st.typed, st.part].flatMap(jamoParts), vowelLen(c.ch)))}</span></div>
       <div class="info">${w.rom || w.mean || st.mode === "hand" ? `<div class="sub2">${w.chars.length > 1 ? `<span class="wko ko" lang="ko">${w.chars.map((x, i) => i === st.c ? `<b>${esc(x.ch)}</b>` : esc(x.ch)).join("")}</span>` : ""}${w.rom ? `<span class="rom">${romMark(w.rom, w.chars.length, st.c)}</span>` : ""}${w.mean ? `<span class="mean tr">${esc(w.mean)}</span>` : ""}${st.mode === "hand" ? `<span class="htools" role="group">${Object.entries(TOOLS).map(([k, v]) => `<button data-tool="${k}" aria-pressed="${toolKey() === k}" aria-label="${esc(t("h_" + k))}">${v.icon}<span class="ml"> ${esc(t("h_" + k))}</span></button>`).join("")}<button class="hmag" data-hmode aria-pressed="${magnetOn()}" aria-label="${esc(t("h_magnet"))}">🧲<span class="ml"> ${esc(t("h_magnet"))}</span></button></span>` : ""}</div>` : ""}
       <div class="slotrow"><div class="slots">${jam.map((j, i) => `<span class="slot ${i < st.k ? "filled" : i === st.k ? "current" : ""}">${i <= st.k ? esc(j) : ""}</span>`).join("")}</div></div></div></div>
-      ${st.mode === "hand" ? `<div class="hand"><div class="hbox"><canvas class="hguide" aria-hidden="true"></canvas><canvas class="hink" aria-label="${esc(t("w_hand"))}"></canvas><b class="hscore" hidden></b><span class="fx" aria-hidden="true"></span></div><div class="hbtns"><button data-act="hdone" aria-label="${esc(t("h_done"))}">✓<span class="ml"> ${esc(t("h_done"))}</span></button><button data-act="horder" aria-label="${esc(t("h_order"))}">✎<span class="ml"> ${esc(t("h_order"))}</span></button><button data-act="hundo" aria-label="${esc(t("h_undo"))}">↶<span class="ml"> ${esc(t("h_undo"))}</span></button><button data-act="hclear" aria-label="${esc(t("h_clear"))}"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M15.4 3.6a2 2 0 0 1 2.8 0l2.2 2.2a2 2 0 0 1 0 2.8L11 18H6.6l-3-3a2 2 0 0 1 0-2.8z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M9.2 9.8l5 5M6.6 18H21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span class="ml"> ${esc(t("h_clear"))}</span></button></div></div>`
+      ${st.mode === "hand" ? `<div class="hand"><div class="hbox"><canvas class="hguide" aria-hidden="true"></canvas><canvas class="hink" aria-label="${esc(t("w_hand"))}"></canvas><span class="fx" aria-hidden="true"></span></div><div class="hbtns"><b class="hscore" hidden></b><button data-act="hdone" aria-label="${esc(t("h_done"))}">✓<span class="ml"> ${esc(t("h_done"))}</span></button><button data-act="horder" aria-label="${esc(t("h_order"))}">✎<span class="ml"> ${esc(t("h_order"))}</span></button><button data-act="hundo" aria-label="${esc(t("h_undo"))}">↶<span class="ml"> ${esc(t("h_undo"))}</span></button><button data-act="hclear" aria-label="${esc(t("h_clear"))}"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M15.4 3.6a2 2 0 0 1 2.8 0l2.2 2.2a2 2 0 0 1 0 2.8L11 18H6.6l-3-3a2 2 0 0 1 0-2.8z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M9.2 9.8l5 5M6.6 18H21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span class="ml"> ${esc(t("h_clear"))}</span></button></div></div>`
         : `<div class="kb" lang="ko">${KB_ROWS.map(r => `<div class="kr">${r.map(j => `<button data-j="${j}">${j}</button>`).join("")}</div>`).join("")}</div>`}`;
     paintBox(c); if (st.lineEnd) { work.querySelector(".box")?.classList.add("ok"); paintBox(c, true); } // 줄 끝 = 마지막 글자 완성 표시 그대로 // 자판 칸 = 회색 글자 위에 친 자모 자리만 진하게(본부 10-07 · 글자가 따로 그려져 어긋나던 것)
     work.classList.toggle("handmode", st.mode === "hand"); // 손글씨 = 위 작은 글자 상자·자모 칸 숨기고 큰 칸을 키움(본부 10-07)
@@ -582,7 +582,7 @@ export default async function write(app, ep, id, opts = {}) {
         if (kb < bd - 0.02 && t0 - kt > 0.04) { F.lost = true; return; } } /* 손가락이 지나온 쪽(뒤 25%)에 더 가까움 = 거꾸로 감 → 따라오기 그만(쓰기부 10-12 「자」 ㅈ 거꾸로가 50% 넘게 따라와 붙던 것) */
       F.prog = Math.max(F.prog, bi); };
     const up = () => { if (!H.cur) return; const S = H.cur; H.cur = null; clearTimeout(H.timer); const F = H.follow; H.follow = null;
-      if (magnetOn()) { if (F && F.prog >= F.Q.length * 0.5) return magnetUp(S, true); return magnetUp(S); } /* 절반(50%↑) 따라왔으면 나머지 채움(본부 10-12 · 전 85%) · 그 획 완성 */ H.timer = setTimeout(() => st.hand === H && handJudge(), 1200); jamoSay(H);
+      if (magnetOn()) { if (F && F.prog >= F.Q.length * 0.5) return magnetUp(S, true); return magnetUp(S); } /* 절반(50%↑) 따라왔으면 나머지 채움(본부 10-12 · 전 85%) · 그 획 완성 */ H.timer = setTimeout(() => st.hand === H && !H.cur && readyToJudge(H) && handJudge(), 1200); jamoSay(H);
       const msg = strokeHint(H, S); if (msg) bubble(msg); }; // 획순·방향 알림(짧은 말풍선)
     const bubble = msg => { let b = box.querySelector(".hbubble"); if (!b) { b = document.createElement("b"); b.className = "hbubble"; box.append(b); } b.textContent = msg; b.hidden = false; H.hints = (H.hints || []).concat(msg); clearTimeout(H.bt); H.bt = setTimeout(() => (b.hidden = true), 2500); };
     // 획순 보기(본부 10-07) — 회색 글자를 획 차례대로 주황으로 칠해 드러냄(획 0.5초 · revealOrder) · 시작점 번호 원 · 끝에 작은 화살촉(글자 안) → 다 칠하면 1초 뒤 회색으로
@@ -651,16 +651,23 @@ export default async function write(app, ep, id, opts = {}) {
   const bestGet = (w, c) => { try { return JSON.parse(localStorage.getItem("malmun.hbest") || "{}")[bestKey(w, c)] ?? null; } catch { return null; } };
   const bestPut = (w, c, v) => { try { const o = JSON.parse(localStorage.getItem("malmun.hbest") || "{}"), k = bestKey(w, c); if (!(o[k] >= v)) { o[k] = v; localStorage.setItem("malmun.hbest", JSON.stringify(o)); } } catch {} };
   // 자모 하나의 획을 다 맞게 그음 = 그 자모 소리(투덜이 10-13 「손으로 쓸 때도 소리」 · 자동 완성과 같은 소리) — 자모마다 한 번 · 자석으로 붙여도 같음
-  function jamoSay(H) {
-    if (!H || st.auto || H.passed || !SK.STK) return; const ch = H.ch, list = strokesOf(ch), us = unitsOf(ch); if (!list.length || !us.length) return;
+  // 자료 획마다 「다 맞게 그었나」(그 획 회색 가운데 길의 75%↑ 를 학습자 획이 덮음) — 자모 소리·자동 채점이 함께 씀
+  function strokesDone(H) {
+    if (!H || !SK.STK || !H.strokes.length) return null; const ch = H.ch, list = strokesOf(ch); if (!list.length) return null;
     const tw = Math.max(...H.strokes.map(S => S.w ?? TOOLS[toolKey()].w)), gw = tw * GUIDE_K, stk = Object.keys(TOOLS).find(k => Math.abs(TOOLS[k].w - tw) < 1e-6) || toolKey();
     const segs = []; for (const S of H.strokes) { if (S.length === 1) segs.push([S[0], S[0]]); for (let i = 1; i < S.length; i++) segs.push([S[i - 1], S[i]]); }
     const near = (x, y) => segs.some(([a, c]) => { const dx = c[0] - a[0], dy = c[1] - a[1], l = dx * dx + dy * dy || 1e-12, r = Math.max(0, Math.min(1, ((x - a[0]) * dx + (y - a[1]) * dy) / l)); return Math.hypot(x - a[0] - dx * r, y - a[1] - dy * r) <= gw / 2 + 0.008; });
-    const done = s0 => { const Q = fitPath(ch, list, s0, stk), step = Math.max(1, Math.floor(Q.length / 30)); let n = 0, k = 0; for (let i = 0; i < Q.length; i += step) { k++; if (near(Q[i].x, Q[i].y)) n++; } return k && n / k >= COMP_MIN; };
+    return { list, done: list.map((S, si) => { const Q = fitPath(ch, list, si, stk), step = Math.max(1, Math.floor(Q.length / 30)); let n = 0, k = 0; for (let i = 0; i < Q.length; i += step) { k++; if (near(Q[i].x, Q[i].y)) n++; } return k > 0 && n / k >= COMP_MIN; }) };
+  }
+  // 자모 하나의 획을 다 맞게 그음 = 그 자모 소리(투덜이 10-13 「손으로 쓸 때도 소리」 · 자동 완성과 같은 소리) — 자모마다 한 번 · 자석으로 붙여도 같음
+  function jamoSay(H) {
+    if (!H || st.auto || H.passed) return; const r = strokesDone(H); if (!r) return; const us = unitsOf(H.ch); if (!us.length) return;
     H.said ||= new Set(); let say = null;
-    us.forEach((u, ui) => { if (H.said.has(ui)) return; const mine = list.map((S, si) => [S, si]).filter(([S]) => S.unit === ui); if (mine.length && mine.every(([, si]) => done(si))) { H.said.add(ui); say = u.jamo; } });
+    us.forEach((u, ui) => { if (H.said.has(ui)) return; const mine = r.list.map((S, si) => [S, si]).filter(([S]) => S.unit === ui); if (mine.length && mine.every(([, si]) => r.done[si])) { H.said.add(ui); say = u.jamo; } });
     if (!say) return; const src = jamoSrc(say); if (src && !st.busy) run([src]);
   }
+  // 손 뗀 뒤 자동 채점 = 모든 획을 다 그었을 때만(투덜이 10-14 「쓰는 도중에 갑자기 꽝」 — 획 사이에 1.2초 넘게 생각하면 덜 쓴 글자를 채점하던 것) · 덜 썼으면 ✓ 채점 단추로만
+  const readyToJudge = H => { const r = strokesDone(H); return !!r && r.done.every(Boolean); };
   async function handJudge() {
     const H = st.hand; if (!H || !H.strokes.length || st.busy || st.s >= segs.length || st.lineEnd || H.passed || magnetOn()) return; // 자석 = 점수 없음(순서만)
     clearTimeout(H.timer);
