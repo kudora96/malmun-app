@@ -179,5 +179,11 @@
  "stt_server_note": "Your voice is used only for scoring and is not stored on the server. A few recent recordings stay on this phone (for replay and diagnostics).",
  "why_frame": "{parts} — {redo}{rest}",
  "n_episodes_one": "{n} episode",
- "n_lines_one": "{n} line"
+ "n_lines_one": "{n} line",
+ "diag_title": "Diagnostics",
+ "diag_hint": "Send one screenshot, or use 「복사」 (Copy)",
+ "diag_keep": "Diagnostic recordings on this phone (max 3 · never leave the phone · also deleted by 「Delete all」 in the list):",
+ "diag_h_rec": "Last 5 speaking recordings",
+ "diag_h_nav": "Back navigation log",
+ "diag_h_err": "Recent errors"
 }
