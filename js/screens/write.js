@@ -532,6 +532,11 @@ export default async function write(app, ep, id, opts = {}) {
       drawSnd = { src, g, ctx, peak: P[2] * vol, quiet: 0 }; window.__sfxLog?.push({ t: Math.round(performance.now()), ev: "효과음", name: "draw/" + tk }); } catch {} }
   function drawMove(speed) { const d = drawSnd; if (!d) return; try { d.g.gain.setTargetAtTime(Math.max(0.0001, d.peak * Math.min(1, 0.2 + speed / 1.2)), d.ctx.currentTime, 0.03); clearTimeout(d.quiet); d.quiet = setTimeout(() => { try { d.g.gain.setTargetAtTime(0.0001, d.ctx.currentTime, 0.05); } catch {} }, 90); } catch {} }
   function drawEnd() { const d = drawSnd; if (!d) return; drawSnd = null; clearTimeout(d.quiet); try { d.g.gain.setTargetAtTime(0.0001, d.ctx.currentTime, 0.03); } catch {} setTimeout(() => { try { d.src.stop(); } catch {} }, 180); }
+  // 획의 마지막 꺾임 자리(길이 t · 칸 비율) — 앞뒤 칸 2.5% 방향이 60° 넘게(둥근 ㅇ 은 꺾임 아님) 바뀌는 곳 · 없으면 0 · 자석 「나머지 채움」은 이 꺾임을 지난 뒤에만(꺾인 뒤 30% 까지 그음)
+  function cornerT(Q) { if (Q.lc != null) return Q.lc; let lc = 0; const tot = Q.tot || (Q.length ? Q[Q.length - 1].t : 0), at = t0 => { let i = 0; while (i < Q.length - 1 && Q[i].t < t0) i++; return Q[i]; };
+    for (let i = 0; i < Q.length; i++) { const t0 = Q[i].t; if (t0 < Math.max(0.025, tot * 0.15) || t0 > Math.min(tot - 0.025, tot * 0.85)) continue; /* 획 끝 갈고리(ㅅ 끝 93%)는 꺾임으로 안 셈 */ const a = at(t0 - 0.025), b = Q[i], c2 = at(t0 + 0.025), d1 = Math.atan2(b.y - a.y, b.x - a.x), d2 = Math.atan2(c2.y - b.y, c2.x - b.x); let dd = Math.abs(d2 - d1); if (dd > Math.PI) dd = 2 * Math.PI - dd; if (dd > (60 * Math.PI) / 180) lc = t0; }
+    Q.lc = lc; return lc; }
+  const pastCorner = (Q, t0) => { const lc = cornerT(Q), tot = Q.tot || Q[Q.length - 1].t; return !lc || t0 >= lc + 0.3 * (tot - lc); };
   function swish(len = 0.3, tk = toolKey(), tok = false) {
     try { const ctx = audioCtx(), vol = window.__sfxVolume ?? 1, d = Math.min(0.3, 0.12 + 0.3 * len);
       const P = { pencil: [3400, 1.1, 0.3], pen: [2600, 1.0, 0.2], brush: [900, 0.5, 0.24] }[tk] || [2600, 1, 0.2] /* 연필 = 5200Hz·0.16 이라 PC 스피커에서 안 들리던 것(투덜이 10-14) → 3400Hz·0.3 */, src = ctx.createBufferSource(), bp = ctx.createBiquadFilter(), g = ctx.createGain(), t0 = ctx.currentTime + 0.005;
@@ -591,7 +596,7 @@ export default async function write(app, ep, id, opts = {}) {
         if (kb < bd - 0.02 && t0 - kt > 0.04) { F.lost = true; return; } } /* 손가락이 지나온 쪽(뒤 25%)에 더 가까움 = 거꾸로 감 → 따라오기 그만(쓰기부 10-12 「자」 ㅈ 거꾸로가 50% 넘게 따라와 붙던 것) */
       F.prog = Math.max(F.prog, bi); };
     const up = () => { if (!H.cur) return; drawEnd(); const S = H.cur; H.cur = null; clearTimeout(H.timer); const F = H.follow; H.follow = null; if (H.tDue) { H.tDue = false; setTimeout(() => st.hand === H && !H.cur && !H.passed && handJudge(), 50); }
-      if (magnetOn()) { if (F && F.prog >= F.Q.length * 0.5) return magnetUp(S, true); return magnetUp(S); } /* 절반(50%↑) 따라왔으면 나머지 채움(본부 10-12 · 전 85%) · 그 획 완성 */ H.timer = setTimeout(() => st.hand === H && !H.cur && readyToJudge(H) && handJudge(), 1200); jamoSay(H);
+      if (magnetOn()) { if (F && F.prog >= F.Q.length * 0.5 && pastCorner(F.Q, F.Q[F.prog].t)) return magnetUp(S, true); return magnetUp(S); } /* 절반(50%↑) 따라왔으면 나머지 채움(본부 10-12 · 전 85%) · 그 획 완성 */ H.timer = setTimeout(() => st.hand === H && !H.cur && readyToJudge(H) && handJudge(), 1200); jamoSay(H);
       const msg = strokeHint(H, S); if (msg) bubble(msg); }; // 획순·방향 알림(짧은 말풍선)
     const bubble = msg => { let b = box.querySelector(".hbubble"); if (!b) { b = document.createElement("b"); b.className = "hbubble"; box.append(b); } b.textContent = msg; b.hidden = false; H.hints = (H.hints || []).concat(msg); clearTimeout(H.bt); H.bt = setTimeout(() => (b.hidden = true), 2500); };
     // 획순 보기(본부 10-07) — 회색 글자를 획 차례대로 주황으로 칠해 드러냄(획 0.5초 · revealOrder) · 시작점 번호 원 · 끝에 작은 화살촉(글자 안) → 다 칠하면 1초 뒤 회색으로
@@ -645,6 +650,7 @@ export default async function write(app, ep, id, opts = {}) {
       if (best < 0) { paintInk(); paintGuide(); magMarks(); bubble(t("h_magnet_miss")); return; }
       if (best !== H.mag) { paintInk(); paintGuide(); magMarks(); bubble(t("h_order_again", { n: H.mag + 1 })); H.magWrong = (H.magWrong || 0) + 1; return; } // 순서 다시(그 획 번호)
       { const dv = strokeDir(c.ch, S, H.magList[best]); if (dv.rev) { paintInk(); paintGuide(); magMarks(); bubble(dv.msg); H.magWrong = (H.magWrong || 0) + 1; return; } } /* 거꾸로 그은 획 = 안 붙음 + 방향 알림(본부 10-12) */
+      { const Qb = brushPath(c.ch, H.magList[best]), lc = cornerT(Qb); if (lc > 0) { const tail = Qb.filter(q => q.t > lc + 0.03); if (tail.length && tail.filter(q => lineD(q.x, q.y) < 0.12).length / tail.length < 0.5) { paintInk(); paintGuide(); magMarks(); bubble(t("h_magnet_miss")); return; } } } /* 꺾이는 획(ㅈ 첫 획 = 가로 + 왼쪽 아래 삐침 · ㄱ ㄴ ㄹ …) = 마지막 꺾임 뒤까지 그어야 붙음(투덜이 10-14 「자」 가로만 그었는데 삐침까지 칠해짐) */
       const Q = brushPath(c.ch, H.magList[best]); H.strokes.push(Object.assign(Q.map(q => [q.x, q.y, 1]), { tool: S.tool, w: S.w, snap: true })); swish(Q.tot, S.tool, true); H.mag++; paintInk(); paintGuide(); magDone();
     };
     const magDone = () => { // 획 하나 붙은 뒤 — 다음 번호 강조(잠깐 크게) · 다 붙으면 「✓ 순서 맞음」
