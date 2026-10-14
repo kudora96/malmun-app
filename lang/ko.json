@@ -174,5 +174,11 @@
  "stt_server_note": "목소리는 점수를 매기는 데만 쓰고 서버에 저장하지 않아요. 이 폰에는 최근 녹음 몇 개가 남아요(다시 듣기·진단용).",
  "spk_dubu": "두부",
  "spk_kong": "콩",
- "why_frame": "{parts} — {redo}{rest}"
+ "why_frame": "{parts} — {redo}{rest}",
+ "diag_title": "진단",
+ "diag_hint": "사진 한 장 또는 「복사」로 보내 주세요",
+ "diag_keep": "이 폰에 남은 진단 녹음(최대 3개 · 폰 밖으로 보내지 않음 · 목록의 「모두 지우기」로도 지워짐):",
+ "diag_h_rec": "최근 말하기 녹음 5개",
+ "diag_h_nav": "뒤로 가기 기록",
+ "diag_h_err": "최근 오류"
 }
