@@ -10,26 +10,26 @@
 //  R7 영상은 늘 맨 위 · 지금 줄은 영상 바로 아래(앞 줄은 영상 뒤로) — 손으로 목록을 움직이면 4초 동안은 따라가지 않음
 //  R8 듣기 모드(대사→설명 · 설명만)도 R1~R6 그대로(영상 대신 소리 조각) · 모드를 바꾸면 멈춤(▶ 로 시작)
 //  R9 다시 들어오면 마지막 줄이 선택된 채 멈춰 있음
-import { warmSTT } from "../sttserver.js?v=1014.4";
-import * as sfxL from "../sfx.js?v=1014.4"; // 카드 말하기 최대 길이 = 본보기 길이로(10-07)
-import { t, lang, langName, KO_UI, uiKoOn, preloadKoUi } from "../i18n.js?v=1014.4";
-import { setTx } from "../retext.js?v=1014.4";
-import { esc, renderText, glossCards, sayParts } from "../text.js?v=1014.4";
-import { episode } from "../data.js?v=1014.4";
-import { paths } from "../paths.js?v=1014.4";
-import { Sequence } from "../audio.js?v=1014.4";
-import { I, progress, SPEAKER, spkHtml, uiKoBtn, switchUiKo } from "../ui.js?v=1014.4";
-import writeView from "./write.js?v=1014.4";
-import { diagEnv, keepDiag } from "../diag.js?v=1014.4";
-import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1014.4";
-import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace, lateFactor, sylAt, paintAt, karaokeRun } from "../rhythm.js?v=1014.4";
-import { playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1014.4";
-import { heardHTML, endHint, scoreOf, bestFull, spanOf, sylsAt } from "../heard.js?v=1014.4"; // 덧붙은 말 빼고 견주기(본부 10-11)
-import { recDel, downloadRec, askPersist } from "../recstore.js?v=1014.4";
-import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1014.4";
-import { scoreFx, stopFx } from "../scorefx.js?v=1014.4"; // 점수별 효과(본부 10-05)
-import { record, recordSROnly, srOnlyMode, setSrOnly, isAndroid, srMiss, micWhy, srWhy, canScore, closeMic, logRec, micOpen, seqMode, srOnBlob, devSR, setDevSR, srJudge, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1014.4";
-import { hold, quietWake } from "../wake.js?v=1014.4";
+import { warmSTT } from "../sttserver.js?v=1014.5";
+import * as sfxL from "../sfx.js?v=1014.5"; // 카드 말하기 최대 길이 = 본보기 길이로(10-07)
+import { t, lang, langName, KO_UI, uiKoOn, preloadKoUi } from "../i18n.js?v=1014.5";
+import { setTx } from "../retext.js?v=1014.5";
+import { esc, renderText, glossCards, sayParts } from "../text.js?v=1014.5";
+import { episode } from "../data.js?v=1014.5";
+import { paths } from "../paths.js?v=1014.5";
+import { Sequence } from "../audio.js?v=1014.5";
+import { I, progress, SPEAKER, spkHtml, uiKoBtn, switchUiKo } from "../ui.js?v=1014.5";
+import writeView from "./write.js?v=1014.5";
+import { diagEnv, keepDiag } from "../diag.js?v=1014.5";
+import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1014.5";
+import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace, lateFactor, sylAt, paintAt, karaokeRun } from "../rhythm.js?v=1014.5";
+import { playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1014.5";
+import { heardHTML, endHint, scoreOf, bestFull, spanOf, sylsAt } from "../heard.js?v=1014.5"; // 덧붙은 말 빼고 견주기(본부 10-11)
+import { recDel, downloadRec, askPersist } from "../recstore.js?v=1014.5";
+import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1014.5";
+import { scoreFx, stopFx } from "../scorefx.js?v=1014.5"; // 점수별 효과(본부 10-05)
+import { record, recordSROnly, srOnlyMode, setSrOnly, isAndroid, srMiss, micWhy, srWhy, canScore, closeMic, logRec, micOpen, seqMode, srOnBlob, devSR, setDevSR, srJudge, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1014.5";
+import { hold, quietWake } from "../wake.js?v=1014.5";
 
 const RATES = [1, 0.75, 0.5];
 const pref = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } };
