@@ -477,7 +477,7 @@ a{color:inherit;text-decoration:none}
 .v9pop .rom{opacity:.75;font-size:12px}
 .norom .chip .rom,.norom .v9pop .rom{display:none}
 .v9bar .romb{flex:none;padding:3px 8px;font-size:11.5px;border:1px solid var(--line);border-radius:999px;color:var(--mute)}
-.v9bar .chip.uiko{padding:3px 7px;font-size:11.5px} /* 설명 막대 ⇄한(앱개발부 10-14) */
+.v9bar .chip.uiko{padding:3px 8px;font-size:12px;min-height:32px} /* 설명 막대 ⇄한(앱개발부 10-14 · 본부 1014.2 누르기 쉽게 32px · 칸 맞춤 줄임은 learn.js fitPanel 이 되돌림) */
 .whead .chip.uiko{padding:3px 7px;font-size:11.5px}
 .v9bar .romb[aria-pressed=true]{border-color:var(--hi);color:var(--hi);background:var(--hi-soft);font-weight:700}
 @media (prefers-reduced-motion:reduce){.v9body .sn{transition:none}}

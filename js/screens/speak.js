@@ -83,7 +83,7 @@ const recGet0 = async key => { try { const d = await db(); return await new Prom
 export const recPut = async (key, val) => { try { const d = await db(); await new Promise(res => { const tx = d.transaction("rec", "readwrite"); tx.objectStore("rec").put(val, key); tx.oncomplete = tx.onerror = () => { d.close(); res(); }; }); } catch {} };
 
 // 단추 글 = 기호(◀ ▶ ? ✕) + 글 — 좁으면 글만 숨김(머리 줄 한 줄 유지)
-const lbl = s => { const m = String(s).match(/^([^\p{L}\p{M}\p{N}]*)(.*?)([^\p{L}\p{M}\p{N}]*)$/u); return m ? `${m[1] ? `<i class="ic">${esc(m[1].trim())}</i>` : ""}<span class="lt">${esc(m[2])}</span>${m[3] ? `<i class="ic">${esc(m[3].trim())}</i>` : ""}` : esc(s); };
+const lbl = k => { const s = t(k), m = String(s).match(/^([^\p{L}\p{M}\p{N}]*)(.*?)([^\p{L}\p{M}\p{N}]*)$/u); return m ? `${m[1] ? `<i class="ic">${esc(m[1].trim())}</i>` : ""}<span class="lt" data-k="${k}" data-kcore>${esc(m[2])}</span>${m[3] ? `<i class="ic">${esc(m[3].trim())}</i>` : ""}` : esc(s); };
 export default async function speak(app, ep, id, opts = {}) {
   const d = await episode(ep, lang);
   if (seqMode()) warmSTT(); // 서버 받아쓰기 데우기(본부 10-12 · 안드로이드·아이폰)
@@ -106,7 +106,7 @@ export default async function speak(app, ep, id, opts = {}) {
 
   app.innerHTML = `<section class="scr speak ${opts.embedded ? "embedded" : ""}">
     <div class="whead"><b>${esc(t("speak"))}</b><span class="sub">${li + 1} / ${d.lines.length}<span class="spk"> · ${spkHtml(line.speaker)}</span></span>
-      ${uiKoBtn()}<button class="micpick" data-act="help" aria-label="${esc(t("help"))}">${lbl(t("help_btn"))}</button><span class="segnav"></span><button class="micpick closex" data-act="close" aria-label="${esc(t("close_btn"))}">${lbl(t("close_btn"))}</button></div>
+      ${uiKoBtn()}<button class="micpick" data-act="help" aria-label="${esc(t("help"))}">${lbl("help_btn")}</button><span class="segnav"></span><button class="micpick closex" data-act="close" aria-label="${esc(t("close_btn"))}">${lbl("close_btn")}</button></div>
     <div class="miclist" hidden></div>
     <div class="helpbox" hidden>${[1, 2, 3, 4, 5, 6].map(k => `<p>${esc(t("help_sp_" + k))}</p>`).join("")}<p class="x">${esc(t("help_close"))}</p></div>
     <div class="task"><div class="say ko" lang="ko"></div><div class="tr"></div></div>
@@ -153,7 +153,7 @@ export default async function speak(app, ep, id, opts = {}) {
     $(".tr").innerHTML = p.whole ? esc(line.tr || "") : sp ? `${romOn && sp.rom ? `<span class="trrom" dir="ltr">${esc(sp.rom)}</span>` : ""}${esc(sp.mean)}` : "";
     // 긴 과제(줄 전체)는 창 안에 들어갈 때까지 글자를 줄인다 — 스크롤 없이(S7)
     $(".segnav").innerHTML = parts.length > 1
-      ? `<button data-seg="-1" ${st.i ? "" : "disabled"} aria-label="${esc(t("previous"))}">${lbl(t("prev_btn"))}</button><span>${st.i + 1}/${parts.length}${sv?.score >= PASS ? " ✓" : ""}</span><button data-seg="1" ${st.i < parts.length - 1 ? "" : "disabled"} aria-label="${esc(t("next"))}">${lbl(t("next_btn"))}</button>` : "";
+      ? `<button data-seg="-1" ${st.i ? "" : "disabled"} aria-label="${esc(t("previous"))}">${lbl("prev_btn")}</button><span>${st.i + 1}/${parts.length}${sv?.score >= PASS ? " ✓" : ""}</span><button data-seg="1" ${st.i < parts.length - 1 ? "" : "disabled"} aria-label="${esc(t("next"))}">${lbl("next_btn")}</button>` : "";
     fitHead();
     const sc = st.score ?? null; // 점수는 이번에 말한 뒤에만(열 때 예전 점수를 보이지 않음 — ✓ 는 토막 번호 옆에)
     $(".sbar i").style.width = (sc ?? 0) + "%";
@@ -477,7 +477,7 @@ export default async function speak(app, ep, id, opts = {}) {
   sfx.preload([lineSrc, ...parts.map(p => p.src)]);
   const release = hold();
   // 언어를 바꾸면(본부 10-13 안 A · retext 가 보내는 malmun:uilang) 결과 줄·토막 단추를 지금 상태 그대로 새 언어로 — 녹음·채점은 안 건드림 · 「확인 중…」 동안은 retext 가 바꾼 글 그대로
-  const onLang = () => { if (!st.alive) return; fitHead(); if (st.checking) return; paint(); if (st.retryDev) $(".msg").textContent = t("sr_retry_dev"); };
+  const onLang = () => { if (!st.alive) return; setRateWord(t("speed")); fitHead(); /* 속도 알약 말도 새 언어로(다시 그릴 때 옛 말로 쓰지 않게 · 다국어부 10-14) */ if (st.checking) return; paint(); if (st.retryDev) $(".msg").textContent = t("sr_retry_dev"); };
   addEventListener("malmun:uilang", onLang);
   return () => { removeEventListener("malmun:uilang", onLang); st.alive = false; newAtt(); clearInterval(litT); closeCmp(); stopRec(true); stopSounds(); st.stream?.getTracks().forEach(x => x.stop()); release(); quietWake(false); document.removeEventListener("keydown", onEsc, true); delete app.__sp; };
 }
