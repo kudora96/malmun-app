@@ -1137,7 +1137,9 @@ button.dim{opacity:.45}
 /* 점수 표시 = 손글씨 칸 밖 단추 줄 맨 앞(투덜이 10-14 「40%」가 「글」 ㄱ 첫 가로와 겹침) · 자리는 늘 잡아 둠(점수가 떠도 칸 크기 안 바뀜) */
 .write .hbtns .hscore{position:static;display:block;align-self:stretch;text-align:center;padding:2px 8px;border-radius:999px;font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.35;min-height:1.35em;background:var(--card);box-shadow:0 1px 0 var(--line);pointer-events:none}
 .write .hbtns .hscore[hidden]{display:block;visibility:hidden}
-.write .hbtns .hscore{white-space:nowrap;overflow:hidden;text-overflow:clip;max-width:100%;box-sizing:border-box}
+.write .hbtns .hscore{white-space:nowrap;overflow:visible;max-width:100%;box-sizing:border-box;line-height:normal;height:auto;min-height:1.35em} /* 나스탈리크 등 키 큰 글이 잘리지 않게(검사부 10-14 ur 320 「✓ ترتیب درست」 31px > 24px) · 폭은 fitScore 가 글자 줄임 */
+/* 위 글자 줄(배우는 한국어) = 학습자 언어 줄높이를 물려받지 않음(ur 나스탈리크 줄높이로 글자 단추가 53px → 줄 밖 5px 로 ⇄한 과 겹침 · 검사부 10-14) */
+.write .sent,.write .sent .w,.write .sent .c{line-height:1.25}
 /* 아이폰 사파리가 글자를 저절로 키우지 않게(쓰기 화면 · 10-14 「✓ 순서 맞음」 위가 잘림) */
 .write{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .write .hbtns .hscore.ok{color:var(--okc)}
