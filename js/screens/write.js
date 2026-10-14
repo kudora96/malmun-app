@@ -247,11 +247,13 @@ export default async function write(app, ep, id, opts = {}) {
     if (low > sr.bottom - pb + 1) stg.style.height = Math.ceil(sr.height + low - (sr.bottom - pb)) + "px";
   }
   // 머리 줄 한 줄 유지(본부 10-07) — 넘치면 ✕ 닫기 글을 숨기고 ✕ 만
+  // 따로 연 쓰기(#/write) 머리 줄(.bar) — 넘치면 차례로: ⌨✍ 그림만 → 「?」 만 → 화자 숨김 → 「쓰기」 제목 숨김(번호는 한 줄) · 검사부 10-14 th 320 19px 넘쳐 「?」 화면 밖
+  function fitBarW() { const b = app.querySelector(".scr.write > .bar"); if (!b) return; const hp = b.querySelector("[data-act=help]"); if (hp) hp.textContent = t("help_btn"); const over = () => b.scrollWidth > b.clientWidth + 1 || [...b.children].some(e => e.getBoundingClientRect().right > b.getBoundingClientRect().right + 1) || [...b.querySelectorAll(".grow .t, .grow .sub")].some(e => e.offsetParent && e.scrollWidth > e.clientWidth + 1); /* 제목·번호가 줄임표로 잘려도 넘침(가운데 칸이 줄어 「ฝ…」「2.」만 보이던 것) */ b.classList.remove("b1", "b2", "b3", "b4"); for (const c of ["b1", "b2", "b3", "b4"]) { if (!over()) break; b.classList.add(c); if (c === "b2" && hp) hp.textContent = "?"; } }
   function fitHeadW() { const h = work.closest(".write")?.querySelector(".whead") || app.querySelector(".whead"); if (!h) return; const sb = h.querySelector(".sub"), over = () => h.scrollWidth > h.clientWidth + 1 || (sb && sb.scrollWidth > sb.clientWidth + 1); /* 번호 칸이 말줄임으로 잘려도 넘침(ur 「3 / 1…」) */ const hp = h.querySelector("[data-act=help]"); if (hp) hp.textContent = t("help_btn"); h.classList.remove("narrow", "n2", "n3", "n3b", "n3c", "n3d", "n4"); for (const c of ["narrow", "n2", "n3", "n3b", "n3c", "n3d", "n4"]) { if (!over()) break; h.classList.add(c); if (c === "n3c" && hp) hp.textContent = "?"; /* 두 줄로 꺾기 전 ? 방법 = 「?」 만(이름은 aria-label · 10-14 모국어⇄한 단추가 들어와 폰에서 두 줄이 되던 것) */ } } // 머리 줄이 넘치면 차례로: ✕ 글 숨김 → 「쓰기」 제목 숨김 → 화자 이름 숨김 → 두 줄로(닫기 단추가 화면 밖으로 밀리지 않게 · 검사부 10-12 vi 375)
   // 손글씨 도구 단추(연필·펜·붓·자석)가 창 밖으로 나가면(10-12 vi 320 「🧲 Nam châm」 31px) = 그림만(이름은 aria-label)
   function fitTools() { const ht = work.querySelector(".htools"); if (!ht) return; ht.classList.remove("ic"); const wr = work.closest(".write"); if (!wr) return; const R = wr.getBoundingClientRect(); if ([...ht.querySelectorAll("button")].some(b => { const r = b.getBoundingClientRect(); return r.right > R.right + 0.5 || r.left < R.left - 0.5; }) || ht.scrollWidth > ht.clientWidth + 1) ht.classList.add("ic"); }
   function fitWord() {
-    fitTools(); fitSub2(); fitHeadW(); fitStageH();
+    fitTools(); fitSub2(); fitHeadW(); fitBarW(); fitStageH();
     const row = work.querySelector(".info .word"); if (!row || !row.clientWidth) return;
     const bs = [...row.querySelectorAll(".wc")]; bs.forEach(b => { b.style.fontSize = ""; b.style.padding = ""; });
     for (let fs = parseFloat(getComputedStyle(bs[0] || row).fontSize) - 1; row.scrollWidth > row.clientWidth + 1 && fs >= 11; fs -= 1) bs.forEach(b => { b.style.fontSize = fs + "px"; b.style.padding = fs < 16 ? "0 2px" : ""; });
@@ -909,7 +911,7 @@ export default async function write(app, ep, id, opts = {}) {
 
   setNote(); render();
   if (autoAllNext && autoAllNext.ep === ep && String(autoAllNext.id) === String(id) && Date.now() - autoAllNext.t < 8000) { autoAllNext = null; setTimeout(() => { if (st.alive && !st.auto) autoPart("all"); }, 300); } else autoAllNext = null; // 전체 자동 완성 이어서(본부 10-11)
-  try { const nTip = +(localStorage.getItem("malmun.wlinetip") || 0); if (nTip < 2) { localStorage.setItem("malmun.wlinetip", String(nTip + 1)); const tip = $(".wtip"); tip.textContent = t("w_line_tip"); tip.hidden = false; sentEl.classList.add("flash"); st.tipT = setTimeout(hideLineTip, 4000); } } catch {} // 🔊 = 이 줄 듣기 말풍선 처음 2번(투덜이 10-13)
+  try { const nTip = +(localStorage.getItem("malmun.wlinetip") || 0); if (nTip < 2) { localStorage.setItem("malmun.wlinetip", String(nTip + 1)); const tip = $(".wtip"); tip.textContent = t("w_line_tip"); tip.hidden = false; sentEl.classList.add("flash"); requestAnimationFrame(() => { const sp = sentEl.querySelector(".spkb"), row = tip.parentElement; if (!sp || !row) return; const r = sp.getBoundingClientRect(), rr = row.getBoundingClientRect(); tip.style.left = Math.max(4, Math.min(rr.width - tip.offsetWidth - 4, r.left + r.width / 2 - rr.left - 24)) + "px"; tip.style.right = "auto"; }); /* 말풍선 꼬리 = 🔊 단추 위치(ur 오른쪽→왼쪽에서 ◀▶ 를 가리키던 것 · 10-14) */ st.tipT = setTimeout(hideLineTip, 4000); } } catch {} // 🔊 = 이 줄 듣기 말풍선 처음 2번(투덜이 10-13)
   const release = hold();
   // 이 줄에서 쓸 소리를 미리 받아 풀어 둔다(대사 · 낱말·토막 · 글자 · 자판 자모) — 누르는 순간 바로 나오게
   sfx.preload([lineSrc, ...allWords.map(w => unitSrc(w.unit)), ...segs.map(g => unitSrc(g.unit)),
