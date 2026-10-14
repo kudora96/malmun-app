@@ -1,7 +1,7 @@
-import { t, tL, lang, langName, LANGS, READY, setLang, KO_UI, uiKoOn, setUiKo, langShort, preloadKoUi } from "./i18n.js?v=1013.1";
-import { snapshot, retext } from "./retext.js?v=1013.1";
-import { VERSION } from "./version.js?v=1013.1";
-import { esc } from "./text.js?v=1013.1";
+import { t, tL, lang, langName, LANGS, READY, setLang, KO_UI, uiKoOn, setUiKo, langShort, preloadKoUi } from "./i18n.js?v=1014.1";
+import { snapshot, retext } from "./retext.js?v=1014.1";
+import { VERSION } from "./version.js?v=1014.1";
+import { esc } from "./text.js?v=1014.1";
 
 const svg = (d, fill) => `<svg class="ico" viewBox="0 0 24 24" ${fill ? 'fill="currentColor"' : 'fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"'} aria-hidden="true">${d}</svg>`;
 export const I = {
@@ -25,7 +25,7 @@ export async function switchUiKo(ko) {
   if (!KO_UI.includes(lang) || ko === uiKoOn()) return;
   const before = snapshot(); await setUiKo(ko); retext(before, document.body);
   document.querySelectorAll("[data-act=uiko]").forEach(b => b.setAttribute("aria-pressed", String(uiKoOn())));
-  if (ko) backTip();
+  if (ko) backTip(); else document.querySelectorAll(".toast.uikotip").forEach(x => x.remove()); // 모국어로 돌아오면 안내는 바로 치움
 }
 // 한국어로 바꾼 뒤 길을 잃지 않게(본부 10-14 ④) — 처음 두 번만, 모국어로 「ไทย⇄한 을 누르면 돌아와요」
 function backTip() {

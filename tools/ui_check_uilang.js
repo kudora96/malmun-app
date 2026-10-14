@@ -9,7 +9,7 @@
   if (!I.KO_UI.includes(LANG)) return `✓ 언어 하나: ${LANG} 는 ⇄한 없음 — 건너뜀`;
   window.__sfxVolume = 0.0001; window.__noRhythm = true; window.__noSrSwitch = true;
   const SCRIPT = { ne: /[ऀ-ॿ]/, vi: /[ăâđêôơưạ-ỹ]/i, th: /[฀-๿]/, ur: /[؀-ۿ]/ }[LANG];
-  const CONTENT = "[lang=ko], .kotext, .ko, .v9body, .glosses, .saybig, .tr, .rom, .mean, .who, .vsub, .vtitle, .v9bar [data-x=ex], [data-act=uiko], .pairln, .lines .line:not(.cur), video, .heard";
+  const CONTENT = "[lang=ko], .kotext, .ko, .v9body, .glosses, .saybig, .tr, .rom, .mean, .who, .vsub, .vtitle, .v9bar [data-x=ex], [data-act=uiko], .toast.uikotip, .pairln, .lines .line:not(.cur), video, .heard"; // .toast.uikotip = 한국어로 바꾼 직후 모국어 「돌아오는 길」 안내(일부러 모국어 · 다국어부 10-14)
   const strip = s => s.replace(/「[^」]*」|⁨[^⁩]*⁩|"[^"]*"/g, "");
   const left = re => { const out = []; const w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT); for (let n = w.nextNode(); n; n = w.nextNode()) { const p = n.parentElement; if (!p || !p.getClientRects().length || p.closest(CONTENT) || p.closest("[hidden]")) continue; if (re.test(strip(n.nodeValue))) out.push(`${p.tagName.toLowerCase()}.${String(p.className).split(" ")[0]}「${n.nodeValue.trim().slice(0, 20)}」`); } return out; };
   const HANGUL = /[가-힣]/;

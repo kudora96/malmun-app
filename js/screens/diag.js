@@ -1,16 +1,17 @@
 // 진단 화면 #/diag(본부 10-07 「PC 에선 되는데 폰에선 안 됨」) — 투덜이가 폰에서 열어 사진 한 장 · 「복사」로 글째 보냄
 //  기기 · 받아쓰기(인식만 / 녹음+인식 동시) · 마이크(허락 · 실제 적용된 설정 · 장치) · 녹음 형식(지원 · 3초 녹음을 풀 수 있나)
 //  소리(AudioContext 상태 · 「가」 소리 · 효과음 · 음성 창고 읽기) · 최근 오류 20개 — 앱 동작은 안 바꿈(시험은 이 화면 안에서만)
-import { VERSION } from "../version.js?v=1013.1";
-import { esc } from "../text.js?v=1013.1";
-import { paths } from "../paths.js?v=1013.1";
-import { charsF } from "../data.js?v=1013.1";
-import { audioCtx } from "../wake.js?v=1013.1";
-import * as sfx from "../sfx.js?v=1013.1";
-import { srOnlyMode, setSrOnly, devSR, setDevSR, seqMode, srFailCount, serverMode } from "../recorder.js?v=1013.1";
-import { sttReady, sttURL, serverSTT } from "../sttserver.js?v=1013.1";
-import { diagCount, clearDiag } from "../diag.js?v=1013.1";
-import { errLog, clearErr } from "../errlog.js?v=1013.1";
+import { VERSION } from "../version.js?v=1014.1";
+import { esc } from "../text.js?v=1014.1";
+import { uiKoBtn } from "../ui.js?v=1014.1";
+import { paths } from "../paths.js?v=1014.1";
+import { charsF } from "../data.js?v=1014.1";
+import { audioCtx } from "../wake.js?v=1014.1";
+import * as sfx from "../sfx.js?v=1014.1";
+import { srOnlyMode, setSrOnly, devSR, setDevSR, seqMode, srFailCount, serverMode } from "../recorder.js?v=1014.1";
+import { sttReady, sttURL, serverSTT } from "../sttserver.js?v=1014.1";
+import { diagCount, clearDiag } from "../diag.js?v=1014.1";
+import { errLog, clearErr } from "../errlog.js?v=1014.1";
 
 // 같은 오류(종류·글·주소·자리)는 한 줄로 묶음 — 화면·복사 글 같이(본부 10-12 · 띄엄띄엄 쌓인 version.json 실패 20개)
 const errGroups = () => { const g = new Map(); for (const e of errLog()) { const k = [e.kind, e.msg, e.url || "", e.src || "", e.line || ""].join("|"), o = g.get(k); if (o) { o.n += e.n || 1; o.at = e.at; } else g.set(k, { ...e, n: e.n || 1 }); } return [...g.values()].reverse(); };
@@ -39,7 +40,7 @@ export default async function diag(app) {
     return a.slice().reverse().map(x => [String(x.at || "").slice(11, 19), x.where, `방식 ${x.mode || "?"}`, `끝 ${x.why || "?"}${x.cut ? "(" + x.cut + ")" : ""}`, ev(x), `들음 「${(x.heard || []).slice(-1)[0] || "없음"}」`, `점수 ${x.score ?? "-"}`, `녹음 최대 ${x.maxDb ?? "?"}dB`, x.play || "재생 전", `마이크 뒤 ${x.micAfter || "?"}`, x.seq ? `1번 길: ${x.seq}` : "", `${x.mic || ""} · ${x.set || ""}`, `ctx ${x.ctxRate || "?"}Hz ${x.ctxState || ""}`].join(" | ")); };
   const paint = () => {
     const errs = errLog();
-    app.innerHTML = `<section class="scr diag"><div class="bar"><div class="grow"><div class="t">진단 · Diagnostics</div><div class="sub">사진 한 장 또는 「복사」로 보내 주세요</div></div><a class="dback" href="#/list">✕ 닫기</a></div>
+    app.innerHTML = `<section class="scr diag"><div class="bar"><div class="grow"><div class="t">진단 · Diagnostics</div><div class="sub">사진 한 장 또는 「복사」로 보내 주세요</div></div>${uiKoBtn()}<a class="dback" href="#/list">✕ 닫기</a></div>
       <table class="dtab">${Object.entries(base).map(([k, v]) => row(k, v)).join("")}${Object.values(keys).map(k => row(k, res[k] ?? "—")).join("")}</table>
       <div class="dbtns">${tests.map(([a, l]) => `<button data-t="${a}">${esc(l)}</button>`).join("")}</div>
       <p class="dkeep">이 폰에 남은 진단 녹음: <b class="dkeepn">…</b>개(최대 3개 · 폰 밖으로 보내지 않음 · 목록의 「모두 지우기」로도 지워짐) <button data-t="cleardiag">진단 녹음 지우기</button></p><h3>최근 말하기 녹음 5개</h3><ol class="derr drec">${recRows().map(x => `<li>${esc(x)}</li>`).join("") || "<li>없음</li>"}</ol>

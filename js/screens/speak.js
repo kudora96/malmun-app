@@ -13,21 +13,21 @@
 //     못 넘어도 막지 않는다([다음 ▶]) · 음성 인식이 안 되는 곳은 점수 없이 듣고 비교만(녹음은 저장)
 //  S6 녹음은 이 기기 안에만(IndexedDB) — 서버로 보내지 않는다
 //  S7 영상 창 안(embedded): 스크롤 없이 · 줄 이동·닫기는 학습 화면이 한다 · 줄 전체까지 통과하면 다음 줄 말하기로
-import { warmSTT } from "../sttserver.js?v=1013.1";
-import { t, lang } from "../i18n.js?v=1013.1";
-import { esc, sayParts, koq } from "../text.js?v=1013.1";
-import { spkHtml } from "../ui.js?v=1013.1";
-import { episode } from "../data.js?v=1013.1";
-import { paths } from "../paths.js?v=1013.1";
-import { audioCtx, hold, quietWake } from "../wake.js?v=1013.1";
-import * as sfx from "../sfx.js?v=1013.1";
-import { diagEnv, keepDiag } from "../diag.js?v=1013.1";
-import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1013.1";
-import { bestHeard, heardHTML, endHint, scoreOf, bestFull, spanOf, sylsAt } from "../heard.js?v=1013.1"; // 덧붙은 말 빼고 견주기(본부 10-11)
-import { openCompare, playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1013.1";
-import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace, lateFactor, sylAt, karaokeRun } from "../rhythm.js?v=1013.1";
-import { recDel, downloadRec, askPersist } from "../recstore.js?v=1013.1";
-import { logRec, dB, srWhy, srWatch, niceLabel, ALIAS, srOnlyMode, setSrOnly, isAndroid, recordSROnly, srMiss, micSet, seqMode, srOnBlob, devSR, setDevSR, srJudge } from "../recorder.js?v=1013.1";
+import { warmSTT } from "../sttserver.js?v=1014.1";
+import { t, lang } from "../i18n.js?v=1014.1";
+import { esc, sayParts, koq } from "../text.js?v=1014.1";
+import { spkHtml, uiKoBtn } from "../ui.js?v=1014.1";
+import { episode } from "../data.js?v=1014.1";
+import { paths } from "../paths.js?v=1014.1";
+import { audioCtx, hold, quietWake } from "../wake.js?v=1014.1";
+import * as sfx from "../sfx.js?v=1014.1";
+import { diagEnv, keepDiag } from "../diag.js?v=1014.1";
+import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1014.1";
+import { bestHeard, heardHTML, endHint, scoreOf, bestFull, spanOf, sylsAt } from "../heard.js?v=1014.1"; // 덧붙은 말 빼고 견주기(본부 10-11)
+import { openCompare, playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1014.1";
+import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace, lateFactor, sylAt, karaokeRun } from "../rhythm.js?v=1014.1";
+import { recDel, downloadRec, askPersist } from "../recstore.js?v=1014.1";
+import { logRec, dB, srWhy, srWatch, niceLabel, ALIAS, srOnlyMode, setSrOnly, isAndroid, recordSROnly, srMiss, micSet, seqMode, srOnBlob, devSR, setDevSR, srJudge } from "../recorder.js?v=1014.1";
 
 // 통과 두 단계(본부 10-04 · 투덜이 「원어민은 되지만 외국인은 100% 어렵다」): 80↑ = ☆ 통과(✓ · [저장]) · 95↑ = ★ 완벽
 export const PASS = 80, PERFECT = 95;
@@ -66,8 +66,8 @@ export function quietLimit(want, heard) {
 export const maxMsFor = say => Math.max(8000, (3 + 0.8 * [...String(say || "")].filter(c => /[가-힣]/.test(c)).length) * 1000);
 
 // ── 닮음 = 음절 정렬(js/score.js · 「들린 말」 빨간 표시와 같은 함수 — 본부 10-04) ──
-import { similarity, align } from "../score.js?v=1013.1";
-import { scoreFx } from "../scorefx.js?v=1013.1"; // 점수별 효과(본부 10-05)
+import { similarity, align } from "../score.js?v=1014.1";
+import { scoreFx } from "../scorefx.js?v=1014.1"; // 점수별 효과(본부 10-05)
 export { similarity };
 
 // ── 내 목소리 저장(S6) ──
@@ -106,7 +106,7 @@ export default async function speak(app, ep, id, opts = {}) {
 
   app.innerHTML = `<section class="scr speak ${opts.embedded ? "embedded" : ""}">
     <div class="whead"><b>${esc(t("speak"))}</b><span class="sub">${li + 1} / ${d.lines.length}<span class="spk"> · ${spkHtml(line.speaker)}</span></span>
-      <button class="micpick" data-act="help" aria-label="${esc(t("help"))}">${lbl(t("help_btn"))}</button><span class="segnav"></span><button class="micpick closex" data-act="close" aria-label="${esc(t("close_btn"))}">${lbl(t("close_btn"))}</button></div>
+      ${uiKoBtn()}<button class="micpick" data-act="help" aria-label="${esc(t("help"))}">${lbl(t("help_btn"))}</button><span class="segnav"></span><button class="micpick closex" data-act="close" aria-label="${esc(t("close_btn"))}">${lbl(t("close_btn"))}</button></div>
     <div class="miclist" hidden></div>
     <div class="helpbox" hidden>${[1, 2, 3, 4, 5, 6].map(k => `<p>${esc(t("help_sp_" + k))}</p>`).join("")}<p class="x">${esc(t("help_close"))}</p></div>
     <div class="task"><div class="say ko" lang="ko"></div><div class="tr"></div></div>
@@ -124,8 +124,8 @@ export default async function speak(app, ep, id, opts = {}) {
   // 도움말 풍선 = 칸 안에 다 보이게(본부 10-07 · 스크롤 0) — 넘치면 글을 조금씩 작게(최소 0.6배)
   const fitHelp = () => { const hb = $(".helpbox"); if (!hb || hb.hidden) return; const ps = [...hb.children]; ps.forEach(x => x.style.removeProperty("zoom")); for (let z = 0.95; z >= 0.6 && hb.scrollHeight > hb.clientHeight; z -= 0.05) ps.forEach(x => (x.style.zoom = z.toFixed(2))); };
   new ResizeObserver(() => fitHelp()).observe($(".helpbox"));
-  // 머리 줄은 한 줄(본부 10-06 — 375×667 에서 「✕ बन्द」가 둘째 줄로 떨어짐) — 넘치면 h1: 단추 글 숨김(◀ ▶ ? ✕ 만) → h2: 제목 옆 「· 화자」 숨김
-  function fitHead() { const h = $(".whead"); if (!h) return; h.classList.remove("h1", "h2"); for (const c of ["h1", "h2"]) { if (h.scrollWidth <= h.clientWidth + 1) break; h.classList.add(c); } }
+  // 머리 줄은 한 줄(본부 10-06 — 375×667 에서 「✕ बन्द」가 둘째 줄로 떨어짐) — 넘치면 h1: 단추 글 숨김(◀ ▶ ? ✕ 만) → h2: 제목 옆 「· 화자」 숨김 → h3: 사이 좁힘·⇄한 작게 → h4: 「말하기」 제목 숨김(⇄한 들어온 뒤 320 · 앱개발부 10-14)
+  function fitHead() { const h = $(".whead"); if (!h) return; h.classList.remove("h1", "h2", "h3", "h4"); for (const c of ["h1", "h2", "h3", "h4"]) { if (h.scrollWidth <= h.clientWidth + 1) break; h.classList.add(c); } }
   new ResizeObserver(() => fitHead()).observe($(".whead"));
   // [तुलना] = 비교 화면(파형 두 줄 + 음절 칸 · js/compare.js) — 다시 누르면 원래 말하기 화면 · 토막을 바꾸거나 🎤 를 누르면 닫음
   let cmp = null;
@@ -477,7 +477,7 @@ export default async function speak(app, ep, id, opts = {}) {
   sfx.preload([lineSrc, ...parts.map(p => p.src)]);
   const release = hold();
   // 언어를 바꾸면(본부 10-13 안 A · retext 가 보내는 malmun:uilang) 결과 줄·토막 단추를 지금 상태 그대로 새 언어로 — 녹음·채점은 안 건드림 · 「확인 중…」 동안은 retext 가 바꾼 글 그대로
-  const onLang = () => { if (!st.alive || st.checking) return; paint(); if (st.retryDev) $(".msg").textContent = t("sr_retry_dev"); };
+  const onLang = () => { if (!st.alive) return; fitHead(); if (st.checking) return; paint(); if (st.retryDev) $(".msg").textContent = t("sr_retry_dev"); };
   addEventListener("malmun:uilang", onLang);
   return () => { removeEventListener("malmun:uilang", onLang); st.alive = false; newAtt(); clearInterval(litT); closeCmp(); stopRec(true); stopSounds(); st.stream?.getTracks().forEach(x => x.stop()); release(); quietWake(false); document.removeEventListener("keydown", onEsc, true); delete app.__sp; };
 }

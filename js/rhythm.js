@@ -10,12 +10,12 @@
 //      같은 음절 되풀이(「이…있어요」「거구구나」 — 들은 말에 더 들어간 음절이 옆 음절과 같거나 첫소리+모음이 같음)도 −0.08(「더듬음」)
 //  · 최종 점수 = 글자 점수(score.js) × f(R): R ≥ 0.85 → 1 · 0.5 ≤ R < 0.85 → 0.90 + 0.10 × (R − 0.5)/0.35 · R < 0.5 → 0.88
 //  녹음·재생은 그대로 — 받은 녹음(blob)을 풀어 재기만
-import { audioCtx } from "./wake.js?v=1013.1";
-import { leadOf, voicedEnd, keepFirstOf } from "./playmine.js?v=1013.1";
-import { speechEnd } from "./recstore.js?v=1013.1";
-import * as sfx from "./sfx.js?v=1013.1";
-import { align } from "./score.js?v=1013.1";
-import { koq } from "./text.js?v=1013.1";
+import { audioCtx } from "./wake.js?v=1014.1";
+import { leadOf, voicedEnd, keepFirstOf } from "./playmine.js?v=1014.1";
+import { speechEnd } from "./recstore.js?v=1014.1";
+import * as sfx from "./sfx.js?v=1014.1";
+import { align } from "./score.js?v=1014.1";
+import { koq } from "./text.js?v=1014.1";
 
 export const FR = 0.02; // 특징 칸 20ms
 const alignCache = new Map();
@@ -159,6 +159,38 @@ export function prepare({ al, key, text, mbuf, ybuf }) {
   // 낱말(띄어쓰기) 묶음 — 긴 줄 리듬용(본부 10-07)
   const groups = (() => { const g = []; let k = 0; for (const w of String(text).split(/\s+/)) { const m = [...w].filter(isSyl).length; if (!m) continue; g.push({ ks: Array.from({ length: m }, (_, i) => k + i), w: w.replace(/[^\p{L}\p{N}]/gu, "") }); k += m; } return k === W.length ? g : null; })();
   return { W, msyl, ysyl, ends, keepFirst, groups, aligned, mLead, mStop, mEnd, mLead0, ref, yLead, yStop };
+}
+
+// 내 목소리 음절 칸 = 내 파형 소리 덩어리에 맞춤(본부 10-14 투덜이 — 틀리게 읽은 「약해계세요」가 DTW 로 오른쪽 좁은 곳에 몰림 · 비교 화면 표시만 · 점수 칸 ysyl0 는 그대로)
+//  [a, b] 를 10ms 칸으로 음절 수만큼 나눔(동적 계획) — 비용 = 경계 자리 소리 크기(골짜기·쉼일수록 쌈) + 칸마다 말소리 길이 ÷ 본보기 길이 비율 어긋남 + 믿는 경계(앞뒤 음절 둘 다 맞음)는 DTW 자리에서 멀수록
+//  → 칸 앞뒤 쉼(60ms 넘음)은 덜어 냄 · md = 본보기 음절 길이 · prior[k] = 음절 k 시작의 DTW 시각 · trust[k] = 그 경계를 믿을지
+export function snapSyl(buf, md, a, b, prior = [], trust = []) {
+  const N = md.length, H = 0.01; if (!N || b - a < 0.05 * N) return null;
+  const d = buf.getChannelData(0), sr = buf.sampleRate, w = Math.max(1, Math.round(sr * H)), i0 = Math.max(0, Math.floor(a / H)), n = Math.min(Math.floor(d.length / w), Math.ceil(b / H)) - i0;
+  if (n < N * 4) return null;
+  const r = new Float32Array(n); let pk = 1e-9;
+  for (let i = 0; i < n; i++) { let q = 0; const o = (i0 + i) * w; for (let k = o; k < o + w; k++) q += d[k] * d[k]; r[i] = Math.sqrt(q / w); }
+  const sm = r.map((_, i) => (r[Math.max(0, i - 1)] + 2 * r[i] + r[Math.min(n - 1, i + 1)]) / 4); sm.forEach(v => { if (v > pk) pk = v; });
+  const thr = pk * Math.pow(10, -30 / 20), vc = new Int32Array(n + 1); for (let i = 0; i < n; i++) vc[i + 1] = vc[i] + (sm[i] > thr ? 1 : 0);
+  if (vc[n] < N * 3) return null; // 말소리가 너무 적음 → DTW 그대로
+  const bc = new Float64Array(n + 1).map((_, j) => { const v = Math.min(sm[Math.max(0, j - 1)], sm[Math.min(n - 1, j)]); return 3 * Math.max(0, Math.min(1, (20 * Math.log10(v / pk + 1e-6) + 50) / 50)); }), lg = new Float64Array(n + 1).map((_, v) => Math.log(v + 3)); // 경계 값 = 0 쉼 ~ 3 가장 큰 소리 · 길이 로그 표(안쪽 고리에서 셈 안 함)
+  const T = md.reduce((p, q) => p + q, 0), E = md.map(x => (vc[n] * x) / T), Lmax = Math.min(n, Math.max(150, Math.ceil(3 * Math.max(...E))));
+  const D = Array.from({ length: N + 1 }, () => new Float64Array(n + 1).fill(Infinity)), P = Array.from({ length: N + 1 }, () => new Int32Array(n + 1));
+  D[0][0] = 0;
+  for (let k = 1; k <= N; k++) {
+    const lE = Math.log(E[k - 1] + 3), Dk = D[k], Pk = P[k], Dp = D[k - 1], pr = k > 1 && trust[k - 1] && prior[k - 1] != null ? prior[k - 1] : null;
+    const add = new Float64Array(n + 1); if (k > 1) for (let p = 0; p <= n; p++) { let c = bc[p]; if (pr != null) { const z = (a + p * H - pr) / 0.15; c += 2 * Math.min(1, z * z); } add[p] = c; } // 경계 p 값(음절 k 시작)
+    for (let q = k === N ? n : k; q <= n - (N - k); q++) { const vq = vc[q];
+      for (let p = Math.max(k - 1, q - Lmax); p < q; p++) { const base = Dp[p]; if (base === Infinity) continue;
+        const v = vq - vc[p], x = lg[v] - lE, c = base + x * x + (v < 3 ? 4 : 0) + add[p];
+        if (c < Dk[q]) { Dk[q] = c; Pk[q] = p; } } } }
+  if (D[N][n] === Infinity) return null;
+  const B = [n]; for (let k = N, q = n; k > 0; k--) { q = P[k][q]; B.unshift(q); }
+  const on = i => sm[i] > thr;
+  return md.map((_, k) => { let p = B[k], q = B[k + 1];
+    let p2 = p; while (p2 < q - 4 && !on(p2)) p2++; if (p2 - p > 6) p = p2 - 1;
+    let q2 = q; while (q2 > p + 4 && !on(q2 - 1)) q2--; if (q - q2 > 6) q = q2 + 2;
+    return { s: a + p * H, e: a + q * H }; });
 }
 
 // 조용한 틈(20ms 칸 · 그 소리 최대에서 30dB 아래) — [t0, t1] 안에서 이어진 구간들 [{ s, e }]
