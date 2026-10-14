@@ -123,9 +123,9 @@ export default async function write(app, ep, id, opts = {}) {
 
   app.innerHTML = `<section class="scr write ${opts.embedded ? "embedded" : ""}">
     ${opts.embedded
-      ? `<div class="whead"><b>${esc(t("write"))}</b><span class="sub">${li + 1} / ${d.lines.length} · ${spkHtml(line.speaker)}</span>${modeBtns()}${uiKoBtn()}<button class="whelp" data-act="help" aria-label="${esc(t("help"))}">${esc(t("help_btn"))}</button><button class="whelp wclose" data-act="close" aria-label="${esc(t("close_btn"))}">✕<span class="lt">${esc(String(t("close_btn")).replace(/^✕\s*/, " "))}</span></button><span class="loopnote" aria-live="polite"></span></div>`
+      ? `<div class="whead"><b>${esc(t("write"))}</b><span class="sub"><span class="ln">${li + 1} / ${d.lines.length}</span><span class="sp"> · ${spkHtml(line.speaker)}</span></span>${modeBtns()}${uiKoBtn()}<button class="whelp" data-act="help" aria-label="${esc(t("help"))}">${esc(t("help_btn"))}</button><button class="whelp wclose" data-act="close" aria-label="${esc(t("close_btn"))}">✕<span class="lt">${esc(String(t("close_btn")).replace(/^✕\s*/, " "))}</span></button><span class="loopnote" aria-live="polite"></span></div>`
       : `<div class="bar"><a class="iconbtn" href="#/learn/${ep}/${line.id}" aria-label="${esc(t("back"))}">${I.back}</a>
-      <div class="grow"><div class="t">${esc(t("write"))}</div><div class="sub">${li + 1} / ${d.lines.length} · ${spkHtml(line.speaker)}</div></div>${modeBtns()}${uiKoBtn()}<button class="whelp" data-act="help" aria-label="${esc(t("help"))}">${esc(t("help_btn"))}</button></div><div class="loopnote" aria-live="polite"></div>`}
+      <div class="grow"><div class="t">${esc(t("write"))}</div><div class="sub"><span class="ln">${li + 1} / ${d.lines.length}</span><span class="sp"> · ${spkHtml(line.speaker)}</span></div></div>${modeBtns()}${uiKoBtn()}<button class="whelp" data-act="help" aria-label="${esc(t("help"))}">${esc(t("help_btn"))}</button></div><div class="loopnote" aria-live="polite"></div>`}
     <div class="segrow"><div class="sent" lang="ko"></div><div class="segnav"></div><div class="wtip" hidden></div></div>
     <div class="work"></div>
     <div class="helpbox" hidden>${helpHtml()}</div>
@@ -223,11 +223,12 @@ export default async function write(app, ep, id, opts = {}) {
   // 손글씨 칸이 작으면(10-12 en·ur 320×640 = 88·92px — 아래 단추 셋 두 줄 + 손글씨 단추 넷 글이 옆을 차지) 차례로: ① 아래 단추 셋 한 줄(wt1) ② 도구 단추 그림만 ③ 손글씨 단추 넷 그림만 · 목표 칸 150px
   function fitHandBox() {
     const wr = work.closest(".write"), hand = work.querySelector(".hand"), H = st.hand; if (!wr || !hand || !H?.fit) return;
-    wr.classList.remove("wt1"); hand.classList.remove("hic"); work.querySelector(".htools")?.classList.remove("ic2"); H.fit(); stageFix();
+    wr.classList.remove("wt1", "hcomp"); hand.classList.remove("hic"); work.querySelector(".htools")?.classList.remove("ic2"); H.fit(); stageFix();
     const small = () => (H.s || 0) < 150;
     if (small() && wb.classList.contains("below")) { wr.classList.add("wt1"); stageFix(); H.fit(); }
     if (small()) { work.querySelector(".htools")?.classList.add("ic2"); stageFix(); H.fit(); }
     if (small()) { hand.classList.add("hic"); H.fit(); }
+    if (small()) { wr.classList.add("hcomp"); fitStageH(); H.fit(); } // ④ 그래도 작으면(ur 320 나스탈리크 — 머리 줄·뜻 줄이 높아 129px · 본부 10-14) 뜻 줄 한 줄·글자 조금 작게·머리 줄 줄간격 좁게
     // 칸을 맞춘 뒤 글자 칸 줄이 좁아져 세 단추가 잘리면(넘침 숨김) = 아래 줄로 옮기고 한 번 더(되부름 없이 한 번만)
     const row = wb.parentElement?.classList.contains("slotrow") ? wb.parentElement : null, stg = work.querySelector(".stage");
     if (row && stg && (row.scrollWidth > row.clientWidth + 1 || wb.getBoundingClientRect().right > stg.getBoundingClientRect().right + 1)) { stg.after(wb); stg.classList.remove("btns-in"); wb.classList.add("below"); fitStageH(); if (!fitHandBox.again) { fitHandBox.again = true; try { fitHandBox(); } finally { fitHandBox.again = false; } } }
@@ -246,7 +247,7 @@ export default async function write(app, ep, id, opts = {}) {
     if (low > sr.bottom - pb + 1) stg.style.height = Math.ceil(sr.height + low - (sr.bottom - pb)) + "px";
   }
   // 머리 줄 한 줄 유지(본부 10-07) — 넘치면 ✕ 닫기 글을 숨기고 ✕ 만
-  function fitHeadW() { const h = work.closest(".write")?.querySelector(".whead") || app.querySelector(".whead"); if (!h) return; const sb = h.querySelector(".sub"), over = () => h.scrollWidth > h.clientWidth + 1 || (sb && sb.scrollWidth > sb.clientWidth + 1); /* 번호 칸이 말줄임으로 잘려도 넘침(ur 「3 / 1…」) */ const hp = h.querySelector("[data-act=help]"); if (hp) hp.textContent = t("help_btn"); h.classList.remove("narrow", "n2", "n3", "n3b", "n3c", "n4"); for (const c of ["narrow", "n2", "n3", "n3b", "n3c", "n4"]) { if (!over()) break; h.classList.add(c); if (c === "n3c" && hp) hp.textContent = "?"; /* 두 줄로 꺾기 전 ? 방법 = 「?」 만(이름은 aria-label · 10-14 모국어⇄한 단추가 들어와 폰에서 두 줄이 되던 것) */ } } // 머리 줄이 넘치면 차례로: ✕ 글 숨김 → 「쓰기」 제목 숨김 → 화자 이름 숨김 → 두 줄로(닫기 단추가 화면 밖으로 밀리지 않게 · 검사부 10-12 vi 375)
+  function fitHeadW() { const h = work.closest(".write")?.querySelector(".whead") || app.querySelector(".whead"); if (!h) return; const sb = h.querySelector(".sub"), over = () => h.scrollWidth > h.clientWidth + 1 || (sb && sb.scrollWidth > sb.clientWidth + 1); /* 번호 칸이 말줄임으로 잘려도 넘침(ur 「3 / 1…」) */ const hp = h.querySelector("[data-act=help]"); if (hp) hp.textContent = t("help_btn"); h.classList.remove("narrow", "n2", "n3", "n3b", "n3c", "n3d", "n4"); for (const c of ["narrow", "n2", "n3", "n3b", "n3c", "n3d", "n4"]) { if (!over()) break; h.classList.add(c); if (c === "n3c" && hp) hp.textContent = "?"; /* 두 줄로 꺾기 전 ? 방법 = 「?」 만(이름은 aria-label · 10-14 모국어⇄한 단추가 들어와 폰에서 두 줄이 되던 것) */ } } // 머리 줄이 넘치면 차례로: ✕ 글 숨김 → 「쓰기」 제목 숨김 → 화자 이름 숨김 → 두 줄로(닫기 단추가 화면 밖으로 밀리지 않게 · 검사부 10-12 vi 375)
   // 손글씨 도구 단추(연필·펜·붓·자석)가 창 밖으로 나가면(10-12 vi 320 「🧲 Nam châm」 31px) = 그림만(이름은 aria-label)
   function fitTools() { const ht = work.querySelector(".htools"); if (!ht) return; ht.classList.remove("ic"); const wr = work.closest(".write"); if (!wr) return; const R = wr.getBoundingClientRect(); if ([...ht.querySelectorAll("button")].some(b => { const r = b.getBoundingClientRect(); return r.right > R.right + 0.5 || r.left < R.left - 0.5; }) || ht.scrollWidth > ht.clientWidth + 1) ht.classList.add("ic"); }
   function fitWord() {
@@ -917,8 +918,8 @@ export default async function write(app, ep, id, opts = {}) {
   function retext() {
     if (!st.alive) return; const L = k => t(k), span = (el, k) => { if (!el) return; el.setAttribute("aria-label", L(k)); const m = el.querySelector(".ml"); if (m) m.textContent = " " + L(k); };
     const h = app.querySelector(".whead"), bar = app.querySelector(".bar");
-    if (h) { const b = h.querySelector(":scope > b"); if (b) b.textContent = L("write"); const sb = h.querySelector(".sub"); if (sb) sb.innerHTML = `${li + 1} / ${d.lines.length} · ${spkHtml(line.speaker)}`; }
-    if (bar) { const tt = bar.querySelector(".t"), sb = bar.querySelector(".sub"), bk = bar.querySelector(".iconbtn"); if (tt) tt.textContent = L("write"); if (sb) sb.innerHTML = `${li + 1} / ${d.lines.length} · ${spkHtml(line.speaker)}`; bk?.setAttribute("aria-label", L("back")); }
+    if (h) { const b = h.querySelector(":scope > b"); if (b) b.textContent = L("write"); const sb = h.querySelector(".sub"); if (sb) sb.innerHTML = `<span class="ln">${li + 1} / ${d.lines.length}</span><span class="sp"> · ${spkHtml(line.speaker)}</span>`; }
+    if (bar) { const tt = bar.querySelector(".t"), sb = bar.querySelector(".sub"), bk = bar.querySelector(".iconbtn"); if (tt) tt.textContent = L("write"); if (sb) sb.innerHTML = `<span class="ln">${li + 1} / ${d.lines.length}</span><span class="sp"> · ${spkHtml(line.speaker)}</span>`; bk?.setAttribute("aria-label", L("back")); }
     app.querySelectorAll("[data-mode]").forEach(x => span(x, x.dataset.mode === "kb" ? "w_kb" : "w_hand"));
     app.querySelectorAll("[data-act=help]").forEach(x => { x.textContent = L("help_btn"); x.setAttribute("aria-label", L("help")); });
     app.querySelectorAll("[data-act=close]").forEach(x => { x.setAttribute("aria-label", L("close_btn")); x.innerHTML = `✕<span class="lt">${esc(String(L("close_btn")).replace(/^✕\s*/, " "))}</span>`; });

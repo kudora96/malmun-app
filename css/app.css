@@ -1086,6 +1086,8 @@ button.dim{opacity:.45}
 .write.wt2 .kb,.write.wt2.embedded .kb{gap:3px;padding-top:3px}
 .write.wt2 .kb .kr,.write.wt2 .kb .kr button,.write.wt2.embedded .kb .kr button{min-height:var(--krmin,30px)}
 .write.wt2 .kb .kr{gap:3px}
+/* 머리 줄 n3d(10-14) — 두 줄로 꺾기 전 마지막: 화자(· 선생님) 숨김 · 번호 「3 / 15」 만(ur 320 머리 줄 두 줄 → 손글씨 칸 129) */
+.write .whead.n3d .sub .sp{display:none}
 /* 머리 줄 n3b(10-12) — 두 줄로 꺾기 전에 ⌨ ✍ 그림만(이름은 aria-label) */
 .write .whead.n3b .wmode .ml{display:none}
 .write .whead.n3b .wmode button{min-width:40px}
@@ -1103,6 +1105,12 @@ button.dim{opacity:.45}
 /* 손글씨 도구 단추 그림만(fitTools ic · 10-12) */
 .write .htools.ic .ml,.write .htools.ic2 .ml{display:none}
 .write .htools.ic button,.write .htools.ic2 button{min-width:36px}
+/* 손글씨 칸이 그래도 작을 때(fitHandBox hcomp · 10-14 ur 320) — 뜻·로마자 한 줄(넘치면 …) · 글자 조금 작게 · 줄간격 좁게 · 머리 줄 줄간격 좁게 */
+.write.hcomp .work.handmode .stage .sub2{row-gap:1px}
+.write.hcomp .work.handmode .stage .sub2 :is(.rom,.mean){font-size:13px;line-height:1.35;white-space:nowrap;padding-block:0;margin-block:0}
+.write.hcomp .work.handmode .stage .sub2 .wko{font-size:14px}
+.write.hcomp .whead{line-height:1.15;row-gap:2px}
+.write.hcomp .whead button{min-height:28px;padding-block:2px}
 /* 점수 표시 = 손글씨 칸 밖 단추 줄 맨 앞(투덜이 10-14 「40%」가 「글」 ㄱ 첫 가로와 겹침) · 자리는 늘 잡아 둠(점수가 떠도 칸 크기 안 바뀜) */
 .write .hbtns .hscore{position:static;display:block;align-self:stretch;text-align:center;padding:2px 8px;border-radius:999px;font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.35;min-height:1.35em;background:var(--card);box-shadow:0 1px 0 var(--line);pointer-events:none}
 .write .hbtns .hscore[hidden]{display:block;visibility:hidden}
