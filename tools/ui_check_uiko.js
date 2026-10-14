@@ -30,7 +30,7 @@
   }
   function mixed(st, m, ko) {
     let n = 0;
-    for (const [k, x] of m) { const s0 = x.s.replace(/「[^」]*」|"[^"]*"/g, ""); const bad = ko ? SCRIPT.test(s0) && !HANGUL.test(s0) : HANGUL.test(s0); // 「복사」처럼 화면 단추 이름을 따옴표로 가리키는 것은 일부러 if (!bad) continue; const key = `${st}|섞임|${ko}|${where(k, x)}|${x.s}`; if (seen.has(key)) continue; seen.add(key); n++; out.push(`✗ ${st} 섞임(${ko ? "한국어 화면에 모국어" : "모국어 화면에 한글"}) ${where(k, x)} 「${x.s.slice(0, 40)}」`); }
+    for (const [k, x] of m) { const s0 = x.s.replace(/「[^」]*」|"[^"]*"/g, ""); const bad = ko ? SCRIPT.test(s0) && !HANGUL.test(s0) : HANGUL.test(s0); /* 「복사」처럼 화면 단추 이름을 따옴표로 가리키는 것은 일부러 */ if (!bad) continue; const key = `${st}|섞임|${ko}|${where(k, x)}|${x.s}`; if (seen.has(key)) continue; seen.add(key); n++; out.push(`✗ ${st} 섞임(${ko ? "한국어 화면에 모국어" : "모국어 화면에 한글"}) ${where(k, x)} 「${x.s.slice(0, 40)}」`); }
     return n;
   }
   const lines = () => document.querySelectorAll(".lines .line");
