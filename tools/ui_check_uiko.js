@@ -11,7 +11,7 @@
   const HANGUL = /[가-힣ㄱ-ㆎ]/;
   const SCRIPT = { ne: /[ऀ-ॿ]/, hi: /[ऀ-ॿ]/, th: /[฀-๿]/, ur: /[؀-ۿ]/, bn: /[ঀ-৿]/, km: /[ក-៿]/, lo: /[຀-໿]/, my: /[က-႟]/, si: /[඀-෿]/, zh: /[一-鿿]/, ja: /[぀-ヿ一-鿿]/, mn: /[Ѐ-ӿ]/, ru: /[Ѐ-ӿ]/, ky: /[Ѐ-ӿ]/ }[L] || /[A-Za-zÀ-ɏ]{3,}/;
   // 배우는 내용·이름(언어와 상관없이 그대로인 것) — retext SKIP 과 같은 뜻 + 자판·글자 칸·화자 이름·편 제목
-  const CONTENT = "[lang=ko]:not(button):not(.chip), .kotext, .ko, .v9body p, .v9body .pair, .glosses, .saybig, .sayrom, .tr, .trrom, .rom, .mean, .who, .vsub, .vtitle .tt, .sent, .wko, .slot, .slotrow, .kb, .hand, .spk, .spkg, .chips, .cap, .lines .line > p, .eps .t, .cwave, .csyl, .heard, .hrow, .stage, script, style, svg, textarea, input, .uiko .b, .uiko .a, [data-lang], [data-act=lang], .pb, .diag .dtab, .diag .dbtns button:not([data-t=copy]), .diag .dkeep, .diag h3, .diag .derr"; // [data-act=lang]·.pb = 언어 이름 단추(일부러 그 언어 이름) · 진단 표·시험 단추·기록 = 한국어 그대로(본부 10-14 — 제목·안내·닫기·복사만 번역)
+  const CONTENT = "[lang=ko]:not(button):not(.chip), .kotext, .ko, .v9body p, .v9body .pair, .glosses, .saybig, .sayrom, .tr, .trrom, .rom, .mean, .who, .vsub, .vtitle .tt, .sent, .wko, .slot, .slotrow, .kb, .hand, .spk, .spkg, .chips, .cap, .lines .line > p, .eps .t, .cwave, .csyl, .heard, .hrow, .stage, script, style, svg, textarea, input, .uiko .b, .uiko .a, [data-lang], [data-act=lang], .pb, .diag .dtab, .diag .dbtns button, .diag .dkeep, .diag h3, .diag .derr"; // [data-act=lang]·.pb = 언어 이름 단추(일부러 그 언어 이름) · 진단 표·시험 단추(복사 포함)·기록 = 한국어 그대로(본부 10-14 · 앱개발부 — 제목·안내·닫기만 번역)
   const vis = el => { for (let a = el; a && a !== document.body; a = a.parentElement) { if (a.hidden) return false; const s = getComputedStyle(a); if (s.display === "none" || s.visibility === "hidden") return false; } return el.getClientRects().length > 0; };
   const path = el => { const p = []; for (let a = el; a && a !== document.body; a = a.parentElement) { let i = 0; for (let b = a; (b = b.previousElementSibling);) i++; p.unshift(a.tagName.toLowerCase() + (a.className && typeof a.className === "string" ? "." + a.className.trim().split(/\s+/)[0] : "") + ":" + i); } return p.join(">"); };
   const label = el => (el.className && typeof el.className === "string" ? "." + el.className.trim().split(/\s+/).slice(0, 2).join(".") : el.tagName.toLowerCase());
@@ -30,7 +30,7 @@
   }
   function mixed(st, m, ko) {
     let n = 0;
-    for (const [k, x] of m) { const bad = ko ? SCRIPT.test(x.s) && !HANGUL.test(x.s) : HANGUL.test(x.s); if (!bad) continue; const key = `${st}|섞임|${ko}|${where(k, x)}|${x.s}`; if (seen.has(key)) continue; seen.add(key); n++; out.push(`✗ ${st} 섞임(${ko ? "한국어 화면에 모국어" : "모국어 화면에 한글"}) ${where(k, x)} 「${x.s.slice(0, 40)}」`); }
+    for (const [k, x] of m) { const s0 = x.s.replace(/「[^」]*」|"[^"]*"/g, ""); const bad = ko ? SCRIPT.test(s0) && !HANGUL.test(s0) : HANGUL.test(s0); // 「복사」처럼 화면 단추 이름을 따옴표로 가리키는 것은 일부러 if (!bad) continue; const key = `${st}|섞임|${ko}|${where(k, x)}|${x.s}`; if (seen.has(key)) continue; seen.add(key); n++; out.push(`✗ ${st} 섞임(${ko ? "한국어 화면에 모국어" : "모국어 화면에 한글"}) ${where(k, x)} 「${x.s.slice(0, 40)}」`); }
     return n;
   }
   const lines = () => document.querySelectorAll(".lines .line");
