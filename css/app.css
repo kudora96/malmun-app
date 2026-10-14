@@ -1126,9 +1126,20 @@ button.dim{opacity:.45}
 .write.hcomp .work.handmode .stage .sub2 .wko{font-size:14px}
 .write.hcomp .whead{line-height:1.15;row-gap:2px}
 .write.hcomp .whead button{min-height:28px;padding-block:2px}
+/* 시간 막대(투덜이 10-14 「게임처럼 타이머」) — 손글씨 단추 줄 점수 아래 · 첫 획부터 줄어듦 · 3초 남으면 빨강 · 자리 늘 잡아 둠 */
+.write .hbtns .htime{position:relative;display:block;align-self:stretch;height:16px;border-radius:999px;background:var(--line);overflow:hidden;visibility:hidden}
+.write .hbtns .htime.on{visibility:visible}
+.write .hbtns .htime i{position:absolute;left:0;top:0;bottom:0;width:100%;background:var(--hi);transition:width .1s linear}
+.write .hbtns .htime.low i{background:var(--badc)}
+.write .hbtns .htime b{position:relative;display:block;text-align:center;font-size:11px;line-height:16px;font-weight:800;color:var(--on-hi);font-variant-numeric:tabular-nums}
+.write .hand.two .hbtns .htime{grid-column:1/-1}
+.write .hand.stack .hbtns .htime{flex-basis:100%}
 /* 점수 표시 = 손글씨 칸 밖 단추 줄 맨 앞(투덜이 10-14 「40%」가 「글」 ㄱ 첫 가로와 겹침) · 자리는 늘 잡아 둠(점수가 떠도 칸 크기 안 바뀜) */
 .write .hbtns .hscore{position:static;display:block;align-self:stretch;text-align:center;padding:2px 8px;border-radius:999px;font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.35;min-height:1.35em;background:var(--card);box-shadow:0 1px 0 var(--line);pointer-events:none}
 .write .hbtns .hscore[hidden]{display:block;visibility:hidden}
+.write .hbtns .hscore{white-space:nowrap;overflow:hidden;text-overflow:clip;max-width:100%;box-sizing:border-box}
+/* 아이폰 사파리가 글자를 저절로 키우지 않게(쓰기 화면 · 10-14 「✓ 순서 맞음」 위가 잘림) */
+.write{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .write .hbtns .hscore.ok{color:var(--okc)}
 .write .hbtns .hscore.bad{color:var(--badc)}
 .write .hand.two .hbtns .hscore{grid-column:1/-1}
