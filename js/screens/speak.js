@@ -13,21 +13,21 @@
 //     못 넘어도 막지 않는다([다음 ▶]) · 음성 인식이 안 되는 곳은 점수 없이 듣고 비교만(녹음은 저장)
 //  S6 녹음은 이 기기 안에만(IndexedDB) — 서버로 보내지 않는다
 //  S7 영상 창 안(embedded): 스크롤 없이 · 줄 이동·닫기는 학습 화면이 한다 · 줄 전체까지 통과하면 다음 줄 말하기로
-import { warmSTT } from "../sttserver.js?v=1015.3";
-import { t, lang, langShort } from "../i18n.js?v=1015.3";
-import { esc, sayParts, koq } from "../text.js?v=1015.3";
-import { spkHtml, uiKoBtn } from "../ui.js?v=1015.3";
-import { episode } from "../data.js?v=1015.3";
-import { paths } from "../paths.js?v=1015.3";
-import { audioCtx, hold, quietWake } from "../wake.js?v=1015.3";
-import * as sfx from "../sfx.js?v=1015.3";
-import { diagEnv, keepDiag } from "../diag.js?v=1015.3";
-import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1015.3";
-import { bestHeard, heardHTML, endHint, scoreOf, bestFull, spanOf, sylsAt } from "../heard.js?v=1015.3"; // 덧붙은 말 빼고 견주기(본부 10-11)
-import { openCompare, playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1015.3";
-import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace, lateFactor, sylAt, karaokeRun, isFull } from "../rhythm.js?v=1015.3";
-import { recDel, downloadRec, askPersist } from "../recstore.js?v=1015.3";
-import { logRec, dB, srWhy, srWatch, niceLabel, ALIAS, srOnlyMode, setSrOnly, isAndroid, recordSROnly, srMiss, micSet, seqMode, srOnBlob, devSR, setDevSR, srJudge } from "../recorder.js?v=1015.3";
+import { warmSTT } from "../sttserver.js?v=1015.4";
+import { t, lang, langShort } from "../i18n.js?v=1015.4";
+import { esc, sayParts, koq } from "../text.js?v=1015.4";
+import { spkHtml, uiKoBtn } from "../ui.js?v=1015.4";
+import { episode } from "../data.js?v=1015.4";
+import { paths } from "../paths.js?v=1015.4";
+import { audioCtx, hold, quietWake } from "../wake.js?v=1015.4";
+import * as sfx from "../sfx.js?v=1015.4";
+import { diagEnv, keepDiag } from "../diag.js?v=1015.4";
+import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1015.4";
+import { bestHeard, heardHTML, endHint, scoreOf, bestFull, spanOf, sylsAt } from "../heard.js?v=1015.4"; // 덧붙은 말 빼고 견주기(본부 10-11)
+import { openCompare, playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1015.4";
+import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace, lateFactor, sylAt, karaokeRun, isFull } from "../rhythm.js?v=1015.4";
+import { recDel, downloadRec, askPersist } from "../recstore.js?v=1015.4";
+import { logRec, dB, srWhy, srWatch, niceLabel, ALIAS, srOnlyMode, setSrOnly, isAndroid, recordSROnly, srMiss, micSet, seqMode, srOnBlob, devSR, setDevSR, srJudge } from "../recorder.js?v=1015.4";
 
 // 통과 두 단계(본부 10-04 · 투덜이 「원어민은 되지만 외국인은 100% 어렵다」): 80↑ = ☆ 통과(✓ · [저장]) · 95↑ = ★ 완벽
 export const PASS = 80, PERFECT = 95;
@@ -66,8 +66,8 @@ export function quietLimit(want, heard) {
 export const maxMsFor = say => Math.max(8000, (3 + 0.8 * [...String(say || "")].filter(c => /[가-힣]/.test(c)).length) * 1000);
 
 // ── 닮음 = 음절 정렬(js/score.js · 「들린 말」 빨간 표시와 같은 함수 — 본부 10-04) ──
-import { similarity, align } from "../score.js?v=1015.3";
-import { scoreFx } from "../scorefx.js?v=1015.3"; // 점수별 효과(본부 10-05)
+import { similarity, align } from "../score.js?v=1015.4";
+import { scoreFx } from "../scorefx.js?v=1015.4"; // 점수별 효과(본부 10-05)
 export { similarity };
 
 // ── 내 목소리 저장(S6) ──
@@ -127,7 +127,7 @@ export default async function speak(app, ep, id, opts = {}) {
   const fitHelp = () => { const hb = $(".helpbox"); if (!hb || hb.hidden) return; const ps = [...hb.children]; ps.forEach(x => x.style.removeProperty("zoom")); hb.style.overflowY = "hidden"; for (let z = 0.96; z >= 0.92 && hb.scrollHeight > hb.clientHeight; z -= 0.04) ps.forEach(x => (x.style.zoom = z.toFixed(2))); if (hb.scrollHeight > hb.clientHeight + 1) hb.style.overflowY = "auto"; }; // 글은 12px 아래로 안 줄임(검사부 10-15 ur 320 · 0.6배는 못 읽음) — 그래도 넘치면 풍선 안에서 굴려 읽음
   new ResizeObserver(() => fitHelp()).observe($(".helpbox"));
   // 머리 줄은 한 줄(본부 10-06 — 375×667 에서 「✕ बन्द」가 둘째 줄로 떨어짐) — 넘치면 h1: 단추 글 숨김(◀ ▶ ? ✕ 만) → h2: 제목 옆 「· 화자」 숨김 → h3: 사이 좁힘·⇄한 작게 → h4: 「말하기」 제목 숨김(⇄한 들어온 뒤 320 · 앱개발부 10-14)
-  function fitHead(keep = false) { const h = $(".whead"); if (!h) return; if (!keep) h.classList.remove("h1", "h2", "h3", "h4"); for (const c of ["h1", "h2", "h3", "h4"]) { if (h.classList.contains(c)) continue; if (h.scrollWidth <= h.clientWidth + 1) break; h.classList.add(c); } }
+  function fitHead(keep = false) { const h = $(".whead"); if (!h) return; if (h.clientWidth === fitHead.w) keep = true; /* 폭이 그대로면 단계를 내리지 않음(다시 그릴 때·⇄ 때 제목이 나타났다 숨었다 0 · 다국어부 th 375) */ fitHead.w = h.clientWidth; if (!keep) h.classList.remove("h1", "h2", "h3", "h4"); for (const c of ["h1", "h2", "h3", "h4"]) { if (h.classList.contains(c)) continue; if (h.scrollWidth <= h.clientWidth + 1) break; h.classList.add(c); } }
   new ResizeObserver(() => fitHead()).observe($(".whead"));
   // [तुलना] = 비교 화면(파형 두 줄 + 음절 칸 · js/compare.js) — 다시 누르면 원래 말하기 화면 · 토막을 바꾸거나 🎤 를 누르면 닫음
   let cmp = null;

@@ -1,18 +1,18 @@
 // 진단 화면 #/diag(본부 10-07 「PC 에선 되는데 폰에선 안 됨」) — 투덜이가 폰에서 열어 사진 한 장 · 「복사」로 글째 보냄
 //  기기 · 받아쓰기(인식만 / 녹음+인식 동시) · 마이크(허락 · 실제 적용된 설정 · 장치) · 녹음 형식(지원 · 3초 녹음을 풀 수 있나)
 //  소리(AudioContext 상태 · 「가」 소리 · 효과음 · 음성 창고 읽기) · 최근 오류 20개 — 앱 동작은 안 바꿈(시험은 이 화면 안에서만)
-import { VERSION } from "../version.js?v=1015.3";
-import { esc } from "../text.js?v=1015.3";
-import { uiKoBtn } from "../ui.js?v=1015.3";
-import { t, tAlt, preloadKoUi } from "../i18n.js?v=1015.3";
-import { paths } from "../paths.js?v=1015.3";
-import { charsF } from "../data.js?v=1015.3";
-import { audioCtx } from "../wake.js?v=1015.3";
-import * as sfx from "../sfx.js?v=1015.3";
-import { srOnlyMode, setSrOnly, devSR, setDevSR, seqMode, srFailCount, serverMode } from "../recorder.js?v=1015.3";
-import { sttReady, sttURL, serverSTT } from "../sttserver.js?v=1015.3";
-import { diagCount, clearDiag } from "../diag.js?v=1015.3";
-import { errLog, clearErr } from "../errlog.js?v=1015.3";
+import { VERSION } from "../version.js?v=1015.4";
+import { esc } from "../text.js?v=1015.4";
+import { uiKoBtn } from "../ui.js?v=1015.4";
+import { t, tAlt, preloadKoUi } from "../i18n.js?v=1015.4";
+import { paths } from "../paths.js?v=1015.4";
+import { charsF } from "../data.js?v=1015.4";
+import { audioCtx } from "../wake.js?v=1015.4";
+import * as sfx from "../sfx.js?v=1015.4";
+import { srOnlyMode, setSrOnly, devSR, setDevSR, seqMode, srFailCount, serverMode } from "../recorder.js?v=1015.4";
+import { sttReady, sttURL, serverSTT } from "../sttserver.js?v=1015.4";
+import { diagCount, clearDiag } from "../diag.js?v=1015.4";
+import { errLog, clearErr } from "../errlog.js?v=1015.4";
 
 // 같은 오류(종류·글·주소·자리)는 한 줄로 묶음 — 화면·복사 글 같이(본부 10-12 · 띄엄띄엄 쌓인 version.json 실패 20개)
 const errGroups = () => { const g = new Map(); for (const e of errLog()) { const k = [e.kind, e.msg, e.url || "", e.src || "", e.line || ""].join("|"), o = g.get(k); if (o) { o.n += e.n || 1; o.at = e.at; } else g.set(k, { ...e, n: e.n || 1 }); } return [...g.values()].reverse(); };
@@ -49,7 +49,7 @@ export default async function diag(app) {
   const keepH = () => { keepGrow(); const p = app.querySelector(".dkeep"), s = p?.firstChild; if (!s || s.nodeType !== 3) return; const alt = tAlt("diag_keep"); if (!alt) return; p.style.minHeight = ""; const H = () => p.getBoundingClientRect().height, h1 = H(), v = s.nodeValue; s.nodeValue = v.replace(t("diag_keep"), alt); const h2 = H(); s.nodeValue = v; p.style.minHeight = Math.max(h1, h2) + "px"; };
   const paint = () => {
     const errs = errLog();
-    app.innerHTML = `<section class="scr diag"><div class="bar"><div class="grow"><div class="t">${esc(L("diag_title"))}</div><div class="sub">${esc(L("diag_hint"))}</div></div>${uiKoBtn()}<a class="dback" href="#/list">✕ ${esc(L("close_word"))}</a></div>
+    app.innerHTML = `<section class="scr diag"><div class="bar"><div class="grow"><div class="t">${esc(L("diag_title"))}</div><div class="sub">${esc(L("diag_hint"))}</div></div>${uiKoBtn()}<a class="dback" href="#/list">✕ <span data-k="close_word">${esc(L("close_word"))}</span></a></div>
       <table class="dtab" lang="ko">${Object.entries(base).map(([k, v]) => row(k, v)).join("")}${Object.values(keys).map(k => row(k, res[k] ?? "—")).join("")}</table>
       <div class="dbtns" lang="ko">${tests.map(([a, l]) => `<button data-t="${a}">${esc(l)}</button>`).join("")}</div>
       <p class="dkeep">${esc(L("diag_keep"))} <b class="dkeepn">…</b></p><div class="dbtns" lang="ko"><button data-t="cleardiag">진단 녹음 지우기</button></div><h3>${esc(L("diag_h_rec"))}</h3><ol class="derr drec">${recRows().map(x => `<li>${esc(x)}</li>`).join("") || "<li>없음</li>"}</ol>

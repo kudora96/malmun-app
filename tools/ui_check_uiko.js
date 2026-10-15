@@ -47,7 +47,7 @@
   const act = async (a, i = 0) => { const l = lines()[i]; l?.click(); await W(450); const b = [...(l?.querySelectorAll(`[data-act=${a}]`) || [])].find(vis); b?.click(); await W(1500); return !!b; };
   const STATES = {
     "처음 화면": async () => { location.hash = "#/?hello"; await W(900); },
-    "편 목록": async () => { location.hash = "#/list"; await W(900); },
+    "편 목록": async () => { location.hash = "#/diag"; await W(300); location.hash = "#/list"; await W(900); },
     "언어 창": async () => { location.hash = "#/list"; await W(800); document.querySelector("[data-act=lang]")?.click(); await W(500); },
     "배우기": async () => { location.hash = "#/list"; await W(500); location.hash = "#/learn/L01-00-01"; await W(2200); lines()[0]?.click(); await W(500); },
     "설명 창": async () => { await STATES["배우기"](); await act("explain"); },
@@ -58,7 +58,7 @@
     "말하기 도움말": async () => { await STATES["말하기 창"](); [...document.querySelectorAll(".speak [data-act=help]")].find(vis)?.click(); await W(600); },
     "말하기 화면(따로)": async () => { location.hash = "#/list"; await W(500); location.hash = "#/speak/L01-00-01/1"; await W(2200); },
     "쓰기 화면(따로)": async () => { location.hash = "#/list"; await W(500); location.hash = "#/write/L01-00-01/1"; await W(2200); },
-    "진단": async () => { location.hash = "#/diag"; await W(1500); },
+    "진단": async () => { location.hash = "#/list"; await W(400); location.hash = "#/diag"; await W(1500); }, // 같은 주소면 다시 안 그려져 「새로 연 화면」이 아님 → 다른 화면을 거쳐 엶
   };
   const want = window.__uikoStates || Object.keys(STATES);
   const setMode = async ko => { if (I.uiKoOn() !== ko) { await I.setUiKo(ko); } };
