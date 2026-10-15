@@ -70,7 +70,8 @@ function run(root = document.body) {
   queued = false;
   if (!koReady(lang)) { preloadKoUi().then(() => run(root)); return; }
   if (!snapCache || snapMode !== mode() + lang) { snapCache = snapshot(); snapMode = mode() + lang; }
-  root.querySelectorAll(TARGET).forEach(el => fit(el, snapCache));
+  const n0 = fitted.size; root.querySelectorAll(TARGET).forEach(el => fit(el, snapCache));
+  if (fitted.size !== n0) window.dispatchEvent(new CustomEvent("malmun:langfit")); // 폭을 새로 고정함 → 머리 줄 줄이기(fitHead 등)가 「두 말 중 긴 쪽」 폭으로 처음부터 다시 재게(⇄ 첫 번째에도 0px)
 }
 const queue = () => { if (!queued) { queued = true; requestAnimationFrame(() => run()); } };
 
