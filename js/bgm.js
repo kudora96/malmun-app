@@ -51,7 +51,7 @@ const pick = () => { let last = cur; if (last < 0) try { last = +(localStorage.g
 
 const playOk = () => bgmOn() && !muted() && document.visibilityState === "visible";
 // 지금 있어야 할 음량(0~1) — 화면 · 앱 소리 · 마이크 · 막음(hold)
-const level = () => { if (mic || holds) return 0; const g = scene in SCENE_GAIN ? SCENE_GAIN[scene] : STUDY; return g * (sounds > 0 || media.size ? DUCK : 1) * Math.min(1, window.__sfxVolume ?? 1); };
+const level = () => { for (const m of media) if (!m.isConnected || m.paused || m.ended) media.delete(m); /* 화면에서 사라진 영상·소리(멈춤 신호 없이 빠짐)는 뺌 — 안 빼면 덕킹이 안 풀림(ur 320 점검) */ if (mic || holds) return 0; const g = scene in SCENE_GAIN ? SCENE_GAIN[scene] : STUDY; return g * (sounds > 0 || media.size ? DUCK : 1) * Math.min(1, window.__sfxVolume ?? 1); };
 function setGain(now = false) {
   target = level(); if (!gain) return;
   const ctx = audioCtx(), t0 = ctx.currentTime, g = gain.gain, v = g.value;
