@@ -159,6 +159,13 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     inn.style.zoom = (Math.floor(lo * 100) / 100).toFixed(2);
   }
   // 위 칸 안 내용 = 그 칸 안에서 맞춤(설명·말하기 — 칸 크기는 그대로 · 넘치면 안 내용만 작게 · 쓰기는 write.js 가 스스로 맞춤)
+  // ⇄(앱 글 언어) 뒤 설명 창 = 막대·「말해 보세요」 단추 크기·자리 그대로(본부 ⇄ 0px · 다국어부 10-15) — 창 zoom 은 두고 본문 글(.v9body 안 단추 칸 빼고)만 넘치면 줄임(0.6배까지)
+  function fitBody() {
+    const body = panel.querySelector(".v9body"); if (!body) return;
+    const tg = [...body.children].filter(c => !c.classList.contains("sayb")).concat([...body.querySelectorAll(".sayb > p")]);
+    tg.forEach(c => c.style.removeProperty("zoom"));
+    for (let z = 0.96; z >= 0.6 && panel.scrollHeight > panel.clientHeight; z -= 0.04) tg.forEach(c => (c.style.zoom = z.toFixed(2)));
+  }
   function fitPanel() {
     const kind = st.panel?.kind; if (kind !== "explain" && kind !== "speak") return;
     const kids = [...panel.children].filter(c => !c.classList.contains("vplay"));
@@ -185,6 +192,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   new MutationObserver(() => { if (refitQ) return; refitQ = setTimeout(() => { refitQ = 0; // 강조 표시가 쉬지 않고 바뀌어도 120ms 마다 한 번은 살핌(늦추기만 하면 영영 안 돎)
     if (!st.panel || (st.panel.kind !== "explain" && st.panel.kind !== "speak")) return;
     const h = [...panel.children].filter(c => !c.classList.contains("vplay")).reduce((a, c) => a + c.offsetHeight, 0);
+    if (st.uiFit && st.panel.kind === "explain") return fitBody(); // ⇄ 뒤 = 창 크기 그대로 · 본문 글만 맞춤
     if (Math.abs(h - (st.fitH || 0)) > 2 || panel.scrollHeight > panel.clientHeight) fitPanel();
   }, 120); }).observe(app.querySelector(".panel"), { subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: ["hidden", "class", "aria-pressed"] });
   const onFit = () => { fitPanel(); vsubFill(st.cur); fitCard(st.cur); clearTimeout(st.fitT); st.fitT = setTimeout(() => keepVisible(st.cur), 120); }; // 창 크기가 바뀌면(브라우저가 스크롤을 옮겨도) 지금 줄 카드를 제자리로 — 손 스크롤 중이면 그대로
@@ -490,7 +498,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   async function openPanel(kind, i, { autoplay = false, task, restore = null } = {}) {
     if (!st.panel && !(restore && nav.depth > 0)) navPush(); // 처음 열 때만 한 칸(토글로 다시 열 때는 있던 칸 그대로)
     i = Math.max(0, Math.min(L.length - 1, i));
-    stopAll(); ex.stop(); st.once = false; select(i, { scroll: false });
+    stopAll(); ex.stop(); st.once = false; st.uiFit = false; select(i, { scroll: false });
     st.panel?.cleanup?.();
     const mine = (st.panel = { kind, i });
     vwrap.hidden = true; panel.hidden = false; panel.className = `panel ${kind}${kind === "explain" && L[i].v9 ? " v9" : ""}${" fitting"}`; if (kind !== "explain") panel.innerHTML = ""; // 앞 창 내용이 새 창 크기로 잠깐 넘쳐 보이지 않게 setTimeout(() => st.panel === mine && panel.classList.remove("fitting"), 1500); // 글 크기 맞출 때까지 안 보이게(늦어도 1.5초 뒤엔 보임)
@@ -869,6 +877,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   const onUiLang = () => {
     if (!app.querySelector(".scr.learn")) return removeEventListener("malmun:uilang", onUiLang);
     setRateWord(t("speed")); // 속도 알약 말(rateLabel)도 새 언어로(다국어부 10-14)
+    if (st.panel?.kind === "explain") st.uiFit = true; // 이 창이 닫히거나 다른 줄로 갈 때까지 창 크기 고정
     if (st.uiBar) return; const w = uiKoOn() ? "ko" : "L";
     v9set("snd", w); v9set("txt", w);
     const p = st.panel; if (p?.kind !== "explain" || !L[p.i]?.v9) return;
