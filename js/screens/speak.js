@@ -25,7 +25,7 @@ import { diagEnv, keepDiag } from "../diag.js?v=1015.1";
 import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1015.1";
 import { bestHeard, heardHTML, endHint, scoreOf, bestFull, spanOf, sylsAt } from "../heard.js?v=1015.1"; // 덧붙은 말 빼고 견주기(본부 10-11)
 import { openCompare, playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1015.1";
-import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace, lateFactor, sylAt, karaokeRun } from "../rhythm.js?v=1015.1";
+import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace, lateFactor, sylAt, karaokeRun, isFull } from "../rhythm.js?v=1015.1";
 import { recDel, downloadRec, askPersist } from "../recstore.js?v=1015.1";
 import { logRec, dB, srWhy, srWatch, niceLabel, ALIAS, srOnlyMode, setSrOnly, isAndroid, recordSROnly, srMiss, micSet, seqMode, srOnBlob, devSR, setDevSR, srJudge } from "../recorder.js?v=1015.1";
 
@@ -415,7 +415,7 @@ export default async function speak(app, ep, id, opts = {}) {
     // 저장은 자동이 아님 — 80% 넘으면 [저장] 단추가 나오고 학습자가 누른다(투덜이 10-04) · 저절로 다음 토막으로 넘기지도 않는다(저장할 틈)
     paint();
     if (sr && !heard.length && !st.diag?.spoke && st.whyEnd !== "cut") st.whyEnd = "nospeech"; // 마이크를 켜고 아무 말도 안 함 = 「목소리가 안 들렸어요」(투덜이 10-08)
-    if (sr) scoreFx($(".fx"), st.score, { busy: () => !!st.rec }); // 점수가 뜨는 순간 효과 한 번 · 아무 말도 없었어도 꽝(투덜이 10-08 「그냥 0 만 떠」)
+    if (sr) scoreFx($(".fx"), st.score, { busy: () => !!st.rec, full: isFull(st.score, st.rhy) }); // 점수가 뜨는 순간 효과 한 번 · 아무 말도 없었어도 꽝(투덜이 10-08 「그냥 0 만 떠」)
   }
   app.__sp = { closeList: () => closeMics(true), toggle: () => (st.model ? (stopSounds(), paint()) : playModel()), busy: () => !!st.rec || st.model || sfx.playing(), _finish: finish, _state: st, _cur: () => cur(), _paint: () => paint() };
 

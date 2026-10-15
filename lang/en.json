@@ -202,5 +202,6 @@
  "diag_keep": "Diagnostic recordings on this phone (max 3 · never leave the phone · also deleted by 「Delete all」 in the list):",
  "diag_h_rec": "Last 5 speaking recordings",
  "diag_h_nav": "Back navigation log",
- "diag_h_err": "Recent errors"
+ "diag_h_err": "Recent errors",
+ "fx_100": "100 points!"
 }

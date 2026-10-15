@@ -337,7 +337,7 @@
   const cnt = await new Promise(res => { const q = indexedDB.open("malmun", 1); q.onsuccess = () => { const g = q.result.transaction("rec").objectStore("rec").getAllKeys(); g.onsuccess = () => { q.result.close(); res(g.result.filter(k => String(k).startsWith("L01-00-01/")).length); }; }; });
   ok(shown && cnt === 0 && da.hidden, "편 목록 「이 편 녹음 모두 지우기」 → 그 편 녹음 0", `보임 ${shown} · 남은 ${cnt}`);
   location.hash = "#/learn/L01-00-01"; await W(1500);
-  // 점수별 효과(본부 10-05) — 100 perfect · 95~99 great · 80~94 pass · 80 아래 miss · 말소리 없음 = 효과 없음 · 소리 media/sfx/score_*.mp3 · 크기·스크롤 그대로
+  // 점수별 효과(본부 10-05 · 10-15 단계 바꿈) — 95↑ perfect(★ 완벽) · 80~94 pass · 80 아래 miss · 🎉 100점(full) 은 리듬까지 만점일 때 덮개 · 말소리 없음 = 효과 없음 · 소리 media/sfx/score_*.mp3 · 크기·스크롤 그대로
   const fxSeen = [], fxSize = [], fxGet = [];
   const fxBox = el => (el.closest(".speak") ? [$(".panel").offsetHeight, $(".panel .speak").scrollHeight - $(".panel .speak").clientHeight].join("/") : String(el.closest(".panel").offsetHeight));
   const mo = new MutationObserver(ms => ms.forEach(m => { const el = m.target; if (el.classList?.contains("fx") && el.classList.contains("on")) { const k = [...el.classList].filter(c => c !== "fx" && c !== "on").join(""); if (fxSeen[fxSeen.length - 1] !== k) { fxSeen.push(k); fxSize.push(fxBox(el)); } } }));

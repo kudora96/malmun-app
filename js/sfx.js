@@ -12,7 +12,14 @@ let gen = 0; // stopAll 번호표 — 받는 중(load)에 멈춤이 오면 다 �
 const nameOf = url => decodeURIComponent(url.split("?")[0].split("/").slice(-2).join("/"));
 const note = (ev, url, extra) => window.__sfxLog?.push({ t: Math.round(performance.now()), ev, name: nameOf(url), ...extra }); // 점검 도구용
 
+// 합성 소리(파일 없음 · 「synth:이름」 주소) — render(OfflineAudioContext 만들 함수) → AudioBuffer · 한 번 만들어 버퍼로 둠(팡파레 등 · 본부 10-15)
+const synths = new Map();
+export const defineSynth = (name, render) => synths.set(name, render);
 export function load(url) {
+  if (!cache.has(url) && url.startsWith("synth:")) {
+    const r = synths.get(url.slice(6));
+    cache.set(url, r ? Promise.resolve().then(() => r((ch, len) => new OfflineAudioContext(ch, Math.ceil(len * audioCtx().sampleRate), audioCtx().sampleRate))).catch(e => { logErr("sfx", e?.message || "synth", { url }); return null; }) : Promise.resolve(null));
+  }
   if (!cache.has(url)) {
     // 받기·풀기 실패는 기록하고 기억에서 뺌 — 다음에 누르면 다시 받음(본부 10-07 폰: 한 번 실패한 소리가 그 뒤로 계속 안 나던 것)
     cache.set(url, fetch(url).then(r => { if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); })

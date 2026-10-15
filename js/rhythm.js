@@ -401,6 +401,8 @@ export async function rhythmOf({ ep, key, url, text, blob, heard, span, words, s
 }
 
 // 결과 줄 근거 — 「글자 100% · 리듬 78%」 + 리듬이 85% 아래면 가장 많이 깎인 곳 한 곳
+// 🎉 100점(본부 10-15 투덜이 「소리 정확도·리듬 모두 100」) — 점수 100 · 글자 100 · 리듬이 만점 문턱(R_FULL · 점수에서 리듬으로 안 깎이는 자리) 위 · 더듬음·없는 쉼은 R_FULL 아래라 안 됨
+export const isFull = (sc, h) => sc >= 100 && !!h && h.L >= 100 && h.R >= R_FULL;
 export const rhyText = (h, t) => `${t("rhythm_line", { l: h.L, r: Math.floor(h.R * 100 + 1e-9) })}${h.R < R_FULL && h.worst ? " · " + t("rhy_" + h.worst.kind, { s: koq(h.worst.ch) }) : ""}`;
 
 // 저장본 점수 판(본부 10-06 — 리듬 넣기 전에 저장한 100점이 남아 새 녹음(96)을 「앞 저장본이 더 높음」으로 밀어냄)
