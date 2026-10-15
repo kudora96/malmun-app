@@ -245,5 +245,9 @@
  "bgm_inst_kalimba": "Kalimba",
  "bgm_inst_gayageum": "Gayageum (đàn tranh Hàn)",
  "bgm_inst_daegeum": "Daegeum (sáo Hàn)",
- "bgm_inst_piano": "Piano"
+ "bgm_inst_piano": "Piano",
+ "bgm_inst_piri": "Piri (kèn Hàn)",
+ "bgm_ver_calm": "Êm dịu",
+ "bgm_ver_bright": "Tươi sáng",
+ "bgm_ver_lively": "Sôi động"
 }

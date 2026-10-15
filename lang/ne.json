@@ -245,5 +245,9 @@
  "bgm_inst_kalimba": "कालिम्बा",
  "bgm_inst_gayageum": "गायागम (कोरियाली वीणा)",
  "bgm_inst_daegeum": "देगम (कोरियाली बाँसुरी)",
- "bgm_inst_piano": "पियानो"
+ "bgm_inst_piano": "पियानो",
+ "bgm_inst_piri": "पिरि (कोरियाली सहनाई)",
+ "bgm_ver_calm": "शान्त",
+ "bgm_ver_bright": "उज्यालो",
+ "bgm_ver_lively": "रमाइलो"
 }

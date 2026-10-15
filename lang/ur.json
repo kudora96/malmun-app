@@ -245,5 +245,9 @@
  "bgm_inst_kalimba": "کلمبا",
  "bgm_inst_gayageum": "گایاگم (کوریائی ستار)",
  "bgm_inst_daegeum": "دیگم (کوریائی بانسری)",
- "bgm_inst_piano": "پیانو"
+ "bgm_inst_piano": "پیانو",
+ "bgm_inst_piri": "پیری (کوریائی شہنائی)",
+ "bgm_ver_calm": "پرسکون",
+ "bgm_ver_bright": "روشن",
+ "bgm_ver_lively": "پرجوش"
 }

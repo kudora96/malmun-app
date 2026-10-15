@@ -245,5 +245,9 @@
  "bgm_inst_kalimba": "คาลิมบา",
  "bgm_inst_gayageum": "คายากึม (พิณเกาหลี)",
  "bgm_inst_daegeum": "แทกึม (ขลุ่ยเกาหลี)",
- "bgm_inst_piano": "เปียโน"
+ "bgm_inst_piano": "เปียโน",
+ "bgm_inst_piri": "พีรี (ปี่เกาหลี)",
+ "bgm_ver_calm": "สงบ",
+ "bgm_ver_bright": "สดใส",
+ "bgm_ver_lively": "สนุกสนาน"
 }
