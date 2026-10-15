@@ -130,7 +130,7 @@
   for (let k = 0; k < 6 && !/^이게/.test($(".panel .sent").textContent.replace(/\s/g, "")); k++) { $(".panel [data-seg='1']").click(); await W(250); }
   const segAt = $(".panel .segnav").innerText.replace(/\s/g, "");
   const reSeg = async () => { $(".panel [data-seg='-1']").click(); await W(200); $(".panel [data-seg='1']").click(); await W(250); };
-  const tgt = () => $(".panel .target")?.textContent, slots = () => document.querySelectorAll(".panel .slot").length, typed = () => $(".panel .typed")?.textContent;
+  const tgt = () => $(".panel .target")?.textContent, slots = () => document.querySelectorAll(".panel .slot:not(.slotpad)").length, typed = () => $(".panel .typed")?.textContent;
   key("ㅇ"); await idle(); key("ㅣ"); await idle();
   const geSlots = slots(), geT = tgt();
   key("ㄱ"); await idle(); key("ㅔ"); await idle(4000);

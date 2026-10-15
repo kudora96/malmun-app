@@ -74,6 +74,15 @@
       localStorage.setItem("malmun.htool", "pencil"); await openCh(Math.max(0, liOf("이")), "이"); log.length = 0; $(".panel [data-act=auto]").click(); await W(1500); got["자동 pencil"] = log.some(e => e.name === "swish/pencil"); $(".panel [data-act=auto]").click(); await W(300);
       ok(Object.values(got).every(Boolean), "ⓙ 쓰는 효과음 — 손으로 긋기·순서·자동 · 연필·펜·붓 모두", Object.entries(got).map(([k, v]) => `${k} ${v ? "○" : "✗"}`).join(" · ")); }
     localStorage.setItem("malmun.htool", "pen");
+    // ⓛ 시간 끝(투덜이 10-15 「시간 막대가 다 지나도 계속 써져」) — 「이」 첫 획을 긋는 채로 시간이 끝남 → 그 자리에서 채점(꽝) · 손 떼고 10ms 뒤 새 획 = 막힘(획 수 그대로 · 새 시간 시작 안 함) · 꽝 지운 뒤 새 획 = 시간 처음부터 · 막대 숫자 = 남은 시간
+    { localStorage.setItem("malmun.hmode", "free"); const H = await openCh(Math.max(0, liOf("이")), "이"); const L = await wr().strokesOf("이"), lim = (4 + 2.5 * L.length) * 1000, Q = await wr().fitPath("이", 0, "pen"), iv5 = $(".panel .hink");
+      pev(iv5, "pointerdown", Q[0].x, Q[0].y); for (const q of Q.slice(0, Math.floor(Q.length / 2))) pev(iv5, "pointermove", q.x, q.y); await W(1500);
+      const bar = $(".panel .htime b"), shownSec = +bar.textContent, realSec = Math.ceil((H.tLimit - (performance.now() - H.tStart)) / 1000), numOk = Math.abs(shownSec - realSec) <= 1;
+      await W(Math.max(0, lim - 1500) + 300); /* 시간 끝 + 0.3초(꽝 지움 1.2초 전) */ const judgedAt = !$(".panel .hscore").hidden, curEnded = !H.cur; const n1 = H.strokes.length;
+      pev(iv5, "pointerup", 0.5, 0.5); await W(10); pev(iv5, "pointerdown", 0.3, 0.3); pev(iv5, "pointermove", 0.4, 0.4); pev(iv5, "pointerup", 0.4, 0.4); await W(200);
+      const blocked = H.strokes.length === n1 && !H.tStart; await W(1500);
+      pev(iv5, "pointerdown", Q[0].x, Q[0].y); pev(iv5, "pointermove", Q[1].x, Q[1].y); await W(300); const restarted = !!H.tStart && H.tLimit - (performance.now() - H.tStart) > lim - 1500; pev(iv5, "pointerup", Q[1].x, Q[1].y); await W(200);
+      ok(judgedAt && curEnded && blocked && restarted && numOk && !H.passed, "ⓛ 시간 끝 = 긋는 중이어도 바로 채점(꽝) · 바로 이어 긋는 획 막힘 · 꽝 지운 뒤 새 획 = 시간 처음부터 · 막대 숫자 = 남은 시간", `채점 ${judgedAt} 「${$(".panel .hscore").textContent}」 · 획 끝냄 ${curEnded} · 막힘 ${blocked} · 다시 시작 ${restarted} · 숫자 ${shownSec}/실제 ${realSec}`); }
     // ⓚ 다시 쓸 때도 쓰는 소리(투덜이 10-14 「한 번 쓰고 다시 쓸 때 가끔 소리가 안 남」) — 경우마다 한 획 긋고 draw/ 「효과음」 1번 이상
     { const res2 = []; const stroke = async () => { const H = wr().hand(); const L = await wr().strokesOf(H.ch); const Q = await wr().fitPath(H.ch, Math.min(L.length - 1, 1), "pen"); log.length = 0; await drawP(Q.map(q => [q.x, q.y]), 3); return log.filter(e => /^draw\//.test(e.name || "")).length; };
       const li9 = Math.max(0, liOf("있")); await openCh(li9, "있"); res2.push(["첫 획", await stroke()]);

@@ -1126,6 +1126,9 @@ button.dim{opacity:.45}
 .write.hcomp .work.handmode .stage .sub2 .wko{font-size:14px}
 .write.hcomp .whead{line-height:1.15;row-gap:2px}
 .write.hcomp .whead button{min-height:28px;padding-block:2px}
+/* 자모 칸 = 늘 4칸 자리(겹받침 최대 · 빈 칸은 안 보임) → 오른쪽 단추 줄(이 글자 듣기·한 줄 자동·전체 자동)이 글자마다 안 움직임(투덜이 10-15 「메뉴 위치가 일정해야」) */
+.write .slot.slotpad{visibility:hidden}
+html:lang(ur) .write .work:not(.handmode) .info .sub2{height:34px;overflow:visible} /* 나스탈리크 줄 상자 소수점 높이로 글자마다 단추 1px 흔들림 → 정수 높이 */
 /* 점수·시간 한 칸(.hslot · 10-14) — 손글씨 칸 밖 단추 줄 맨 앞 · 시간 막대(쓰는 동안)와 점수(채점 뒤)는 같은 자리에 겹쳐 둠(함께 안 보임)
    자리 높이 늘 고정 = 채점 때 단추·칸 안 움직임(투덜이 「채점할 때 화면이 흔들려」) · contain = 글이 단추 줄 폭을 안 바꿈 · ur 은 글자 작게 + 칸 조금 높게(320 손글씨 칸 58 → 다시 150↑ · 검사부 10-14) */
 .write .hbtns .hslot{display:grid;align-self:stretch;contain:inline-size;min-width:0;height:28px}
