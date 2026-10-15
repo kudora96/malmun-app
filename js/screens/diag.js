@@ -4,7 +4,7 @@
 import { VERSION } from "../version.js?v=1015.3";
 import { esc } from "../text.js?v=1015.3";
 import { uiKoBtn } from "../ui.js?v=1015.3";
-import { t, tAlt } from "../i18n.js?v=1015.3";
+import { t, tAlt, preloadKoUi } from "../i18n.js?v=1015.3";
 import { paths } from "../paths.js?v=1015.3";
 import { charsF } from "../data.js?v=1015.3";
 import { audioCtx } from "../wake.js?v=1015.3";
@@ -58,7 +58,7 @@ export default async function diag(app) {
     diagCount().then(n => { const b = app.querySelector(".dkeepn"); if (b) b.textContent = String(n); }); /* 진단 녹음 개수(본부 10-11) */
     keepH();
   };
-  paint();
+  paint(); preloadKoUi().then(() => app.querySelector(".scr.diag") && keepH()); // 한국어판이 늦게 와도 두 말 높이로 다시 잼
   let running = false; // 시험 도는 중(검사부 10-11) — 시험 단추·「오류 지우기」·「다시 시험」 모두 막음(복사만 됨)
   const lock = on => app.querySelectorAll(".diag button[data-t]").forEach(x => { if (x.dataset.t !== "copy") x.disabled = on; });
   const msg = s => { const p = app.querySelector(".dmsg"); if (p) p.textContent = s; };
