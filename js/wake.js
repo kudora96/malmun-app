@@ -15,7 +15,7 @@ export function audioCtx() {
 function start() {
   try {
     const c = audioCtx();
-    if (osc || quiet) return;
+    if (osc || quiet || document.hidden) return;
     osc = c.createOscillator();
     const g = c.createGain();
     osc.frequency.value = 45; g.gain.value = 0.0126;
@@ -31,6 +31,8 @@ export function quietWake(on) {
   else if (!quiet && users > 0) start();
 }
 
+// 탭이 숨으면(다른 탭·앱) 깨우기 신호도 멈춤 — 크롬 탭 🔊 표시가 뒤에 둔 탭에 늘 떠서 어느 탭이 소리를 내는지 헷갈림(본부 10-15) · 돌아오면 다시
+document.addEventListener("visibilitychange", () => { if (document.hidden) { if (osc) { try { osc.stop(); } catch {} osc = null; } } else if (users > 0 && !quiet) start(); });
 // 화면이 열릴 때 hold() · 닫힐 때 돌려받은 함수를 부른다. 브라우저는 사용자가 한 번 눌러야 소리를 켜 주므로 첫 누름에도 다시 깨운다.
 export function hold() {
   users++;
