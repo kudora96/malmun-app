@@ -49,7 +49,7 @@ export default async function diag(app) {
   const keepH = () => { keepGrow(); const p = app.querySelector(".dkeep"), s = p?.firstChild; if (!s || s.nodeType !== 3) return; const alt = tAlt("diag_keep"); if (!alt) return; p.style.minHeight = ""; const H = () => p.getBoundingClientRect().height, h1 = H(), v = s.nodeValue; s.nodeValue = v.replace(t("diag_keep"), alt); const h2 = H(); s.nodeValue = v; p.style.minHeight = Math.max(h1, h2) + "px"; };
   const paint = () => {
     const errs = errLog();
-    app.innerHTML = `<section class="scr diag"><div class="bar"><div class="grow"><div class="t">${esc(L("diag_title"))}</div><div class="sub">${esc(L("diag_hint"))}</div></div>${uiKoBtn()}<a class="dback" href="#/list">✕ ${esc(L("close_word"))}</a></div>
+    app.innerHTML = `<section class="scr diag"><div class="bar"><div class="grow"><div class="t">${esc(L("diag_title"))}</div><div class="sub">${esc(L("diag_hint"))}</div></div>${uiKoBtn()}<a class="dback" href="#/list">✕ <span data-k="close_word">${esc(L("close_word"))}</span></a></div>
       <table class="dtab" lang="ko">${Object.entries(base).map(([k, v]) => row(k, v)).join("")}${Object.values(keys).map(k => row(k, res[k] ?? "—")).join("")}</table>
       <div class="dbtns" lang="ko">${tests.map(([a, l]) => `<button data-t="${a}">${esc(l)}</button>`).join("")}</div>
       <p class="dkeep">${esc(L("diag_keep"))} <b class="dkeepn">…</b></p><div class="dbtns" lang="ko"><button data-t="cleardiag">진단 녹음 지우기</button></div><h3>${esc(L("diag_h_rec"))}</h3><ol class="derr drec">${recRows().map(x => `<li>${esc(x)}</li>`).join("") || "<li>없음</li>"}</ol>

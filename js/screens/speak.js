@@ -127,7 +127,7 @@ export default async function speak(app, ep, id, opts = {}) {
   const fitHelp = () => { const hb = $(".helpbox"); if (!hb || hb.hidden) return; const ps = [...hb.children]; ps.forEach(x => x.style.removeProperty("zoom")); hb.style.overflowY = "hidden"; for (let z = 0.96; z >= 0.92 && hb.scrollHeight > hb.clientHeight; z -= 0.04) ps.forEach(x => (x.style.zoom = z.toFixed(2))); if (hb.scrollHeight > hb.clientHeight + 1) hb.style.overflowY = "auto"; }; // 글은 12px 아래로 안 줄임(검사부 10-15 ur 320 · 0.6배는 못 읽음) — 그래도 넘치면 풍선 안에서 굴려 읽음
   new ResizeObserver(() => fitHelp()).observe($(".helpbox"));
   // 머리 줄은 한 줄(본부 10-06 — 375×667 에서 「✕ बन्द」가 둘째 줄로 떨어짐) — 넘치면 h1: 단추 글 숨김(◀ ▶ ? ✕ 만) → h2: 제목 옆 「· 화자」 숨김 → h3: 사이 좁힘·⇄한 작게 → h4: 「말하기」 제목 숨김(⇄한 들어온 뒤 320 · 앱개발부 10-14)
-  function fitHead(keep = false) { const h = $(".whead"); if (!h) return; if (!keep) h.classList.remove("h1", "h2", "h3", "h4"); for (const c of ["h1", "h2", "h3", "h4"]) { if (h.classList.contains(c)) continue; if (h.scrollWidth <= h.clientWidth + 1) break; h.classList.add(c); } }
+  function fitHead(keep = false) { const h = $(".whead"); if (!h) return; if (h.clientWidth === fitHead.w) keep = true; /* 폭이 그대로면 단계를 내리지 않음(다시 그릴 때·⇄ 때 제목이 나타났다 숨었다 0 · 다국어부 th 375) */ fitHead.w = h.clientWidth; if (!keep) h.classList.remove("h1", "h2", "h3", "h4"); for (const c of ["h1", "h2", "h3", "h4"]) { if (h.classList.contains(c)) continue; if (h.scrollWidth <= h.clientWidth + 1) break; h.classList.add(c); } }
   new ResizeObserver(() => fitHead()).observe($(".whead"));
   // [तुलना] = 비교 화면(파형 두 줄 + 음절 칸 · js/compare.js) — 다시 누르면 원래 말하기 화면 · 토막을 바꾸거나 🎤 를 누르면 닫음
   let cmp = null;
