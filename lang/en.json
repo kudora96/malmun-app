@@ -203,5 +203,6 @@
  "diag_h_rec": "Last 5 speaking recordings",
  "diag_h_nav": "Back navigation log",
  "diag_h_err": "Recent errors",
- "fx_100": "100 points!"
+ "fx_100": "100 points!",
+ "bgm_toggle": "Background music on/off"
 }

@@ -1,6 +1,6 @@
 import { t } from "../i18n.js?v=1015.1";
 import { esc } from "../text.js?v=1015.1";
-import { langChip, openLangSheet, uiKoBtn } from "../ui.js?v=1015.1";
+import { langChip, openLangSheet, uiKoBtn, bgmBtn } from "../ui.js?v=1015.1";
 import { rerender } from "../main.js?v=1015.1";
 
 const KEY = "malmun.started";
@@ -10,7 +10,7 @@ export default function welcome(app) {
   // 두 번째부터는 바로 편 목록
   if (started() && !location.hash.includes("hello")) { location.replace("#/list"); return; }
   app.innerHTML = `<section class="scr welcome">
-    <div class="top">${uiKoBtn()}${langChip()}</div>
+    <div class="top">${bgmBtn()}${uiKoBtn()}${langChip()}</div>
     <div class="board"><img src="img/L01-00-01.jpg" alt=""></div>
     <div class="hello">
       <span class="big ko" lang="ko">안녕하세요!</span>

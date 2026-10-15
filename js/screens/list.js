@@ -1,7 +1,7 @@
 import { t } from "../i18n.js?v=1015.1";
 import { esc } from "../text.js?v=1015.1";
 import { catalog } from "../data.js?v=1015.1";
-import { langChip, openLangSheet, progress, uiKoBtn } from "../ui.js?v=1015.1";
+import { langChip, openLangSheet, progress, uiKoBtn, bgmBtn } from "../ui.js?v=1015.1";
 import { rerender } from "../main.js?v=1015.1";
 import { VERSION } from "../version.js?v=1015.1";
 import { recCount, recDelEpisode } from "../recstore.js?v=1015.1";
@@ -16,7 +16,7 @@ export default async function list(app, unit = "L01-00") {
   const seen = Math.min(p.line || 0, first?.lines || 0);
   app.innerHTML = `<section class="scr list">
     <div class="bar"><div class="grow"><div class="t ko" lang="ko">${esc(cat.units[unit] || unit)}</div>
-      <div class="sub">${esc(unit)} · ${esc(t("n_episodes", { n: eps.length }))}</div></div><span class="hbt">${uiKoBtn()}${langChip()}</span></div>
+      <div class="sub">${esc(unit)} · ${esc(t("n_episodes", { n: eps.length }))}</div></div><span class="hbt">${bgmBtn()}${uiKoBtn()}${langChip()}</span></div>
     ${first ? `<a class="hero" href="#/learn/${first.id}"><img src="img/${first.id}.jpg" alt="">
       <div><div class="ttl ko" lang="ko">${esc(first.id.slice(-2))} ${esc(first.title)}</div>
       <div class="meta">${mmss(first.duration)} · ${esc(t("n_lines", { n: first.lines }))}${seen ? " · " + esc(t("seen_to", { n: seen })) : ""}</div>

@@ -1,5 +1,6 @@
 import { detectLang, setLang, LANGS, t } from "./i18n.js?v=1015.1";
 import { VERSION } from "./version.js?v=1015.1";
+import { bgmScene } from "./bgm.js?v=1015.1";
 import welcome from "./screens/welcome.js?v=1015.1";
 import list from "./screens/list.js?v=1015.1";
 import learn from "./screens/learn.js?v=1015.1";
@@ -30,6 +31,7 @@ async function route() {
   cleanup?.(); cleanup = null;
   document.getElementById("sheet-root").innerHTML = "";
   const screen = routes[name] || welcome;
+  bgmScene(routes[name] ? name : ""); // 배경음악 = 첫 화면·편 목록만(본부 10-15)
   try {
     cleanup = (await screen(app, ...args)) || null;
   } catch (e) {

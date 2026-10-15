@@ -1,3 +1,4 @@
+import { bgmOn, setBgm } from "./bgm.js?v=1015.1";
 import { t, tL, lang, langName, LANGS, READY, setLang, KO_UI, uiKoOn, setUiKo, langShort, preloadKoUi } from "./i18n.js?v=1015.1";
 import { snapshot, retext } from "./retext.js?v=1015.1";
 import { VERSION } from "./version.js?v=1015.1";
@@ -20,6 +21,8 @@ export const langChip = () => `<button class="chip" data-act="lang" aria-label="
 //  어느 화면에서 눌러도 앱 전체가 같이(기억 malmun.uiko) · 다시 그리지 않고 그 자리에서 글만(retext) · 처음엔 모국어
 //  화면은 uiKoBtn() 만 머리 줄 오른쪽 묶음 맨 앞에 두면 됨 — 누르기는 아래 문서 한 곳(switchUiKo)이 받음(배우기 화면은 자기 손잡이가 먼저 받고 멈춤)
 export const uiKoBtn = () => (KO_UI.includes(lang) ? `<button class="chip uiko" data-act="uiko" aria-pressed="${uiKoOn()}" aria-label="${esc(langName(lang))} ⇄ 한국어"><span class="a" lang="${lang}">${esc(langShort(lang))}</span>⇄<span class="b" lang="ko">한</span></button>` : "");
+// ♪ 배경음악 켜기/끄기(본부 10-15 · 첫 화면·편 목록 머리 · 누르기는 아래 문서 한 곳)
+export const bgmBtn = () => `<button class="chip bgmb" data-act="bgm" aria-pressed="${bgmOn()}" aria-label="${esc(t("bgm_toggle"))}" title="${esc(t("bgm_toggle"))}"><span aria-hidden="true">♪</span></button>`;
 export async function toggleUiKo(after) { await switchUiKo(!uiKoOn()); after?.(); }
 export async function switchUiKo(ko) {
   if (!KO_UI.includes(lang) || ko === uiKoOn()) return;
@@ -36,6 +39,7 @@ function backTip() {
 if (!window.__uikoWired) { // 문서 한 곳에서 받기(화면이 따로 손잡이를 안 달아도 됨)
   window.__uikoWired = true;
   document.addEventListener("click", e => { const b = e.target.closest?.("[data-act=uiko]"); if (!b || e.defaultPrevented) return; e.preventDefault(); switchUiKo(!uiKoOn()); });
+  document.addEventListener("click", e => { if (e.target.closest?.("[data-act=bgm]")) setBgm(!bgmOn()); });
   preloadKoUi();
 }
 export function openLangSheet(onPick) {
