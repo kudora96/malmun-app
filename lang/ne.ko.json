@@ -232,5 +232,16 @@
  "diag_h_nav": "뒤로 가기 기록",
  "diag_h_err": "최근 오류",
  "fx_100": "100점!",
- "bgm_toggle": "배경음악 켜기/끄기"
+ "bgm_toggle": "배경음악 켜기/끄기",
+ "music_box": "음악 상자",
+ "music_hint": "앱에 흐르는 우리 민요예요. 들어 보고 내려받을 수 있어요.",
+ "music_play": "듣기",
+ "music_stop": "멈춤",
+ "music_dl": "내려받기",
+ "music_dl_fail": "내려받지 못했어요. 다시 해 보세요.",
+ "bgm_inst_bell": "종",
+ "bgm_inst_kalimba": "칼림바",
+ "bgm_inst_gayageum": "가야금",
+ "bgm_inst_daegeum": "대금",
+ "bgm_inst_piano": "피아노"
 }
