@@ -2,8 +2,8 @@
 //  새로 그려진 단추마다: 지금 말 글과 반대쪽 말 글(i18n.tAlt)로 폭·높이를 재서 → 둘 중 큰 쪽으로 고정(min-width·min-height)
 //  고정하면 줄이 넘치는 자리(좁은 폰 머리 줄 등)는 → 폭은 지금 그대로 고정하고, 더 긴 말일 때 글자 크기만 줄임(모드별 배율 · ⇄ 때 바꿈)
 //  쓰기 화면(.write)은 쓰기부가 따로 함 · 배우는 내용(대사·낱말·설명 본문)은 건드리지 않음
-import { t, tAlt, uiKoOn, koReady, preloadKoUi, lang } from "./i18n.js?v=1015.2";
-import { snapshot } from "./retext.js?v=1015.2";
+import { t, tAlt, uiKoOn, koReady, preloadKoUi, lang, KO_UI } from "./i18n.js?v=1015.2.1";
+import { snapshot } from "./retext.js?v=1015.2.1";
 
 const TARGET = "button, a[href], .chip, [role=button], .modeb, .whead > b, .whead > .sub, .bar .t, .bar .sub, .vtitle .tt > b, .exhead > b, .v9bar > span";
 const SKIP = ".write, [lang=ko]:not(button):not(.chip), .kotext, .ko, .v9body :is(p,.pair,.pairln,.glosses,.saybig,.sayrom,.ex,.sn), .glosses, .saybig, .tr, .rom, .mean, .who, .vsub, .chip.uiko, [data-lang], [data-act=lang], .kb, .slot, .lines .line > p, svg, script, style, textarea, input";
@@ -65,6 +65,7 @@ function fit(el, snap) {
 let snapCache = null, snapMode = null, queued = false;
 function run(root = document.body) {
   queued = false;
+  if (!KO_UI.includes(lang)) return; // ⇄ 없는 언어(en·hi 등) = 할 일 없음 — 한국어판이 없어 koReady 가 늘 거짓 → 끝없이 다시 돌며 앱이 멈추던 것(쓰기부 10-15 긴급)
   if (!koReady(lang)) { preloadKoUi().then(() => run(root)); return; }
   if (!snapCache || snapMode !== mode() + lang) { snapCache = snapshot(); snapMode = mode() + lang; }
   root.querySelectorAll(TARGET).forEach(el => fit(el, snapCache));
