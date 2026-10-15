@@ -203,5 +203,6 @@
  "diag_keep": "Bản ghi âm chẩn đoán trên điện thoại này (tối đa 3 · không bao giờ gửi ra ngoài điện thoại · cũng bị xóa bằng nút xóa tất cả trong danh sách):",
  "diag_h_rec": "5 bản ghi âm nói gần nhất",
  "diag_h_nav": "Nhật ký quay lại",
- "diag_h_err": "Lỗi gần đây"
+ "diag_h_err": "Lỗi gần đây",
+ "fx_100": "100 điểm!"
 }
