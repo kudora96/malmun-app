@@ -310,7 +310,7 @@ a{color:inherit;text-decoration:none}
 .speak .micpick:disabled{opacity:.35}
 .speak .helpbox{position:absolute;inset:40px 0 0 0;z-index:3;display:grid;align-content:start;gap:5px;padding:8px 16px 10px;background:var(--bg);overflow:auto;font-size:13px;line-height:1.4}
 .speak .helpbox p{margin:0;padding:6px 10px;border-radius:10px;background:var(--bubble)}
-.speak .helpbox p.x{background:none;color:var(--mute);font-size:11.5px;text-align:center;padding:0}
+.speak .helpbox p.x{background:none;color:var(--mute);font-size:12px;text-align:center;padding:0}
 /* 목록은 창 위에 덮어 띄운다 — 밀어내면 창 안에 스크롤이 생긴다(S7) */
 .speak{position:relative}
 /* 마이크 목록 = 아래쪽 작은 펼침(과제 화면을 가리지 않음) */
