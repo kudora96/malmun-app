@@ -299,7 +299,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     const playBtn = k => `<button class="pb" data-x="ex" data-v="${k}" aria-pressed="false"><span class="ic" aria-hidden="true">▶</span> ${esc(v9name(k))}</button>`;
     // 맨 위 한 줄(본부 10-05 투덜이 승인): 「듣기」 동그란 재생 묶음 · 「읽기」 탭 묶음 · ✕ — 이름표 = 학습자 언어 + (한국어)
     const k = sndOf(i), code = v9code(k);
-    const lab = (key, ko) => `<span class="glab">${esc(t(key))}${lang === "ko" ? "" : ` <small lang="ko">(${ko})</small>`}</span>`;
+    const lab = (key, ko) => `<span class="glab"><span data-k="${key}">${esc(t(key))}</span>${lang === "ko" ? "" : ` <small lang="ko">(${ko})</small>`}</span>`;
     return `<div class="exv v9${romOn() ? "" : " norom"}">
       <div class="v9bar">${lab("v9_listen", "듣기")}<span class="seg snd">${v9L && x.audio?.[v9L]?.ex ? playBtn("L") : ""}${playBtn("ko")}</span>${x.sent?.length ? `<span class="snum" aria-live="off">1/${x.sent.length}</span>` : ""}${uiKoBtn()}<button class="romb" data-x="v9rom" aria-pressed="${romOn()}"><span data-k="v9_rom">${esc(t("v9_rom"))}</span></button><button class="pb closex" data-x="close" title="${esc(t("close_word"))}" aria-label="${esc(t("close_word"))}"><span class="cx">✕</span><span class="cw"> ${esc(t("close_word"))}</span></button><div class="v9tip" hidden>${esc(t("v9_tip"))}</div></div>
       ${v9L ? "" : `<div class="v9soon">${esc(t("v9_lang_soon"))}</div>`}<div class="v9pop" hidden></div>
