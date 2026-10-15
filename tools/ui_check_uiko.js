@@ -11,7 +11,7 @@
   const HANGUL = /[가-힣ㄱ-ㆎ]/;
   const SCRIPT = { ne: /[ऀ-ॿ]/, hi: /[ऀ-ॿ]/, th: /[฀-๿]/, ur: /[؀-ۿ]/, bn: /[ঀ-৿]/, km: /[ក-៿]/, lo: /[຀-໿]/, my: /[က-႟]/, si: /[඀-෿]/, zh: /[一-鿿]/, ja: /[぀-ヿ一-鿿]/, mn: /[Ѐ-ӿ]/, ru: /[Ѐ-ӿ]/, ky: /[Ѐ-ӿ]/ }[L] || /[A-Za-zÀ-ɏ]{3,}/;
   // 배우는 내용·이름(언어와 상관없이 그대로인 것) — retext SKIP 과 같은 뜻 + 자판·글자 칸·화자 이름·편 제목
-  const CONTENT = "[lang=ko]:not(button):not(.chip), .kotext, .ko, .v9body p, .v9body .pair, .glosses, .saybig, .sayrom, .tr, .trrom, .rom, .mean, .who, .vsub, .vtitle .tt, .sent, .wko, .slot, .slotrow, .kb, .hand, .spk, .spkg, .chips, .cap, .lines .line > p, .eps .t, .cwave, .csyl, .heard, .hrow, .stage, script, style, svg, textarea, input, .uiko .b, .uiko .a, [data-lang], [data-act=lang], .pb, .diag .dtab, .diag .dbtns button, .diag .dkeep, .diag h3, .diag .derr"; // [data-act=lang]·.pb = 언어 이름 단추(일부러 그 언어 이름) · 진단 표·시험 단추(복사 포함)·기록 = 한국어 그대로(본부 10-14 · 앱개발부 — 제목·안내·닫기만 번역)
+  const CONTENT = "[lang=ko]:not(button):not(.chip), .kotext, .ko, .v9body p, .v9body .pair, .glosses, .saybig, .sayrom, .tr, .trrom, .rom, .mean, .who, .vsub, .vtitle .tt, .sent, .wko, .slot, .slotrow, .kb, .hand, .spk, .spkg, .chips, .cap, .lines .line > p, .eps .t, .cwave, .csyl, .heard, .hrow, .stage, script, style, svg, textarea, input, .chip.uiko .b, .chip.uiko .a, [data-lang], [data-act=lang], .pb, .diag .dtab, .diag .dbtns button, .diag .dkeep, .diag h3, .diag .derr"; // [data-act=lang]·.pb = 언어 이름 단추(일부러 그 언어 이름) · 진단 표·시험 단추(복사 포함)·기록 = 한국어 그대로(본부 10-14 · 앱개발부 — 제목·안내·닫기만 번역)
   const vis = el => { for (let a = el; a && a !== document.body; a = a.parentElement) { if (a.hidden) return false; const s = getComputedStyle(a); if (s.display === "none" || s.visibility === "hidden") return false; } return el.getClientRects().length > 0; };
   const path = el => { const p = []; for (let a = el; a && a !== document.body; a = a.parentElement) { let i = 0; for (let b = a; (b = b.previousElementSibling);) i++; p.unshift(a.tagName.toLowerCase() + (a.className && typeof a.className === "string" ? "." + a.className.trim().split(/\s+/)[0] : "") + ":" + i); } return p.join(">"); };
   const label = el => (el.className && typeof el.className === "string" ? "." + el.className.trim().split(/\s+/).slice(0, 2).join(".") : el.tagName.toLowerCase());
@@ -19,8 +19,18 @@
     const m = new Map();
     const tw = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
     for (let n; (n = tw.nextNode());) { const el = n.parentElement, s = n.nodeValue.trim(); if (!s || !el || !/\p{L}/u.test(s) || el.closest(CONTENT) || !vis(el)) continue; m.set(path(el) + "#t" + [...el.childNodes].indexOf(n), { el, s }); }
-    for (const el of document.querySelectorAll("[aria-label],[title],[placeholder]")) { if (el.closest(CONTENT + ", .uiko") || !vis(el)) continue; for (const a of ["aria-label", "title", "placeholder"]) { const s = el.getAttribute(a); if (s && /\p{L}/u.test(s)) m.set(path(el) + "@" + a, { el, s, a }); } }
+    for (const el of document.querySelectorAll("[aria-label],[title],[placeholder]")) { if (el.closest(CONTENT + ", .chip.uiko") || !vis(el)) continue; for (const a of ["aria-label", "title", "placeholder"]) { const s = el.getAttribute(a); if (s && /\p{L}/u.test(s)) m.set(path(el) + "@" + a, { el, s, a }); } }
     return m;
+  }
+  // ⇄ 전후 단추·알약·머리 줄 크기·자리(본부 10-15 · 0px 이어야) — 쓰기 화면(.write)은 쓰기부 몫이라 따로 셈(ℹ)
+  const BOX = "button, a[href], .chip, [role=button], .modeb, .whead > *, .bar > *, .vtitle .tt > *, .v9bar > *, .hbt > *, .top > *";
+  function rects() { const m = new Map(); for (const el of document.querySelectorAll(BOX)) { if (!vis(el)) continue; const r = el.getBoundingClientRect(); m.set(path(el), { el, r: [r.left, r.top, r.width, r.height].map(x => Math.round(x * 2) / 2) }); } return m; }
+  function moved(st, a, b) {
+    let n = 0;
+    for (const [k, x] of a) { const y = b.get(k); if (!y) continue; const d = x.r.map((v, i) => Math.abs(v - y.r[i])), mx = Math.max(...d); if (mx < 0.5) continue;
+      const w = x.el.closest(".write") ? "ℹ(쓰기)" : "✗"; const key = `${st}|움직임|${k}`; if (seen.has(key)) continue; seen.add(key); if (w === "✗") n++;
+      out.push(`${w} ${st} ⇄ 때 크기·자리 바뀜 ${label(x.el)} 「${(x.el.textContent || "").trim().slice(0, 20)}」 x${d[0]} y${d[1]} 폭${d[2]} 높이${d[3]}px`); }
+    return n;
   }
   const where = (k, x) => `${label(x.el)}${x.a ? "@" + x.a : ""}`;
   function cmp(st, after, fresh, toKo) {
@@ -58,10 +68,10 @@
   for (const st of want) {
     try {
       document.getElementById("sheet-root") && (document.getElementById("sheet-root").innerHTML = "");
-      await setMode(false); await STATES[st](); const capL = cap(); total += mixed(st, capL, false);
+      await setMode(false); await STATES[st](); await W(300); const capL = cap(), boxL = rects(); total += mixed(st, capL, false);
       if (!(await toggle())) { out.push(`✗ ${st} ⇄ 단추 없음(보이는 곳)`); total++; continue; }
-      const capT = cap(); await STATES[st](); const capK = cap(); total += mixed(st, capK, true) + cmp(st, capT, capK, true);
-      await toggle(); const capT2 = cap(); await setMode(false); await STATES[st](); const capL2 = cap(); total += cmp(st, capT2, capL2, false);
+      const capT = cap(), boxT = rects(); total += moved(st, boxL, boxT); await STATES[st](); const capK = cap(); total += mixed(st, capK, true) + cmp(st, capT, capK, true);
+      const boxK = rects(); await toggle(); const capT2 = cap(); total += moved(st + "(한→모국어)", boxK, rects()); await setMode(false); await STATES[st](); const capL2 = cap(); total += cmp(st, capT2, capL2, false);
       out.push(`  ${st}: 글 ${capL.size}개 봄`);
     } catch (e) { out.push(`✗ ${st} 실행 오류 ${e.message}`); total++; }
   }

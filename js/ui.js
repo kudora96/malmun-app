@@ -1,6 +1,7 @@
 import { bgmOn, setBgm } from "./bgm.js?v=1015.2";
 import { t, tL, lang, langName, LANGS, READY, setLang, KO_UI, uiKoOn, setUiKo, langShort, preloadKoUi } from "./i18n.js?v=1015.2";
 import { snapshot, retext } from "./retext.js?v=1015.2";
+import "./langfit.js?v=1015.2"; // ⇄ 때 단추 크기·자리 고정(다국어부 10-15)
 import { VERSION } from "./version.js?v=1015.2";
 import { esc } from "./text.js?v=1015.2";
 

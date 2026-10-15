@@ -87,6 +87,7 @@ export async function setLang(code, remember = false) {
   if (info.font && !document.querySelector(`link[data-font="${code}"]`)) { const k = Object.assign(document.createElement("link"), { rel: "stylesheet", href: `https://fonts.googleapis.com/css2?family=${info.font.replace(/ /g, "+")}:wght@400;700&display=swap` }); k.dataset.font = code; document.head.append(k); }
   document.documentElement.style.setProperty("--lang-lh", info.lh || "");
   document.documentElement.dir = RTL.has(code) && Object.keys(strings).length ? "rtl" : "ltr"; // 그 언어 글이 실제로 실렸을 때만 오른쪽→왼쪽(언어부 10-11 — 영어 글인데 뒤집히던 것)
+  window.dispatchEvent(new CustomEvent("malmun:langset")); // 언어를 바꿈(지구 단추) — langfit 이 단추 폭을 다시 잼
 }
 
 export const t = (k, vars) => {
@@ -95,6 +96,9 @@ export const t = (k, vars) => {
   if (vars) for (const [a, b] of Object.entries(vars)) s = s.replace(`{${a}}`, b);
   return s;
 };
+// ⇄ 반대쪽 글(지금 모국어면 한국어판 · 한국어면 모국어) — 단추 폭을 두 말 중 긴 쪽으로 고정할 때(js/langfit.js · 다국어부 10-15)
+export const tAlt = k => { const ko = koGot[lang]; if (!ko) return null; return uiKoOn() ? (strings[k] ?? fallback[k] ?? null) : (ko[k] ?? strings[k] ?? fallback[k] ?? null); };
+export const koReady = c => !!koGot[c || lang];
 // 모국어 글(한국어 토글과 상관없이) — 한국어로 바꾼 직후 「돌아오는 길」 안내처럼 학습자가 꼭 읽어야 하는 글(본부 10-14 ④)
 export const tL = (k, vars) => { let s = strings[k] ?? fallback[k] ?? k; if (vars) for (const [a, b] of Object.entries(vars)) s = s.replace(`{${a}}`, b); return s; };
 export const langName = c => (LANGS.find(l => l[0] === c) || [c, c])[1];
