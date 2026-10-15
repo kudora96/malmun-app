@@ -1,10 +1,10 @@
-import { bgmOn, setBgm, TRACKS, playTrack, bgmNow, onBgmChange } from "./bgm.js?v=1015.5";
-import { paths } from "./paths.js?v=1015.5";
-import { t, tL, lang, langName, LANGS, READY, setLang, KO_UI, uiKoOn, setUiKo, langShort, preloadKoUi } from "./i18n.js?v=1015.5";
-import { snapshot, retext } from "./retext.js?v=1015.5";
-import "./langfit.js?v=1015.5"; // ⇄ 때 단추 크기·자리 고정(다국어부 10-15)
-import { VERSION } from "./version.js?v=1015.5";
-import { esc } from "./text.js?v=1015.5";
+import { bgmOn, setBgm, TRACKS, playTrack, bgmNow, onBgmChange } from "./bgm.js?v=1015.6";
+import { paths } from "./paths.js?v=1015.6";
+import { t, tL, lang, langName, LANGS, READY, setLang, KO_UI, uiKoOn, setUiKo, langShort, preloadKoUi } from "./i18n.js?v=1015.6";
+import { snapshot, retext } from "./retext.js?v=1015.6";
+import "./langfit.js?v=1015.6"; // ⇄ 때 단추 크기·자리 고정(다국어부 10-15)
+import { VERSION } from "./version.js?v=1015.6";
+import { esc } from "./text.js?v=1015.6";
 
 const svg = (d, fill) => `<svg class="ico" viewBox="0 0 24 24" ${fill ? 'fill="currentColor"' : 'fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"'} aria-hidden="true">${d}</svg>`;
 export const I = {
