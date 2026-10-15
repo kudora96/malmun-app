@@ -244,5 +244,9 @@
  "bgm_inst_kalimba": "Kalimba",
  "bgm_inst_gayageum": "Gayageum (zither)",
  "bgm_inst_daegeum": "Daegeum (flute)",
- "bgm_inst_piano": "Piano"
+ "bgm_inst_piano": "Piano",
+ "bgm_inst_piri": "Piri (reed pipe)",
+ "bgm_ver_calm": "Calm",
+ "bgm_ver_bright": "Bright",
+ "bgm_ver_lively": "Lively"
 }

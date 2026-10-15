@@ -49,7 +49,7 @@ if (!window.__uikoWired) { // 문서 한 곳에서 받기(화면이 따로 손�
 export const musicBtn = () => `<button class="musicbox" data-act="musicbox">🎵 <span data-k="music_box">${esc(t("music_box"))}</span></button>`;
 export function openMusicBox() {
   const root = document.getElementById("sheet-root");
-  const row = (x, i) => { const on = bgmNow() === i; return `<li><span class="nm"><b lang="ko">${esc(x.song)}</b> · <span data-k="bgm_inst_${x.inst}">${esc(t("bgm_inst_" + x.inst))}</span></span>
+  const row = (x, i) => { const on = bgmNow() === i; return `<li><span class="nm"><b lang="ko">${esc(x.song)}</b> <small><span data-k="bgm_inst_${x.inst}">${esc(t("bgm_inst_" + x.inst))}</span> · <span data-k="bgm_ver_${x.ver}">${esc(t("bgm_ver_" + x.ver))}</span></small></span>
     <button class="mplay" data-play="${i}" aria-pressed="${on}"><span aria-hidden="true">${on ? "■" : "▶"}</span> <span data-k="${on ? "music_stop" : "music_play"}">${esc(t(on ? "music_stop" : "music_play"))}</span></button>
     <button class="mdl" data-dl="${i}">⬇ <span data-k="music_dl">${esc(t("music_dl"))}</span></button></li>`; };
   const paint = () => { const ul = root.querySelector(".mlist"); if (ul) ul.innerHTML = TRACKS.map(row).join(""); };
