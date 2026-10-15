@@ -1126,6 +1126,8 @@ button.dim{opacity:.45}
 .write .segrow .wtip::before{top:auto;bottom:100%;border-top-color:transparent;border-bottom-color:var(--ink)}
 /* 머리 줄 n3d(10-14) — 두 줄로 꺾기 전 마지막: 화자(· 선생님) 숨김 · 번호 「3 / 15」 만(ur 320 머리 줄 두 줄 → 손글씨 칸 129) */
 .write .whead.n3d .sub .sp{display:none}
+.write .whead.n3d{gap:3px;padding-inline:8px} /* ♪ 단추가 늘어 320 에서 두 줄(n4)로 꺾이며 칸이 27px 줄던 것(10-15) — 사이를 좁혀 한 줄 */
+.write .whead.n3d > :is(button,.chip),.write .whead.n3d .wmode button{padding-inline:6px}
 /* 머리 줄 n3b(10-12) — 두 줄로 꺾기 전에 ⌨ ✍ 그림만(이름은 aria-label) */
 .write .whead.n3b .wmode .ml{display:none}
 .write .whead.n3b .wmode button{min-width:40px}
@@ -1193,7 +1195,7 @@ html:lang(ur) .write .hbox .hscore{line-height:1.4;padding-block:0}
 .write .hjudge p i{font-style:normal;color:var(--badc);margin-inline-end:3px}
 .write .hjudge p.ok{color:var(--okc)}
 .write .hjudge{position:relative}
-.write .hand .hbtns .hjudge.cut{padding-inline-end:30px} /* 「⋯」 자리 — 좁은 폰 안쪽 여백 규칙보다 이김(검사부 10-15 ur 320 ⋯ 이 글을 덮음) */
+.write .hand .hbtns .hjudge{padding-inline-end:30px} /* 「⋯」 자리를 늘 비워 둠(나중에 생기면 글이 다시 꺾여 아랫줄이 반만 보이던 것 · 10-15) */ /* 「⋯」 자리 — 좁은 폰 안쪽 여백 규칙보다 이김(검사부 10-15 ur 320 ⋯ 이 글을 덮음) */
 .write .hbox .hjfull,html:lang(ur) .write .hbox .hjfull p{line-height:1.6}
 .write .hand .hbtns .hjudge button.jmore{display:block;box-shadow:0 1px 0 var(--line);position:absolute;inset-inline-end:3px;bottom:3px;min-width:24px;height:20px;min-height:0;padding:0 3px;border:1px solid var(--line);border-radius:8px;background:var(--card);box-shadow:0 1px 0 var(--line);font-size:14px;font-weight:800;line-height:1;color:var(--ink)}
 .write .hbox .hjfull{position:absolute;inset:0;z-index:6;overflow:auto;padding:8px 10px;border-radius:12px;background:color-mix(in srgb,var(--card) 96%,transparent);box-shadow:0 0 0 2px var(--line);font-size:13px;line-height:1.4;font-weight:600;color:var(--ink);cursor:pointer}
@@ -1247,6 +1249,12 @@ html:lang(ur) .write .work.handmode .stage .sub2 .mean{padding-block:9px;margin-
 .write .hand .hbtns > button{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .write .hand .hbtns > button .ml,.write .hand .hbtns > button .ms{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
 .write .hand.hic .hbtns > button{min-width:0}
+/* 글 단추(그림만 아닌 배치) = 긴 말은 두 줄까지(「मेटाउनुहोस्」 처럼 9px 로도 한 줄에 안 들던 것 · 단추 높이 그대로) */
+.write .hand:not(.hic) .hbtns > button{white-space:normal;line-height:1.05}
+.write .hand:not(.hic) .hbtns > button .ml{white-space:normal}
+.write .hand:not(.hic) .hbtns > button .ml .dl > span,.write .hand:not(.hic) .hbtns > button .ml .dl::after{white-space:normal;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+.write .hand .hbtns [data-act=hundo] .ml{display:none} /* 되돌리기 단추 = 늘 「한 획」 짧은 이름(10-15 「↶…」 로 잘리던 것 · 단추 폭 고정) */
+.write .hand:not(.hic) .hbtns [data-act=hundo] .ms{display:inline;margin-inline-start:.25em}
 .write .hand.two .hbtns,.write .hand.three .hbtns{grid-auto-rows:34px} /* 단추 줄 높이 고정(ur 나스탈리크 글로 1px 흔들림) */
 html:lang(ur) .write .hand.two .hbtns,html:lang(ur) .write .hand.three .hbtns{grid-auto-rows:36px}
 .write .hand.two .hbtns > button,.write .hand.three .hbtns > button{min-height:0;height:100%}
