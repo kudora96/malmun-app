@@ -234,5 +234,16 @@
  "diag_h_nav": "Nhật ký quay lại",
  "diag_h_err": "Lỗi gần đây",
  "fx_100": "100 điểm!",
- "bgm_toggle": "Bật/tắt nhạc nền"
+ "bgm_toggle": "Bật/tắt nhạc nền",
+ "music_box": "Hộp nhạc",
+ "music_hint": "Dân ca Hàn Quốc phát trong ứng dụng. Có thể nghe và tải về.",
+ "music_play": "Nghe",
+ "music_stop": "Dừng",
+ "music_dl": "Tải về",
+ "music_dl_fail": "Không tải về được. Hãy thử lại.",
+ "bgm_inst_bell": "Chuông",
+ "bgm_inst_kalimba": "Kalimba",
+ "bgm_inst_gayageum": "Gayageum (đàn tranh Hàn)",
+ "bgm_inst_daegeum": "Daegeum (sáo Hàn)",
+ "bgm_inst_piano": "Piano"
 }
