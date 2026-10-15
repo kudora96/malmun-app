@@ -1255,3 +1255,5 @@ html[dir=rtl] .write .hjudge{direction:rtl}
 .chip.uiko .a,.chip.uiko .b,.chip.uiko[aria-pressed] .a,.chip.uiko[aria-pressed] .b{font-weight:800}
 /* 설명 막대 ▶/■(듣는 중) 표시 폭 고정 — ⇄ 로 듣는 말이 바뀌면 ▶·■ 가 서로 바뀌어 단추 폭이 0.5~1px 흔들림(본부 10-15 · 0px) */
 .v9bar .pb .ic{display:inline-block;width:1em;text-align:center}
+/* 처음 화면 한국어 모드 — 큰 「안녕하세요!」와 같은 말이라 작은 인사 줄은 숨김(다시 그리지 않고 · 10-15) */
+:root.uiko .welcome .hello .tr{visibility:hidden}
