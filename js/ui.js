@@ -24,7 +24,7 @@ export const langChip = () => `<button class="chip" data-act="lang" aria-label="
 //  화면은 uiKoBtn() 만 머리 줄 오른쪽 묶음 맨 앞에 두면 됨 — 누르기는 아래 문서 한 곳(switchUiKo)이 받음(배우기 화면은 자기 손잡이가 먼저 받고 멈춤)
 export const uiKoBtn = () => bgmBtn() + (KO_UI.includes(lang) ? `<button class="chip uiko" data-act="uiko" aria-pressed="${uiKoOn()}" aria-label="${esc(langName(lang))} ⇄ 한국어"><span class="a" lang="${lang}">${esc(langShort(lang))}</span>⇄<span class="b" lang="ko">한</span></button>` : "");
 // ♪ 배경음악 켜기/끄기(본부 10-15 · 모든 창 = uiKoBtn() 앞에 붙어 ⇄ 와 같은 자리 · en 처럼 ⇄ 가 없는 언어에도 ♪ 는 있음 · 크기 고정 · 누르기는 아래 문서 한 곳)
-export const bgmBtn = () => `<button class="chip bgmb" data-act="bgm" aria-pressed="${bgmOn()}" aria-label="${esc(t("bgm_toggle"))}" title="${esc(t("bgm_toggle"))}"><span aria-hidden="true">♪</span></button>`;
+export const bgmBtn = () => `<button class="chip bgmb" data-act="bgm" aria-pressed="${bgmOn()}" aria-label="${esc(t("bgm_toggle"))}" title="${esc(t("bgm_toggle"))}"><span aria-hidden="true">♪</span><span class="lt" data-k="bgm_short">${esc(t("bgm_short"))}</span></button>`;
 export async function toggleUiKo(after) { await switchUiKo(!uiKoOn()); after?.(); }
 export async function switchUiKo(ko) {
   if (!KO_UI.includes(lang) || ko === uiKoOn()) return;
