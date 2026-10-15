@@ -217,7 +217,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
       v.pause();
       if (st.rep) {
         v.currentTime = l.start;
-        st.gap = setTimeout(() => { st.gap = 0; if (st.rep) v.play().catch(() => {}); sync(); }, LOOP_GAP);
+        st.gap = setTimeout(() => { st.gap = 0; if (st.rep && !st.panel && !document.hidden) v.play().catch(() => {}); sync(); }, LOOP_GAP); /* 위 창(쓰기·말하기·설명)이 떠 있거나 탭이 숨으면 다시 안 틂(본부 10-15 가만히 있는데 소리) */
       } else st.once = false;
       return sync();
     }
@@ -254,7 +254,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     sync();
   };
   seq.ondone = () => {
-    if (st.rep) { st.gap = setTimeout(() => { st.gap = 0; if (st.rep) seq.play(lessonItems(st.cur, true)); }, LOOP_GAP); }
+    if (st.rep) { st.gap = setTimeout(() => { st.gap = 0; if (st.rep && !st.panel && !document.hidden) seq.play(lessonItems(st.cur, true)); }, LOOP_GAP); }
     else st.once = false;
     sync();
   };
@@ -484,6 +484,9 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     if (st.panel) closePanel(true);
   };
   addEventListener("popstate", onPop);
+  // 탭이 숨으면(다른 탭·앱) 문장·설명 소리 멈춤(본부 10-15 — 뒤에 둔 탭에서 소리가 「자주」 남) · 돌아와도 저절로 다시 틀지 않음(▶ 로 이어서)
+  const onHide = () => { if (!document.hidden) return; if (playing()) { clearTimeout(st.gap); st.gap = 0; if (st.panel?.kind === "explain") ex.pause(); else if (!st.panel) { if (st.mode === "video") v.pause(); else seq.pause(); } sync(); } };
+  document.addEventListener("visibilitychange", onHide);
   async function openPanel(kind, i, { autoplay = false, task, restore = null } = {}) {
     if (!st.panel && !(restore && nav.depth > 0)) navPush(); // 처음 열 때만 한 칸(토글로 다시 열 때는 있던 칸 그대로)
     i = Math.max(0, Math.min(L.length - 1, i));
@@ -917,5 +920,5 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   if (reopen) openPanel(reopen.kind, reopen.i, { restore: reopen }); // ने⇄한 토글 전 창·자리
   else if (opts.explain) openPanel("explain", st.cur, { autoplay: true }); /* #/explain/{편}/{줄} = 그 줄 v9 설명 창(첫 터치 전엔 소리가 막힐 수 있음 — ▶ 로 시작) */
   const release = hold(); // 소리 장치 깨워 두기(첫소리 먹힘 방지)
-  return () => { clearTimeout(tipT); document.removeEventListener("fullscreenchange", onFsChange); clearInterval(edgeT); clearInterval(litT); clearInterval(seekTimer); clearInterval(hlTimer); document.removeEventListener("pointerdown", onDocDown, true); removeEventListener("popstate", onPop); removeEventListener("malmun:uilang", onUiLang); clearTimeout(st.animEnd); release(); st.panel?.cleanup?.(); ex.stop(); removeEventListener("resize", pad); removeEventListener("resize", onFit); clearInterval(timer); clearTimeout(st.gap); document.removeEventListener("keydown", onKey); seq.stop(); v.pause(); v.removeAttribute("src"); v.load(); };
+  return () => { clearTimeout(tipT); document.removeEventListener("fullscreenchange", onFsChange); clearInterval(edgeT); clearInterval(litT); clearInterval(seekTimer); clearInterval(hlTimer); document.removeEventListener("pointerdown", onDocDown, true); removeEventListener("popstate", onPop); removeEventListener("malmun:uilang", onUiLang); document.removeEventListener("visibilitychange", onHide); clearTimeout(st.animEnd); release(); st.panel?.cleanup?.(); ex.stop(); removeEventListener("resize", pad); removeEventListener("resize", onFit); clearInterval(timer); clearTimeout(st.gap); document.removeEventListener("keydown", onKey); seq.stop(); v.pause(); v.removeAttribute("src"); v.load(); };
 }
