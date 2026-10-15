@@ -225,7 +225,7 @@
  "diag_h_err": "Recent errors",
  "fx_100": "100 points!",
  "bgm_toggle": "Background music on/off",
- "help_sp_7": "⇄한 — Switches the app text to Korean. Your recording and sounds keep going. Tap again to come back to your language.",
+ "help_sp_7": "{b} — Switches the app text to Korean. Your recording and sounds keep going. Tap again to come back to your language.",
  "help_wr_1": "⌨ Keyboard / ✍ Handwriting — choose how to write.",
  "help_wr_2": "Letter row at the top — tap a letter to start from there. The colored letter is the one to write now; green ones are done. 🔊 reads this row; tapping a letter box reads just that letter.",
  "help_wr_3": "Keyboard — tap consonants and vowels in order. “Auto line” writes this row for you; “Auto all” writes to the end.",

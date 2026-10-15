@@ -14,7 +14,7 @@
 //  S6 녹음은 이 기기 안에만(IndexedDB) — 서버로 보내지 않는다
 //  S7 영상 창 안(embedded): 스크롤 없이 · 줄 이동·닫기는 학습 화면이 한다 · 줄 전체까지 통과하면 다음 줄 말하기로
 import { warmSTT } from "../sttserver.js?v=1015.2";
-import { t, lang } from "../i18n.js?v=1015.2";
+import { t, lang, langShort } from "../i18n.js?v=1015.2";
 import { esc, sayParts, koq } from "../text.js?v=1015.2";
 import { spkHtml, uiKoBtn } from "../ui.js?v=1015.2";
 import { episode } from "../data.js?v=1015.2";
@@ -83,6 +83,8 @@ const recGet0 = async key => { try { const d = await db(); return await new Prom
 export const recPut = async (key, val) => { try { const d = await db(); await new Promise(res => { const tx = d.transaction("rec", "readwrite"); tx.objectStore("rec").put(val, key); tx.oncomplete = tx.onerror = () => { d.close(); res(); }; }); } catch {} };
 
 // 단추 글 = 기호(◀ ▶ ? ✕) + 글 — 좁으면 글만 숨김(머리 줄 한 줄 유지)
+// 사용법 풍선 글(help_sp_*) — {b} = 「ने⇄한」 단추 이름(한국어 칸 · ⇄ 때 이 함수로 다시 씀)
+const helpHTML = () => [1, 2, 3, 4, 5, 6, 7, 8, 9].map(k => "help_sp_" + k).filter(k => t(k) !== k).map(k => `<p>${esc(t(k)).replace("{b}", `<span lang="ko">${esc(langShort(lang))}⇄한</span>`)}</p>`).join("") + `<p class="x">${esc(t("help_close"))}</p>`;
 const lbl = k => { const s = t(k), m = String(s).match(/^([^\p{L}\p{M}\p{N}]*)(.*?)([^\p{L}\p{M}\p{N}]*)$/u); return m ? `${m[1] ? `<i class="ic">${esc(m[1].trim())}</i>` : ""}<span class="lt" data-k="${k}" data-kcore>${esc(m[2])}</span>${m[3] ? `<i class="ic">${esc(m[3].trim())}</i>` : ""}` : esc(s); };
 export default async function speak(app, ep, id, opts = {}) {
   const d = await episode(ep, lang);
@@ -108,7 +110,7 @@ export default async function speak(app, ep, id, opts = {}) {
     <div class="whead"><b>${esc(t("speak"))}</b><span class="sub">${li + 1} / ${d.lines.length}<span class="spk"> · ${spkHtml(line.speaker)}</span></span>
       ${uiKoBtn()}<button class="micpick" data-act="help" aria-label="${esc(t("help"))}">${lbl("help_btn")}</button><span class="segnav"></span><button class="micpick closex" data-act="close" aria-label="${esc(t("close_btn"))}">${lbl("close_btn")}</button></div>
     <div class="miclist" hidden></div>
-    <div class="helpbox" hidden>${[1, 2, 3, 4, 5, 6, 7, 8, 9].map(k => "help_sp_" + k).filter(k => t(k) !== k).map(k => `<p>${esc(t(k))}</p>`).join("")}<p class="x">${esc(t("help_close"))}</p></div>
+    <div class="helpbox" hidden>${helpHTML()}</div>
     <div class="task"><div class="say ko" lang="ko"></div><div class="tr"></div></div>
     <div class="meter"><div class="lvl" hidden><i></i></div><div class="sbar"><i></i><em style="left:${PASS}%"></em></div><div class="tbar" hidden><i></i><em class="pace" hidden></em><span class="tt"></span></div><div class="msgw"><div class="msg" aria-live="polite"></div><span class="fx" aria-hidden="true"></span></div><div class="heardline"></div><div class="keeprow"><button data-act="keep" title="${esc(t("keep"))}" hidden>${esc(t("keep_short"))}</button><button data-act="savedplay" title="${esc(t("saved_title"))}" hidden>${esc(t("saved_play"))}</button><span class="mini"><button data-act="savedl" title="${esc(t("download"))}" hidden>⬇ ${esc(t("dl_short"))}</button><button data-act="savedel" title="${esc(t("del_one"))}" hidden>🗑 ${esc(t("del_short"))}</button></span></div><button class="micname" data-act="pick" hidden></button></div>
     <div class="cmp" hidden></div>
@@ -477,7 +479,7 @@ export default async function speak(app, ep, id, opts = {}) {
   sfx.preload([lineSrc, ...parts.map(p => p.src)]);
   const release = hold();
   // 언어를 바꾸면(본부 10-13 안 A · retext 가 보내는 malmun:uilang) 결과 줄·토막 단추를 지금 상태 그대로 새 언어로 — 녹음·채점은 안 건드림 · 「확인 중…」 동안은 retext 가 바꾼 글 그대로
-  const onLang = () => { if (!st.alive) return; setRateWord(t("speed")); fitHead(); /* 속도 알약 말도 새 언어로(다시 그릴 때 옛 말로 쓰지 않게 · 다국어부 10-14) */ if (st.checking) return; paint(); if (st.retryDev) $(".msg").textContent = t("sr_retry_dev"); };
+  const onLang = () => { if (!st.alive) return; setRateWord(t("speed")); $(".helpbox").innerHTML = helpHTML(); fitHelp(); fitHead(); /* 속도 알약 말도 새 언어로(다시 그릴 때 옛 말로 쓰지 않게 · 다국어부 10-14) */ if (st.checking) return; paint(); if (st.retryDev) $(".msg").textContent = t("sr_retry_dev"); };
   addEventListener("malmun:uilang", onLang);
   return () => { removeEventListener("malmun:uilang", onLang); st.alive = false; newAtt(); clearInterval(litT); closeCmp(); stopRec(true); stopSounds(); st.stream?.getTracks().forEach(x => x.stop()); release(); quietWake(false); document.removeEventListener("keydown", onEsc, true); delete app.__sp; };
 }
