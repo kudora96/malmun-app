@@ -5,7 +5,8 @@
 import { t, tAlt, uiKoOn, koReady, preloadKoUi, lang, uiKeys, KO_UI } from "./i18n.js?v=1015.3";
 import { snapshot } from "./retext.js?v=1015.3";
 
-const TARGET = "button, a[href], .chip, [role=button], .modeb, .sheet > p, .sheet h2, .whead > b, .whead > .sub, .bar .t, .bar .sub, .vtitle .tt > b, .exhead > b, .v9bar > span";
+const TARGET = "button, a[href], .chip, [role=button], .modeb, .sheet > p, .sheet h2, .eps .st, .hero .meta, .whead > b, .whead > .sub, .bar .t, .bar .sub, .vtitle .tt > b, .exhead > b, .v9bar > span";
+const SHRINK = ".whead > *, .bar > *, .bar .t, .bar .sub, .vtitle .tt > *, .hbt > *, .eps .st"; // 한 줄을 나눠 쓰는 머리 줄 — 넓히지 않고 글자만 줄임
 const SKIP = ".write, [lang=ko]:not(button):not(.chip), .kotext, .ko, .v9body :is(p,.pair,.pairln,.glosses,.saybig,.sayrom,.ex,.sn), .glosses, .saybig, .tr, .rom, .mean, .who, .vsub, .chip.uiko, [data-lang], [data-act=lang], .kb, .slot, .lines .line > p, svg, script, style, textarea, input";
 const EDGE = /^([\s\p{S}\p{P}]*?)(\p{L}[\s\S]*?\S|\p{L})([\s\p{S}\p{P}]*)$/u;
 const coreOf = s => EDGE.exec(String(s).trim())?.[2] ?? String(s).trim();
@@ -35,7 +36,7 @@ function applyScale(el) { const f = el.__lf; if (!f) return; const s = f.scale[m
 // 단추 글이 다른 열쇠 글로 바뀌면(「설명」 → 「▶ 영상 전체」 같은 상태 바뀜) 폭을 풀고 다시 잼 — ⇄ 로 바뀐 글(두 말 중 하나)은 그대로
 function refitIfChanged(el) {
   const f = el.__lf; if (!f || f.sig.has(el.textContent)) return;
-  el.__lf = null; fitted.delete(el); el.style.minWidth = el.style.maxWidth = el.style.minHeight = el.style.fontSize = el.style.whiteSpace = "";
+  el.__lf = null; fitted.delete(el); el.style.minWidth = el.style.maxWidth = el.style.minHeight = el.style.maxHeight = el.style.overflow = el.style.fontSize = el.style.whiteSpace = "";
 }
 function fit(el, snap) {
   refitIfChanged(el);
@@ -54,15 +55,21 @@ function fit(el, snap) {
   el.__lf = { fs0: getComputedStyle(el).fontSize, scale: { L: 1, K: 1 }, sig: new Set([sig0, sig1]) }; fitted.add(el);
   if (Math.abs(r1.width - r0.width) < 0.05 && Math.abs(r1.height - r0.height) < 0.05) { el.style.boxSizing = bs0; return; } // 두 말 폭이 같음
   const W = Math.max(r0.width, r1.width), H = Math.max(r0.height, r1.height);
+  // 좁은 머리 줄(.whead·.bar 안 · 다른 단추와 한 줄을 나눠 씀)은 넓히지 않음 — 지금 크기를 그대로 잠그고 긴 말일 때 글자만 줄임(우르두 320 머리 줄이 두 줄로 꺾여 닫기 단추가 밀리던 것 · 10-15)
+  const lockNow = () => {
+    el.style.minWidth = el.style.maxWidth = `${r0.width}px`; el.style.minHeight = el.style.maxHeight = `${r0.height}px`; el.style.overflow = "hidden";
+    nodes.forEach(([n, , a]) => { n.nodeValue = a; }); // 잠근 크기에 반대쪽 말이 들어가려면 몇 배로 줄여야 하는지
+    let sc = 1; for (let k = 0; k < 6 && (el.scrollWidth > el.clientWidth + 0.5 || el.scrollHeight > el.clientHeight + 0.5); k++) { sc *= Math.min(el.clientWidth / el.scrollWidth, el.clientHeight / el.scrollHeight, 0.97); el.style.fontSize = `calc(${el.__lf.fs0} * ${sc.toFixed(3)})`; }
+    nodes.forEach(([n, v]) => { n.nodeValue = v; }); el.style.fontSize = "";
+    el.__lf.scale[alt] = Math.max(MIN_SCALE, sc);
+  };
+  if (el.matches(SHRINK)) { lockNow(); return; }
   el.style.boxSizing = "border-box"; el.style.minHeight = `${H}px`;
   if (r1.width <= r0.width) { el.style.minWidth = `${r0.width}px`; return; } // 지금 말이 더 긺 = 지금 폭이 기준
   el.style.minWidth = `${W}px`;
-  // 넓혀서 줄·화면이 넘치면 → 폭은 지금 그대로 고정 + 반대쪽(더 긴) 말일 때 글자만 줄임
-  const row = el.parentElement, over = () => (row && row.scrollWidth > row.clientWidth + 1) || el.getBoundingClientRect().right > innerWidth + 0.5;
-  if (over()) {
-    el.style.minWidth = el.style.maxWidth = `${r0.width}px`; el.style.whiteSpace = "nowrap";
-    el.__lf.scale[alt] = Math.max(MIN_SCALE, (r0.width - 2) / r1.width);
-  }
+  // 넓혀서 줄·화면이 넘치면(오른쪽→왼쪽 언어는 왼쪽 밖) → 지금 크기로 잠그고 긴 말일 때 글자만 줄임
+  const row = el.parentElement, over = () => (row && (row.scrollWidth > row.clientWidth + 1 || row.scrollHeight > row.clientHeight + 1)) || [...(row?.children || [el])].some(c => { const r = c.getBoundingClientRect(); return r.right > innerWidth + 0.5 || r.left < -0.5; });
+  if (over()) { el.style.minHeight = ""; lockNow(); }
 }
 
 let snapCache = null, snapMode = null, queued = false;
