@@ -13,21 +13,21 @@
 //     못 넘어도 막지 않는다([다음 ▶]) · 음성 인식이 안 되는 곳은 점수 없이 듣고 비교만(녹음은 저장)
 //  S6 녹음은 이 기기 안에만(IndexedDB) — 서버로 보내지 않는다
 //  S7 영상 창 안(embedded): 스크롤 없이 · 줄 이동·닫기는 학습 화면이 한다 · 줄 전체까지 통과하면 다음 줄 말하기로
-import { warmSTT } from "../sttserver.js?v=1015.2";
-import { t, lang, langShort } from "../i18n.js?v=1015.2";
-import { esc, sayParts, koq } from "../text.js?v=1015.2";
-import { spkHtml, uiKoBtn } from "../ui.js?v=1015.2";
-import { episode } from "../data.js?v=1015.2";
-import { paths } from "../paths.js?v=1015.2";
-import { audioCtx, hold, quietWake } from "../wake.js?v=1015.2";
-import * as sfx from "../sfx.js?v=1015.2";
-import { diagEnv, keepDiag } from "../diag.js?v=1015.2";
-import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1015.2";
-import { bestHeard, heardHTML, endHint, scoreOf, bestFull, spanOf, sylsAt } from "../heard.js?v=1015.2"; // 덧붙은 말 빼고 견주기(본부 10-11)
-import { openCompare, playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1015.2";
-import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace, lateFactor, sylAt, karaokeRun, isFull } from "../rhythm.js?v=1015.2";
-import { recDel, downloadRec, askPersist } from "../recstore.js?v=1015.2";
-import { logRec, dB, srWhy, srWatch, niceLabel, ALIAS, srOnlyMode, setSrOnly, isAndroid, recordSROnly, srMiss, micSet, seqMode, srOnBlob, devSR, setDevSR, srJudge } from "../recorder.js?v=1015.2";
+import { warmSTT } from "../sttserver.js?v=1015.3";
+import { t, lang, langShort } from "../i18n.js?v=1015.3";
+import { esc, sayParts, koq } from "../text.js?v=1015.3";
+import { spkHtml, uiKoBtn } from "../ui.js?v=1015.3";
+import { episode } from "../data.js?v=1015.3";
+import { paths } from "../paths.js?v=1015.3";
+import { audioCtx, hold, quietWake } from "../wake.js?v=1015.3";
+import * as sfx from "../sfx.js?v=1015.3";
+import { diagEnv, keepDiag } from "../diag.js?v=1015.3";
+import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1015.3";
+import { bestHeard, heardHTML, endHint, scoreOf, bestFull, spanOf, sylsAt } from "../heard.js?v=1015.3"; // 덧붙은 말 빼고 견주기(본부 10-11)
+import { openCompare, playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1015.3";
+import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace, lateFactor, sylAt, karaokeRun, isFull } from "../rhythm.js?v=1015.3";
+import { recDel, downloadRec, askPersist } from "../recstore.js?v=1015.3";
+import { logRec, dB, srWhy, srWatch, niceLabel, ALIAS, srOnlyMode, setSrOnly, isAndroid, recordSROnly, srMiss, micSet, seqMode, srOnBlob, devSR, setDevSR, srJudge } from "../recorder.js?v=1015.3";
 
 // 통과 두 단계(본부 10-04 · 투덜이 「원어민은 되지만 외국인은 100% 어렵다」): 80↑ = ☆ 통과(✓ · [저장]) · 95↑ = ★ 완벽
 export const PASS = 80, PERFECT = 95;
@@ -66,8 +66,8 @@ export function quietLimit(want, heard) {
 export const maxMsFor = say => Math.max(8000, (3 + 0.8 * [...String(say || "")].filter(c => /[가-힣]/.test(c)).length) * 1000);
 
 // ── 닮음 = 음절 정렬(js/score.js · 「들린 말」 빨간 표시와 같은 함수 — 본부 10-04) ──
-import { similarity, align } from "../score.js?v=1015.2";
-import { scoreFx } from "../scorefx.js?v=1015.2"; // 점수별 효과(본부 10-05)
+import { similarity, align } from "../score.js?v=1015.3";
+import { scoreFx } from "../scorefx.js?v=1015.3"; // 점수별 효과(본부 10-05)
 export { similarity };
 
 // ── 내 목소리 저장(S6) ──
@@ -84,7 +84,7 @@ export const recPut = async (key, val) => { try { const d = await db(); await ne
 
 // 단추 글 = 기호(◀ ▶ ? ✕) + 글 — 좁으면 글만 숨김(머리 줄 한 줄 유지)
 // 사용법 풍선 글(help_sp_*) — {b} = 「ने⇄한」 단추 이름(한국어 칸 · ⇄ 때 이 함수로 다시 씀)
-const helpHTML = () => [1, 2, 3, 4, 5, 6, 7, 8, 9].map(k => "help_sp_" + k).filter(k => t(k) !== k).map(k => `<p>${esc(t(k)).replace("{b}", `<span lang="ko">${esc(langShort(lang))}⇄한</span>`)}</p>`).join("") + `<p class="x">${esc(t("help_close"))}</p>`;
+const helpHTML = () => [1, 2, 3, 4, 5, 6, 7, 8, 9].map(k => "help_sp_" + k).filter(k => t(k) !== k).map(k => `<p dir="auto">${esc(t(k)).replace("{b}", `<span lang="ko">${esc(langShort(lang))}⇄한</span>`)}</p>`).join("") + `<p class="x">${esc(t("help_close"))}</p>`;
 const lbl = k => { const s = t(k), m = String(s).match(/^([^\p{L}\p{M}\p{N}]*)(.*?)([^\p{L}\p{M}\p{N}]*)$/u); return m ? `${m[1] ? `<i class="ic">${esc(m[1].trim())}</i>` : ""}<span class="lt" data-k="${k}" data-kcore>${esc(m[2])}</span>${m[3] ? `<i class="ic">${esc(m[3].trim())}</i>` : ""}` : esc(s); };
 export default async function speak(app, ep, id, opts = {}) {
   const d = await episode(ep, lang);
@@ -124,7 +124,7 @@ export default async function speak(app, ep, id, opts = {}) {
   const $ = s => app.querySelector(s);
   const cur = () => parts[st.i];
   // 도움말 풍선 = 칸 안에 다 보이게(본부 10-07 · 스크롤 0) — 넘치면 글을 조금씩 작게(최소 0.6배)
-  const fitHelp = () => { const hb = $(".helpbox"); if (!hb || hb.hidden) return; const ps = [...hb.children]; ps.forEach(x => x.style.removeProperty("zoom")); for (let z = 0.95; z >= 0.6 && hb.scrollHeight > hb.clientHeight; z -= 0.05) ps.forEach(x => (x.style.zoom = z.toFixed(2))); };
+  const fitHelp = () => { const hb = $(".helpbox"); if (!hb || hb.hidden) return; const ps = [...hb.children]; ps.forEach(x => x.style.removeProperty("zoom")); hb.style.overflowY = "hidden"; for (let z = 0.96; z >= 0.92 && hb.scrollHeight > hb.clientHeight; z -= 0.04) ps.forEach(x => (x.style.zoom = z.toFixed(2))); if (hb.scrollHeight > hb.clientHeight + 1) hb.style.overflowY = "auto"; }; // 글은 12px 아래로 안 줄임(검사부 10-15 ur 320 · 0.6배는 못 읽음) — 그래도 넘치면 풍선 안에서 굴려 읽음
   new ResizeObserver(() => fitHelp()).observe($(".helpbox"));
   // 머리 줄은 한 줄(본부 10-06 — 375×667 에서 「✕ बन्द」가 둘째 줄로 떨어짐) — 넘치면 h1: 단추 글 숨김(◀ ▶ ? ✕ 만) → h2: 제목 옆 「· 화자」 숨김 → h3: 사이 좁힘·⇄한 작게 → h4: 「말하기」 제목 숨김(⇄한 들어온 뒤 320 · 앱개발부 10-14)
   function fitHead() { const h = $(".whead"); if (!h) return; h.classList.remove("h1", "h2", "h3", "h4"); for (const c of ["h1", "h2", "h3", "h4"]) { if (h.scrollWidth <= h.clientWidth + 1) break; h.classList.add(c); } }

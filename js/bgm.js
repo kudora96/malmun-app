@@ -4,8 +4,8 @@
 //    곡마다 [loopStart, loopEnd] 한 번 → 끝나면 다른 곡(같은 곡 연속 없음 · 앱을 다시 열어도 지난 곡 다음) · 곡 늘리기 = TRACKS 한 줄
 //  · 녹음 전 hold() 로 그 자리에서 0 으로 멈춤(녹음에 안 섞임) · 블루투스 깨우기(wake.js)와 같은 소리 장치라 출력은 늘 열려 있음
 //  · 점검(?mute=1 · __sfxVolume 아주 작게)에선 안 틂
-import { audioCtx } from "./wake.js?v=1015.2";
-import { paths } from "./paths.js?v=1015.2";
+import { audioCtx } from "./wake.js?v=1015.3";
+import { paths } from "./paths.js?v=1015.3";
 
 const KEY = "malmun.bgm";
 const TRACKS = [ // 소리부 05_audio/_bgm/LIST.md(아리랑 5 · 도라지타령 2 · 10-15) · loopStart·loopEnd 그대로 · 무작위 · 같은 곡 연속 없음
