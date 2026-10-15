@@ -39,7 +39,8 @@ function backTip() {
 }
 if (!window.__uikoWired) { // 문서 한 곳에서 받기(화면이 따로 손잡이를 안 달아도 됨)
   window.__uikoWired = true;
-  document.addEventListener("click", e => { const b = e.target.closest?.("[data-act=uiko]"); if (!b || e.defaultPrevented) return; e.preventDefault(); switchUiKo(!uiKoOn()); });
+  // 잡기 단계(capture)에서 받고 멈춤 — 화면의 「바깥 누르면 닫힘」(? 방법·말풍선·마이크 목록) 손잡이까지 가지 않게 → ⇄ = 그 상태 그대로 글만(본부 10-15 투덜이 원칙)
+  document.addEventListener("click", e => { const b = e.target.closest?.("[data-act=uiko]"); if (!b) return; e.preventDefault(); e.stopPropagation(); switchUiKo(!uiKoOn()); }, true);
   document.addEventListener("click", e => { if (e.target.closest?.("[data-act=bgm]")) setBgm(!bgmOn()); });
   preloadKoUi();
 }

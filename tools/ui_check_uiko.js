@@ -24,7 +24,7 @@
   }
   // ⇄ 전후 단추·알약·머리 줄 크기·자리(본부 10-15 · 0px 이어야) — 쓰기 화면(.write)은 쓰기부 몫이라 따로 셈(ℹ)
   const BOX = "button, a[href], .chip, [role=button], .modeb, .whead > *, .bar > *, .vtitle .tt > *, .v9bar > *, .hbt > *, .top > *";
-  function rects() { const m = new Map(); for (const el of document.querySelectorAll(BOX)) { if (!vis(el)) continue; const r = el.getBoundingClientRect(); m.set(path(el), { el, r: [r.left, r.top, r.width, r.height].map(x => Math.round(x * 2) / 2) }); } return m; }
+  function rects() { const m = new Map(); for (const el of document.querySelectorAll(BOX)) { if (!vis(el) || el.closest(".v9body .chips, .glosses")) continue; /* 낱말 조각 칩 = 배우는 뜻(말이 바뀌면 길이도 바뀌는 게 맞음 · 본부·앱개발부 10-15) */ const r = el.getBoundingClientRect(); m.set(path(el), { el, r: [r.left, r.top, r.width, r.height].map(x => Math.round(x * 2) / 2) }); } return m; }
   function moved(st, a, b) {
     let n = 0;
     for (const [k, x] of a) { const y = b.get(k); if (!y) continue; const d = x.r.map((v, i) => Math.abs(v - y.r[i])), mx = Math.max(...d); if (mx < 0.5) continue;
@@ -40,7 +40,7 @@
   }
   function mixed(st, m, ko) {
     let n = 0;
-    for (const [k, x] of m) { const s0 = x.s.replace(/「[^」]*」|"[^"]*"/g, ""); const bad = ko ? SCRIPT.test(s0) && !HANGUL.test(s0) : HANGUL.test(s0); /* 「복사」처럼 화면 단추 이름을 따옴표로 가리키는 것은 일부러 */ if (!bad) continue; const key = `${st}|섞임|${ko}|${where(k, x)}|${x.s}`; if (seen.has(key)) continue; seen.add(key); n++; out.push(`✗ ${st} 섞임(${ko ? "한국어 화면에 모국어" : "모국어 화면에 한글"}) ${where(k, x)} 「${x.s.slice(0, 40)}」`); }
+    for (const [k, x] of m) { const s0 = x.s.replace(/「[^」]*」|"[^"]*"|\S*⇄한/g, ""); const bad = ko ? SCRIPT.test(s0) && !HANGUL.test(s0) : HANGUL.test(s0); /* 「복사」처럼 화면 단추 이름을 따옴표로 가리키는 것은 일부러 */ if (!bad) continue; const key = `${st}|섞임|${ko}|${where(k, x)}|${x.s}`; if (seen.has(key)) continue; seen.add(key); n++; out.push(`✗ ${st} 섞임(${ko ? "한국어 화면에 모국어" : "모국어 화면에 한글"}) ${where(k, x)} 「${x.s.slice(0, 40)}」`); }
     return n;
   }
   const lines = () => document.querySelectorAll(".lines .line");

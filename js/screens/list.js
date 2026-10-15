@@ -19,7 +19,7 @@ export default async function list(app, unit = "L01-00") {
       <div class="sub">${esc(unit)} · ${esc(t("n_episodes", { n: eps.length }))}</div></div><span class="hbt">${bgmBtn()}${uiKoBtn()}${langChip()}</span></div>
     ${first ? `<a class="hero" href="#/learn/${first.id}"><img src="img/${first.id}.jpg" alt="">
       <div><div class="ttl ko" lang="ko">${esc(first.id.slice(-2))} ${esc(first.title)}</div>
-      <div class="meta">${mmss(first.duration)} · ${esc(t("n_lines", { n: first.lines }))}${seen ? " · " + esc(t("seen_to", { n: seen })) : ""}</div>
+      <div class="meta">${mmss(first.duration)} · <span>${esc(t("n_lines", { n: first.lines }))}</span>${seen ? ` · <span>${esc(t("seen_to", { n: seen }))}</span>` : ""}</div><!-- {n} 칸 글은 따로 감쌈 — ⇄ 때 그 자리에서 바뀌게(다국어부 10-15) -->
       <div class="prog"><i style="width:${first.lines ? (100 * seen) / first.lines : 0}%"></i></div></div></a>` : ""}
     <ol class="eps">${eps.filter(e => e !== first).map(e => {
       const inner = `<span class="n">${esc(e.id.slice(-2))}</span><span class="ko" lang="ko">${esc(e.title)}</span><span class="st">${e.ready ? "" : esc(t("soon"))}</span>`;

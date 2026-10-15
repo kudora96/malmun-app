@@ -8,7 +8,7 @@
   const v = document.documentElement.dataset.v, I = await import(`/js/i18n.js?v=${v}`);
   if (!I.KO_UI.includes(L)) return `· ${L}: ⇄ 단추 없는 언어(건너뜀)`;
   const vis = el => { for (let a = el; a && a !== document.documentElement; a = a.parentElement) { if (a.hidden) return false; const s = getComputedStyle(a); if (s.display === "none" || s.visibility === "hidden") return false; } return el.getClientRects().length > 0; };
-  const path = el => { const p = []; for (let a = el; a && a !== document.body; a = a.parentElement) { let i = 0; for (let b = a; (b = b.previousElementSibling);) i++; p.unshift(a.tagName.toLowerCase() + ":" + i); } // 이름표(class)는 상태로 바뀌니 빼고 자리만 return p.join(">"); };
+  const path = el => { const p = []; for (let a = el; a && a !== document.body; a = a.parentElement) { let i = 0; for (let b = a; (b = b.previousElementSibling);) i++; p.unshift(a.tagName.toLowerCase() + ":" + i); } /* 이름표(class)는 상태로 바뀌니 빼고 자리만 */ return p.join(">"); };
   const label = el => (el.className && typeof el.className === "string" ? "." + el.className.trim().split(/\s+/).slice(0, 2).join(".") : el.tagName.toLowerCase());
   const OPEN = "[role=dialog], .sheet, .helpbox, .help, .panel, .cmp, .scorefx, .fx100, .toast, details[open], .modal, .overlay, .wtip, .modetip, .fstip, .whelp-box, .hbox, .full, .more";
   function finger() {

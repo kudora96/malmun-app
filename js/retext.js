@@ -36,7 +36,7 @@ const swap = (v, before, mem) => {
   if (k) { mem.k = k; return v.replace(tv, t(k)); }
   k = memOk(false) ? mem.k : before.get(c) || before.core.get(c);
   if (k && m) { mem.k = k; return m[1] + (before.txt.get(k) === c ? t(k) : coreOf(t(k))) + m[3]; }
-  for (const { re, k: tk, names } of before.tpl) { const r = re.exec(tv); if (r) return v.replace(tv, t(tk, Object.fromEntries(names.map((n, i) => [n, r[i + 1]])))); }
+  for (const { re, k: tk, names } of before.tpl) { const r = re.exec(tv); if (!r) continue; const vars = Object.fromEntries(names.map((n, i) => [n, /^\d+$/.test(r[i + 1]) ? +r[i + 1] : r[i + 1]])); return v.replace(tv, t(tk.replace(/_(zero|one|two|few|many|other)$/, ""), vars)); } // 복수형 열쇠(n_lines_other 등)는 바탕 열쇠로 — 한국어판엔 복수형 열쇠가 없어 그 말 글이 남던 것(다국어부 10-15 · ur 편 목록)
   const nt = /^([\s\p{S}\p{P}]*)(.*?\p{L}[\p{L}\p{M}]*)(\s*[\d.,:/×%]+.*)$/u.exec(tv); // 글 + 숫자 꼬리(「속도 0.9×」 · 「गति 0.9×」)
   if (nt) { k = before.get(nt[2].trim()) || before.core.get(nt[2].trim()); if (k) return v.replace(tv, nt[1] + coreOf(t(k)) + nt[3]); }
   return null;

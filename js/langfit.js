@@ -2,10 +2,10 @@
 //  새로 그려진 단추마다: 지금 말 글과 반대쪽 말 글(i18n.tAlt)로 폭·높이를 재서 → 둘 중 큰 쪽으로 고정(min-width·min-height)
 //  고정하면 줄이 넘치는 자리(좁은 폰 머리 줄 등)는 → 폭은 지금 그대로 고정하고, 더 긴 말일 때 글자 크기만 줄임(모드별 배율 · ⇄ 때 바꿈)
 //  쓰기 화면(.write)은 쓰기부가 따로 함 · 배우는 내용(대사·낱말·설명 본문)은 건드리지 않음
-import { t, tAlt, uiKoOn, koReady, preloadKoUi, lang } from "./i18n.js?v=1015.2";
+import { t, tAlt, uiKoOn, koReady, preloadKoUi, lang, uiKeys } from "./i18n.js?v=1015.2";
 import { snapshot } from "./retext.js?v=1015.2";
 
-const TARGET = "button, a[href], .chip, [role=button], .modeb, .whead > b, .whead > .sub, .bar .t, .bar .sub, .vtitle .tt > b, .exhead > b, .v9bar > span";
+const TARGET = "button, a[href], .chip, [role=button], .modeb, .sheet > p, .sheet h2, .whead > b, .whead > .sub, .bar .t, .bar .sub, .vtitle .tt > b, .exhead > b, .v9bar > span";
 const SKIP = ".write, [lang=ko]:not(button):not(.chip), .kotext, .ko, .v9body :is(p,.pair,.pairln,.glosses,.saybig,.sayrom,.ex,.sn), .glosses, .saybig, .tr, .rom, .mean, .who, .vsub, .chip.uiko, [data-lang], [data-act=lang], .kb, .slot, .lines .line > p, svg, script, style, textarea, input";
 const EDGE = /^([\s\p{S}\p{P}]*?)(\p{L}[\s\S]*?\S|\p{L})([\s\p{S}\p{P}]*)$/u;
 const coreOf = s => EDGE.exec(String(s).trim())?.[2] ?? String(s).trim();
@@ -16,15 +16,18 @@ function altOf(node, snap) {
   const v = node.nodeValue, tv = v.trim(); if (!tv || !/\p{L}/u.test(tv)) return null;
   const p = node.parentElement;
   if (p?.dataset.k) { const a = tAlt(p.dataset.k); return a == null ? null : (p.hasAttribute("data-kcore") ? coreOf(a) : a); }
+  const ks = multi().get(tv); if (ks?.length > 1) { const as = ks.map(tAlt).filter(a => a != null); if (as.length) return as.map(a => v.replace(tv, a)); } // 한 글 = 열쇠 여럿(「듣기」·「닫기」) → 반대쪽 글 후보 전부(가장 긴 것으로 잼)
   let k = snap.get(tv); if (k) { const a = tAlt(k); return a == null ? null : v.replace(tv, a); }
   const m = EDGE.exec(v), c = m?.[2].trim();
   k = c && (snap.get(c) || snap.core.get(c)); if (k) { const a = tAlt(k); return a == null ? null : m[1] + (snap.txt.get(k) === c ? a : coreOf(a)) + m[3]; }
-  for (const { re, k: tk, names } of snap.tpl) { const r = re.exec(tv); if (!r) continue; let a = tAlt(tk); if (a == null) return null; names.forEach((n, i) => { a = a.replace(`{${n}}`, r[i + 1]); }); return v.replace(tv, a); } // {칸} 틀 글(「31편」 · 「5 / 15」)
+  for (const { re, k: tk0, names } of snap.tpl) { const r = re.exec(tv); if (!r) continue; const tk = tk0.replace(/_(zero|one|two|few|many|other)$/, ""); let a = uiKoOn() ? (tAlt(tk0) ?? tAlt(tk)) : tAlt(tk); /* 한국어판엔 복수형 열쇠가 없음 → 한국어 쪽은 바탕 열쇠 */ if (a == null) return null; names.forEach((n, i) => { a = a.replace(`{${n}}`, r[i + 1]); }); return v.replace(tv, a); } // {칸} 틀 글(「31편」 · 「5 / 15」)
   const nt = /^([\s\p{S}\p{P}]*)(.*?\p{L}[\p{L}\p{M}]*)(\s*[\d.,:/×%]+.*)$/u.exec(tv);
   if (nt) { k = snap.get(nt[2].trim()) || snap.core.get(nt[2].trim()); if (k) { const a = tAlt(k); return a == null ? null : v.replace(tv, nt[1] + coreOf(a) + nt[3]); } }
   return null;
 }
 
+let multiMap = null, multiMode = "";
+function multi() { const m0 = mode() + lang; if (multiMap && multiMode === m0) return multiMap; multiMap = new Map(); multiMode = m0; for (const k of uiKeys()) { const s = String(t(k)).trim(); if (!s || s.includes("{")) continue; (multiMap.get(s) || multiMap.set(s, []).get(s)).push(k); } return multiMap; }
 const mode = () => (uiKoOn() ? "K" : "L");
 const fitted = new Set();
 function applyScale(el) { const f = el.__lf; if (!f) return; const s = f.scale[mode()] || 1; el.style.fontSize = s === 1 ? f.fs0 : `calc(${f.fs0} * ${s.toFixed(3)})`; }
@@ -38,7 +41,7 @@ function fit(el, snap) {
   refitIfChanged(el);
   if (el.__lf || !el.isConnected || el.closest(SKIP) || !el.getClientRects().length) return;
   const nodes = []; const w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
-  for (let n; (n = w.nextNode());) { const p = n.parentElement; if (p.closest(SKIP) && !el.matches(".chip.uiko")) continue; const a = altOf(n, snap); if (a != null && a !== n.nodeValue) nodes.push([n, n.nodeValue, a]); }
+  for (let n; (n = w.nextNode());) { const p = n.parentElement; if (p.closest(SKIP) && !el.matches(".chip.uiko")) continue; let a = altOf(n, snap); if (Array.isArray(a)) a = a.reduce((x, y) => (y.length > x.length ? y : x)); if (a != null && a !== n.nodeValue) nodes.push([n, n.nodeValue, a]); }
   if (!nodes.length) return;
   const bs0 = el.style.boxSizing; el.style.boxSizing = "border-box"; // 잴 때부터 테두리까지 한 폭(min-width 와 같은 기준)
   const box = () => { const c = getComputedStyle(el); return { width: parseFloat(c.width) || el.offsetWidth, height: parseFloat(c.height) || el.offsetHeight }; }; // 레이아웃 px 소수까지(설명 창처럼 통째로 줄여 보이는(scale) 곳도 · 반올림 0.5px 흔들림 없게)
