@@ -18,6 +18,9 @@
       const len = S => S.reduce((a, p, i) => a + (i ? Math.hypot(p[0] - S[i - 1][0], p[1] - S[i - 1][1]) : 0), 0), lk = fp.map(len).reduce((b, v, i, A) => (v > A[b] ? i : b), 0); // 가장 긴 획(짧은 획은 이웃 획 회색에 덮여 빠져도 「짧음」)
       const plen = S => S.reduce((a, p, i) => a + (i ? Math.hypot(p[0] - S[i - 1][0], p[1] - S[i - 1][1]) : 0), 0), norm = S => 0.35 + 1.1 * plen(S);
       const timed = (S, k, stop = 0) => { const T = norm(S) * 1000 * k, o = S.map(p => p.slice()); const m = Math.floor(S.length / 2); o.ts = S.map((p, q) => 1000 + (q / Math.max(1, S.length - 1)) * T + (stop && q >= m ? stop : 0)); if (stop) { o.splice(m, 0, o[m - 1].slice()); o.ts.splice(m, 0, o.ts[m - 1] + stop); } return o; };
+      let sd2 = 11; const rn = () => ((sd2 = (sd2 * 1103515245 + 12345) >>> 0) / 4294967296) - 0.5;
+      const dens = S => { const o = []; for (let q = 1; q < S.length; q++) { const a = S[q - 1], b = S[q], k = Math.max(1, Math.ceil(Math.hypot(b[0] - a[0], b[1] - a[1]) / 0.003)); for (let m = 0; m < k; m++) o.push([a[0] + (b[0] - a[0]) * m / k, a[1] + (b[1] - a[1]) * m / k, 1]); } o.push(S.at(-1)); return o; };
+      const shake = S => dens(S).map(p => [p[0] + rn() * 0.03, p[1] + rn() * 0.03, 1]); // 점마다 ±1.5% 떨림(대표님 10-15)
       const bow = (S, a) => { const dx = S.at(-1)[0] - S[0][0], dy = S.at(-1)[1] - S[0][1], h = Math.abs(dx) >= Math.abs(dy); return S.map((p, q) => { const f = Math.sin(Math.PI * q / Math.max(1, S.length - 1)) * a; return h ? [p[0], p[1] - f, 1] : [p[0] - f, p[1], 1]; }); };
       const bb = fp.flat(), cx = (Math.min(...bb.map(p => p[0])) + Math.max(...bb.map(p => p[0]))) / 2, cy = (Math.min(...bb.map(p => p[1])) + Math.max(...bb.map(p => p[1]))) / 2;
       const cases = [
@@ -32,6 +35,7 @@
         ["시간", all().slice(0, N - 1), j => j.L.at(-1)?.k === "wx_time", true],
         // 세 기준(10-15 안 A) — ② 선: 가장 긴 획 가운데를 위(가로획)·왼쪽(세로획)으로 7% 휨 → [선] 줄 · 그 획 번호 · 「많이」 ③ 빠르기: 점마다 시각을 붙여 견본의 3배 느림 / 0.2배 빠름 / 가운데 0.8초 멈춤
         ["선", fp.map((S, i) => (i === lk ? bow(S, 0.07) : S)), j => j.L.some(o => o.k === "wx_line" && o.v.n === lk + 1 && o.v.a === "wx_a_lot")],
+        ["떨림", fp.map((S, i) => (i === lk ? shake(S) : dens(S))), j => j.L.some(o => o.k === "wx_shake" && o.v.n === lk + 1)],
         ["느림", fp.map((S, i) => timed(S, i === lk ? 3 : 1)), j => j.L.some(o => o.k === "wx_slow" && o.v.n === lk + 1) && j.pct >= 80],
         ["빠름", fp.map((S, i) => timed(S, i === lk ? 0.2 : 1)), j => j.L.some(o => o.k === "wx_fast" && o.v.n === lk + 1)],
         ["멈춤", fp.map((S, i) => timed(S, 1, i === lk ? 800 : 0)), j => j.L.some(o => o.k === "wx_pause" && o.v.n === lk + 1)],
