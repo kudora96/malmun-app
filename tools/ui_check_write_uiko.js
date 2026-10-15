@@ -12,13 +12,16 @@
   const open = async (li, mode) => { localStorage.setItem("malmun.wmode", mode); document.querySelectorAll(".panel [data-act=close]").forEach(b => b.click()); await W(300); document.querySelectorAll(".line")[li].querySelector("[data-act=write]").click(); await W(1500); };
   const wr = () => $(".panel .write")?.parentElement?.__wr;
   const draw = async (P, id = 31) => { const iv = $(".panel .hink"), R = iv.getBoundingClientRect(), e = (t, x, y) => iv.dispatchEvent(new PointerEvent(t, { bubbles: true, cancelable: true, pointerId: id, pointerType: "touch", isPrimary: true, clientX: R.left + x * R.width, clientY: R.top + y * R.height })); e("pointerdown", ...P[0]); for (const q of P) e("pointermove", ...q); e("pointerup", ...P.at(-1)); await W(120); };
-  const bad = { a: [], b: [], c: [], d: [], e: [] };
+  const bad = { a: [], b: [], c: [], d: [], e: [], f: [] };
   try {
     for (const lg of ["ne", "ur", "vi", "th"]) {
       if (!i18n.KO_UI.includes(lg)) continue; localStorage.setItem("malmun.lang", lg); await i18n.setLang(lg); await i18n.setUiKo(false); localStorage.setItem("malmun.hmode", "free"); localStorage.setItem("malmun.hfollow", "0");
       // ⓐ 가만히
       await open(14, "hand"); { const p0 = pos(); await flip(true); const p1 = pos(); await flip(false); const p2 = pos(); const m = Math.max(diff(p0, p1), diff(p0, p2)); if (m) bad.a.push(`${lg} ${m}px`); }
       { await open(14, "kb"); const p0 = pos(); await flip(true); const p1 = pos(); await flip(false); const m = diff(p0, p1); if (m) bad.a.push(`${lg} 자판 ${m}px`); }
+      // ⓕ 따로 연 쓰기 화면(#/write · 머리 줄 = .bar) — ⇄ 두 번 0px(앱개발부 10-15 ne 375 y 8px)
+      { localStorage.setItem("malmun.wmode", "kb"); location.hash = "#/write/L01-00-01/1"; await W(2600); const q = () => [...document.querySelectorAll(".scr.write .sent .c, .scr.write button:not(.jmore), .scr.write .kb, .scr.write > .bar")].map(e => { const b = e.getBoundingClientRect(); return [b.left, b.top, b.width, b.height].map(v => Math.round(v * 2) / 2); });
+        const p0 = q(); await flip(true); await W(500); const p1 = q(); await flip(false); await W(500); const p2 = q(); const m = Math.max(diff(p0, p1), diff(p0, p2)); if (m) bad.f.push(`${lg} ${m}px`); location.hash = "#/learn/L01-00-01"; await W(2200); }
       // ⓑ 쓰는 중
       await open(14, "hand"); { const H = wr().hand(), Q = await wr().fitPath(H.ch, 0, "pen"); await draw(Q.map(q => [q.x, q.y])); const s0 = [H.strokes.length, !!$(".panel .htime.on")]; await flip(true); const s1 = [wr().hand().strokes.length, !!$(".panel .htime.on"), wr().hand() === H]; await flip(false); if (s0[0] !== s1[0] || s0[1] !== s1[1] || !s1[2]) bad.b.push(`${lg} ${JSON.stringify(s0)}→${JSON.stringify(s1)}`); }
       // ⓒ 꽝 + 「⋯」 펼침
@@ -35,6 +38,7 @@
     ok(!bad.b.length, "ⓑ 쓰는 중 ⇄ = 그은 획·시간 막대 그대로", bad.b.join(" · "));
     ok(!bad.c.length, "ⓒ 꽝 + 「⋯」 펼침에서 ⇄ = 펼침·점수·판정 줄 수·획 그대로", bad.c.join(" · "));
     ok(!bad.d.length, "ⓓ 👣 따라 쓰기 중 ⇄ = 견본 붓 그대로", bad.d.join(" · "));
+    ok(!bad.f.length, "ⓕ 따로 연 쓰기 화면(#/write) ⇄ 두 번 = 글자 줄·단추·자판·머리 줄 0px", bad.f.join(" · "));
     ok(!bad.e.length, "ⓔ 자판 「전체 자동」 도는 중 ⇄ = 계속 돎", bad.e.join(" · "));
   } catch (e) { res.push("✗ 점검 도중 오류: " + e.message); }
   await i18n.setUiKo(false); const lg0 = keep.lang || "en"; localStorage.setItem("malmun.lang", lg0); await i18n.setLang(lg0);
