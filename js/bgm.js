@@ -1,72 +1,100 @@
-// 배경음악(본부 10-15 투덜이 「ㅇ」) — 첫 화면·편 목록에서만 작게 · 듣기·말하기·쓰기 화면에선 저절로 꺼지고 나오면 다시(효과음은 그대로)
-//  · 켜기/끄기 = ♪ 단추(첫 화면·편 목록 머리 · 처음 켬 · 기억 malmun.bgm)
-//  · 파일 = 소리부 05_audio/_bgm(직접 합성 · 저작권 없음 · −30 LUFS 그대로 gain 1) — 아리랑 곡들(투덜이 10-15)을 돌려 씀
-//    곡마다 [loopStart, loopEnd] 한 번 → 끝나면 다른 곡(같은 곡 연속 없음 · 앱을 다시 열어도 지난 곡 다음) · 곡 늘리기 = TRACKS 한 줄
-//  · 녹음 전 hold() 로 그 자리에서 0 으로 멈춤(녹음에 안 섞임) · 블루투스 깨우기(wake.js)와 같은 소리 장치라 출력은 늘 열려 있음
+// 배경음악(본부 10-15 투덜이 「카페에서 공부하는 느낌」)
+//  · 모든 화면에 깔림 — 첫 화면·편 목록 = 보통(소리부 −30 LUFS 그대로 gain 1) · 공부 화면(배우기·설명·쓰기·말하기) = 아주 작게(STUDY) · 진단 = 0
+//  · 앱 소리(문장·설명·자모·효과음 · <audio>/<video> 재생 · sfx.js)가 나는 동안 더 낮춤(덕킹) · 마이크가 열려 있는 동안 완전히 0(녹음·받아쓰기에 안 섞임)
+//  · 화면을 옮겨도 곡은 이어지고 음량만 바뀜 · 다른 앱·탭으로 가면 멈춤 · 돌아오면 다음 곡
+//  · 켜기/끄기 = ♪ 단추(ui.js bgmBtn · 모든 창 · 처음 켬 · 기억 malmun.bgm) · 🎵 음악 상자(ui.js openMusicBox)에서 곡 골라 듣기
+//  · 파일 = 소리부 05_audio/_bgm(직접 합성 · 저작권 없음) — 곡마다 [loopStart, loopEnd] 한 번 → 끝나면 다른 곡(같은 곡 연속 없음 · 앱을 다시 열어도 지난 곡 다음)
 //  · 점검(?mute=1 · __sfxVolume 아주 작게)에선 안 틂
 import { audioCtx } from "./wake.js?v=1015.3";
 import { paths } from "./paths.js?v=1015.3";
 
-const KEY = "malmun.bgm";
-const TRACKS = [ // 소리부 05_audio/_bgm/LIST.md(아리랑 5 · 도라지타령 2 · 10-15) · loopStart·loopEnd 그대로 · 무작위 · 같은 곡 연속 없음
-  { file: "bgm_arirang_a.mp3", loopStart: 1.0, loopEnd: 97.0 },
-  { file: "bgm_arirang_b.mp3", loopStart: 1.0, loopEnd: 97.0 },
-  { file: "bgm_arirang_gayageum.mp3", loopStart: 1.0, loopEnd: 97.0 },
-  { file: "bgm_arirang_daegeum.mp3", loopStart: 1.0, loopEnd: 97.0 },
-  { file: "bgm_arirang_piano.mp3", loopStart: 1.0, loopEnd: 97.0 },
-  { file: "bgm_doraji_gayageum.mp3", loopStart: 1.0, loopEnd: 97.0 },
-  { file: "bgm_doraji_daegeum.mp3", loopStart: 1.0, loopEnd: 97.0 },
+const KEY = "malmun.bgm", LAST = "malmun.bgmLast";
+// 곡 목록(늘리기 = 한 줄) — song = 곡 이름(한국어 · 고유 이름) · inst = 악기 열쇠(bgm_inst_*) · 소리부 LIST.md 의 loopStart·loopEnd 그대로
+export const TRACKS = [
+  { file: "bgm_arirang_a.mp3", song: "아리랑", inst: "bell", loopStart: 1.0, loopEnd: 97.0 },
+  { file: "bgm_arirang_b.mp3", song: "아리랑", inst: "kalimba", loopStart: 1.0, loopEnd: 97.0 },
+  { file: "bgm_arirang_gayageum.mp3", song: "아리랑", inst: "gayageum", loopStart: 1.0, loopEnd: 97.0 },
+  { file: "bgm_arirang_daegeum.mp3", song: "아리랑", inst: "daegeum", loopStart: 1.0, loopEnd: 97.0 },
+  { file: "bgm_arirang_piano.mp3", song: "아리랑", inst: "piano", loopStart: 1.0, loopEnd: 97.0 },
+  { file: "bgm_doraji_gayageum.mp3", song: "도라지타령", inst: "gayageum", loopStart: 1.0, loopEnd: 97.0 },
+  { file: "bgm_doraji_daegeum.mp3", song: "도라지타령", inst: "daegeum", loopStart: 1.0, loopEnd: 97.0 },
 ];
-const LAST = "malmun.bgmLast";
-const SCENES = new Set(["", "list"]); // 음악이 나오는 화면(첫 화면 · 편 목록)
-const FADE = 0.6;
+const SCENE_GAIN = { "": 1, list: 1, diag: 0 }, STUDY = 0.32, DUCK = 0.3; // 공부 화면 ≈ −10dB · 앱 소리 날 때 그 위에서 ≈ −10dB 더
+const UP = 0.8, DOWN = 0.2; // 음량 바꾸는 시간(초) — 내릴 땐 빨리
 
 export const bgmOn = () => { try { return localStorage.getItem(KEY) !== "0"; } catch { return true; } };
 const muted = () => /[?&]mute=1\b/.test(location.search) || (window.__sfxVolume ?? 1) < 0.01;
 
-let scene = null, holds = 0, src = null, gain = null, waitTap = false, cur = -1, next = -1;
+let scene = null, holds = 0, src = null, gain = null, waitTap = false, cur = -1, next = -1, mic = false, sounds = 0, target = 0, endAt = 0;
+const media = new Set(); // 지금 나는 <audio>/<video>
 const loads = new Map(); // 곡 번호 → Promise<AudioBuffer|null>
 const load = i => { if (!loads.has(i)) loads.set(i, fetch(paths.bgm(TRACKS[i].file)).then(r => { if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); })
   .then(b => audioCtx().decodeAudioData(b)).catch(() => { loads.delete(i); return null; })); return loads.get(i); };
-// 다음 곡 = 방금(또는 지난번 앱에서) 나온 곡이 아닌 것 중 하나
 const pick = () => { let last = cur; if (last < 0) try { last = +(localStorage.getItem(LAST) ?? -1); } catch {} const c = TRACKS.map((_, i) => i).filter(i => i !== last || TRACKS.length < 2); return c[Math.floor(Math.random() * c.length)]; };
 
-const want = () => bgmOn() && !muted() && !holds && SCENES.has(scene) && document.visibilityState === "visible";
+const playOk = () => bgmOn() && !muted() && document.visibilityState === "visible";
+// 지금 있어야 할 음량(0~1) — 화면 · 앱 소리 · 마이크 · 막음(hold)
+const level = () => { if (mic || holds) return 0; const g = scene in SCENE_GAIN ? SCENE_GAIN[scene] : STUDY; return g * (sounds > 0 || media.size ? DUCK : 1) * Math.min(1, window.__sfxVolume ?? 1); };
+function setGain(now = false) {
+  target = level(); if (!gain) return;
+  const ctx = audioCtx(), t0 = ctx.currentTime, g = gain.gain, v = g.value;
+  g.cancelScheduledValues(t0); g.setValueAtTime(now ? target : v, t0);
+  if (!now) g.linearRampToValueAtTime(target, t0 + (target < v ? DOWN : UP));
+  if (endAt - 1.5 > t0 + UP) { g.setValueAtTime(target, endAt - 1.5); g.linearRampToValueAtTime(0, endAt); } // 곡 끝 줄임은 다시 걸어 둠
+}
 
-async function start() {
-  if (src || !want()) return;
+async function start(force = -1) {
+  if (src || !playOk()) return;
   const ctx = audioCtx();
-  if (ctx.state !== "running") { // 손대기 전엔 소리 장치가 잠겨 있음 → 첫 누름 때
+  if (ctx.state !== "running") { // 첫 누름 전엔 소리 장치가 잠겨 있음 → 아무거나 처음 누를 때 조용히(본부 10-15 · 따로 단추·안내 없음)
     if (!waitTap) { waitTap = true; addEventListener("pointerdown", () => { waitTap = false; setTimeout(sync, 0); }, { once: true, capture: true }); }
     return;
   }
-  const i = next >= 0 ? next : pick(); next = -1;
-  const b = await load(i); if (!b || src || !want()) return;
-  const T = TRACKS[i], a = T.loopStart, len = Math.min(T.loopEnd, b.duration) - a, vol = Math.min(1, window.__sfxVolume ?? 1); /* 점검이 아주 작게 돌리면 그만큼 */
+  const i = force >= 0 ? force : next >= 0 ? next : pick(); next = -1;
+  const b = await load(i); if (!b || src || !playOk()) return;
+  const T = TRACKS[i], a = T.loopStart, len = Math.min(T.loopEnd, b.duration) - a;
   const s = ctx.createBufferSource(), g = ctx.createGain();
   s.buffer = b; s.connect(g); g.connect(ctx.destination);
-  const t0 = ctx.currentTime; g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(vol, t0 + FADE);
-  g.gain.setValueAtTime(vol, t0 + len - 1.5); g.gain.linearRampToValueAtTime(0, t0 + len); // 곡 끝 1.5초 줄이며 다음 곡으로
-  s.onended = () => { if (src !== s) return; src = gain = null; s.disconnect(); if (next < 0) next = pick(); sync(); }; // 우리가 멈춘 게 아니라 곡이 끝난 것 → 다른 곡
-  s.start(t0, a, len); src = s; gain = g; cur = i;
+  const t0 = ctx.currentTime; g.gain.setValueAtTime(0, t0);
+  s.onended = () => { if (src !== s) return; src = gain = null; s.disconnect(); if (next < 0) next = pick(); sync(); paintBox(); }; // 곡이 끝남 → 다른 곡
+  s.start(t0, a, len); src = s; gain = g; cur = i; endAt = t0 + len;
+  target = level(); g.gain.linearRampToValueAtTime(target, t0 + UP); g.gain.setValueAtTime(target, endAt - 1.5); g.gain.linearRampToValueAtTime(0, endAt); // 곡 끝 1.5초 줄이며 다음 곡으로
   try { localStorage.setItem(LAST, String(i)); } catch {}
-  if (TRACKS.length > 1) { next = pick(); load(next); } // 다음 곡 미리 받아 둠
+  if (TRACKS.length > 1) { next = pick(); load(next); }
+  paintBox();
 }
 function stop(now = false) {
   if (!src) return;
   const ctx = audioCtx(), s = src, g = gain, t0 = ctx.currentTime; src = gain = null;
   g.gain.cancelScheduledValues(t0); g.gain.setValueAtTime(now ? 0 : g.gain.value, t0);
-  if (now) { try { s.stop(); } catch {} s.disconnect(); return; }
-  g.gain.linearRampToValueAtTime(0, t0 + FADE); try { s.stop(t0 + FADE + 0.05); } catch {}
+  if (now) { try { s.stop(); } catch {} s.disconnect(); }
+  else { g.gain.linearRampToValueAtTime(0, t0 + 0.6); try { s.stop(t0 + 0.65); } catch {} }
+  paintBox();
 }
-function sync() { if (want()) start(); else stop(); }
+function sync() {
+  if (!playOk()) return stop();
+  if (!src) { target = level(); return start(); }
+  setGain(mic || holds > 0);
+}
 
-// 화면이 바뀔 때(main.js route) — 이름 = 주소 첫 칸("" 첫 화면 · list · learn · speak · write …)
+// 화면이 바뀔 때(main.js route) — 이름 = 주소 첫 칸("" 첫 화면 · list · learn · speak · write · diag …)
 export function bgmScene(name) { scene = name; sync(); }
-// 녹음·말하기처럼 음악이 절대 섞이면 안 되는 동안(그 자리에서 0) — 끝나면 release()
-export function hold() { holds++; stop(true); let done = false; return () => { if (done) return; done = true; holds = Math.max(0, holds - 1); sync(); }; }
-export function setBgm(on) { try { localStorage.setItem(KEY, on ? "1" : "0"); } catch {} document.querySelectorAll("[data-act=bgm]").forEach(b => b.setAttribute("aria-pressed", String(bgmOn()))); sync(); }
+// 음악이 절대 섞이면 안 되는 동안(그 자리에서 0) — 끝나면 release()
+export function hold() { holds++; sync(); let done = false; return () => { if (done) return; done = true; holds = Math.max(0, holds - 1); sync(); }; }
+export function setBgm(on) { try { localStorage.setItem(KEY, on ? "1" : "0"); } catch {} document.querySelectorAll("[data-act=bgm]").forEach(b => b.setAttribute("aria-pressed", String(bgmOn()))); sync(); paintBox(); }
+// 🎵 음악 상자에서 이 곡 듣기(꺼져 있으면 켬) · 지금 나는 곡이면 그대로
+export function playTrack(i) { if (!bgmOn()) { try { localStorage.setItem(KEY, "1"); } catch {} document.querySelectorAll("[data-act=bgm]").forEach(b => b.setAttribute("aria-pressed", "true")); } if (src && cur === i) return; stop(true); next = -1; start(i); }
+export const bgmNow = () => (src ? cur : -1);
+let boxPaint = null; export const onBgmChange = f => { boxPaint = f; };
+function paintBox() { try { boxPaint?.(); } catch {} }
+
 document.addEventListener("visibilitychange", sync); // 다른 앱으로 가면 멈춤 · 돌아오면 다시
-// 마이크를 여는 순간 그 자리에서 0(녹음에 음악이 섞이지 않게 · 마이크 여는 곳이 여럿이라 한 곳에서 받음) — 다시 켜지는 건 화면이 첫 화면·편 목록으로 바뀔 때
-{ const md = navigator.mediaDevices, gum = md?.getUserMedia?.bind(md); if (gum) md.getUserMedia = c => { stop(true); return gum(c); }; }
-export const bgmState = () => ({ playing: !!src, scene, holds, on: bgmOn(), track: cur >= 0 ? TRACKS[cur].file : null, next: next >= 0 ? TRACKS[next].file : null }); // 점검 도구용
+// 앱 소리 덕킹 — <audio>/<video>(문장·설명·영상) 재생 · sfx.js 짧은 소리(자모·글자·효과음 · malmun:snd 신호)
+for (const ev of ["play", "playing"]) document.addEventListener(ev, e => { if (e.target instanceof HTMLMediaElement && !e.target.muted && !media.has(e.target)) { media.add(e.target); sync(); } }, true);
+for (const ev of ["pause", "ended", "emptied", "abort"]) document.addEventListener(ev, e => { if (media.delete(e.target)) sync(); }, true);
+addEventListener("malmun:snd", e => { sounds = Math.max(0, sounds + (e.detail || 0)); sync(); });
+// 마이크 — 여는 순간(허락 묻기 전부터) 그 자리에서 0 · 열린 마이크가 하나라도 살아 있는 동안 0 · 다 닫히면 다시(녹음·받아쓰기에 음악이 안 섞임 · 여는 곳이 여럿이라 한 곳에서 받음)
+{ const md = navigator.mediaDevices, gum = md?.getUserMedia?.bind(md), live = new Set(); let tm = 0;
+  const check = () => { for (const s of live) if (!s.getTracks().some(x => x.readyState === "live")) live.delete(s); const m = live.size > 0; if (m !== mic) { mic = m; sync(); } if (!live.size && tm) { clearInterval(tm); tm = 0; } };
+  if (gum) md.getUserMedia = c => { mic = true; sync(); return gum(c).then(s => { if (c?.audio) { live.add(s); if (!tm) tm = setInterval(check, 250); } else check(); return s; }, e => { check(); throw e; }); }; }
+export const bgmState = () => ({ playing: !!src, scene, holds, on: bgmOn(), track: cur >= 0 ? TRACKS[cur].file : null, next: next >= 0 ? TRACKS[next].file : null, gain: src ? +target.toFixed(3) : 0, live: gain ? +gain.gain.value.toFixed(3) : 0, mic, duck: sounds > 0 || media.size > 0 }); // 점검 도구용

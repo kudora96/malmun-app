@@ -49,11 +49,11 @@ export async function play(url, { offset = 0, dur, fade = 0 } = {}) {
     const h = { src, stopped: false };
     live.add(h);
     src.onended = () => {
-      live.delete(h);
+      live.delete(h); dispatchEvent(new CustomEvent("malmun:snd", { detail: -1 })); // 배경음악 덕킹 끝(bgm.js)
       note(h.stopped ? "멈춤" : "끝", url, { pos: offset + (ctx.currentTime - t0) });
       res(true);
     };
-    note("시작", url);
+    note("시작", url); dispatchEvent(new CustomEvent("malmun:snd", { detail: 1 })); // 배경음악 덕킹(bgm.js)
     src.start(t0, offset, len);
   });
 }

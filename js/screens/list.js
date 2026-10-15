@@ -1,7 +1,7 @@
 import { t } from "../i18n.js?v=1015.3";
 import { esc } from "../text.js?v=1015.3";
 import { catalog } from "../data.js?v=1015.3";
-import { langChip, openLangSheet, progress, uiKoBtn, bgmBtn } from "../ui.js?v=1015.3";
+import { langChip, openLangSheet, progress, uiKoBtn, musicBtn } from "../ui.js?v=1015.3";
 import { rerender } from "../main.js?v=1015.3";
 import { VERSION } from "../version.js?v=1015.3";
 import { recCount, recDelEpisode } from "../recstore.js?v=1015.3";
@@ -16,7 +16,7 @@ export default async function list(app, unit = "L01-00") {
   const seen = Math.min(p.line || 0, first?.lines || 0);
   app.innerHTML = `<section class="scr list">
     <div class="bar"><div class="grow"><div class="t ko" lang="ko">${esc(cat.units[unit] || unit)}</div>
-      <div class="sub">${esc(unit)} · ${esc(t("n_episodes", { n: eps.length }))}</div></div><span class="hbt">${bgmBtn()}${uiKoBtn()}${langChip()}</span></div>
+      <div class="sub">${esc(unit)} · ${esc(t("n_episodes", { n: eps.length }))}</div></div><span class="hbt">${uiKoBtn()}${langChip()}</span></div>
     ${first ? `<a class="hero" href="#/learn/${first.id}"><img src="img/${first.id}.jpg" alt="">
       <div><div class="ttl ko" lang="ko">${esc(first.id.slice(-2))} ${esc(first.title)}</div>
       <div class="meta">${mmss(first.duration)} · <span>${esc(t("n_lines", { n: first.lines }))}</span>${seen ? ` · <span>${esc(t("seen_to", { n: seen }))}</span>` : ""}</div><!-- {n} 칸 글은 따로 감쌈 — ⇄ 때 그 자리에서 바뀌게(다국어부 10-15) -->
@@ -25,6 +25,7 @@ export default async function list(app, unit = "L01-00") {
       const inner = `<span class="n">${esc(e.id.slice(-2))}</span><span class="ko" lang="ko">${esc(e.title)}</span><span class="st">${e.ready ? "" : esc(t("soon"))}</span>`;
       return `<li>${e.ready ? `<a href="#/learn/${e.id}">${inner}</a>` : `<div class="soon">${inner}</div>`}</li>`;
     }).join("")}</ol>
+    <p class="mboxp">${musicBtn()}</p>
     ${first ? `<p class="delall"><button data-ep="${esc(first.id)}" hidden>🗑 ${esc(t("del_all"))}</button></p>` : ""}
     <p class="ver">v${esc(VERSION)}</p>
   </section>`;

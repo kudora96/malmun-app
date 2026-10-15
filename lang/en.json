@@ -233,5 +233,16 @@
  "help_wr_5": "✎ Order — shows the stroke order and direction. ↶ One stroke removes only the last stroke; Erase clears all. ▶ Next — go to the next letter anytime.",
  "help_wr_6": "🧲 Magnet — draw near each gray stroke in number order and it snaps into place (no score, just learn the order). 👣 Follow — an orange dot goes first at the right order and speed; draw after it.",
  "help_wr_7": "Three scores — Shape (missing strokes, direction, order, length) · Line (how close to the middle line) · Speed. Shape over 80 and Line over 60 = pass · all three 95+ = ★ · Shape and Line 100 with Speed 95+ = 🎉 100 points!",
- "help_wr_8": "Box on the right — before writing: number of strokes and how to write; after: what went well (✓) and what to fix (❶❷), with the reason. Wrong strokes flash red, correct ones as orange dots. If the text is long, tap “⋯”."
+ "help_wr_8": "Box on the right — before writing: number of strokes and how to write; after: what went well (✓) and what to fix (❶❷), with the reason. Wrong strokes flash red, correct ones as orange dots. If the text is long, tap “⋯”.",
+ "music_box": "Music box",
+ "music_hint": "Korean folk songs played in the app. Listen or download them.",
+ "music_play": "Play",
+ "music_stop": "Stop",
+ "music_dl": "Download",
+ "music_dl_fail": "Couldn’t download. Please try again.",
+ "bgm_inst_bell": "Bells",
+ "bgm_inst_kalimba": "Kalimba",
+ "bgm_inst_gayageum": "Gayageum (zither)",
+ "bgm_inst_daegeum": "Daegeum (flute)",
+ "bgm_inst_piano": "Piano"
 }
