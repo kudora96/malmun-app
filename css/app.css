@@ -925,7 +925,8 @@ a{color:inherit;text-decoration:none}
 /* 손글씨 점수(본부 10-07) — 칸 위 왼쪽 「87% ☆」 · 효과(scorefx)는 칸 오른쪽 위 · 위 글자 줄 그 글자 아래 최고 점수 작게 */
 .write .hbox .hscore.ok{color:var(--okc)}
 .write .hbox .hscore.bad{color:var(--badc)}
-.write .hbox .fx{right:8px;top:6px;bottom:auto}
+.write .hbox .fx{right:0;top:auto;bottom:calc(100% + 3px);max-width:84px;white-space:nowrap;overflow:visible;font-size:12px;line-height:1.2;pointer-events:none} /* 꽝·통과 글 = 칸 위 점수 줄 오른쪽 끝(칸 안 획 번호·시간 꼬리표와 안 겹침 · 본부 10-15) */
+.write .hbox .hscore{max-width:calc(100% - 88px)!important} /* 오른쪽 88px = 꽝·통과 글 자리(늘 비움 · 0px) */
 .write .sent .c .hb{font-size:.5em;vertical-align:sub;margin-left:1px;line-height:1;font-weight:700;color:var(--okc);font-variant-numeric:tabular-nums}
 /* 위 글자 줄(본부 10-07) — 지금 쓰는 글자 = 칠(진한 바탕 + 밝은 글자) · 직접 써서 마친 글자 = 초록 · 안 쓴 글자 = 기본 */
 .write .sent .c.now{background:var(--hi);color:var(--on-hi);border-color:var(--hi)}
@@ -950,6 +951,7 @@ a{color:inherit;text-decoration:none}
 .write .whelp{flex:none;align-self:center;padding:0 8px;min-height:24px;border-radius:8px;background:var(--bubble);font-size:12px;font-weight:600;white-space:nowrap}
 .write .helpbox{position:absolute;inset:36px 0 0 0;z-index:5;display:grid;align-content:start;gap:5px;padding:8px 16px 10px;background:var(--bg);overflow:hidden;font-size:13px;line-height:1.4}
 .write .helpbox[hidden]{display:none}
+.write .helpbox.scroll{overflow-y:auto;overscroll-behavior:contain} /* 12px 로도 넘칠 때만 굴림 */
 .write .helpbox p{margin:0;padding:6px 10px;border-radius:10px;background:var(--bubble)}
 .write .helpbox p.x{background:none;color:var(--mute);font-size:11.5px;text-align:center;padding:0}
 .write .hand.two .hbtns{display:grid;grid-template-columns:repeat(2,auto);gap:5px;align-content:center}
@@ -1159,6 +1161,7 @@ html:lang(ur) .write .work:not(.handmode) .info .sub2{height:34px;overflow:visib
 /* 점수·시간 한 칸(.hslot · 10-14 → 10-15 투덜이 「오른쪽 위 점수 칸이 자리 낭비」) — 손글씨 칸 바깥 왼쪽 위 작은 배지 · 칸 테두리 위라 글자·획과 절대 안 겹침
    시간 막대(쓰는 동안)와 점수(채점 뒤)는 같은 자리에 겹쳐 둠 · .hand 위 여백이 늘 그 자리(채점 때 0px) · 비게 된 단추 줄 맨 위 = 판정 상자 */
 .write .hand{padding-top:26px}
+.write .hand:not(.stack){align-items:flex-start} /* 칸을 위로 붙임(도구 줄과 칸 사이 빈자리 없앰 · 남는 높이는 아래 · 10-15) */
 html:lang(ur) .write .hand{padding-top:30px}
 .write .hbox .hslot{position:absolute;left:0;bottom:calc(100% + 3px);display:grid;contain:strict;width:min(44%,132px);height:21px;pointer-events:none}
 html:lang(ur) .write .hbox .hslot{height:25px}
@@ -1277,6 +1280,13 @@ html:lang(ur) .write .whead:not(.n4){height:44px}
 .write .whead > .wmode,.write .whead > .uiko,.write .whead > .bgmb,.write .whead > .whelp{order:2}
 .write .whead > .wmode{margin-left:0;margin-inline-start:auto} /* ur(오른쪽→왼쪽)도 끝 쪽으로 · 빈자리를 나눠 갖지 않게 하나만 auto */
 .write .whead .wclose{margin-left:0}
+/* 먹 색 단추·목록(대표님 10-15) — 단추 크기 고정 · 목록은 덮개(자리 0px) */
+.write .htools .inkb{display:inline-flex;align-items:center;gap:3px;flex:none}
+.write .sw{display:inline-block;width:14px;height:14px;border-radius:50%;box-shadow:0 0 0 1.5px var(--card),0 0 0 2.5px var(--line);flex:none}
+.write .inkmenu{position:absolute;z-index:8;display:grid;grid-template-columns:1fr;gap:2px;padding:6px;border-radius:12px;background:var(--card);box-shadow:0 6px 18px rgba(0,0,0,.18),0 0 0 1px var(--line);max-height:70vh;overflow:auto}
+.write .inkmenu button{display:flex;align-items:center;gap:8px;min-height:32px;padding:4px 10px;border:0;border-radius:8px;background:transparent;font-size:13px;font-weight:700;color:var(--ink);text-align:start;white-space:nowrap}
+.write .inkmenu button[aria-selected=true]{background:color-mix(in srgb,var(--hi) 14%,transparent)}
+.write .inkmenu button .sw{width:16px;height:16px}
 .write .hjudge .tg-speed{background:rgba(42,111,176,.13);color:#2a6fb0}
 /* 위 글자 줄(배우는 한국어) = 학습자 언어 줄높이를 물려받지 않음(ur 나스탈리크 줄높이로 글자 단추가 53px → 줄 밖 5px 로 ⇄한 과 겹침 · 검사부 10-14) */
 .write .sent,.write .sent .w,.write .sent .c{line-height:1.25}

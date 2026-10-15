@@ -35,10 +35,11 @@
     // ⓕ 검사부 10-13(qa_hand_sloppy) — 바른 획 + 손 떨림(점마다 ±0.75% · 씨앗 7) = 95 이상 · 획마다 끝을 10% 휨 = 80 아래(붓 포함) · 13자 × 도구 3
     let sd = 7; const rnd = () => ((sd = (sd * 1103515245 + 12345) >>> 0) / 4294967296) - 0.5; const jitLow = [], bendHigh = [];
     for (const ch of "나누가오이글자세종왕읽을웠") { const L = await wr.strokesOf(ch), P = L.map(S => wr.brushPath(ch, S));
-      for (const tk of T) { const j = wr.handScore(ch, P.map(Q => Object.assign(Q.map(q => [q.x + rnd() * 0.015, q.y + rnd() * 0.015, 1]), { tool: tk, w: TW[tk] }))).pct;
+      const dn = Q => { const o = []; for (let i = 1; i < Q.length; i++) { const a = Q[i - 1], b = Q[i], k = Math.max(1, Math.ceil(Math.hypot(b.x - a.x, b.y - a.y) / 0.003)); for (let m = 0; m < k; m++) o.push({ x: a.x + (b.x - a.x) * m / k, y: a.y + (b.y - a.y) * m / k }); } o.push(Q.at(-1)); return o; }; // 손가락처럼 촘촘한 점(0.3%)
+      for (const tk of T) { const jr = wr.handScore(ch, P.map(Q => Object.assign(dn(Q).map(q => [q.x + rnd() * 0.015, q.y + rnd() * 0.015, 1]), { tool: tk, w: TW[tk] })), 300), j = jr.pct, jl = jr.lineP, sm = wr.handScore(ch, P.map(Q => Object.assign(dn(Q).map(q => [q.x, q.y, 1]), { tool: tk, w: TW[tk] })), 300).lineP;
         const b = wr.handScore(ch, P.map((Q, i) => Object.assign(Q.map((q, k) => { const r = k / Math.max(1, Q.length - 1); return [q.x + (i % 2 ? 0.1 : -0.1) * r, q.y + (i % 2 ? -0.06 : 0.06) * r, 1]; }), { tool: tk, w: TW[tk] }))).pct;
-        if (j < 95) jitLow.push(`${ch}(${tk} ${j})`); if (b >= 80) bendHigh.push(`${ch}(${tk} ${b})`); } }
-    ok(!jitLow.length, "ⓕ 바르게 + 손 떨림(±0.75%) = 95 이상(연필·펜·붓)", jitLow.join(" "));
+        if (!(j >= 80 && jl < 95 && jl >= 60 && sm >= 98)) jitLow.push(`${ch}(${tk} 모양 ${j} 선 ${jl} · 바른 선 ${sm})`); if (b >= 80) bendHigh.push(`${ch}(${tk} ${b})`); } }
+    ok(!jitLow.length, "ⓕ 바르게 + 손 떨림(점마다 ±0.75% · 대표님 10-15 매끄러움) = 통과지만 선 95 아래(★ 없음) · 같은 획 떨림 없으면 선 98↑", jitLow.join(" "));
     ok(!bendHigh.length, "ⓕ 획 끝 10% 휨 = 80 아래(붓도)", bendHigh.join(" "));
     ok(n >= 90, `글자 ${n}자 × 도구 3 잼`, `${chars.length}자 중 획 자료 있는 것`);
     ok(!bad.a.length, "ⓐ 자료 획 길 그대로 = 100", bad.a.join(" "));
