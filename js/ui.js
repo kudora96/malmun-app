@@ -29,7 +29,7 @@ export async function switchUiKo(ko) {
   if (!KO_UI.includes(lang) || ko === uiKoOn()) return;
   const before = snapshot(); await setUiKo(ko); retext(before, document.body);
   document.querySelectorAll("[data-act=uiko]").forEach(b => b.setAttribute("aria-pressed", String(uiKoOn())));
-  if (ko) backTip(); else document.querySelectorAll(".toast.uikotip").forEach(x => x.remove()); // 모국어로 돌아오면 안내는 바로 치움
+  if (ko) backTip(); // 안내는 4초 뒤 저절로 사라짐(⇄ 상태 보존 · 다국어부 uikeep 10-15)
 }
 // 한국어로 바꾼 뒤 길을 잃지 않게(본부 10-14 ④) — 처음 두 번만, 모국어로 「ไทย⇄한 을 누르면 돌아와요」
 function backTip() {

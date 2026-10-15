@@ -481,5 +481,6 @@ export default async function speak(app, ep, id, opts = {}) {
   // 언어를 바꾸면(본부 10-13 안 A · retext 가 보내는 malmun:uilang) 결과 줄·토막 단추를 지금 상태 그대로 새 언어로 — 녹음·채점은 안 건드림 · 「확인 중…」 동안은 retext 가 바꾼 글 그대로
   const onLang = () => { if (!st.alive) return; setRateWord(t("speed")); $(".helpbox").innerHTML = helpHTML(); fitHelp(); fitHead(true); /* ⇄ 때는 줄이기만(풀지 않음) — 단추 글이 보였다 숨었다 하지 않게(다국어부 10-15 ur 1280) */ /* 속도 알약 말도 새 언어로(다시 그릴 때 옛 말로 쓰지 않게 · 다국어부 10-14) */ if (st.checking) return; paint(); if (st.retryDev) $(".msg").textContent = t("sr_retry_dev"); };
   addEventListener("malmun:uilang", onLang);
-  return () => { removeEventListener("malmun:uilang", onLang); st.alive = false; newAtt(); clearInterval(litT); closeCmp(); stopRec(true); stopSounds(); st.stream?.getTracks().forEach(x => x.stop()); release(); quietWake(false); document.removeEventListener("keydown", onEsc, true); delete app.__sp; };
+  const onFitW = () => st.alive && fitHead(true); addEventListener("malmun:langfit", onFitW); // langfit 이 단추 폭을 「두 말 중 긴 쪽」으로 고정할 때 → 처음부터 긴 말 기준 단계(첫 ⇄ 도 0px · 다국어부 10-15)
+  return () => { removeEventListener("malmun:uilang", onLang); removeEventListener("malmun:langfit", onFitW); st.alive = false; newAtt(); clearInterval(litT); closeCmp(); stopRec(true); stopSounds(); st.stream?.getTracks().forEach(x => x.stop()); release(); quietWake(false); document.removeEventListener("keydown", onEsc, true); delete app.__sp; };
 }
