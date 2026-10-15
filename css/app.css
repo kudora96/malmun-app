@@ -1159,6 +1159,7 @@ html:lang(ur) .write .hjudge{padding-block:2px}
 html:lang(ur) .write .hand.hic .hbtns :is(.ml,.ms){line-height:1.75;font-size:9.5px}
 .write .hjudge p i{font-style:normal;color:var(--badc);margin-inline-end:3px}
 .write .hjudge p.ok{color:var(--okc)}
+.write .hjudge.hint{border-color:color-mix(in srgb,var(--hi) 45%,var(--line));background:color-mix(in srgb,var(--hi) 6%,var(--card))}
 .write .hand.two .hbtns{grid-template-rows:minmax(66px,1fr);align-content:stretch}
 .write .hand.two .hbtns .hjudge{grid-column:1/-1}
 .write .hand.stack .hbtns .hjudge{flex:none;flex-basis:100%;height:62px;min-height:0}

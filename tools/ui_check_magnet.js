@@ -24,10 +24,10 @@
     const draw = async (pts, off = 0.03) => { ev("pointerdown", pts[0].x + off, pts[0].y + off); for (const q of pts) ev("pointermove", q.x + off, q.y + off); ev("pointerup", pts[pts.length - 1].x + off, pts[pts.length - 1].y + off); await W(250); };
     const path = S => wr().brushPath(ch, S).filter((_, i, a) => i % Math.max(1, Math.floor(a.length / 25)) === 0);
     // ⓔ 아무 데나
-    await draw([{ x: 0.02, y: 0.95 }, { x: 0.1, y: 0.97 }], 0); const bub0 = $(".panel .hbubble")?.textContent || "";
+    await draw([{ x: 0.02, y: 0.95 }, { x: 0.1, y: 0.97 }], 0); const bub0 = $(".panel .hjudge")?.textContent || "";
     ok(H.strokes.length === 0 && H.mag === 0, "ⓔ 회색 획과 먼 곳 = 안 붙음", `획 ${H.strokes.length} · 「${bub0}」`);
     // ⓓ 순서 틀림(2번 획을 먼저)
-    if (list.length > 1) { await draw(path(list[1])); const bub = $(".panel .hbubble")?.textContent || "";
+    if (list.length > 1) { await draw(path(list[1])); const bub = $(".panel .hjudge")?.textContent || "";
       ok(H.strokes.length === 0 && H.mag === 0 && /1/.test(bub), "ⓓ 순서 틀림 = 안 붙음 · 「순서 다시: 1번」", `「${bub}」`); }
     // ⓒ 차례대로(칸 3% 비껴)
     for (const S of list) await draw(path(S));

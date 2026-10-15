@@ -624,7 +624,7 @@ export default async function write(app, ep, id, opts = {}) {
     const up = () => { if (!H.cur) return; drawEnd(); const S = H.cur; H.cur = null; clearTimeout(H.timer); const F = H.follow; H.follow = null; if (H.tDue) { H.tDue = false; setTimeout(() => st.hand === H && !H.cur && !H.passed && handJudge(), 50); }
       if (magnetOn()) { if (F && F.prog >= F.Q.length * 0.5 && pastCorner(F.Q, F.Q[F.prog].t)) return magnetUp(S, true); return magnetUp(S); } /* 절반(50%↑) 따라왔으면 나머지 채움(본부 10-12 · 전 85%) · 그 획 완성 */ H.timer = setTimeout(() => st.hand === H && !H.cur && readyToJudge(H) && handJudge(), 1200); jamoSay(H);
       const msg = strokeHint(H, S); if (msg) bubble(msg); }; // 획순·방향 알림(짧은 말풍선)
-    const bubble = msg => { let b = box.querySelector(".hbubble"); if (!b) { b = document.createElement("b"); b.className = "hbubble"; box.append(b); } b.textContent = msg; b.hidden = false; H.hints = (H.hints || []).concat(msg); clearTimeout(H.bt); H.bt = setTimeout(() => (b.hidden = true), 2500); };
+    const bubble = msg => { const bx = work.querySelector(".hjudge"); H.hints = (H.hints || []).concat(msg); if (!bx) return; H.jx = null; bx.className = "hjudge hint"; bx.innerHTML = `<p class="hb">${esc(msg)}</p>`; fitJudge(); }; // 획순·방향 알림 = 판정 상자 한 곳에만(본부 10-15 — 칸 위 말풍선·머리 줄에 같은 글이 … 로 잘려 두 번 더 나오던 것) · 다음 알림·채점이 바꿈
     // 획순 보기(본부 10-07) — 회색 글자를 획 차례대로 주황으로 칠해 드러냄(획 0.5초 · revealOrder) · 시작점 번호 원 · 끝에 작은 화살촉(글자 안) → 다 칠하면 1초 뒤 회색으로
     //  keep = 자동 손글씨(다 칠한 채로 남음 = 「써진」 상태) · 다시 누르거나 멈추면 그 자리에서 그침 → true = 끝까지 칠함
     const clipG = cv => { const n = cv.width, k = c.ch + "|" + n + "|" + toolKey() + "|" + hfontKey(); if (H.gk !== k) { H.gk = k; H.gm = document.createElement("canvas"); H.gm.width = H.gm.height = n; guideGlyph(H.gm.getContext("2d"), n, c.ch, guideW(), "#000"); } const cx = cv.getContext("2d"); cx.save(); cx.globalCompositeOperation = "destination-in"; cx.drawImage(H.gm, 0, 0); cx.restore(); return cv; }; /* 획순·자동 완성 칠 = 회색 모양 안으로(본부 10-12) */
@@ -771,7 +771,7 @@ export default async function write(app, ep, id, opts = {}) {
       st.busy = true; H.passSnd = true; const okSnd = await run(["ok", 150, c.file || jamoSrc(c.jamo[c.jamo.length - 1])]); if (H.passSnd) { st.busy = false; H.passSnd = false; if (okSnd && st.hand === H && H.passed && !H.cur && st.alive) H.adv = setTimeout(() => { if (st.hand === H && H.passed && !H.cur) handNext(true); }, 500); } /* 통과 = 딩동 → 글자 소리 → 다음 글자(투덜이 10-14 · 읽는 중에 다시 쓰기 시작하면 머묾) */ // 통과 = 딩동 → 그 글자 소리(투덜이 10-13 · 자동 완성과 같은 차례)
       return;
     }
-    note.textContent = r.dir || t("h_again"); /* 방향 알림은 판정 상자에(10-15 · 말풍선 대신) */
+    note.textContent = ""; /* 꽝 안내·방향 알림은 판정 상자 한 곳에만(본부 10-15 · 머리 줄 끝에 … 로 잘려 또 나오던 것) */
     if (jx?.it.length) drawFix(r, jx); else H.paintGuide(r); /* 틀린 획 빨강 + 맞는 획 주황 점선 2초 · 짚을 획이 없으면 옛 덜 덮은 곳 깜빡 */
     setTimeout(() => { if (st.hand === H) H.paintGuide(); }, 900);
     // 꽝(80% 아래)이면 덜 덮은 곳 주황 깜빡 뒤 1.2초에 내 획을 저절로 지움 — 바로 다시 쓰게(투덜이 10-07) · 점수는 남김(새로 쓰기 시작하면 지움)

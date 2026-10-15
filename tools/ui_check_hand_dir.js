@@ -10,6 +10,7 @@
   const { lang: LG } = await import(`/js/i18n.js?v=${document.documentElement.dataset.v}`); // 지금 언어 글도(검사부 10-12 — vi 로 돌리면 ne/ko 글로 박혀 틀림)
   const L = {}; for (const k of [...new Set(["ne", "en", "ko", "ne.ko", LG, LG + ".ko"])]) { try { L[k] = await (await fetch(`/lang/${k}.json?` + Date.now())).json(); } catch {} }
   const isKey = (txt, key) => !!txt && Object.values(L).some(o => o?.[key] === txt);
+  const hasKey = (txt, key) => !!txt && Object.values(L).some(o => o?.[key] && txt.includes(o[key])); // 판정 상자 = 「1번째 획(ㄱ): <방향 글>」 처럼 다른 글 속에 들어 있음(10-15)
   const open = async li => { document.querySelectorAll(".panel [data-act=close]").forEach(b => b.click()); await W(300); document.querySelectorAll(".line")[li].querySelector("[data-act=write]").click(); await W(1600); document.querySelector("video")?.pause(); };
   const wr = () => $(".panel .write")?.parentElement?.__wr;
   try {
@@ -69,8 +70,8 @@
       const draw = async strokes => { for (const S of strokes) { const ev = (t, [x, y]) => iv.dispatchEvent(new PointerEvent(t, { pointerId: id, bubbles: true, cancelable: true, clientX: R.left + x * R.width, clientY: R.top + y * R.height, pointerType: "touch", isPrimary: true })); ev("pointerdown", S[0]); for (const q of S.slice(1)) ev("pointermove", q); ev("pointerup", S[S.length - 1]); id++; await W(30); } };
       $(".panel [data-act=hclear]")?.click(); await W(100);
       await draw(list.map((S, i) => (i === 0 ? pathOf(ch, S).reverse() : pathOf(ch, S)))); $(".panel [data-act=hdone]").click(); await W(400);
-      const sc = $(".panel .hscore"), note = $(".panel .loopnote")?.textContent || "", bub = $(".panel .hbubble")?.textContent || "", want = keyOf(ch, list[0]), r = H.last;
-      ok(sc && !sc.hidden && sc.classList.contains("bad") && r?.pct < 80 && isKey(r?.dir, want) && isKey(bub, want), `ⓒ 화면: 「${ch}」 첫 획 거꾸로 → 빨강 점수 + 방향 말풍선`, `「${sc?.textContent}」 · 말풍선 「${bub}」 · 아래 글 「${note.slice(0, 40)}」`);
+      const sc = $(".panel .hscore"), note = $(".panel .loopnote")?.textContent || "", bub = $(".panel .hjudge")?.textContent || "", want = keyOf(ch, list[0]), r = H.last;
+      ok(sc && !sc.hidden && sc.classList.contains("bad") && r?.pct < 80 && isKey(r?.dir, want) && hasKey(bub, want), `ⓒ 화면: 「${ch}」 첫 획 거꾸로 → 빨강 점수 + 방향 말풍선`, `「${sc?.textContent}」 · 말풍선 「${bub}」 · 아래 글 「${note.slice(0, 40)}」`);
       await W(1400); $(".panel [data-act=hclear]").click(); await W(100);
       await draw(list.map(S => pathOf(ch, S))); $(".panel [data-act=hdone]").click(); await W(400);
       ok(H.last?.pct >= 95 && H.passed, `ⓑ 화면: 「${ch}」 바른 방향 → 통과(≥95)`, `${H.last?.pct}%`); for (let k = 0; k < 60 && wr().busy(); k++) await W(100); }
@@ -80,8 +81,8 @@
       for (let c = 0; c < nCh; c++) { const H = wr().hand(), ch = H.ch; for (let k = 0; k < 30 && !H.magList; k++) await W(100); const list = H.magList || [];
         const iv = $(".panel .hink"), R = () => iv.getBoundingClientRect(), ev = (t, x, y) => { const r = R(); iv.dispatchEvent(new PointerEvent(t, { bubbles: true, pointerId: 9, pointerType: "touch", clientX: r.left + x * r.width, clientY: r.top + y * r.height, buttons: 1 })); };
         const draw = async P => { ev("pointerdown", ...P[0]); for (const q of P) ev("pointermove", ...q); ev("pointerup", ...P[P.length - 1]); await W(250); };
-        for (let i = 0; i < list.length; i++) { const jm = await jamoOf(ch, list[i]), P = pathOf(ch, list[i]), m0 = H.mag; const bb = $(".panel .hbubble"); if (bb) bb.textContent = "";
-          await draw([...P].reverse()); const bub = $(".panel .hbubble")?.textContent || "", Q = wr().brushPath(ch, list[i]), closed = Math.hypot(Q[0].x - Q[Q.length - 1].x, Q[0].y - Q[Q.length - 1].y) < 0.15 * Q.tot;
+        for (let i = 0; i < list.length; i++) { const jm = await jamoOf(ch, list[i]), P = pathOf(ch, list[i]), m0 = H.mag; const bb = $(".panel .hjudge"); if (bb) bb.textContent = "";
+          await draw([...P].reverse()); const bub = $(".panel .hjudge")?.textContent || "", Q = wr().brushPath(ch, list[i]), closed = Math.hypot(Q[0].x - Q[Q.length - 1].x, Q[0].y - Q[Q.length - 1].y) < 0.15 * Q.tot;
           const want = closed ? null : keyOf(ch, list[i]), refused = H.mag === m0 && (closed ? isKey(bub, "h_dir_ccw") || isKey(bub, "h_dir_cw") : isKey(bub, want));
           await draw(P); const took = H.mag === m0 + 1; if (!refused || !took) fine = false; out.push(`${ch}${i + 1}${jm}${refused ? "" : "✗거꾸로「" + bub + "」"}${took ? "" : "✗안붙음"}`); }
         await W(400); const sc = $(".panel .hscore")?.textContent || ""; if (!H.passed || !/✓/.test(sc)) { fine = false; out.push(`${ch} 「${sc}」`); }
