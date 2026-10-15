@@ -84,7 +84,7 @@ export const recPut = async (key, val) => { try { const d = await db(); await ne
 
 // 단추 글 = 기호(◀ ▶ ? ✕) + 글 — 좁으면 글만 숨김(머리 줄 한 줄 유지)
 // 사용법 풍선 글(help_sp_*) — {b} = 「ने⇄한」 단추 이름(한국어 칸 · ⇄ 때 이 함수로 다시 씀)
-const helpHTML = () => [1, 2, 3, 4, 5, 6, 7, 8, 9].map(k => "help_sp_" + k).filter(k => t(k) !== k).map(k => `<p>${esc(t(k)).replace("{b}", `<span lang="ko">${esc(langShort(lang))}⇄한</span>`)}</p>`).join("") + `<p class="x">${esc(t("help_close"))}</p>`;
+const helpHTML = () => [1, 2, 3, 4, 5, 6, 7, 8, 9].map(k => "help_sp_" + k).filter(k => t(k) !== k).map(k => `<p dir="auto">${esc(t(k)).replace("{b}", `<span lang="ko">${esc(langShort(lang))}⇄한</span>`)}</p>`).join("") + `<p class="x">${esc(t("help_close"))}</p>`;
 const lbl = k => { const s = t(k), m = String(s).match(/^([^\p{L}\p{M}\p{N}]*)(.*?)([^\p{L}\p{M}\p{N}]*)$/u); return m ? `${m[1] ? `<i class="ic">${esc(m[1].trim())}</i>` : ""}<span class="lt" data-k="${k}" data-kcore>${esc(m[2])}</span>${m[3] ? `<i class="ic">${esc(m[3].trim())}</i>` : ""}` : esc(s); };
 export default async function speak(app, ep, id, opts = {}) {
   const d = await episode(ep, lang);
@@ -124,7 +124,7 @@ export default async function speak(app, ep, id, opts = {}) {
   const $ = s => app.querySelector(s);
   const cur = () => parts[st.i];
   // 도움말 풍선 = 칸 안에 다 보이게(본부 10-07 · 스크롤 0) — 넘치면 글을 조금씩 작게(최소 0.6배)
-  const fitHelp = () => { const hb = $(".helpbox"); if (!hb || hb.hidden) return; const ps = [...hb.children]; ps.forEach(x => x.style.removeProperty("zoom")); for (let z = 0.95; z >= 0.6 && hb.scrollHeight > hb.clientHeight; z -= 0.05) ps.forEach(x => (x.style.zoom = z.toFixed(2))); };
+  const fitHelp = () => { const hb = $(".helpbox"); if (!hb || hb.hidden) return; const ps = [...hb.children]; ps.forEach(x => x.style.removeProperty("zoom")); hb.style.overflowY = "hidden"; for (let z = 0.96; z >= 0.92 && hb.scrollHeight > hb.clientHeight; z -= 0.04) ps.forEach(x => (x.style.zoom = z.toFixed(2))); if (hb.scrollHeight > hb.clientHeight + 1) hb.style.overflowY = "auto"; }; // 글은 12px 아래로 안 줄임(검사부 10-15 ur 320 · 0.6배는 못 읽음) — 그래도 넘치면 풍선 안에서 굴려 읽음
   new ResizeObserver(() => fitHelp()).observe($(".helpbox"));
   // 머리 줄은 한 줄(본부 10-06 — 375×667 에서 「✕ बन्द」가 둘째 줄로 떨어짐) — 넘치면 h1: 단추 글 숨김(◀ ▶ ? ✕ 만) → h2: 제목 옆 「· 화자」 숨김 → h3: 사이 좁힘·⇄한 작게 → h4: 「말하기」 제목 숨김(⇄한 들어온 뒤 320 · 앱개발부 10-14)
   function fitHead() { const h = $(".whead"); if (!h) return; h.classList.remove("h1", "h2", "h3", "h4"); for (const c of ["h1", "h2", "h3", "h4"]) { if (h.scrollWidth <= h.clientWidth + 1) break; h.classList.add(c); } }
