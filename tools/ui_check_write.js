@@ -114,14 +114,14 @@
   ok(/1\/\d/.test(nav) && f.sentOverflow <= 1 && f.scroll <= 1, "8번(41글자) 고정 토막으로 · 한 줄에 다 보임 · 스크롤 없음", `${nav.replace(/\s/g, "")} · ${$(".panel .sent").innerText.replace(/\s+/g, " ")} · 넘침 ${f.sentOverflow}/${f.scroll}`);
   const total = +(nav.match(/\/(\d+)/) || [])[1] || 1;
   $(".panel [data-seg='1']").click(); await W(300); ok(new RegExp(`2/${total}`).test($(".panel .segnav").innerText.replace(/\s/g, "")), "토막 ▶ → 2번째 토막", $(".panel .sent").innerText.replace(/\s+/g, " "));
-  // 마지막 토막으로 가서 자동 완성으로 끝내기 → 다음 줄(9번)
+  // 마지막 토막으로 가서 [전체 자동] → 그 줄 문장 전체 소리 한 번 → 그 줄에 머묾(투덜이 10-15 「전체인데 일부만」 · 다음 줄로 저절로 안 넘어감 · 다음 줄 소리 예약 0)
   for (let s = 2; s < total; s++) { $(".panel [data-seg='1']").click(); await W(200); }
-  $(".panel [data-act=autoall]").click(); await idle(30000);
-  for (let k = 0; k < 120 && !/^9 \//.test($(".panel .whead .sub")?.textContent || ""); k++) await W(250);
-  await W(1200); const go9 = !!$(".panel .write")?.parentElement?.__wr?.st?.().auto, lab9 = $(".panel [data-act=autoall]")?.textContent || "";
-  ok(/^9 \//.test($(".panel .whead .sub")?.textContent || "") && go9 && /⏹/.test(lab9), "[전체 자동 완성] 8번 마지막 토막 끝 → 대사 → 9번 줄로 넘어가 이어서 씀", `${$(".panel .whead .sub")?.textContent} · 자동 ${go9} · 단추 「${lab9}」`);
-  $(".panel [data-act=autoall]")?.click(); await W(300); ok(!$(".panel .write")?.parentElement?.__wr?.st?.().auto, "전체 자동 중 같은 단추 = 멈춤");
-  line(9).querySelector("[data-act=write]").click(); await W(400);
+  const at8 = (window.__sfxLog || []).length; $(".panel [data-act=autoall]").click(); await idle(30000); /* 기록 배열은 그대로 둠(아래 점검이 같은 배열을 봄) */
+  for (let k = 0; k < 120 && !$(".panel .write")?.parentElement?.__wr?.st?.().lineEnd; k++) await W(250); await W(5000);
+  { const S8 = $(".panel .write")?.parentElement?.__wr?.st?.(), lab8 = $(".panel [data-act=autoall]")?.textContent || "", heard = (window.__sfxLog || []).slice(at8).filter(e => e.ev === "시작" && /_sub|_t\d|line|L01-00-01_08/.test(e.name || "")).map(e => e.name);
+    ok(/^8 \//.test($(".panel .whead .sub")?.textContent || "") && S8?.lineEnd && !S8.auto && !S8.allNext && !/⏹/.test(lab8) && heard.length >= 1, "[전체 자동] 8번 마지막 토막 끝 → 그 줄 문장 소리 한 번 → 8번 줄에 머묾(다음 줄로 안 감)", `${$(".panel .whead .sub")?.textContent} · 자동 ${S8?.auto} · 단추 「${lab8}」 · 소리 ${heard.join(",")}`); }
+  $(".panel [data-seg='-1']")?.click(); await W(300); $(".panel [data-act=autoall]").click(); await W(800); $(".panel [data-act=autoall]")?.click(); await W(300); ok(!$(".panel .write")?.parentElement?.__wr?.st?.().auto, "전체 자동 중 같은 단추 = 멈춤");
+  line(8).querySelector("[data-act=write]").click(); await W(400); /* 10-15 전체 자동 = 8번에 머묾 → 8번 쓰기 단추 다시 */
   ok($("#vwrap").offsetHeight > 0 && $(".panel").offsetHeight === 0, "쓰기 단추 다시 → 영상");
   // 겹모음 한 칸(본부 10-06) — 14번 「이게」: 게 = 칸 2개 · ㅔ 한 번 / ㅓ+ㅣ 두 번 둘 다 맞음 · 자동 완성 소리 ㄱ→ㅔ
   line(14).querySelector(".kotext").click(); await W(800); if ($(".panel").hidden || !$(".panel .sent")) { line(14).querySelector("[data-act=write]").click(); await W(1300); }

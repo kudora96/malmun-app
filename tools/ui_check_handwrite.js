@@ -22,10 +22,10 @@
     const sc = p.querySelector(".write"), noScroll = sc.scrollHeight <= sc.clientHeight + 1 && p.scrollHeight <= p.clientHeight + 1;
     ok(hr && Math.abs(hr.width - hr.height) <= 1 && hr.width >= 120 && inside && !ov.length && noScroll, "ⓑ 손글씨 칸 = 정사각 · 창 안 · 겹침 0 · 스크롤 0", `${Math.round(hr?.width)}×${Math.round(hr?.height)} · 겹침 ${ov.join(",") || 0} · 창 안 ${inside}`);
     const iv = $(".hink"), H0 = wr().hand(), ch0 = H0.ch;
-    const draw = async strokes => { const iv = $(".hink"), r = iv.getBoundingClientRect(); let id = 7; // 글자마다 칸을 새로 그리므로 매번 찾음
+    const draw = async (strokes, secs = null) => { const iv = $(".hink"), r = iv.getBoundingClientRect(); let id = 7; // 글자마다 칸을 새로 그리므로 매번 찾음 · secs = 획마다 걸리는 시간(빠르기 채점 · 10-15 세 기준)
       for (const S of strokes) { const pts = []; for (let i = 0; i < S.length; i++) { pts.push(S[i]); if (i < S.length - 1) for (let q = 1; q < 6; q++) pts.push([S[i][0] + ((S[i + 1][0] - S[i][0]) * q) / 6, S[i][1] + ((S[i + 1][1] - S[i][1]) * q) / 6]); }
         const ev = (type, [x, y]) => iv.dispatchEvent(new PointerEvent(type, { pointerId: id, bubbles: true, cancelable: true, clientX: r.left + x * r.width, clientY: r.top + y * r.height, pointerType: "touch", isPrimary: true }));
-        ev("pointerdown", pts[0]); for (const q of pts.slice(1)) ev("pointermove", q); ev("pointerup", pts[pts.length - 1]); id++; } };
+        const dt = secs ? (secs[strokes.indexOf(S)] * 1000) / pts.length : 0, t0 = performance.now(); ev("pointerdown", pts[0]); for (const [k, q] of pts.slice(1).entries()) { if (dt) { const w = t0 + (k + 1) * dt - performance.now(); if (w > 1) await W(w); } ev("pointermove", q); } /* 늦어지면 기다리지 않음(실제 걸린 시간 = 견본) */ ev("pointerup", pts[pts.length - 1]); id++; } };
     // ⓖ 그리는 동안 안 움직임
     const y0 = [window.scrollY, p.scrollTop, sc.scrollTop, document.querySelector(".learn")?.scrollTop ?? 0].join(",");
     const ta = getComputedStyle(iv).touchAction;
@@ -33,7 +33,7 @@
     const zig = [Array.from({ length: 14 }, (_, i) => [0.05 + 0.065 * i, i % 2 ? 0.08 : 0.2]), Array.from({ length: 14 }, (_, i) => [0.05 + 0.065 * i, i % 2 ? 0.9 : 0.78])];
     await draw(zig); $("[data-act=hdone]").click(); await W(700);
     const sc1 = wr().hand().last?.pct ?? -1, lab1 = $(".hscore")?.textContent || "";
-    ok(sc1 >= 0 && sc1 < 80 && wr().hand().ch === ch0 && !wr().hand().passed && /^\d+%$/.test(lab1) && $(".hscore").classList.contains("bad"), "ⓓ 엉뚱한 낙서 → 실패 · 칸 위 「n%」(빨강·별 없음) · 같은 글자", `「${lab1}」`);
+    ok(sc1 >= 0 && sc1 < 80 && wr().hand().ch === ch0 && !wr().hand().passed && $(".hscore").querySelectorAll("i[data-k]").length === 3 && !$(".hscore .st") && $(".hscore").classList.contains("bad"), "ⓓ 엉뚱한 낙서 → 실패 · 칸 위 「모양 · 선 · 빠르기」(빨강·별 없음) · 같은 글자", `「${lab1}」`);
     const y1 = [window.scrollY, p.scrollTop, sc.scrollTop, document.querySelector(".learn")?.scrollTop ?? 0].join(",");
     ok(ta === "none" && y0 === y1, "ⓖ 그리는 동안 화면·창 안 움직임(touch-action none)", `${ta} · ${y0} → ${y1}`);
     // ⓔ 되돌리기·지우기
@@ -48,7 +48,9 @@
       const circ = sc([Array.from({ length: 41 }, (_, i) => [0.3 + 0.24 * Math.cos(i * Math.PI / 20), 0.5 + 0.34 * Math.sin(i * Math.PI / 20)]), [[0.75, 0.1], [0.75, 0.9]]]); // 대충 큰 동그라미 + 막대
       { const tl = ["pencil", "pen", "brush"].map(tk => sc(wr().centerOf(ch0).map(S => Object.assign(S.slice(), { tool: tk, w: { pencil: 0.04, pen: 0.07, brush: 0.12 }[tk] }))).pct); // 투덜이 10-08 — 가는 도구도 가운데를 따라 그리면 100 가까이
         ok(tl.every(v => v >= 95) && Math.max(...tl) - Math.min(...tl) <= 2, "ⓗ 연필·펜·붓으로 가운데 따라 그림 → 모두 95 이상 · 도구 차이 없음", tl.join("/")); }
-      ok(full.pct >= 95, "ⓗ 정확히 따라 그림 → 95 이상(★)", `${full.pct}% · 덩어리 ${full.comps.map(v => Math.round(v * 100)).join("/")}`);
+      ok(full.pct >= 80, "ⓗ 글자를 빈틈없이 칠함(가로 줄로) → 통과(80↑ · 10-15 세 기준부터 ★ 는 가운데 선을 따라갈 때만)", `${full.pct}% · 모양 ${full.shapeP} · 선 ${full.lineP} · 덩어리 ${full.comps.map(v => Math.round(v * 100)).join("/")}`);
+      { const L = await wr().strokesOf(ch0), F = []; for (let i = 0; i < L.length; i++) F.push((await wr().fitPath(ch0, i, "pen")).map(q => [q.x, q.y])); const g = sc(F.map(S => Object.assign(S, { tool: "pen", w: 0.07 })));
+        ok(g.pct >= 95 && g.lineP >= 95, "ⓗ 회색 가운데 선을 정확히 따라 그림 → 모양·선 95 이상(★)", `${g.pct}% · 선 ${g.lineP}`); }
       ok(!half.ok && half.pct < 80, "ⓗ 오른쪽 획 빼먹고 왼쪽만 → 실패", `${half.pct}% · 덩어리 ${half.comps.map(v => Math.round(v * 100)).join("/")}`);
       ok(shift.pct < 80, "ⓗ 펜 굵기만큼 옆으로 비껴 그림 → 80 아래", `${shift.pct}% · 벗어남 ${Math.round(shift.outside * 100)}%`);
       ok(circ.pct < 80, "ⓗ 대충 큰 동그라미 + 막대 → 실패", `${circ.pct}%`);
@@ -56,12 +58,12 @@
     // ⓒ 따라 그리기 → 통과(★ · 초록 점수 · 효과) → 그 자리 머묾(다시 쓰기 가능) · 위 글자 줄에 최고 점수 · 「다음 ▶」→ 다음 글자
     await W(1300);
     for (let k = 0; k < 60 && wr().busy(); k++) await W(100);
-    const tr = wr().traceOf(ch0);
-    await draw(tr); $("[data-act=hdone]").click(); await W(400);
+    const L0 = await wr().strokesOf(ch0), tr = [], secs = []; for (let i = 0; i < L0.length; i++) { const Q = await wr().fitPath(ch0, i, "pen"); tr.push(Q.filter((q, k) => k % 3 === 0 || k === Q.length - 1).map(q => [q.x, q.y])); secs.push(0.35 + 1.1 * Q.tot); } // 회색 가운데 선을 견본 빠르기로(세 기준 ★ = 모양·선·빠르기 95↑)
+    await draw(tr, secs); $("[data-act=hdone]").click(); await W(400);
     const lab2 = $(".hscore")?.textContent || "", fxOn = $(".hbox .fx")?.classList.contains("on"), stay = wr().hand() === H0 && H0.passed, nextB = $("[data-act=hnext]");
     for (let k = 0; k < 60 && wr().busy(); k++) await W(100);
     const best = String(Object.values(JSON.parse(localStorage.getItem("malmun.hbest") || "{}")).pop() ?? ""); // 최고 점수 = 기억만(위 글자 줄엔 안 보임 · 투덜이 10-07)
-    ok(/^\d+% ★$/.test(lab2) && fxOn && stay && !!nextB && best === lab2.replace(/% .*/, "") && !P().querySelector(".sent .hb"), "ⓒ 따라 그림 → 「n% ★」 + 효과 · 그 글자에 머묾 · 「다음 ▶」 · 최고 점수 기억(글자 줄엔 숫자 안 보임)", `「${lab2}」 · 효과 ${fxOn} · 최고 ${best}`);
+    ok(/^★/.test(lab2) && fxOn && stay && !!nextB && best === String(H0.last?.pct) && !P().querySelector(".sent .hb"), "ⓒ 따라 그림 → 「★ 모양 · 선 · 빠르기」 + 효과 · 그 글자에 머묾 · 「다음 ▶」 · 최고 점수 기억(글자 줄엔 숫자 안 보임)", `「${lab2}」 · 효과 ${fxOn} · 최고 ${best}`);
     // 다시 쓰기 — 그리기 시작하면 통과 풀림(점수 숨김) · 낮게 써도 최고 점수 그대로
     await draw(zig); const re = !H0.passed && $(".hscore").hidden; $("[data-act=hdone]").click(); await W(500);
     for (let k = 0; k < 60 && wr().busy(); k++) await W(100);

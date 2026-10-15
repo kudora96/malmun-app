@@ -1208,6 +1208,66 @@ html[dir=rtl] .write .hbox .hjfull{direction:rtl}
 .write .hand.stack .hbtns .hjudge{flex:none;flex-basis:100%;height:62px;min-height:0}
 html[dir=rtl] .write .hjudge{direction:rtl}
 .write .hbox .hfix{pointer-events:none}
+/* 세 기준 점수 배지(투덜이 10-15 안 A) — 칸 위 한 줄 「모양 92 · 선 68 · 빠르기 55」 · 칸마다 색 · 좁으면 숫자만(.num) · 시간 막대는 왼쪽 44% 그대로 */
+.write .hbox .hslot{width:100%}
+.write .hbox .htime{width:min(44%,132px);justify-self:start}
+.write .hbox .hscore{gap:8px}
+.write .hbox .hscore i{font-style:normal;display:inline-flex;align-items:baseline;gap:3px}
+.write .hbox .hscore i u{text-decoration:none;font-size:.8em;font-weight:700;opacity:.85}
+.write .hbox .hscore i.ok{color:var(--okc)}
+.write .hbox .hscore i.bad{color:var(--badc)}
+.write .hbox .hscore i.na{color:var(--mute)}
+.write .hbox .hscore i.st{color:#c99a06}
+.write .hbox .hscore.num u{display:none}
+.write .hbox .hpace{pointer-events:none}
+/* 판정 줄 앞 작은 꼬리표 [모양]·[선]·[빠르기] — 배지 칸 이름과 짝 */
+.write .hjudge .tg{display:inline-block;margin-inline-end:4px;padding:0 5px;border-radius:6px;font-size:.78em;font-weight:800;line-height:1.45;vertical-align:1px;white-space:nowrap}
+.write .hjudge .tg-shape{background:color-mix(in srgb,var(--badc) 12%,transparent);color:var(--badc)}
+.write .hjudge .tg-line{background:rgba(224,138,30,.16);color:#9a5410}
+.write .hjudge.guide{color:var(--mute);font-weight:600}
+.write .hjudge.guide p.g1{color:var(--ink);font-weight:800}
+/* 뜻 줄 높이·줄 수 고정(투덜이 10-15) — 손글씨: 한 줄(넓은 창) 또는 두 줄(.two · 600px 아래 · 뜻 / 도구) · 뜻은 한 줄(줄임표) · 줄 높이 고정이라 글자 크기가 줄어도 높이 그대로 */
+.write .work.handmode .stage .sub2{flex-wrap:nowrap;height:28px;row-gap:4px}
+.write .work.handmode .stage .sub2.two{flex-wrap:wrap;height:60px;align-content:space-between}
+.write .work.handmode .stage .sub2.two .htools{flex-basis:100%;justify-content:flex-end;margin-left:0}
+.write .work.handmode .stage .sub2 .mean{flex:1 1 0;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:28px}
+.write .work.handmode .stage .sub2.two .mean{flex-basis:0}
+.write .work.handmode .stage .sub2:not(.two) .htools{flex:none}
+.write .work.handmode .stage .sub2 .wko{line-height:28px}
+html:lang(ur) .write .work.handmode .stage .sub2{height:34px}
+html:lang(ur) .write .work.handmode .stage .sub2.two{height:72px}
+html:lang(ur) .write .work.handmode .stage .sub2 :is(.mean,.wko){line-height:34px}
+html:lang(ur) .write .work.handmode .stage .sub2{overflow:visible} /* 나스탈리크 글이 줄 높이 밖으로 나옴 → 줄은 그대로 두고 잘라 내는 칸만 위아래로 넓힘(다국어부 10-15 ur 320 7px 잘림) */
+html:lang(ur) .write .work.handmode .stage .sub2 .mean{padding-block:9px;margin-block:-9px}
+.write .work:not(.handmode) .info .sub2 .mean{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* 단추 줄 폭 고정(⇄·글자 넘김에도 칸·단추 0px · 10-15) — 폭은 write.js fit 이 칸 폭으로 정함(--hbw1 한 줄 · --hbw2 두 줄 · --hbw3 세 줄) · 단추 글은 한 줄(…) */
+.write .hand:not(.two):not(.three):not(.stack) .hbtns{width:var(--hbw1,150px)}
+.write .hand.two .hbtns{width:var(--hbw2,180px);grid-template-columns:repeat(2,minmax(0,1fr))}
+.write .hand.three .hbtns{width:var(--hbw3,160px);grid-template-columns:repeat(3,minmax(0,1fr))}
+.write .hand .hbtns > button{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.write .hand .hbtns > button .ml,.write .hand .hbtns > button .ms{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.write .hand.hic .hbtns > button{min-width:0}
+.write .hand.two .hbtns,.write .hand.three .hbtns{grid-auto-rows:34px} /* 단추 줄 높이 고정(ur 나스탈리크 글로 1px 흔들림) */
+html:lang(ur) .write .hand.two .hbtns,html:lang(ur) .write .hand.three .hbtns{grid-auto-rows:36px}
+.write .hand.two .hbtns > button,.write .hand.three .hbtns > button{min-height:0;height:100%}
+html:lang(ur) .write .hand:not(.two):not(.three):not(.stack) .hbtns > button{height:40px;flex:none}
+/* 쓰기 머리 줄 높이 고정(⇄ 한국어·학습자 언어 글꼴 차이로 32 ↔ 37px · 10-15) */
+.write .whead:not(.n4){height:36px;box-sizing:border-box;align-items:center}
+html:lang(ur) .write .whead:not(.n4){height:44px}
+/* 단추 글 두 겹(write.js dual · 10-15) — 겹친 글 중 가장 긴 것이 폭을 정하고 하나만 보임 */
+.write .dl{display:inline-grid;vertical-align:baseline;min-width:0}
+.write .dl > span,.write .dl::after{grid-area:1/1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.write .dl::after{content:attr(data-alt);visibility:hidden}
+/* 쓰기 도움말 — 낮은 창(높이 700 아래)은 줄 사이·안쪽 여백을 줄여 8줄도 스크롤 없이(10-15 사용법 8줄) */
+@media (max-height:700px){.write .helpbox{gap:3px;padding-top:6px}.write .helpbox p{padding:3px 8px}}
+@media (max-height:600px){.write .helpbox{gap:2px;line-height:1.28}.write .helpbox p{padding:2px 6px}}
+/* 머리 줄 단추 = 오른쪽 끝에 붙임(⇄ 로 「쓰기·लेखन」 제목·화자 글 폭이 바뀌어도 단추 자리 0px · 10-15) · 안내 글(loopnote)은 단추 앞 빈자리 */
+.write .whead > b,.write .whead > .sub{order:0}
+.write .whead > .loopnote{order:1;margin-left:0;margin-inline-start:0}
+.write .whead > .wmode,.write .whead > .uiko,.write .whead > .bgmb,.write .whead > .whelp{order:2}
+.write .whead > .wmode{margin-left:0;margin-inline-start:auto} /* ur(오른쪽→왼쪽)도 끝 쪽으로 · 빈자리를 나눠 갖지 않게 하나만 auto */
+.write .whead .wclose{margin-left:0}
+.write .hjudge .tg-speed{background:rgba(42,111,176,.13);color:#2a6fb0}
 /* 위 글자 줄(배우는 한국어) = 학습자 언어 줄높이를 물려받지 않음(ur 나스탈리크 줄높이로 글자 단추가 53px → 줄 밖 5px 로 ⇄한 과 겹침 · 검사부 10-14) */
 .write .sent,.write .sent .w,.write .sent .c{line-height:1.25}
 /* 아이폰 사파리가 글자를 저절로 키우지 않게(쓰기 화면 · 10-14 「✓ 순서 맞음」 위가 잘림) */
