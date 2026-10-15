@@ -10,7 +10,7 @@
       ok(hd.scrollWidth <= hd.clientWidth + 1, `${mode}: 머리 줄 넘침 0(모드 단추 · ? कसरी)`, `${hd.scrollWidth - hd.clientWidth}px`);
       $("[data-act=help]").click(); await W(400);
       const hb = $(".helpbox"), z = hb.firstElementChild.style.zoom || "1";
-      const fpx = parseFloat(getComputedStyle(hb.querySelector("p")).fontSize) * (parseFloat(z) || 1), fits = hb.scrollHeight <= hb.clientHeight + 1, rolls = hb.classList.contains("scroll") && getComputedStyle(hb).overflowY === "auto";
+      const fpx = Math.min(...[...hb.querySelectorAll("p")].map(p => parseFloat(getComputedStyle(p).fontSize) * (parseFloat(p.style.zoom) || 1))), /* 가장 작은 글(닫기 안내 포함) */ fits = hb.scrollHeight <= hb.clientHeight + 1, rolls = hb.classList.contains("scroll") && getComputedStyle(hb).overflowY === "auto";
       ok(!hb.hidden && hb.querySelectorAll("p").length >= 8 && fpx >= 11.9 && (fits || rolls), `${mode}: 도움말 7줄↑ + 닫기 · 글 12px 이상 · 다 들어가거나(대부분) 넘치면 칸 안에서 굴림(검사부 10-15 ur 320)`, `글 ${fpx.toFixed(1)}px · 넘침 ${hb.scrollHeight - hb.clientHeight}px · 굴림 ${rolls}`);
       hb.click(); await W(200);
       ok(hb.hidden, `${mode}: 누르면 닫힘`);

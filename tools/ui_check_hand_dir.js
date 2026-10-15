@@ -35,7 +35,7 @@
     { const out = [];
       for (const tk of ["pencil", "pen", "brush"]) { $(`.panel [data-tool=${tk}]`).click(); await W(200);
         const gv = $(".panel .hguide"), n = gv.width, d = A(gv), m = A(wr().guideCv(wr().hand().ch, wr().guideW(tk), n)); let mk = 0, hit = 0, ex = 0, top = 0; for (let i = 0; i < n * n; i++) if (m[i * 4 + 3] > 250) top = Math.max(top, d[i * 4 + 3]); /* 회색 색의 진하기(반투명이면 낮음) */
-        for (let i = 0; i < n * n; i++) { const x = i % n, y = (i / n) | 0, cross = Math.abs(x - n / 2) < n / 100 + 2 || Math.abs(y - n / 2) < n / 100 + 2; if (m[i * 4 + 3] > 128) { mk++; if (d[i * 4 + 3] >= top * 0.4) hit++; } else if (!cross && m[i * 4 + 3] < 10 && d[i * 4 + 3] >= top * 0.6) ex++; }
+        for (let i = 0; i < n * n; i++) { const x = i % n, y = (i / n) | 0, cross = Math.abs(x - n / 2) < n / 100 + 2 || Math.abs(y - n / 2) < n / 100 + 2; if (m[i * 4 + 3] > 128) { mk++; if (d[i * 4 + 3] >= top * 0.3) hit++; } /* 작은 칸(375 · 159px)의 가는 연필 회색 가장자리 번짐 = 0.3 까지 칠한 것으로 셈(10-15) */ else if (!cross && m[i * 4 + 3] < 10 && d[i * 4 + 3] >= top * 0.6) ex++; }
         out.push({ tk, fill: hit / Math.max(1, mk), ex: ex / Math.max(1, mk) }); }
       ok(out.every(o => o.fill >= 0.95 && o.ex <= 0.02), "ⓐ 칸 회색 = 그 도구 굵기 글꼴 모양(도구 단추 누르면 다시 칠함)", out.map(o => `${o.tk} 채움 ${Math.round(o.fill * 100)}% 밖 ${(o.ex * 100).toFixed(1)}%`).join(" · ")); }
     // 자료 획 길(바른 방향) · 거꾸로
