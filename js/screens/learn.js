@@ -170,6 +170,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     const kind = st.panel?.kind; if (kind !== "explain" && kind !== "speak") return;
     if (st.uiFit && kind === "explain") return fitBody(); // ⇄ 뒤엔 창을 연 뒤 늦게 오는 맞춤(0.3초·글꼴)도 본문만 — 창 크기 그대로
     const kids = [...panel.children].filter(c => !c.classList.contains("vplay"));
+    kids.forEach(c => c.style.removeProperty("min-height")); // 아래 「창 높이 채움」은 잴 때 빼고
     // 설명 = 칸을 꽉 채우는 가장 큰 크기(짧은 줄은 키우고 긴 줄은 줄임 · 15px → 최대 20px · 칩·간격도 같은 비율 — 본부 10-06) · 말하기 = 넘칠 때만 줄임
     const uk = panel.querySelector(".v9bar .chip.uiko"), ukH = z => uk && (uk.style.minHeight = `${(32 / z).toFixed(1)}px`); // ⇄한 = 줄여도 화면에서 32px(본부 1014.2 누르기 쉽게)
     const fits = z => { kids.forEach(c => (c.style.zoom = String(z))); ukH(z); return panel.scrollHeight <= panel.clientHeight; };
@@ -178,6 +179,8 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     lo = Math.floor(lo * 1000) / 1000;
     kids.forEach(c => (lo === 1 ? c.style.removeProperty("zoom") : (c.style.zoom = String(lo)))); ukH(lo);
     for (let k = 0; k < 8 && panel.scrollHeight > panel.clientHeight && lo > 0.4; k++) { lo -= 0.015; kids.forEach(c => (c.style.zoom = lo.toFixed(3))); ukH(lo); } // 그래도 1px 이라도 넘치면 조금씩 더
+    // 설명(v9) 틀 = 창 높이를 늘 채움(.exv.v9 높이 auto 라 본문이 짧아지면 「말해 보세요」 칸이 따라 올라감 → ⇄ 때 단추 자리 0px · 다국어부 10-15)
+    if (kind === "explain") kids.forEach(c => c.classList.contains("v9") && (c.style.minHeight = `${Math.max(0, panel.clientHeight / lo - 0.5).toFixed(2)}px`));
     st.fitH = kids.reduce((a, c) => a + c.offsetHeight, 0); // 맞춘 때의 내용 높이 — 바뀌면(로마자 켬/끔 · 말해 본 결과 · 단추 줄) 다시 맞춤
   }
   function keepVisible(i, { force = false } = {}) {
