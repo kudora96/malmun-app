@@ -593,10 +593,10 @@ export default async function write(app, ep, id, opts = {}) {
     const fit = () => { if (!hand.isConnected) return; const cs = getComputedStyle(hand), px = v => parseFloat(cs[v]) || 0, gap = px("columnGap") || 10; // 칸 크기 = 안쪽 여백 빼고(본부 10-07 왼쪽 끝 3px 에 붙던 것)
       const iw = hand.clientWidth - px("paddingLeft") - px("paddingRight"), ih = hand.clientHeight - px("paddingTop") - px("paddingBottom");
       // 단추 자리 = 오른쪽 한 줄 · 오른쪽 두 줄 · 칸 아래 중 단추가 다 들어가고 칸이 가장 큰 것(도구 3 + 단추 4 = 7개 · 375×667 에서 한 줄이면 넘침)
-      const lay = [["", c2 => Math.min(ih, iw - bt.offsetWidth - gap), () => bt.offsetHeight <= ih], ["two", () => Math.min(ih, iw - bt.offsetWidth - gap), () => bt.offsetHeight <= ih], ["stack", () => Math.min(ih - bt.offsetHeight - (px("rowGap") || 8), iw), () => bt.offsetWidth <= iw + 1]];
-      bt.style.height = ""; let best = null; for (const [k, sz, fits] of lay) { hand.classList.remove("stack", "two"); if (k) hand.classList.add(k); const v = sz(), f = fits(); if (f && (!best || v > best[1])) best = [k, v]; }
+      const lay = [["", c2 => Math.min(ih, iw - bt.offsetWidth - gap), () => bt.offsetHeight <= ih], ["two", () => Math.min(ih, iw - bt.offsetWidth - gap), () => bt.offsetHeight <= ih], ["three", () => Math.min(ih, iw - bt.offsetWidth - gap), () => bt.offsetHeight <= ih] /* 오른쪽 세 줄(판정 상자 + 단추 3×2) — 320×568 처럼 낮은 폰(검사부 10-15 칸 아래로 밀려 60px) */, ["stack", () => Math.min(ih - bt.offsetHeight - (px("rowGap") || 8), iw), () => bt.offsetWidth <= iw + 1]];
+      bt.style.height = ""; let best = null; for (const [k, sz, fits] of lay) { hand.classList.remove("stack", "two", "three"); if (k) hand.classList.add(k); const v = sz(), f = fits(); if (f && (!best || v > best[1])) best = [k, v]; }
       if (!best) best = ["stack", Math.min(ih - bt.offsetHeight - 8, iw)];
-      hand.classList.remove("stack", "two"); if (best[0]) hand.classList.add(best[0]);
+      hand.classList.remove("stack", "two", "three"); if (best[0]) hand.classList.add(best[0]);
       const s = Math.max(60, Math.floor(best[1])), dpr = window.devicePixelRatio || 1;
       box.style.width = box.style.height = s + "px"; for (const cv of [gv, iv, box.querySelector(".hfix")]) if (cv) cv.width = cv.height = Math.round(s * dpr); H.s = s;
       bt.style.height = ""; if (best[0] !== "stack") bt.style.height = Math.max(s, bt.offsetHeight) + "px"; /* 판정 상자 = 단추 줄 남는 높이 전부(칸 높이와 같게 · 글 길이와 상관없이 고정 · 투덜이 10-15) */ fitJudge(); paintGuide(); paintInk(); };
@@ -611,7 +611,7 @@ export default async function write(app, ep, id, opts = {}) {
     iv.addEventListener("pointerdown", e => { if (st.auto || H.timeUp) return; /* 시간 끝 뒤 = 채점 결과 나올 때까지 획 안 받음 */ if (st.busy) { if (!H.passSnd) return; hush(); st.busy = false; H.passSnd = false; } H.drawGen = (H.drawGen || 0) + 1; /* 통과 글자 소리 중에 다시 쓰기 = 소리 끊고 첫 획부터 받음(본부 10-10 「100 뒤 다시 쓰면 첫 획이 빠져 68」) */ if (H.cur) up(); /* 손 뗌을 못 받은 채 남은 획 = 먼저 마무리 */ e.preventDefault(); try { iv.setPointerCapture(e.pointerId); } catch {} clearTimeout(H.timer); stopLoop(); // 투덜이 10-14 PC 마우스 「자석이 갑자기 안 먹음」 — 이 줄이 앞 // 주석에 묻혀 손 뗌 잡기(setPointerCapture)가 없었음 → 칸 밖에서 놓으면 획이 안 끝나 자석이 안 붙고 그대로 남음
       if (H.ordPlaying || H.ordAt) { H.stopOrder(); paintGuide(); } // 획순 보는 중·멈춘 채 쓰기 시작 = 획순 그만(회색으로)
       if (H.passed) { H.passed = false; H.strokes = []; H.roles = null; H.orderTold = false; H.mag = 0; markHand(); if (magnetOn()) { paintGuide(); H.magMarks?.(); } } // 통과 뒤 다시 그리면 = 다시 쓰기(더 높은 점수 · 자석은 처음 획부터)
-      clearTimeout(H.clr); clearFix(); { const sc = work.querySelector(".hscore"); if (sc) sc.hidden = true; } // 새로 쓰기 시작 = 점수 지움
+      clearTimeout(H.clr); clearFix(); judgeFull(false); { const sc = work.querySelector(".hscore"); if (sc) sc.hidden = true; } // 새로 쓰기 시작 = 점수 지움
       const tk = toolKey(); H.cur = Object.assign([pt(e, null)], { tool: tk, w: TOOLS[tk].w }); H.strokes.push(H.cur); paintInk(); drawStart(tk); H.lastMv = [e.clientX, e.clientY, e.timeStamp || performance.now()]; if (!magnetOn()) startTimer(H); });
     iv.addEventListener("pointermove", e => { if (!H.cur) return; e.preventDefault(); { const now = e.timeStamp || performance.now(), L = H.lastMv; if (L) { const r = iv.getBoundingClientRect(), dt = Math.max(1, now - L[2]); drawMove(Math.hypot(e.clientX - L[0], e.clientY - L[1]) / Math.max(1, r.width) / (dt / 1000)); } H.lastMv = [e.clientX, e.clientY, now]; } const evs = e.getCoalescedEvents?.() || []; for (const ev of evs.length ? evs : [e]) H.cur.push(pt(ev, H.cur)); if (magnetOn()) magFollow(H.cur[H.cur.length - 1]); paintInk(); });
     // 실시간 자석(본부 10-11 「포토샵 마그네틱 올가미처럼」) — 지금 차례 획 위에서 손가락과 가장 가까운 점이 앞으로만 따라옴 · 칸 12% 넘게 떨어지면 따라오기 멈춤
@@ -624,7 +624,7 @@ export default async function write(app, ep, id, opts = {}) {
     const up = () => { if (!H.cur) return; drawEnd(); const S = H.cur; H.cur = null; clearTimeout(H.timer); const F = H.follow; H.follow = null; if (H.tDue) { H.tDue = false; setTimeout(() => st.hand === H && !H.cur && !H.passed && handJudge(), 50); }
       if (magnetOn()) { if (F && F.prog >= F.Q.length * 0.5 && pastCorner(F.Q, F.Q[F.prog].t)) return magnetUp(S, true); return magnetUp(S); } /* 절반(50%↑) 따라왔으면 나머지 채움(본부 10-12 · 전 85%) · 그 획 완성 */ H.timer = setTimeout(() => st.hand === H && !H.cur && readyToJudge(H) && handJudge(), 1200); jamoSay(H);
       const msg = strokeHint(H, S); if (msg) bubble(msg); }; // 획순·방향 알림(짧은 말풍선)
-    const bubble = msg => { const bx = work.querySelector(".hjudge"); H.hints = (H.hints || []).concat(msg); if (!bx) return; H.jx = null; bx.className = "hjudge hint"; bx.innerHTML = `<p class="hb">${esc(msg)}</p>`; fitJudge(); }; // 획순·방향 알림 = 판정 상자 한 곳에만(본부 10-15 — 칸 위 말풍선·머리 줄에 같은 글이 … 로 잘려 두 번 더 나오던 것) · 다음 알림·채점이 바꿈
+    const bubble = msg => { const bx = work.querySelector(".hjudge"); H.hints = (H.hints || []).concat(msg); if (!bx) return; H.jx = null; judgeFull(false); bx.className = "hjudge hint"; bx.innerHTML = `<p class="hb">${esc(msg)}</p>`; fitJudge(); }; // 획순·방향 알림 = 판정 상자 한 곳에만(본부 10-15 — 칸 위 말풍선·머리 줄에 같은 글이 … 로 잘려 두 번 더 나오던 것) · 다음 알림·채점이 바꿈
     // 획순 보기(본부 10-07) — 회색 글자를 획 차례대로 주황으로 칠해 드러냄(획 0.5초 · revealOrder) · 시작점 번호 원 · 끝에 작은 화살촉(글자 안) → 다 칠하면 1초 뒤 회색으로
     //  keep = 자동 손글씨(다 칠한 채로 남음 = 「써진」 상태) · 다시 누르거나 멈추면 그 자리에서 그침 → true = 끝까지 칠함
     const clipG = cv => { const n = cv.width, k = c.ch + "|" + n + "|" + toolKey() + "|" + hfontKey(); if (H.gk !== k) { H.gk = k; H.gm = document.createElement("canvas"); H.gm.width = H.gm.height = n; guideGlyph(H.gm.getContext("2d"), n, c.ch, guideW(), "#000"); } const cx = cv.getContext("2d"); cx.save(); cx.globalCompositeOperation = "destination-in"; cx.drawImage(H.gm, 0, 0); cx.restore(); return cv; }; /* 획순·자동 완성 칠 = 회색 모양 안으로(본부 10-12) */
@@ -726,14 +726,17 @@ export default async function write(app, ep, id, opts = {}) {
     return { L, it: L.filter(o => o.j != null || o.s != null) };
   }
   function showJudge(jx) {
-    const bx = work.querySelector(".hjudge"); if (!bx) return; st.hand && (st.hand.jx = jx); if (!jx) { bx.innerHTML = ""; bx.className = "hjudge"; return; }
+    const bx = work.querySelector(".hjudge"); if (!bx) return; judgeFull(false); st.hand && (st.hand.jx = jx); if (!jx) { bx.innerHTML = ""; bx.className = "hjudge"; return; }
     const N = "❶❷❸❹"; bx.className = "hjudge " + (jx.L[0]?.ok && jx.L[0].k !== "wx_rest" ? "ok" : "bad");
     bx.innerHTML = jx.L.map((o, i) => `<p${o.ok ? ' class="ok"' : ""}><i>${jx.L.length > 1 ? N[i] : ""}</i>${esc(o.raw ?? tx(o.k, o.v?.dk ? { ...o.v, d: t(o.v.dk) } : o.v))}</p>`).join(""); fitJudge();
   }
   function fitJudge() { const bx = work.querySelector(".hjudge"); if (!bx) return; bx.style.removeProperty("font-size"); bx.querySelectorAll("p").forEach(p => (p.hidden = false)); const over = () => bx.scrollHeight > bx.clientHeight + 1 || bx.scrollWidth > bx.clientWidth + 1;
     for (let f = parseFloat(getComputedStyle(bx).fontSize) - 0.5; f >= 12 && over(); f -= 0.5) bx.style.fontSize = f + "px";
     const ps = [...bx.querySelectorAll("p")]; ps.forEach(p => p.style.removeProperty("-webkit-line-clamp")); for (let i = ps.length - 1; i > 0 && over(); i--) ps[i].hidden = true;
-    if (over()) { const p = ps.find(q => !q.hidden) && [...ps].reverse().find(q => !q.hidden), cs = getComputedStyle(bx), lh = parseFloat(getComputedStyle(p).lineHeight) || 16, room = bx.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) - (p.offsetTop - bx.firstElementChild.offsetTop); const bot = () => p.getBoundingClientRect().bottom > bx.getBoundingClientRect().bottom - (bx.offsetHeight - bx.clientHeight) / 2 - parseFloat(cs.paddingBottom) + 0.5; for (let k = Math.max(1, Math.floor(room / lh)); k >= 1; k--) { p.style.setProperty("-webkit-line-clamp", String(k)); if (!bot()) break; } } } /* ur 나스탈리크처럼 글꼴 키가 줄높이보다 크면 한 줄 더 줄임 */ // 한 줄도 다 안 들어가면 그 줄을 들어가는 만큼만(… 로 끝)
+    if (over()) { const p = ps.find(q => !q.hidden) && [...ps].reverse().find(q => !q.hidden), cs = getComputedStyle(bx), lh = parseFloat(getComputedStyle(p).lineHeight) || 16, room = bx.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) - (p.offsetTop - bx.firstElementChild.offsetTop); const bot = () => p.getBoundingClientRect().bottom > bx.getBoundingClientRect().bottom - (bx.offsetHeight - bx.clientHeight) / 2 - parseFloat(cs.paddingBottom) + 0.5; for (let k = Math.max(1, Math.floor(room / lh)); k >= 1; k--) { p.style.setProperty("-webkit-line-clamp", String(k)); if (!bot()) break; } }
+    const cut = ps.some(q => q.hidden || q.style.getPropertyValue("-webkit-line-clamp")); bx.classList.toggle("cut", cut); let mb = bx.querySelector(".jmore"); /* 다 못 보이면 「⋯」 단추 → 누르면 칸 위에 전체 글(검사부 10-15 320 「…」 로 끝까지 못 읽음) */
+    if (cut && !mb) { mb = document.createElement("button"); mb.className = "jmore"; mb.dataset.act = "jmore"; mb.textContent = "⋯"; bx.append(mb); } if (mb) mb.setAttribute("aria-label", bx.innerText.replace("⋯", "").trim()); if (!cut) mb?.remove(); } /* ur 나스탈리크처럼 글꼴 키가 줄높이보다 크면 한 줄 더 줄임 */
+  function judgeFull(on) { const box = work.querySelector(".hbox"), bx = work.querySelector(".hjudge"); box?.querySelector(".hjfull")?.remove(); if (!on || !box || !bx) return; const d = document.createElement("div"); d.className = "hjfull"; d.dataset.act = "jfull"; d.innerHTML = [...bx.querySelectorAll("p")].map(p => `<p class="${p.className}">${p.innerHTML}</p>`).join(""); box.append(d); } // 한 줄도 다 안 들어가면 그 줄을 들어가는 만큼만(… 로 끝)
   // 손글씨 칸에 잠깐(2초) — 틀린 내 획 빨강 · 맞는 획 주황 점선 + 번호 + 끝 화살
   function drawFix(r, jx) {
     const H = st.hand, cv = work.querySelector(".hfix"); if (!H || !cv) return; clearTimeout(H.fixT); const x = cv.getContext("2d"), n = cv.width; x.clearRect(0, 0, n, n); if (!jx?.it.length || !r.ex) return;
@@ -980,6 +983,7 @@ export default async function write(app, ep, id, opts = {}) {
     if (!b) return;
     const a = b.dataset.act;
     if (a === "close") { hush(); stopLoop(); return opts.onClose?.(); } // ✕ 닫기(본부 10-07 — 말하기·설명 창과 같게 · 폰 뒤로도 같은 동작)
+    if (a === "jmore") return judgeFull(!work.querySelector(".hjfull")); if (a === "jfull") return judgeFull(false); // 판정 글 전체 보기 · 누르면 닫힘
     if (a === "hdone") return handJudge();
     if (a === "hnext") return handNext();
     if (a === "horder") return st.hand?.toggleOrder?.();

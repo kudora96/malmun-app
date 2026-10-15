@@ -37,10 +37,12 @@
     $(".panel [data-act=hdone]").click(); await W(700);
     const jb = $(".panel .hjudge"), ps = [...jb.querySelectorAll("p")].filter(p => !p.hidden), jr = jb.getBoundingClientRect(), last = ps.at(-1)?.getBoundingClientRect();
     ok(ps.length >= 1 && jb.scrollHeight <= jb.clientHeight + 1 && (!last || last.bottom <= jr.bottom + 1), `꽝 뒤 판정 상자 ${ps.length}줄 · 상자 밖으로 안 넘침(${innerWidth}×${innerHeight})`, `${jb.scrollHeight}/${jb.clientHeight} · ${jb.innerText.slice(0, 60)}`);
-    const sr = $(".panel .hslot").getBoundingClientRect(), br = $(".panel .hbox").getBoundingClientRect(), btn = [...document.querySelectorAll(".panel .hbtns button")].map(b => b.getBoundingClientRect());
+    const sr = $(".panel .hslot").getBoundingClientRect(), br = $(".panel .hbox").getBoundingClientRect(), btn = [...document.querySelectorAll(".panel .hbtns > button")].map(b => b.getBoundingClientRect());
     const hit = (a, b) => a.right > b.left + 1 && b.right > a.left + 1 && a.bottom > b.top + 1 && b.bottom > a.top + 1;
     ok(sr.bottom <= br.top + 0.5 && !$(".panel .hscore").hidden, "점수 배지 = 손글씨 칸 바깥 왼쪽 위(칸·회색 글자와 겹침 0px)", `배지 아래 ${Math.round(sr.bottom)} · 칸 위 ${Math.round(br.top)}`);
     ok(!btn.some(b => hit(b, jr)) && !hit(jr, br), "판정 상자가 단추·손글씨 칸을 안 덮음");
+    ok(br.width >= 100 && !$(".panel .hand").classList.contains("stack"), "판정 상자가 있어도 손글씨 칸 100px↑ · 칸 아래로 안 밀림(검사부 10-15 320 59px)", `${Math.round(br.width)}px · ${$(".panel .hand").className}`);
+    { const mb = $(".panel .jmore"); if (mb) { mb.click(); await W(200); const f = $(".panel .hjfull"), fr = f?.getBoundingClientRect(); ok(!!f && fr.width <= br.width + 1 && fr.height <= br.height + 1 && f.innerText.replace(/\s/g, "").length >= jb.innerText.replace(/[\s⋯]/g, "").length - 2, "잘린 판정 글 「⋯」 → 손글씨 칸 위에 전체 글 · 누르면 닫힘"); f?.click(); await W(100); ok(!$(".panel .hjfull"), "전체 글 닫힘"); } else res.push("· 참고: 판정 글이 다 보여 「⋯」 없음"); }
     const fx = $(".panel .hfix"), d = fx.getContext("2d").getImageData(0, 0, fx.width, fx.height).data; let px = 0; for (let i = 3; i < d.length; i += 4) if (d[i] > 0) px++;
     ok(px > 50, "꽝 뒤 칸에 맞는 획 주황 점선·번호가 그려짐", `${px}px`);
     await W(2300); const d2 = fx.getContext("2d").getImageData(0, 0, fx.width, fx.height).data; let px2 = 0; for (let i = 3; i < d2.length; i += 4) if (d2[i] > 0) px2++;

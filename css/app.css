@@ -1156,12 +1156,29 @@ html:lang(ur) .write .hbox .hscore{font-size:12px;line-height:1}
 .write .hjudge p[style*=line-clamp]{display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden}
 html:lang(ur) .write .hjudge,html:lang(ur) .write .hjudge p{line-height:1.5}
 html:lang(ur) .write .hjudge{padding-block:2px}
-html:lang(ur) .write .hand.hic .hbtns :is(.ml,.ms){line-height:1.75;font-size:9.5px}
+html:lang(ur) .write .hand.hic .hbtns :is(.ml,.ms){line-height:1.4;font-size:9.5px}
+.write.hcomp .hand.hic .hjudge{min-height:25px;padding-block:2px}
+.write.hcomp .hand.hic.two .hbtns{grid-template-rows:minmax(25px,1fr)}
+.write.hcomp .hand{padding-top:22px}
+html:lang(ur) .write.hcomp .hand{padding-top:25px}
+.write.hcomp .hbox .hslot{height:18px}
+html:lang(ur) .write.hcomp .hbox .hslot{height:21px}
+html:lang(ur) .write .hbox .hscore{line-height:1.4;padding-block:0}
 .write .hjudge p i{font-style:normal;color:var(--badc);margin-inline-end:3px}
 .write .hjudge p.ok{color:var(--okc)}
+.write .hjudge{position:relative}
+.write .hjudge.cut{padding-inline-end:30px}
+.write .hbox .hjfull,html:lang(ur) .write .hbox .hjfull p{line-height:1.6}
+.write .hand .hbtns .hjudge button.jmore{display:block;box-shadow:0 1px 0 var(--line);position:absolute;inset-inline-end:3px;bottom:3px;min-width:24px;height:20px;min-height:0;padding:0 3px;border:1px solid var(--line);border-radius:8px;background:var(--card);box-shadow:0 1px 0 var(--line);font-size:14px;font-weight:800;line-height:1;color:var(--ink)}
+.write .hbox .hjfull{position:absolute;inset:0;z-index:6;overflow:auto;padding:8px 10px;border-radius:12px;background:color-mix(in srgb,var(--card) 96%,transparent);box-shadow:0 0 0 2px var(--line);font-size:13px;line-height:1.4;font-weight:600;color:var(--ink);cursor:pointer}
+.write .hbox .hjfull p{margin:0 0 5px}
+.write .hbox .hjfull p.ok{color:var(--okc)}
+html[dir=rtl] .write .hbox .hjfull{direction:rtl}
 .write .hjudge.hint{border-color:color-mix(in srgb,var(--hi) 45%,var(--line));background:color-mix(in srgb,var(--hi) 6%,var(--card))}
 .write .hand.two .hbtns{grid-template-rows:minmax(66px,1fr);align-content:stretch}
 .write .hand.two .hbtns .hjudge{grid-column:1/-1}
+.write .hand.three .hbtns{display:grid;grid-template-columns:repeat(3,auto);grid-template-rows:minmax(25px,1fr);gap:5px;align-content:stretch}
+.write .hand.three .hbtns .hjudge{grid-column:1/-1;min-height:25px}
 .write .hand.stack .hbtns .hjudge{flex:none;flex-basis:100%;height:62px;min-height:0}
 html[dir=rtl] .write .hjudge{direction:rtl}
 .write .hbox .hfix{pointer-events:none}
@@ -1179,8 +1196,8 @@ html[dir=rtl] .write .hjudge{direction:rtl}
 /* 좁은 폰(hic · 320×640 등) — 그림+글 단추 낮게 · 판정 상자 두 줄 높이부터(칸이 바꾸기 전 크기에 가깝게) */
 .write .hand.hic .hbtns button{min-height:34px;padding:1px 3px;font-size:13.5px;line-height:1}
 .write .hand.hic .hbtns :is(.ml,.ms){line-height:1.1}
-.write .hand.hic .hjudge{min-height:44px;padding:3px 6px;font-size:12.5px;line-height:1.3}
-.write .hand.hic.two .hbtns{grid-template-rows:minmax(44px,1fr)}
+.write .hand.hic .hjudge{min-height:28px;padding:3px 6px;font-size:12.5px;line-height:1.3}
+.write .hand.hic.two .hbtns{grid-template-rows:minmax(28px,1fr)} /* 칸이 먼저(검사부 10-15 320 판정 상자 때문에 칸 아래로 밀려 59px) — 상자는 한 줄부터 · 못 읽는 글은 「⋯」 */
 .write .hand.hic.stack .hbtns .hjudge{height:46px}
 
 /* ==== 글자부(획순 칠·자모 칠 표시) ==== */
