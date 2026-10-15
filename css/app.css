@@ -897,7 +897,6 @@ a{color:inherit;text-decoration:none}
 .write .hand.stack .hbtns button{min-height:32px;padding:4px 10px}
 
 /* 손글씨 점수(본부 10-07) — 칸 위 왼쪽 「87% ☆」 · 효과(scorefx)는 칸 오른쪽 위 · 위 글자 줄 그 글자 아래 최고 점수 작게 */
-.write .hbox .hscore{position:absolute;left:8px;top:6px;z-index:2;padding:1px 8px;border-radius:999px;font-size:14px;font-weight:800;font-variant-numeric:tabular-nums;pointer-events:none;background:var(--card);box-shadow:0 1px 0 var(--line)}
 .write .hbox .hscore.ok{color:var(--okc)}
 .write .hbox .hscore.bad{color:var(--badc)}
 .write .hbox .fx{right:8px;top:6px;bottom:auto}
@@ -1129,30 +1128,59 @@ button.dim{opacity:.45}
 /* 자모 칸 = 늘 4칸 자리(겹받침 최대 · 빈 칸은 안 보임) → 오른쪽 단추 줄(이 글자 듣기·한 줄 자동·전체 자동)이 글자마다 안 움직임(투덜이 10-15 「메뉴 위치가 일정해야」) */
 .write .slot.slotpad{visibility:hidden}
 html:lang(ur) .write .work:not(.handmode) .info .sub2{height:34px;overflow:visible} /* 나스탈리크 줄 상자 소수점 높이로 글자마다 단추 1px 흔들림 → 정수 높이 */
-/* 점수·시간 한 칸(.hslot · 10-14) — 손글씨 칸 밖 단추 줄 맨 앞 · 시간 막대(쓰는 동안)와 점수(채점 뒤)는 같은 자리에 겹쳐 둠(함께 안 보임)
-   자리 높이 늘 고정 = 채점 때 단추·칸 안 움직임(투덜이 「채점할 때 화면이 흔들려」) · contain = 글이 단추 줄 폭을 안 바꿈 · ur 은 글자 작게 + 칸 조금 높게(320 손글씨 칸 58 → 다시 150↑ · 검사부 10-14) */
-.write .hbtns .hslot{display:grid;align-self:stretch;contain:inline-size;min-width:0;height:28px}
-html:lang(ur) .write .hbtns .hslot{height:32px}
-.write .hand.two .hbtns .hslot{grid-column:1/-1}
-.write .hand.stack .hbtns .hslot{flex-basis:100%}
-.write .hbtns .hslot > *{grid-area:1/1;min-width:0}
-.write .hbtns .hscore{display:flex!important;align-items:center;justify-content:center;white-space:nowrap;overflow:visible;box-sizing:border-box;padding:0 8px;border-radius:999px;font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1;background:var(--card);box-shadow:0 1px 0 var(--line);pointer-events:none}
-html:lang(ur) .write .hbtns .hscore{font-size:12px;line-height:1}
-.write .hbtns .hscore[hidden]{visibility:hidden} /* 전역 [hidden] 보다 이김 — 자리 그대로 */
-.write .hbtns .hscore.ok{color:var(--okc)}
-.write .hbtns .hscore.bad{color:var(--badc)}
-.write .hbtns .htime{position:relative;align-self:center;height:16px;border-radius:999px;background:var(--line);overflow:hidden;visibility:hidden}
-.write .hbtns .htime.on{visibility:visible}
-.write .hbtns .htime i{position:absolute;left:0;top:0;bottom:0;width:100%;background:var(--hi);transition:width .1s linear}
-.write .hbtns .htime.low i{background:var(--badc)}
-.write .hbtns .htime b{position:relative;display:block;text-align:center;font-size:11px;line-height:16px;font-weight:800;color:var(--on-hi);font-variant-numeric:tabular-nums}
+/* 점수·시간 한 칸(.hslot · 10-14 → 10-15 투덜이 「오른쪽 위 점수 칸이 자리 낭비」) — 손글씨 칸 바깥 왼쪽 위 작은 배지 · 칸 테두리 위라 글자·획과 절대 안 겹침
+   시간 막대(쓰는 동안)와 점수(채점 뒤)는 같은 자리에 겹쳐 둠 · .hand 위 여백이 늘 그 자리(채점 때 0px) · 비게 된 단추 줄 맨 위 = 판정 상자 */
+.write .hand{padding-top:26px}
+html:lang(ur) .write .hand{padding-top:30px}
+.write .hbox .hslot{position:absolute;left:0;bottom:calc(100% + 3px);display:grid;contain:strict;width:min(44%,132px);height:21px;pointer-events:none}
+html:lang(ur) .write .hbox .hslot{height:25px}
+.write .hbox .hslot > *{grid-area:1/1;min-width:0}
+.write .hbox .hscore{position:static;justify-self:start;display:flex!important;align-items:center;max-width:100%;white-space:nowrap;overflow:hidden;box-sizing:border-box;padding:0 9px;border-radius:999px;font-size:13.5px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1;background:var(--card);box-shadow:0 0 0 1px var(--line);pointer-events:none}
+html:lang(ur) .write .hbox .hscore{font-size:12px;line-height:1}
+.write .hbox .hscore[hidden]{visibility:hidden} /* 전역 [hidden] 보다 이김 — 자리 그대로 */
+.write .hbox .hscore.ok{color:var(--okc)}
+.write .hbox .hscore.bad{color:var(--badc)}
+.write .hbox .htime{position:relative;align-self:center;height:14px;border-radius:999px;background:var(--line);overflow:hidden;visibility:hidden}
+.write .hbox .htime.on{visibility:visible}
+.write .hbox .htime i{position:absolute;left:0;top:0;bottom:0;width:100%;background:var(--hi);transition:width .1s linear}
+.write .hbox .htime.low i{background:var(--badc)}
+.write .hbox .htime b{position:relative;display:block;text-align:center;font-size:10.5px;line-height:14px;font-weight:800;color:var(--on-hi);font-variant-numeric:tabular-nums}
+/* 획순·방향 말풍선 = 칸 위 오른쪽(왼쪽 위 점수·시간과 안 겹침) */
+.write .hbox .hbubble{left:auto;right:0;top:-3px;transform:translateY(-100%);max-width:54%}
+/* 판정 상자(투덜이 10-15 · mock.html) — 단추 줄 맨 위 남는 높이 전부 · 크기 고정(contain:size = 글 길이가 상자·단추 줄 크기를 안 바꿈) · 넘치면 write.js fitJudge 가 글자 줄임(12px) → 뒤 줄 뺌 */
+.write .hjudge{contain:size;flex:1 1 0;min-height:66px;overflow:hidden;box-sizing:border-box;padding:5px 8px;border:1.5px solid var(--line);border-radius:10px;background:var(--card);font-size:13.5px;line-height:1.35;font-weight:600;color:var(--ink);text-align:start;white-space:normal}
+.write .hjudge.bad{border-color:color-mix(in srgb,var(--badc) 45%,var(--line));background:color-mix(in srgb,var(--badc) 5%,var(--card))}
+.write .hjudge.ok{border-color:color-mix(in srgb,var(--okc) 45%,var(--line));background:color-mix(in srgb,var(--okc) 6%,var(--card))}
+.write .hjudge p{margin:0 0 3px;overflow-wrap:anywhere}
+.write .hjudge p[hidden]{display:none}
+.write .hjudge p[style*=line-clamp]{display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden}
+html:lang(ur) .write .hjudge,html:lang(ur) .write .hjudge p{line-height:1.5}
+html:lang(ur) .write .hjudge{padding-block:2px}
+html:lang(ur) .write .hand.hic .hbtns :is(.ml,.ms){line-height:1.75;font-size:9.5px}
+.write .hjudge p i{font-style:normal;color:var(--badc);margin-inline-end:3px}
+.write .hjudge p.ok{color:var(--okc)}
+.write .hand.two .hbtns{grid-template-rows:minmax(66px,1fr);align-content:stretch}
+.write .hand.two .hbtns .hjudge{grid-column:1/-1}
+.write .hand.stack .hbtns .hjudge{flex:none;flex-basis:100%;height:62px;min-height:0}
+html[dir=rtl] .write .hjudge{direction:rtl}
+.write .hbox .hfix{pointer-events:none}
 /* 위 글자 줄(배우는 한국어) = 학습자 언어 줄높이를 물려받지 않음(ur 나스탈리크 줄높이로 글자 단추가 53px → 줄 밖 5px 로 ⇄한 과 겹침 · 검사부 10-14) */
 .write .sent,.write .sent .w,.write .sent .c{line-height:1.25}
 /* 아이폰 사파리가 글자를 저절로 키우지 않게(쓰기 화면 · 10-14 「✓ 순서 맞음」 위가 잘림) */
 .write{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 /* 손글씨 단추 넷 그림만(fitHandBox hic · 10-12) — 「다음 ▶」 은 글 그대로 */
-.write .hand.hic .hbtns .ml{display:none}
-.write .hand.hic .hbtns button{min-width:40px;padding:4px 6px;font-size:15px}
+/* 10-15 투덜이 — 그림만이면 처음 온 학습자가 모름 → 그림 아래 짧은 글(그 언어 · ⇄ 따라) · 한 획 되돌리기 = 「한 획」 */
+.write .hand.hic .hbtns button{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;min-width:44px;padding:3px 4px;font-size:15px;line-height:1.05}
+.write .hand.hic .hbtns .ml{display:block;max-width:64px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;font-weight:700}
+.write .hbtns .ms{display:none}
+.write .hand.hic .hbtns [data-act=hundo] .ml{display:none}
+.write .hand.hic .hbtns .ms{display:block;max-width:64px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;font-weight:700}
+/* 좁은 폰(hic · 320×640 등) — 그림+글 단추 낮게 · 판정 상자 두 줄 높이부터(칸이 바꾸기 전 크기에 가깝게) */
+.write .hand.hic .hbtns button{min-height:34px;padding:1px 3px;font-size:13.5px;line-height:1}
+.write .hand.hic .hbtns :is(.ml,.ms){line-height:1.1}
+.write .hand.hic .hjudge{min-height:44px;padding:3px 6px;font-size:12.5px;line-height:1.3}
+.write .hand.hic.two .hbtns{grid-template-rows:minmax(44px,1fr)}
+.write .hand.hic.stack .hbtns .hjudge{height:46px}
 
 /* ==== 글자부(획순 칠·자모 칠 표시) ==== */
 

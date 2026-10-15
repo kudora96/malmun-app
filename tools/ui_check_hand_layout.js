@@ -28,13 +28,13 @@
       document.querySelectorAll(".panel [data-act=close]").forEach(b => b.click()); await Wt(400); document.querySelectorAll(".line")[14].querySelector("[data-act=write]").click(); await Wt(1800);
       for (let k = 0; k < 6 && ![...document.querySelectorAll(".panel .sent .c")].some(b => b.textContent === "나"); k++) { $q(".panel .segnav [data-seg='1']")?.click(); await Wt(700); }
       [...document.querySelectorAll(".panel .sent .c")].find(b => b.textContent === "나")?.click(); await Wt(1600); const wr = $q(".panel .write").parentElement.__wr; wr.hand().stopOrder(); await Wt(400); const H = wr.hand(); for (let k = 0; k < 30 && hm === "magnet" && !H.magList; k++) await Wt(100);
-      const pos = () => [...document.querySelectorAll(".panel .hbox, .panel .hbtns button, .panel .stage, .panel .sent")].map(e => { const b = e.getBoundingClientRect(); return [b.left, b.top, b.width, b.height].map(Math.round); });
+      const pos = () => [...document.querySelectorAll(".panel .hbox, .panel .hbtns button, .panel .hjudge, .panel .hslot, .panel .stage, .panel .sent")].map(e => { const b = e.getBoundingClientRect(); return [b.left, b.top, b.width, b.height].map(Math.round); });
       const iv = $q(".panel .hink"), RR = iv.getBoundingClientRect(), pe = (t, x, y) => iv.dispatchEvent(new PointerEvent(t, { bubbles: true, cancelable: true, pointerId: 4, pointerType: "mouse", isPrimary: true, buttons: t === "pointerup" ? 0 : 1, clientX: RR.left + x * RR.width, clientY: RR.top + y * RR.height }));
       const L = await wr.strokesOf("나"); let p0 = null;
       for (let i = 0; i < L.length; i++) { const Q = hm === "magnet" ? wr.brushPath("나", H.magList[i]) : await wr.fitPath("나", i, "pen"); const P = mode === "fail" ? Q.map(q => ({ x: q.x + 0.15, y: q.y })) : Q; if (i === L.length - 1) { await Wt(300); p0 = pos(); } pe("pointerdown", P[0].x, P[0].y); P.forEach(q => pe("pointermove", q.x, q.y)); pe("pointerup", P.at(-1).x, P.at(-1).y); await Wt(300); }
       if (mode === "fail") $q(".panel [data-act=hdone]").click(); await Wt(900); const p1 = pos(); let mv = 0; p0.forEach((a, i) => a.forEach((v, k) => { mv = Math.max(mv, Math.abs(v - ((p1[i] || [])[k] ?? 9999))); }));
       outs.push([`${hm === "magnet" ? "자석" : "손글씨"} ${mode === "pass" ? "통과" : "꽝"}`, mv, !$q(".panel .hscore").hidden]); }
-    ok(outs.every(([, mv, shown]) => mv === 0 && shown), "채점 때 화면 고정 — 점수가 떠도 손글씨 칸·단추·글자 줄 움직임 0px(자석 통과 · 손글씨 통과 · 꽝)", outs.map(([k, mv, sh]) => `${k} ${mv}px${sh ? "" : " 점수 안 뜸"}`).join(" · ")); } catch (e) { ok(false, "채점 때 화면 고정 점검 오류", e.message); }
+    ok(outs.every(([, mv, shown]) => mv === 0 && shown), "채점 때 화면 고정 — 점수·판정 상자 글이 떠도 손글씨 칸·단추·판정 상자·점수 배지·글자 줄 움직임 0px(자석 통과 · 손글씨 통과 · 꽝)", outs.map(([k, mv, sh]) => `${k} ${mv}px${sh ? "" : " 점수 안 뜸"}`).join(" · ")); } catch (e) { ok(false, "채점 때 화면 고정 점검 오류", e.message); }
   localStorage.removeItem("malmun.hmode");
   keep.mode == null ? localStorage.removeItem("malmun.wmode") : localStorage.setItem("malmun.wmode", keep.mode);
   document.querySelectorAll(".panel [data-act=close]").forEach(b => b.click());
