@@ -60,7 +60,7 @@ export const uiKoOn = () => { try { return KO_UI.includes(lang) && localStorage.
 // {lang}.ko.json 은 언어마다 한 번만 받아 기억(앱개발부 10-13 안 A — 토글 「즉시」) · 받아 둔 뒤엔 setUiKo 가 기다림 없이 koUi 를 바꿈(await 앞에서)
 const koGot = {}, koWait = {};
 export function preloadKoUi(c = lang) {
-  if (!KO_UI.includes(c)) return Promise.resolve({});
+  if (!KO_UI.includes(c)) { koGot[c] ||= {}; return Promise.resolve({}); } // ⇄ 없는 언어도 「받음」으로 표시(기다리는 쪽이 끝없이 다시 부르지 않게)
   return (koWait[c] ||= fetch(`lang/${c}.ko.json?v=${VERSION}`).then(r => (r.ok ? r.json() : {})).catch(() => ({})).then(j => (koGot[c] = j)));
 }
 async function loadKoUi() {
