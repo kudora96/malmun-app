@@ -1251,3 +1251,7 @@ html[dir=rtl] .write .hjudge{direction:rtl}
 :root.uiko[dir=rtl] :is(p,h1,h2,h3,li,small,label,.sub,.say,.tr,.toast,.modetip,.fstip,button > span:only-child){unicode-bidi:plaintext}
 /* 말해 보세요 속도 알약(.mrate) — 나스탈리크 꼬리가 알약 위아래에서 깎이지 않게(알약 크기는 그대로 · 10-14 ur 375·1280) */
 :lang(ur) :is(.v9body,.speak) .sbtns .mrate{overflow:visible}
+/* 「모국어⇄한」 단추 — 켜진 쪽을 굵게 바꾸면 단추 폭이 1~3px 바뀌어 옆 글이 밀림(본부 10-15 「⇄ 때 크기·자리 0px」) → 두 쪽 다 늘 굵게 · 켜진 쪽은 색·진하기로만 */
+.chip.uiko .a,.chip.uiko .b,.chip.uiko[aria-pressed] .a,.chip.uiko[aria-pressed] .b{font-weight:800}
+/* 설명 막대 ▶/■(듣는 중) 표시 폭 고정 — ⇄ 로 듣는 말이 바뀌면 ▶·■ 가 서로 바뀌어 단추 폭이 0.5~1px 흔들림(본부 10-15 · 0px) */
+.v9bar .pb .ic{display:inline-block;width:1em;text-align:center}
