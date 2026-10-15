@@ -24,11 +24,11 @@
   }
   // ⇄ 전후 단추·알약·머리 줄 크기·자리(본부 10-15 · 0px 이어야) — 쓰기 화면(.write)은 쓰기부 몫이라 따로 셈(ℹ)
   const BOX = "button, a[href], .chip, [role=button], .modeb, .whead > *, .bar > *, .vtitle .tt > *, .v9bar > *, .hbt > *, .top > *";
-  function rects() { const m = new Map(); for (const el of document.querySelectorAll(BOX)) { if (!vis(el) || el.closest(".v9body .chips, .glosses")) continue; /* 낱말 조각 칩 = 배우는 뜻(말이 바뀌면 길이도 바뀌는 게 맞음 · 본부·앱개발부 10-15) */ const r = el.getBoundingClientRect(); m.set(path(el), { el, r: [r.left, r.top, r.width, r.height].map(x => Math.round(x * 2) / 2) }); } return m; }
+  function rects() { const m = new Map(); for (const el of document.querySelectorAll(BOX)) { if (!vis(el) || el.closest(".v9body .chips, .glosses")) continue; /* 낱말 조각 칩 = 배우는 뜻(말이 바뀌면 길이도 바뀌는 게 맞음 · 본부·앱개발부 10-15) */ const r = el.getBoundingClientRect(); m.set(path(el), { el, r: [r.left, r.top, r.width, r.height] }); } /* 날 값 그대로 견줌(0.5 반올림 흔들림 없이) */ return m; }
   function moved(st, a, b) {
     let n = 0;
-    for (const [k, x] of a) { const y = b.get(k); if (!y) continue; const d = x.r.map((v, i) => Math.abs(v - y.r[i])), mx = Math.max(...d); if (mx < 0.5) continue;
-      const w = x.el.closest(".write") ? "ℹ(쓰기)" : "✗"; const key = `${st}|움직임|${k}`; if (seen.has(key)) continue; seen.add(key); if (w === "✗") n++;
+    for (const [k, x] of a) { const y = b.get(k); if (!y) continue; const d = x.r.map((v, i) => Math.round(Math.abs(v - y.r[i]) * 10) / 10), mx = Math.max(...d); if (mx < 0.5) continue; /* 0.5px 미만 = 화면 화소보다 작은 소수점 흔들림 */
+      const w = x.el.closest(".write, .scr.write, .wbody, .segrow") ? "ℹ(쓰기)" : "✗"; const key = `${st}|움직임|${k}`; if (seen.has(key)) continue; seen.add(key); if (w === "✗") n++;
       out.push(`${w} ${st} ⇄ 때 크기·자리 바뀜 ${label(x.el)} 「${(x.el.textContent || "").trim().slice(0, 20)}」 x${d[0]} y${d[1]} 폭${d[2]} 높이${d[3]}px`); }
     return n;
   }
