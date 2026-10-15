@@ -1025,7 +1025,7 @@ button.dim{opacity:.45}
 
 /* 「ने ⇄ 한」 앱 글 토글(본부 10-08) — 단추 모양 · 켜진 쪽 굵게·강조 */
 .chip.uiko{gap:3px;padding:4px 9px;font-size:12px;flex:none;white-space:nowrap}
-.chip.uiko .a,.chip.uiko .b{opacity:.55;font-weight:500}
+.chip.uiko .a,.chip.uiko .b{opacity:.55;font-weight:800} /* 고른 쪽은 진하기·색으로만 · 굵기는 같게(⇄ 누를 때 칩 폭 1~2px 흔들림 0 · 쓰기부 10-15) */
 .chip.uiko[aria-pressed=false] .a,.chip.uiko[aria-pressed=true] .b{opacity:1;font-weight:800;color:var(--hi)}
 .learn .vtitle .chip.uiko{margin-top:2px}
 .hbt{display:flex;gap:6px;align-items:center;flex:none}
