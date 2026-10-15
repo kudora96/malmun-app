@@ -22,7 +22,7 @@
     ok(okBgm.every(x => /:[1-9]/.test(x)), "♪ 단추 = 모든 창(보이는 곳에 하나 이상)", okBgm.join(" "));
     // 따로 연 말하기에서 실제 녹음(가짜 마이크) — 녹음 도는 동안 음악 0
     await go("#/speak/L01-00-01/1"); const sp = S();
-    const rec = document.querySelector(".speak [data-act=rec]"); rec?.click(); await W(700); const d = S();
+    const rec = document.querySelector(".speak [data-act=rec]"); rec?.click(); for (let k = 0; k < 30 && !rec?.classList.contains("on"); k++) await W(100); await W(150); const d = S(); // 녹음이 실제로 시작된 뒤(🎤 뒤 마이크 여는 데 0.3~0.7초)
     rec?.click(); await W(2500); await go("#/learn/L01-00-01"); for (let k = 0; k < 20 && S().mic; k++) await W(250); // 말하기 화면은 다음 녹음을 위해 마이크를 열어 둠 → 화면을 나가면 닫힘
     const e = S();
     ok(d.mic && d.gain === 0 && d.live < 1e-4, "말하기 녹음 중(마이크 열림) = 음악 완전히 0(녹음·받아쓰기에 안 섞임)", `전 ${J(sp)} · 녹음 중 ${J(d)}`);
