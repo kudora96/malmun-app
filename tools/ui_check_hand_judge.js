@@ -20,7 +20,7 @@
       const timed = (S, k, stop = 0) => { const T = norm(S) * 1000 * k, o = S.map(p => p.slice()); const m = Math.floor(S.length / 2); o.ts = S.map((p, q) => 1000 + (q / Math.max(1, S.length - 1)) * T + (stop && q >= m ? stop : 0)); if (stop) { o.splice(m, 0, o[m - 1].slice()); o.ts.splice(m, 0, o.ts[m - 1] + stop); } return o; };
       let sd2 = 11; const rn = () => ((sd2 = (sd2 * 1103515245 + 12345) >>> 0) / 4294967296) - 0.5;
       const dens = S => { const o = []; for (let q = 1; q < S.length; q++) { const a = S[q - 1], b = S[q], k = Math.max(1, Math.ceil(Math.hypot(b[0] - a[0], b[1] - a[1]) / 0.003)); for (let m = 0; m < k; m++) o.push([a[0] + (b[0] - a[0]) * m / k, a[1] + (b[1] - a[1]) * m / k, 1]); } o.push(S.at(-1)); return o; };
-      const shake = S => dens(S).map(p => [p[0] + rn() * 0.03, p[1] + rn() * 0.03, 1]); // 점마다 ±1.5% 떨림(대표님 10-15)
+      const shake = S => dens(S).map(p => [p[0] + rn() * 0.04, p[1] + rn() * 0.04, 1]); // 점마다 ±2% 떨림(눈에 띄게 · 작은 폰 칸은 1px 계단만큼 더 봐주므로 · 대표님 10-16)
       const bow = (S, a) => { const dx = S.at(-1)[0] - S[0][0], dy = S.at(-1)[1] - S[0][1], h = Math.abs(dx) >= Math.abs(dy); return S.map((p, q) => { const f = Math.sin(Math.PI * q / Math.max(1, S.length - 1)) * a; return h ? [p[0], p[1] - f, 1] : [p[0] - f, p[1], 1]; }); };
       const bb = fp.flat(), cx = (Math.min(...bb.map(p => p[0])) + Math.max(...bb.map(p => p[0]))) / 2, cy = (Math.min(...bb.map(p => p[1])) + Math.max(...bb.map(p => p[1]))) / 2;
       const cases = [

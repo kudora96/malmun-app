@@ -1295,7 +1295,7 @@ html:lang(ur) .write .hand.hic .hbtns :is(.ml,.ms){font-size:9px;line-height:1.2
 /* 머리 줄 단추 = 오른쪽 끝에 붙임(⇄ 로 「쓰기·लेखन」 제목·화자 글 폭이 바뀌어도 단추 자리 0px · 10-15) · 안내 글(loopnote)은 단추 앞 빈자리 */
 .write .whead > b,.write .whead > .sub{order:0}
 .write .whead > .loopnote{order:1;margin-left:0;margin-inline-start:0}
-.write .whead > .wmode,.write .whead > .uiko,.write .whead > .bgmb,.write .whead > .whelp{order:2}
+.write .whead > .wmode,.write .whead > .uiko,.write .whead > .bigb,.write .whead > .bgmb,.write .whead > .whelp{order:2}
 .write .whead > .wmode{margin-left:0;margin-inline-start:auto} /* ur(오른쪽→왼쪽)도 끝 쪽으로 · 빈자리를 나눠 갖지 않게 하나만 auto */
 .write .whead .wclose{margin-left:0}
 /* 먹 색 팔레트(대표님 10-16) — 손글씨 칸 바로 위 오른쪽 한 줄(점수 줄 왼쪽 44% 는 점수·시간) · 동그라미 크기 = 칸 폭에 맞춰 저절로(최대 20px) · 고른 색 테두리 */
