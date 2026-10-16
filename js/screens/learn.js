@@ -138,7 +138,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     let kf = parseFloat(getComputedStyle(ko).fontSize), tf = tr ? parseFloat(getComputedStyle(tr).fontSize) : 0;
     el.classList.add("fitc");
     for (let k = 0; k < 16 && el.offsetHeight > avail && kf > 11; k++) { kf -= 1; tf = Math.max(10, tf - 0.7); el.style.setProperty("--kf", kf + "px"); el.style.setProperty("--tf", tf + "px"); }
-    for (const c of ["tr2", "tr1"]) { if (!tr || el.offsetHeight <= avail) break; el.classList.remove("tr2", "tr1"); el.classList.add(c); } if (el.offsetHeight > avail) el.classList.add("ac1"); /* 그래도 넘치면 [▶ 이 줄 듣기] = ▶ 만(글은 화면 읽기용으로 남김) · 단추 안쪽 여백 줄임(다국어부 10-12 ur 320 — 단추가 셋째 줄로) */ // 가장 작은 글로도 넘치면 학습자 말 뜻을 2줄 → 1줄(설명 창에 다 보임 · 검사부 10-12 vi·th·ur 320 — 단추가 아래 막대 뒤로)
+    for (const c of ["tr2", "tr1"]) { if (!tr || el.offsetHeight <= avail) break; el.classList.remove("tr2", "tr1"); el.classList.add(c); } if (el.offsetHeight > avail) el.classList.add("ac1"); const once = el.querySelector(".acts [data-act=once]"); if (once) { if (el.classList.contains("ac1")) once.setAttribute("aria-label", t("listen_line")); else once.removeAttribute("aria-label"); } /* 그래도 넘치면 [▶ 이 줄 듣기] = ▶ 만(글은 화면 읽기용으로 남김) · 단추 안쪽 여백 줄임(다국어부 10-12 ur 320 — 단추가 셋째 줄로) */ // 가장 작은 글로도 넘치면 학습자 말 뜻을 2줄 → 1줄(설명 창에 다 보임 · 검사부 10-12 vi·th·ur 320 — 단추가 아래 막대 뒤로)
   }
   // 영상 창 = 제목 줄 바로 밑에 영상(위 정렬) · 남는 자리(폰)에 지금 대사를 영화 자막처럼 크게(투덜이 10-06 ㅇ) — 화자(작게) · 한국어(굵게) · 로마자(켜짐이면 작게) · 학습자 언어
   //   글 크기 = 그 자리를 채우는 가장 큰 크기(넘치면 줄임 · 스크롤 0) · 대사가 바뀔 때와 창 크기가 바뀔 때만 다시 맞춤 · 자리가 70px 안 되면(넓고 낮은 창) 자막 줄 없음
@@ -662,13 +662,14 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     box.querySelector(".heardline").innerHTML = switchedSR ? `<button class="srboth" data-x="srboth">${esc(t("sr_both_again"))}</button>` : bh ? (({ html, ok }) => `<span class="lab">${esc(t("heard_label"))}:</span> <span class="ko" lang="ko">${html}</span>${ok ? " ✓" : ""}`)(heardHTML(L[i].say.ko, bh)) : "";
   }
   // 맨 위 한 줄 맞추기 + 처음 한 번 말풍선(▶ = 듣는 언어 · 탭 = 읽는 언어 · 3초 · 다시 안 뜸)
+  const v9Over = bar => { if (bar.scrollWidth > bar.clientWidth + 1) return true; const r = bar.getBoundingClientRect(); return [...bar.children].some(e => { const c = e.getBoundingClientRect(); return c.width > 0 && (c.left < r.left - 1 || c.right > r.right + 1); }); }; // 가운데 맞춤이면 왼쪽 넘침은 scrollWidth 에 안 잡힘
   function v9Fit() {
     const bar = panel.querySelector(".v9bar"); if (!bar) return;
-    const over = () => bar.scrollWidth > bar.clientWidth + 1;
-    bar.classList.remove("nok", "nocw", "tight");
-    if (over()) bar.classList.add("nok");
-    if (over()) bar.classList.add("nocw");
-    if (over()) bar.classList.add("tight"); // 그래도 넘치면 칩(⛶·♪·⇄·로마자) 안쪽 여백·사이를 좁힘(⛶ 칩이 늘어 ✕ 가 밀리던 것 · 10-16)
+    const over = () => v9Over(bar);
+    bar.classList.remove("nok", "nocw", "tight", "nolab");
+    for (const c of ["nok", "nocw", "tight", "nolab"]) { if (!over()) break; bar.classList.add(c); } // tight = 칩(⛶·♪·⇄·로마자) 안쪽 여백·사이를 좁힘(⛶ 칩이 늘어 ✕ 가 밀리던 것 · 10-16) · nolab = 그래도 넘치면 「듣기」 이름표 숨김
+    // 나중에 칩 글·폭이 바뀌어도(⇄ · 언어 폭 고정 · ■/▶) 넘치면 다시 맞춤(검사부 10-16 ne 375 — 머리 줄 양 끝 잘림)
+    if (!bar.__ro && window.ResizeObserver) { let q = 0; bar.__ro = new ResizeObserver(() => { if (q) return; q = requestAnimationFrame(() => { q = 0; if (!bar.isConnected) return bar.__ro.disconnect(); if (v9Over(bar)) v9Fit(); }); }); bar.__ro.observe(bar); [...bar.children].forEach(e => bar.__ro.observe(e)); }
     if (pref("malmun.v9tip") !== "1") { const tip = panel.querySelector(".v9tip"); pref("malmun.v9tip", "1"); tip.hidden = false; setTimeout(() => { tip.hidden = true; }, 3000); }
   }
   const markPlay = (k = null) => panel.querySelectorAll(".v9bar .pb[data-x=ex]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.v === k)));

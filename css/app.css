@@ -486,7 +486,7 @@ a{color:inherit;text-decoration:none}
 .v9bar{position:relative;align-items:center;gap:4px;padding:7px 10px 3px;white-space:nowrap}
 .v9bar .glab{font-size:10.5px;color:var(--mute);flex:none}
 .v9bar .glab small{font-size:9.5px}
-.v9bar.nok .glab small{display:none}
+.v9bar.nok .glab small{display:none}.v9bar.nolab .glab{display:none}
 .v9bar .seg{display:inline-flex;flex:none;border:1px solid var(--hi);border-radius:999px;overflow:hidden}
 .v9bar .seg.snd .pb{border:0;border-radius:0;padding:4px 8px;font-size:12px}
 .v9bar .seg.snd .pb+.pb{border-left:1px solid var(--hi)}
@@ -695,7 +695,7 @@ a{color:inherit;text-decoration:none}
 .line.fitc .acts{margin-top:4px;gap:4px}
 .line.fitc .acts button{padding-top:4px;padding-bottom:4px;font-size:11.5px}
 .line.fitc.tr2 .tr,.line.fitc.tr1 .tr{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}.line.fitc.tr1 .tr{-webkit-line-clamp:1}
-.line.fitc.ac1 .acts button{padding-left:8px;padding-right:8px}.line.fitc.ac1 .acts [data-act=once] span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.line.fitc.ac1 .acts button{padding-left:8px;padding-right:8px}.line.fitc.ac1 .acts [data-act=once] span{display:none}.line.fitc.ac1 .acts [data-act=once]{min-width:0!important;max-width:none!important} /* ▶ 만 = 언어 폭 고정도 풀어 작은 단추로(검사부 10-16 ne 375 — 빈 넓은 단추 · 글 71px 잘림) · 이름은 aria-label */
 .write .kb .kr,.write .kb .kr button,.write.embedded .kb .kr button{min-height:30px}
 .learn .panel.write{height:min(500px,calc(100dvh - 98px - clamp(120px,26dvh,210px)))} /* 자막 카드 자리 26% — 660×560 에서도 자판 다섯 줄 · 카드는 fitCard 가 글 줄여 맞춤 */
 @media (max-height:720px){.learn .panel.write{height:min(500px,calc(100dvh - 98px - clamp(120px,26dvh,210px)))}}
