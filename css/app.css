@@ -1350,7 +1350,9 @@ html:lang(ur) .write .hand .hpal{height:25px}
 .learn.big .panel .write .work:not(.handmode) .kb .kr{flex:none;height:clamp(40px,6.2dvh,54px)}
 @media (orientation:landscape){ /* 가로 크게 자판 = 같은 원칙(본부 10-16) — 높이는 줄 높이로 정해짐 → 폭을 줄 높이의 1.3배로 맞춰 가운데로 모음(양옆 = 여백) · 자모 글자 크게 */
   .learn.big .panel .write .work:not(.handmode) .kb{--kh:clamp(40px,6.2dvh,54px);width:min(100%,calc(var(--kh) * 13 + 36px + 24px));align-self:center;box-sizing:border-box}
-  .learn.big .panel .write .work:not(.handmode) .kb .kr button{font-size:min(calc(var(--kh) * 0.55),26px)}
+  .learn.big .panel .write .work:not(.handmode) .kb .kr button{font-size:min(calc(var(--kh) * 0.55),26px);line-height:1;min-height:0}
+  .learn.big .panel .write .work:not(.handmode) .kb{flex:1 1 0;min-height:0;justify-content:flex-end} /* 낮은 가로 폰(ur 머리 줄 큼 · 360 높이) = 자판 줄이 남은 높이에 맞춰 줄어듦(화면 밖 0 · 앱개발부 10-16) */
+  .learn.big .panel .write .work:not(.handmode) .kb .kr{height:auto;flex:0 1 var(--kh);min-height:24px;max-height:var(--kh)}
 }
 @media (orientation:portrait){ /* 세로 크게 자판 = 남는 높이로 위 글자 칸을 크게(빈자리 없게) · 뜻·자모 칸은 그 아래 */
   .learn.big .panel .write .work:not(.handmode)>.stage{grid-template-columns:minmax(0,1fr)!important;grid-template-areas:"box" "info" "btns"!important;justify-items:center;height:auto!important}
