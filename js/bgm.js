@@ -38,8 +38,8 @@ const SCENE_GAIN = { "": 1, list: 1, diag: 0 }, STUDY = 0.32, DUCK = 0.3; // 공
 const UP = 0.8, DOWN = 0.2; // 음량 바꾸는 시간(초) — 내릴 땐 빨리
 
 // 음량(대표님 10-16 · 🎵 음악 상자 막대 · 0~1 · 기억 · 앱 전체 — 공부 화면·덕킹·녹음 0 은 이 값 위에서 그대로)
-export const bgmVol = () => { try { const v = parseFloat(localStorage.getItem(VOL)); return v >= 0 && v <= 1 ? v : 1; } catch { return 1; } };
-export function setBgmVol(v) { try { localStorage.setItem(VOL, String(Math.max(0, Math.min(1, v)))); } catch {} sync(); }
+export const bgmVol = () => { try { const v = parseFloat(localStorage.getItem(VOL)); return v >= 0 && v <= 2 ? v : 1; } catch { return 1; } }; // 0~2배 · 1 = 기본(대표님 10-16 「지금 크기 = 막대 가운데」)
+export function setBgmVol(v) { try { localStorage.setItem(VOL, String(Math.max(0, Math.min(2, v)))); } catch {} sync(); }
 export const bgmOn = () => { try { return localStorage.getItem(KEY) !== "0"; } catch { return true; } };
 const muted = () => /[?&]mute=1\b/.test(location.search) || (window.__sfxVolume ?? 1) < 0.01;
 

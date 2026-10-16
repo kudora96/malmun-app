@@ -15,7 +15,7 @@
     const tw = document.createTreeWalker(document.querySelector("#app") || document.body, NodeFilter.SHOW_TEXT);
     for (let n; (n = tw.nextNode());) {
       const txt = n.nodeValue.trim(), el = n.parentElement;
-      if (!txt || !el || !vis(el) || el.closest("[hidden],svg,script,style")) continue;
+      if (!txt || !el || !vis(el) || el.closest("[hidden],svg,script,style,.hjudge")) continue; /* .hjudge 판정 상자 = 일부러 줄이고 「⋯ 전체 보기」(쓰기부 10-16) */
       if (/\{[a-z_]+\}/.test(txt)) { const k = `${where}|자리|${txt}`; if (!seen.has(k)) { seen.add(k); out.push(`✗ ${where} 자리 남음 「${txt.slice(0, 40)}」 ${label(el)}`); bad++; } }
       const r = document.createRange(); r.selectNodeContents(n);
       const tr = r.getBoundingClientRect(); if (!tr.width || !tr.height) continue;

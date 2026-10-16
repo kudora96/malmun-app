@@ -34,8 +34,10 @@
     ok(!!box() && !!q("[data-mb=onoff]") && !!q("[data-mb=vol]") && !!q("[data-mb=next]") && !!q(".mnow") && q(".mlist")?.children.length === B.TRACKS.length, "♪ 누르면 음악 상자(켜기/끄기 · 음량 · 지금 곡 · 다음 곡 · 곡 목록)", box() ? q(".mnow").textContent.trim().slice(0, 40) : "안 열림");
     const w0 = btn().getBoundingClientRect().width; [...document.querySelectorAll("[data-act=uiko]")].find(vis)?.click(); await W(500); const keep = !!box(); [...document.querySelectorAll("[data-act=uiko]")].find(vis)?.click(); await W(500);
     ok(keep && !!box(), "상자 연 채 ⇄ = 그대로(상태 보존)", String(keep));
-    const vol = q("[data-mb=vol]"); vol.value = "40"; vol.dispatchEvent(new Event("input", { bubbles: true })); await W(300); const v1 = S();
-    ok(near(v1.vol, 0.4) && near(v1.gain, V * 0.4), "음량 막대 40 = 배경음악 0.4배(기억)", J(v1));
+    const vol = q("[data-mb=vol]"), mid = vol.value; vol.value = "20"; vol.dispatchEvent(new Event("input", { bubbles: true })); await W(300); const v1 = S(), tipQ = !!box()?.querySelector(".mvtip");
+    ok(mid === "50" && near(v1.vol, 0.4) && near(v1.gain, V * 0.4), "음량 막대 = 가운데(50)가 기본 · 20 = 0.4배(기억)", `가운데 ${mid} · ${J(v1)}`);
+    vol.value = "80"; vol.dispatchEvent(new Event("input", { bubbles: true })); await W(300); const tipL = box()?.querySelector(".mvtip")?.textContent || ""; vol.value = "10"; vol.dispatchEvent(new Event("input", { bubbles: true })); await W(300); const tipS = box()?.querySelector(".mvtip")?.textContent || "";
+    ok(near(S().vol, 0.2) && tipL && tipS && tipL !== tipS && !tipQ, "많이 키움(80)·많이 줄임(10) = 풍선 도움말 · 보통 근처(20 위)는 없음", `${tipL.slice(0, 20)} | ${tipS.slice(0, 20)}`); vol.value = "20"; vol.dispatchEvent(new Event("input", { bubbles: true })); await W(200);
     const t0 = S().track; q("[data-mb=next]").click(); await W(1500); const t1 = S();
     ok(t1.playing && t1.track && t1.track !== t0, "⏭ 다음 곡 = 다른 곡", `${t0} → ${t1.track}`);
     q("[data-mb=onoff]").click(); await W(300); const g = S(), gp = btn().dataset.on;
@@ -47,7 +49,7 @@
     const rows = box().querySelectorAll(".mlist li"); rows[2]?.querySelector("[data-play]").click(); await W(1500); const j = S();
     ok(j.track === B.TRACKS[2].file && box().querySelectorAll("[data-dl]").length === B.TRACKS.length && box().querySelector("[data-play='2']")?.getAttribute("aria-pressed") === "true",
       "곡 목록 ▶ 그 곡 듣기 · ⬇ 내려받기 단추", `${rows.length}곡 · 지금 ${j.track}`);
-    const w1 = btn() ? btn().getBoundingClientRect().width : -1; q("[data-mb=vol]").value = "100"; q("[data-mb=vol]").dispatchEvent(new Event("input", { bubbles: true }));
+    const w1 = btn() ? btn().getBoundingClientRect().width : -1; q("[data-mb=vol]").value = "50"; q("[data-mb=vol]").dispatchEvent(new Event("input", { bubbles: true }));
     q("[data-close]").click(); await W(300);
     ok(w0 > 0, "♪ 단추 있음", `폭 ${w0.toFixed(1)}`);
     window.__sfxVolume = 0.0001; await go("#/learn/L01-00-01"); await go("#/list"); const k = S();

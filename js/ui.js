@@ -49,6 +49,7 @@ if (!window.__uikoWired) { // 문서 한 곳에서 받기(화면이 따로 손�
 // 🎵 음악 상자(본부 10-15 · 대표님 10-16 ♪ 로 엶) — 켜기/끄기 · 🔊 음량 막대(기억) · 지금 나오는 곡 · ⏭ 다음 곡 · 곡 목록(▶ 듣기 · ⬇ 내려받기 mp3 · 직접 만든 곡이라 자유) · 머리에 ⇄
 //  ⇄ 를 눌러도 창 그대로(글만 바뀜 · 상태 보존) · 소리·음량은 bgm.js 가 앱 전체에 적용
 export const musicBtn = () => `<button class="musicbox" data-act="musicbox">🎵 <span data-k="music_box">${esc(t("music_box"))}</span></button>`;
+const volPos = f => Math.round(f <= 1 ? f * 50 : 50 + (f - 1) * 50), volOf = p => (p <= 50 ? p / 50 : 1 + (p - 50) / 50); // 막대 자리 ⇄ 음량 배수
 export function openMusicBox() {
   const root = document.getElementById("sheet-root");
   const lab = x => `<b lang="ko">${esc(x.song)}</b> <small><span data-k="bgm_inst_${x.inst}">${esc(t("bgm_inst_" + x.inst))}</span> · <span data-k="bgm_ver_${x.ver}">${esc(t("bgm_ver_" + x.ver))}</span></small>`;
@@ -57,7 +58,7 @@ export function openMusicBox() {
     <button class="mdl" data-dl="${i}">⬇ <span data-k="music_dl">${esc(t("music_dl"))}</span></button></li>`; };
   const nowHTML = () => { const i = bgmNow(), k = bgmOn() ? "music_wait" : "music_none"; return i >= 0 ? `<span class="ml" data-k="music_now">${esc(t("music_now"))}</span> ${lab(TRACKS[i])}` : `<span class="ml" data-k="${k}">${esc(t(k))}</span>`; };
   const ctrl = () => `<button class="monoff" data-mb="onoff" aria-pressed="${bgmOn()}"><span aria-hidden="true">♪</span> <span data-k="${bgmOn() ? "music_on" : "music_off"}">${esc(t(bgmOn() ? "music_on" : "music_off"))}</span></button>
-    <label class="mvol"><span aria-hidden="true">🔊</span><span class="sr" data-k="music_vol">${esc(t("music_vol"))}</span><input type="range" min="0" max="100" step="5" value="${Math.round(bgmVol() * 100)}" data-mb="vol" aria-label="${esc(t("music_vol"))}"></label>
+    <label class="mvol"><span aria-hidden="true">🔊</span><span class="sr" data-k="music_vol">${esc(t("music_vol"))}</span><input type="range" min="0" max="100" step="5" value="${volPos(bgmVol())}" data-mb="vol" aria-label="${esc(t("music_vol"))}"></label>
     <button class="mnext" data-mb="next"${bgmOn() ? "" : " disabled"}>⏭ <span data-k="music_next">${esc(t("music_next"))}</span></button>`;
   const paint = () => { const ul = root.querySelector(".mlist"); if (!ul) return; ul.innerHTML = TRACKS.map(row).join(""); root.querySelector(".mnow").innerHTML = nowHTML(); const c = root.querySelector(".mctrl"); if (!c.contains(document.activeElement) || document.activeElement.type !== "range") c.innerHTML = ctrl(); };
   root.innerHTML = `<div class="sheet-dim" data-close></div>
@@ -71,7 +72,10 @@ export function openMusicBox() {
   const close = () => { onBgmChange(null); root.innerHTML = ""; document.removeEventListener("keydown", key); };
   const key = e => { if (e.key === "Escape") close(); };
   document.addEventListener("keydown", key);
-  root.oninput = e => { const v = e.target.closest?.("[data-mb=vol]"); if (v) setBgmVol(+v.value / 100); };
+  // 막대 가운데(50) = 기본 크기(1배) · 오른쪽 끝 = 2배 · 왼쪽 끝 = 0(대표님 10-16) · 많이 키우면/줄이면 잠깐 풍선 도움말(고른 언어)
+  let tipT = 0, tipK = "";
+  const volTip = k => { const c = root.querySelector(".mctrl"); let b = root.querySelector(".mvtip"); if (!k) { b?.remove(); tipK = ""; return; } if (k === tipK && b) return; tipK = k; b?.remove(); b = Object.assign(document.createElement("div"), { className: "mvtip", role: "status" }); b.innerHTML = `<span data-k="${k}">${esc(t(k))}</span>`; c.after(b); clearTimeout(tipT); tipT = setTimeout(() => { b.remove(); tipK = ""; }, 2600); };
+  root.oninput = e => { const v = e.target.closest?.("[data-mb=vol]"); if (!v) return; const p = +v.value; setBgmVol(volOf(p)); volTip(p >= 70 ? "music_vol_loud" : p <= 15 ? "music_vol_quiet" : ""); };
   root.onclick = async e => {
     if (e.target.closest("[data-close]")) return close();
     const mb = e.target.closest("[data-mb]");
