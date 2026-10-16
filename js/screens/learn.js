@@ -176,7 +176,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     kids.forEach(c => c.style.removeProperty("min-height")); // 아래 「창 높이 채움」은 잴 때 빼고
     // 설명 = 칸을 꽉 채우는 가장 큰 크기(짧은 줄은 키우고 긴 줄은 줄임 · 15px → 최대 20px · 칩·간격도 같은 비율 — 본부 10-06) · 말하기 = 넘칠 때만 줄임
     const uk = panel.querySelector(".v9bar .chip.uiko"), ukH = z => uk && (uk.style.minHeight = `${(32 / z).toFixed(1)}px`); // ⇄한 = 줄여도 화면에서 32px(본부 1014.2 누르기 쉽게)
-    const vb = st.big && kind === "explain" ? panel.querySelector(".v9bar") : null; // 크게 보기 = 위 막대가 옆으로 넘치지 않는 데까지만 키움(보통 화면은 그대로)
+    const vb = st.big ? panel.querySelector(kind === "explain" ? ".v9bar" : ".whead") : null; // 크게 보기 = 위 막대가 옆으로 넘치지 않는 데까지만 키움(보통 화면은 그대로)
     const fits = z => { kids.forEach(c => (c.style.zoom = String(z))); ukH(z); return panel.scrollHeight <= panel.clientHeight && (!vb || vb.scrollWidth <= vb.clientWidth + 1); };
     let lo = 0.5, hi = kind === "explain" ? 1.33 : st.big ? 1.15 : 1; // 크게 보기 말하기 = 과제 글·단추도 키움
     if (fits(hi)) lo = hi; else for (let k = 0; k < 8; k++) { const m = (lo + hi) / 2; if (fits(m)) lo = m; else hi = m; }
