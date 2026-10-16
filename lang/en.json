@@ -272,5 +272,12 @@
  "bgm_ver_calm": "Calm",
  "bgm_ver_bright": "Bright",
  "bgm_ver_lively": "Lively",
- "bgm_short": "Music"
+ "bgm_short": "Music",
+ "music_on": "Music on",
+ "music_off": "Music off",
+ "music_vol": "Volume",
+ "music_next": "Next song",
+ "music_now": "Now playing:",
+ "music_none": "Music is off",
+ "music_wait": "Starting soon (tap the screen once)"
 }
