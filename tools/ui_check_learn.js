@@ -18,9 +18,12 @@
     const top = vid && !pan ? "영상" : pan && !vid ? ($(".panel").classList.contains("explain") ? "설명" : "쓰기") : "❌둘다/없음";
     const pressed = [...cur.querySelectorAll("[aria-pressed=true]")].map(b => b.dataset.act).join("");
     const bad = [];
-    if (!(c.top >= st.bottom - 2 && c.top < ctrl.top - 30)) bad.push(`지금 줄 안 보임(${Math.round(c.top)} · 위 창 끝 ${Math.round(st.bottom)} · 아래 막대 ${Math.round(ctrl.top)})`);
+    // 폰 가로(10-16): 창이 열리면 저절로 ⛶ 크게(줄 목록 숨김 = 설계) · 창 없으면 왼쪽 영상 기둥 + 오른쪽 줄 목록 → 줄은 화면 높이 안에만 있으면 됨
+    const big = $(".scr.learn").classList.contains("big"), side = !big && c.width > 0 && c.left >= st.right - 1;
+    if (big || side) { if (side && !(c.top >= -2 && c.top < innerHeight - 30)) bad.push(`지금 줄 안 보임(가로 · ${Math.round(c.top)})`); }
+    else if (!(c.top >= st.bottom - 2 && c.top < ctrl.top - 30)) bad.push(`지금 줄 안 보임(${Math.round(c.top)} · 위 창 끝 ${Math.round(st.bottom)} · 아래 막대 ${Math.round(ctrl.top)})`);
     if (top.startsWith("❌")) bad.push("위 창 " + top);
-    if (st.height > innerHeight * 0.8) bad.push("위 창 너무 큼 " + Math.round(st.height));
+    if (!big && !side && st.height > innerHeight * 0.8) bad.push("위 창 너무 큼 " + Math.round(st.height));
     if ((top === "설명" && pressed !== "explain") || (top === "쓰기" && pressed !== "write") || (top === "영상" && pressed)) bad.push("단추 표시 어긋남 " + pressed);
     res.push(`${bad.length ? "✗" : "✓"} ${name} → ${top} · 줄 ${L().indexOf(cur) + 1}${bad.length ? " · " + bad.join(" / ") : ""}`);
   };
