@@ -1346,7 +1346,19 @@ html:lang(ur) .write .hand .hpal{height:25px}
 .learn.big .panel .write .work.handmode.bigl .hbtns .hjudge{grid-column:1 / -1;min-height:0;font-size:16px;line-height:1.45}
 .learn.big .panel .write .work.handmode.bigl .hbtns>button{min-height:52px;height:auto;font-size:14px}
 .learn.big .panel .write .work:not(.handmode)>.stage{height:auto!important} /* 크게 자판 = 위 칸이 자판에 덮이지 않게(높이는 내용대로) */
-.learn.big .panel .write .work:not(.handmode) .kb{margin-top:4px}
+.learn.big .panel .write .work:not(.handmode) .kb{margin-top:auto;flex:none} /* 크게 자판 = 자판 줄은 보통 높이(늘리지 않음) · 남는 높이는 위(글자 칸)로 · 자판은 아래(엄지) · 앱개발부 10-16 */
+.learn.big .panel .write .work:not(.handmode) .kb .kr{flex:none;height:clamp(40px,6.2dvh,54px)}
+@media (orientation:landscape){ /* 가로 크게 자판 = 같은 원칙(본부 10-16) — 높이는 줄 높이로 정해짐 → 폭을 줄 높이의 1.3배로 맞춰 가운데로 모음(양옆 = 여백) · 자모 글자 크게 */
+  .learn.big .panel .write .work:not(.handmode) .kb{--kh:clamp(40px,6.2dvh,54px);width:min(100%,calc(var(--kh) * 13 + 36px + 24px));align-self:center;box-sizing:border-box}
+  .learn.big .panel .write .work:not(.handmode) .kb .kr button{font-size:min(calc(var(--kh) * 0.55),26px)}
+}
+@media (orientation:portrait){ /* 세로 크게 자판 = 남는 높이로 위 글자 칸을 크게(빈자리 없게) · 뜻·자모 칸은 그 아래 */
+  .learn.big .panel .write .work:not(.handmode)>.stage{grid-template-columns:minmax(0,1fr)!important;grid-template-areas:"box" "info" "btns"!important;justify-items:center;height:auto!important}
+  .learn.big .panel .write .work:not(.handmode)>.stage .box{--bx:max(min(62vw,34dvh),min(84vw,100dvh - 440px));width:var(--bx)!important;height:var(--bx)!important;font-size:calc(var(--bx) * 0.74)} /* 남는 높이 = 위 글자 칸(본부 10-16) · 작은 폰은 예전 크기 */
+  .learn.big .panel .write .work:not(.handmode)>.stage .info{justify-self:stretch}
+  .learn.big .panel .write .work:not(.handmode) .kb .kr{height:min(calc((100vw - 68px) / 10 * 1.15),54px)} /* 단추 = 거의 정사각(폭에 맞춘 높이 · 본부 10-16) */
+  .learn.big .panel .write .work:not(.handmode) .kb button{font-size:min(6vw,24px)} /* 자모 글자 크게 */
+}
 .write .hjudge .tg-speed{background:rgba(42,111,176,.13);color:#2a6fb0}
 /* 위 글자 줄(배우는 한국어) = 학습자 언어 줄높이를 물려받지 않음(ur 나스탈리크 줄높이로 글자 단추가 53px → 줄 밖 5px 로 ⇄한 과 겹침 · 검사부 10-14) */
 .write .sent,.write .sent .w,.write .sent .c{line-height:1.25}
