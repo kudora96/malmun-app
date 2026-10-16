@@ -111,8 +111,10 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   }
   // 지금 줄 = 영상(+모드 줄) 바로 아래 · 앞 줄들은 영상 뒤로 올라간다
   const stick = app.querySelector(".stick"), list = app.querySelector(".lines");
+  // 폰 가로(높이 ≤ 500 · 크게 보기 아닐 때) = 왼쪽 영상 기둥 · 오른쪽 줄 목록 두 칸(대표님 10-16) — 줄 목록 위에 덮는 칸이 없으니 「영상 아래」 = 화면 위
+  const mqSide = matchMedia("(orientation: landscape) and (max-height: 500px)"), side = () => mqSide.matches && !st.big, stickH = () => (side() ? 0 : stick.offsetHeight);
   function underVideo(el, instant = false) {
-    const to = Math.max(0, Math.min(el.getBoundingClientRect().top + scrollY - stick.offsetHeight - 10, document.documentElement.scrollHeight - innerHeight));
+    const to = Math.max(0, Math.min(el.getBoundingClientRect().top + scrollY - stickH() - 10, document.documentElement.scrollHeight - innerHeight));
     cancelAnimationFrame(st.anim); clearTimeout(st.animEnd);
     if (instant || reduce || document.hidden) return scrollTo(0, to);
     // 화면 그리기 박자가 멈춰도(가려진 창 · 느린 폰) 제자리에 가 있게 — 움직임이 끝날 시각에 한 번 더 맞춘다
@@ -124,7 +126,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   }
   // 마지막 줄도 영상 바로 아래까지 올라올 수 있게 목록 아래 여백 = 화면에서 영상을 뺀 높이
   const ctrlBar = app.querySelector(".ctrl");
-  const pad = () => { list.style.paddingBottom = Math.max(ctrlBar.offsetHeight + 24, innerHeight - stick.offsetHeight - 40) + "px"; }; // 맨 끝 줄도 아래 막대 위로 다 보이게
+  const pad = () => { list.style.paddingBottom = Math.max(ctrlBar.offsetHeight + 24, innerHeight - stickH() - 40) + "px"; }; // 맨 끝 줄도 아래 막대 위로 다 보이게
   // 지금 줄이 위 창과 아래 막대 사이에 다 보이지 않으면 그 자리로(손으로 스크롤 중이면 4초 기다림 — handScroll 그대로)
   // 기준(본부 10-05): 줄 카드 전체(아래끝 포함)가 영상 아래~막대 위에 보일 것 · 아니면 카드 위끝을 영상 바로 아래로(카드가 그 사이보다 길어도 위끝 맞춤)
   // 쓰기 창이 열려 있으면 지금 자막 카드(글 전부 + 아래 메뉴 줄)가 쓰기 창과 아래 막대 사이에 다 들어가게 — 길면 카드 안 글을 줄임(10-06 본부·투덜이)
@@ -188,7 +190,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   function keepVisible(i, { force = false } = {}) {
     const el = items[i]; if (!el || (!force && Date.now() - st.handScroll <= 4000)) return;
     pad(); fitCard(i);
-    const r = el.getBoundingClientRect(), top = stick.getBoundingClientRect().bottom, bot = ctrlBar.getBoundingClientRect().top;
+    const r = el.getBoundingClientRect(), top = side() ? 0 : stick.getBoundingClientRect().bottom, bot = side() ? innerHeight : ctrlBar.getBoundingClientRect().top;
     const fits = r.height <= bot - top;
     if (st.panel ? Math.abs(r.top - top - 10) > 14 : r.top < top - 1 || (fits ? r.bottom > bot + 1 : r.top > top + 12)) underVideo(el); // 쓰기 중 = 언제나 쓰기 창 바로 아래
   }
@@ -538,13 +540,15 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   // ⛶ 크게 보기(대표님 10-16 · 바깥 껍데기만 — 끄면 지금 화면과 1px 도 같음 · 기본 꺼짐) — 위 창(설명·말하기·쓰기)만 화면 가득 · 자막·재생 막대·줄 목록 숨김
   //  켜는 길: 창 오른쪽 아래 ⛶ 단추 · 폰 가로(높이 ≤ 500)에서 창이 열려 있으면 저절로 · 끄는 길: 「작게」 · Esc · 창 닫기 · 세로로 돌림(저절로 켠 것만)
   //  .scr.learn.big · <html>.bigview · window 「malmun:big」(detail.on) — 창 안 배치는 각 창이 이 신호로 다시 맞춤(쓰기 = 쓰기부)
-  const bigB = app.querySelector(".bigb"), mqLand = matchMedia("(orientation: landscape) and (max-height: 500px)");
+  const bigB = app.querySelector(".bigb"), bigHome = app.querySelector(".stick > .seek"), mqLand = matchMedia("(orientation: landscape) and (max-height: 500px)");
   let bigOn = false, bigAuto = false;
   function setBig(on, auto = false) {
     on = !!on && !!st.panel; if (on === bigOn) { if (on && !auto) bigAuto = false; return; }
     bigOn = on; bigAuto = on && auto; st.big = on;
     app.querySelector(".scr.learn").classList.toggle("big", on); document.documentElement.classList.toggle("bigview", on);
     bigB.setAttribute("aria-pressed", String(on));
+    // 크게 = 「⛶ 작게」 칩을 그 창 머리 줄의 ♪ 앞으로(떠 있는 단추 없음 · 본부 10-16) · 작게 = 원래 자리(재생 줄 위 알약)로 돌려놓음
+    const head = on && panel.querySelector(".chip.bgmb"); if (head) head.before(bigB); else if (!on && bigB.parentElement !== bigHome.parentElement) bigHome.before(bigB);
     dispatchEvent(new CustomEvent("malmun:big", { detail: { on } }));
     requestAnimationFrame(() => requestAnimationFrame(() => { st.uiFit = false; const v9 = st.panel?.kind === "explain" && L[st.panel.i]?.v9; if (v9) v9Fit(); fitPanel(); if (v9) v9Fit(); }));
   }
