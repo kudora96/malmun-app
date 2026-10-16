@@ -545,9 +545,10 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   function setBig(on, auto = false) {
     on = !!on && !!st.panel; if (on === bigOn) { if (on && !auto) bigAuto = false; return; }
     bigOn = on; bigAuto = on && auto; st.big = on;
-    app.querySelector(".scr.learn").classList.toggle("big", on); document.documentElement.classList.toggle("bigview", on);
+    const sc = app.querySelector(".scr.learn"); sc.classList.toggle("big", on); document.documentElement.classList.toggle("bigview", on);
+    if (on) sc.dataset.orient = orient(); else delete sc.dataset.orient; // 쓰기부 약속(10-16): 크게일 때 방향 land|port
     bigB.setAttribute("aria-pressed", String(on));
-    dispatchEvent(new CustomEvent("malmun:big", { detail: { on } }));
+    dispatchEvent(new CustomEvent("malmun:big", { detail: { on, orient: orient() } }));
     requestAnimationFrame(() => requestAnimationFrame(() => { st.uiFit = false; const v9 = st.panel?.kind === "explain" && L[st.panel.i]?.v9; if (v9) v9Fit(); fitPanel(); if (v9) v9Fit(); }));
   }
   // ⛶ 칩 자리 = 위 창 머리 줄의 ♪ 앞(보통·크게 같은 자리 · 떠 있는 단추 없음 · 본부 10-16) — 창 내용이 늦게 그려져도(말하기·쓰기) 기다렸다가 넣고 그 창 머리 줄 맞춤을 다시
@@ -556,9 +557,13 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     const head = panel.querySelector(".chip.bgmb"); if (!head) return n < 40 && setTimeout(() => placeBig(mine, n + 1), 100);
     head.before(bigB); bigB.hidden = false;
     if (matchMedia("(orientation: landscape) and (max-height: 500px)").matches) return setBig(true, true);
-    dispatchEvent(new CustomEvent("malmun:big", { detail: { on: bigOn } })); // 머리 줄에 칩이 늘었음 → 말하기·쓰기 머리 줄 다시 맞춤
+    dispatchEvent(new CustomEvent("malmun:big", { detail: { on: bigOn, orient: orient() } })); // 머리 줄에 칩이 늘었음 → 말하기·쓰기 머리 줄 다시 맞춤
     requestAnimationFrame(() => { if (st.panel?.kind === "explain" && L[st.panel.i]?.v9) v9Fit(); fitPanel(); });
   }
+  const orient = () => (innerWidth > innerHeight ? "land" : "port");
+  // 크게 연 채 폰을 돌리면 방향 표시·신호 다시(쓰기 칸 배치 · 글 크기 맞춤)
+  const onTurn = () => { if (!bigOn) return; const sc = app.querySelector(".scr.learn"), o = orient(); if (sc.dataset.orient === o) return; sc.dataset.orient = o; dispatchEvent(new CustomEvent("malmun:big", { detail: { on: true, orient: o } })); requestAnimationFrame(() => { st.uiFit = false; if (st.panel?.kind === "explain" && L[st.panel.i]?.v9) v9Fit(); fitPanel(); }); };
+  addEventListener("resize", onTurn);
   const onLand = () => { if (mqLand.matches) { if (st.panel) setBig(true, true); } else if (bigAuto) setBig(false); };
   mqLand.addEventListener?.("change", onLand);
   const onBigKey = e => { if (e.key === "Escape" && bigOn) { e.stopPropagation(); setBig(false); } };
@@ -966,5 +971,5 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   if (reopen) openPanel(reopen.kind, reopen.i, { restore: reopen }); // ने⇄한 토글 전 창·자리
   else if (opts.explain) openPanel("explain", st.cur, { autoplay: true }); /* #/explain/{편}/{줄} = 그 줄 v9 설명 창(첫 터치 전엔 소리가 막힐 수 있음 — ▶ 로 시작) */
   const release = hold(); // 소리 장치 깨워 두기(첫소리 먹힘 방지)
-  return () => { mqLand.removeEventListener?.("change", onLand); document.removeEventListener("keydown", onBigKey, true); document.documentElement.classList.remove("bigview"); clearTimeout(tipT); document.removeEventListener("fullscreenchange", onFsChange); clearInterval(edgeT); clearInterval(litT); clearInterval(seekTimer); clearInterval(hlTimer); document.removeEventListener("pointerdown", onDocDown, true); removeEventListener("popstate", onPop); removeEventListener("malmun:uilang", onUiLang); document.removeEventListener("visibilitychange", onHide); clearTimeout(st.animEnd); release(); st.panel?.cleanup?.(); ex.stop(); removeEventListener("resize", pad); removeEventListener("resize", onFit); clearInterval(timer); clearTimeout(st.gap); document.removeEventListener("keydown", onKey); seq.stop(); v.pause(); v.removeAttribute("src"); v.load(); };
+  return () => { removeEventListener("resize", onTurn); mqLand.removeEventListener?.("change", onLand); document.removeEventListener("keydown", onBigKey, true); document.documentElement.classList.remove("bigview"); clearTimeout(tipT); document.removeEventListener("fullscreenchange", onFsChange); clearInterval(edgeT); clearInterval(litT); clearInterval(seekTimer); clearInterval(hlTimer); document.removeEventListener("pointerdown", onDocDown, true); removeEventListener("popstate", onPop); removeEventListener("malmun:uilang", onUiLang); document.removeEventListener("visibilitychange", onHide); clearTimeout(st.animEnd); release(); st.panel?.cleanup?.(); ex.stop(); removeEventListener("resize", pad); removeEventListener("resize", onFit); clearInterval(timer); clearTimeout(st.gap); document.removeEventListener("keydown", onKey); seq.stop(); v.pause(); v.removeAttribute("src"); v.load(); };
 }
