@@ -20,7 +20,7 @@ import { paths } from "../paths.js?v=1015.6";
 import { I, spkHtml, uiKoBtn } from "../ui.js?v=1015.6";
 import { audioCtx, hold } from "../wake.js?v=1015.6";
 import * as sfx from "../sfx.js?v=1015.6";
-import { scoreFx } from "../scorefx.js?v=1015.6";
+import { scoreFx, stopFx } from "../scorefx.js?v=1015.6";
 import { units as jamoUnits, baseOf, shapeFix } from "../jamobox.js?v=1015.6"; // 자모 자리 나누기(획순 · 자판 덧칠 · 손글씨 덩어리 — 본부 10-07) // 손글씨 점수 효과 = 말하기와 같은 규칙(본부 10-07)
 import { createStrokes } from "../strokes.js?v=1015.6"; // 획 자료·획순 칠(글자부)
 import { fitToGuide } from "../strokefit.js?v=1015.6"; // 자석 따라오는 획 길 = 회색 가운데(글자부 10-12)
@@ -1156,7 +1156,7 @@ export default async function write(app, ep, id, opts = {}) {
     if (!b) return;
     const a = b.dataset.act;
     if (a === "close") { hush(); stopLoop(); return opts.onClose?.(); } // ✕ 닫기(본부 10-07 — 말하기·설명 창과 같게 · 폰 뒤로도 같은 동작)
-    if (a === "keepstar") { const k = st.hand?.jx?.keep; if (k) { keepStar(k.ch, k.id); b.setAttribute("aria-pressed", "true"); } return; } if (a === "keepsheet") return keepOpen("word"); // 간직하기(🎉 100점만)
+    if (a === "keepstar") { const k = st.hand?.jx?.keep; if (k) { keepStar(k.ch, k.id); b.setAttribute("aria-pressed", "true"); } return; } if (a === "keepsheet") { stopFx(); return keepOpen("word"); } /* 🎉 덮개·팡파레가 미리보기 위에 겹치지 않게 바로 치움(검사부 10-15) */ // 간직하기(🎉 100점만)
     if (a === "inkpick") return inkMenu(!app.querySelector(".inkmenu")); if (a === "inkset") { try { localStorage.setItem("malmun.hink", b.dataset.ink); } catch {} inkMenu(false); app.querySelectorAll(".inkb .sw").forEach(sw => (sw.style.background = inkHex())); st.hand?.paintInk?.(); return; } // 먹 색 고르기 → 바로 닫힘 · 그은 획도 그 색
     if (a === "jmore") return judgeFull(!work.querySelector(".hjfull")); if (a === "jfull") return judgeFull(false); // 판정 글 전체 보기 · 누르면 닫힘
     if (a === "hdone") return handJudge();
