@@ -549,7 +549,10 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     if (on) sc.dataset.orient = orient(); else delete sc.dataset.orient; // 쓰기부 약속(10-16): 크게일 때 방향 land|port
     bigB.setAttribute("aria-pressed", String(on));
     dispatchEvent(new CustomEvent("malmun:big", { detail: { on, orient: orient() } }));
-    requestAnimationFrame(() => requestAnimationFrame(() => { st.uiFit = false; const v9 = st.panel?.kind === "explain" && L[st.panel.i]?.v9; if (v9) v9Fit(); fitPanel(); if (v9) v9Fit(); }));
+    requestAnimationFrame(() => requestAnimationFrame(() => { // 끄면 = 창을 처음 열 때와 같은 순서(배율 풀고 → 머리 줄 → 창 맞춤)로 다시 맞춤 → 들어가기 전과 1px 같음(검사부 1016.1 G3)
+      st.uiFit = false; const v9 = st.panel?.kind === "explain" && L[st.panel.i]?.v9;
+      if (!on) [...panel.children].forEach(c => c.style.removeProperty("zoom"));
+      if (v9) v9Fit(); fitPanel(); if (v9 && on) v9Fit(); }));
   }
   // ⛶ 칩 자리 = 위 창 머리 줄의 ♪ 앞(보통·크게 같은 자리 · 떠 있는 단추 없음 · 본부 10-16) — 창 내용이 늦게 그려져도(말하기·쓰기) 기다렸다가 넣고 그 창 머리 줄 맞춤을 다시
   function placeBig(mine, n = 0) {
