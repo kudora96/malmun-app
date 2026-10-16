@@ -280,6 +280,8 @@
  "music_on": "Đang bật nhạc",
  "music_off": "Đã tắt nhạc",
  "music_vol": "Âm lượng",
+ "music_vol_loud": "Mở to hơn có thể làm khó nghe giọng nói",
+ "music_vol_quiet": "Nhỏ quá có thể gần như không nghe thấy nhạc",
  "music_next": "Bài tiếp",
  "music_now": "Đang phát:",
  "music_none": "Hiện đang tắt nhạc",

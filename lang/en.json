@@ -279,6 +279,8 @@
  "music_on": "Music on",
  "music_off": "Music off",
  "music_vol": "Volume",
+ "music_vol_loud": "Louder music may get in the way of speech and listening",
+ "music_vol_quiet": "At this level the music may be hard to hear",
  "music_next": "Next song",
  "music_now": "Now playing:",
  "music_none": "Music is off",
