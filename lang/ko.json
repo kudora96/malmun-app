@@ -280,5 +280,7 @@
  "music_next": "다음 곡",
  "music_now": "지금 나오는 곡:",
  "music_none": "지금은 음악이 꺼져 있어요",
- "music_wait": "곧 나와요(화면을 한 번 누르면 시작)"
+ "music_wait": "곧 나와요(화면을 한 번 누르면 시작)",
+ "music_vol_loud": "더 키우면 말소리·듣기를 방해할 수 있어요",
+ "music_vol_quiet": "많이 줄이면 거의 안 들릴 수 있어요"
 }

@@ -1459,3 +1459,5 @@ html.bigview,html.bigview body{overflow:hidden}
 }
 .v9bar.tight{gap:2px;padding-inline:6px}.v9bar.tight .chip,.v9bar.tight .romb{padding:0 5px;min-width:28px}.v9bar.tight .seg.snd .pb{padding:4px 6px}
 .write .bigb .off,.write .bigb .on{display:none!important} /* 쓰기 머리 줄 = ⛶ 만(34px 고정 · 말에 따라 폭이 안 바뀌게 · langfit 는 쓰기 화면을 안 건드림) */
+.sheet.mbox .mvtip{align-self:flex-start;margin:-2px 0 2px;padding:6px 10px;border-radius:10px;background:var(--ink);color:var(--bg);font-size:12.5px;line-height:1.35;animation:fade .2s} /* 음량 풍선 도움말(대표님 10-16) */
+.sheet.mbox .mvol input{background:linear-gradient(90deg,transparent calc(50% - 1px),var(--line) calc(50% - 1px),var(--line) calc(50% + 1px),transparent calc(50% + 1px))} /* 가운데 = 기본 눈금 */
