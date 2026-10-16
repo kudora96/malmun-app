@@ -660,9 +660,10 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   function v9Fit() {
     const bar = panel.querySelector(".v9bar"); if (!bar) return;
     const over = () => bar.scrollWidth > bar.clientWidth + 1;
-    bar.classList.remove("nok", "nocw");
+    bar.classList.remove("nok", "nocw", "tight");
     if (over()) bar.classList.add("nok");
     if (over()) bar.classList.add("nocw");
+    if (over()) bar.classList.add("tight"); // 그래도 넘치면 칩(⛶·♪·⇄·로마자) 안쪽 여백·사이를 좁힘(⛶ 칩이 늘어 ✕ 가 밀리던 것 · 10-16)
     if (pref("malmun.v9tip") !== "1") { const tip = panel.querySelector(".v9tip"); pref("malmun.v9tip", "1"); tip.hidden = false; setTimeout(() => { tip.hidden = true; }, 3000); }
   }
   const markPlay = (k = null) => panel.querySelectorAll(".v9bar .pb[data-x=ex]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.v === k)));

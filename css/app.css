@@ -1421,3 +1421,4 @@ html.bigview,html.bigview body{overflow:hidden}
   .learn:not(.big) .lines{margin-left:56vw;padding-top:8px}
   .learn:not(.big) .ctrl{left:0;right:auto;width:56vw;max-width:none;margin:0}
 }
+.v9bar.tight{gap:2px;padding-inline:6px}.v9bar.tight .chip,.v9bar.tight .romb{padding:0 5px;min-width:28px}.v9bar.tight .seg.snd .pb{padding:4px 6px}
