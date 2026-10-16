@@ -5,8 +5,8 @@
 //  · 켜기/끄기 = ♪ 단추(ui.js bgmBtn · 모든 창 · 처음 켬 · 기억 malmun.bgm) · 🎵 음악 상자(ui.js openMusicBox)에서 곡 골라 듣기
 //  · 파일 = 소리부 05_audio/_bgm(직접 합성 · 저작권 없음) — 곡마다 [loopStart, loopEnd] 한 번 → 끝나면 다른 곡(같은 곡 연속 없음 · 앱을 다시 열어도 지난 곡 다음)
 //  · 점검(?mute=1 · __sfxVolume 아주 작게)에선 안 틂
-import { audioCtx } from "./wake.js?v=1016.3";
-import { paths } from "./paths.js?v=1016.3";
+import { audioCtx } from "./wake.js?v=1016.23";
+import { paths } from "./paths.js?v=1016.23";
 
 const KEY = "malmun.bgm", LAST = "malmun.bgmLast", VOL = "malmun.bgmVol";
 // 곡 목록(늘리기 = 한 줄) — song = 곡 이름(한국어 · 고유 이름) · inst = 악기 열쇠(bgm_inst_*) · ver = 결(bgm_ver_*) · loopStart·loopEnd 는 catalog 그대로

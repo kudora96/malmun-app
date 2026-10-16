@@ -10,26 +10,26 @@
 //  R7 영상은 늘 맨 위 · 지금 줄은 영상 바로 아래(앞 줄은 영상 뒤로) — 손으로 목록을 움직이면 4초 동안은 따라가지 않음
 //  R8 듣기 모드(대사→설명 · 설명만)도 R1~R6 그대로(영상 대신 소리 조각) · 모드를 바꾸면 멈춤(▶ 로 시작)
 //  R9 다시 들어오면 마지막 줄이 선택된 채 멈춰 있음
-import { warmSTT } from "../sttserver.js?v=1016.3";
-import * as sfxL from "../sfx.js?v=1016.3"; // 카드 말하기 최대 길이 = 본보기 길이로(10-07)
-import { t, lang, langName, KO_UI, uiKoOn, preloadKoUi } from "../i18n.js?v=1016.3";
-import { setTx } from "../retext.js?v=1016.3";
-import { esc, renderText, glossCards, sayParts } from "../text.js?v=1016.3";
-import { episode } from "../data.js?v=1016.3";
-import { paths } from "../paths.js?v=1016.3";
-import { Sequence } from "../audio.js?v=1016.3";
-import { I, progress, SPEAKER, spkHtml, uiKoBtn, switchUiKo } from "../ui.js?v=1016.3";
-import writeView from "./write.js?v=1016.3";
-import { diagEnv, keepDiag } from "../diag.js?v=1016.3";
-import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1016.3";
-import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace, lateFactor, sylAt, paintAt, karaokeRun, isFull } from "../rhythm.js?v=1016.3";
-import { playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1016.3";
-import { heardHTML, endHint, scoreOf, bestFull, spanOf, sylsAt } from "../heard.js?v=1016.3"; // 덧붙은 말 빼고 견주기(본부 10-11)
-import { recDel, downloadRec, askPersist } from "../recstore.js?v=1016.3";
-import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1016.3";
-import { scoreFx, stopFx } from "../scorefx.js?v=1016.3"; // 점수별 효과(본부 10-05)
-import { record, recordSROnly, srOnlyMode, setSrOnly, isAndroid, srMiss, micWhy, srWhy, canScore, closeMic, logRec, micOpen, seqMode, srOnBlob, devSR, setDevSR, srJudge, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1016.3";
-import { hold, quietWake } from "../wake.js?v=1016.3";
+import { warmSTT } from "../sttserver.js?v=1016.23";
+import * as sfxL from "../sfx.js?v=1016.23"; // 카드 말하기 최대 길이 = 본보기 길이로(10-07)
+import { t, lang, langName, KO_UI, uiKoOn, preloadKoUi } from "../i18n.js?v=1016.23";
+import { setTx } from "../retext.js?v=1016.23";
+import { esc, renderText, glossCards, sayParts } from "../text.js?v=1016.23";
+import { episode } from "../data.js?v=1016.23";
+import { paths } from "../paths.js?v=1016.23";
+import { Sequence } from "../audio.js?v=1016.23";
+import { I, progress, SPEAKER, spkHtml, uiKoBtn, switchUiKo } from "../ui.js?v=1016.23";
+import writeView from "./write.js?v=1016.23";
+import { diagEnv, keepDiag } from "../diag.js?v=1016.23";
+import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1016.23";
+import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace, lateFactor, sylAt, paintAt, karaokeRun, isFull } from "../rhythm.js?v=1016.23";
+import { playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1016.23";
+import { heardHTML, endHint, scoreOf, bestFull, spanOf, sylsAt } from "../heard.js?v=1016.23"; // 덧붙은 말 빼고 견주기(본부 10-11)
+import { recDel, downloadRec, askPersist } from "../recstore.js?v=1016.23";
+import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1016.23";
+import { scoreFx, stopFx } from "../scorefx.js?v=1016.23"; // 점수별 효과(본부 10-05)
+import { record, recordSROnly, srOnlyMode, setSrOnly, isAndroid, srMiss, micWhy, srWhy, canScore, closeMic, logRec, micOpen, seqMode, srOnBlob, devSR, setDevSR, srJudge, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1016.23";
+import { hold, quietWake } from "../wake.js?v=1016.23";
 
 const RATES = [1, 0.75, 0.5];
 const pref = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } };
@@ -541,18 +541,35 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   //  켜는 길: 창 오른쪽 아래 ⛶ 단추 · 폰 가로(높이 ≤ 500)에서 창이 열려 있으면 저절로 · 끄는 길: 「작게」 · Esc · 창 닫기 · 세로로 돌림(저절로 켠 것만)
   //  .scr.learn.big · <html>.bigview · window 「malmun:big」(detail.on) — 창 안 배치는 각 창이 이 신호로 다시 맞춤(쓰기 = 쓰기부)
   const bigB = app.querySelector(".bigb"), bigHome = app.querySelector(".stick > .seek"), mqLand = matchMedia("(orientation: landscape) and (max-height: 500px)");
-  let bigOn = false, bigAuto = false;
+  let bigOn = false, bigAuto = false, bigSave = null;
   function setBig(on, auto = false) {
     on = !!on && !!st.panel; if (on === bigOn) { if (on && !auto) bigAuto = false; return; }
     bigOn = on; bigAuto = on && auto; st.big = on;
+    // 「끄면 같음」(검사부 1016.1 G3): 켤 때 창 안 요소마다 style·class·langfit 잰 값(__lf)을 적어 두고 → 끌 때 화면 크기·⇄ 상태·창이 그대로면 그대로 되돌림
+    //  (다시 재면 배율·langfit 순서에 따라 1~40px 달라짐) · 크게 때 새로 잰 langfit 고정도 풀림 → 뒤늦게 다시 잰 것까지 0.3·0.7초에 한 번 더 되돌림 · 되돌린 뒤 넘치면(글이 바뀜) 보통 맞춤
+    const sig = () => `${innerWidth}x${innerHeight}|${uiKoOn()}|${st.panel?.kind}|${st.panel?.i}`;
+    if (on) bigSave = { sig: sig(), els: [panel, ...panel.querySelectorAll("*")].filter(e => e.tagName !== "CANVAS").map(e => [e, e.getAttribute("style"), e.getAttribute("class"), e.__lf || null]), fitH: st.fitH, uiFit: st.uiFit }; // fitH·uiFit = 창 높이 지킴이(아래 MutationObserver)가 크게 때 높이로 다시 맞추지 않게
+    const restore = !on && bigSave?.sig === sig() ? bigSave : null; if (!on) bigSave = null;
+    const put = (lf = false) => { if (bigOn || !restore || restore.sig !== sig()) return false; st.fitH = restore.fitH; st.uiFit = restore.uiFit || st.uiFit; for (const [e, sa, ca, f] of restore.els) { if (!e.isConnected) continue; if (lf) e.__lf = f; if (e.getAttribute("style") !== sa) sa == null ? e.removeAttribute("style") : e.setAttribute("style", sa); if (e.getAttribute("class") !== ca) ca == null ? e.removeAttribute("class") : e.setAttribute("class", ca); } return true; };
     const sc = app.querySelector(".scr.learn"); sc.classList.toggle("big", on); document.documentElement.classList.toggle("bigview", on);
     if (on) sc.dataset.orient = orient(); else delete sc.dataset.orient; // 쓰기부 약속(10-16): 크게일 때 방향 land|port
     bigB.setAttribute("aria-pressed", String(on));
     dispatchEvent(new CustomEvent("malmun:big", { detail: { on, orient: orient() } }));
     requestAnimationFrame(() => requestAnimationFrame(() => { // 끄면 = 창을 처음 열 때와 같은 순서(배율 풀고 → 머리 줄 → 창 맞춤)로 다시 맞춤 → 들어가기 전과 1px 같음(검사부 1016.1 G3)
-      st.uiFit = false; const v9 = st.panel?.kind === "explain" && L[st.panel.i]?.v9;
+      if (bigOn !== on || !st.panel) return; // ⛶ 빠르게 두 번 = 앞 것은 버림(검사부 G6)
+      const v9 = st.panel?.kind === "explain" && L[st.panel.i]?.v9, bar = v9 && panel.querySelector(".v9bar");
+      if (put(true)) { // 크게 때 새로 그려진 요소(⇄ 로 말하기 머리 줄 등) = langfit 고정 풀고 보통 크기에서 다시 재고 → 그 창 머리 줄 다시 맞춤
+        const old = new Set(restore.els.map(x => x[0]));
+        for (const e of panel.querySelectorAll("*")) if (!old.has(e) && e.__lf) { e.__lf = null; ["min-width", "max-width", "min-height", "max-height", "overflow", "font-size", "white-space", "box-sizing"].forEach(k => e.style.removeProperty(k)); }
+        const fresh = v9 && [...panel.querySelectorAll(".v9body *")].some(e => !old.has(e)); // 크게 때 ⇄ 로 본문이 새로 그려짐 → ⇄ 와 같은 길(본문 글만 맞춤)
+        if (fresh) fitBody();
+        requestAnimationFrame(() => requestAnimationFrame(() => { if (bigOn) return; if (fresh) fitBody(); dispatchEvent(new CustomEvent("malmun:big", { detail: { on: false, orient: orient() } })); }));
+        [300, 700].forEach(ms => setTimeout(put, ms)); if (v9 && panel.scrollHeight > panel.clientHeight + 1) fitBody(); //(⇄ 와 같은 길 · 머리 줄·창 크기 그대로)
+        if (panel.scrollHeight <= panel.clientHeight + 1 && !(bar && v9Over(bar))) return; }
+      st.uiFit = false;
       if (!on) [...panel.children].forEach(c => c.style.removeProperty("zoom"));
-      if (v9) v9Fit(); fitPanel(); if (v9 && on) v9Fit(); }));
+      if (v9) v9Fit(); fitPanel(); if (v9 && on) v9Fit();
+      dispatchEvent(new CustomEvent("malmun:big", { detail: { on, orient: orient() } })); })); // 폭을 다시 잰 뒤 말하기·쓰기 머리 줄도 한 번 더
   }
   // ⛶ 칩 자리 = 위 창 머리 줄의 ♪ 앞(보통·크게 같은 자리 · 떠 있는 단추 없음 · 본부 10-16) — 창 내용이 늦게 그려져도(말하기·쓰기) 기다렸다가 넣고 그 창 머리 줄 맞춤을 다시
   function placeBig(mine, n = 0) {
