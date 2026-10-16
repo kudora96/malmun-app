@@ -446,7 +446,7 @@ a{color:inherit;text-decoration:none}
 .sheet.mbox li .mdl{background:var(--bg);border:1px solid var(--line)}
 .sheet.mbox h2{display:flex;align-items:center;gap:8px}.sheet.mbox h2 .chip.bgmb{margin-inline-start:auto}
 /* ♪ 배경음악 켜기/끄기(본부 10-15) — 끔 = 흐리게 + 빗금 */
-.chip.bgmb{flex:none;min-width:34px;height:30px;box-sizing:border-box;justify-content:center;gap:3px;padding:0 9px;font-size:15px;line-height:1;font-family:system-ui,sans-serif}.chip.bgmb .lt{font-size:12px;font-family:inherit} .chip.bgmb,.learn .bigb{overflow:visible!important} /* 나스탈리크(ur) 「موسیقی」 꼬리가 높이 30 밖으로 5px — langfit 잠금(overflow:hidden)에 잘리던 것(검사부 1016.1 ur 812×375) · 폭은 글 크기로 맞춰짐 */
+.chip.bgmb{flex:none;min-width:34px;height:30px;box-sizing:border-box;justify-content:center;gap:3px;padding:0 9px;font-size:15px;line-height:1;font-family:system-ui,sans-serif}.chip.bgmb .lt{font-size:12px;font-family:inherit} .chip.bgmb,.learn .bigb,.v9bar .romb{overflow:visible!important}.sheet.mbox .monoff,.sheet.mbox .mnext{max-width:none!important;overflow:visible!important} /* vi 「♪ Đang bật nhạc」 13px 잘림(검사부 1016.29) — 줄이 꺾여도 됨 */ /* 나스탈리크(ur) 「موسیقی」 꼬리가 높이 30 밖으로 5px — langfit 잠금(overflow:hidden)에 잘리던 것(검사부 1016.1 ur 812×375) · 폭은 글 크기로 맞춰짐 */
 @media (max-width:519px){.chip.bgmb .lt{display:none}} /* 좁은 화면 = ♪ 만(머리 줄 단추들과 같은 규칙 · 글은 aria-label·title 에도) */
 .speak .whead.h1 .chip.bgmb .lt,.v9bar.nocw .chip.bgmb .lt{display:none} /* 높이·글꼴 고정(ur 나스탈리크 줄 높이로 41px 까지 부풀던 것) */
 .chip.bgmb[data-on=false]{opacity:.5;text-decoration:line-through}

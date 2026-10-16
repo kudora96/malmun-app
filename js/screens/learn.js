@@ -10,27 +10,27 @@
 //  R7 영상은 늘 맨 위 · 지금 줄은 영상 바로 아래(앞 줄은 영상 뒤로) — 손으로 목록을 움직이면 4초 동안은 따라가지 않음
 //  R8 듣기 모드(대사→설명 · 설명만)도 R1~R6 그대로(영상 대신 소리 조각) · 모드를 바꾸면 멈춤(▶ 로 시작)
 //  R9 다시 들어오면 마지막 줄이 선택된 채 멈춰 있음
-import { warmSTT } from "../sttserver.js?v=1016.29";
-import * as sfxL from "../sfx.js?v=1016.29"; // 카드 말하기 최대 길이 = 본보기 길이로(10-07)
-import { t, lang, langName, KO_UI, uiKoOn, preloadKoUi } from "../i18n.js?v=1016.29";
-import { setTx } from "../retext.js?v=1016.29";
-import { langfitRun } from "../langfit.js?v=1016.29";
-import { esc, renderText, glossCards, sayParts } from "../text.js?v=1016.29";
-import { episode } from "../data.js?v=1016.29";
-import { paths } from "../paths.js?v=1016.29";
-import { Sequence } from "../audio.js?v=1016.29";
-import { I, progress, SPEAKER, spkHtml, uiKoBtn, switchUiKo } from "../ui.js?v=1016.29";
-import writeView from "./write.js?v=1016.29";
-import { diagEnv, keepDiag } from "../diag.js?v=1016.29";
-import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1016.29";
-import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace, lateFactor, sylAt, paintAt, karaokeRun, isFull } from "../rhythm.js?v=1016.29";
-import { playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1016.29";
-import { heardHTML, endHint, scoreOf, bestFull, spanOf, sylsAt } from "../heard.js?v=1016.29"; // 덧붙은 말 빼고 견주기(본부 10-11)
-import { recDel, downloadRec, askPersist } from "../recstore.js?v=1016.29";
-import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1016.29";
-import { scoreFx, stopFx } from "../scorefx.js?v=1016.29"; // 점수별 효과(본부 10-05)
-import { record, recordSROnly, srOnlyMode, setSrOnly, isAndroid, srMiss, micWhy, srWhy, canScore, closeMic, logRec, micOpen, seqMode, srOnBlob, devSR, setDevSR, srJudge, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1016.29";
-import { hold, quietWake } from "../wake.js?v=1016.29";
+import { warmSTT } from "../sttserver.js?v=1016.30";
+import * as sfxL from "../sfx.js?v=1016.30"; // 카드 말하기 최대 길이 = 본보기 길이로(10-07)
+import { t, lang, langName, KO_UI, uiKoOn, preloadKoUi } from "../i18n.js?v=1016.30";
+import { setTx } from "../retext.js?v=1016.30";
+import { langfitRun } from "../langfit.js?v=1016.30";
+import { esc, renderText, glossCards, sayParts } from "../text.js?v=1016.30";
+import { episode } from "../data.js?v=1016.30";
+import { paths } from "../paths.js?v=1016.30";
+import { Sequence } from "../audio.js?v=1016.30";
+import { I, progress, SPEAKER, spkHtml, uiKoBtn, switchUiKo } from "../ui.js?v=1016.30";
+import writeView from "./write.js?v=1016.30";
+import { diagEnv, keepDiag } from "../diag.js?v=1016.30";
+import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1016.30";
+import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace, lateFactor, sylAt, paintAt, karaokeRun, isFull } from "../rhythm.js?v=1016.30";
+import { playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1016.30";
+import { heardHTML, endHint, scoreOf, bestFull, spanOf, sylsAt } from "../heard.js?v=1016.30"; // 덧붙은 말 빼고 견주기(본부 10-11)
+import { recDel, downloadRec, askPersist } from "../recstore.js?v=1016.30";
+import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1016.30";
+import { scoreFx, stopFx } from "../scorefx.js?v=1016.30"; // 점수별 효과(본부 10-05)
+import { record, recordSROnly, srOnlyMode, setSrOnly, isAndroid, srMiss, micWhy, srWhy, canScore, closeMic, logRec, micOpen, seqMode, srOnBlob, devSR, setDevSR, srJudge, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1016.30";
+import { hold, quietWake } from "../wake.js?v=1016.30";
 
 const RATES = [1, 0.75, 0.5];
 const pref = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } };
@@ -177,8 +177,9 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     kids.forEach(c => c.style.removeProperty("min-height")); // 아래 「창 높이 채움」은 잴 때 빼고
     // 설명 = 칸을 꽉 채우는 가장 큰 크기(짧은 줄은 키우고 긴 줄은 줄임 · 15px → 최대 20px · 칩·간격도 같은 비율 — 본부 10-06) · 말하기 = 넘칠 때만 줄임
     const uk = panel.querySelector(".v9bar .chip.uiko"), ukH = z => uk && (uk.style.minHeight = `${(32 / z).toFixed(1)}px`); // ⇄한 = 줄여도 화면에서 32px(본부 1014.2 누르기 쉽게)
+    const xb = kind === "explain" && !st.big ? panel.querySelector(".v9bar") : null;
     const vb = st.big && kind === "speak" ? panel.querySelector(".whead") : null; // 크게 말하기 = 머리 줄 폭 안에서만 키움(설명 막대는 크게일 때 두 줄로 꺾여도 됨) // 크게 보기 = 위 막대가 옆으로 넘치지 않는 데까지만 키움(보통 화면은 그대로)
-    const fits = z => { kids.forEach(c => (c.style.zoom = String(z))); ukH(z); return panel.scrollHeight <= panel.clientHeight && (!vb || vb.scrollWidth <= vb.clientWidth + 1); };
+    const fits = z => { kids.forEach(c => (c.style.zoom = String(z))); ukH(z); return panel.scrollHeight <= panel.clientHeight && (!vb || vb.scrollWidth <= vb.clientWidth + 1) && (!xb || !v9Over(xb)); }; // xb = 설명 막대: 키운 배율에서도 한 줄 안(키우면 막대 칸이 좁아져 ✕ 가 밖으로 · 검사부 1016.29 ne 375)
     let lo = 0.5, hi = kind === "explain" ? (st.big ? 1.7 : 1.33) : st.big ? 1.15 : 1; // 크게 설명 = 화면 높이를 글이 다 쓰게 // 크게 보기 말하기 = 과제 글·단추도 키움
     if (fits(hi)) lo = hi; else for (let k = 0; k < 8; k++) { const m = (lo + hi) / 2; if (fits(m)) lo = m; else hi = m; }
     lo = Math.floor(lo * 1000) / 1000;
@@ -690,7 +691,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     box.querySelector(".heardline").innerHTML = switchedSR ? `<button class="srboth" data-x="srboth">${esc(t("sr_both_again"))}</button>` : bh ? (({ html, ok }) => `<span class="lab">${esc(t("heard_label"))}:</span> <span class="ko" lang="ko">${html}</span>${ok ? " ✓" : ""}`)(heardHTML(L[i].say.ko, bh)) : "";
   }
   // 맨 위 한 줄 맞추기 + 처음 한 번 말풍선(▶ = 듣는 언어 · 탭 = 읽는 언어 · 3초 · 다시 안 뜸)
-  const v9Over = bar => { if (bar.scrollWidth > bar.clientWidth + 1) return true; const r = bar.getBoundingClientRect(); return [...bar.children].some(e => { const c = e.getBoundingClientRect(); return c.width > 0 && (c.left < r.left - 1 || c.right > r.right + 1); }); }; // 가운데 맞춤이면 왼쪽 넘침은 scrollWidth 에 안 잡힘
+  const v9Over = bar => { if (bar.scrollWidth > bar.clientWidth + 1) return true; const r = bar.getBoundingClientRect(), pr = panel.getBoundingClientRect(); if (r.left < pr.left - 1 || r.right > pr.right + 1) return true; return [...bar.children].some(e => { const c = e.getBoundingClientRect(); return c.width > 0 && (c.left < r.left - 1 || c.right > r.right + 1); }); }; // 가운데 맞춤이면 왼쪽 넘침은 scrollWidth 에 안 잡힘
   function v9Fit(z1 = !st.uiFit) {
     const bar = panel.querySelector(".v9bar"); if (!bar) return;
     if (z1) [...panel.children].forEach(c => c.style.removeProperty("zoom")); // 늘 배율 1 에서 잼(줄인 배율에선 막대가 넓어져 단계가 달라짐 — ⛶ 칩이 늦게 들어올 때 · 검사부 1016.1 ur 320 ⇄) · 부른 쪽이 바로 fitPanel
