@@ -1,4 +1,4 @@
-import { bgmOn, setBgm, TRACKS, playTrack, bgmNow, onBgmChange } from "./bgm.js?v=1015.6";
+import { bgmOn, setBgm, TRACKS, playTrack, bgmNow, onBgmChange, bgmVol, setBgmVol, playNext } from "./bgm.js?v=1015.6";
 import { paths } from "./paths.js?v=1015.6";
 import { t, tL, lang, langName, LANGS, READY, setLang, KO_UI, uiKoOn, setUiKo, langShort, preloadKoUi } from "./i18n.js?v=1015.6";
 import { snapshot, retext } from "./retext.js?v=1015.6";
@@ -22,9 +22,10 @@ export const langChip = () => `<button class="chip" data-act="lang" aria-label="
 // 「ने ⇄ 한」 토글(본부 10-08 · 10-14 모든 화면) — 소리 없는 토글이어도 단추 모양 · 켜짐 = 「한」 쪽 강조
 //  어느 화면에서 눌러도 앱 전체가 같이(기억 malmun.uiko) · 다시 그리지 않고 그 자리에서 글만(retext) · 처음엔 모국어
 //  화면은 uiKoBtn() 만 머리 줄 오른쪽 묶음 맨 앞에 두면 됨 — 누르기는 아래 문서 한 곳(switchUiKo)이 받음(배우기 화면은 자기 손잡이가 먼저 받고 멈춤)
-export const uiKoBtn = () => bgmBtn() + (KO_UI.includes(lang) ? `<button class="chip uiko" data-act="uiko" aria-pressed="${uiKoOn()}" aria-label="${esc(langName(lang))} ⇄ 한국어"><span class="a" lang="${lang}">${esc(langShort(lang))}</span>⇄<span class="b" lang="ko">한</span></button>` : "");
-// ♪ 배경음악 켜기/끄기(본부 10-15 · 모든 창 = uiKoBtn() 앞에 붙어 ⇄ 와 같은 자리 · en 처럼 ⇄ 가 없는 언어에도 ♪ 는 있음 · 크기 고정 · 누르기는 아래 문서 한 곳)
-export const bgmBtn = () => `<button class="chip bgmb" data-act="bgm" aria-pressed="${bgmOn()}" aria-label="${esc(t("bgm_toggle"))}" title="${esc(t("bgm_toggle"))}"><span aria-hidden="true">♪</span><span class="lt" data-k="bgm_short">${esc(t("bgm_short"))}</span></button>`;
+export const uiKoBtn = () => bgmBtn() + uikoChip();
+export const uikoChip = () => (KO_UI.includes(lang) ? `<button class="chip uiko" data-act="uiko" aria-pressed="${uiKoOn()}" aria-label="${esc(langName(lang))} ⇄ 한국어"><span class="a" lang="${lang}">${esc(langShort(lang))}</span>⇄<span class="b" lang="ko">한</span></button>` : "");
+// ♪ 「음악」 = 🎵 음악 상자 열기(대표님 10-16 · 모든 창 = uiKoBtn() 앞 · ⇄ 없는 언어에도 · 크기 고정 · 끔 = 흐리게 빗금(data-on) · 누르기는 아래 문서 한 곳)
+export const bgmBtn = () => `<button class="chip bgmb" data-act="bgm" data-on="${bgmOn()}" aria-haspopup="dialog" aria-label="${esc(t("music_box"))}" title="${esc(t("music_box"))}"><span aria-hidden="true">♪</span><span class="lt" data-k="bgm_short">${esc(t("bgm_short"))}</span></button>`;
 export async function toggleUiKo(after) { await switchUiKo(!uiKoOn()); after?.(); }
 export async function switchUiKo(ko) {
   if (!KO_UI.includes(lang) || ko === uiKoOn()) return;
@@ -42,29 +43,42 @@ if (!window.__uikoWired) { // 문서 한 곳에서 받기(화면이 따로 손�
   window.__uikoWired = true;
   // 잡기 단계(capture)에서 받고 멈춤 — 화면의 「바깥 누르면 닫힘」(? 방법·말풍선·마이크 목록) 손잡이까지 가지 않게 → ⇄ = 그 상태 그대로 글만(본부 10-15 투덜이 원칙)
   document.addEventListener("click", e => { const b = e.target.closest?.("[data-act=uiko]"); if (!b) return; e.preventDefault(); e.stopPropagation(); switchUiKo(!uiKoOn()); }, true);
-  document.addEventListener("click", e => { if (e.target.closest?.("[data-act=bgm]")) setBgm(!bgmOn()); else if (e.target.closest?.("[data-act=musicbox]")) openMusicBox(); });
+  document.addEventListener("click", e => { if (e.target.closest?.("[data-act=bgm], [data-act=musicbox]")) openMusicBox(); });
   preloadKoUi();
 }
-// 🎵 음악 상자(본부 10-15 투덜이) — 앱에 흐르는 우리 민요 곡 목록 · 곡마다 ▶ 듣기(지금 배경음악으로) · ⬇ 내려받기(mp3 · 직접 만든 곡이라 자유) · 머리에 ♪·⇄
+// 🎵 음악 상자(본부 10-15 · 대표님 10-16 ♪ 로 엶) — 켜기/끄기 · 🔊 음량 막대(기억) · 지금 나오는 곡 · ⏭ 다음 곡 · 곡 목록(▶ 듣기 · ⬇ 내려받기 mp3 · 직접 만든 곡이라 자유) · 머리에 ⇄
+//  ⇄ 를 눌러도 창 그대로(글만 바뀜 · 상태 보존) · 소리·음량은 bgm.js 가 앱 전체에 적용
 export const musicBtn = () => `<button class="musicbox" data-act="musicbox">🎵 <span data-k="music_box">${esc(t("music_box"))}</span></button>`;
 export function openMusicBox() {
   const root = document.getElementById("sheet-root");
-  const row = (x, i) => { const on = bgmNow() === i; return `<li><span class="nm"><b lang="ko">${esc(x.song)}</b> <small><span data-k="bgm_inst_${x.inst}">${esc(t("bgm_inst_" + x.inst))}</span> · <span data-k="bgm_ver_${x.ver}">${esc(t("bgm_ver_" + x.ver))}</span></small></span>
+  const lab = x => `<b lang="ko">${esc(x.song)}</b> <small><span data-k="bgm_inst_${x.inst}">${esc(t("bgm_inst_" + x.inst))}</span> · <span data-k="bgm_ver_${x.ver}">${esc(t("bgm_ver_" + x.ver))}</span></small>`;
+  const row = (x, i) => { const on = bgmNow() === i; return `<li${on ? ' class="now"' : ""}><span class="nm">${lab(x)}</span>
     <button class="mplay" data-play="${i}" aria-pressed="${on}"><span aria-hidden="true">${on ? "■" : "▶"}</span> <span data-k="${on ? "music_stop" : "music_play"}">${esc(t(on ? "music_stop" : "music_play"))}</span></button>
     <button class="mdl" data-dl="${i}">⬇ <span data-k="music_dl">${esc(t("music_dl"))}</span></button></li>`; };
-  const paint = () => { const ul = root.querySelector(".mlist"); if (ul) ul.innerHTML = TRACKS.map(row).join(""); };
+  const nowHTML = () => { const i = bgmNow(), k = bgmOn() ? "music_wait" : "music_none"; return i >= 0 ? `<span class="ml" data-k="music_now">${esc(t("music_now"))}</span> ${lab(TRACKS[i])}` : `<span class="ml" data-k="${k}">${esc(t(k))}</span>`; };
+  const ctrl = () => `<button class="monoff" data-mb="onoff" aria-pressed="${bgmOn()}"><span aria-hidden="true">♪</span> <span data-k="${bgmOn() ? "music_on" : "music_off"}">${esc(t(bgmOn() ? "music_on" : "music_off"))}</span></button>
+    <label class="mvol"><span aria-hidden="true">🔊</span><span class="sr" data-k="music_vol">${esc(t("music_vol"))}</span><input type="range" min="0" max="100" step="5" value="${Math.round(bgmVol() * 100)}" data-mb="vol" aria-label="${esc(t("music_vol"))}"></label>
+    <button class="mnext" data-mb="next"${bgmOn() ? "" : " disabled"}>⏭ <span data-k="music_next">${esc(t("music_next"))}</span></button>`;
+  const paint = () => { const ul = root.querySelector(".mlist"); if (!ul) return; ul.innerHTML = TRACKS.map(row).join(""); root.querySelector(".mnow").innerHTML = nowHTML(); const c = root.querySelector(".mctrl"); if (!c.contains(document.activeElement) || document.activeElement.type !== "range") c.innerHTML = ctrl(); };
   root.innerHTML = `<div class="sheet-dim" data-close></div>
     <div class="sheet mbox" role="dialog" aria-modal="true" aria-labelledby="sheet-h"><span class="grab"></span>
-    <h2 id="sheet-h"><span data-k="music_box">🎵 ${esc(t("music_box"))}</span>${uiKoBtn()}</h2><p data-k="music_hint">${esc(t("music_hint"))}</p>
+    <h2 id="sheet-h"><span data-k="music_box">🎵 ${esc(t("music_box"))}</span>${uikoChip()}<button class="mclose" data-close aria-label="${esc(t("close_word"))}">✕</button></h2>
+    <div class="mctrl">${ctrl()}</div>
+    <p class="mnow">${nowHTML()}</p>
+    <p data-k="music_hint">${esc(t("music_hint"))}</p>
     <ul class="mlist">${TRACKS.map(row).join("")}</ul></div>`;
   onBgmChange(paint);
   const close = () => { onBgmChange(null); root.innerHTML = ""; document.removeEventListener("keydown", key); };
   const key = e => { if (e.key === "Escape") close(); };
   document.addEventListener("keydown", key);
+  root.oninput = e => { const v = e.target.closest?.("[data-mb=vol]"); if (v) setBgmVol(+v.value / 100); };
   root.onclick = async e => {
     if (e.target.closest("[data-close]")) return close();
+    const mb = e.target.closest("[data-mb]");
+    if (mb?.dataset.mb === "onoff") { setBgm(!bgmOn()); return setTimeout(paint, 50); }
+    if (mb?.dataset.mb === "next") { playNext(); return setTimeout(paint, 300); }
     const pb = e.target.closest("[data-play]");
-    if (pb) { const i = +pb.dataset.play; if (bgmNow() === i) setBgm(false); else playTrack(i); return setTimeout(paint, 50); }
+    if (pb) { const i = +pb.dataset.play; if (bgmNow() === i) setBgm(false); else playTrack(i); return setTimeout(paint, 300); }
     const db = e.target.closest("[data-dl]");
     if (db) { const x = TRACKS[+db.dataset.dl]; db.disabled = true;
       try { const b = await (await fetch(paths.bgm(x.file))).blob(), u = URL.createObjectURL(b), a = Object.assign(document.createElement("a"), { href: u, download: `malmun_${x.file.replace(/^bgm_/, "")}` }); document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(u), 4000); }

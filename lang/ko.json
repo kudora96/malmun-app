@@ -270,5 +270,12 @@
  "bgm_ver_calm": "잔잔",
  "bgm_ver_bright": "밝은",
  "bgm_ver_lively": "신나는",
- "bgm_short": "음악"
+ "bgm_short": "음악",
+ "music_on": "음악 켜짐",
+ "music_off": "음악 꺼짐",
+ "music_vol": "음량",
+ "music_next": "다음 곡",
+ "music_now": "지금 나오는 곡:",
+ "music_none": "지금은 음악이 꺼져 있어요",
+ "music_wait": "곧 나와요(화면을 한 번 누르면 시작)"
 }

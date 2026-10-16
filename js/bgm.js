@@ -8,7 +8,7 @@
 import { audioCtx } from "./wake.js?v=1015.6";
 import { paths } from "./paths.js?v=1015.6";
 
-const KEY = "malmun.bgm", LAST = "malmun.bgmLast";
+const KEY = "malmun.bgm", LAST = "malmun.bgmLast", VOL = "malmun.bgmVol";
 // 곡 목록(늘리기 = 한 줄) — song = 곡 이름(한국어 · 고유 이름) · inst = 악기 열쇠(bgm_inst_*) · ver = 결(bgm_ver_*) · loopStart·loopEnd 는 catalog 그대로
 export const TRACKS = [ // 소리부 05_audio/_bgm/bgm_catalog.json(10-15 · 민요만 · 안개·별빛·물결 뺌) · ver = 잔잔(공부 화면)·밝은(첫 화면·목록)·신나는(음악 상자에서만)
   { file: "bgm_arirang_a.mp3", song: "아리랑", inst: "bell", ver: "calm", loopStart: 1.0, loopEnd: 97.0 },
@@ -37,6 +37,9 @@ export const TRACKS = [ // 소리부 05_audio/_bgm/bgm_catalog.json(10-15 · 민
 const SCENE_GAIN = { "": 1, list: 1, diag: 0 }, STUDY = 0.32, DUCK = 0.3; // 공부 화면 ≈ −10dB · 앱 소리 날 때 그 위에서 ≈ −10dB 더
 const UP = 0.8, DOWN = 0.2; // 음량 바꾸는 시간(초) — 내릴 땐 빨리
 
+// 음량(대표님 10-16 · 🎵 음악 상자 막대 · 0~1 · 기억 · 앱 전체 — 공부 화면·덕킹·녹음 0 은 이 값 위에서 그대로)
+export const bgmVol = () => { try { const v = parseFloat(localStorage.getItem(VOL)); return v >= 0 && v <= 1 ? v : 1; } catch { return 1; } };
+export function setBgmVol(v) { try { localStorage.setItem(VOL, String(Math.max(0, Math.min(1, v)))); } catch {} sync(); }
 export const bgmOn = () => { try { return localStorage.getItem(KEY) !== "0"; } catch { return true; } };
 const muted = () => /[?&]mute=1\b/.test(location.search) || (window.__sfxVolume ?? 1) < 0.01;
 
@@ -51,7 +54,7 @@ const pick = () => { let last = cur; if (last < 0) try { last = +(localStorage.g
 
 const playOk = () => bgmOn() && !muted() && document.visibilityState === "visible";
 // 지금 있어야 할 음량(0~1) — 화면 · 앱 소리 · 마이크 · 막음(hold)
-const level = () => { for (const m of media) if (!m.isConnected || m.paused || m.ended) media.delete(m); /* 화면에서 사라진 영상·소리(멈춤 신호 없이 빠짐)는 뺌 — 안 빼면 덕킹이 안 풀림(ur 320 점검) */ if (mic || holds) return 0; const g = scene in SCENE_GAIN ? SCENE_GAIN[scene] : STUDY; return g * (sounds > 0 || media.size ? DUCK : 1) * Math.min(1, window.__sfxVolume ?? 1); };
+const level = () => { for (const m of media) if (!m.isConnected || m.paused || m.ended) media.delete(m); /* 화면에서 사라진 영상·소리(멈춤 신호 없이 빠짐)는 뺌 — 안 빼면 덕킹이 안 풀림(ur 320 점검) */ if (mic || holds) return 0; const g = scene in SCENE_GAIN ? SCENE_GAIN[scene] : STUDY; return g * bgmVol() * (sounds > 0 || media.size ? DUCK : 1) * Math.min(1, window.__sfxVolume ?? 1); };
 function setGain(now = false) {
   target = level(); if (!gain) return;
   const ctx = audioCtx(), t0 = ctx.currentTime, g = gain.gain, v = g.value;
@@ -98,10 +101,12 @@ function sync() {
 export function bgmScene(name) { const v0 = poolVer(); scene = name; if (poolVer() !== v0 && next >= 0) { next = pick(); load(next); } sync(); } // 결이 바뀌면 다음 곡도 그 결로
 // 음악이 절대 섞이면 안 되는 동안(그 자리에서 0) — 끝나면 release()
 export function hold() { holds++; sync(); let done = false; return () => { if (done) return; done = true; holds = Math.max(0, holds - 1); sync(); }; }
-export function setBgm(on) { try { localStorage.setItem(KEY, on ? "1" : "0"); } catch {} document.querySelectorAll("[data-act=bgm]").forEach(b => b.setAttribute("aria-pressed", String(bgmOn()))); sync(); paintBox(); }
+export function setBgm(on) { try { localStorage.setItem(KEY, on ? "1" : "0"); } catch {} document.querySelectorAll("[data-act=bgm]").forEach(b => (b.dataset.on = String(bgmOn()))); sync(); paintBox(); }
 // 🎵 음악 상자에서 이 곡 듣기(꺼져 있으면 켬) · 지금 나는 곡이면 그대로
-export function playTrack(i) { if (!bgmOn()) { try { localStorage.setItem(KEY, "1"); } catch {} document.querySelectorAll("[data-act=bgm]").forEach(b => b.setAttribute("aria-pressed", "true")); } if (src && cur === i) return; stop(true); next = -1; start(i); }
+export function playTrack(i) { if (!bgmOn()) { try { localStorage.setItem(KEY, "1"); } catch {} document.querySelectorAll("[data-act=bgm]").forEach(b => (b.dataset.on = "true")); } if (src && cur === i) return; stop(true); next = -1; start(i); }
 export const bgmNow = () => (src ? cur : -1);
+// ⏭ 다음 곡(음악 상자) — 지금 화면 결에서 다른 곡으로 바로
+export function playNext() { if (!bgmOn()) return; const n = next >= 0 ? next : pick(); stop(true); next = -1; start(n); }
 let boxPaint = null; export const onBgmChange = f => { boxPaint = f; };
 function paintBox() { try { boxPaint?.(); } catch {} }
 
@@ -114,4 +119,4 @@ addEventListener("malmun:snd", e => { sounds = Math.max(0, sounds + (e.detail ||
 { const md = navigator.mediaDevices, gum = md?.getUserMedia?.bind(md), live = new Set(); let tm = 0;
   const check = () => { for (const s of live) if (!s.getTracks().some(x => x.readyState === "live")) live.delete(s); const m = live.size > 0; if (m !== mic) { mic = m; sync(); } if (!live.size && tm) { clearInterval(tm); tm = 0; } };
   if (gum) md.getUserMedia = c => { mic = true; sync(); return gum(c).then(s => { if (c?.audio) { live.add(s); if (!tm) tm = setInterval(check, 250); } else check(); return s; }, e => { check(); throw e; }); }; }
-export const bgmState = () => ({ playing: !!src, scene, holds, on: bgmOn(), track: cur >= 0 ? TRACKS[cur].file : null, next: next >= 0 ? TRACKS[next].file : null, gain: src ? +target.toFixed(3) : 0, live: gain ? +gain.gain.value.toFixed(3) : 0, mic, duck: sounds > 0 || media.size > 0 }); // 점검 도구용
+export const bgmState = () => ({ playing: !!src, scene, holds, on: bgmOn(), track: cur >= 0 ? TRACKS[cur].file : null, next: next >= 0 ? TRACKS[next].file : null, gain: src ? +target.toFixed(3) : 0, vol: bgmVol(), live: gain ? +gain.gain.value.toFixed(3) : 0, mic, duck: sounds > 0 || media.size > 0 }); // 점검 도구용

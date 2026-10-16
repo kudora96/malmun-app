@@ -1,6 +1,6 @@
 import { t } from "../i18n.js?v=1015.6";
 import { esc } from "../text.js?v=1015.6";
-import { langChip, openLangSheet, uiKoBtn, musicBtn } from "../ui.js?v=1015.6";
+import { langChip, openLangSheet, uiKoBtn } from "../ui.js?v=1015.6";
 import { rerender } from "../main.js?v=1015.6";
 
 const KEY = "malmun.started";
@@ -18,7 +18,6 @@ export default function welcome(app) {
       <span class="say">${esc(t("welcome_say"))}</span>
     </div>
     <a class="cta" href="#/list">${esc(t("start"))}</a>
-    ${musicBtn()}
     <div class="ledge"></div>
   </section>`;
   app.querySelector("[data-act=lang]").onclick = () => openLangSheet(rerender);

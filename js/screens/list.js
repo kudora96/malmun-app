@@ -1,7 +1,7 @@
 import { t } from "../i18n.js?v=1015.6";
 import { esc } from "../text.js?v=1015.6";
 import { catalog } from "../data.js?v=1015.6";
-import { langChip, openLangSheet, progress, uiKoBtn, musicBtn } from "../ui.js?v=1015.6";
+import { langChip, openLangSheet, progress, uiKoBtn } from "../ui.js?v=1015.6";
 import { rerender } from "../main.js?v=1015.6";
 import { VERSION } from "../version.js?v=1015.6";
 import { recCount, recDelEpisode } from "../recstore.js?v=1015.6";
@@ -25,7 +25,6 @@ export default async function list(app, unit = "L01-00") {
       const inner = `<span class="n">${esc(e.id.slice(-2))}</span><span class="ko" lang="ko">${esc(e.title)}</span><span class="st">${e.ready ? "" : esc(t("soon"))}</span>`;
       return `<li>${e.ready ? `<a href="#/learn/${e.id}">${inner}</a>` : `<div class="soon">${inner}</div>`}</li>`;
     }).join("")}</ol>
-    <p class="mboxp">${musicBtn()}</p>
     ${first ? `<p class="delall"><button data-ep="${esc(first.id)}" hidden>🗑 ${esc(t("del_all"))}</button></p>` : ""}
     <p class="ver">v${esc(VERSION)}</p>
   </section>`;
