@@ -38,8 +38,8 @@
       const dn = Q => { const o = []; for (let i = 1; i < Q.length; i++) { const a = Q[i - 1], b = Q[i], k = Math.max(1, Math.ceil(Math.hypot(b.x - a.x, b.y - a.y) / 0.003)); for (let m = 0; m < k; m++) o.push({ x: a.x + (b.x - a.x) * m / k, y: a.y + (b.y - a.y) * m / k }); } o.push(Q.at(-1)); return o; }; // 손가락처럼 촘촘한 점(0.3%)
       for (const tk of T) { const jr = wr.handScore(ch, P.map(Q => Object.assign(dn(Q).map(q => [q.x + rnd() * 0.015, q.y + rnd() * 0.015, 1]), { tool: tk, w: TW[tk] })), 300), j = jr.pct, jl = jr.lineP, sm = wr.handScore(ch, P.map(Q => Object.assign(dn(Q).map(q => [q.x, q.y, 1]), { tool: tk, w: TW[tk] })), 300).lineP;
         const b = wr.handScore(ch, P.map((Q, i) => Object.assign(Q.map((q, k) => { const r = k / Math.max(1, Q.length - 1); return [q.x + (i % 2 ? 0.1 : -0.1) * r, q.y + (i % 2 ? -0.06 : 0.06) * r, 1]; }), { tool: tk, w: TW[tk] }))).pct;
-        if (!(j >= 80 && jl < 95 && jl >= 60 && sm >= 98)) jitLow.push(`${ch}(${tk} 모양 ${j} 선 ${jl} · 바른 선 ${sm})`); if (b >= 80) bendHigh.push(`${ch}(${tk} ${b})`); } }
-    ok(!jitLow.length, "ⓕ 바르게 + 손 떨림(점마다 ±0.75% · 대표님 10-15 매끄러움) = 통과지만 선 95 아래(★ 없음) · 같은 획 떨림 없으면 선 98↑", jitLow.join(" "));
+        const big = wr.handScore(ch, P.map(Q => Object.assign(dn(Q).map(q => [q.x + rnd() * 0.03, q.y + rnd() * 0.03, 1]), { tool: tk, w: TW[tk] })), 300); if (!(jr.pass && j >= 95 && sm >= 99 && big.lineP < 95 && big.total < j)) jitLow.push(`${ch}(${tk} 떨림 ${j} · 많이 떨림 ${big.total}·선 ${big.lineP} · 바른 선 ${sm})`); /* 대표님 10-16 = 살짝 떨림은 봐줌(95↑) · 많이 떨면 깎임 */ if (b >= 80) bendHigh.push(`${ch}(${tk} ${b})`); } }
+    ok(!jitLow.length, "ⓕ 바르게 + 살짝 떨림(점마다 ±0.75%) = 95↑ 통과 · 많이 떨림(±1.5%) = 선 95 아래·점수 깎임 · 떨림 없으면 선 99↑(대표님 10-16 「눈에 띄게 떨릴 때만」)", jitLow.join(" "));
     ok(!bendHigh.length, "ⓕ 획 끝 10% 휨 = 80 아래(붓도)", bendHigh.join(" "));
     ok(n >= 90, `글자 ${n}자 × 도구 3 잼`, `${chars.length}자 중 획 자료 있는 것`);
     ok(!bad.a.length, "ⓐ 자료 획 길 그대로 = 100", bad.a.join(" "));

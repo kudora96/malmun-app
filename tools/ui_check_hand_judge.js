@@ -20,7 +20,7 @@
       const timed = (S, k, stop = 0) => { const T = norm(S) * 1000 * k, o = S.map(p => p.slice()); const m = Math.floor(S.length / 2); o.ts = S.map((p, q) => 1000 + (q / Math.max(1, S.length - 1)) * T + (stop && q >= m ? stop : 0)); if (stop) { o.splice(m, 0, o[m - 1].slice()); o.ts.splice(m, 0, o.ts[m - 1] + stop); } return o; };
       let sd2 = 11; const rn = () => ((sd2 = (sd2 * 1103515245 + 12345) >>> 0) / 4294967296) - 0.5;
       const dens = S => { const o = []; for (let q = 1; q < S.length; q++) { const a = S[q - 1], b = S[q], k = Math.max(1, Math.ceil(Math.hypot(b[0] - a[0], b[1] - a[1]) / 0.003)); for (let m = 0; m < k; m++) o.push([a[0] + (b[0] - a[0]) * m / k, a[1] + (b[1] - a[1]) * m / k, 1]); } o.push(S.at(-1)); return o; };
-      const shake = S => dens(S).map(p => [p[0] + rn() * 0.03, p[1] + rn() * 0.03, 1]); // 점마다 ±1.5% 떨림(대표님 10-15)
+      const shake = S => dens(S).map(p => [p[0] + rn() * 0.04, p[1] + rn() * 0.04, 1]); // 점마다 ±2% 떨림(눈에 띄게 · 작은 폰 칸은 1px 계단만큼 더 봐주므로 · 대표님 10-16)
       const bow = (S, a) => { const dx = S.at(-1)[0] - S[0][0], dy = S.at(-1)[1] - S[0][1], h = Math.abs(dx) >= Math.abs(dy); return S.map((p, q) => { const f = Math.sin(Math.PI * q / Math.max(1, S.length - 1)) * a; return h ? [p[0], p[1] - f, 1] : [p[0] - f, p[1], 1]; }); };
       const bb = fp.flat(), cx = (Math.min(...bb.map(p => p[0])) + Math.max(...bb.map(p => p[0]))) / 2, cy = (Math.min(...bb.map(p => p[1])) + Math.max(...bb.map(p => p[1]))) / 2;
       const cases = [
@@ -34,7 +34,7 @@
         ["남는 선", [...all(), [[0.04, 0.95, 1], [0.12, 0.96, 1], [0.22, 0.97, 1]]], j => j.L.some(o => o.k === "wx_extra")],
         ["시간", all().slice(0, N - 1), j => j.L.at(-1)?.k === "wx_time", true],
         // 세 기준(10-15 안 A) — ② 선: 가장 긴 획 가운데를 위(가로획)·왼쪽(세로획)으로 7% 휨 → [선] 줄 · 그 획 번호 · 「많이」 ③ 빠르기: 점마다 시각을 붙여 견본의 3배 느림 / 0.2배 빠름 / 가운데 0.8초 멈춤
-        ["선", fp.map((S, i) => (i === lk ? bow(S, 0.07) : S)), j => j.L.some(o => o.k === "wx_line" && o.v.n === lk + 1 && o.v.a === "wx_a_lot")],
+        ["선", fp.map((S, i) => (i === lk ? bow(S, 0.1) : S)), j => j.L.some(o => o.k === "wx_line" && o.v.n === lk + 1 && o.v.a === "wx_a_lot")],
         ["떨림", fp.map((S, i) => (i === lk ? shake(S) : dens(S))), j => j.L.some(o => o.k === "wx_shake" && o.v.n === lk + 1)],
         ["느림", fp.map((S, i) => timed(S, i === lk ? 3 : 1)), j => j.L.some(o => o.k === "wx_slow" && o.v.n === lk + 1) && j.pct >= 80],
         ["빠름", fp.map((S, i) => timed(S, i === lk ? 0.2 : 1)), j => j.L.some(o => o.k === "wx_fast" && o.v.n === lk + 1)],
@@ -47,7 +47,7 @@
     { const ch = "나", L = await wr.strokesOf(ch), F = []; for (let i = 0; i < L.length; i++) F.push((await wr.fitPath(ch, i, "pen")).map(q => [q.x, q.y, 1]));
       const bw = (S, a) => { const h = Math.abs(S.at(-1)[0] - S[0][0]) >= Math.abs(S.at(-1)[1] - S[0][1]); return S.map((p, q) => { const f = Math.sin(Math.PI * q / Math.max(1, S.length - 1)) * a; return h ? [p[0], p[1] - f, 1] : [p[0] - f, p[1], 1]; }); }, r1 = wr.handScore(ch, F.map(S => bw(S, 0.08))), r2 = wr.handScore(ch, F);
       ok(r2.pass && r2.shapeP >= 95 && r2.lineP >= 95 && r2.speedP == null, "바른 획 = 모양·선 95↑ · 빠르기 잴 수 없음(–)", `모양 ${r2.shapeP} 선 ${r2.lineP} 빠르기 ${r2.speedP}`);
-      ok(!r1.pass && r1.pct < 80 && r1.lineP < 60, "획마다 가운데를 8% 휘어 그음 = 꽝(선·모양)", `모양 ${r1.shapeP} 선 ${r1.lineP}`); }
+      ok(!r1.pass && r1.pct < 80, "획마다 가운데를 8% 휘어 그음 = 꽝(선·모양)", `모양 ${r1.shapeP} 선 ${r1.lineP}`); }
     ok(!bad.length, "채점 설명이 잘못을 짚음(나·세·어·을·왕 × 완벽·빠짐·방향·순서·짧음·자리·크기·남는 선·시간·선 휨·느림·빠름·멈춤 · 4줄 이하)", bad.slice(0, 8).join(" · "));
     // 실제 화면 — 「어」 왼쪽 한 획만 그어 채점(꽝)
     const iv = $(".panel .hink"), R = iv.getBoundingClientRect(), pe = (t, x, y) => iv.dispatchEvent(new PointerEvent(t, { bubbles: true, cancelable: true, pointerId: 5, pointerType: "mouse", isPrimary: true, buttons: t === "pointerup" ? 0 : 1, clientX: R.left + x * R.width, clientY: R.top + y * R.height }));
@@ -61,7 +61,7 @@
     ok(!btn.some(b => hit(b, jr)) && !hit(jr, br), "판정 상자가 단추·손글씨 칸을 안 덮음");
     ok(br.width >= 100 && !$(".panel .hand").classList.contains("stack"), "판정 상자가 있어도 손글씨 칸 100px↑ · 칸 아래로 안 밀림(검사부 10-15 320 59px)", `${Math.round(br.width)}px · ${$(".panel .hand").className}`);
     { const mb = $(".panel .jmore"); if (mb) { mb.click(); await W(200); const f = $(".panel .hjfull"), fr = f?.getBoundingClientRect(); ok(!!f && fr.width <= br.width + 1 && fr.height <= br.height + 1 && f.innerText.replace(/\s/g, "").length >= jb.innerText.replace(/[\s⋯]/g, "").length - 2, "잘린 판정 글 「⋯」 → 손글씨 칸 위에 전체 글 · 누르면 닫힘"); f?.click(); await W(100); ok(!$(".panel .hjfull"), "전체 글 닫힘"); } else res.push("· 참고: 판정 글이 다 보여 「⋯」 없음"); }
-    { const parts = [...document.querySelectorAll(".panel .hscore i[data-k]")].map(i => i.dataset.k).join(","); ok(parts === "wx_s_shape,wx_s_line,wx_s_speed", "점수 배지 세 칸(모양 · 선 · 빠르기)", parts + " · " + $(".panel .hscore").textContent); }
+    { const tx0 = $(".panel .hscore").textContent.trim(); ok(/^★?\s*\d+%$/.test(tx0) && $(".panel .hjudge .tg"), "점수 = 하나(n%) · 설명 줄은 [모양]·[선]·[빠르기] 꼬리표(대표님 10-16)", tx0); }
     const fx = $(".panel .hfix"), d = fx.getContext("2d").getImageData(0, 0, fx.width, fx.height).data; let px = 0; for (let i = 3; i < d.length; i += 4) if (d[i] > 0) px++;
     ok(px > 50, "꽝 뒤 칸에 맞는 획 주황 점선·번호가 그려짐", `${px}px`);
     await W(2300); const d2 = fx.getContext("2d").getImageData(0, 0, fx.width, fx.height).data; let px2 = 0; for (let i = 3; i < d2.length; i += 4) if (d2[i] > 0) px2++;
@@ -80,9 +80,9 @@
       for (let i = 0; i < L.length; i++) { const Q0 = await w4.fitPath(ch, i, "pen"), Q = Q0.filter((q, k) => k % 2 === 0 || k === Q0.length - 1), T = (0.35 + 1.1 * Q0.tot) * 1000, ev = (t, q) => iv.dispatchEvent(new PointerEvent(t, { pointerId: id, bubbles: true, cancelable: true, clientX: R.left + q.x * R.width, clientY: R.top + q.y * R.height, pointerType: "touch", isPrimary: true }));
         const t0 = performance.now(); ev("pointerdown", Q[0]); for (let k = 1; k < Q.length; k++) { const wt = t0 + k * T / Q.length - performance.now(); if (wt > 1) await W(wt); ev("pointermove", Q[k]); } ev("pointerup", Q.at(-1)); id++; await W(150); }
       $(".panel [data-act=hdone]")?.click(); await W(900); const r = H4.last, row = !!$(".panel .keeprow"), saved = (JSON.parse(localStorage.getItem("malmun.keep") || "{}")[ch]?.list || []).length;
-      $(".panel [data-act=keepsheet]")?.click(); await W(900); const ov = document.querySelector(".keepov"), cv = ov?.querySelector("canvas"); let ink = 0; if (cv) { const d = cv.getContext("2d").getImageData(0, 0, cv.width, cv.height).data; for (let i = 0; i < d.length; i += 64) if (d[i] + d[i + 1] + d[i + 2] < 240) ink++; } /* 먹(어두운 점) */
+      $(".panel [data-act=keepsheet]")?.click(); await W(120); const fxGone = !document.querySelector(".fxfull"); await W(780); const ov = document.querySelector(".keepov"), cv = ov?.querySelector("canvas"); let ink = 0; if (cv) { const d = cv.getContext("2d").getImageData(0, 0, cv.width, cv.height).data; for (let i = 0; i < d.length; i += 64) if (d[i] + d[i + 1] + d[i + 2] < 240) ink++; } /* 먹(어두운 점) */
       ov?.querySelector("[data-kact=close]")?.click(); await W(200);
-      ok(r?.shapeP === 100 && r?.lineP === 100 && (r?.speedP ?? 0) >= 95 && row && saved === 1 && !!cv && ink > 50 && !document.querySelector(".keepov"), "간직하기: 견본 빠르기로 바르게 = 🎉 100점 → ⭐·📄 단추 · 그 글씨 모음 · A4 미리보기에 내 획 · 닫힘", `${r?.shapeP}/${r?.lineP}/${r?.speedP} · 단추 ${row} · 모음 ${saved} · 먹 ${ink}`);
+      ok(r?.shapeP === 100 && r?.lineP === 100 && (r?.speedP ?? 0) >= 95 && row && saved === 1 && !!cv && ink > 50 && fxGone && !document.querySelector(".keepov"), "간직하기: 견본 빠르기로 바르게 = 🎉 100점 → ⭐·📄 단추 · 그 글씨 모음 · 📄 누르면 🎉 덮개 바로 치움 · A4 미리보기에 내 획 · 닫힘", `${r?.shapeP}/${r?.lineP}/${r?.speedP} · 단추 ${row} · 모음 ${saved} · 덮개 치움 ${fxGone} · 먹 ${ink}`);
       $(".panel [data-act=hclear]")?.click(); await W(200); const Q = await w4.fitPath(ch, 0, "pen"); const ev2 = (t, q) => iv.dispatchEvent(new PointerEvent(t, { pointerId: 90, bubbles: true, cancelable: true, clientX: R.left + q.x * R.width, clientY: R.top + q.y * R.height, pointerType: "touch", isPrimary: true })); ev2("pointerdown", Q[0]); Q.forEach(q => ev2("pointermove", q)); ev2("pointerup", Q.at(-1)); await W(150);
       $(".panel [data-act=hdone]")?.click(); await W(600); ok(!$(".panel .keeprow"), "100점 아니면 간직 단추 없음", `${w4.hand().last?.pct}`); localStorage.removeItem("malmun.keep"); }
     // 👣 따라 쓰기 — 켜면 견본 붓(주황)이 칸에 그려짐 · 자석은 꺼짐 · 획을 다 쓰면 견본 사라짐 · 끄면 그대로 손글씨

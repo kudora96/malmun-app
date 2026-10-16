@@ -62,6 +62,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
       <div class="fstip" role="status" hidden><span class="who">${spkHtml("선생님")}</span><p>${esc(t("subs_tip"))}</p><button class="x" data-act="tipx" aria-label="${esc(t("close_word"))}">✕</button></div></div></div><div class="vsub" hidden aria-hidden="true"><div class="in"></div></div></div>
     <div class="panel" hidden></div>
     </div>
+    <button class="bigb" data-act="big" aria-pressed="false" hidden aria-label="${esc(t("big_view"))}" title="${esc(t("big_view"))}"><span aria-hidden="true">⛶</span><span class="off" data-k="big_short">${esc(t("big_short"))}</span><span class="on" data-k="big_off">${esc(t("big_off"))}</span></button>
     <div class="seek" data-off><span class="t0">0:00</span><div class="trk" aria-label="seek"><div class="rail"><i></i></div></div><span class="t1">0:00</span></div>
     </div>
     <ol class="lines">${L.map((l, i) => `<li class="line sp-${SPEAKER[l.speaker] || "x"} ${l.speaker === "선생님" ? "" : "right"}" data-i="${i}" data-peek="👁 ${esc(t("subs_peek"))}">
@@ -110,8 +111,10 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   }
   // 지금 줄 = 영상(+모드 줄) 바로 아래 · 앞 줄들은 영상 뒤로 올라간다
   const stick = app.querySelector(".stick"), list = app.querySelector(".lines");
+  // 폰 가로(높이 ≤ 500 · 크게 보기 아닐 때) = 왼쪽 영상 기둥 · 오른쪽 줄 목록 두 칸(대표님 10-16) — 줄 목록 위에 덮는 칸이 없으니 「영상 아래」 = 화면 위
+  const mqSide = matchMedia("(orientation: landscape) and (max-height: 500px)"), side = () => mqSide.matches && !st.big, stickH = () => (side() ? 0 : stick.offsetHeight);
   function underVideo(el, instant = false) {
-    const to = Math.max(0, Math.min(el.getBoundingClientRect().top + scrollY - stick.offsetHeight - 10, document.documentElement.scrollHeight - innerHeight));
+    const to = Math.max(0, Math.min(el.getBoundingClientRect().top + scrollY - stickH() - 10, document.documentElement.scrollHeight - innerHeight));
     cancelAnimationFrame(st.anim); clearTimeout(st.animEnd);
     if (instant || reduce || document.hidden) return scrollTo(0, to);
     // 화면 그리기 박자가 멈춰도(가려진 창 · 느린 폰) 제자리에 가 있게 — 움직임이 끝날 시각에 한 번 더 맞춘다
@@ -123,7 +126,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   }
   // 마지막 줄도 영상 바로 아래까지 올라올 수 있게 목록 아래 여백 = 화면에서 영상을 뺀 높이
   const ctrlBar = app.querySelector(".ctrl");
-  const pad = () => { list.style.paddingBottom = Math.max(ctrlBar.offsetHeight + 24, innerHeight - stick.offsetHeight - 40) + "px"; }; // 맨 끝 줄도 아래 막대 위로 다 보이게
+  const pad = () => { list.style.paddingBottom = Math.max(ctrlBar.offsetHeight + 24, innerHeight - stickH() - 40) + "px"; }; // 맨 끝 줄도 아래 막대 위로 다 보이게
   // 지금 줄이 위 창과 아래 막대 사이에 다 보이지 않으면 그 자리로(손으로 스크롤 중이면 4초 기다림 — handScroll 그대로)
   // 기준(본부 10-05): 줄 카드 전체(아래끝 포함)가 영상 아래~막대 위에 보일 것 · 아니면 카드 위끝을 영상 바로 아래로(카드가 그 사이보다 길어도 위끝 맞춤)
   // 쓰기 창이 열려 있으면 지금 자막 카드(글 전부 + 아래 메뉴 줄)가 쓰기 창과 아래 막대 사이에 다 들어가게 — 길면 카드 안 글을 줄임(10-06 본부·투덜이)
@@ -173,8 +176,9 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     kids.forEach(c => c.style.removeProperty("min-height")); // 아래 「창 높이 채움」은 잴 때 빼고
     // 설명 = 칸을 꽉 채우는 가장 큰 크기(짧은 줄은 키우고 긴 줄은 줄임 · 15px → 최대 20px · 칩·간격도 같은 비율 — 본부 10-06) · 말하기 = 넘칠 때만 줄임
     const uk = panel.querySelector(".v9bar .chip.uiko"), ukH = z => uk && (uk.style.minHeight = `${(32 / z).toFixed(1)}px`); // ⇄한 = 줄여도 화면에서 32px(본부 1014.2 누르기 쉽게)
-    const fits = z => { kids.forEach(c => (c.style.zoom = String(z))); ukH(z); return panel.scrollHeight <= panel.clientHeight; };
-    let lo = 0.5, hi = kind === "explain" ? 1.33 : 1;
+    const vb = st.big && kind === "speak" ? panel.querySelector(".whead") : null; // 크게 말하기 = 머리 줄 폭 안에서만 키움(설명 막대는 크게일 때 두 줄로 꺾여도 됨) // 크게 보기 = 위 막대가 옆으로 넘치지 않는 데까지만 키움(보통 화면은 그대로)
+    const fits = z => { kids.forEach(c => (c.style.zoom = String(z))); ukH(z); return panel.scrollHeight <= panel.clientHeight && (!vb || vb.scrollWidth <= vb.clientWidth + 1); };
+    let lo = 0.5, hi = kind === "explain" ? (st.big ? 1.7 : 1.33) : st.big ? 1.15 : 1; // 크게 설명 = 화면 높이를 글이 다 쓰게 // 크게 보기 말하기 = 과제 글·단추도 키움
     if (fits(hi)) lo = hi; else for (let k = 0; k < 8; k++) { const m = (lo + hi) / 2; if (fits(m)) lo = m; else hi = m; }
     lo = Math.floor(lo * 1000) / 1000;
     kids.forEach(c => (lo === 1 ? c.style.removeProperty("zoom") : (c.style.zoom = String(lo)))); ukH(lo);
@@ -186,7 +190,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   function keepVisible(i, { force = false } = {}) {
     const el = items[i]; if (!el || (!force && Date.now() - st.handScroll <= 4000)) return;
     pad(); fitCard(i);
-    const r = el.getBoundingClientRect(), top = stick.getBoundingClientRect().bottom, bot = ctrlBar.getBoundingClientRect().top;
+    const r = el.getBoundingClientRect(), top = side() ? 0 : stick.getBoundingClientRect().bottom, bot = side() ? innerHeight : ctrlBar.getBoundingClientRect().top;
     const fits = r.height <= bot - top;
     if (st.panel ? Math.abs(r.top - top - 10) > 14 : r.top < top - 1 || (fits ? r.bottom > bot + 1 : r.top > top + 12)) underVideo(el); // 쓰기 중 = 언제나 쓰기 창 바로 아래
   }
@@ -506,7 +510,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     st.panel?.cleanup?.();
     const mine = (st.panel = { kind, i });
     vwrap.hidden = true; panel.hidden = false; panel.className = `panel ${kind}${kind === "explain" && L[i].v9 ? " v9" : ""}${" fitting"}`; if (kind !== "explain") panel.innerHTML = ""; // 앞 창 내용이 새 창 크기로 잠깐 넘쳐 보이지 않게 setTimeout(() => st.panel === mine && panel.classList.remove("fitting"), 1500); // 글 크기 맞출 때까지 안 보이게(늦어도 1.5초 뒤엔 보임)
-    markButtons();
+    markButtons(); setTimeout(() => placeBig(st.panel), 0); // ⛶ 칩 = 그 창 머리 줄 ♪ 앞(창이 그려진 뒤) · 폰 가로면 저절로 크게
     if (kind === "explain") {
       panel.innerHTML = explainHTML(i);
       st.sayAt = null; if (L[i].say?.ko) sylAt(ep, `${ep}_${String(L[i].id).padStart(2, "0")}_say`, L[i].say.ko).then(a => { if (st.panel === mine) st.sayAt = a; }).catch(() => {}); // 말해 보세요 문장 견본 소리 음절 시각(노래방 칠)
@@ -527,11 +531,44 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     if (!st.panel) return;
     if (!fromNav) navPop(); // 단추로 닫으면 쌓아 둔 뒤로 가기 칸도 걷어 냄
     st.panel.cleanup?.(); ex.stop(); clearTimeout(st.gap); st.gap = 0; st.panel = null;
+    setBig(false); bigB.hidden = true; bigHome.before(bigB); // 창을 닫으면 크게 보기도 끝 · 칩은 제자리(숨김)
     panel.hidden = true; panel.innerHTML = ""; vwrap.hidden = false; vsubFill(st.cur); fitCard(st.cur); // 영상 창도 같은 카드 자리
     markButtons();
     v.currentTime = L[st.cur].start;
     pad(); underVideo(items[st.cur]); sync();
   }
+  // ⛶ 크게 보기(대표님 10-16 · 바깥 껍데기만 — 끄면 지금 화면과 1px 도 같음 · 기본 꺼짐) — 위 창(설명·말하기·쓰기)만 화면 가득 · 자막·재생 막대·줄 목록 숨김
+  //  켜는 길: 창 오른쪽 아래 ⛶ 단추 · 폰 가로(높이 ≤ 500)에서 창이 열려 있으면 저절로 · 끄는 길: 「작게」 · Esc · 창 닫기 · 세로로 돌림(저절로 켠 것만)
+  //  .scr.learn.big · <html>.bigview · window 「malmun:big」(detail.on) — 창 안 배치는 각 창이 이 신호로 다시 맞춤(쓰기 = 쓰기부)
+  const bigB = app.querySelector(".bigb"), bigHome = app.querySelector(".stick > .seek"), mqLand = matchMedia("(orientation: landscape) and (max-height: 500px)");
+  let bigOn = false, bigAuto = false;
+  function setBig(on, auto = false) {
+    on = !!on && !!st.panel; if (on === bigOn) { if (on && !auto) bigAuto = false; return; }
+    bigOn = on; bigAuto = on && auto; st.big = on;
+    const sc = app.querySelector(".scr.learn"); sc.classList.toggle("big", on); document.documentElement.classList.toggle("bigview", on);
+    if (on) sc.dataset.orient = orient(); else delete sc.dataset.orient; // 쓰기부 약속(10-16): 크게일 때 방향 land|port
+    bigB.setAttribute("aria-pressed", String(on));
+    dispatchEvent(new CustomEvent("malmun:big", { detail: { on, orient: orient() } }));
+    requestAnimationFrame(() => requestAnimationFrame(() => { st.uiFit = false; const v9 = st.panel?.kind === "explain" && L[st.panel.i]?.v9; if (v9) v9Fit(); fitPanel(); if (v9) v9Fit(); }));
+  }
+  // ⛶ 칩 자리 = 위 창 머리 줄의 ♪ 앞(보통·크게 같은 자리 · 떠 있는 단추 없음 · 본부 10-16) — 창 내용이 늦게 그려져도(말하기·쓰기) 기다렸다가 넣고 그 창 머리 줄 맞춤을 다시
+  function placeBig(mine, n = 0) {
+    if (st.panel !== mine) return;
+    const head = panel.querySelector(".chip.bgmb"); if (!head) return n < 40 && setTimeout(() => placeBig(mine, n + 1), 100);
+    head.before(bigB); bigB.hidden = false;
+    if (matchMedia("(orientation: landscape) and (max-height: 500px)").matches) return setBig(true, true);
+    dispatchEvent(new CustomEvent("malmun:big", { detail: { on: bigOn, orient: orient() } })); // 머리 줄에 칩이 늘었음 → 말하기·쓰기 머리 줄 다시 맞춤
+    requestAnimationFrame(() => { if (st.panel?.kind === "explain" && L[st.panel.i]?.v9) v9Fit(); fitPanel(); });
+  }
+  const orient = () => (innerWidth > innerHeight ? "land" : "port");
+  // 크게 연 채 폰을 돌리면 방향 표시·신호 다시(쓰기 칸 배치 · 글 크기 맞춤)
+  const onTurn = () => { if (!bigOn) return; const sc = app.querySelector(".scr.learn"), o = orient(); if (sc.dataset.orient === o) return; sc.dataset.orient = o; dispatchEvent(new CustomEvent("malmun:big", { detail: { on: true, orient: o } })); requestAnimationFrame(() => { st.uiFit = false; if (st.panel?.kind === "explain" && L[st.panel.i]?.v9) v9Fit(); fitPanel(); }); };
+  addEventListener("resize", onTurn);
+  const onLand = () => { if (mqLand.matches) { if (st.panel) setBig(true, true); } else if (bigAuto) setBig(false); };
+  mqLand.addEventListener?.("change", onLand);
+  const onBigKey = e => { if (e.key === "Escape" && bigOn) { e.stopPropagation(); setBig(false); } };
+  document.addEventListener("keydown", onBigKey, true);
+  bigB.addEventListener("click", e => { e.stopPropagation(); setBig(!bigOn); });
   // 카드 안 말하기(녹음 → 점수 → 내 목소리) — js/recorder.js
   let sp = null; // { i, ctl, blob, audio, saved }
   // 시도 번호 + 받아쓰기 끊기(검사부 10-11) — 「확인 중…」 동안 카드를 닫거나 새로 녹음하면 옛 결과는 버림 · srOnBlob 도 멈춤
@@ -628,9 +665,10 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   function v9Fit() {
     const bar = panel.querySelector(".v9bar"); if (!bar) return;
     const over = () => bar.scrollWidth > bar.clientWidth + 1;
-    bar.classList.remove("nok", "nocw");
+    bar.classList.remove("nok", "nocw", "tight");
     if (over()) bar.classList.add("nok");
     if (over()) bar.classList.add("nocw");
+    if (over()) bar.classList.add("tight"); // 그래도 넘치면 칩(⛶·♪·⇄·로마자) 안쪽 여백·사이를 좁힘(⛶ 칩이 늘어 ✕ 가 밀리던 것 · 10-16)
     if (pref("malmun.v9tip") !== "1") { const tip = panel.querySelector(".v9tip"); pref("malmun.v9tip", "1"); tip.hidden = false; setTimeout(() => { tip.hidden = true; }, 3000); }
   }
   const markPlay = (k = null) => panel.querySelectorAll(".v9bar .pb[data-x=ex]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.v === k)));
@@ -933,5 +971,5 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   if (reopen) openPanel(reopen.kind, reopen.i, { restore: reopen }); // ने⇄한 토글 전 창·자리
   else if (opts.explain) openPanel("explain", st.cur, { autoplay: true }); /* #/explain/{편}/{줄} = 그 줄 v9 설명 창(첫 터치 전엔 소리가 막힐 수 있음 — ▶ 로 시작) */
   const release = hold(); // 소리 장치 깨워 두기(첫소리 먹힘 방지)
-  return () => { clearTimeout(tipT); document.removeEventListener("fullscreenchange", onFsChange); clearInterval(edgeT); clearInterval(litT); clearInterval(seekTimer); clearInterval(hlTimer); document.removeEventListener("pointerdown", onDocDown, true); removeEventListener("popstate", onPop); removeEventListener("malmun:uilang", onUiLang); document.removeEventListener("visibilitychange", onHide); clearTimeout(st.animEnd); release(); st.panel?.cleanup?.(); ex.stop(); removeEventListener("resize", pad); removeEventListener("resize", onFit); clearInterval(timer); clearTimeout(st.gap); document.removeEventListener("keydown", onKey); seq.stop(); v.pause(); v.removeAttribute("src"); v.load(); };
+  return () => { removeEventListener("resize", onTurn); mqLand.removeEventListener?.("change", onLand); document.removeEventListener("keydown", onBigKey, true); document.documentElement.classList.remove("bigview"); clearTimeout(tipT); document.removeEventListener("fullscreenchange", onFsChange); clearInterval(edgeT); clearInterval(litT); clearInterval(seekTimer); clearInterval(hlTimer); document.removeEventListener("pointerdown", onDocDown, true); removeEventListener("popstate", onPop); removeEventListener("malmun:uilang", onUiLang); document.removeEventListener("visibilitychange", onHide); clearTimeout(st.animEnd); release(); st.panel?.cleanup?.(); ex.stop(); removeEventListener("resize", pad); removeEventListener("resize", onFit); clearInterval(timer); clearTimeout(st.gap); document.removeEventListener("keydown", onKey); seq.stop(); v.pause(); v.removeAttribute("src"); v.load(); };
 }
