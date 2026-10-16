@@ -265,6 +265,7 @@
  "music_stop": "멈춤",
  "music_dl": "내려받기",
  "music_dl_fail": "내려받지 못했어요. 다시 해 보세요.",
+ "music_on": "음악 켜짐",
  "bgm_inst_bell": "종",
  "bgm_inst_kalimba": "칼림바",
  "bgm_inst_gayageum": "가야금",
@@ -273,5 +274,11 @@
  "bgm_inst_piri": "피리",
  "bgm_ver_calm": "잔잔",
  "bgm_ver_bright": "밝은",
- "bgm_ver_lively": "신나는"
+ "bgm_ver_lively": "신나는",
+ "music_off": "음악 꺼짐",
+ "music_vol": "음량",
+ "music_next": "다음 곡",
+ "music_now": "지금 나오는 곡:",
+ "music_none": "지금은 음악이 꺼져 있어요",
+ "music_wait": "곧 나와요(화면을 한 번 누르면 시작)"
 }

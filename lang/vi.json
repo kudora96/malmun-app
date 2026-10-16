@@ -265,6 +265,7 @@
  "music_stop": "Dừng",
  "music_dl": "Tải về",
  "music_dl_fail": "Không tải về được. Hãy thử lại.",
+ "music_on": "Đang bật nhạc",
  "bgm_inst_bell": "Chuông",
  "bgm_inst_kalimba": "Kalimba",
  "bgm_inst_gayageum": "Gayageum (đàn tranh Hàn)",
@@ -273,5 +274,11 @@
  "bgm_inst_piri": "Piri (kèn Hàn)",
  "bgm_ver_calm": "Êm dịu",
  "bgm_ver_bright": "Tươi sáng",
- "bgm_ver_lively": "Sôi động"
+ "bgm_ver_lively": "Sôi động",
+ "music_off": "Đã tắt nhạc",
+ "music_vol": "Âm lượng",
+ "music_next": "Bài tiếp",
+ "music_now": "Đang phát:",
+ "music_none": "Hiện đang tắt nhạc",
+ "music_wait": "Sắp phát (chạm vào màn hình một lần)"
 }

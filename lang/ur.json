@@ -265,6 +265,7 @@
  "music_stop": "روکیں",
  "music_dl": "ڈاؤن لوڈ",
  "music_dl_fail": "ڈاؤن لوڈ نہیں ہو سکا۔ دوبارہ کوشش کریں۔",
+ "music_on": "موسیقی آن ہے",
  "bgm_inst_bell": "گھنٹیاں",
  "bgm_inst_kalimba": "کلمبا",
  "bgm_inst_gayageum": "گایاگم (کوریائی ستار)",
@@ -273,5 +274,11 @@
  "bgm_inst_piri": "پیری (کوریائی شہنائی)",
  "bgm_ver_calm": "پرسکون",
  "bgm_ver_bright": "روشن",
- "bgm_ver_lively": "پرجوش"
+ "bgm_ver_lively": "پرجوش",
+ "music_off": "موسیقی بند ہے",
+ "music_vol": "آواز کی سطح",
+ "music_next": "اگلا گانا",
+ "music_now": "ابھی چل رہا ہے:",
+ "music_none": "ابھی موسیقی بند ہے",
+ "music_wait": "جلد شروع ہوگا (اسکرین کو ایک بار چھوئیں)"
 }

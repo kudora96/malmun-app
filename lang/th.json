@@ -265,6 +265,7 @@
  "music_stop": "หยุด",
  "music_dl": "ดาวน์โหลด",
  "music_dl_fail": "ดาวน์โหลดไม่ได้ ลองอีกครั้ง",
+ "music_on": "เปิดเพลงอยู่",
  "bgm_inst_bell": "ระฆัง",
  "bgm_inst_kalimba": "คาลิมบา",
  "bgm_inst_gayageum": "คายากึม (พิณเกาหลี)",
@@ -273,5 +274,11 @@
  "bgm_inst_piri": "พีรี (ปี่เกาหลี)",
  "bgm_ver_calm": "สงบ",
  "bgm_ver_bright": "สดใส",
- "bgm_ver_lively": "สนุกสนาน"
+ "bgm_ver_lively": "สนุกสนาน",
+ "music_off": "ปิดเพลงอยู่",
+ "music_vol": "ระดับเสียง",
+ "music_next": "เพลงถัดไป",
+ "music_now": "กำลังเล่น:",
+ "music_none": "ตอนนี้ปิดเพลงอยู่",
+ "music_wait": "กำลังจะเล่น (แตะหน้าจอหนึ่งครั้ง)"
 }

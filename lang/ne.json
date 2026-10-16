@@ -265,6 +265,7 @@
  "music_stop": "रोक्नुहोस्",
  "music_dl": "डाउनलोड",
  "music_dl_fail": "डाउनलोड हुन सकेन। फेरि प्रयास गर्नुहोस्।",
+ "music_on": "संगीत चालु छ",
  "bgm_inst_bell": "घण्टी",
  "bgm_inst_kalimba": "कालिम्बा",
  "bgm_inst_gayageum": "गायागम (कोरियाली वीणा)",
@@ -273,5 +274,11 @@
  "bgm_inst_piri": "पिरि (कोरियाली सहनाई)",
  "bgm_ver_calm": "शान्त",
  "bgm_ver_bright": "उज्यालो",
- "bgm_ver_lively": "रमाइलो"
+ "bgm_ver_lively": "रमाइलो",
+ "music_off": "संगीत बन्द छ",
+ "music_vol": "आवाज",
+ "music_next": "अर्को गीत",
+ "music_now": "अहिले बजिरहेको गीत:",
+ "music_none": "अहिले संगीत बन्द छ",
+ "music_wait": "छिट्टै बज्छ (स्क्रिनमा एक पटक थिच्नुहोस्)"
 }
