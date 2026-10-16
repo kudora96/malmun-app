@@ -62,6 +62,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
       <div class="fstip" role="status" hidden><span class="who">${spkHtml("선생님")}</span><p>${esc(t("subs_tip"))}</p><button class="x" data-act="tipx" aria-label="${esc(t("close_word"))}">✕</button></div></div></div><div class="vsub" hidden aria-hidden="true"><div class="in"></div></div></div>
     <div class="panel" hidden></div>
     </div>
+    <button class="bigb" data-act="big" aria-pressed="false" hidden aria-label="${esc(t("big_view"))}" title="${esc(t("big_view"))}"><span aria-hidden="true">⛶</span><span class="off" data-k="big_short">${esc(t("big_short"))}</span><span class="on" data-k="big_off">${esc(t("big_off"))}</span></button>
     <div class="seek" data-off><span class="t0">0:00</span><div class="trk" aria-label="seek"><div class="rail"><i></i></div></div><span class="t1">0:00</span></div>
     </div>
     <ol class="lines">${L.map((l, i) => `<li class="line sp-${SPEAKER[l.speaker] || "x"} ${l.speaker === "선생님" ? "" : "right"}" data-i="${i}" data-peek="👁 ${esc(t("subs_peek"))}">
@@ -173,8 +174,9 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     kids.forEach(c => c.style.removeProperty("min-height")); // 아래 「창 높이 채움」은 잴 때 빼고
     // 설명 = 칸을 꽉 채우는 가장 큰 크기(짧은 줄은 키우고 긴 줄은 줄임 · 15px → 최대 20px · 칩·간격도 같은 비율 — 본부 10-06) · 말하기 = 넘칠 때만 줄임
     const uk = panel.querySelector(".v9bar .chip.uiko"), ukH = z => uk && (uk.style.minHeight = `${(32 / z).toFixed(1)}px`); // ⇄한 = 줄여도 화면에서 32px(본부 1014.2 누르기 쉽게)
-    const fits = z => { kids.forEach(c => (c.style.zoom = String(z))); ukH(z); return panel.scrollHeight <= panel.clientHeight; };
-    let lo = 0.5, hi = kind === "explain" ? 1.33 : 1;
+    const vb = st.big && kind === "explain" ? panel.querySelector(".v9bar") : null; // 크게 보기 = 위 막대가 옆으로 넘치지 않는 데까지만 키움(보통 화면은 그대로)
+    const fits = z => { kids.forEach(c => (c.style.zoom = String(z))); ukH(z); return panel.scrollHeight <= panel.clientHeight && (!vb || vb.scrollWidth <= vb.clientWidth + 1); };
+    let lo = 0.5, hi = kind === "explain" ? 1.33 : st.big ? 1.15 : 1; // 크게 보기 말하기 = 과제 글·단추도 키움
     if (fits(hi)) lo = hi; else for (let k = 0; k < 8; k++) { const m = (lo + hi) / 2; if (fits(m)) lo = m; else hi = m; }
     lo = Math.floor(lo * 1000) / 1000;
     kids.forEach(c => (lo === 1 ? c.style.removeProperty("zoom") : (c.style.zoom = String(lo)))); ukH(lo);
@@ -506,7 +508,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     st.panel?.cleanup?.();
     const mine = (st.panel = { kind, i });
     vwrap.hidden = true; panel.hidden = false; panel.className = `panel ${kind}${kind === "explain" && L[i].v9 ? " v9" : ""}${" fitting"}`; if (kind !== "explain") panel.innerHTML = ""; // 앞 창 내용이 새 창 크기로 잠깐 넘쳐 보이지 않게 setTimeout(() => st.panel === mine && panel.classList.remove("fitting"), 1500); // 글 크기 맞출 때까지 안 보이게(늦어도 1.5초 뒤엔 보임)
-    markButtons();
+    markButtons(); app.querySelector(".bigb").hidden = false; setTimeout(() => { if (st.panel && matchMedia("(orientation: landscape) and (max-height: 500px)").matches) setBig(true, true); }, 0); // ⛶ 단추 보임 · 폰 가로면 저절로 크게
     if (kind === "explain") {
       panel.innerHTML = explainHTML(i);
       st.sayAt = null; if (L[i].say?.ko) sylAt(ep, `${ep}_${String(L[i].id).padStart(2, "0")}_say`, L[i].say.ko).then(a => { if (st.panel === mine) st.sayAt = a; }).catch(() => {}); // 말해 보세요 문장 견본 소리 음절 시각(노래방 칠)
@@ -527,11 +529,30 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     if (!st.panel) return;
     if (!fromNav) navPop(); // 단추로 닫으면 쌓아 둔 뒤로 가기 칸도 걷어 냄
     st.panel.cleanup?.(); ex.stop(); clearTimeout(st.gap); st.gap = 0; st.panel = null;
+    setBig(false); bigB.hidden = true; // 창을 닫으면 크게 보기도 끝
     panel.hidden = true; panel.innerHTML = ""; vwrap.hidden = false; vsubFill(st.cur); fitCard(st.cur); // 영상 창도 같은 카드 자리
     markButtons();
     v.currentTime = L[st.cur].start;
     pad(); underVideo(items[st.cur]); sync();
   }
+  // ⛶ 크게 보기(대표님 10-16 · 바깥 껍데기만 — 끄면 지금 화면과 1px 도 같음 · 기본 꺼짐) — 위 창(설명·말하기·쓰기)만 화면 가득 · 자막·재생 막대·줄 목록 숨김
+  //  켜는 길: 창 오른쪽 아래 ⛶ 단추 · 폰 가로(높이 ≤ 500)에서 창이 열려 있으면 저절로 · 끄는 길: 「작게」 · Esc · 창 닫기 · 세로로 돌림(저절로 켠 것만)
+  //  .scr.learn.big · <html>.bigview · window 「malmun:big」(detail.on) — 창 안 배치는 각 창이 이 신호로 다시 맞춤(쓰기 = 쓰기부)
+  const bigB = app.querySelector(".bigb"), mqLand = matchMedia("(orientation: landscape) and (max-height: 500px)");
+  let bigOn = false, bigAuto = false;
+  function setBig(on, auto = false) {
+    on = !!on && !!st.panel; if (on === bigOn) { if (on && !auto) bigAuto = false; return; }
+    bigOn = on; bigAuto = on && auto; st.big = on;
+    app.querySelector(".scr.learn").classList.toggle("big", on); document.documentElement.classList.toggle("bigview", on);
+    bigB.setAttribute("aria-pressed", String(on));
+    dispatchEvent(new CustomEvent("malmun:big", { detail: { on } }));
+    requestAnimationFrame(() => requestAnimationFrame(() => { st.uiFit = false; const v9 = st.panel?.kind === "explain" && L[st.panel.i]?.v9; if (v9) v9Fit(); fitPanel(); if (v9) v9Fit(); }));
+  }
+  const onLand = () => { if (mqLand.matches) { if (st.panel) setBig(true, true); } else if (bigAuto) setBig(false); };
+  mqLand.addEventListener?.("change", onLand);
+  const onBigKey = e => { if (e.key === "Escape" && bigOn) { e.stopPropagation(); setBig(false); } };
+  document.addEventListener("keydown", onBigKey, true);
+  bigB.addEventListener("click", e => { e.stopPropagation(); setBig(!bigOn); });
   // 카드 안 말하기(녹음 → 점수 → 내 목소리) — js/recorder.js
   let sp = null; // { i, ctl, blob, audio, saved }
   // 시도 번호 + 받아쓰기 끊기(검사부 10-11) — 「확인 중…」 동안 카드를 닫거나 새로 녹음하면 옛 결과는 버림 · srOnBlob 도 멈춤
@@ -933,5 +954,5 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   if (reopen) openPanel(reopen.kind, reopen.i, { restore: reopen }); // ने⇄한 토글 전 창·자리
   else if (opts.explain) openPanel("explain", st.cur, { autoplay: true }); /* #/explain/{편}/{줄} = 그 줄 v9 설명 창(첫 터치 전엔 소리가 막힐 수 있음 — ▶ 로 시작) */
   const release = hold(); // 소리 장치 깨워 두기(첫소리 먹힘 방지)
-  return () => { clearTimeout(tipT); document.removeEventListener("fullscreenchange", onFsChange); clearInterval(edgeT); clearInterval(litT); clearInterval(seekTimer); clearInterval(hlTimer); document.removeEventListener("pointerdown", onDocDown, true); removeEventListener("popstate", onPop); removeEventListener("malmun:uilang", onUiLang); document.removeEventListener("visibilitychange", onHide); clearTimeout(st.animEnd); release(); st.panel?.cleanup?.(); ex.stop(); removeEventListener("resize", pad); removeEventListener("resize", onFit); clearInterval(timer); clearTimeout(st.gap); document.removeEventListener("keydown", onKey); seq.stop(); v.pause(); v.removeAttribute("src"); v.load(); };
+  return () => { mqLand.removeEventListener?.("change", onLand); document.removeEventListener("keydown", onBigKey, true); document.documentElement.classList.remove("bigview"); clearTimeout(tipT); document.removeEventListener("fullscreenchange", onFsChange); clearInterval(edgeT); clearInterval(litT); clearInterval(seekTimer); clearInterval(hlTimer); document.removeEventListener("pointerdown", onDocDown, true); removeEventListener("popstate", onPop); removeEventListener("malmun:uilang", onUiLang); document.removeEventListener("visibilitychange", onHide); clearTimeout(st.animEnd); release(); st.panel?.cleanup?.(); ex.stop(); removeEventListener("resize", pad); removeEventListener("resize", onFit); clearInterval(timer); clearTimeout(st.gap); document.removeEventListener("keydown", onKey); seq.stop(); v.pause(); v.removeAttribute("src"); v.load(); };
 }

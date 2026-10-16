@@ -1373,3 +1373,31 @@ html:lang(ur) .write .whead:not(.n4){height:44px}
 .v9bar .pb .ic{display:inline-block;width:1em;text-align:center}
 /* 처음 화면 한국어 모드 — 큰 「안녕하세요!」와 같은 말이라 작은 인사 줄은 숨김(다시 그리지 않고 · 10-15) */
 :root.uiko .welcome .hello .tr{visibility:hidden}
+
+/* ⛶ 크게 보기(대표님 10-16 · 바깥 껍데기만 — .big 이 없으면 아래 규칙은 하나도 안 걸림 · 끄면 지금 화면과 같음)
+   보통 = 아래 재생 단추 줄 바로 위 오른쪽에 뜬 알약(엄지 자리 · 배치 0 · 위 창이 열렸을 때만) · 크게 = 창만 화면 가득 · 자막·재생 막대·줄 목록·제목 줄 숨김 · 맨 아래 가운데 「⛶ 작게」 */
+.learn .bigb{position:fixed;right:max(12px,calc(50vw - 248px));bottom:calc(78px + env(safe-area-inset-bottom,0px));z-index:6;display:inline-flex;align-items:center;gap:5px;height:30px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:var(--bg2);color:var(--ink);font-size:12px;font-weight:700;box-shadow:0 2px 6px rgba(0,0,0,.14)}
+.learn .bigb[hidden]{display:none}.learn .bigb .on{display:none}.learn .bigb[aria-pressed=true] .on{display:inline}.learn .bigb[aria-pressed=true] .off{display:none}
+html.bigview,html.bigview body{overflow:hidden}
+.learn.big .lines,.learn.big .ctrl,.learn.big .seek,.learn.big .vtitle{display:none!important}
+.learn.big .stick{position:fixed;inset:0;z-index:30;height:100dvh;padding:env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left);display:flex;flex-direction:column;animation:bigIn .2s ease-out}
+.learn.big .stick .vstage{flex:1;min-height:0;height:auto!important;display:flex;flex-direction:column}
+.learn.big .stick .vstage>.panel{flex:1;min-height:0;height:auto!important;max-height:none!important;border-bottom:0}
+.learn.big .bigb{position:static;flex:none;align-self:center;margin:4px auto calc(8px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);border-color:var(--ink)}
+@keyframes bigIn{from{opacity:.5;transform:scale(.985)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.learn.big .stick{animation:none}}
+/* 크게 · 말하기 = 과제 글이 위 주인공 · 단추 줄은 엄지 닿는 맨 아래 · 🎤 가 가장 크게 */
+.learn.big .panel.speak .sbtns{margin-top:auto;padding-bottom:6px}
+.learn.big .panel.speak .sbtns .mic{min-height:56px;font-size:1.08em}
+/* 크게 · 폰 가로(높이 ≤ 500) = 두 칸: 왼쪽 주인공(설명 글 · 과제 글·파형) · 오른쪽 할 일(말해 보세요 · 단추 세로) */
+@media (orientation:landscape) and (max-height:500px){
+  .learn.big .exv.v9 .v9body{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);grid-auto-rows:min-content;column-gap:14px;align-content:start}
+  .learn.big .exv.v9 .v9body>*{grid-column:1}
+  .learn.big .exv.v9 .v9body>.sayb{grid-column:2;grid-row:1 / span 8;margin-top:0;align-self:stretch;justify-content:flex-end}
+  .learn.big .stick .vstage>.panel.speak .speak{display:grid;justify-content:stretch;grid-template-columns:minmax(0,1fr) 220px;grid-template-rows:auto minmax(0,1fr) auto;column-gap:14px}
+  .learn.big .panel.speak .speak>.whead{grid-column:1 / -1}
+  .learn.big .panel.speak .speak>.task,.learn.big .panel.speak .speak>.cmp{grid-column:1;grid-row:2}
+  .learn.big .panel.speak .speak>.meter{grid-column:1;grid-row:3}
+  .learn.big .panel.speak .speak>.sbtns{grid-column:2;grid-row:2 / span 2;grid-template-columns:1fr;align-content:end;margin-top:0}
+  .learn.big .panel.speak .speak>.miclist,.learn.big .panel.speak .speak>.helpbox{grid-column:1 / -1;grid-row:2 / span 2}
+}
