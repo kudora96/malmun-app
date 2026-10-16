@@ -282,5 +282,18 @@
  "music_next": "다음 곡",
  "music_now": "지금 나오는 곡:",
  "music_none": "지금은 음악이 꺼져 있어요",
- "music_wait": "곧 나와요(화면을 한 번 누르면 시작)"
+ "music_wait": "곧 나와요(화면을 한 번 누르면 시작)",
+ "bgm_song_arirang": "아리랑",
+ "bgm_song_doraji": "도라지타령",
+ "bgm_song_kwaeji": "쾌지나 칭칭 나네",
+ "bgm_song_ongheya": "옹헤야",
+ "bgm_song_ganggang": "강강술래",
+ "bgm_song_miryang": "밀양아리랑",
+ "bgm_song_gunbam": "군밤타령",
+ "bgm_song_jindo": "진도아리랑",
+ "bgm_song_cheonan": "천안삼거리",
+ "bgm_song_gangwon": "강원도아리랑",
+ "bgm_song_gyeongbok": "경복궁타령",
+ "bgm_song_monggeumpo": "몽금포타령",
+ "bgm_ver_power": "힘찬"
 }

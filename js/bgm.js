@@ -5,35 +5,51 @@
 //  · 켜기/끄기 = ♪ 단추(ui.js bgmBtn · 모든 창 · 처음 켬 · 기억 malmun.bgm) · 🎵 음악 상자(ui.js openMusicBox)에서 곡 골라 듣기
 //  · 파일 = 소리부 05_audio/_bgm(직접 합성 · 저작권 없음) — 곡마다 [loopStart, loopEnd] 한 번 → 끝나면 다른 곡(같은 곡 연속 없음 · 앱을 다시 열어도 지난 곡 다음)
 //  · 점검(?mute=1 · __sfxVolume 아주 작게)에선 안 틂
-import { audioCtx } from "./wake.js?v=1016.31";
-import { paths } from "./paths.js?v=1016.31";
+import { audioCtx } from "./wake.js?v=1016.40";
+import { paths } from "./paths.js?v=1016.40";
 
 const KEY = "malmun.bgm", LAST = "malmun.bgmLast", VOL = "malmun.bgmVol";
-// 곡 목록(늘리기 = 한 줄) — song = 곡 이름(한국어 · 고유 이름) · inst = 악기 열쇠(bgm_inst_*) · ver = 결(bgm_ver_*) · loopStart·loopEnd 는 catalog 그대로
-export const TRACKS = [ // 소리부 05_audio/_bgm/bgm_catalog.json(10-15 · 민요만 · 안개·별빛·물결 뺌) · ver = 잔잔(공부 화면)·밝은(첫 화면·목록)·신나는(음악 상자에서만)
-  { file: "bgm_arirang_a.mp3", song: "아리랑", inst: "bell", ver: "calm", loopStart: 1.0, loopEnd: 97.0 },
-  { file: "bgm_arirang_b.mp3", song: "아리랑", inst: "kalimba", ver: "calm", loopStart: 1.0, loopEnd: 97.0 },
-  { file: "bgm_arirang_gayageum.mp3", song: "아리랑", inst: "gayageum", ver: "calm", loopStart: 1.0, loopEnd: 97.0 },
-  { file: "bgm_arirang_daegeum.mp3", song: "아리랑", inst: "daegeum", ver: "calm", loopStart: 1.0, loopEnd: 97.0 },
-  { file: "bgm_arirang_piano.mp3", song: "아리랑", inst: "piano", ver: "calm", loopStart: 1.0, loopEnd: 97.0 },
-  { file: "bgm_doraji_gayageum.mp3", song: "도라지타령", inst: "gayageum", ver: "calm", loopStart: 1.0, loopEnd: 97.0 },
-  { file: "bgm_doraji_daegeum.mp3", song: "도라지타령", inst: "daegeum", ver: "calm", loopStart: 1.0, loopEnd: 97.0 },
-  { file: "bgm_kwaeji_calm.mp3", song: "쾌지나 칭칭 나네", inst: "daegeum", ver: "calm", loopStart: 1.0, loopEnd: 109.0 },
-  { file: "bgm_kwaeji_bright.mp3", song: "쾌지나 칭칭 나네", inst: "gayageum", ver: "bright", loopStart: 1.0, loopEnd: 73.0 },
-  { file: "bgm_kwaeji_lively.mp3", song: "쾌지나 칭칭 나네", inst: "piri", ver: "lively", loopStart: 1.0, loopEnd: 93.16 },
-  { file: "bgm_ongheya_calm.mp3", song: "옹헤야", inst: "daegeum", ver: "calm", loopStart: 1.0, loopEnd: 80.2 },
-  { file: "bgm_ongheya_bright.mp3", song: "옹헤야", inst: "gayageum", ver: "bright", loopStart: 1.0, loopEnd: 81.96 },
-  { file: "bgm_ongheya_lively.mp3", song: "옹헤야", inst: "piri", ver: "lively", loopStart: 1.0, loopEnd: 79.848 },
-  { file: "bgm_ganggang_calm.mp3", song: "강강술래", inst: "daegeum", ver: "calm", loopStart: 1.0, loopEnd: 106.6 },
-  { file: "bgm_ganggang_bright.mp3", song: "강강술래", inst: "gayageum", ver: "bright", loopStart: 1.0, loopEnd: 74.92 },
-  { file: "bgm_ganggang_lively.mp3", song: "강강술래", inst: "piri", ver: "lively", loopStart: 1.0, loopEnd: 68.584 },
-  { file: "bgm_arirang_calm.mp3", song: "아리랑", inst: "daegeum", ver: "calm", loopStart: 1.0, loopEnd: 90.1 },
-  { file: "bgm_arirang_bright.mp3", song: "아리랑", inst: "gayageum", ver: "bright", loopStart: 1.0, loopEnd: 107.92 },
-  { file: "bgm_arirang_lively.mp3", song: "아리랑", inst: "piri", ver: "lively", loopStart: 1.0, loopEnd: 115.048 },
-  { file: "bgm_doraji_calm.mp3", song: "도라지타령", inst: "daegeum", ver: "calm", loopStart: 1.0, loopEnd: 78.143 },
-  { file: "bgm_doraji_bright.mp3", song: "도라지타령", inst: "gayageum", ver: "bright", loopStart: 1.0, loopEnd: 103.857 },
-  { file: "bgm_doraji_lively.mp3", song: "도라지타령", inst: "piri", ver: "lively", loopStart: 1.0, loopEnd: 116.2 },
+// 곡 목록(늘리기 = 한 줄) — 소리부 「철학판」 36곡(본부 10-16 대표님 ㅇ · 05_audio/_bgm/med · bgm_catalog.json style "med") = 12곡 × 결 3(잔잔 = 공부 화면 · 밝은 = 첫 화면·목록 · 힘찬 = 음악 상자에서만)
+//  id = 곡 열쇠(bgm_song_<id> · 학습자 언어 · 없으면 en) · song = 한국어 이름 · loopStart·loopEnd 는 catalog 그대로 · 옛 민요·오케스트라 판은 목록에서 뺌(파일은 그대로)
+export const TRACKS = [
+  { file: "bgm_arirang_med_calm.mp3", id: "arirang", song: "아리랑", en: "Arirang", ver: "calm", loopStart: 1.0, loopEnd: 98.423 },
+  { file: "bgm_arirang_med_bright.mp3", id: "arirang", song: "아리랑", en: "Arirang", ver: "bright", loopStart: 1.0, loopEnd: 102.25 },
+  { file: "bgm_arirang_med_power.mp3", id: "arirang", song: "아리랑", en: "Arirang", ver: "power", loopStart: 1.0, loopEnd: 91.0 },
+  { file: "bgm_doraji_med_calm.mp3", id: "doraji", song: "도라지타령", en: "Doraji Taryeong", ver: "calm", loopStart: 1.0, loopEnd: 93.382 },
+  { file: "bgm_doraji_med_bright.mp3", id: "doraji", song: "도라지타령", en: "Doraji Taryeong", ver: "bright", loopStart: 1.0, loopEnd: 86.714 },
+  { file: "bgm_doraji_med_power.mp3", id: "doraji", song: "도라지타령", en: "Doraji Taryeong", ver: "power", loopStart: 1.0, loopEnd: 112.317 },
+  { file: "bgm_kwaeji_med_calm.mp3", id: "kwaeji", song: "쾌지나 칭칭 나네", en: "Kwaejina Chingching Nane", ver: "calm", loopStart: 1.0, loopEnd: 85.349 },
+  { file: "bgm_kwaeji_med_bright.mp3", id: "kwaeji", song: "쾌지나 칭칭 나네", en: "Kwaejina Chingching Nane", ver: "bright", loopStart: 1.0, loopEnd: 115.545 },
+  { file: "bgm_kwaeji_med_power.mp3", id: "kwaeji", song: "쾌지나 칭칭 나네", en: "Kwaejina Chingching Nane", ver: "power", loopStart: 1.0, loopEnd: 110.091 },
+  { file: "bgm_ongheya_med_calm.mp3", id: "ongheya", song: "옹헤야", en: "Ongheya", ver: "calm", loopStart: 1.0, loopEnd: 98.051 },
+  { file: "bgm_ongheya_med_bright.mp3", id: "ongheya", song: "옹헤야", en: "Ongheya", ver: "bright", loopStart: 1.0, loopEnd: 95.14 },
+  { file: "bgm_ongheya_med_power.mp3", id: "ongheya", song: "옹헤야", en: "Ongheya", ver: "power", loopStart: 1.0, loopEnd: 90.657 },
+  { file: "bgm_ganggang_med_calm.mp3", id: "ganggang", song: "강강술래", en: "Ganggangsullae", ver: "calm", loopStart: 1.0, loopEnd: 89.612 },
+  { file: "bgm_ganggang_med_bright.mp3", id: "ganggang", song: "강강술래", en: "Ganggangsullae", ver: "bright", loopStart: 1.0, loopEnd: 105.372 },
+  { file: "bgm_ganggang_med_power.mp3", id: "ganggang", song: "강강술래", en: "Ganggangsullae", ver: "power", loopStart: 1.0, loopEnd: 106.249 },
+  { file: "bgm_miryang_med_calm.mp3", id: "miryang", song: "밀양아리랑", en: "Miryang Arirang", ver: "calm", loopStart: 1.0, loopEnd: 111.708 },
+  { file: "bgm_miryang_med_bright.mp3", id: "miryang", song: "밀양아리랑", en: "Miryang Arirang", ver: "bright", loopStart: 1.0, loopEnd: 112.682 },
+  { file: "bgm_miryang_med_power.mp3", id: "miryang", song: "밀양아리랑", en: "Miryang Arirang", ver: "power", loopStart: 1.0, loopEnd: 107.364 },
+  { file: "bgm_gunbam_med_calm.mp3", id: "gunbam", song: "군밤타령", en: "Gunbam Taryeong", ver: "calm", loopStart: 1.0, loopEnd: 83.858 },
+  { file: "bgm_gunbam_med_bright.mp3", id: "gunbam", song: "군밤타령", en: "Gunbam Taryeong", ver: "bright", loopStart: 1.0, loopEnd: 81.372 },
+  { file: "bgm_gunbam_med_power.mp3", id: "gunbam", song: "군밤타령", en: "Gunbam Taryeong", ver: "power", loopStart: 1.0, loopEnd: 77.545 },
+  { file: "bgm_jindo_med_calm.mp3", id: "jindo", song: "진도아리랑", en: "Jindo Arirang", ver: "calm", loopStart: 1.0, loopEnd: 85.138 },
+  { file: "bgm_jindo_med_bright.mp3", id: "jindo", song: "진도아리랑", en: "Jindo Arirang", ver: "bright", loopStart: 1.0, loopEnd: 86.909 },
+  { file: "bgm_jindo_med_power.mp3", id: "jindo", song: "진도아리랑", en: "Jindo Arirang", ver: "power", loopStart: 1.0, loopEnd: 107.364 },
+  { file: "bgm_cheonan_med_calm.mp3", id: "cheonan", song: "천안삼거리", en: "Cheonan Samgeori", ver: "calm", loopStart: 1.0, loopEnd: 93.784 },
+  { file: "bgm_cheonan_med_bright.mp3", id: "cheonan", song: "천안삼거리", en: "Cheonan Samgeori", ver: "bright", loopStart: 1.0, loopEnd: 91.0 },
+  { file: "bgm_cheonan_med_power.mp3", id: "cheonan", song: "천안삼거리", en: "Cheonan Samgeori", ver: "power", loopStart: 1.0, loopEnd: 110.091 },
+  { file: "bgm_gangwon_med_calm.mp3", id: "gangwon", song: "강원도아리랑", en: "Gangwon-do Arirang", ver: "calm", loopStart: 1.0, loopEnd: 110.231 },
+  { file: "bgm_gangwon_med_bright.mp3", id: "gangwon", song: "강원도아리랑", en: "Gangwon-do Arirang", ver: "bright", loopStart: 1.0, loopEnd: 106.955 },
+  { file: "bgm_gangwon_med_power.mp3", id: "gangwon", song: "강원도아리랑", en: "Gangwon-do Arirang", ver: "power", loopStart: 1.0, loopEnd: 101.909 },
+  { file: "bgm_gyeongbok_med_calm.mp3", id: "gyeongbok", song: "경복궁타령", en: "Gyeongbokgung Taryeong", ver: "calm", loopStart: 1.0, loopEnd: 106.701 },
+  { file: "bgm_gyeongbok_med_bright.mp3", id: "gyeongbok", song: "경복궁타령", en: "Gyeongbokgung Taryeong", ver: "bright", loopStart: 1.0, loopEnd: 70.907 },
+  { file: "bgm_gyeongbok_med_power.mp3", id: "gyeongbok", song: "경복궁타령", en: "Gyeongbokgung Taryeong", ver: "power", loopStart: 1.0, loopEnd: 94.209 },
+  { file: "bgm_monggeumpo_med_calm.mp3", id: "monggeumpo", song: "몽금포타령", en: "Monggeumpo Taryeong", ver: "calm", loopStart: 1.0, loopEnd: 94.711 },
+  { file: "bgm_monggeumpo_med_bright.mp3", id: "monggeumpo", song: "몽금포타령", en: "Monggeumpo Taryeong", ver: "bright", loopStart: 1.0, loopEnd: 91.9 },
+  { file: "bgm_monggeumpo_med_power.mp3", id: "monggeumpo", song: "몽금포타령", en: "Monggeumpo Taryeong", ver: "power", loopStart: 1.0, loopEnd: 111.182 },
 ];
+const FIRST = "bgm_arirang_med_bright.mp3"; // 앱을 처음 열 때 첫 곡(본부 판단 · 대표님이 바꾸면 따름)
 const SCENE_GAIN = { "": 1, list: 1, diag: 0 }, STUDY = 0.32, DUCK = 0.3; // 공부 화면 ≈ −10dB · 앱 소리 날 때 그 위에서 ≈ −10dB 더
 const UP = 0.8, DOWN = 0.2; // 음량 바꾸는 시간(초) — 내릴 땐 빨리
 
@@ -50,7 +66,7 @@ const load = i => { if (!loads.has(i)) loads.set(i, fetch(paths.bgm(TRACKS[i].fi
   .then(b => audioCtx().decodeAudioData(b)).catch(() => { loads.delete(i); return null; })); return loads.get(i); };
 // 다음 곡 = 지금 화면 결(첫 화면·목록 = 밝은 · 그 밖 = 잔잔)에서 방금(지난번 앱) 곡이 아닌 것 하나 · 화면을 옮겨도 나오던 곡은 끝까지(다음 곡부터 그 화면 결)
 const poolVer = () => (scene === "" || scene === "list" ? "bright" : "calm");
-const pick = () => { let last = cur; if (last < 0) try { last = +(localStorage.getItem(LAST) ?? -1); } catch {} const ids = TRACKS.map((_, i) => i), pool = ids.filter(i => TRACKS[i].ver === poolVer()), c = (pool.length ? pool : ids).filter(i => i !== last); return c.length ? c[Math.floor(Math.random() * c.length)] : (pool[0] ?? 0); };
+const pick = () => { let last = cur, first = false; if (last < 0) try { const v = localStorage.getItem(LAST); first = v == null; last = +(v ?? -1); } catch {} const f0 = TRACKS.findIndex(x => x.file === FIRST); if (first && f0 >= 0 && TRACKS[f0].ver === poolVer()) return f0; const ids = TRACKS.map((_, i) => i), pool = ids.filter(i => TRACKS[i].ver === poolVer()), c = (pool.length ? pool : ids).filter(i => i !== last); return c.length ? c[Math.floor(Math.random() * c.length)] : (pool[0] ?? 0); };
 
 const playOk = () => bgmOn() && !muted() && document.visibilityState === "visible";
 // 지금 있어야 할 음량(0~1) — 화면 · 앱 소리 · 마이크 · 막음(hold)

@@ -1,10 +1,10 @@
-import { bgmOn, setBgm, TRACKS, playTrack, bgmNow, onBgmChange, bgmVol, setBgmVol, playNext } from "./bgm.js?v=1016.31";
-import { paths } from "./paths.js?v=1016.31";
-import { t, tL, lang, langName, LANGS, READY, setLang, KO_UI, uiKoOn, setUiKo, langShort, preloadKoUi } from "./i18n.js?v=1016.31";
-import { snapshot, retext } from "./retext.js?v=1016.31";
-import "./langfit.js?v=1016.31"; // ⇄ 때 단추 크기·자리 고정(다국어부 10-15)
-import { VERSION } from "./version.js?v=1016.31";
-import { esc } from "./text.js?v=1016.31";
+import { bgmOn, setBgm, TRACKS, playTrack, bgmNow, onBgmChange, bgmVol, setBgmVol, playNext } from "./bgm.js?v=1016.40";
+import { paths } from "./paths.js?v=1016.40";
+import { t, tL, lang, langName, LANGS, READY, setLang, KO_UI, uiKoOn, setUiKo, langShort, preloadKoUi } from "./i18n.js?v=1016.40";
+import { snapshot, retext } from "./retext.js?v=1016.40";
+import "./langfit.js?v=1016.40"; // ⇄ 때 단추 크기·자리 고정(다국어부 10-15)
+import { VERSION } from "./version.js?v=1016.40";
+import { esc } from "./text.js?v=1016.40";
 
 const svg = (d, fill) => `<svg class="ico" viewBox="0 0 24 24" ${fill ? 'fill="currentColor"' : 'fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"'} aria-hidden="true">${d}</svg>`;
 export const I = {
@@ -52,7 +52,8 @@ export const musicBtn = () => `<button class="musicbox" data-act="musicbox">🎵
 const volPos = f => Math.round(f <= 1 ? f * 50 : 50 + (f - 1) * 50), volOf = p => (p <= 50 ? p / 50 : 1 + (p - 50) / 50); // 막대 자리 ⇄ 음량 배수
 export function openMusicBox() {
   const root = document.getElementById("sheet-root");
-  const lab = x => `<b lang="ko">${esc(x.song)}</b> <small><span data-k="bgm_inst_${x.inst}">${esc(t("bgm_inst_" + x.inst))}</span> · <span data-k="bgm_ver_${x.ver}">${esc(t("bgm_ver_" + x.ver))}</span></small>`;
+  const nm = x => { const k = "bgm_song_" + x.id, v = t(k); return v === k ? x.en : v; }; // 곡 이름 = 학습자 언어(다국어부 열쇠 · 없으면 영어) · ⇄ = 한국어
+  const lab = x => `<b data-k="bgm_song_${x.id}">${esc(nm(x))}</b> <small><span data-k="bgm_ver_${x.ver}">${esc(t("bgm_ver_" + x.ver))}</span></small>`;
   const row = (x, i) => { const on = bgmNow() === i; return `<li${on ? ' class="now"' : ""}><span class="nm">${lab(x)}</span>
     <button class="mplay" data-play="${i}" aria-pressed="${on}"><span aria-hidden="true">${on ? "■" : "▶"}</span> <span data-k="${on ? "music_stop" : "music_play"}">${esc(t(on ? "music_stop" : "music_play"))}</span></button>
     <button class="mdl" data-dl="${i}">⬇ <span data-k="music_dl">${esc(t("music_dl"))}</span></button></li>`; };

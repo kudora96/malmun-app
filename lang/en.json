@@ -284,5 +284,18 @@
  "music_next": "Next song",
  "music_now": "Now playing:",
  "music_none": "Music is off",
- "music_wait": "Starting soon (tap the screen once)"
+ "music_wait": "Starting soon (tap the screen once)",
+ "bgm_song_arirang": "Arirang",
+ "bgm_song_doraji": "Doraji Taryeong",
+ "bgm_song_kwaeji": "Kwaejina Chingching Nane",
+ "bgm_song_ongheya": "Ongheya",
+ "bgm_song_ganggang": "Ganggangsullae",
+ "bgm_song_miryang": "Miryang Arirang",
+ "bgm_song_gunbam": "Gunbam Taryeong",
+ "bgm_song_jindo": "Jindo Arirang",
+ "bgm_song_cheonan": "Cheonan Samgeori",
+ "bgm_song_gangwon": "Gangwon-do Arirang",
+ "bgm_song_gyeongbok": "Gyeongbokgung Taryeong",
+ "bgm_song_monggeumpo": "Monggeumpo Taryeong",
+ "bgm_ver_power": "Power"
 }
