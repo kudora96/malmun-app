@@ -176,9 +176,9 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     kids.forEach(c => c.style.removeProperty("min-height")); // 아래 「창 높이 채움」은 잴 때 빼고
     // 설명 = 칸을 꽉 채우는 가장 큰 크기(짧은 줄은 키우고 긴 줄은 줄임 · 15px → 최대 20px · 칩·간격도 같은 비율 — 본부 10-06) · 말하기 = 넘칠 때만 줄임
     const uk = panel.querySelector(".v9bar .chip.uiko"), ukH = z => uk && (uk.style.minHeight = `${(32 / z).toFixed(1)}px`); // ⇄한 = 줄여도 화면에서 32px(본부 1014.2 누르기 쉽게)
-    const vb = st.big ? panel.querySelector(kind === "explain" ? ".v9bar" : ".whead") : null; // 크게 보기 = 위 막대가 옆으로 넘치지 않는 데까지만 키움(보통 화면은 그대로)
+    const vb = st.big && kind === "speak" ? panel.querySelector(".whead") : null; // 크게 말하기 = 머리 줄 폭 안에서만 키움(설명 막대는 크게일 때 두 줄로 꺾여도 됨) // 크게 보기 = 위 막대가 옆으로 넘치지 않는 데까지만 키움(보통 화면은 그대로)
     const fits = z => { kids.forEach(c => (c.style.zoom = String(z))); ukH(z); return panel.scrollHeight <= panel.clientHeight && (!vb || vb.scrollWidth <= vb.clientWidth + 1); };
-    let lo = 0.5, hi = kind === "explain" ? 1.33 : st.big ? 1.15 : 1; // 크게 보기 말하기 = 과제 글·단추도 키움
+    let lo = 0.5, hi = kind === "explain" ? (st.big ? 1.7 : 1.33) : st.big ? 1.15 : 1; // 크게 설명 = 화면 높이를 글이 다 쓰게 // 크게 보기 말하기 = 과제 글·단추도 키움
     if (fits(hi)) lo = hi; else for (let k = 0; k < 8; k++) { const m = (lo + hi) / 2; if (fits(m)) lo = m; else hi = m; }
     lo = Math.floor(lo * 1000) / 1000;
     kids.forEach(c => (lo === 1 ? c.style.removeProperty("zoom") : (c.style.zoom = String(lo)))); ukH(lo);
@@ -510,7 +510,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     st.panel?.cleanup?.();
     const mine = (st.panel = { kind, i });
     vwrap.hidden = true; panel.hidden = false; panel.className = `panel ${kind}${kind === "explain" && L[i].v9 ? " v9" : ""}${" fitting"}`; if (kind !== "explain") panel.innerHTML = ""; // 앞 창 내용이 새 창 크기로 잠깐 넘쳐 보이지 않게 setTimeout(() => st.panel === mine && panel.classList.remove("fitting"), 1500); // 글 크기 맞출 때까지 안 보이게(늦어도 1.5초 뒤엔 보임)
-    markButtons(); app.querySelector(".bigb").hidden = false; setTimeout(() => { if (st.panel && matchMedia("(orientation: landscape) and (max-height: 500px)").matches) setBig(true, true); }, 0); // ⛶ 단추 보임 · 폰 가로면 저절로 크게
+    markButtons(); setTimeout(() => placeBig(st.panel), 0); // ⛶ 칩 = 그 창 머리 줄 ♪ 앞(창이 그려진 뒤) · 폰 가로면 저절로 크게
     if (kind === "explain") {
       panel.innerHTML = explainHTML(i);
       st.sayAt = null; if (L[i].say?.ko) sylAt(ep, `${ep}_${String(L[i].id).padStart(2, "0")}_say`, L[i].say.ko).then(a => { if (st.panel === mine) st.sayAt = a; }).catch(() => {}); // 말해 보세요 문장 견본 소리 음절 시각(노래방 칠)
@@ -531,7 +531,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     if (!st.panel) return;
     if (!fromNav) navPop(); // 단추로 닫으면 쌓아 둔 뒤로 가기 칸도 걷어 냄
     st.panel.cleanup?.(); ex.stop(); clearTimeout(st.gap); st.gap = 0; st.panel = null;
-    setBig(false); bigB.hidden = true; // 창을 닫으면 크게 보기도 끝
+    setBig(false); bigB.hidden = true; bigHome.before(bigB); // 창을 닫으면 크게 보기도 끝 · 칩은 제자리(숨김)
     panel.hidden = true; panel.innerHTML = ""; vwrap.hidden = false; vsubFill(st.cur); fitCard(st.cur); // 영상 창도 같은 카드 자리
     markButtons();
     v.currentTime = L[st.cur].start;
@@ -547,10 +547,17 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     bigOn = on; bigAuto = on && auto; st.big = on;
     app.querySelector(".scr.learn").classList.toggle("big", on); document.documentElement.classList.toggle("bigview", on);
     bigB.setAttribute("aria-pressed", String(on));
-    // 크게 = 「⛶ 작게」 칩을 그 창 머리 줄의 ♪ 앞으로(떠 있는 단추 없음 · 본부 10-16) · 작게 = 원래 자리(재생 줄 위 알약)로 돌려놓음
-    const head = on && panel.querySelector(".chip.bgmb"); if (head) head.before(bigB); else if (!on && bigB.parentElement !== bigHome.parentElement) bigHome.before(bigB);
     dispatchEvent(new CustomEvent("malmun:big", { detail: { on } }));
     requestAnimationFrame(() => requestAnimationFrame(() => { st.uiFit = false; const v9 = st.panel?.kind === "explain" && L[st.panel.i]?.v9; if (v9) v9Fit(); fitPanel(); if (v9) v9Fit(); }));
+  }
+  // ⛶ 칩 자리 = 위 창 머리 줄의 ♪ 앞(보통·크게 같은 자리 · 떠 있는 단추 없음 · 본부 10-16) — 창 내용이 늦게 그려져도(말하기·쓰기) 기다렸다가 넣고 그 창 머리 줄 맞춤을 다시
+  function placeBig(mine, n = 0) {
+    if (st.panel !== mine) return;
+    const head = panel.querySelector(".chip.bgmb"); if (!head) return n < 40 && setTimeout(() => placeBig(mine, n + 1), 100);
+    head.before(bigB); bigB.hidden = false;
+    if (matchMedia("(orientation: landscape) and (max-height: 500px)").matches) return setBig(true, true);
+    dispatchEvent(new CustomEvent("malmun:big", { detail: { on: bigOn } })); // 머리 줄에 칩이 늘었음 → 말하기·쓰기 머리 줄 다시 맞춤
+    requestAnimationFrame(() => { if (st.panel?.kind === "explain" && L[st.panel.i]?.v9) v9Fit(); fitPanel(); });
   }
   const onLand = () => { if (mqLand.matches) { if (st.panel) setBig(true, true); } else if (bigAuto) setBig(false); };
   mqLand.addEventListener?.("change", onLand);

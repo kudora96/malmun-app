@@ -1376,14 +1376,18 @@ html:lang(ur) .write .whead:not(.n4){height:44px}
 
 /* ⛶ 크게 보기(대표님 10-16 · 바깥 껍데기만 — .big 이 없으면 아래 규칙은 하나도 안 걸림 · 끄면 지금 화면과 같음)
    보통 = 아래 재생 단추 줄 바로 위 오른쪽에 뜬 알약(엄지 자리 · 배치 0 · 위 창이 열렸을 때만) · 크게 = 창만 화면 가득 · 자막·재생 막대·줄 목록·제목 줄 숨김 · 맨 아래 가운데 「⛶ 작게」 */
-.learn .bigb{position:fixed;right:max(12px,calc(50vw - 248px));bottom:calc(78px + env(safe-area-inset-bottom,0px));z-index:6;display:inline-flex;align-items:center;gap:5px;height:30px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:var(--bg2);color:var(--ink);font-size:12px;font-weight:700;box-shadow:0 2px 6px rgba(0,0,0,.14)}
+.learn .bigb{flex:none;display:inline-flex;align-items:center;justify-content:center;gap:3px;min-width:34px;height:30px;box-sizing:border-box;padding:0 9px;border-radius:999px;border:1px solid var(--line);background:var(--bg2);color:var(--ink);font-size:15px;line-height:1;font-family:system-ui,sans-serif} /* ⛶ 칩 = 창 머리 줄 ♪ 앞 · ♪ 칩과 같은 꼴·크기 */
+.learn .bigb .off,.learn .bigb .on{font-size:12px;font-family:inherit}
+@media (max-width:519px){.learn .bigb .off,.learn .bigb .on{display:none!important}}
+.speak .whead.h1 .bigb .off,.speak .whead.h1 .bigb .on,.v9bar.nocw .bigb .off,.v9bar.nocw .bigb .on{display:none!important}
 .learn .bigb[hidden]{display:none}.learn .bigb .on{display:none}.learn .bigb[aria-pressed=true] .on{display:inline}.learn .bigb[aria-pressed=true] .off{display:none}
 html.bigview,html.bigview body{overflow:hidden}
 .learn.big .lines,.learn.big .ctrl,.learn.big .seek,.learn.big .vtitle{display:none!important}
 .learn.big .stick{position:fixed;inset:0;z-index:30;height:100dvh;padding:env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left);display:flex;flex-direction:column;animation:bigIn .2s ease-out}
 .learn.big .stick .vstage{flex:1;min-height:0;height:auto!important;display:flex;flex-direction:column}
 .learn.big .stick .vstage>.panel{flex:1;min-height:0;height:auto!important;max-height:none!important;border-bottom:0}
-.learn.big .bigb{position:static;flex:none;height:30px;padding:0 10px;margin:0;box-shadow:none;background:var(--ink);color:var(--bg);border-color:var(--ink)} /* 크게 = 창 머리 줄 ♪ 앞 칩 */
+.learn.big .bigb{background:var(--ink);color:var(--bg);border-color:var(--ink)} /* 크게 = 같은 칩 · 진하게 */
+.learn.big .v9bar{flex-wrap:wrap;row-gap:4px} /* 크게 설명 = 위 막대 두 줄 되어도 됨 → 글이 더 커짐 */
 .learn.big .stick{padding-bottom:env(safe-area-inset-bottom,0px)}
 @keyframes bigIn{from{opacity:.5;transform:scale(.985)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){.learn.big .stick{animation:none}}
@@ -1416,5 +1420,4 @@ html.bigview,html.bigview body{overflow:hidden}
   .learn:not(.big) .stick .vstage>.panel{flex:1;min-height:0;height:auto!important}
   .learn:not(.big) .lines{margin-left:56vw;padding-top:8px}
   .learn:not(.big) .ctrl{left:0;right:auto;width:56vw;max-width:none;margin:0}
-  .learn:not(.big) .bigb{right:auto;left:calc(56vw - 132px);bottom:calc(72px + env(safe-area-inset-bottom,0px))}
 }
