@@ -66,8 +66,8 @@
       const sc8 = $(".panel .hscore"), judged = !sc8.hidden, stay = wr().hand() === H8 && !H8.passed;
       ok(shown && judged && stay, "ⓗ 시간 막대 · 덜 그은 채 시간 끝 = 채점(통과 못 함 → 그 글자에 머묾)", `막대 ${shown} · 제한 ${lim / 1000}초 · 점수 「${sc8.textContent}」 · 머묾 ${stay}`);
       await W(1500); const H9 = wr().hand(); log.length = 0; const o9 = osc; for (let i = 0; i < L8.length; i++) { const Q = await wr().fitPath("이", i, "pen"); await drawP(Q.map(q => [q.x, q.y])); } await W(1400);
-      let g9 = 0; while (g9++ < 60 && wr().hand() === H9) await W(100); const moved = wr().hand() !== H9, said = log.some(e => e.ev === "시작" && /uC774\.mp3$/.test(e.name));
-      ok(H9.passed && moved && said && osc > o9, "ⓗ 다 그으면 바로 채점 → 통과 = 딩동 → 「이」 → 다음 글자", `통과 ${H9.passed} · 글자 소리 ${said} · 다음 글자로 ${moved}`); }
+      await W(2500); const stay9 = wr().hand() === H9, nudge = !!$(".panel [data-act=hnext].nudge"), said = log.some(e => e.ev === "시작" && /uC774\.mp3$/.test(e.name));
+      ok(H9.passed && stay9 && nudge && said && osc > o9, "ⓗ 다 그으면 바로 채점 → 통과 = 딩동 → 「이」 → 그 글자에 머묾 · 「다음 ▶」 반짝(대표님 10-16 설명 볼 틈)", `통과 ${H9.passed} · 글자 소리 ${said} · 머묾 ${stay9} · 반짝 ${nudge}`); }
     // ⓙ 쓰는 효과음 — 손(연필·펜·붓) · 순서 · 자동 모두
     { const got = {}; for (const tk of ["pencil", "pen", "brush"]) { localStorage.setItem("malmun.htool", tk); await openCh(Math.max(0, liOf("이")), "이"); log.length = 0; const Q = await wr().fitPath("이", 1, tk); await drawP(Q.map(q => [q.x, q.y]), 4); got["손 " + tk] = log.some(e => e.name === "draw/" + tk);
         log.length = 0; $(".panel [data-act=horder]").click(); await W(1300); got["순서 " + tk] = log.some(e => e.name === "swish/" + tk); $(".panel [data-act=horder]").click(); await W(200); }

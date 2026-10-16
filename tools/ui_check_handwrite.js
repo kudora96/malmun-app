@@ -33,7 +33,7 @@
     const zig = [Array.from({ length: 14 }, (_, i) => [0.05 + 0.065 * i, i % 2 ? 0.08 : 0.2]), Array.from({ length: 14 }, (_, i) => [0.05 + 0.065 * i, i % 2 ? 0.9 : 0.78])];
     await draw(zig); $("[data-act=hdone]").click(); await W(700);
     const sc1 = wr().hand().last?.pct ?? -1, lab1 = $(".hscore")?.textContent || "";
-    ok(sc1 >= 0 && sc1 < 80 && wr().hand().ch === ch0 && !wr().hand().passed && $(".hscore").querySelectorAll("i[data-k]").length === 3 && !$(".hscore .st") && $(".hscore").classList.contains("bad"), "ⓓ 엉뚱한 낙서 → 실패 · 칸 위 「모양 · 선 · 빠르기」(빨강·별 없음) · 같은 글자", `「${lab1}」`);
+    ok(sc1 >= 0 && sc1 < 80 && wr().hand().ch === ch0 && !wr().hand().passed && /^\d+%$/.test(lab1.trim()) && !$(".hscore .st") && $(".hscore").classList.contains("bad"), "ⓓ 엉뚱한 낙서 → 실패 · 칸 위 점수 하나 「n%」(빨강·별 없음 · 대표님 10-16) · 같은 글자", `「${lab1}」`);
     const y1 = [window.scrollY, p.scrollTop, sc.scrollTop, document.querySelector(".learn")?.scrollTop ?? 0].join(",");
     ok(ta === "none" && y0 === y1, "ⓖ 그리는 동안 화면·창 안 움직임(touch-action none)", `${ta} · ${y0} → ${y1}`);
     // ⓔ 되돌리기·지우기
