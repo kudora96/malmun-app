@@ -13,21 +13,21 @@
 //     못 넘어도 막지 않는다([다음 ▶]) · 음성 인식이 안 되는 곳은 점수 없이 듣고 비교만(녹음은 저장)
 //  S6 녹음은 이 기기 안에만(IndexedDB) — 서버로 보내지 않는다
 //  S7 영상 창 안(embedded): 스크롤 없이 · 줄 이동·닫기는 학습 화면이 한다 · 줄 전체까지 통과하면 다음 줄 말하기로
-import { warmSTT } from "../sttserver.js?v=1015.6";
-import { t, lang, langShort } from "../i18n.js?v=1015.6";
-import { esc, sayParts, koq } from "../text.js?v=1015.6";
-import { spkHtml, uiKoBtn } from "../ui.js?v=1015.6";
-import { episode } from "../data.js?v=1015.6";
-import { paths } from "../paths.js?v=1015.6";
-import { audioCtx, hold, quietWake } from "../wake.js?v=1015.6";
-import * as sfx from "../sfx.js?v=1015.6";
-import { diagEnv, keepDiag } from "../diag.js?v=1015.6";
-import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1015.6";
-import { bestHeard, heardHTML, endHint, scoreOf, bestFull, spanOf, sylsAt } from "../heard.js?v=1015.6"; // 덧붙은 말 빼고 견주기(본부 10-11)
-import { openCompare, playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1015.6";
-import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace, lateFactor, sylAt, karaokeRun, isFull } from "../rhythm.js?v=1015.6";
-import { recDel, downloadRec, askPersist } from "../recstore.js?v=1015.6";
-import { logRec, dB, srWhy, srWatch, niceLabel, ALIAS, srOnlyMode, setSrOnly, isAndroid, recordSROnly, srMiss, micSet, seqMode, srOnBlob, devSR, setDevSR, srJudge } from "../recorder.js?v=1015.6";
+import { warmSTT } from "../sttserver.js?v=1016.1";
+import { t, lang, langShort } from "../i18n.js?v=1016.1";
+import { esc, sayParts, koq } from "../text.js?v=1016.1";
+import { spkHtml, uiKoBtn } from "../ui.js?v=1016.1";
+import { episode } from "../data.js?v=1016.1";
+import { paths } from "../paths.js?v=1016.1";
+import { audioCtx, hold, quietWake } from "../wake.js?v=1016.1";
+import * as sfx from "../sfx.js?v=1016.1";
+import { diagEnv, keepDiag } from "../diag.js?v=1016.1";
+import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1016.1";
+import { bestHeard, heardHTML, endHint, scoreOf, bestFull, spanOf, sylsAt } from "../heard.js?v=1016.1"; // 덧붙은 말 빼고 견주기(본부 10-11)
+import { openCompare, playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1016.1";
+import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace, lateFactor, sylAt, karaokeRun, isFull } from "../rhythm.js?v=1016.1";
+import { recDel, downloadRec, askPersist } from "../recstore.js?v=1016.1";
+import { logRec, dB, srWhy, srWatch, niceLabel, ALIAS, srOnlyMode, setSrOnly, isAndroid, recordSROnly, srMiss, micSet, seqMode, srOnBlob, devSR, setDevSR, srJudge } from "../recorder.js?v=1016.1";
 
 // 통과 두 단계(본부 10-04 · 투덜이 「원어민은 되지만 외국인은 100% 어렵다」): 80↑ = ☆ 통과(✓ · [저장]) · 95↑ = ★ 완벽
 export const PASS = 80, PERFECT = 95;
@@ -66,8 +66,8 @@ export function quietLimit(want, heard) {
 export const maxMsFor = say => Math.max(8000, (3 + 0.8 * [...String(say || "")].filter(c => /[가-힣]/.test(c)).length) * 1000);
 
 // ── 닮음 = 음절 정렬(js/score.js · 「들린 말」 빨간 표시와 같은 함수 — 본부 10-04) ──
-import { similarity, align } from "../score.js?v=1015.6";
-import { scoreFx } from "../scorefx.js?v=1015.6"; // 점수별 효과(본부 10-05)
+import { similarity, align } from "../score.js?v=1016.1";
+import { scoreFx } from "../scorefx.js?v=1016.1"; // 점수별 효과(본부 10-05)
 export { similarity };
 
 // ── 내 목소리 저장(S6) ──
@@ -481,6 +481,6 @@ export default async function speak(app, ep, id, opts = {}) {
   // 언어를 바꾸면(본부 10-13 안 A · retext 가 보내는 malmun:uilang) 결과 줄·토막 단추를 지금 상태 그대로 새 언어로 — 녹음·채점은 안 건드림 · 「확인 중…」 동안은 retext 가 바꾼 글 그대로
   const onLang = () => { if (!st.alive) return; setRateWord(t("speed")); $(".helpbox").innerHTML = helpHTML(); fitHelp(); fitHead(true); /* ⇄ 때는 줄이기만(풀지 않음) — 단추 글이 보였다 숨었다 하지 않게(다국어부 10-15 ur 1280) */ /* 속도 알약 말도 새 언어로(다시 그릴 때 옛 말로 쓰지 않게 · 다국어부 10-14) */ if (st.checking) return; paint(); if (st.retryDev) $(".msg").textContent = t("sr_retry_dev"); };
   addEventListener("malmun:uilang", onLang);
-  const onFitW = () => st.alive && fitHead(true); addEventListener("malmun:langfit", onFitW); // langfit 이 단추 폭을 「두 말 중 긴 쪽」으로 고정할 때 → 처음부터 긴 말 기준 단계(첫 ⇄ 도 0px · 다국어부 10-15)
-  return () => { removeEventListener("malmun:uilang", onLang); removeEventListener("malmun:langfit", onFitW); st.alive = false; newAtt(); clearInterval(litT); closeCmp(); stopRec(true); stopSounds(); st.stream?.getTracks().forEach(x => x.stop()); release(); quietWake(false); document.removeEventListener("keydown", onEsc, true); delete app.__sp; };
+  const onFitW = () => st.alive && fitHead(true); addEventListener("malmun:langfit", onFitW); const onBig = () => st.alive && requestAnimationFrame(() => fitHead()); addEventListener("malmun:big", onBig); // 크게 보기 들고 날 때(머리 줄 폭·⛶ 칩) 다시 맞춤 // langfit 이 단추 폭을 「두 말 중 긴 쪽」으로 고정할 때 → 처음부터 긴 말 기준 단계(첫 ⇄ 도 0px · 다국어부 10-15)
+  return () => { removeEventListener("malmun:uilang", onLang); removeEventListener("malmun:langfit", onFitW); removeEventListener("malmun:big", onBig); st.alive = false; newAtt(); clearInterval(litT); closeCmp(); stopRec(true); stopSounds(); st.stream?.getTracks().forEach(x => x.stop()); release(); quietWake(false); document.removeEventListener("keydown", onEsc, true); delete app.__sp; };
 }
