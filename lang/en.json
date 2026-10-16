@@ -279,5 +279,8 @@
  "music_next": "Next song",
  "music_now": "Now playing:",
  "music_none": "Music is off",
- "music_wait": "Starting soon (tap the screen once)"
+ "music_wait": "Starting soon (tap the screen once)",
+ "big_view": "Full view on/off",
+ "big_short": "Full view",
+ "big_off": "Exit"
 }

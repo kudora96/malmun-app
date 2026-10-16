@@ -277,5 +277,8 @@
  "music_next": "다음 곡",
  "music_now": "지금 나오는 곡:",
  "music_none": "지금은 음악이 꺼져 있어요",
- "music_wait": "곧 나와요(화면을 한 번 누르면 시작)"
+ "music_wait": "곧 나와요(화면을 한 번 누르면 시작)",
+ "big_view": "크게 보기 ⇄ 작게",
+ "big_short": "크게 보기",
+ "big_off": "작게"
 }
