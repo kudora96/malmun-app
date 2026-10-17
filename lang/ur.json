@@ -285,5 +285,18 @@
  "music_next": "اگلا گانا",
  "music_now": "ابھی چل رہا ہے:",
  "music_none": "ابھی موسیقی بند ہے",
- "music_wait": "جلد شروع ہوگا (اسکرین کو ایک بار چھوئیں)"
+ "music_wait": "جلد شروع ہوگا (اسکرین کو ایک بار چھوئیں)",
+ "bgm_song_arirang": "آریرانگ",
+ "bgm_song_doraji": "دوراجی تاریونگ",
+ "bgm_song_kwaeji": "کویجینا چنگ چنگ نانے",
+ "bgm_song_ongheya": "اونگ ہیا",
+ "bgm_song_ganggang": "گانگ گانگ سولے",
+ "bgm_song_miryang": "میریانگ آریرانگ",
+ "bgm_song_gunbam": "گن بام تاریونگ",
+ "bgm_song_jindo": "جندو آریرانگ",
+ "bgm_song_cheonan": "چھونان سام گوری",
+ "bgm_song_gangwon": "گانگون دو آریرانگ",
+ "bgm_song_gyeongbok": "گیونگ بوک گنگ تاریونگ",
+ "bgm_song_monggeumpo": "مونگ گم پو تاریونگ",
+ "bgm_ver_power": "پرزور"
 }

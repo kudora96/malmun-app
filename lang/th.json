@@ -285,5 +285,18 @@
  "music_next": "เพลงถัดไป",
  "music_now": "กำลังเล่น:",
  "music_none": "ตอนนี้ปิดเพลงอยู่",
- "music_wait": "กำลังจะเล่น (แตะหน้าจอหนึ่งครั้ง)"
+ "music_wait": "กำลังจะเล่น (แตะหน้าจอหนึ่งครั้ง)",
+ "bgm_song_arirang": "อารีรัง",
+ "bgm_song_doraji": "โทราจี ทารยอง",
+ "bgm_song_kwaeji": "ควีจีนา ชิงชิง นาเน",
+ "bgm_song_ongheya": "องเฮยา",
+ "bgm_song_ganggang": "คังกังซุลแล",
+ "bgm_song_miryang": "มีรยัง อารีรัง",
+ "bgm_song_gunbam": "คุนบัม ทารยอง",
+ "bgm_song_jindo": "จินโด อารีรัง",
+ "bgm_song_cheonan": "ชอนัน ซัมกอรี",
+ "bgm_song_gangwon": "คังวอนโด อารีรัง",
+ "bgm_song_gyeongbok": "คย็องบกกุง ทารยอง",
+ "bgm_song_monggeumpo": "มงกึมโพ ทารยอง",
+ "bgm_ver_power": "ทรงพลัง"
 }
