@@ -285,5 +285,18 @@
  "music_next": "अर्को गीत",
  "music_now": "अहिले बजिरहेको गीत:",
  "music_none": "अहिले संगीत बन्द छ",
- "music_wait": "छिट्टै बज्छ (स्क्रिनमा एक पटक थिच्नुहोस्)"
+ "music_wait": "छिट्टै बज्छ (स्क्रिनमा एक पटक थिच्नुहोस्)",
+ "bgm_song_arirang": "आरिराङ",
+ "bgm_song_doraji": "दोराजी तारयोङ",
+ "bgm_song_kwaeji": "क्वेजिना चिङचिङ नाने",
+ "bgm_song_ongheya": "ओङहेया",
+ "bgm_song_ganggang": "गाङगाङसुल्ले",
+ "bgm_song_miryang": "मिर्याङ आरिराङ",
+ "bgm_song_gunbam": "गुनबाम तारयोङ",
+ "bgm_song_jindo": "जिन्दो आरिराङ",
+ "bgm_song_cheonan": "छोनान साम्गोरी",
+ "bgm_song_gangwon": "गाङवोन-दो आरिराङ",
+ "bgm_song_gyeongbok": "ग्योङबोकगुङ तारयोङ",
+ "bgm_song_monggeumpo": "मोङगुम्पो तारयोङ",
+ "bgm_ver_power": "बलियो"
 }
