@@ -1,10 +1,10 @@
-import { bgmOn, setBgm, TRACKS, playTrack, bgmNow, onBgmChange, bgmVol, setBgmVol, playNext } from "./bgm.js?v=1016.33";
-import { paths } from "./paths.js?v=1016.33";
-import { t, tL, lang, langName, LANGS, READY, setLang, KO_UI, uiKoOn, setUiKo, langShort, preloadKoUi } from "./i18n.js?v=1016.33";
-import { snapshot, retext } from "./retext.js?v=1016.33";
-import "./langfit.js?v=1016.33"; // ⇄ 때 단추 크기·자리 고정(다국어부 10-15)
-import { VERSION } from "./version.js?v=1016.33";
-import { esc } from "./text.js?v=1016.33";
+import { bgmOn, setBgm, TRACKS, playTrack, bgmNow, onBgmChange, bgmVol, setBgmVol, playNext } from "./bgm.js?v=1016.38";
+import { paths } from "./paths.js?v=1016.38";
+import { t, tL, tAlt, lang, langName, LANGS, READY, setLang, KO_UI, uiKoOn, setUiKo, langShort, preloadKoUi } from "./i18n.js?v=1016.38";
+import { snapshot, retext } from "./retext.js?v=1016.38";
+import "./langfit.js?v=1016.38"; // ⇄ 때 단추 크기·자리 고정(다국어부 10-15)
+import { VERSION } from "./version.js?v=1016.38";
+import { esc } from "./text.js?v=1016.38";
 
 const svg = (d, fill) => `<svg class="ico" viewBox="0 0 24 24" ${fill ? 'fill="currentColor"' : 'fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"'} aria-hidden="true">${d}</svg>`;
 export const I = {
@@ -52,15 +52,20 @@ export const musicBtn = () => `<button class="musicbox" data-act="musicbox">🎵
 const volPos = f => Math.round(f <= 1 ? f * 50 : 50 + (f - 1) * 50), volOf = p => (p <= 50 ? p / 50 : 1 + (p - 50) / 50); // 막대 자리 ⇄ 음량 배수
 export function openMusicBox() {
   const root = document.getElementById("sheet-root");
-  const nm = x => { const k = "bgm_song_" + x.id, v = t(k); return v === k ? x.en : v; }; // 곡 이름 = 학습자 언어(다국어부 열쇠 · 없으면 영어) · ⇄ = 한국어
-  const lab = x => `<b data-k="bgm_song_${x.id}">${esc(nm(x))}</b> <small><span data-k="bgm_ver_${x.ver}">${esc(t("bgm_ver_" + x.ver))}</span></small>`;
+  const nm = (x, f = t) => { const k = "bgm_song_" + x.id, v = f(k); return v === k ? x.en : v; }; // 곡 이름 = 학습자 언어(다국어부 열쇠 · 없으면 영어) · ⇄ = 한국어
+  const KV = { calm: "잔잔", bright: "밝은", power: "힘찬" };
+  const stk = k => `<span class="stk"><span data-k="${k}">${esc(t(k))}</span><span class="gh" aria-hidden="true">${esc(t(k))}</span><span class="gh" aria-hidden="true">${esc(tAlt(k) ?? "")}</span></span>`; // 단추 폭 = 두 말 중 긴 쪽(⇄ 0px · 잘림 없음)
+  const tLL = k => (uiKoOn() ? tAlt(k) ?? tL(k) : t(k)); // 학습자 말(⇄ 한국어 중에도)
+  const one = (a, b) => `<b>${esc(a)}</b> <small>${esc(b)}</small>`;
+  // 칸 크기 = 학습자 말·한국어 중 큰 쪽(보이지 않는 두 겹) → ⇄ 때 줄 높이·단추 자리 0px(대표님 10-15 「⇄ 는 글만」)
+  const lab = x => `<span class="stk"><span><b data-k="bgm_song_${x.id}">${esc(nm(x))}</b> <small><span data-k="bgm_ver_${x.ver}">${esc(t("bgm_ver_" + x.ver))}</span></small></span><span class="gh" aria-hidden="true">${one(nm(x, tLL), tLL("bgm_ver_" + x.ver))}</span><span class="gh" aria-hidden="true" lang="ko">${one(x.song, KV[x.ver] || "")}</span></span>`;
   const row = (x, i) => { const on = bgmNow() === i; return `<li${on ? ' class="now"' : ""}><span class="nm">${lab(x)}</span>
-    <button class="mplay" data-play="${i}" aria-pressed="${on}"><span aria-hidden="true">${on ? "■" : "▶"}</span> <span data-k="${on ? "music_stop" : "music_play"}">${esc(t(on ? "music_stop" : "music_play"))}</span></button>
-    <button class="mdl" data-dl="${i}">⬇ <span data-k="music_dl">${esc(t("music_dl"))}</span></button></li>`; };
+    <button class="mplay" data-play="${i}" aria-pressed="${on}"><span aria-hidden="true">${on ? "■" : "▶"}</span> ${stk(on ? "music_stop" : "music_play")}</button>
+    <button class="mdl" data-dl="${i}">⬇ ${stk("music_dl")}</button></li>`; };
   const nowHTML = () => { const i = bgmNow(), k = bgmOn() ? "music_wait" : "music_none"; return i >= 0 ? `<span class="ml" data-k="music_now">${esc(t("music_now"))}</span> ${lab(TRACKS[i])}` : `<span class="ml" data-k="${k}">${esc(t(k))}</span>`; };
-  const ctrl = () => `<button class="monoff" data-mb="onoff" aria-pressed="${bgmOn()}"><span aria-hidden="true">♪</span> <span data-k="${bgmOn() ? "music_on" : "music_off"}">${esc(t(bgmOn() ? "music_on" : "music_off"))}</span></button>
+  const ctrl = () => `<button class="monoff" data-mb="onoff" aria-pressed="${bgmOn()}"><span aria-hidden="true">♪</span> ${stk(bgmOn() ? "music_on" : "music_off")}</button>
     <label class="mvol"><span aria-hidden="true">🔊</span><span class="sr" data-k="music_vol">${esc(t("music_vol"))}</span><input type="range" min="0" max="100" step="5" value="${volPos(bgmVol())}" data-mb="vol" aria-label="${esc(t("music_vol"))}"></label>
-    <button class="mnext" data-mb="next"${bgmOn() ? "" : " disabled"}>⏭ <span data-k="music_next">${esc(t("music_next"))}</span></button>`;
+    <button class="mnext" data-mb="next"${bgmOn() ? "" : " disabled"}>⏭ ${stk("music_next")}</button>`;
   const paint = () => { const ul = root.querySelector(".mlist"); if (!ul) return; ul.innerHTML = TRACKS.map(row).join(""); root.querySelector(".mnow").innerHTML = nowHTML(); const c = root.querySelector(".mctrl"); if (!c.contains(document.activeElement) || document.activeElement.type !== "range") c.innerHTML = ctrl(); };
   root.innerHTML = `<div class="sheet-dim" data-close></div>
     <div class="sheet mbox" role="dialog" aria-modal="true" aria-labelledby="sheet-h"><span class="grab"></span>
