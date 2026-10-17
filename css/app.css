@@ -438,7 +438,7 @@ a{color:inherit;text-decoration:none}
 .sheet.mbox .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 .sheet.mbox .mnow{font-size:13px;color:var(--ink)}.sheet.mbox .mnow .ml{color:var(--mute)}
 .sheet.mbox li.now{background:var(--hi-soft);border-radius:8px}
-.sheet.mbox .mlist{grid-template-columns:minmax(0,1fr);max-height:62dvh;overflow:auto}.sheet.mbox li .nm small{display:block;color:var(--mute);font-size:12px}.sheet.mbox .stk{display:inline-grid;vertical-align:top;max-width:100%}.sheet.mbox .stk b{overflow-wrap:break-word}.sheet.mbox .stk>*{grid-area:1/1}.sheet.mbox .stk>.gh{visibility:hidden}.sheet.mbox :is(.monoff,.mnext) .stk{vertical-align:baseline} /* 켜기·다음 = 두 말 겹쳐 폭 고정(vi 13px 잘림·⇄ 17px 고침) */.sheet.mbox .stk small{display:block;color:var(--mute);font-size:12px}
+.sheet.mbox .mlist{grid-template-columns:minmax(0,1fr);max-height:62dvh;overflow:auto}.sheet.mbox li .nm small{display:block;color:var(--mute);font-size:12px}.sheet.mbox .stk{display:inline-grid;vertical-align:top;max-width:100%}.sheet.mbox .stk b{overflow-wrap:break-word}.sheet.mbox .stk>*{grid-area:1/1}.sheet.mbox .stk>.gh{visibility:hidden}.sheet.mbox .gb{font-weight:800}.sheet.mbox .gh[data-t]::after,.sheet.mbox .gh [data-t]::after{content:attr(data-t)}.sheet.mbox :is(.monoff,.mnext) .stk{vertical-align:baseline} /* 켜기·다음 = 두 말 겹쳐 폭 고정(vi 13px 잘림·⇄ 17px 고침) */.sheet.mbox .stk small{display:block;color:var(--mute);font-size:12px}
 .sheet.mbox li{display:flex;align-items:center;gap:8px;padding:6px 4px;border-bottom:1px solid var(--line)}
 .sheet.mbox li .nm{flex:1;min-width:0;font-size:14px}.sheet.mbox li .nm b{font-weight:800}
 .sheet.mbox li button{width:auto;flex:none;padding:7px 12px;border-radius:999px;font-size:13px;white-space:nowrap}
