@@ -213,7 +213,9 @@ export default async function write(app, ep, id, opts = {}) {
     const r = work.querySelector(".info .sub2"); if (!r || !r.clientWidth) return; const xs = [...r.querySelectorAll(".mean")];
     if (work.classList.contains("handmode")) r.classList.toggle("two", r.clientWidth < 600 && innerHeight >= 700); /* 낮은 폰(320×640 등) = 한 줄(도구는 그림만 · 뜻이 줄어듦) → 손글씨 칸 150px↑ · 창 크기로만 정함 */
     xs.forEach(x => x.style.removeProperty("font-size")); const over = x => { if (x.scrollWidth > x.clientWidth + 1) return true; const rg = document.createRange(); rg.selectNodeContents(x); const a = rg.getBoundingClientRect(), b = x.getBoundingClientRect(); return a.width > 0 && a.width > b.width - 3; }; /* 글 폭 = 칸보다 3px 좁게(글꼴 차이 여유 · 앱개발부 10-16 vi 320×640 7px 잘림) */
-    for (const x of xs) for (let f = parseFloat(getComputedStyle(x).fontSize) - 1; f >= 11 && over(x); f--) x.style.fontSize = f + "px";
+    const ht = r.querySelector(".htools"); ht?.classList.remove("tight");
+    const fit1 = () => { for (const x of xs) for (let f = parseFloat(getComputedStyle(x).fontSize) - 1; f >= 11 && over(x); f--) x.style.fontSize = f + "px"; };
+    fit1(); if (ht && xs.some(over)) { ht.classList.add("tight"); xs.forEach(x => x.style.removeProperty("font-size")); fit1(); } /* 11px 로도 안 들면(글꼴이 넓은 PC · 앱개발부 10-17 vi 320×640) 옆 도구 단추 여백을 좁혀 뜻 자리를 넓힘 */
   }
   // 자판이 창 아래로 잘림(다국어부 10-12 320×640 — 아래 단추 줄이 두 줄로 꺾여 자판 마지막 줄 ㅚㅝㅞㅟㅢ 가 24~70px 잘림) — 넘칠 때만 차례로:
   //  ① 아래 단추 셋을 한 줄로(글 작게 · 단추 안에서 두 줄) ② 자판 줄 높이를 30 → 22px 까지 1px 씩

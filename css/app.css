@@ -1248,6 +1248,8 @@ html[dir=rtl] .write .hjudge{direction:rtl}
 .write .work.handmode .stage .sub2 .mean{flex:1 1 0;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:28px}
 .write .work.handmode .stage .sub2.two .mean{flex-basis:0}
 .write .work.handmode .stage .sub2:not(.two) .htools{flex:none}
+.write .work.handmode .stage .sub2 .htools.tight{gap:2px}
+.write .work.handmode .stage .sub2 .htools.tight button{padding-inline:3px}
 .write .work.handmode .stage .sub2 .wko{line-height:28px}
 html:lang(ur) .write .work.handmode .stage .sub2{height:34px}
 html:lang(ur) .write .work.handmode .stage .sub2.two{height:72px}
