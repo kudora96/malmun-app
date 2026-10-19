@@ -1302,10 +1302,10 @@ html:lang(ur) .write .hand.hic .hbtns :is(.ml,.ms){font-size:9px;line-height:1.2
 .write .whead .wclose{margin-left:0}
 /* 먹 색 팔레트(대표님 10-16) — 손글씨 칸 바로 위 오른쪽 한 줄(점수 줄 왼쪽 44% 는 점수·시간) · 동그라미 크기 = 칸 폭에 맞춰 저절로(최대 20px) · 고른 색 테두리 */
 .write .hand{position:relative}
-.write .hand .hpal{position:absolute;display:flex;justify-content:flex-start;gap:5px;height:21px;align-items:center;z-index:1}
+.write .hand .hpal{position:absolute;display:flex;justify-content:flex-start;gap:clamp(2px,1.2vw,5px);height:21px;align-items:center;z-index:1}
 html:lang(ur) .write .hand .hpal{height:25px}
 .write .hand.stack .hpal{justify-content:flex-start}
-.write .hand .hpal button{flex:0 1 20px;min-width:0;aspect-ratio:1;max-height:20px;padding:0;border:0;border-radius:50%;background:var(--c);box-shadow:0 0 0 1.5px var(--card),0 0 0 2.5px var(--line);cursor:pointer}
+.write .hand .hpal button{flex:0 1 18px;min-width:0;aspect-ratio:1;max-height:18px;padding:0;border:0;border-radius:50%;background:var(--c);box-shadow:0 0 0 1.5px var(--card),0 0 0 2.5px var(--line);cursor:pointer}
 .write .hand .hpal button[aria-checked=true]{box-shadow:0 0 0 2px var(--card),0 0 0 4px var(--hi)}
 .write .hbox .fx{right:auto;left:64px;z-index:3;padding:0 6px;border-radius:999px;background:var(--card)} /* 꽝·통과 글 = 점수 바로 옆(잠깐 팔레트 위에 겹침 · 바탕을 깔아 읽히게) */
 .write .hbox .hscore{max-width:60px!important}
@@ -1342,7 +1342,7 @@ html:lang(ur) .write .hand .hpal{height:25px}
 .learn.big .panel .write .work.handmode.bigl>.wbtns{grid-column:2;grid-row:2}
 .learn.big .panel .write .work.handmode.bigl>.hand{display:contents}
 .learn.big .panel .write .work.handmode.bigl .hpal{position:static!important;grid-column:1;grid-row:1;width:auto!important;justify-self:end;align-self:center;gap:6px}
-.learn.big .panel .write .work.handmode.bigl .hpal button{flex:none;width:20px;height:20px}
+.learn.big .panel .write .work.handmode.bigl .hpal button{flex:none;width:18px;height:18px}
 .learn.big .panel .write .work.handmode.bigl .hbox{grid-column:1;grid-row:2 / span 2;align-self:start;margin-top:0}
 .learn.big .panel .write .work.handmode.bigl .hbtns{grid-column:2;grid-row:3;display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr));grid-template-rows:minmax(0,1fr) auto;gap:6px;height:auto!important;width:auto!important;min-height:0}
 .learn.big .panel .write .work.handmode.bigl .hbtns .hjudge{grid-column:1 / -1;min-height:0;font-size:16px;line-height:1.45}

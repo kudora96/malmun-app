@@ -13,17 +13,17 @@
 //  W5 소리는 언제나 하나만 · 새 일을 하면 앞 소리는 멈춘다
 //  W6 영상 창 안(embedded): 창 안에서 스크롤 없이 다 보이게 — 긴 문장은 토막으로(◀ 1/3 ▶) ·
 //     토막을 다 쓰면 자동으로 다음 토막 · 줄을 다 쓰면 대사를 듣고 자동으로 다음 줄 쓰기 · 아래 ▶ = 이 부분 듣기
-import { t, tL, lang, uiKoOn, KO_UI, preloadKoUi } from "../i18n.js?v=1016.60";
-import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO, koq } from "../text.js?v=1016.60";
-import { episode, chars, charsF } from "../data.js?v=1016.60";
-import { paths } from "../paths.js?v=1016.60";
-import { I, spkHtml, uiKoBtn } from "../ui.js?v=1016.60";
-import { audioCtx, hold } from "../wake.js?v=1016.60";
-import * as sfx from "../sfx.js?v=1016.60";
-import { scoreFx, stopFx } from "../scorefx.js?v=1016.60";
-import { units as jamoUnits, baseOf, shapeFix } from "../jamobox.js?v=1016.60"; // 자모 자리 나누기(획순 · 자판 덧칠 · 손글씨 덩어리 — 본부 10-07) // 손글씨 점수 효과 = 말하기와 같은 규칙(본부 10-07)
-import { createStrokes } from "../strokes.js?v=1016.60"; // 획 자료·획순 칠(글자부)
-import { fitToGuide } from "../strokefit.js?v=1016.60"; // 자석 따라오는 획 길 = 회색 가운데(글자부 10-12)
+import { t, tL, lang, uiKoOn, KO_UI, preloadKoUi } from "../i18n.js?v=1016.61";
+import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO, koq } from "../text.js?v=1016.61";
+import { episode, chars, charsF } from "../data.js?v=1016.61";
+import { paths } from "../paths.js?v=1016.61";
+import { I, spkHtml, uiKoBtn } from "../ui.js?v=1016.61";
+import { audioCtx, hold } from "../wake.js?v=1016.61";
+import * as sfx from "../sfx.js?v=1016.61";
+import { scoreFx, stopFx } from "../scorefx.js?v=1016.61";
+import { units as jamoUnits, baseOf, shapeFix } from "../jamobox.js?v=1016.61"; // 자모 자리 나누기(획순 · 자판 덧칠 · 손글씨 덩어리 — 본부 10-07) // 손글씨 점수 효과 = 말하기와 같은 규칙(본부 10-07)
+import { createStrokes } from "../strokes.js?v=1016.61"; // 획 자료·획순 칠(글자부)
+import { fitToGuide } from "../strokefit.js?v=1016.61"; // 자석 따라오는 획 길 = 회색 가운데(글자부 10-12)
 
 const KEYS = [..."ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎㄲㄸㅃㅆㅉ"], VOW = [..."ㅏㅑㅓㅕㅗㅛㅜㅠㅡㅣ"];
 const VOW2 = [..."ㅐㅒㅔㅖㅘㅙㅚㅝㅞㅟㅢ"]; // 겹모음 줄(본부 10-06) — 칸 하나 · ㅓ+ㅣ 처럼 나눠 쳐도 받음
@@ -333,7 +333,7 @@ export default async function write(app, ep, id, opts = {}) {
   }
   // 쓰기 도구(본부 10-07 투덜이 「더 실감 나고 재미있게」) — 연필 4% · 펜 7% · 붓 12%(빠르면 가늘고 천천히·꾹 누르면 굵게 0.5~1.2배 · 끝은 가늘게) · 고른 것 기억
   // 먹 색(대표님 10-15 「초록 한 색만」) — 도구 줄 🎨 단추 하나 → 아래로 펼치는 목록 · 고른 색 기억 · 쓰는 획·통과 뒤·간직하기 모두 그 색
-  const INKS = [["black", "#161616"], ["navy", "#1f2a5c"], ["blue", "#1d5fbf"], ["red", "#c0392b"], ["green", "#23794a"], ["purple", "#6b3fa0"], ["brown", "#7a4b12"], ["gold", "#b07d0a"]];
+  const INKS = [["black", "#161616"], ["navy", "#1f2a5c"], ["blue", "#1d5fbf"], ["red", "#c0392b"], ["green", "#23794a"], ["purple", "#6b3fa0"], ["brown", "#7a4b12"], ["gold", "#b07d0a"], ["orange", "#e0751a"], ["pink", "#d6457a"], ["sky", "#2b9fd6"], ["gray", "#7b7b7b"]]; // 12색(대표님 10-19 「그 줄은 전부 색을 넣을 거면 색을 더」)
   const inkKey = () => { try { const k = localStorage.getItem("malmun.hink"); return INKS.some(([a]) => a === k) ? k : "black"; } catch { return "black"; } }, inkHex = () => (INKS.find(([a]) => a === inkKey()) || INKS[0])[1];
   const TOOLS = { pencil: { w: 0.04, color: "#4a4a50", icon: "✏️" }, pen: { w: 0.07, color: "#1f2a5c", icon: "🖊" }, brush: { w: 0.12, color: "#161616", icon: "🖌" } };
   const magnetOn = () => { try { return localStorage.getItem("malmun.hmode") === "magnet"; } catch { return false; } };

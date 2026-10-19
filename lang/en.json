@@ -303,5 +303,9 @@
  "why_fail": "I can't explain this one right now. Listen to the model once more.",
  "why_limit": "That's all for today. Try again tomorrow.",
  "age_noscore": "Voice scores and AI explanations open when you're older. For now, record yourself and compare with the model.",
- "seek_bar": "Playback position"
+ "seek_bar": "Playback position",
+ "ink_orange": "Orange",
+ "ink_pink": "Pink",
+ "ink_sky": "Sky blue",
+ "ink_gray": "Gray"
 }
