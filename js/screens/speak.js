@@ -13,22 +13,22 @@
 //     못 넘어도 막지 않는다([다음 ▶]) · 음성 인식이 안 되는 곳은 점수 없이 듣고 비교만(녹음은 저장)
 //  S6 녹음은 이 기기 안에만(IndexedDB) — 서버로 보내지 않는다
 //  S7 영상 창 안(embedded): 스크롤 없이 · 줄 이동·닫기는 학습 화면이 한다 · 줄 전체까지 통과하면 다음 줄 말하기로
-import { noScoreKey } from "../agepolicy.js?v=1016.52"; // 점수 없음 안내 = 나이 때문인지(대표님 10-19)
-import { warmSTT } from "../sttserver.js?v=1016.52";
-import { t, lang, langShort } from "../i18n.js?v=1016.52";
-import { esc, sayParts, koq } from "../text.js?v=1016.52";
-import { spkHtml, uiKoBtn } from "../ui.js?v=1016.52";
-import { episode } from "../data.js?v=1016.52";
-import { paths } from "../paths.js?v=1016.52";
-import { audioCtx, hold, quietWake } from "../wake.js?v=1016.52";
-import * as sfx from "../sfx.js?v=1016.52";
-import { diagEnv, keepDiag } from "../diag.js?v=1016.52";
-import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1016.52";
-import { bestHeard, heardHTML, endHint, scoreOf, bestFull, spanOf, sylsAt } from "../heard.js?v=1016.52"; // 덧붙은 말 빼고 견주기(본부 10-11)
-import { openCompare, playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1016.52";
-import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace, lateFactor, sylAt, karaokeRun, isFull } from "../rhythm.js?v=1016.52";
-import { recDel, downloadRec, askPersist } from "../recstore.js?v=1016.52";
-import { logRec, dB, srWhy, srWatch, niceLabel, ALIAS, srOnlyMode, setSrOnly, isAndroid, recordSROnly, srMiss, micSet, seqMode, srOnBlob, devSR, setDevSR, srJudge } from "../recorder.js?v=1016.52";
+import { noScoreKey, ageHelpKey } from "../agepolicy.js?v=1016.53"; // 점수 없음 안내 = 나이 때문인지(대표님 10-19)
+import { warmSTT } from "../sttserver.js?v=1016.53";
+import { t, lang, langShort } from "../i18n.js?v=1016.53";
+import { esc, sayParts, koq } from "../text.js?v=1016.53";
+import { spkHtml, uiKoBtn } from "../ui.js?v=1016.53";
+import { episode } from "../data.js?v=1016.53";
+import { paths } from "../paths.js?v=1016.53";
+import { audioCtx, hold, quietWake } from "../wake.js?v=1016.53";
+import * as sfx from "../sfx.js?v=1016.53";
+import { diagEnv, keepDiag } from "../diag.js?v=1016.53";
+import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1016.53";
+import { bestHeard, heardHTML, endHint, scoreOf, bestFull, spanOf, sylsAt } from "../heard.js?v=1016.53"; // 덧붙은 말 빼고 견주기(본부 10-11)
+import { openCompare, playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1016.53";
+import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace, lateFactor, sylAt, karaokeRun, isFull } from "../rhythm.js?v=1016.53";
+import { recDel, downloadRec, askPersist } from "../recstore.js?v=1016.53";
+import { logRec, dB, srWhy, srWatch, niceLabel, ALIAS, srOnlyMode, setSrOnly, isAndroid, recordSROnly, srMiss, micSet, seqMode, srOnBlob, devSR, setDevSR, srJudge } from "../recorder.js?v=1016.53";
 
 // 통과 두 단계(본부 10-04 · 투덜이 「원어민은 되지만 외국인은 100% 어렵다」): 80↑ = ☆ 통과(✓ · [저장]) · 95↑ = ★ 완벽
 export const PASS = 80, PERFECT = 95;
@@ -67,9 +67,9 @@ export function quietLimit(want, heard) {
 export const maxMsFor = say => Math.max(8000, (3 + 0.8 * [...String(say || "")].filter(c => /[가-힣]/.test(c)).length) * 1000);
 
 // ── 닮음 = 음절 정렬(js/score.js · 「들린 말」 빨간 표시와 같은 함수 — 본부 10-04) ──
-import { similarity, align } from "../score.js?v=1016.52";
-import { scoreFx } from "../scorefx.js?v=1016.52"; // 점수별 효과(본부 10-05)
-import { whyRow } from "../whyask.js?v=1016.52"; // 「왜 틀렸어요?」(본부 10-19 · 기본 꺼짐 ?why=1)
+import { similarity, align } from "../score.js?v=1016.53";
+import { scoreFx } from "../scorefx.js?v=1016.53"; // 점수별 효과(본부 10-05)
+import { whyRow } from "../whyask.js?v=1016.53"; // 「왜 틀렸어요?」(본부 10-19 · 기본 꺼짐 ?why=1)
 export { similarity };
 
 // ── 내 목소리 저장(S6) ──
@@ -86,7 +86,7 @@ export const recPut = async (key, val) => { try { const d = await db(); await ne
 
 // 단추 글 = 기호(◀ ▶ ? ✕) + 글 — 좁으면 글만 숨김(머리 줄 한 줄 유지)
 // 사용법 풍선 글(help_sp_*) — {b} = 「ने⇄한」 단추 이름(한국어 칸 · ⇄ 때 이 함수로 다시 씀)
-const helpHTML = () => [1, 2, 3, 4, 5, 6, 7, 8, 9].map(k => "help_sp_" + k).filter(k => t(k) !== k).map(k => `<p dir="auto">${esc(t(k)).replace("{b}", `<span lang="ko">${esc(langShort(lang))}⇄한</span>`)}</p>`).join("") + `<p class="x">${esc(t("help_close"))}</p>`;
+const helpHTML = () => [1, 2, 3, 4, 5, 6, 7, 8, 9].map(k => "help_sp_" + k).concat(ageHelpKey() ? [ageHelpKey()] : []).filter(k => t(k) !== k).map(k => `<p dir="auto">${esc(t(k)).replace("{b}", `<span lang="ko">${esc(langShort(lang))}⇄한</span>`)}</p>`).join("") + `<p class="x">${esc(t("help_close"))}</p>`;
 const lbl = k => { const s = t(k), m = String(s).match(/^([^\p{L}\p{M}\p{N}]*)(.*?)([^\p{L}\p{M}\p{N}]*)$/u); return m ? `${m[1] ? `<i class="ic">${esc(m[1].trim())}</i>` : ""}<span class="lt" data-k="${k}" data-kcore>${esc(m[2])}</span>${m[3] ? `<i class="ic">${esc(m[3].trim())}</i>` : ""}` : esc(s); };
 export default async function speak(app, ep, id, opts = {}) {
   const d = await episode(ep, lang);

@@ -81,5 +81,8 @@ export let onDeviceKo = "?";
   }).catch(() => { onDeviceKo = "확인 실패"; });
 })();
 
-// 채점이 안 될 때 안내 열쇠 — 나이 때문이면 「18세부터 점수 · 지금은 녹음·견주기」 · 아니면 지금 안내(브라우저 탓)
-export const noScoreKey = () => (gateOn() && !allowed("sttServer") && onDeviceKo !== "available" ? "age_noscore" : "speak_hint_noscore");
+// 채점이 안 될 때 본 화면 안내 — 나이 때문이면 평소 안내 그대로(「말해 보세요」 · 대표님 10-19 「화면 틀은 그대로 · 본문에 나이 글 띄우지 말 것」) · 아니면 지금 안내(브라우저 탓)
+const ageBlocked = () => gateOn() && !allowed("sttServer") && onDeviceKo !== "available";
+export const noScoreKey = () => (ageBlocked() ? "speak_hint" : "speak_hint_noscore");
+// 나이 때문에 못 쓰는 것 = 「?」 사용법 안에 한 줄(age_noscore) · 막힌 게 없으면 null
+export const ageHelpKey = () => (gateOn() && (ageBlocked() || !allowed("aiExplain")) ? "age_noscore" : null);
