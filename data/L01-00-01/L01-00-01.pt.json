@@ -1,0 +1,82 @@
+{
+ "clip_id": "L01-00-01",
+ "lang": "pt",
+ "what": "대사 자막층 pt — 언어부 S2(10-19) · Claude 초안 A + 제미나이 초안 B 비교 후 고름(s2_drafts.md) · 브라질 포르투갈어(você) · 아이→선생님 공손(Professora) · 선생님→아이 다정(대사엔 tu/você 동사 자리 거의 없음) · 1번 인사 = 시청자 포함 복수(Entrem · Bem-vindos) · 14번 = você 공손 권유 olhe(「-세요」 줄) · 한국 이름은 따옴표 한글 · 원어민 확인 전",
+ "title_t": "\"세종대왕\": as letras têm dono",
+ "characters": [
+  {
+   "id": "dubu",
+   "bio": "Um robô que apresenta o programa"
+  },
+  {
+   "id": "kong",
+   "bio": "Uma gatinha branca"
+  },
+  {
+   "id": "seonsaengnim",
+   "bio": "Professora coreana de trinta anos"
+  }
+ ],
+ "subtitles": [
+  {
+   "id": 1,
+   "t": "Entrem, por favor. Bem-vindos ao palácio \"경복궁\"."
+  },
+  {
+   "id": 2,
+   "t": "Professora! Eu fiz uma letra!"
+  },
+  {
+   "id": 3,
+   "t": "Uma letra? Isso é um desenho."
+  },
+  {
+   "id": 4,
+   "t": "Não é uma letra? Por quê?"
+  },
+  {
+   "id": 5,
+   "t": "As letras são um combinado. Só são letras se todo mundo puder ler junto."
+  },
+  {
+   "id": 6,
+   "t": "Ah, então se só eu sei, não é uma letra."
+  },
+  {
+   "id": 7,
+   "t": "Então quem decidiu esse combinado?"
+  },
+  {
+   "id": 8,
+   "t": "Foi o rei \"세종대왕\". Há quinhentos anos, o próprio rei fez as letras. Naquela época, o povo não conhecia as letras. Era difícil demais."
+  },
+  {
+   "id": 9,
+   "t": "Nossa! Então todo mundo deve ter adorado!"
+  },
+  {
+   "id": 10,
+   "t": "Não. Os ministros foram contra."
+  },
+  {
+   "id": 11,
+   "t": "Os ministros? Por quê?"
+  },
+  {
+   "id": 12,
+   "t": "É que, naquela época, só quem conhecia as letras tinha poder."
+  },
+  {
+   "id": 13,
+   "t": "Então, e nós? Nós também podemos ler?"
+  },
+  {
+   "id": 14,
+   "t": "Vamos lá, olhe aqui. Esta é aquela letra. É \"아\"."
+  },
+  {
+   "id": 15,
+   "t": "Então era isso que o rei \"세종대왕\" queria fazer. Letras que qualquer um pudesse ler com facilidade. E esse qualquer um, hoje, somos nós."
+  }
+ ]
+}
