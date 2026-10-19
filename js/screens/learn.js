@@ -10,27 +10,28 @@
 //  R7 영상은 늘 맨 위 · 지금 줄은 영상 바로 아래(앞 줄은 영상 뒤로) — 손으로 목록을 움직이면 4초 동안은 따라가지 않음
 //  R8 듣기 모드(대사→설명 · 설명만)도 R1~R6 그대로(영상 대신 소리 조각) · 모드를 바꾸면 멈춤(▶ 로 시작)
 //  R9 다시 들어오면 마지막 줄이 선택된 채 멈춰 있음
-import { warmSTT } from "../sttserver.js?v=1016.49";
-import * as sfxL from "../sfx.js?v=1016.49"; // 카드 말하기 최대 길이 = 본보기 길이로(10-07)
-import { t, lang, langName, KO_UI, uiKoOn, preloadKoUi } from "../i18n.js?v=1016.49";
-import { setTx } from "../retext.js?v=1016.49";
-import { langfitRun } from "../langfit.js?v=1016.49";
-import { esc, renderText, glossCards, sayParts } from "../text.js?v=1016.49";
-import { episode } from "../data.js?v=1016.49";
-import { paths } from "../paths.js?v=1016.49";
-import { Sequence } from "../audio.js?v=1016.49";
-import { I, progress, SPEAKER, spkHtml, uiKoBtn, switchUiKo } from "../ui.js?v=1016.49";
-import writeView from "./write.js?v=1016.49";
-import { diagEnv, keepDiag } from "../diag.js?v=1016.49";
-import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1016.49";
-import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace, lateFactor, sylAt, paintAt, karaokeRun, isFull } from "../rhythm.js?v=1016.49";
-import { playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1016.49";
-import { heardHTML, endHint, scoreOf, bestFull, spanOf, sylsAt } from "../heard.js?v=1016.49"; // 덧붙은 말 빼고 견주기(본부 10-11)
-import { recDel, downloadRec, askPersist } from "../recstore.js?v=1016.49";
-import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1016.49";
-import { scoreFx, stopFx } from "../scorefx.js?v=1016.49"; // 점수별 효과(본부 10-05)
-import { record, recordSROnly, srOnlyMode, setSrOnly, isAndroid, srMiss, micWhy, srWhy, canScore, closeMic, logRec, micOpen, seqMode, srOnBlob, devSR, setDevSR, srJudge, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1016.49";
-import { hold, quietWake } from "../wake.js?v=1016.49";
+import { noScoreKey } from "../agepolicy.js?v=1016.51"; // 점수 없음 안내 = 나이 때문인지(대표님 10-19)
+import { warmSTT } from "../sttserver.js?v=1016.51";
+import * as sfxL from "../sfx.js?v=1016.51"; // 카드 말하기 최대 길이 = 본보기 길이로(10-07)
+import { t, lang, langName, KO_UI, uiKoOn, preloadKoUi } from "../i18n.js?v=1016.51";
+import { setTx } from "../retext.js?v=1016.51";
+import { langfitRun } from "../langfit.js?v=1016.51";
+import { esc, renderText, glossCards, sayParts } from "../text.js?v=1016.51";
+import { episode } from "../data.js?v=1016.51";
+import { paths } from "../paths.js?v=1016.51";
+import { Sequence } from "../audio.js?v=1016.51";
+import { I, progress, SPEAKER, spkHtml, uiKoBtn, switchUiKo } from "../ui.js?v=1016.51";
+import writeView from "./write.js?v=1016.51";
+import { diagEnv, keepDiag } from "../diag.js?v=1016.51";
+import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1016.51";
+import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace, lateFactor, sylAt, paintAt, karaokeRun, isFull } from "../rhythm.js?v=1016.51";
+import { playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1016.51";
+import { heardHTML, endHint, scoreOf, bestFull, spanOf, sylsAt } from "../heard.js?v=1016.51"; // 덧붙은 말 빼고 견주기(본부 10-11)
+import { recDel, downloadRec, askPersist } from "../recstore.js?v=1016.51";
+import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1016.51";
+import { scoreFx, stopFx } from "../scorefx.js?v=1016.51"; // 점수별 효과(본부 10-05)
+import { record, recordSROnly, srOnlyMode, setSrOnly, isAndroid, srMiss, micWhy, srWhy, canScore, closeMic, logRec, micOpen, seqMode, srOnBlob, devSR, setDevSR, srJudge, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1016.51";
+import { hold, quietWake } from "../wake.js?v=1016.51";
 
 const RATES = [1, 0.75, 0.5];
 const pref = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } };
@@ -517,7 +518,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
       panel.innerHTML = explainHTML(i);
       st.sayAt = null; if (L[i].say?.ko) sylAt(ep, `${ep}_${String(L[i].id).padStart(2, "0")}_say`, L[i].say.ko).then(a => { if (st.panel === mine) st.sayAt = a; }).catch(() => {}); // 말해 보세요 문장 견본 소리 음절 시각(노래방 칠)
       if (L[i].v9) v9Fit(); fitPanel(); panel.classList.remove("fitting"); setTimeout(fitPanel, 300); document.fonts?.ready.then(() => st.panel === mine && fitPanel()); // 글꼴이 늦게 와도 다시 맞춤 // 한 줄에 안 들어가면 (한국어) 괄호 → ✕ 글자 순서로 뺌
-      if (L[i].v9) { mine.cleanup = spStop; spInit(i); if (!canScore()) { const g = panel.querySelector(".sayb .smsg"); if (g) g.textContent = t("speak_hint_noscore"); } } // 마이크는 🎤 누를 때만 연다(열면 블루투스가 통화 모드로 바뀌어 설명 소리까지 전화 음질 — 본부 10-03)
+      if (L[i].v9) { mine.cleanup = spStop; spInit(i); if (!canScore()) { const g = panel.querySelector(".sayb .smsg"); if (g) g.textContent = t(noScoreKey()); } } // 마이크는 🎤 누를 때만 연다(열면 블루투스가 통화 모드로 바뀌어 설명 소리까지 전화 음질 — 본부 10-03)
       if (autoplay) { ex.play((st.exLoop = exItems(i))); if (L[i].v9) markPlay(sndOf(i)); }
       setTimeout(() => { if (st.panel === mine) fitCard(i); keepVisible(i); }, 60); setTimeout(() => st.panel === mine && fitCard(i), 350); /* 설명 창이 커진 뒤 지금 줄 카드도 남은 자리에 맞춤(검사부 10-12 vi·th·ur 320 — 단추가 아래 막대 뒤로) */ // 카드가 길어도 그 줄이 아래 막대에 가리지 않게
     } else {
@@ -680,7 +681,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     // 점수가 안 나오면 절대 통과·저장 아님(본부 10-04 — 엉뚱한 말도 그냥 넘어가던 것) · 왜 안 나왔는지 짧게
     // 점수는 언제나 % — 못 알아들었으면 「0% · 까닭」 · 80% 넘으면 [저장]
     box.querySelector("[data-x=keep]").hidden = !(sc != null && sc >= PASS);
-    setTx(msg, () => { let m = switchedSR ? `0% · ${t("sr_only_switched")}` : sc == null ? (canScore() ? `0% · ${t(r.why === "nospeech" ? "why_nospeech" : srWhy(r.srErr))}` : t("speak_hint_noscore")) : scoreLine(sc, r.why, t, (h => h && { ...h, say: L[i].say.ko, rom: Object.fromEntries([...(L[i].v9?.pieces || []).map(p => [p.ko, p.rom]), ...Object.entries(L[i].v9?.gloss || {}).map(([k, g]) => [k, g.rom])].filter(([k, r]) => k && r)) })(endHint(L[i].say.ko, r.heard))); // 두 단계 통과 ☆/★ + 끝난 까닭
+    setTx(msg, () => { let m = switchedSR ? `0% · ${t("sr_only_switched")}` : sc == null ? (canScore() ? `0% · ${t(r.why === "nospeech" ? "why_nospeech" : srWhy(r.srErr))}` : t(noScoreKey())) : scoreLine(sc, r.why, t, (h => h && { ...h, say: L[i].say.ko, rom: Object.fromEntries([...(L[i].v9?.pieces || []).map(p => [p.ko, p.rom]), ...Object.entries(L[i].v9?.gloss || {}).map(([k, g]) => [k, g.rom])].filter(([k, r]) => k && r)) })(endHint(L[i].say.ko, r.heard))); // 두 단계 통과 ☆/★ + 끝난 까닭
       if (rhy && sc != null) m += " · " + rhyText(rhy, t);
       if (rhy?.late && sc != null) m += " · " + t("why_late");
       if (!r.blob && sc != null) m += " · " + t("sr_only_note");

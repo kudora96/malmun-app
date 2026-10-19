@@ -1,18 +1,19 @@
 // 진단 화면 #/diag(본부 10-07 「PC 에선 되는데 폰에선 안 됨」) — 투덜이가 폰에서 열어 사진 한 장 · 「복사」로 글째 보냄
 //  기기 · 받아쓰기(인식만 / 녹음+인식 동시) · 마이크(허락 · 실제 적용된 설정 · 장치) · 녹음 형식(지원 · 3초 녹음을 풀 수 있나)
 //  소리(AudioContext 상태 · 「가」 소리 · 효과음 · 음성 창고 읽기) · 최근 오류 20개 — 앱 동작은 안 바꿈(시험은 이 화면 안에서만)
-import { VERSION } from "../version.js?v=1016.49";
-import { esc } from "../text.js?v=1016.49";
-import { uiKoBtn } from "../ui.js?v=1016.49";
-import { t, tAlt, preloadKoUi } from "../i18n.js?v=1016.49";
-import { paths } from "../paths.js?v=1016.49";
-import { charsF } from "../data.js?v=1016.49";
-import { audioCtx } from "../wake.js?v=1016.49";
-import * as sfx from "../sfx.js?v=1016.49";
-import { srOnlyMode, setSrOnly, devSR, setDevSR, seqMode, srFailCount, serverMode } from "../recorder.js?v=1016.49";
-import { sttReady, sttURL, serverSTT } from "../sttserver.js?v=1016.49";
-import { diagCount, clearDiag } from "../diag.js?v=1016.49";
-import { errLog, clearErr } from "../errlog.js?v=1016.49";
+import { VERSION } from "../version.js?v=1016.51";
+import { esc } from "../text.js?v=1016.51";
+import { uiKoBtn } from "../ui.js?v=1016.51";
+import { t, tAlt, preloadKoUi } from "../i18n.js?v=1016.51";
+import { paths } from "../paths.js?v=1016.51";
+import { charsF } from "../data.js?v=1016.51";
+import { audioCtx } from "../wake.js?v=1016.51";
+import * as sfx from "../sfx.js?v=1016.51";
+import { srOnlyMode, setSrOnly, devSR, setDevSR, seqMode, srFailCount, serverMode } from "../recorder.js?v=1016.51";
+import * as AP from "../agepolicy.js?v=1016.51"; // 나이·나라 · 켜진/막힌 기능(대표님 10-19 시험 스위치 ?age=15&country=NP)
+import { sttReady, sttURL, serverSTT } from "../sttserver.js?v=1016.51";
+import { diagCount, clearDiag } from "../diag.js?v=1016.51";
+import { errLog, clearErr } from "../errlog.js?v=1016.51";
 
 // 같은 오류(종류·글·주소·자리)는 한 줄로 묶음 — 화면·복사 글 같이(본부 10-12 · 띄엄띄엄 쌓인 version.json 실패 20개)
 const errGroups = () => { const g = new Map(); for (const e of errLog()) { const k = [e.kind, e.msg, e.url || "", e.src || "", e.line || ""].join("|"), o = g.get(k); if (o) { o.n += e.n || 1; o.at = e.at; } else g.set(k, { ...e, n: e.n || 1 }); } return [...g.values()].reverse(); };
@@ -38,6 +39,10 @@ export default async function diag(app) {
     "판": VERSION, "주소": location.href.replace(/[?#].*$/, ""), "브라우저": navigator.userAgent, "화면": `${screen.width}×${screen.height} · 창 ${innerWidth}×${innerHeight} · dpr ${devicePixelRatio}`,
     "받아쓰기 방식": srOnlyMode() ? `받아쓰기만(${srHow}${devSR() === "sronly" ? " — 녹음 소리로 받아쓰기가 연속 2번 안 됨" : ""})` : seqMode() && serverMode() ? `녹음 → 서버 받아쓰기(2안 · 안드로이드 기본 · ${devSR() === "server" ? "이 기기에서 됨 확인 · 기기 기억 7일" : "아직 확인 전"} · 실패하면 이번 방문만 받아쓰기만)` : seqMode() ? `녹음 먼저 → 그 소리로 받아쓰기(${devSR() === "seq-ok" ? "이 기기에서 됨 확인 · 기기 기억 7일" : "아직 확인 전"} · 연속 실패 ${srFailCount()}/2 · 이번 방문만)` : "녹음+받아쓰기 같이", "서버 받아쓰기": sttReady() ? `켜짐 · ${sttURL()}` : "꺼짐(주소 없음)", "받아쓰기 있음": SR ? (window.SpeechRecognition ? "SpeechRecognition" : "webkitSpeechRecognition") : "없음", "마이크 허락": micPerm,
     "기기 안 받아쓰기": onDev,
+    "나이 판정": AP.gateOn() ? `${AP.age() ?? "모름"}세 · 나라 ${AP.country() || "모름(가장 엄한 쪽)"}${AP.testMode() ? " · 시험 스위치(?age=off 로 끔)" : ""} · 판 ${AP.POLICY.version}` : "꺼짐(나이 화면 전 · 지금 앱 그대로) · 시험: 주소 끝 ?age=15&country=NP",
+    "켜진 기능": AP.table().filter(x => x.ok).map(x => x.ko).join(" · ") || "-",
+    "막힌 기능": AP.table().filter(x => !x.ok).map(x => `${x.ko}(${x.min === Infinity ? "보류" : x.min + "세부터"})`).join(" · ") || "없음",
+    "18세 미만 받아쓰기": AP.gateOn() && !AP.allowed("sttServer") ? `서버·브라우저 받아쓰기 막음 · 기기 안 한국어 ${AP.onDeviceKo}${AP.onDeviceKo === "available" ? " → 기기 안으로 채점" : " → 채점 없이 녹음·견주기만"}` : "해당 없음",
     "녹음 형식": mrTypes, "AudioContext": (() => { try { return audioCtx().state; } catch (e) { return "만들기 실패 " + e.message; } })(),
     "preservesPitch": "preservesPitch" in HTMLMediaElement.prototype ? "있음" : "webkitPreservesPitch" in HTMLMediaElement.prototype ? "webkit 만" : "없음",
   };

@@ -13,21 +13,22 @@
 //     못 넘어도 막지 않는다([다음 ▶]) · 음성 인식이 안 되는 곳은 점수 없이 듣고 비교만(녹음은 저장)
 //  S6 녹음은 이 기기 안에만(IndexedDB) — 서버로 보내지 않는다
 //  S7 영상 창 안(embedded): 스크롤 없이 · 줄 이동·닫기는 학습 화면이 한다 · 줄 전체까지 통과하면 다음 줄 말하기로
-import { warmSTT } from "../sttserver.js?v=1016.49";
-import { t, lang, langShort } from "../i18n.js?v=1016.49";
-import { esc, sayParts, koq } from "../text.js?v=1016.49";
-import { spkHtml, uiKoBtn } from "../ui.js?v=1016.49";
-import { episode } from "../data.js?v=1016.49";
-import { paths } from "../paths.js?v=1016.49";
-import { audioCtx, hold, quietWake } from "../wake.js?v=1016.49";
-import * as sfx from "../sfx.js?v=1016.49";
-import { diagEnv, keepDiag } from "../diag.js?v=1016.49";
-import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1016.49";
-import { bestHeard, heardHTML, endHint, scoreOf, bestFull, spanOf, sylsAt } from "../heard.js?v=1016.49"; // 덧붙은 말 빼고 견주기(본부 10-11)
-import { openCompare, playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1016.49";
-import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace, lateFactor, sylAt, karaokeRun, isFull } from "../rhythm.js?v=1016.49";
-import { recDel, downloadRec, askPersist } from "../recstore.js?v=1016.49";
-import { logRec, dB, srWhy, srWatch, niceLabel, ALIAS, srOnlyMode, setSrOnly, isAndroid, recordSROnly, srMiss, micSet, seqMode, srOnBlob, devSR, setDevSR, srJudge } from "../recorder.js?v=1016.49";
+import { noScoreKey } from "../agepolicy.js?v=1016.51"; // 점수 없음 안내 = 나이 때문인지(대표님 10-19)
+import { warmSTT } from "../sttserver.js?v=1016.51";
+import { t, lang, langShort } from "../i18n.js?v=1016.51";
+import { esc, sayParts, koq } from "../text.js?v=1016.51";
+import { spkHtml, uiKoBtn } from "../ui.js?v=1016.51";
+import { episode } from "../data.js?v=1016.51";
+import { paths } from "../paths.js?v=1016.51";
+import { audioCtx, hold, quietWake } from "../wake.js?v=1016.51";
+import * as sfx from "../sfx.js?v=1016.51";
+import { diagEnv, keepDiag } from "../diag.js?v=1016.51";
+import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1016.51";
+import { bestHeard, heardHTML, endHint, scoreOf, bestFull, spanOf, sylsAt } from "../heard.js?v=1016.51"; // 덧붙은 말 빼고 견주기(본부 10-11)
+import { openCompare, playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1016.51";
+import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace, lateFactor, sylAt, karaokeRun, isFull } from "../rhythm.js?v=1016.51";
+import { recDel, downloadRec, askPersist } from "../recstore.js?v=1016.51";
+import { logRec, dB, srWhy, srWatch, niceLabel, ALIAS, srOnlyMode, setSrOnly, isAndroid, recordSROnly, srMiss, micSet, seqMode, srOnBlob, devSR, setDevSR, srJudge } from "../recorder.js?v=1016.51";
 
 // 통과 두 단계(본부 10-04 · 투덜이 「원어민은 되지만 외국인은 100% 어렵다」): 80↑ = ☆ 통과(✓ · [저장]) · 95↑ = ★ 완벽
 export const PASS = 80, PERFECT = 95;
@@ -66,9 +67,9 @@ export function quietLimit(want, heard) {
 export const maxMsFor = say => Math.max(8000, (3 + 0.8 * [...String(say || "")].filter(c => /[가-힣]/.test(c)).length) * 1000);
 
 // ── 닮음 = 음절 정렬(js/score.js · 「들린 말」 빨간 표시와 같은 함수 — 본부 10-04) ──
-import { similarity, align } from "../score.js?v=1016.49";
-import { scoreFx } from "../scorefx.js?v=1016.49"; // 점수별 효과(본부 10-05)
-import { whyRow } from "../whyask.js?v=1016.49"; // 「왜 틀렸어요?」(본부 10-19 · 기본 꺼짐 ?why=1)
+import { similarity, align } from "../score.js?v=1016.51";
+import { scoreFx } from "../scorefx.js?v=1016.51"; // 점수별 효과(본부 10-05)
+import { whyRow } from "../whyask.js?v=1016.51"; // 「왜 틀렸어요?」(본부 10-19 · 기본 꺼짐 ?why=1)
 export { similarity };
 
 // ── 내 목소리 저장(S6) ──
@@ -162,7 +163,7 @@ export default async function speak(app, ep, id, opts = {}) {
     $(".sbar i").style.width = (sc ?? 0) + "%";
     $(".meter").classList.toggle("pass", sc != null && sc >= PASS);
     // 점수는 언제나 % — 알아듣지 못했으면 「0% · 까닭」(투덜이 10-04)
-    $(".msg").textContent = st.rec ? t(!st.ready ? "mic_opening" : st.switched ? "mic_switched" : "listening") : st.kept ? `${sc}% ✓ · ${starOf(sc)} ${t(st.kept)}` : st.note ? `0% · ${t(st.whyEnd === "nospeech" ? "why_nospeech" : st.note)}` : st.micErr && sc == null && !mineBlob() ? st.micErr : sc == null ? (SR ? t(mineBlob() ? "no_score" : "speak_hint") : t(mineBlob() ? "no_score" : "speak_hint_noscore"))
+    $(".msg").textContent = st.rec ? t(!st.ready ? "mic_opening" : st.switched ? "mic_switched" : "listening") : st.kept ? `${sc}% ✓ · ${starOf(sc)} ${t(st.kept)}` : st.note ? `0% · ${t(st.whyEnd === "nospeech" ? "why_nospeech" : st.note)}` : st.micErr && sc == null && !mineBlob() ? st.micErr : sc == null ? (SR ? t(mineBlob() ? "no_score" : "speak_hint") : t(mineBlob() ? "no_score" : noScoreKey()))
       : scoreLine(sc, st.whyEnd, t, st.hint); // 점수에 맞는 한마디 + 끝난 까닭·틀린 곳(들은 내용으로)
     if (!st.rec && st.rhy && sc != null && !st.note && st.rhy.L >= PASS) $(".msg").textContent += " · " + rhyText(st.rhy, t);
     if (!st.rec && st.late && sc != null && !st.note) $(".msg").textContent += " · " + t("why_late"); // 정확하지만 너무 늦음 // 근거: 글자 % · 리듬 % · 가장 많이 깎인 곳
@@ -292,7 +293,7 @@ export default async function speak(app, ep, id, opts = {}) {
       st.rec = fake; st.ready = true; sr = { stop() {} }; paint();
       st.pace = null; { const p = cur(), u = p.src || lineSrc; if (u) sfx.load(u).then(async b => { if (!b || st.rec !== fake) return; const pc = await paceOf({ ep, key: p.src ? p.key : `${ep}_${String(line.id).padStart(2, "0")}_line`, text: p.text, rate: getRate("m"), buf: b }); if (st.rec === fake) st.pace = pc; }).catch(() => {}); } // 받아쓰기만이어도 따라 읽기 칠(본부 10-10)
       const r = await c.done; if (st.rec === fake) st.rec = null; if (fake.onstop === null || r.cancelled || !st.alive) return; // 버림(다른 토막·닫기)
-      if (r.error) { $(".msg").textContent = st.micErr = t("speak_hint_noscore"); paint(); return; }
+      if (r.error) { $(".msg").textContent = st.micErr = t(noScoreKey()); paint(); return; }
       heard = r.heard; srErr = r.srErr; st.why = r.why; st.diag.sr = r.diag.sr; finish(null); return;
     }
     st.seqRec = seqMode(); // 안드로이드 = 녹음만(받아쓰기는 끝난 뒤 그 녹음 소리로 · 본부 10-10 갤럭시)

@@ -6,8 +6,9 @@
 // 시간·인식(본부 10-04 투덜이 승인): 말 사이 쉼 2초 · 🎤 뒤 6초 말 없으면 끝 · 최대 길이 = 문장 길이에 맞춤 · 인식이 혼자 끝나면 같은 트랙으로 다시
 // 그때와 다른 점(본부 10-04 「남긴 차이」): ① 윈도우 별칭 장치 「default」「communications」는 절대 안 고름(통신 장치를 열면 윈도우가 다른 소리를 줄임)
 //   ② 「준비 중 → 녹음 중」 표시(첫 소리가 들어오면) ③ 인식 오류 까닭을 돌려줌(onerror 를 삼키지 않음) ④ 진단 기록(이벤트만 듣고 소리 경로는 안 건드림)
-import { audioCtx } from "./wake.js?v=1016.49";
-import { sttReady, serverSTT, sttNoteOnce } from "./sttserver.js?v=1016.49";
+import { audioCtx } from "./wake.js?v=1016.51";
+import { allowed } from "./agepolicy.js?v=1016.51"; // 서버 받아쓰기 = 나이(대표님 10-19)
+import { sttReady, serverSTT, sttNoteOnce } from "./sttserver.js?v=1016.51";
 
 // 시간 규칙(본부 10-04 · 투덜이 「빨리 안 하면 바로 닫힘」): 말 사이 쉼 2초 · 🎤 뒤 6초 안에 말 없으면 끝 · 최대 길이는 부르는 쪽이 정함(문장 길이)
 const QUIET_MS = 2000, START_MS = 6000;
@@ -78,7 +79,7 @@ const DEV_DAYS = 7, DEV_K = "malmun.srdev", DEV_T = "malmun.srdev.t", FAIL_K = "
 const SRV_FAIL = "malmun.srvfail", SRV_OFF = "malmun.srvoff", SRV_OFF_MS = 600000;
 try { if (sttReady() && sessionStorage.getItem("malmun.srmode") === "only" && !sessionStorage.getItem("malmun.srmode.v2")) sessionStorage.removeItem("malmun.srmode"); sessionStorage.setItem("malmun.srmode.v2", "1"); } catch {} /* 옛 판이 서버 한 번 실패로 남긴 「받아쓰기만」(같은 탭에 며칠씩 남던 것)을 새 판 첫 열기에 한 번 지움 — 서버가 있으면 안드로이드는 1번안을 안 써서 이 값이 필요 없음(본부 10-12) */
 const srvOff = () => { try { const t = +sessionStorage.getItem(SRV_OFF) || 0; return t > 0 && Date.now() - t < SRV_OFF_MS; } catch { return false; } };
-export const serverMode = () => { try { return sttReady() && sessionStorage.getItem("malmun.srmode") !== "only" && !srvOff(); } catch { return false; } };
+export const serverMode = () => { try { return allowed("sttServer") && sttReady() && sessionStorage.getItem("malmun.srmode") !== "only" && !srvOff(); } catch { return false; } };
 export const devSR = () => { try { const v = localStorage.getItem(DEV_K); if (!v) return null; const t = +localStorage.getItem(DEV_T) || 0;
   if (!t) { localStorage.removeItem(DEV_K); return null; } /* 옛 판 값(적은 때 없음 · sronly든 seq-ok든) = 지움 → 1번안 다시 시험(본부 10-11) */
   if (!(Date.now() - t < DEV_DAYS * 864e5)) { localStorage.removeItem(DEV_K); localStorage.removeItem(DEV_T); return null; } return v; } catch { return null; } };
