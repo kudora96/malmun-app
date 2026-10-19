@@ -62,6 +62,7 @@ function fit(el, snap) {
     let sc = 1; for (let k = 0; k < 6 && (el.scrollWidth > el.clientWidth + 0.5 || el.scrollHeight > el.clientHeight + 0.5); k++) { sc *= Math.min(el.clientWidth / el.scrollWidth, el.clientHeight / el.scrollHeight, 0.97); el.style.fontSize = `calc(${el.__lf.fs0} * ${sc.toFixed(3)})`; }
     nodes.forEach(([n, v]) => { n.nodeValue = v; }); el.style.fontSize = "";
     el.__lf.scale[alt] = Math.max(MIN_SCALE, sc);
+    el.style.overflow = ""; // 잴 때만 숨김(높이는 잠근 채 · 넘치는 획만 밖으로 보임) — 그대로 두면 미얀마·나스탈리크처럼 글자 상자보다 키 큰 글자가 깎임(10-19 my 편 목록 「곧」) · 크기는 min 과 글자 배율로 지킴
   };
   if (el.matches(SHRINK)) { lockNow(); return; }
   el.style.boxSizing = "border-box"; el.style.minHeight = `${H}px`;

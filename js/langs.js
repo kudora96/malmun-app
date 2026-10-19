@@ -12,7 +12,7 @@ export const LANG_INFO = {
   "ky": {"dir": "ltr", "font": "Noto Sans", "short": "Кыр"},
   "lo": {"dir": "ltr", "font": "Noto Sans Lao", "lh": 1.6, "minpx": 12, "short": "ລາວ"},
   "mn": {"dir": "ltr", "font": "Noto Sans", "ko_ui": true, "short": "Мон"},
-  "my": {"dir": "ltr", "font": "Noto Sans Myanmar", "lh": 1.8, "minpx": 12, "short": "MY"},
+  "my": {"dir": "ltr", "font": "Noto Sans Myanmar", "ko_ui": true, "lh": 1.8, "minpx": 12, "short": "MY"},
   "ne": {"dir": "ltr", "ko_ui": true, "lh": 1.5, "short": "ने", "stage": "ready"},
   "pt": {"dir": "ltr", "ko_ui": true, "short": "Pt"},
   "ru": {"dir": "ltr", "ko_ui": true, "short": "Рус"},
