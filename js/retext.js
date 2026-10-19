@@ -2,7 +2,7 @@
 //  ① 조합한 글(점수 줄 · 「🎤 말하세요」 등) = setTx(el, () => 글) 로 쓴 곳 → 그 함수를 다시 불러 새 언어로
 //  ② 글 전체가 t(열쇠) 하나인 글·aria-label·title·data-peek → 바꾸기 전 글로 열쇠를 찾아 새 글로(앞뒤 기호 「🎤 」「▶ 」는 그대로)
 //  배우는 한국어·대사 뜻(대사·낱말·설명 본문·학습자 말 뜻)은 건드리지 않음 · 끝에 malmun:uilang 이벤트(말하기·쓰기 창이 상태로 다시 씀)
-import { t, uiKeys } from "./i18n.js?v=1016.68";
+import { t, uiKeys } from "./i18n.js?v=1016.69";
 
 export const setTx = (el, fn) => { if (!el) return; el.__tx = fn; el.textContent = el.__txv = fn(); }; // 뒤에 다른 글로 바뀌면(textContent = …) 그 함수는 안 씀
 export const clearTx = el => { if (el) el.__tx = null; };
