@@ -13,17 +13,17 @@
 //  W5 소리는 언제나 하나만 · 새 일을 하면 앞 소리는 멈춘다
 //  W6 영상 창 안(embedded): 창 안에서 스크롤 없이 다 보이게 — 긴 문장은 토막으로(◀ 1/3 ▶) ·
 //     토막을 다 쓰면 자동으로 다음 토막 · 줄을 다 쓰면 대사를 듣고 자동으로 다음 줄 쓰기 · 아래 ▶ = 이 부분 듣기
-import { t, tL, lang, uiKoOn, KO_UI, preloadKoUi } from "../i18n.js?v=1016.58";
-import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO, koq } from "../text.js?v=1016.58";
-import { episode, chars, charsF } from "../data.js?v=1016.58";
-import { paths } from "../paths.js?v=1016.58";
-import { I, spkHtml, uiKoBtn } from "../ui.js?v=1016.58";
-import { audioCtx, hold } from "../wake.js?v=1016.58";
-import * as sfx from "../sfx.js?v=1016.58";
-import { scoreFx, stopFx } from "../scorefx.js?v=1016.58";
-import { units as jamoUnits, baseOf, shapeFix } from "../jamobox.js?v=1016.58"; // 자모 자리 나누기(획순 · 자판 덧칠 · 손글씨 덩어리 — 본부 10-07) // 손글씨 점수 효과 = 말하기와 같은 규칙(본부 10-07)
-import { createStrokes } from "../strokes.js?v=1016.58"; // 획 자료·획순 칠(글자부)
-import { fitToGuide } from "../strokefit.js?v=1016.58"; // 자석 따라오는 획 길 = 회색 가운데(글자부 10-12)
+import { t, tL, lang, uiKoOn, KO_UI, preloadKoUi } from "../i18n.js?v=1016.60";
+import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO, koq } from "../text.js?v=1016.60";
+import { episode, chars, charsF } from "../data.js?v=1016.60";
+import { paths } from "../paths.js?v=1016.60";
+import { I, spkHtml, uiKoBtn } from "../ui.js?v=1016.60";
+import { audioCtx, hold } from "../wake.js?v=1016.60";
+import * as sfx from "../sfx.js?v=1016.60";
+import { scoreFx, stopFx } from "../scorefx.js?v=1016.60";
+import { units as jamoUnits, baseOf, shapeFix } from "../jamobox.js?v=1016.60"; // 자모 자리 나누기(획순 · 자판 덧칠 · 손글씨 덩어리 — 본부 10-07) // 손글씨 점수 효과 = 말하기와 같은 규칙(본부 10-07)
+import { createStrokes } from "../strokes.js?v=1016.60"; // 획 자료·획순 칠(글자부)
+import { fitToGuide } from "../strokefit.js?v=1016.60"; // 자석 따라오는 획 길 = 회색 가운데(글자부 10-12)
 
 const KEYS = [..."ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎㄲㄸㅃㅆㅉ"], VOW = [..."ㅏㅑㅓㅕㅗㅛㅜㅠㅡㅣ"];
 const VOW2 = [..."ㅐㅒㅔㅖㅘㅙㅚㅝㅞㅟㅢ"]; // 겹모음 줄(본부 10-06) — 칸 하나 · ㅓ+ㅣ 처럼 나눠 쳐도 받음
@@ -910,7 +910,7 @@ export default async function write(app, ep, id, opts = {}) {
     { const lim = bx.getBoundingClientRect().bottom - (bx.offsetHeight - bx.clientHeight) / 2 - (parseFloat(getComputedStyle(bx).paddingBottom) || 0) + 0.5; /* 마지막 지킴: 반만 보이는 줄이 없게(10-15 375 ❷ 반쪽) */
       for (let i = ps.length - 1; i >= 0; i--) { const q = ps[i]; if (q.hidden) continue; for (let k = 0; k < 6 && q.getBoundingClientRect().bottom > lim; k++) { const g = +q.style.getPropertyValue("-webkit-line-clamp") || Math.max(1, Math.round(q.offsetHeight / (parseFloat(getComputedStyle(q).lineHeight) || 18))); if (g <= 1) break; q.style.setProperty("-webkit-line-clamp", String(g - 1)); } if (i > 0 && q.getBoundingClientRect().bottom > lim) q.hidden = true; } }
     const cut = ps.some(q => q.hidden || (q.style.getPropertyValue("-webkit-line-clamp") && q.scrollHeight > q.clientHeight + 1)); bx.classList.toggle("cut", cut); let mb = bx.querySelector(".jmore"); /* 다 못 보이면 「⋯」 단추 → 누르면 칸 위에 전체 글(검사부 10-15 320 「…」 로 끝까지 못 읽음) */
-    if (cut && !mb) { mb = document.createElement("button"); mb.className = "jmore"; mb.dataset.act = "jmore"; mb.textContent = "⋯"; bx.append(mb); } if (mb) mb.setAttribute("aria-label", "⋯"); /* 이름에 배우는 한국어를 넣지 않음(학습자 언어 글과 섞임 · write_ext ⓑ) */ if (!cut) mb?.remove(); } /* ur 나스탈리크처럼 글꼴 키가 줄높이보다 크면 한 줄 더 줄임 */
+    ps.forEach(q => q.classList.remove("jm")); if (cut) [...ps].reverse().find(q => !q.hidden)?.classList.add("jm"); /* 「⋯」 단추가 마지막 줄 글을 덮지 않게 그 줄 끝만 비움(대표님 10-19 PC 880 겹침 · 틀 그대로) */ if (cut && !mb) { mb = document.createElement("button"); mb.className = "jmore"; mb.dataset.act = "jmore"; mb.textContent = "⋯"; bx.append(mb); } if (mb) mb.setAttribute("aria-label", "⋯"); /* 이름에 배우는 한국어를 넣지 않음(학습자 언어 글과 섞임 · write_ext ⓑ) */ if (!cut) mb?.remove(); } /* ur 나스탈리크처럼 글꼴 키가 줄높이보다 크면 한 줄 더 줄임 */
   function judgeFull(on) { const box = work.querySelector(".hbox"), bx = work.querySelector(".hjudge"); box?.querySelector(".hjfull")?.remove(); if (!on || !box || !bx) return; const d = document.createElement("div"); d.className = "hjfull"; d.dataset.act = "jfull"; d.innerHTML = [...bx.querySelectorAll("p")].map(p => `<p class="${p.className}">${p.innerHTML}</p>`).join(""); box.append(d); } // 한 줄도 다 안 들어가면 그 줄을 들어가는 만큼만(… 로 끝)
   // 손글씨 칸에 잠깐(2초) — 틀린 내 획 빨강 · 맞는 획 주황 점선 + 번호 + 끝 화살
   function drawFix(r, jx) {
