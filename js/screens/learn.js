@@ -10,28 +10,28 @@
 //  R7 영상은 늘 맨 위 · 지금 줄은 영상 바로 아래(앞 줄은 영상 뒤로) — 손으로 목록을 움직이면 4초 동안은 따라가지 않음
 //  R8 듣기 모드(대사→설명 · 설명만)도 R1~R6 그대로(영상 대신 소리 조각) · 모드를 바꾸면 멈춤(▶ 로 시작)
 //  R9 다시 들어오면 마지막 줄이 선택된 채 멈춰 있음
-import { noScoreKey } from "../agepolicy.js?v=1016.62"; // 점수 없음 안내 = 나이 때문인지(대표님 10-19)
-import { warmSTT } from "../sttserver.js?v=1016.62";
-import * as sfxL from "../sfx.js?v=1016.62"; // 카드 말하기 최대 길이 = 본보기 길이로(10-07)
-import { t, lang, langName, KO_UI, uiKoOn, preloadKoUi } from "../i18n.js?v=1016.62";
-import { setTx } from "../retext.js?v=1016.62";
-import { langfitRun } from "../langfit.js?v=1016.62";
-import { esc, renderText, glossCards, sayParts } from "../text.js?v=1016.62";
-import { episode } from "../data.js?v=1016.62";
-import { paths } from "../paths.js?v=1016.62";
-import { Sequence } from "../audio.js?v=1016.62";
-import { I, progress, SPEAKER, spkHtml, uiKoBtn, switchUiKo } from "../ui.js?v=1016.62";
-import writeView from "./write.js?v=1016.62";
-import { diagEnv, keepDiag } from "../diag.js?v=1016.62";
-import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1016.62";
-import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace, lateFactor, sylAt, paintAt, karaokeRun, isFull } from "../rhythm.js?v=1016.62";
-import { playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1016.62";
-import { heardHTML, endHint, scoreOf, bestFull, spanOf, sylsAt } from "../heard.js?v=1016.62"; // 덧붙은 말 빼고 견주기(본부 10-11)
-import { recDel, downloadRec, askPersist } from "../recstore.js?v=1016.62";
-import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1016.62";
-import { scoreFx, stopFx } from "../scorefx.js?v=1016.62"; // 점수별 효과(본부 10-05)
-import { record, recordSROnly, srOnlyMode, setSrOnly, isAndroid, srMiss, micWhy, srWhy, canScore, closeMic, logRec, micOpen, seqMode, srOnBlob, devSR, setDevSR, srJudge, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1016.62";
-import { hold, quietWake } from "../wake.js?v=1016.62";
+import { noScoreKey } from "../agepolicy.js?v=1016.63"; // 점수 없음 안내 = 나이 때문인지(대표님 10-19)
+import { warmSTT } from "../sttserver.js?v=1016.63";
+import * as sfxL from "../sfx.js?v=1016.63"; // 카드 말하기 최대 길이 = 본보기 길이로(10-07)
+import { t, lang, langName, KO_UI, uiKoOn, preloadKoUi } from "../i18n.js?v=1016.63";
+import { setTx } from "../retext.js?v=1016.63";
+import { langfitRun } from "../langfit.js?v=1016.63";
+import { esc, renderText, glossCards, sayParts } from "../text.js?v=1016.63";
+import { episode } from "../data.js?v=1016.63";
+import { paths } from "../paths.js?v=1016.63";
+import { Sequence } from "../audio.js?v=1016.63";
+import { I, progress, SPEAKER, spkHtml, uiKoBtn, switchUiKo } from "../ui.js?v=1016.63";
+import writeView from "./write.js?v=1016.63";
+import { diagEnv, keepDiag } from "../diag.js?v=1016.63";
+import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1016.63";
+import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace, lateFactor, sylAt, paintAt, karaokeRun, isFull } from "../rhythm.js?v=1016.63";
+import { playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1016.63";
+import { heardHTML, endHint, scoreOf, bestFull, spanOf, sylsAt } from "../heard.js?v=1016.63"; // 덧붙은 말 빼고 견주기(본부 10-11)
+import { recDel, downloadRec, askPersist } from "../recstore.js?v=1016.63";
+import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1016.63";
+import { scoreFx, stopFx } from "../scorefx.js?v=1016.63"; // 점수별 효과(본부 10-05)
+import { record, recordSROnly, srOnlyMode, setSrOnly, isAndroid, srMiss, micWhy, srWhy, canScore, closeMic, logRec, micOpen, seqMode, srOnBlob, devSR, setDevSR, srJudge, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1016.63";
+import { hold, quietWake } from "../wake.js?v=1016.63";
 
 const RATES = [1, 0.75, 0.5];
 const pref = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } };
@@ -133,6 +133,8 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   // 기준(본부 10-05): 줄 카드 전체(아래끝 포함)가 영상 아래~막대 위에 보일 것 · 아니면 카드 위끝을 영상 바로 아래로(카드가 그 사이보다 길어도 위끝 맞춤)
   // 쓰기 창이 열려 있으면 지금 자막 카드(글 전부 + 아래 메뉴 줄)가 쓰기 창과 아래 막대 사이에 다 들어가게 — 길면 카드 안 글을 줄임(10-06 본부·투덜이)
   function fitCard(i) {
+    if (st.cardKeep === i) return; // ⇄ 뒤 같은 카드 = 맞춘 단계 그대로(⇄ 0px · 다국어부 10-19 ru 375 카드 단추 줄 14~21px) · 다른 줄·창 크기가 바뀌면 다시 맞춤
+    st.cardKeep = -1;
     items.forEach(li => { li.classList.remove("fitc", "tr2", "tr1", "ac1"); li.style.removeProperty("--kf"); li.style.removeProperty("--tf"); });
     const el = items[i]; if (!el) return; // 네 창(영상·설명·쓰기·말하기) 모두 같은 카드 자리·같은 글 크기(본부 10-06 「한 틀」)
     const avail = ctrlBar.getBoundingClientRect().top - stick.getBoundingClientRect().bottom - 14;
@@ -206,7 +208,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     if (st.uiFit && st.panel.kind === "explain") return fitBody(); // ⇄ 뒤 = 창 크기 그대로 · 본문 글만 맞춤
     if (Math.abs(h - (st.fitH || 0)) > 2 || panel.scrollHeight > panel.clientHeight) fitPanel();
   }, 120); }).observe(app.querySelector(".panel"), { subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: ["hidden", "class", "aria-pressed"] });
-  const onFit = () => { st.uiFit = false; fitPanel(); vsubFill(st.cur); fitCard(st.cur); clearTimeout(st.fitT); st.fitT = setTimeout(() => keepVisible(st.cur), 120); }; // 창 크기가 바뀌면(브라우저가 스크롤을 옮겨도) 지금 줄 카드를 제자리로 — 손 스크롤 중이면 그대로
+  const onFit = () => { st.uiFit = false; st.cardKeep = -1; fitPanel(); vsubFill(st.cur); fitCard(st.cur); clearTimeout(st.fitT); st.fitT = setTimeout(() => keepVisible(st.cur), 120); }; // 창 크기가 바뀌면(브라우저가 스크롤을 옮겨도) 지금 줄 카드를 제자리로 — 손 스크롤 중이면 그대로
   addEventListener("resize", onFit);
   addEventListener("resize", pad); pad();
   ["touchmove", "wheel"].forEach(e => window.addEventListener(e, () => { st.handScroll = Date.now(); }, { passive: true }));
@@ -951,6 +953,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   const onUiLang = () => {
     if (!app.querySelector(".scr.learn")) return removeEventListener("malmun:uilang", onUiLang);
     setRateWord(t("speed")); // 속도 알약 말(rateLabel)도 새 언어로(다국어부 10-14)
+    if (items[st.cur]?.classList.contains("fitc")) st.cardKeep = st.cur; // 지금 카드 맞춤 단계 고정(⇄ 0px)
     if (st.panel?.kind === "explain") st.uiFit = true; // 이 창이 닫히거나 다른 줄로 갈 때까지 창 크기 고정
     if (st.uiBar) return; const w = uiKoOn() ? "ko" : "L";
     v9set("snd", w); v9set("txt", w);
