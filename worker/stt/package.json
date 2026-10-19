@@ -1,0 +1,7 @@
+{
+  "name": "malmun-stt-worker",
+  "private": true,
+  "type": "module",
+  "scripts": { "test": "node test/hints_test.mjs" },
+  "dependencies": { "@anthropic-ai/sdk": "0.135.0" }
+}

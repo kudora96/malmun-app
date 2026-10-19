@@ -4,6 +4,7 @@
 //  녹음은 저장하지 않음 — R2·KV 에 안 넣고 로그에도 안 남김(받아쓰기 뒤 메모리에서 버림)
 //  하루 상한 = KV「CAP」 숫자 세기(기기당 DEV_CAP · 전체 ALL_CAP) — KV 는 원자적이 아니라 대략(남용 막기용)
 //  CORS = https://kudora96.github.io · http://localhost:* · http://127.0.0.1:* 만
+import { explain } from "./explain.js"; // 「왜 틀렸어요?」(본부 10-19)
 const MODEL = "@cf/openai/whisper-large-v3-turbo";
 const MAX_BYTES = 1024 * 1024; // 약 1MB(opus 15초는 보통 100KB 안쪽)
 const TYPES = /^audio\/(webm|mp4|ogg|mpeg|aac|x-m4a|wav)\b/i;
@@ -46,6 +47,17 @@ export default {
     const t0 = Date.now(), o = req.headers.get("Origin") || "", url = new URL(req.url);
     if (req.method === "OPTIONS") return allowOrigin(o) ? new Response(null, { status: 204, headers: cors(o) }) : new Response(null, { status: 403 });
     if (url.pathname === "/health" && req.method === "GET") return json(o, 200, { ok: true });
+    if (url.pathname === "/explain") { // 「왜 틀렸어요?」 — JSON 받아 2~3문장(explain.js)
+      if (req.method !== "POST") return json(o, 405, { error: "method not allowed" });
+      if (!allowOrigin(o)) return json(o, 403, { error: "origin not allowed" });
+      const dev = req.headers.get("X-Dev") || "";
+      if (!/^[A-Za-z0-9-]{8,64}$/.test(dev)) return json(o, 400, { error: "bad device id" });
+      if (!/^application\/json(;|$)/i.test(req.headers.get("Content-Type") || "")) return json(o, 415, { error: "json only" });
+      if (+(req.headers.get("Content-Length") || 0) > 4096) return json(o, 413, { error: "too large" });
+      let body; try { const t = await req.text(); if (t.length > 4096) return json(o, 413, { error: "too large" }); body = JSON.parse(t); } catch { return json(o, 400, { error: "bad json" }); }
+      const r = await explain(env, ctx, dev, body);
+      return json(o, r.status, r.out);
+    }
     if (url.pathname !== "/stt") return json(o, 404, { error: "not found" });
     if (req.method !== "POST") return json(o, 405, { error: "method not allowed" });
     if (!allowOrigin(o)) return json(o, 403, { error: "origin not allowed" });

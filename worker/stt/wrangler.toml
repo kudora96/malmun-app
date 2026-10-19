@@ -20,3 +20,7 @@ id = "5101905674604117b0155c5237f24fbb"
 [vars]
 DEV_CAP = "200"    # 기기당 하루 횟수
 ALL_CAP = "20000"  # 전체 하루 횟수(돈 새는 것 막기)
+# 「왜 틀렸어요?」(/explain · 본부 10-19) — 키는 비밀값: npx wrangler secret put ANTHROPIC_API_KEY (대표님 직접 · 이 파일·저장소에 절대 안 적음)
+EX_DEV_CAP = "30"     # 기기당 하루 횟수
+EX_ALL_CAP = "3000"   # 전체 하루 횟수
+EX_MONTH_USD = "20"   # 달 지출 상한(추정 $ · 넘으면 그달 끝까지 쉼)
