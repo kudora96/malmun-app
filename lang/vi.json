@@ -298,5 +298,10 @@
  "bgm_song_gangwon": "Gangwon-do Arirang",
  "bgm_song_gyeongbok": "Gyeongbokgung Taryeong",
  "bgm_song_monggeumpo": "Monggeumpo Taryeong",
- "bgm_ver_power": "Mạnh mẽ"
+ "bgm_ver_power": "Mạnh mẽ",
+ "why_ask": "Sao lại sai?",
+ "why_wait": "Đang suy nghĩ…",
+ "why_fail": "Bây giờ chưa giải thích được câu này. Hãy nghe lại mẫu một lần nữa.",
+ "why_limit": "Hôm nay đến đây thôi. Mai hãy thử lại nhé.",
+ "age_noscore": "Chấm điểm bằng giọng nói sẽ mở khi bạn đủ tuổi. Bây giờ hãy ghi âm rồi so với mẫu."
 }
