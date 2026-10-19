@@ -72,6 +72,7 @@
   const o0 = over(); b?.click(); await W(150); const waiting = !!box()?.querySelector(".wait"); await W(900);
   const bx = box(), sh = $(".sheet.whys");
   ok(waiting && bx && /सही/.test(bx.innerText) && inView(sh) && bx.scrollWidth <= bx.clientWidth + 1 && over() === o0, "W3 누름 = 기다림 글 → 아래 작은 창에 답(화면 안 · 가로 잘림 0 · 말하기 창 그대로)", `창 ${Math.round(sh?.getBoundingClientRect().height || 0)}px`);
+  { const h = () => $(".sheet.whys h2 [data-k=why_ask]")?.textContent, u = $(".sheet.whys [data-act=uiko]"), a0 = h(); if (u) { u.click(); await W(700); const a1 = h(); u.click(); await W(700); ok(a1 && a1 !== a0 && h() === a0 && !!box(), "W7 답 창 ⇄ = 제목 글 바로 바뀜 · 다시 ⇄ 돌아옴 · 답 그대로", `${a0} → ${a1}`); } }
   const s0 = sent[0] || {}; ok(sent.length === 1 && /^어서 오세요\.?$/.test(s0.target) && s0.heard && s0.mode === "speak" && s0.lang === document.documentElement.lang, "W3 보낸 것 = 정답·들은 말·speak·학습자 언어(한 번만)", JSON.stringify(s0).slice(0, 120));
   // W4 닫고 다시
   await shut(); const gone = !box(); btn().click(); await W(500);
