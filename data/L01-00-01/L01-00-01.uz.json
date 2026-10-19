@@ -1,0 +1,82 @@
+{
+ "clip_id": "L01-00-01",
+ "lang": "uz",
+ "what": "대사 자막층 uz — 언어부 집필 도우미 S2(10-19) · Claude 초안 A + 제미나이 초안 B 비교 후 고름(s2_drafts.md) · 라틴 글자(oʻ gʻ = U+02BB · 끊는 표 = U+02BC) · 한국 이름은 따옴표 한글 + 띄어 쓴 우즈베크 낱말(꼬리를 따옴표에 붙이지 않음) · 원어민 확인 전",
+ "title_t": "\"세종대왕\" — harflarning egasi bor",
+ "characters": [
+  {
+   "id": "dubu",
+   "bio": "Dasturni olib boruvchi robot"
+  },
+  {
+   "id": "kong",
+   "bio": "Mitti oq mushukcha"
+  },
+  {
+   "id": "seonsaengnim",
+   "bio": "Oʻttiz yoshli koreyalik ustoz"
+  }
+ ],
+ "subtitles": [
+  {
+   "id": 1,
+   "t": "Marhamat. \"경복궁\" saroyiga xush kelibsiz."
+  },
+  {
+   "id": 2,
+   "t": "Ustoz! Men harf yaratdim!"
+  },
+  {
+   "id": 3,
+   "t": "Harfmi? Bu rasm-ku."
+  },
+  {
+   "id": 4,
+   "t": "Harf emasmi? Nega?"
+  },
+  {
+   "id": 5,
+   "t": "Harf degani kelishuvdir. Hamma birga oʻqiy olsagina, u harf boʻladi."
+  },
+  {
+   "id": 6,
+   "t": "A, faqat oʻzim bilsam, u harf boʻlmas ekan."
+  },
+  {
+   "id": 7,
+   "t": "Unda oʻsha kelishuvni kim belgilagan?"
+  },
+  {
+   "id": 8,
+   "t": "Qirol \"세종대왕\". Besh yuz yil oldin qirolning oʻzi harflarni yaratgan. Chunki oʻsha paytda oddiy xalq harflarni bilmas edi. Harflar juda qiyin edi."
+  },
+  {
+   "id": 9,
+   "t": "Voy! Unda hamma xursand boʻlgan boʻlsa kerak!"
+  },
+  {
+   "id": 10,
+   "t": "Yoʻq. Saroy aʼyonlari qarshi chiqishdi."
+  },
+  {
+   "id": 11,
+   "t": "Aʼyonlarmi? Nega?"
+  },
+  {
+   "id": 12,
+   "t": "Chunki oʻsha paytda faqat harf biladigan odamlardagina kuch bor edi."
+  },
+  {
+   "id": 13,
+   "t": "Unda bizchi? Biz ham oʻqiy olamizmi?"
+  },
+  {
+   "id": 14,
+   "t": "Qani, bu yerga qarang. Mana oʻsha harf. Bu \"아\" harfi."
+  },
+  {
+   "id": 15,
+   "t": "Demak, \"세종대왕\" aynan shuni xohlagan ekanlar. Har bir kishi oson oʻqiy oladigan harflarni. Oʻsha har bir kishi esa hozir bizmiz."
+  }
+ ]
+}

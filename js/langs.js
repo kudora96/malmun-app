@@ -10,7 +10,7 @@ export const LANG_INFO = {
   "ja": {"dir": "ltr", "font": "Noto Sans JP", "ko_ui": true, "short": "日"},
   "km": {"dir": "ltr", "font": "Noto Sans Khmer", "lh": 1.8, "minpx": 12, "short": "ខ្មែរ"},
   "ky": {"dir": "ltr", "font": "Noto Sans", "short": "Кыр"},
-  "lo": {"dir": "ltr", "font": "Noto Sans Lao", "lh": 1.6, "minpx": 12, "short": "ລາວ"},
+  "lo": {"dir": "ltr", "font": "Noto Sans Lao", "ko_ui": true, "lh": 1.6, "minpx": 12, "short": "ລາວ"},
   "mn": {"dir": "ltr", "font": "Noto Sans", "ko_ui": true, "short": "Мон"},
   "my": {"dir": "ltr", "font": "Noto Sans Myanmar", "ko_ui": true, "lh": 1.8, "minpx": 12, "short": "MY"},
   "ne": {"dir": "ltr", "ko_ui": true, "lh": 1.5, "short": "ने", "stage": "ready"},
@@ -18,9 +18,9 @@ export const LANG_INFO = {
   "ru": {"dir": "ltr", "ko_ui": true, "short": "Рус"},
   "si": {"dir": "ltr", "font": "Noto Sans Sinhala", "ko_ui": true, "lh": 1.6, "short": "SI"},
   "th": {"dir": "ltr", "font": "Noto Sans Thai", "ko_ui": true, "lh": 1.6, "minpx": 12, "short": "ไทย", "stage": "pilot"},
-  "tl": {"dir": "ltr", "short": "Fil"},
+  "tl": {"dir": "ltr", "ko_ui": true, "short": "Fil"},
   "ur": {"dir": "rtl", "font": "Noto Nastaliq Urdu", "ko_ui": true, "lh": 2.0, "minpx": 12, "short": "اردو", "stage": "pilot"},
-  "uz": {"dir": "ltr", "short": "Oʻz"},
+  "uz": {"dir": "ltr", "ko_ui": true, "short": "Oʻz"},
   "vi": {"dir": "ltr", "ko_ui": true, "lh": 1.35, "short": "Việt", "stage": "pilot"},
   "zh": {"dir": "ltr", "font": "Noto Sans SC", "ko_ui": true, "short": "中"}
 };
