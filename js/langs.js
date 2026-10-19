@@ -16,7 +16,7 @@ export const LANG_INFO = {
   "ne": {"dir": "ltr", "ko_ui": true, "lh": 1.5, "short": "ने", "stage": "ready"},
   "pt": {"dir": "ltr", "short": "Pt"},
   "ru": {"dir": "ltr", "ko_ui": true, "short": "Рус"},
-  "si": {"dir": "ltr", "font": "Noto Sans Sinhala", "lh": 1.6, "short": "SI"},
+  "si": {"dir": "ltr", "font": "Noto Sans Sinhala", "ko_ui": true, "lh": 1.6, "short": "SI"},
   "th": {"dir": "ltr", "font": "Noto Sans Thai", "ko_ui": true, "lh": 1.6, "minpx": 12, "short": "ไทย", "stage": "pilot"},
   "tl": {"dir": "ltr", "short": "Fil"},
   "ur": {"dir": "rtl", "font": "Noto Nastaliq Urdu", "ko_ui": true, "lh": 2.0, "minpx": 12, "short": "اردو", "stage": "pilot"},
