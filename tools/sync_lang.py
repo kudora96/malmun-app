@@ -107,6 +107,8 @@ def copy(a, b, dry):
 
 def main(argv):
     dry, force = "--dry" in argv, "--force" in argv
+    stage0 = argv[argv.index("--stage") + 1] if "--stage" in argv else "pilot"
+    if "--stage" in argv: del argv[argv.index("--stage"):argv.index("--stage") + 2]
     acc = set(argv[argv.index("--accept") + 1].split(",")) if "--accept" in argv else set()  # 이번에 바뀌기로 한 열쇠(언어부가 새 값을 낸 것) — 이것만 덮기 허락
     if "--accept" in argv: del argv[argv.index("--accept"):argv.index("--accept") + 2]
     argv = [a for a in argv if a not in ("--dry", "--force")]
@@ -135,8 +137,9 @@ def main(argv):
             out.append(f"{c} ⏸ 앱 값 ≠ 원본 {len(diff)}개 — 덮지 않음(언어부에 보내거나 --force):" + "".join(f"\n    {f} {k}: 앱 「{str(y)[:50]}」 · 원본 「{str(x)[:50]}」" for f, k, y, x in diff[:20])); continue
         for a, b in pairs: copy(a, b, dry)
         if len(pairs) > 1 and pairs[1][0].endswith(".ko.json"): info[c]["ko_ui"] = True
-        info[c].setdefault("stage", "pilot")
-        out.append(f"{c} ✓ 글 {n - len(miss)}/{n}" + (f"(en 으로 {len(miss)})" if miss else "") + f" · {info[c]['dir']}" + (f" · {info[c]['font']}" if info[c].get("font") else "") + f" · {info[c]['stage']}")
+        if stage0 == "none": info[c].pop("stage", None)  # --stage none = 글만 넣고 선택 목록엔 「곧」(본부 신호 전 · 10-19)
+        else: info[c].setdefault("stage", stage0)
+        out.append(f"{c} ✓ 글 {n - len(miss)}/{n}" + (f"(en 으로 {len(miss)})" if miss else "") + f" · {info[c]['dir']}" + (f" · {info[c]['font']}" if info[c].get("font") else "") + f" · {info[c].get('stage', '곧(단계 없음)')}")
     if not dry:
         write_table(info)
         for tool in ("sync_v9.py", "sync_content.py"):

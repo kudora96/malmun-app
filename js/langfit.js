@@ -7,7 +7,7 @@ import { snapshot } from "./retext.js?v=1016.62";
 
 const TARGET = "button, a[href], .chip, [role=button], .modeb, .sheet > p, .sheet h2, .eps .st, .hero .meta, .whead > b, .whead > .sub, .bar .t, .bar .sub, .vtitle .tt > b, .exhead > b, .v9bar > span";
 const SHRINK = ".whead > *, .bar > *, .bar .t, .bar .sub, .vtitle .tt > *, .hbt > *, .eps .st"; // 한 줄을 나눠 쓰는 머리 줄 — 넓히지 않고 글자만 줄임
-const SKIP = ".write, [lang=ko]:not(button):not(.chip), .kotext, .ko, .v9body :is(p,.pair,.pairln,.glosses,.saybig,.sayrom,.ex,.sn), .glosses, .saybig, .tr, .rom, .mean, .who, .vsub, .chip.uiko, [data-lang], [data-act=lang], .kb, .slot, .lines .line > p, svg, script, style, textarea, input";
+const SKIP = ".write, [lang=ko]:not(button):not(.chip), .kotext, .ko, .v9body :is(p,.pair,.pairln,.glosses,.saybig,.sayrom,.ex,.sn), .glosses, .saybig, .tr, .rom, .mean, .who, .vsub, .chip.uiko, [data-act=lang], .kb, .slot, .lines .line > p, svg, script, style, textarea, input";
 const EDGE = /^([\s\p{S}\p{P}]*?)(\p{L}[\s\S]*?\S|\p{L})([\s\p{S}\p{P}]*)$/u;
 const coreOf = s => EDGE.exec(String(s).trim())?.[2] ?? String(s).trim();
 const MIN_SCALE = 0.72; // 글자는 이보다 작게 안 줄임(읽기)
