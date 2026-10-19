@@ -22,5 +22,5 @@ export const LANG_INFO = {
   "ur": {"dir": "rtl", "font": "Noto Nastaliq Urdu", "ko_ui": true, "lh": 2.0, "minpx": 12, "short": "اردو", "stage": "pilot"},
   "uz": {"dir": "ltr", "short": "Oʻz"},
   "vi": {"dir": "ltr", "ko_ui": true, "lh": 1.35, "short": "Việt", "stage": "pilot"},
-  "zh": {"dir": "ltr", "font": "Noto Sans SC", "short": "中"}
+  "zh": {"dir": "ltr", "font": "Noto Sans SC", "ko_ui": true, "short": "中"}
 };

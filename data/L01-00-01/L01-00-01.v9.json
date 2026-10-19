@@ -15,7 +15,9 @@
   "si",
   "mn",
   "en",
-  "es"
+  "es",
+  "zh",
+  "my"
  ],
  "say_head": {
   "ko": "새설명_소리_kr/말해보세요_머리_kr.mp3",
@@ -37,7 +39,9 @@
     "si": "එන්න, එන්න. \"경복궁\" මාළිගාවට සාදරයෙන් පිළිගන්නවා.",
     "mn": "Тавтай морилно уу. \"경복궁\" ордонд ирсэнд тань баяртай байна.",
     "en": "Come on in. Welcome to \"경복궁\" Palace.",
-    "es": "Adelante, pasen. Bienvenidos al palacio \"경복궁\"."
+    "es": "Adelante, pasen. Bienvenidos al palacio \"경복궁\".",
+    "zh": "快请进。欢迎来到 \"경복궁\" 王宫。",
+    "my": "ကြွပါ၊ ကြွပါ။ \"경복궁\" နန်းတော်ကို ရောက်လာတာ ကြိုဆိုပါတယ်ရှင်။"
    },
    "pieces": [
     {
@@ -54,7 +58,9 @@
       "si": "ඉක්මනට",
       "mn": "хурдан",
       "en": "quickly",
-      "es": "adelante"
+      "es": "adelante",
+      "zh": "快",
+      "my": "မြန်မြန်"
      }
     },
     {
@@ -71,7 +77,9 @@
       "si": "එන්න",
       "mn": "ирнэ үү",
       "en": "please come",
-      "es": "venga"
+      "es": "venga",
+      "zh": "请来",
+      "my": "ကြွပါ"
      }
     },
     {
@@ -88,7 +96,9 @@
       "si": "\"경복궁\" මාළිගාවට",
       "mn": "\"경복궁\" ордонд",
       "en": "to \"경복궁\" Palace",
-      "es": "al palacio \"경복궁\""
+      "es": "al palacio \"경복궁\"",
+      "zh": "到 \"경복궁\"",
+      "my": "\"경복궁\" နန်းတော်ကို"
      }
     },
     {
@@ -105,7 +115,9 @@
       "si": "ආපු",
       "mn": "ирсэн",
       "en": "having come",
-      "es": "haber venido"
+      "es": "haber venido",
+      "zh": "来了",
+      "my": "ရောက်လာတဲ့"
      }
     },
     {
@@ -122,7 +134,9 @@
       "si": "එක",
       "mn": "явдлыг",
       "en": "the fact that",
-      "es": "eso"
+      "es": "eso",
+      "zh": "这件事",
+      "my": "အရာကို"
      }
     },
     {
@@ -139,7 +153,9 @@
       "si": "සාදරයෙන් පිළිගන්නවා",
       "mn": "угтан авч байна",
       "en": "welcome",
-      "es": "le doy la bienvenida"
+      "es": "le doy la bienvenida",
+      "zh": "欢迎",
+      "my": "ကြိုဆိုပါတယ်"
      }
     }
    ],
@@ -156,7 +172,9 @@
     "si": "ස්ථානය + 에 + 와요",
     "mn": "газар + 에 + 와요",
     "en": "place + 에 + 와요",
-    "es": "lugar + 에 + 와요"
+    "es": "lugar + 에 + 와요",
+    "zh": "地点 + 에 + 와요",
+    "my": "နေရာ + 에 + 와요"
    },
    "text": {
     "ko": {
@@ -206,6 +224,14 @@
     "es": {
      "ex": "Adelante, pasen. Bienvenidos al palacio \"경복궁\" (gyeong-bog-gung, palacio). \"어서 오세요\" (eo-seo o-se-yo, adelante, pase) es un saludo para recibir a quien llega. Si se pone \"에\" (e) después de un lugar, indica adónde se viene, adónde se va o dónde se está. El coreano pone esta partícula después de la palabra.",
      "say": "Ahora dígalo usted. \"한국에 온 걸 환영해요\" (han-gug-e on geol hwan-yeong-hae-yo, le doy la bienvenida a Corea)."
+    },
+    "zh": {
+     "ex": "快请进。欢迎来到 \"경복궁\" (gyeong-bog-gung, 宫殿) 王宫。 \"어서 오세요\" (eo-seo o-se-yo, 快请进) 是迎接来访客人的问候语。在地点后面加上 \"에\" (e)，表示来到哪里、去哪里或者在哪里。韩语把这个助词放在词的后面。",
+     "say": "现在请你试着说一说。 \"한국에 온 걸 환영해요\" (han-gug-e on geol hwan-yeong-hae-yo, 欢迎来到韩国)。"
+    },
+    "my": {
+     "ex": "ကြွပါ၊ ကြွပါ။ \"경복궁\" (gyeong-bog-gung, နန်းတော်) နန်းတော်ကို ရောက်လာတာ ကြိုဆိုပါတယ်ရှင်။ \"어서 오세요\" (eo-seo o-se-yo, ကြွပါ, ကြိုဆိုပါတယ်) ဆိုတာ ရောက်လာတဲ့သူကို ကြိုဆိုတဲ့ နှုတ်ဆက်စကားပါ။ နေရာကို ပြတဲ့ စကားလုံးရဲ့ နောက်မှာ \"에\" (e) ဆိုတဲ့ ပစ္စည်းကို တွဲရင် ဘယ်ကို လာသလဲ၊ ဘယ်ကို သွားသလဲ၊ ဘယ်မှာ ရှိသလဲ ဆိုတာကို ပြပါတယ်။ ကိုရီးယားဘာသာမှာ ဒီပစ္စည်းကို စကားလုံးရဲ့ နောက်မှာ တွဲပါတယ်။",
+     "say": "အခု ပြောကြည့်ပါ။ \"한국에 온 걸 환영해요\" (han-gug-e on geol hwan-yeong-hae-yo, ကိုရီးယားကို ရောက်လာတာ ကြိုဆိုပါတယ်)။"
     }
    },
    "ko_by": {
@@ -312,6 +338,14 @@
     "es": {
      "ex": "어서 오세요. 경복궁에 온 걸 환영해요. \"어서 오세요\" (eo-seo o-se-yo, adelante, pase) 는 찾아온 사람을 맞는 인사예요. 장소 뒤에 \"에\" (e) 를 붙이면 어디에 오는지, 어디에 가는지, 어디에 있는지를 나타내요. 한국어는 이 표시를 낱말 뒤에 붙여요.",
      "say": "이제 말해 보세요. \"한국에 온 걸 환영해요\" (han-gug-e on geol hwan-yeong-hae-yo, le doy la bienvenida a Corea)"
+    },
+    "zh": {
+     "ex": "어서 오세요. 경복궁에 온 걸 환영해요. \"어서 오세요\" (eo-seo o-se-yo, 快请进) 는 찾아온 사람을 맞는 인사예요. 장소 뒤에 \"에\" (e) 를 붙이면 어디에 오는지, 어디에 가는지, 어디에 있는지를 나타내요. 한국어는 이 표시를 낱말 뒤에 붙여요.",
+     "say": "이제 말해 보세요. \"한국에 온 걸 환영해요\" (han-gug-e on geol hwan-yeong-hae-yo, 欢迎来到韩国)"
+    },
+    "my": {
+     "ex": "어서 오세요. 경복궁에 온 걸 환영해요. \"어서 오세요\" (eo-seo o-se-yo, ကြွပါ, ကြိုဆိုပါတယ်) 는 찾아온 사람을 맞는 인사예요. 장소 뒤에 \"에\" (e) 를 붙이면 어디에 오는지, 어디에 가는지, 어디에 있는지를 나타내요. 한국어는 이 표시를 낱말 뒤에 붙여요.",
+     "say": "이제 말해 보세요. \"한국에 온 걸 환영해요\" (han-gug-e on geol hwan-yeong-hae-yo, ကိုရီးယားကို ရောက်လာတာ ကြိုဆိုပါတယ်)"
     }
    },
    "audio": {
@@ -363,6 +397,14 @@
     "es": {
      "ex": null,
      "say": null
+    },
+    "zh": {
+     "ex": null,
+     "say": null
+    },
+    "my": {
+     "ex": null,
+     "say": null
     }
    },
    "sent": [
@@ -390,7 +432,11 @@
      "en": "Come on in.",
      "en_s": null,
      "es": "Adelante, pasen.",
-     "es_s": null
+     "es_s": null,
+     "zh": "快请进。",
+     "zh_s": null,
+     "my": "ကြွပါ၊ ကြွပါ။",
+     "my_s": null
     },
     {
      "ko": "경복궁에 온 걸 환영해요.",
@@ -416,7 +462,11 @@
      "en": "Welcome to \"경복궁\" Palace.",
      "en_s": null,
      "es": "Bienvenidos al palacio \"경복궁\".",
-     "es_s": null
+     "es_s": null,
+     "zh": "欢迎来到 \"경복궁\" 王宫。",
+     "zh_s": null,
+     "my": "\"경복궁\" နန်းတော်ကို ရောက်လာတာ ကြိုဆိုပါတယ်ရှင်။",
+     "my_s": null
     },
     {
      "ko": "\"어서 오세요\"는 찾아온 사람을 맞는 인사예요.",
@@ -442,7 +492,11 @@
      "en": "\"어서 오세요\" is a greeting to welcome someone who comes to you.",
      "en_s": null,
      "es": "\"어서 오세요\" es un saludo para recibir a quien llega.",
-     "es_s": null
+     "es_s": null,
+     "zh": "\"어서 오세요\" 是迎接来访客人的问候语。",
+     "zh_s": null,
+     "my": "\"어서 오세요\" ဆိုတာ ရောက်လာတဲ့သူကို ကြိုဆိုတဲ့ နှုတ်ဆက်စကားပါ။",
+     "my_s": null
     },
     {
      "ko": "장소 뒤에 \"에\"를 붙이면 어디에 오는지, 어디에 가는지, 어디에 있는지를 나타내요.",
@@ -468,7 +522,11 @@
      "en": "Put \"에\" after a place, and it shows where someone comes to, where someone goes, or where something is.",
      "en_s": null,
      "es": "Si se pone \"에\" después de un lugar, indica adónde se viene, adónde se va o dónde se está.",
-     "es_s": null
+     "es_s": null,
+     "zh": "在地点后面加上 \"에\"，表示来到哪里、去哪里或者在哪里。",
+     "zh_s": null,
+     "my": "နေရာကို ပြတဲ့ စကားလုံးရဲ့ နောက်မှာ \"에\" ဆိုတဲ့ ပစ္စည်းကို တွဲရင် ဘယ်ကို လာသလဲ၊ ဘယ်ကို သွားသလဲ၊ ဘယ်မှာ ရှိသလဲ ဆိုတာကို ပြပါတယ်။",
+     "my_s": null
     },
     {
      "ko": "한국어는 이 표시를 낱말 뒤에 붙여요.",
@@ -494,7 +552,11 @@
      "en": "Korean puts this marker after the word.",
      "en_s": null,
      "es": "El coreano pone esta partícula después de la palabra.",
-     "es_s": null
+     "es_s": null,
+     "zh": "韩语把这个助词放在词的后面。",
+     "zh_s": null,
+     "my": "ကိုရီးယားဘာသာမှာ ဒီပစ္စည်းကို စကားလုံးရဲ့ နောက်မှာ တွဲပါတယ်။",
+     "my_s": null
     }
    ],
    "gloss": {
@@ -511,7 +573,9 @@
       "si": "මාළිගාව",
       "mn": "ордон",
       "en": "palace",
-      "es": "palacio"
+      "es": "palacio",
+      "zh": "宫殿",
+      "my": "နန်းတော်"
      }
     },
     "어서 오세요": {
@@ -527,7 +591,9 @@
       "si": "එන්න, සාදරයෙන් පිළිගන්නවා",
       "mn": "тавтай морилно уу",
       "en": "come on in",
-      "es": "adelante, pase"
+      "es": "adelante, pase",
+      "zh": "快请进",
+      "my": "ကြွပါ, ကြိုဆိုပါတယ်"
      }
     },
     "에": {
@@ -543,7 +609,9 @@
       "si": "",
       "mn": "",
       "en": "",
-      "es": ""
+      "es": "",
+      "zh": "",
+      "my": ""
      }
     }
    }
@@ -563,7 +631,9 @@
     "si": "ටීචර්! මම අකුරක් හැදුවා!",
     "mn": "Багшаа! Би үсэг хийчихлээ!",
     "en": "Teacher! I made letters!",
-    "es": "¡Profesora! ¡Hice una letra!"
+    "es": "¡Profesora! ¡Hice una letra!",
+    "zh": "老师！我造出文字啦！",
+    "my": "ဆရာမ! သမီး စာလုံး လုပ်ပြီးပြီရှင့်!"
    },
    "pieces": [
     {
@@ -580,7 +650,9 @@
       "si": "ටීචර්",
       "mn": "багш",
       "en": "teacher",
-      "es": "profesora"
+      "es": "profesora",
+      "zh": "老师",
+      "my": "ဆရာမ"
      }
     },
     {
@@ -597,7 +669,9 @@
       "si": "මම",
       "mn": "би",
       "en": "I",
-      "es": "yo"
+      "es": "yo",
+      "zh": "我",
+      "my": "ကျွန်ုပ်"
      }
     },
     {
@@ -614,7 +688,9 @@
       "si": "අකුරු",
       "mn": "үсэг",
       "en": "letters",
-      "es": "letra"
+      "es": "letra",
+      "zh": "文字",
+      "my": "စာလုံး"
      }
     },
     {
@@ -631,7 +707,9 @@
       "si": "හැදුවා",
       "mn": "хийсэн",
       "en": "made",
-      "es": "hice"
+      "es": "hice",
+      "zh": "造了",
+      "my": "လုပ်ပြီးပြီ"
      }
     }
    ],
@@ -648,7 +726,9 @@
     "si": "만들 + 었어요",
     "mn": "만들 + 었어요",
     "en": "만들 + 었어요",
-    "es": "만들 + 었어요"
+    "es": "만들 + 었어요",
+    "zh": "만들 + 었어요",
+    "my": "만들 + 었어요"
    },
    "text": {
     "ko": {
@@ -698,6 +778,14 @@
     "es": {
      "ex": "¡Profesora! ¡Hice una letra! La terminación \"었어요\" (eoss-eo-yo) indica una acción ya terminada. \"만들어요\" (man-deul-eo-yo, hago) es algo que se hace ahora. \"만들었어요\" (man-deul-eoss-eo-yo, hice) es algo que ya se hizo. Según la palabra anterior, también cambia a \"았어요\" (ass-eo-yo) o \"했어요\" (haess-eo-yo).",
      "say": "Ahora dígalo usted. \"저 글자 만들었어요\" (jeo geul-ja man-deul-eoss-eo-yo, yo hice una letra)."
+    },
+    "zh": {
+     "ex": "老师！我造出文字啦！ 词尾 \"었어요\" (eoss-eo-yo) 表示已经结束的事情。\"만들어요\" (man-deul-eo-yo, 造) 是现在正在做的事。\"만들었어요\" (man-deul-eoss-eo-yo, 造了) 是已经做完的事。根据前面的词，有时也会变成 \"았어요\" (ass-eo-yo) 或 \"했어요\" (haess-eo-yo)。",
+     "say": "现在请你试着说一说。 \"저 글자 만들었어요\" (jeo geul-ja man-deul-eoss-eo-yo, 我造了文字)。"
+    },
+    "my": {
+     "ex": "ဆရာမ! သမီး စာလုံး လုပ်ပြီးပြီရှင့်! \"었어요\" (eoss-eo-yo) ဆိုတဲ့ စကားအဆုံးသတ်က ပြီးသွားပြီ ဖြစ်တဲ့ အလုပ်ကို ပြပါတယ်။ \"만들어요\" (man-deul-eo-yo, ဖန်တီးတယ်) ဆိုတာ အခု လုပ်နေတဲ့ အလုပ်ပါ။ \"만들었어요\" (man-deul-eoss-eo-yo, ဖန်တီးခဲ့တယ်) ဆိုတာ လုပ်ပြီးသွားပြီ ဖြစ်တဲ့ အလုပ်ပါ။ ရှေ့က စကားလုံးပေါ် မူတည်ပြီး \"았어요\" (ass-eo-yo) ဒါမှမဟုတ် \"했어요\" (haess-eo-yo) လို့လည်း ပြောင်းတတ်ပါတယ်။",
+     "say": "အခု ပြောကြည့်ပါ။ \"저 글자 만들었어요\" (jeo geul-ja man-deul-eoss-eo-yo, ကျွန်ုပ် စာလုံး ဖန်တီးခဲ့ပါတယ်)။"
     }
    },
    "ko_by": {
@@ -744,6 +832,14 @@
     "es": {
      "ex": "선생님! 저 글자 만들었어요! 말끝 \"었어요\" (eoss-eo-yo) 는 이미 끝난 일을 나타내요. \"만들어요\" (man-deul-eo-yo, hago) 는 지금 하는 일이에요. \"만들었어요\" (man-deul-eoss-eo-yo, hice) 는 벌써 한 일이에요. 앞말에 따라 \"았어요\" (ass-eo-yo) 나 \"했어요\" (haess-eo-yo) 로 바뀌기도 해요.",
      "say": "이제 말해 보세요. \"저 글자 만들었어요\" (jeo geul-ja man-deul-eoss-eo-yo, yo hice una letra)"
+    },
+    "zh": {
+     "ex": "선생님! 저 글자 만들었어요! 말끝 \"었어요\" (eoss-eo-yo) 는 이미 끝난 일을 나타내요. \"만들어요\" (man-deul-eo-yo, 造) 는 지금 하는 일이에요. \"만들었어요\" (man-deul-eoss-eo-yo, 造了) 는 벌써 한 일이에요. 앞말에 따라 \"았어요\" (ass-eo-yo) 나 \"했어요\" (haess-eo-yo) 로 바뀌기도 해요.",
+     "say": "이제 말해 보세요. \"저 글자 만들었어요\" (jeo geul-ja man-deul-eoss-eo-yo, 我造了文字)"
+    },
+    "my": {
+     "ex": "선생님! 저 글자 만들었어요! 말끝 \"었어요\" (eoss-eo-yo) 는 이미 끝난 일을 나타내요. \"만들어요\" (man-deul-eo-yo, ဖန်တီးတယ်) 는 지금 하는 일이에요. \"만들었어요\" (man-deul-eoss-eo-yo, ဖန်တီးခဲ့တယ်) 는 벌써 한 일이에요. 앞말에 따라 \"았어요\" (ass-eo-yo) 나 \"했어요\" (haess-eo-yo) 로 바뀌기도 해요.",
+     "say": "이제 말해 보세요. \"저 글자 만들었어요\" (jeo geul-ja man-deul-eoss-eo-yo, ကျွန်ုပ် စာလုံး ဖန်တီးခဲ့ပါတယ်)"
     }
    },
    "audio": {
@@ -795,6 +891,14 @@
     "es": {
      "ex": null,
      "say": null
+    },
+    "zh": {
+     "ex": null,
+     "say": null
+    },
+    "my": {
+     "ex": null,
+     "say": null
     }
    },
    "sent": [
@@ -822,7 +926,11 @@
      "en": "Teacher!",
      "en_s": null,
      "es": "¡Profesora!",
-     "es_s": null
+     "es_s": null,
+     "zh": "老师！",
+     "zh_s": null,
+     "my": "ဆရာမ!",
+     "my_s": null
     },
     {
      "ko": "저 글자 만들었어요!",
@@ -848,7 +956,11 @@
      "en": "I made letters!",
      "en_s": null,
      "es": "¡Hice una letra!",
-     "es_s": null
+     "es_s": null,
+     "zh": "我造出文字啦！",
+     "zh_s": null,
+     "my": "သမီး စာလုံး လုပ်ပြီးပြီရှင့်!",
+     "my_s": null
     },
     {
      "ko": "말끝 \"었어요\"는 이미 끝난 일을 나타내요.",
@@ -874,7 +986,11 @@
      "en": "The ending \"었어요\" shows that something is already done.",
      "en_s": null,
      "es": "La terminación \"었어요\" indica una acción ya terminada.",
-     "es_s": null
+     "es_s": null,
+     "zh": "词尾 \"었어요\" 表示已经结束的事情。",
+     "zh_s": null,
+     "my": "\"었어요\" ဆိုတဲ့ စကားအဆုံးသတ်က ပြီးသွားပြီ ဖြစ်တဲ့ အလုပ်ကို ပြပါတယ်။",
+     "my_s": null
     },
     {
      "ko": "\"만들어요\"는 지금 하는 일이에요.",
@@ -900,7 +1016,11 @@
      "en": "\"만들어요\" is something you do now.",
      "en_s": null,
      "es": "\"만들어요\" es algo que se hace ahora.",
-     "es_s": null
+     "es_s": null,
+     "zh": "\"만들어요\" 是现在正在做的事。",
+     "zh_s": null,
+     "my": "\"만들어요\" ဆိုတာ အခု လုပ်နေတဲ့ အလုပ်ပါ။",
+     "my_s": null
     },
     {
      "ko": "\"만들었어요\"는 벌써 한 일이에요.",
@@ -926,7 +1046,11 @@
      "en": "\"만들었어요\" is something you already did.",
      "en_s": null,
      "es": "\"만들었어요\" es algo que ya se hizo.",
-     "es_s": null
+     "es_s": null,
+     "zh": "\"만들었어요\" 是已经做完的事。",
+     "zh_s": null,
+     "my": "\"만들었어요\" ဆိုတာ လုပ်ပြီးသွားပြီ ဖြစ်တဲ့ အလုပ်ပါ။",
+     "my_s": null
     },
     {
      "ko": "앞말에 따라 \"았어요\"나 \"했어요\"로 바뀌기도 해요.",
@@ -952,7 +1076,11 @@
      "en": "Depending on the word before it, it can also change to \"았어요\" or \"했어요\".",
      "en_s": null,
      "es": "Según la palabra anterior, también cambia a \"았어요\" o \"했어요\".",
-     "es_s": null
+     "es_s": null,
+     "zh": "根据前面的词，有时也会变成 \"았어요\" 或 \"했어요\"。",
+     "zh_s": null,
+     "my": "ရှေ့က စကားလုံးပေါ် မူတည်ပြီး \"았어요\" ဒါမှမဟုတ် \"했어요\" လို့လည်း ပြောင်းတတ်ပါတယ်။",
+     "my_s": null
     }
    ],
    "gloss": {
@@ -969,7 +1097,9 @@
       "si": "හදනවා",
       "mn": "хийнэ",
       "en": "make",
-      "es": "hago"
+      "es": "hago",
+      "zh": "造",
+      "my": "ဖန်တီးတယ်"
      }
     },
     "만들었어요": {
@@ -985,7 +1115,9 @@
       "si": "හැදුවා",
       "mn": "хийсэн",
       "en": "made",
-      "es": "hice"
+      "es": "hice",
+      "zh": "造了",
+      "my": "ဖန်တီးခဲ့တယ်"
      }
     },
     "았어요": {
@@ -1001,7 +1133,9 @@
       "si": "",
       "mn": "",
       "en": "",
-      "es": ""
+      "es": "",
+      "zh": "",
+      "my": ""
      }
     },
     "었어요": {
@@ -1017,7 +1151,9 @@
       "si": "",
       "mn": "",
       "en": "",
-      "es": ""
+      "es": "",
+      "zh": "",
+      "my": ""
      }
     },
     "했어요": {
@@ -1033,7 +1169,9 @@
       "si": "",
       "mn": "",
       "en": "",
-      "es": ""
+      "es": "",
+      "zh": "",
+      "my": ""
      }
     }
    }
@@ -1053,7 +1191,9 @@
     "si": "අකුරක්ද? මේක චිත්‍රයක් නේ.",
     "mn": "Үсэг үү? Энэ чинь зураг шүү дээ.",
     "en": "Letters? This is a picture.",
-    "es": "¿Una letra? Esto es un dibujo."
+    "es": "¿Una letra? Esto es un dibujo.",
+    "zh": "是文字吗？这是一幅画呀。",
+    "my": "စာလုံးလား။ ဒါက ပုံဆွဲထားတာပဲကွယ်။"
    },
    "pieces": [
     {
@@ -1070,7 +1210,9 @@
       "si": "අකුරක්ද",
       "mn": "үсэг үү",
       "en": "letters",
-      "es": "letra"
+      "es": "letra",
+      "zh": "文字",
+      "my": "စာလုံးလား"
      }
     },
     {
@@ -1087,7 +1229,9 @@
       "si": "මේක",
       "mn": "энэ бол",
       "en": "this",
-      "es": "esto"
+      "es": "esto",
+      "zh": "这个",
+      "my": "ဒါက"
      }
     },
     {
@@ -1104,7 +1248,9 @@
       "si": "චිත්‍රයක්",
       "mn": "зураг",
       "en": "is a picture",
-      "es": "es un dibujo"
+      "es": "es un dibujo",
+      "zh": "是画",
+      "my": "ပုံပါ"
      }
     }
    ],
@@ -1121,7 +1267,9 @@
     "si": "වචනය + 이에요 / 예요",
     "mn": "үг + 이에요 / 예요",
     "en": "word + 이에요 / 예요",
-    "es": "palabra + 이에요 / 예요"
+    "es": "palabra + 이에요 / 예요",
+    "zh": "词 + 이에요 / 예요",
+    "my": "စကားလုံး + 이에요 / 예요"
    },
    "text": {
     "ko": {
@@ -1171,6 +1319,14 @@
     "es": {
      "ex": "¿Una letra? Esto es un dibujo. Si se pone \"이에요\" (i-e-yo) después de una palabra, se forma una oración que dice qué es esa cosa. Si la palabra tiene consonante final, se pone \"이에요\" (i-e-yo), y si no, se pone \"예요\" (ye-yo). Por ejemplo, \"그림이에요\" (geu-rim-i-e-yo, es un dibujo) y \"글자예요\" (geul-ja-ye-yo, es una letra).",
      "say": "Ahora dígalo usted. \"이건 글자예요\" (i-geon geul-ja-ye-yo, esto es una letra)."
+    },
+    "zh": {
+     "ex": "是文字吗？这是一幅画呀。 在词的后面加上 \"이에요\" (i-e-yo)，就成了说明它是什么的句子。如果有收音，也就是词末的辅音，就加 \"이에요\" (i-e-yo)，没有就加 \"예요\" (ye-yo)。比如 \"그림이에요\" (geu-rim-i-e-yo, 是画) 和 \"글자예요\" (geul-ja-ye-yo, 是文字)。",
+     "say": "现在请你试着说一说。 \"이건 글자예요\" (i-geon geul-ja-ye-yo, 这是文字)。"
+    },
+    "my": {
+     "ex": "စာလုံးလား။ ဒါက ပုံဆွဲထားတာပဲကွယ်။ စကားလုံးရဲ့ နောက်မှာ \"이에요\" (i-e-yo) လို့ တွဲရင် အဲဒါ ဘာလဲ ဆိုတာ ပြောတဲ့ ဝါကျ ဖြစ်သွားပါတယ်။ နောက်ဆုံးဗျည်း၊ ဆိုလိုတာက စကားလုံးရဲ့ အဆုံးမှာ ဗျည်းသံ ရှိရင် \"이에요\" (i-e-yo)၊ မရှိရင် \"예요\" (ye-yo) လို့ တွဲပါတယ်။ \"그림이에요\" (geu-rim-i-e-yo, ပုံပါ)၊ \"글자예요\" (geul-ja-ye-yo, စာလုံးပါ) တို့လိုပါပဲ။",
+     "say": "အခု ပြောကြည့်ပါ။ \"이건 글자예요\" (i-geon geul-ja-ye-yo, ဒါက စာလုံးပါ)။"
     }
    },
    "ko_by": {
@@ -1217,6 +1373,14 @@
     "es": {
      "ex": "글자요? 이건 그림이에요. 낱말 뒤에 \"이에요\" (i-e-yo) 를 붙이면 그것이 무엇인지 말하는 문장이 돼요. 받침, 곧 낱말 끝의 자음이 있으면 \"이에요\" (i-e-yo), 없으면 \"예요\" (ye-yo) 를 붙여요. \"그림이에요\" (geu-rim-i-e-yo, es un dibujo), \"글자예요\" (geul-ja-ye-yo, es una letra) 처럼요.",
      "say": "이제 말해 보세요. \"이건 글자예요\" (i-geon geul-ja-ye-yo, esto es una letra)"
+    },
+    "zh": {
+     "ex": "글자요? 이건 그림이에요. 낱말 뒤에 \"이에요\" (i-e-yo) 를 붙이면 그것이 무엇인지 말하는 문장이 돼요. 받침, 곧 낱말 끝의 자음이 있으면 \"이에요\" (i-e-yo), 없으면 \"예요\" (ye-yo) 를 붙여요. \"그림이에요\" (geu-rim-i-e-yo, 是画), \"글자예요\" (geul-ja-ye-yo, 是文字) 처럼요.",
+     "say": "이제 말해 보세요. \"이건 글자예요\" (i-geon geul-ja-ye-yo, 这是文字)"
+    },
+    "my": {
+     "ex": "글자요? 이건 그림이에요. 낱말 뒤에 \"이에요\" (i-e-yo) 를 붙이면 그것이 무엇인지 말하는 문장이 돼요. 받침, 곧 낱말 끝의 자음이 있으면 \"이에요\" (i-e-yo), 없으면 \"예요\" (ye-yo) 를 붙여요. \"그림이에요\" (geu-rim-i-e-yo, ပုံပါ), \"글자예요\" (geul-ja-ye-yo, စာလုံးပါ) 처럼요.",
+     "say": "이제 말해 보세요. \"이건 글자예요\" (i-geon geul-ja-ye-yo, ဒါက စာလုံးပါ)"
     }
    },
    "audio": {
@@ -1268,6 +1432,14 @@
     "es": {
      "ex": null,
      "say": null
+    },
+    "zh": {
+     "ex": null,
+     "say": null
+    },
+    "my": {
+     "ex": null,
+     "say": null
     }
    },
    "sent": [
@@ -1295,7 +1467,11 @@
      "en": "Letters?",
      "en_s": null,
      "es": "¿Una letra?",
-     "es_s": null
+     "es_s": null,
+     "zh": "是文字吗？",
+     "zh_s": null,
+     "my": "စာလုံးလား။",
+     "my_s": null
     },
     {
      "ko": "이건 그림이에요.",
@@ -1321,7 +1497,11 @@
      "en": "This is a picture.",
      "en_s": null,
      "es": "Esto es un dibujo.",
-     "es_s": null
+     "es_s": null,
+     "zh": "这是一幅画呀。",
+     "zh_s": null,
+     "my": "ဒါက ပုံဆွဲထားတာပဲကွယ်။",
+     "my_s": null
     },
     {
      "ko": "낱말 뒤에 \"이에요\"를 붙이면 그것이 무엇인지 말하는 문장이 돼요.",
@@ -1347,7 +1527,11 @@
      "en": "Put \"이에요\" after a word, and it becomes a sentence that says what something is.",
      "en_s": null,
      "es": "Si se pone \"이에요\" después de una palabra, se forma una oración que dice qué es esa cosa.",
-     "es_s": null
+     "es_s": null,
+     "zh": "在词的后面加上 \"이에요\"，就成了说明它是什么的句子。",
+     "zh_s": null,
+     "my": "စကားလုံးရဲ့ နောက်မှာ \"이에요\" လို့ တွဲရင် အဲဒါ ဘာလဲ ဆိုတာ ပြောတဲ့ ဝါကျ ဖြစ်သွားပါတယ်။",
+     "my_s": null
     },
     {
      "ko": "받침, 곧 낱말 끝의 자음이 있으면 \"이에요\", 없으면 \"예요\"를 붙여요.",
@@ -1373,7 +1557,11 @@
      "en": "If the word ends in a final consonant, add \"이에요\", and if not, add \"예요\".",
      "en_s": null,
      "es": "Si la palabra tiene consonante final, se pone \"이에요\", y si no, se pone \"예요\".",
-     "es_s": null
+     "es_s": null,
+     "zh": "如果有收音，也就是词末的辅音，就加 \"이에요\"，没有就加 \"예요\"。",
+     "zh_s": null,
+     "my": "နောက်ဆုံးဗျည်း၊ ဆိုလိုတာက စကားလုံးရဲ့ အဆုံးမှာ ဗျည်းသံ ရှိရင် \"이에요\"၊ မရှိရင် \"예요\" လို့ တွဲပါတယ်။",
+     "my_s": null
     },
     {
      "ko": "\"그림이에요\", \"글자예요\"처럼요.",
@@ -1399,7 +1587,11 @@
      "en": "Like \"그림이에요\" and \"글자예요\".",
      "en_s": null,
      "es": "Por ejemplo, \"그림이에요\" y \"글자예요\".",
-     "es_s": null
+     "es_s": null,
+     "zh": "比如 \"그림이에요\" 和 \"글자예요\"。",
+     "zh_s": null,
+     "my": "\"그림이에요\"၊ \"글자예요\" တို့လိုပါပဲ။",
+     "my_s": null
     }
    ],
    "gloss": {
@@ -1416,7 +1608,9 @@
       "si": "චිත්‍රයක්",
       "mn": "зураг",
       "en": "is a picture",
-      "es": "es un dibujo"
+      "es": "es un dibujo",
+      "zh": "是画",
+      "my": "ပုံပါ"
      }
     },
     "글자예요": {
@@ -1432,7 +1626,9 @@
       "si": "අකුරක්",
       "mn": "үсэг",
       "en": "is a letter",
-      "es": "es una letra"
+      "es": "es una letra",
+      "zh": "是文字",
+      "my": "စာလုံးပါ"
      }
     },
     "예요": {
@@ -1448,7 +1644,9 @@
       "si": "",
       "mn": "",
       "en": "",
-      "es": ""
+      "es": "",
+      "zh": "",
+      "my": ""
      }
     },
     "이에요": {
@@ -1464,7 +1662,9 @@
       "si": "",
       "mn": "",
       "en": "",
-      "es": ""
+      "es": "",
+      "zh": "",
+      "my": ""
      }
     }
    }
@@ -1484,7 +1684,9 @@
     "si": "මේක අකුරක් නෙවෙයිද? ඇයි?",
     "mn": "Үсэг биш гэж үү? Яагаад?",
     "en": "They aren't letters? Why not?",
-    "es": "¿No es una letra? ¿Por qué?"
+    "es": "¿No es una letra? ¿Por qué?",
+    "zh": "不是文字吗？为什么呀？",
+    "my": "စာလုံး မဟုတ်ဘူးလားရှင့်။ ဘာဖြစ်လို့လဲဟင်။"
    },
    "pieces": [
     {
@@ -1501,7 +1703,9 @@
       "si": "අකුරක්",
       "mn": "үсэг",
       "en": "letters",
-      "es": "letra"
+      "es": "letra",
+      "zh": "文字",
+      "my": "စာလုံး"
      }
     },
     {
@@ -1518,7 +1722,9 @@
       "si": "නෙවෙයි",
       "mn": "биш",
       "en": "are not",
-      "es": "no es"
+      "es": "no es",
+      "zh": "不是",
+      "my": "မဟုတ်ဘူးလား"
      }
     },
     {
@@ -1535,7 +1741,9 @@
       "si": "ඇයි",
       "mn": "яагаад",
       "en": "why",
-      "es": "por qué"
+      "es": "por qué",
+      "zh": "为什么",
+      "my": "ဘာဖြစ်လို့လဲ"
      }
     }
    ],
@@ -1552,7 +1760,9 @@
     "si": "වචනය + 아니에요",
     "mn": "үг + 아니에요",
     "en": "word + 아니에요",
-    "es": "palabra + 아니에요"
+    "es": "palabra + 아니에요",
+    "zh": "词 + 아니에요",
+    "my": "စကားလုံး + 아니에요"
    },
    "text": {
     "ko": {
@@ -1602,6 +1812,14 @@
     "es": {
      "ex": "¿No es una letra? ¿Por qué? \"아니에요\" (a-ni-e-yo, no es) es lo contrario del \"이에요\" (i-e-yo) que escuchamos antes. Si se pone después de una palabra, significa que no es eso. Si se dice subiendo el tono al final, se convierte en una pregunta.",
      "say": "Ahora dígalo usted. \"그림 아니에요\" (geu-rim a-ni-e-yo, no es un dibujo)."
+    },
+    "zh": {
+     "ex": "不是文字吗？为什么呀？ \"아니에요\" (a-ni-e-yo, 不是) 和前面听到的 \"이에요\" (i-e-yo) 意思相反。放在词的后面，表示不是那个东西。句尾语调上扬，就变成了问句。",
+     "say": "现在请你试着说一说。 \"그림 아니에요\" (geu-rim a-ni-e-yo, 不是画)。"
+    },
+    "my": {
+     "ex": "စာလုံး မဟုတ်ဘူးလားရှင့်။ ဘာဖြစ်လို့လဲဟင်။ \"아니에요\" (a-ni-e-yo, မဟုတ်ပါဘူး) ဆိုတာ အရင်က ကြားခဲ့တဲ့ \"이에요\" (i-e-yo) နဲ့ ဆန့်ကျင်ဘက်ပါ။ စကားလုံးရဲ့ နောက်မှာ ထားရင် အဲဒါ မဟုတ်ဘူး ဆိုတဲ့ အဓိပ္ပာယ်ပါ။ အဆုံးကို အသံမြှင့်ပြီး ပြောရင် မေးခွန်း ဖြစ်သွားပါတယ်။",
+     "say": "အခု ပြောကြည့်ပါ။ \"그림 아니에요\" (geu-rim a-ni-e-yo, ပုံ မဟုတ်ပါဘူး)။"
     }
    },
    "ko_by": {
@@ -1648,6 +1866,14 @@
     "es": {
      "ex": "글자 아니에요? 왜요? \"아니에요\" (a-ni-e-yo, no es) 는 앞에서 들은 \"이에요\" (i-e-yo) 의 반대예요. 낱말 뒤에 놓으면 그것이 아니라는 뜻이에요. 끝을 올려 말하면 묻는 말이 돼요.",
      "say": "이제 말해 보세요. \"그림 아니에요\" (geu-rim a-ni-e-yo, no es un dibujo)"
+    },
+    "zh": {
+     "ex": "글자 아니에요? 왜요? \"아니에요\" (a-ni-e-yo, 不是) 는 앞에서 들은 \"이에요\" (i-e-yo) 의 반대예요. 낱말 뒤에 놓으면 그것이 아니라는 뜻이에요. 끝을 올려 말하면 묻는 말이 돼요.",
+     "say": "이제 말해 보세요. \"그림 아니에요\" (geu-rim a-ni-e-yo, 不是画)"
+    },
+    "my": {
+     "ex": "글자 아니에요? 왜요? \"아니에요\" (a-ni-e-yo, မဟုတ်ပါဘူး) 는 앞에서 들은 \"이에요\" (i-e-yo) 의 반대예요. 낱말 뒤에 놓으면 그것이 아니라는 뜻이에요. 끝을 올려 말하면 묻는 말이 돼요.",
+     "say": "이제 말해 보세요. \"그림 아니에요\" (geu-rim a-ni-e-yo, ပုံ မဟုတ်ပါဘူး)"
     }
    },
    "audio": {
@@ -1699,6 +1925,14 @@
     "es": {
      "ex": null,
      "say": null
+    },
+    "zh": {
+     "ex": null,
+     "say": null
+    },
+    "my": {
+     "ex": null,
+     "say": null
     }
    },
    "sent": [
@@ -1726,7 +1960,11 @@
      "en": "They aren't letters?",
      "en_s": null,
      "es": "¿No es una letra?",
-     "es_s": null
+     "es_s": null,
+     "zh": "不是文字吗？",
+     "zh_s": null,
+     "my": "စာလုံး မဟုတ်ဘူးလားရှင့်။",
+     "my_s": null
     },
     {
      "ko": "왜요?",
@@ -1752,7 +1990,11 @@
      "en": "Why not?",
      "en_s": null,
      "es": "¿Por qué?",
-     "es_s": null
+     "es_s": null,
+     "zh": "为什么呀？",
+     "zh_s": null,
+     "my": "ဘာဖြစ်လို့လဲဟင်။",
+     "my_s": null
     },
     {
      "ko": "\"아니에요\"는 앞에서 들은 \"이에요\"의 반대예요.",
@@ -1778,7 +2020,11 @@
      "en": "\"아니에요\" is the opposite of the \"이에요\" you heard before.",
      "en_s": null,
      "es": "\"아니에요\" es lo contrario del \"이에요\" que escuchamos antes.",
-     "es_s": null
+     "es_s": null,
+     "zh": "\"아니에요\" 和前面听到的 \"이에요\" 意思相反。",
+     "zh_s": null,
+     "my": "\"아니에요\" ဆိုတာ အရင်က ကြားခဲ့တဲ့ \"이에요\" နဲ့ ဆန့်ကျင်ဘက်ပါ။",
+     "my_s": null
     },
     {
      "ko": "낱말 뒤에 놓으면 그것이 아니라는 뜻이에요.",
@@ -1804,7 +2050,11 @@
      "en": "Put it after a word, and it means that something is not that thing.",
      "en_s": null,
      "es": "Si se pone después de una palabra, significa que no es eso.",
-     "es_s": null
+     "es_s": null,
+     "zh": "放在词的后面，表示不是那个东西。",
+     "zh_s": null,
+     "my": "စကားလုံးရဲ့ နောက်မှာ ထားရင် အဲဒါ မဟုတ်ဘူး ဆိုတဲ့ အဓိပ္ပာယ်ပါ။",
+     "my_s": null
     },
     {
      "ko": "끝을 올려 말하면 묻는 말이 돼요.",
@@ -1830,7 +2080,11 @@
      "en": "If your voice goes up at the end, it becomes a question.",
      "en_s": null,
      "es": "Si se dice subiendo el tono al final, se convierte en una pregunta.",
-     "es_s": null
+     "es_s": null,
+     "zh": "句尾语调上扬，就变成了问句。",
+     "zh_s": null,
+     "my": "အဆုံးကို အသံမြှင့်ပြီး ပြောရင် မေးခွန်း ဖြစ်သွားပါတယ်။",
+     "my_s": null
     }
    ],
    "gloss": {
@@ -1847,7 +2101,9 @@
       "si": "නෙවෙයි",
       "mn": "биш",
       "en": "is not",
-      "es": "no es"
+      "es": "no es",
+      "zh": "不是",
+      "my": "မဟုတ်ပါဘူး"
      }
     },
     "이에요": {
@@ -1863,7 +2119,9 @@
       "si": "",
       "mn": "",
       "en": "",
-      "es": ""
+      "es": "",
+      "zh": "",
+      "my": ""
      }
     }
    }
@@ -1883,7 +2141,9 @@
     "si": "අකුරු කියන්නේ හැමෝම එකඟ වෙන දෙයක්. හැමෝටම එකට කියවන්න පුළුවන් නම් තමයි ඒක අකුරක් වෙන්නේ.",
     "mn": "Үсэг гэдэг бол тохиролцоо юм. Бүгдээрээ хамтдаа уншиж чаддаг байж л үсэг болно.",
     "en": "Letters are a promise. They are letters only when everyone can read them together.",
-    "es": "Las letras son un acuerdo. Solo son letras si todos pueden leerlas juntos."
+    "es": "Las letras son un acuerdo. Solo son letras si todos pueden leerlas juntos.",
+    "zh": "文字是一种约定哦。大家都能读懂，才算是文字。",
+    "my": "စာလုံးဆိုတာ သဘောတူညီချက် တစ်ခုပဲကွယ်။ လူတိုင်း အတူတူ ဖတ်နိုင်မှ စာလုံး ဖြစ်တာပေါ့။"
    },
    "pieces": [
     {
@@ -1900,7 +2160,9 @@
       "si": "අකුරු",
       "mn": "үсэг бол",
       "en": "letters",
-      "es": "las letras"
+      "es": "las letras",
+      "zh": "文字",
+      "my": "စာလုံးဆိုတာ"
      }
     },
     {
@@ -1917,7 +2179,9 @@
       "si": "එකඟතාවක්",
       "mn": "тохиролцоо",
       "en": "are a promise",
-      "es": "son un acuerdo"
+      "es": "son un acuerdo",
+      "zh": "是约定",
+      "my": "သဘောတူညီချက်ပါ"
      }
     },
     {
@@ -1934,7 +2198,9 @@
       "si": "හැමෝම",
       "mn": "бүгд",
       "en": "all",
-      "es": "todos"
+      "es": "todos",
+      "zh": "大家",
+      "my": "အားလုံး"
      }
     },
     {
@@ -1951,7 +2217,9 @@
       "si": "එකට",
       "mn": "хамтдаа",
       "en": "together",
-      "es": "juntos"
+      "es": "juntos",
+      "zh": "一起",
+      "my": "အတူတူ"
      }
     },
     {
@@ -1968,7 +2236,9 @@
       "si": "කියවන්න පුළුවන්",
       "mn": "уншиж",
       "en": "read",
-      "es": "poder leer"
+      "es": "poder leer",
+      "zh": "读",
+      "my": "ဖတ်နိုင်"
      }
     },
     {
@@ -1985,7 +2255,9 @@
       "si": "නම් තමයි",
       "mn": "чаддаг байж",
       "en": "must be able to",
-      "es": "solo si se puede"
+      "es": "solo si se puede",
+      "zh": "要能",
+      "my": "မှသာ"
      }
     },
     {
@@ -2002,7 +2274,9 @@
       "si": "අකුරක්",
       "mn": "үсэг",
       "en": "are letters",
-      "es": "son letras"
+      "es": "son letras",
+      "zh": "才是文字",
+      "my": "စာလုံးပါ"
      }
     }
    ],
@@ -2019,7 +2293,9 @@
     "si": "වචනය + 은 / 는",
     "mn": "үг + 은 / 는",
     "en": "word + 은 / 는",
-    "es": "palabra + 은 / 는"
+    "es": "palabra + 은 / 는",
+    "zh": "词 + 은 / 는",
+    "my": "စကားလုံး + 은 / 는"
    },
    "text": {
     "ko": {
@@ -2069,6 +2345,14 @@
     "es": {
      "ex": "Las letras son un acuerdo. Solo son letras si todos pueden leerlas juntos. El \"는\" (neun) después de una palabra indica que ahora se va a hablar de eso. Si hay consonante final, se pone \"은\" (eun), y si no, se pone \"는\" (neun).",
      "say": "Ahora dígalo usted. \"한글은 글자예요\" (han-geul-eun geul-ja-ye-yo, el \"한글\" es una escritura)."
+    },
+    "zh": {
+     "ex": "文字是一种约定哦。大家都能读懂，才算是文字。 词后面的 \"는\" (neun) 是一个助词，表示现在要谈论这个。有收音就加 \"은\" (eun)，没有就加 \"는\" (neun)。",
+     "say": "现在请你试着说一说。 \"한글은 글자예요\" (han-geul-eun geul-ja-ye-yo, \"한글\" 是文字)。"
+    },
+    "my": {
+     "ex": "စာလုံးဆိုတာ သဘောတူညီချက် တစ်ခုပဲကွယ်။ လူတိုင်း အတူတူ ဖတ်နိုင်မှ စာလုံး ဖြစ်တာပေါ့။ စကားလုံးနောက်က \"는\" (neun) ဆိုတာ အခု ဒီအကြောင်းကို ပြောမယ် ဆိုတဲ့ ပစ္စည်းပါ။ နောက်ဆုံးဗျည်း ရှိရင် \"은\" (eun)၊ မရှိရင် \"는\" (neun) လို့ တွဲပါတယ်။",
+     "say": "အခု ပြောကြည့်ပါ။ \"한글은 글자예요\" (han-geul-eun geul-ja-ye-yo, \"한글\" က စာလုံးပါ)။"
     }
    },
    "ko_by": {
@@ -2115,6 +2399,14 @@
     "es": {
      "ex": "글자는 약속이에요. 다 같이 읽을 수 있어야 글자예요. 낱말 뒤의 \"는\" (neun) 은 지금 이것에 대해 말하겠다는 표시예요. 받침이 있으면 \"은\" (eun), 없으면 \"는\" (neun) 을 붙여요.",
      "say": "이제 말해 보세요. \"한글은 글자예요\" (han-geul-eun geul-ja-ye-yo, el \"한글\" es una escritura)"
+    },
+    "zh": {
+     "ex": "글자는 약속이에요. 다 같이 읽을 수 있어야 글자예요. 낱말 뒤의 \"는\" (neun) 은 지금 이것에 대해 말하겠다는 표시예요. 받침이 있으면 \"은\" (eun), 없으면 \"는\" (neun) 을 붙여요.",
+     "say": "이제 말해 보세요. \"한글은 글자예요\" (han-geul-eun geul-ja-ye-yo, \"한글\" 是文字)"
+    },
+    "my": {
+     "ex": "글자는 약속이에요. 다 같이 읽을 수 있어야 글자예요. 낱말 뒤의 \"는\" (neun) 은 지금 이것에 대해 말하겠다는 표시예요. 받침이 있으면 \"은\" (eun), 없으면 \"는\" (neun) 을 붙여요.",
+     "say": "이제 말해 보세요. \"한글은 글자예요\" (han-geul-eun geul-ja-ye-yo, \"한글\" က စာလုံးပါ)"
     }
    },
    "audio": {
@@ -2166,6 +2458,14 @@
     "es": {
      "ex": null,
      "say": null
+    },
+    "zh": {
+     "ex": null,
+     "say": null
+    },
+    "my": {
+     "ex": null,
+     "say": null
     }
    },
    "sent": [
@@ -2193,7 +2493,11 @@
      "en": "Letters are a promise.",
      "en_s": null,
      "es": "Las letras son un acuerdo.",
-     "es_s": null
+     "es_s": null,
+     "zh": "文字是一种约定哦。",
+     "zh_s": null,
+     "my": "စာလုံးဆိုတာ သဘောတူညီချက် တစ်ခုပဲကွယ်။",
+     "my_s": null
     },
     {
      "ko": "다 같이 읽을 수 있어야 글자예요.",
@@ -2219,7 +2523,11 @@
      "en": "They are letters only when everyone can read them together.",
      "en_s": null,
      "es": "Solo son letras si todos pueden leerlas juntos.",
-     "es_s": null
+     "es_s": null,
+     "zh": "大家都能读懂，才算是文字。",
+     "zh_s": null,
+     "my": "လူတိုင်း အတူတူ ဖတ်နိုင်မှ စာလုံး ဖြစ်တာပေါ့။",
+     "my_s": null
     },
     {
      "ko": "낱말 뒤의 \"는\"은 지금 이것에 대해 말하겠다는 표시예요.",
@@ -2245,7 +2553,11 @@
      "en": "\"는\" after a word is a marker that shows what you are going to talk about now.",
      "en_s": null,
      "es": "El \"는\" después de una palabra indica que ahora se va a hablar de eso.",
-     "es_s": null
+     "es_s": null,
+     "zh": "词后面的 \"는\" 是一个助词，表示现在要谈论这个。",
+     "zh_s": null,
+     "my": "စကားလုံးနောက်က \"는\" ဆိုတာ အခု ဒီအကြောင်းကို ပြောမယ် ဆိုတဲ့ ပစ္စည်းပါ။",
+     "my_s": null
     },
     {
      "ko": "받침이 있으면 \"은\", 없으면 \"는\"을 붙여요.",
@@ -2271,7 +2583,11 @@
      "en": "If the word ends in a final consonant, add \"은\", and if not, add \"는\".",
      "en_s": null,
      "es": "Si hay consonante final, se pone \"은\", y si no, se pone \"는\".",
-     "es_s": null
+     "es_s": null,
+     "zh": "有收音就加 \"은\"，没有就加 \"는\"。",
+     "zh_s": null,
+     "my": "နောက်ဆုံးဗျည်း ရှိရင် \"은\"၊ မရှိရင် \"는\" လို့ တွဲပါတယ်။",
+     "my_s": null
     }
    ],
    "gloss": {
@@ -2288,7 +2604,9 @@
       "si": "",
       "mn": "",
       "en": "",
-      "es": ""
+      "es": "",
+      "zh": "",
+      "my": ""
      }
     },
     "은": {
@@ -2304,7 +2622,9 @@
       "si": "",
       "mn": "",
       "en": "",
-      "es": ""
+      "es": "",
+      "zh": "",
+      "my": ""
      }
     }
    }
@@ -2324,7 +2644,9 @@
     "si": "ආ, මම විතරක් දන්නවා නම් ඒක අකුරක් නෙවෙයි නේ.",
     "mn": "Аа, би ганцаараа мэдвэл үсэг биш юм байна.",
     "en": "Oh, so if I am the only one who knows them, they aren't letters.",
-    "es": "Ah, ya veo: si solo yo la conozco, no es una letra."
+    "es": "Ah, ya veo: si solo yo la conozco, no es una letra.",
+    "zh": "啊，原来只有我自己懂的话，就不算文字呀。",
+    "my": "အော်၊ ကိုယ်တစ်ယောက်တည်း သိရုံနဲ့ စာလုံး မဖြစ်ဘူးကိုး။"
    },
    "pieces": [
     {
@@ -2341,7 +2663,9 @@
       "si": "ආ",
       "mn": "аа",
       "en": "oh",
-      "es": "ah"
+      "es": "ah",
+      "zh": "啊",
+      "my": "အော်"
      }
     },
     {
@@ -2358,7 +2682,9 @@
       "si": "මම",
       "mn": "би",
       "en": "I",
-      "es": "yo"
+      "es": "yo",
+      "zh": "我",
+      "my": "ကိုယ်"
      }
     },
     {
@@ -2375,7 +2701,9 @@
       "si": "තනියම",
       "mn": "ганцаараа",
       "en": "alone",
-      "es": "a solas"
+      "es": "a solas",
+      "zh": "独自",
+      "my": "တစ်ယောက်တည်း"
      }
     },
     {
@@ -2392,7 +2720,9 @@
       "si": "දන්නවා නම්",
       "mn": "мэдвэл",
       "en": "if I know",
-      "es": "si lo sé"
+      "es": "si lo sé",
+      "zh": "如果知道",
+      "my": "သိရင်"
      }
     },
     {
@@ -2409,7 +2739,9 @@
       "si": "අකුරක්",
       "mn": "үсэг",
       "en": "letters",
-      "es": "letra"
+      "es": "letra",
+      "zh": "文字",
+      "my": "စာလုံး"
      }
     },
     {
@@ -2426,7 +2758,9 @@
       "si": "නෙවෙයි නේ",
       "mn": "биш юм байна",
       "en": "so they are not",
-      "es": "no es, ya veo"
+      "es": "no es, ya veo",
+      "zh": "原来不是",
+      "my": "မဟုတ်ဘူးကိုး"
      }
     }
    ],
@@ -2443,7 +2777,9 @@
     "si": "අග කොටස 구나",
     "mn": "төгсгөл -구나",
     "en": "sentence + 구나",
-    "es": "terminación -구나"
+    "es": "terminación -구나",
+    "zh": "词尾 구나",
+    "my": "စကားအဆုံးသတ် -구나"
    },
    "text": {
     "ko": {
@@ -2493,6 +2829,14 @@
     "es": {
      "ex": "Ah, ya veo: si solo yo la conozco, no es una letra. La terminación \"구나\" (gu-na) se usa para decir, como hablando con uno mismo, algo que se acaba de descubrir. Como se habla con uno mismo, no es una terminación cortés. A \"구나\" (gu-na) no se le añade \"요\" (yo).",
      "say": "Ahora dígalo usted. \"아, 글자가 아니구나\" (a geul-ja-ga a-ni-gu-na, ya veo que no es una letra)."
+    },
+    "zh": {
+     "ex": "啊，原来只有我自己懂的话，就不算文字呀。 词尾 \"구나\" (gu-na) 用在像自言自语一样说出刚刚明白的事情时。因为是自言自语，所以不是礼貌的词尾。\"구나\" (gu-na) 后面不加 \"요\" (yo)。",
+     "say": "现在请你试着说一说。 \"아, 글자가 아니구나\" (a geul-ja-ga a-ni-gu-na, 原来不是文字啊)。"
+    },
+    "my": {
+     "ex": "အော်၊ ကိုယ်တစ်ယောက်တည်း သိရုံနဲ့ စာလုံး မဖြစ်ဘူးကိုး။ \"구나\" (gu-na) ဆိုတဲ့ စကားအဆုံးသတ်ကို အခုမှ သိလိုက်ရတဲ့ အရာကို ကိုယ့်ဘာသာ ပြောသလို ပြောတဲ့အခါ သုံးပါတယ်။ ကိုယ့်ဘာသာ ပြောတာ ဖြစ်လို့ ယဉ်ကျေးတဲ့ စကားအဆုံးသတ် မဟုတ်ပါဘူး။ \"구나\" (gu-na) ရဲ့ နောက်မှာ \"요\" (yo) ကို မတွဲပါဘူး။",
+     "say": "အခု ပြောကြည့်ပါ။ \"아, 글자가 아니구나\" (a geul-ja-ga a-ni-gu-na, အော်, စာလုံး မဟုတ်ဘူးကိုး)။"
     }
    },
    "ko_by": {
@@ -2539,6 +2883,14 @@
     "es": {
      "ex": "아, 저 혼자 알면 글자가 아니구나. 말끝 \"구나\" (gu-na) 는 방금 알게 된 것을 혼잣말처럼 말할 때 써요. 혼잣말이라서 공손한 말끝이 아니에요. \"구나\" (gu-na) 에는 \"요\" (yo) 를 붙이지 않아요.",
      "say": "이제 말해 보세요. \"아, 글자가 아니구나\" (a geul-ja-ga a-ni-gu-na, ya veo que no es una letra)"
+    },
+    "zh": {
+     "ex": "아, 저 혼자 알면 글자가 아니구나. 말끝 \"구나\" (gu-na) 는 방금 알게 된 것을 혼잣말처럼 말할 때 써요. 혼잣말이라서 공손한 말끝이 아니에요. \"구나\" (gu-na) 에는 \"요\" (yo) 를 붙이지 않아요.",
+     "say": "이제 말해 보세요. \"아, 글자가 아니구나\" (a geul-ja-ga a-ni-gu-na, 原来不是文字啊)"
+    },
+    "my": {
+     "ex": "아, 저 혼자 알면 글자가 아니구나. 말끝 \"구나\" (gu-na) 는 방금 알게 된 것을 혼잣말처럼 말할 때 써요. 혼잣말이라서 공손한 말끝이 아니에요. \"구나\" (gu-na) 에는 \"요\" (yo) 를 붙이지 않아요.",
+     "say": "이제 말해 보세요. \"아, 글자가 아니구나\" (a geul-ja-ga a-ni-gu-na, အော်, စာလုံး မဟုတ်ဘူးကိုး)"
     }
    },
    "audio": {
@@ -2590,6 +2942,14 @@
     "es": {
      "ex": null,
      "say": null
+    },
+    "zh": {
+     "ex": null,
+     "say": null
+    },
+    "my": {
+     "ex": null,
+     "say": null
     }
    },
    "sent": [
@@ -2617,7 +2977,11 @@
      "en": "Oh, so if I am the only one who knows them, they aren't letters.",
      "en_s": null,
      "es": "Ah, ya veo: si solo yo la conozco, no es una letra.",
-     "es_s": null
+     "es_s": null,
+     "zh": "啊，原来只有我自己懂的话，就不算文字呀。",
+     "zh_s": null,
+     "my": "အော်၊ ကိုယ်တစ်ယောက်တည်း သိရုံနဲ့ စာလုံး မဖြစ်ဘူးကိုး။",
+     "my_s": null
     },
     {
      "ko": "말끝 \"구나\"는 방금 알게 된 것을 혼잣말처럼 말할 때 써요.",
@@ -2643,7 +3007,11 @@
      "en": "The ending \"구나\" is used when you say something you just found out, as if you are talking to yourself.",
      "en_s": null,
      "es": "La terminación \"구나\" se usa para decir, como hablando con uno mismo, algo que se acaba de descubrir.",
-     "es_s": null
+     "es_s": null,
+     "zh": "词尾 \"구나\" 用在像自言自语一样说出刚刚明白的事情时。",
+     "zh_s": null,
+     "my": "\"구나\" ဆိုတဲ့ စကားအဆုံးသတ်ကို အခုမှ သိလိုက်ရတဲ့ အရာကို ကိုယ့်ဘာသာ ပြောသလို ပြောတဲ့အခါ သုံးပါတယ်။",
+     "my_s": null
     },
     {
      "ko": "혼잣말이라서 공손한 말끝이 아니에요.",
@@ -2669,7 +3037,11 @@
      "en": "Because it is like talking to yourself, it is not a polite ending.",
      "en_s": null,
      "es": "Como se habla con uno mismo, no es una terminación cortés.",
-     "es_s": null
+     "es_s": null,
+     "zh": "因为是自言自语，所以不是礼貌的词尾。",
+     "zh_s": null,
+     "my": "ကိုယ့်ဘာသာ ပြောတာ ဖြစ်လို့ ယဉ်ကျေးတဲ့ စကားအဆုံးသတ် မဟုတ်ပါဘူး။",
+     "my_s": null
     },
     {
      "ko": "\"구나\"에는 \"요\"를 붙이지 않아요.",
@@ -2695,7 +3067,11 @@
      "en": "Do not add \"요\" to \"구나\".",
      "en_s": null,
      "es": "A \"구나\" no se le añade \"요\".",
-     "es_s": null
+     "es_s": null,
+     "zh": "\"구나\" 后面不加 \"요\"。",
+     "zh_s": null,
+     "my": "\"구나\" ရဲ့ နောက်မှာ \"요\" ကို မတွဲပါဘူး။",
+     "my_s": null
     }
    ],
    "gloss": {
@@ -2712,7 +3088,9 @@
       "si": "",
       "mn": "",
       "en": "",
-      "es": ""
+      "es": "",
+      "zh": "",
+      "my": ""
      }
     },
     "요": {
@@ -2728,7 +3106,9 @@
       "si": "",
       "mn": "",
       "en": "",
-      "es": ""
+      "es": "",
+      "zh": "",
+      "my": ""
      }
     }
    }
@@ -2748,7 +3128,9 @@
     "si": "එහෙනම් ඒ එකඟතාව තීරණය කළේ කවුද?",
     "mn": "Тэгвэл тэр тохиролцоог хэн тогтоосон юм бэ?",
     "en": "Then who decided on that promise?",
-    "es": "Entonces, ¿quién estableció ese acuerdo?"
+    "es": "Entonces, ¿quién estableció ese acuerdo?",
+    "zh": "那这个约定是谁定的呢？",
+    "my": "ဒါဆို အဲဒီ သဘောတူညီချက်ကို ဘယ်သူက သတ်မှတ်ခဲ့တာလဲ ခင်ဗျာ။"
    },
    "pieces": [
     {
@@ -2765,7 +3147,9 @@
       "si": "එහෙනම්",
       "mn": "тэгвэл",
       "en": "then",
-      "es": "entonces"
+      "es": "entonces",
+      "zh": "那么",
+      "my": "ဒါဆို"
      }
     },
     {
@@ -2782,7 +3166,9 @@
       "si": "ඒ",
       "mn": "тэр",
       "en": "that",
-      "es": "ese"
+      "es": "ese",
+      "zh": "那个",
+      "my": "အဲဒီ"
      }
     },
     {
@@ -2799,7 +3185,9 @@
       "si": "එකඟතාව",
       "mn": "тохиролцоог",
       "en": "promise",
-      "es": "el acuerdo"
+      "es": "el acuerdo",
+      "zh": "约定",
+      "my": "သဘောတူညီချက်ကို"
      }
     },
     {
@@ -2816,7 +3204,9 @@
       "si": "කවුද",
       "mn": "хэн",
       "en": "who",
-      "es": "quién"
+      "es": "quién",
+      "zh": "谁",
+      "my": "ဘယ်သူက"
      }
     },
     {
@@ -2833,7 +3223,9 @@
       "si": "තීරණය කළේ",
       "mn": "тогтоосон",
       "en": "decided",
-      "es": "estableció"
+      "es": "estableció",
+      "zh": "定了",
+      "my": "သတ်မှတ်ခဲ့သလဲ"
      }
     }
    ],
@@ -2850,7 +3242,9 @@
     "si": "누가 + 했어요?",
     "mn": "누가 + 했어요?",
     "en": "누가 + 했어요?",
-    "es": "누가 + 했어요?"
+    "es": "누가 + 했어요?",
+    "zh": "누가 + 했어요?",
+    "my": "누가 + 했어요?"
    },
    "text": {
     "ko": {
@@ -2900,6 +3294,14 @@
     "es": {
      "ex": "Entonces, ¿quién estableció ese acuerdo? \"누가\" (nu-ga, quién) es la forma abreviada que se forma al unir \"누구\" (nu-gu, quién) y \"가\" (ga). Se usa para preguntar quién hizo algo. El \"했어요\" (haess-eo-yo) de \"정했어요\" (jeong-haess-eo-yo, estableció) es la misma terminación que el \"었어요\" (eoss-eo-yo) que escuchamos antes. Indica una acción ya terminada.",
      "say": "Ahora dígalo usted. \"누가 만들었어요?\" (nu-ga man-deul-eoss-eo-yo, ¿quién la hizo?)."
+    },
+    "zh": {
+     "ex": "那这个约定是谁定的呢？ \"누가\" (nu-ga, 谁) 是 \"누구\" (nu-gu, 谁) 加上 \"가\" (ga) 以后的缩略形式。用来问做那件事的人是谁。\"정했어요\" (jeong-haess-eo-yo, 定了) 里的 \"했어요\" (haess-eo-yo)，和前面听到的 \"었어요\" (eoss-eo-yo) 是同一个词尾。表示已经结束的事情。",
+     "say": "现在请你试着说一说。 \"누가 만들었어요?\" (nu-ga man-deul-eoss-eo-yo, 谁造的？)。"
+    },
+    "my": {
+     "ex": "ဒါဆို အဲဒီ သဘောတူညီချက်ကို ဘယ်သူက သတ်မှတ်ခဲ့တာလဲ ခင်ဗျာ။ \"누가\" (nu-ga, ဘယ်သူက) ဆိုတာ \"누구\" (nu-gu, ဘယ်သူ) ရဲ့ နောက်မှာ \"가\" (ga) တွဲပြီး တိုသွားတဲ့ အတိုကောက်ပုံစံပါ။ အဲဒီ အလုပ်ကို လုပ်တဲ့သူ ဘယ်သူလဲလို့ မေးတဲ့အခါ သုံးပါတယ်။ \"정했어요\" (jeong-haess-eo-yo, သတ်မှတ်ခဲ့တယ်) ထဲက \"했어요\" (haess-eo-yo) ဆိုတာ အရင်က ကြားခဲ့တဲ့ \"었어요\" (eoss-eo-yo) နဲ့ တူတဲ့ စကားအဆုံးသတ်ပါ။ ပြီးသွားပြီ ဖြစ်တဲ့ အလုပ်ကို ပြပါတယ်။",
+     "say": "အခု ပြောကြည့်ပါ။ \"누가 만들었어요?\" (nu-ga man-deul-eoss-eo-yo, ဘယ်သူ ဖန်တီးခဲ့တာလဲ)။"
     }
    },
    "ko_by": {
@@ -2946,6 +3348,14 @@
     "es": {
      "ex": "그럼 그 약속은 누가 정했어요? \"누가\" (nu-ga, quién) 는 \"누구\" (nu-gu, quién) 에 \"가\" (ga) 가 붙으면서 줄어든 말이에요. 그 일을 한 사람이 누구인지 물을 때 써요. \"정했어요\" (jeong-haess-eo-yo, estableció) 의 \"했어요\" (haess-eo-yo) 는 앞에서 들은 \"었어요\" (eoss-eo-yo) 와 같은 말끝이에요. 이미 끝난 일을 나타내요.",
      "say": "이제 말해 보세요. \"누가 만들었어요?\" (nu-ga man-deul-eoss-eo-yo, ¿quién la hizo?)"
+    },
+    "zh": {
+     "ex": "그럼 그 약속은 누가 정했어요? \"누가\" (nu-ga, 谁) 는 \"누구\" (nu-gu, 谁) 에 \"가\" (ga) 가 붙으면서 줄어든 말이에요. 그 일을 한 사람이 누구인지 물을 때 써요. \"정했어요\" (jeong-haess-eo-yo, 定了) 의 \"했어요\" (haess-eo-yo) 는 앞에서 들은 \"었어요\" (eoss-eo-yo) 와 같은 말끝이에요. 이미 끝난 일을 나타내요.",
+     "say": "이제 말해 보세요. \"누가 만들었어요?\" (nu-ga man-deul-eoss-eo-yo, 谁造的？)"
+    },
+    "my": {
+     "ex": "그럼 그 약속은 누가 정했어요? \"누가\" (nu-ga, ဘယ်သူက) 는 \"누구\" (nu-gu, ဘယ်သူ) 에 \"가\" (ga) 가 붙으면서 줄어든 말이에요. 그 일을 한 사람이 누구인지 물을 때 써요. \"정했어요\" (jeong-haess-eo-yo, သတ်မှတ်ခဲ့တယ်) 의 \"했어요\" (haess-eo-yo) 는 앞에서 들은 \"었어요\" (eoss-eo-yo) 와 같은 말끝이에요. 이미 끝난 일을 나타내요.",
+     "say": "이제 말해 보세요. \"누가 만들었어요?\" (nu-ga man-deul-eoss-eo-yo, ဘယ်သူ ဖန်တီးခဲ့တာလဲ)"
     }
    },
    "audio": {
@@ -2997,6 +3407,14 @@
     "es": {
      "ex": null,
      "say": null
+    },
+    "zh": {
+     "ex": null,
+     "say": null
+    },
+    "my": {
+     "ex": null,
+     "say": null
     }
    },
    "sent": [
@@ -3024,7 +3442,11 @@
      "en": "Then who decided on that promise?",
      "en_s": null,
      "es": "Entonces, ¿quién estableció ese acuerdo?",
-     "es_s": null
+     "es_s": null,
+     "zh": "那这个约定是谁定的呢？",
+     "zh_s": null,
+     "my": "ဒါဆို အဲဒီ သဘောတူညီချက်ကို ဘယ်သူက သတ်မှတ်ခဲ့တာလဲ ခင်ဗျာ။",
+     "my_s": null
     },
     {
      "ko": "\"누가\"는 \"누구\"에 \"가\"가 붙으면서 줄어든 말이에요.",
@@ -3050,7 +3472,11 @@
      "en": "\"누가\" is a short form of \"누구\" plus \"가\".",
      "en_s": null,
      "es": "\"누가\" es la forma abreviada que se forma al unir \"누구\" y \"가\".",
-     "es_s": null
+     "es_s": null,
+     "zh": "\"누가\" 是 \"누구\" 加上 \"가\" 以后的缩略形式。",
+     "zh_s": null,
+     "my": "\"누가\" ဆိုတာ \"누구\" ရဲ့ နောက်မှာ \"가\" တွဲပြီး တိုသွားတဲ့ အတိုကောက်ပုံစံပါ။",
+     "my_s": null
     },
     {
      "ko": "그 일을 한 사람이 누구인지 물을 때 써요.",
@@ -3076,7 +3502,11 @@
      "en": "You use it to ask who did something.",
      "en_s": null,
      "es": "Se usa para preguntar quién hizo algo.",
-     "es_s": null
+     "es_s": null,
+     "zh": "用来问做那件事的人是谁。",
+     "zh_s": null,
+     "my": "အဲဒီ အလုပ်ကို လုပ်တဲ့သူ ဘယ်သူလဲလို့ မေးတဲ့အခါ သုံးပါတယ်။",
+     "my_s": null
     },
     {
      "ko": "\"정했어요\"의 \"했어요\"는 앞에서 들은 \"었어요\"와 같은 말끝이에요.",
@@ -3102,7 +3532,11 @@
      "en": "The \"했어요\" in \"정했어요\" is the same ending as the \"었어요\" you heard before.",
      "en_s": null,
      "es": "El \"했어요\" de \"정했어요\" es la misma terminación que el \"었어요\" que escuchamos antes.",
-     "es_s": null
+     "es_s": null,
+     "zh": "\"정했어요\" 里的 \"했어요\"，和前面听到的 \"었어요\" 是同一个词尾。",
+     "zh_s": null,
+     "my": "\"정했어요\" ထဲက \"했어요\" ဆိုတာ အရင်က ကြားခဲ့တဲ့ \"었어요\" နဲ့ တူတဲ့ စကားအဆုံးသတ်ပါ။",
+     "my_s": null
     },
     {
      "ko": "이미 끝난 일을 나타내요.",
@@ -3128,7 +3562,11 @@
      "en": "It shows that something is already done.",
      "en_s": null,
      "es": "Indica una acción ya terminada.",
-     "es_s": null
+     "es_s": null,
+     "zh": "表示已经结束的事情。",
+     "zh_s": null,
+     "my": "ပြီးသွားပြီ ဖြစ်တဲ့ အလုပ်ကို ပြပါတယ်။",
+     "my_s": null
     }
    ],
    "gloss": {
@@ -3145,7 +3583,9 @@
       "si": "",
       "mn": "",
       "en": "",
-      "es": ""
+      "es": "",
+      "zh": "",
+      "my": ""
      }
     },
     "누가": {
@@ -3161,7 +3601,9 @@
       "si": "කවුද",
       "mn": "хэн",
       "en": "who",
-      "es": "quién"
+      "es": "quién",
+      "zh": "谁",
+      "my": "ဘယ်သူက"
      }
     },
     "누구": {
@@ -3177,7 +3619,9 @@
       "si": "කවුද",
       "mn": "хэн",
       "en": "who",
-      "es": "quién"
+      "es": "quién",
+      "zh": "谁",
+      "my": "ဘယ်သူ"
      }
     },
     "었어요": {
@@ -3193,7 +3637,9 @@
       "si": "",
       "mn": "",
       "en": "",
-      "es": ""
+      "es": "",
+      "zh": "",
+      "my": ""
      }
     },
     "정했어요": {
@@ -3209,7 +3655,9 @@
       "si": "තීරණය කළා",
       "mn": "тогтоосон",
       "en": "decided",
-      "es": "estableció"
+      "es": "estableció",
+      "zh": "定了",
+      "my": "သတ်မှတ်ခဲ့တယ်"
      }
     },
     "했어요": {
@@ -3225,7 +3673,9 @@
       "si": "",
       "mn": "",
       "en": "",
-      "es": ""
+      "es": "",
+      "zh": "",
+      "my": ""
      }
     }
    }
@@ -3245,7 +3695,9 @@
     "si": "\"세종대왕\" රජතුමා. මීට අවුරුදු පන්සියයකට කලින් රජතුමාම අකුරු හැදුවා. ඒ කාලේ සාමාන්‍ය මිනිස්සු අකුරු දැනගෙන හිටියේ නැහැ. අකුරු ඉගෙන ගන්න හරිම අමාරු වුණා.",
     "mn": "\"세종대왕\" хаан. Таван зуун жилийн өмнө хаан өөрөө үсгийг бүтээсэн юм. Тэр үед энгийн ард түмэн үсэг мэддэггүй байсан. Үсэг дэндүү хэцүү байсан.",
     "en": "King \"세종대왕\". Five hundred years ago, the king made them himself. Back then, ordinary people did not know letters. The letters were too hard.",
-    "es": "El rey \"세종대왕\". Hace quinientos años, el propio rey hizo las letras. En esa época, la gente común no sabía leer ni escribir. Era demasiado difícil."
+    "es": "El rey \"세종대왕\". Hace quinientos años, el propio rey hizo las letras. En esa época, la gente común no sabía leer ni escribir. Era demasiado difícil.",
+    "zh": "是 \"세종대왕\" 哦。五百年前，国王亲自造了文字。因为那时候，百姓们都不识字。那时的文字实在太难了。",
+    "my": "\"세종대왕\" မင်းကြီးပေါ့ကွယ်။ လွန်ခဲ့တဲ့ နှစ်ငါးရာက ဘုရင်ကိုယ်တိုင် ဖန်တီးခဲ့တာ။ အဲဒီတုန်းက ပြည်သူတွေက စာလုံး မသိကြဘူးလေ။ စာက အရမ်း ခက်ခဲခဲ့တယ်။"
    },
    "pieces": [
     {
@@ -3262,7 +3714,9 @@
       "si": "\"세종대왕\" රජතුමා",
       "mn": "\"세종대왕\" хаан",
       "en": "King \"세종대왕\"",
-      "es": "el rey \"세종대왕\""
+      "es": "el rey \"세종대왕\"",
+      "zh": "是 \"세종대왕\"",
+      "my": "\"세종대왕\" မင်းကြီးပါ"
      }
     },
     {
@@ -3279,7 +3733,9 @@
       "si": "පන්සියයක්",
       "mn": "таван зуун",
       "en": "five hundred",
-      "es": "quinientos"
+      "es": "quinientos",
+      "zh": "五百",
+      "my": "ငါးရာ"
      }
     },
     {
@@ -3296,7 +3752,9 @@
       "si": "අවුරුදු",
       "mn": "жил",
       "en": "years",
-      "es": "años"
+      "es": "años",
+      "zh": "年",
+      "my": "နှစ်"
      }
     },
     {
@@ -3313,7 +3771,9 @@
       "si": "කලින්",
       "mn": "өмнө",
       "en": "ago",
-      "es": "hace"
+      "es": "hace",
+      "zh": "以前",
+      "my": "အရင်က"
      }
     },
     {
@@ -3330,7 +3790,9 @@
       "si": "රජතුමා",
       "mn": "хаан",
       "en": "the king",
-      "es": "el rey"
+      "es": "el rey",
+      "zh": "国王",
+      "my": "ဘုရင်က"
      }
     },
     {
@@ -3347,7 +3809,9 @@
       "si": "තමන්ම",
       "mn": "өөрөө",
       "en": "himself",
-      "es": "en persona"
+      "es": "en persona",
+      "zh": "亲自",
+      "my": "ကိုယ်တိုင်"
      }
     },
     {
@@ -3364,7 +3828,9 @@
       "si": "හැදුවා",
       "mn": "бүтээсэн",
       "en": "made",
-      "es": "hizo"
+      "es": "hizo",
+      "zh": "造了",
+      "my": "ဖန်တီးခဲ့တယ်"
      }
     },
     {
@@ -3381,7 +3847,9 @@
       "si": "ඒ කාලේ",
       "mn": "тэр үед",
       "en": "back then",
-      "es": "en esa época"
+      "es": "en esa época",
+      "zh": "那时候",
+      "my": "အဲဒီတုန်းက"
      }
     },
     {
@@ -3398,7 +3866,9 @@
       "si": "සාමාන්‍ය මිනිස්සු",
       "mn": "ард түмэн",
       "en": "ordinary people",
-      "es": "la gente común"
+      "es": "la gente común",
+      "zh": "百姓们",
+      "my": "ပြည်သူတွေက"
      }
     },
     {
@@ -3415,7 +3885,9 @@
       "si": "අකුරු",
       "mn": "үсгийг",
       "en": "letters",
-      "es": "las letras"
+      "es": "las letras",
+      "zh": "文字",
+      "my": "စာလုံးကို"
      }
     },
     {
@@ -3432,7 +3904,9 @@
       "si": "දැනගෙන හිටියේ නැහැ",
       "mn": "мэддэггүй байсан юм",
       "en": "did not know",
-      "es": "no conocía"
+      "es": "no conocía",
+      "zh": "因为不认识",
+      "my": "မသိခဲ့ကြလို့ပါ"
      }
     },
     {
@@ -3449,7 +3923,9 @@
       "si": "හරිම",
       "mn": "дэндүү",
       "en": "too",
-      "es": "demasiado"
+      "es": "demasiado",
+      "zh": "太",
+      "my": "အရမ်း"
      }
     },
     {
@@ -3466,7 +3942,9 @@
       "si": "අමාරු වුණා",
       "mn": "хэцүү байсан",
       "en": "were hard",
-      "es": "era difícil"
+      "es": "era difícil",
+      "zh": "难了",
+      "my": "ခက်ခဲခဲ့တယ်"
      }
     }
    ],
@@ -3483,7 +3961,9 @@
     "si": "වචනය + 을 / 를 + ක්‍රියා පදය",
     "mn": "үг + 을 / 를 + үйл үг",
     "en": "word + 을 / 를 + verb",
-    "es": "palabra + 을 / 를 + verbo"
+    "es": "palabra + 을 / 를 + verbo",
+    "zh": "词 + 을 / 를 + 动词",
+    "my": "စကားလုံး + 을 / 를 + ကြိယာ"
    },
    "text": {
     "ko": {
@@ -3533,6 +4013,14 @@
     "es": {
      "ex": "El rey \"세종대왕\" (se-jong-dae-wang, rey). Hace quinientos años, el propio rey hizo las letras. En esa época, la gente común no sabía leer ni escribir. Era demasiado difícil. El \"를\" (reul) de \"글자를\" (geul-ja-reul, las letras) va después de la palabra que recibe la acción, es decir, lo que no se sabe o lo que se hace. Si hay consonante final, se pone \"을\" (eul), y si no, se pone \"를\" (reul). El coreano pone esta partícula después de la palabra.",
      "say": "Ahora dígalo usted. \"저는 글자를 만들었어요\" (jeo-neun geul-ja-reul man-deul-eoss-eo-yo, yo hice las letras)."
+    },
+    "zh": {
+     "ex": "是 \"세종대왕\" (se-jong-dae-wang, 国王) 哦。五百年前，国王亲自造了文字。因为那时候，百姓们都不识字。那时的文字实在太难了。 \"글자를\" (geul-ja-reul, 文字) 里的 \"를\" (reul)，加在宾语的后面，比如不知道的东西、造出来的东西。有收音就加 \"을\" (eul)，没有就加 \"를\" (reul)。韩语把这个助词放在词的后面。",
+     "say": "现在请你试着说一说。 \"저는 글자를 만들었어요\" (jeo-neun geul-ja-reul man-deul-eoss-eo-yo, 我造了文字)。"
+    },
+    "my": {
+     "ex": "\"세종대왕\" (se-jong-dae-wang, ဘုရင်) မင်းကြီးပေါ့ကွယ်။ လွန်ခဲ့တဲ့ နှစ်ငါးရာက ဘုရင်ကိုယ်တိုင် ဖန်တီးခဲ့တာ။ အဲဒီတုန်းက ပြည်သူတွေက စာလုံး မသိကြဘူးလေ။ စာက အရမ်း ခက်ခဲခဲ့တယ်။ \"글자를\" (geul-ja-reul, စာလုံးကို) ထဲက \"를\" (reul) ဆိုတာ ဘာကို မသိလဲ၊ ဘာကို ဖန်တီးလဲ ဆိုတဲ့ အလုပ်ခံရတဲ့ စကားလုံးရဲ့ နောက်မှာ တွဲပါတယ်။ နောက်ဆုံးဗျည်း ရှိရင် \"을\" (eul)၊ မရှိရင် \"를\" (reul) လို့ တွဲပါတယ်။ ဒီပစ္စည်းဟာ မြန်မာ \"ကို\" လိုမျိုး စကားလုံးရဲ့ နောက်မှာ တွဲပေမယ့်၊ မြန်မာလို အရာဝတ္ထုတွေ နောက်မှာ \"ကို\" ကို အများအားဖြင့် မတွဲဘဲ၊ ကိုရီးယားလို အရာဝတ္ထုတွေ နောက်မှာလည်း တွဲပါတယ်။",
+     "say": "အခု ပြောကြည့်ပါ။ \"저는 글자를 만들었어요\" (jeo-neun geul-ja-reul man-deul-eoss-eo-yo, ကျွန်ုပ် စာလုံးကို ဖန်တီးခဲ့ပါတယ်)။"
     }
    },
    "ko_by": {
@@ -3623,6 +4111,18 @@
     "es": {
      "ex": "세종대왕이요. 오백 년 전에 왕이 직접 만들었어요. 그때 백성들은 글자를 몰랐거든요. 너무 어려웠어요. \"글자를\" (geul-ja-reul, las letras) 의 \"를\" (reul) 은 무엇을 모르는지, 무엇을 만드는지, 그 대상이 되는 낱말 뒤에 붙어요. 받침이 있으면 \"을\" (eul), 없으면 \"를\" (reul) 을 붙여요. 한국어는 이 표시를 낱말 뒤에 붙여요.",
      "say": "이제 말해 보세요. \"저는 글자를 만들었어요\" (jeo-neun geul-ja-reul man-deul-eoss-eo-yo, yo hice las letras)"
+    },
+    "zh": {
+     "ex": "세종대왕이요. 오백 년 전에 왕이 직접 만들었어요. 그때 백성들은 글자를 몰랐거든요. 너무 어려웠어요. \"글자를\" (geul-ja-reul, 文字) 의 \"를\" (reul) 은 무엇을 모르는지, 무엇을 만드는지, 그 대상이 되는 낱말 뒤에 붙어요. 받침이 있으면 \"을\" (eul), 없으면 \"를\" (reul) 을 붙여요. 한국어는 이 표시를 낱말 뒤에 붙여요.",
+     "say": "이제 말해 보세요. \"저는 글자를 만들었어요\" (jeo-neun geul-ja-reul man-deul-eoss-eo-yo, 我造了文字)"
+    },
+    "my": {
+     "ex": "세종대왕이요. 오백 년 전에 왕이 직접 만들었어요. 그때 백성들은 글자를 몰랐거든요. 너무 어려웠어요. \"글자를\" (geul-ja-reul, စာလုံးကို) 의 \"를\" (reul) 은 무엇을 모르는지, 무엇을 만드는지, 그 대상이 되는 낱말 뒤에 붙어요. 받침이 있으면 \"을\" (eul), 없으면 \"를\" (reul) 을 붙여요. 미얀마어의 \"ကို\"처럼 낱말 뒤에 붙지만, 미얀마어는 물건 뒤에는 보통 \"ကို\"를 붙이지 않고 한국어는 물건에도 붙여요.",
+     "say": "이제 말해 보세요. \"저는 글자를 만들었어요\" (jeo-neun geul-ja-reul man-deul-eoss-eo-yo, ကျွန်ုပ် စာလုံးကို ဖန်တီးခဲ့ပါတယ်)",
+     "slot": "미얀마어의 \"ကို\"처럼 낱말 뒤에 붙지만, 미얀마어는 물건 뒤에는 보통 \"ကို\"를 붙이지 않고 한국어는 물건에도 붙여요.",
+     "sent": {
+      "6": "미얀마어의 \"ကို\"처럼 낱말 뒤에 붙지만, 미얀마어는 물건 뒤에는 보통 \"ကို\"를 붙이지 않고 한국어는 물건에도 붙여요."
+     }
     }
    },
    "audio": {
@@ -3674,6 +4174,14 @@
     "es": {
      "ex": null,
      "say": null
+    },
+    "zh": {
+     "ex": null,
+     "say": null
+    },
+    "my": {
+     "ex": null,
+     "say": null
     }
    },
    "sent": [
@@ -3701,7 +4209,11 @@
      "en": "King \"세종대왕\".",
      "en_s": null,
      "es": "El rey \"세종대왕\".",
-     "es_s": null
+     "es_s": null,
+     "zh": "是 \"세종대왕\" 哦。",
+     "zh_s": null,
+     "my": "\"세종대왕\" မင်းကြီးပေါ့ကွယ်။",
+     "my_s": null
     },
     {
      "ko": "오백 년 전에 왕이 직접 만들었어요.",
@@ -3727,7 +4239,11 @@
      "en": "Five hundred years ago, the king made them himself.",
      "en_s": null,
      "es": "Hace quinientos años, el propio rey hizo las letras.",
-     "es_s": null
+     "es_s": null,
+     "zh": "五百年前，国王亲自造了文字。",
+     "zh_s": null,
+     "my": "လွန်ခဲ့တဲ့ နှစ်ငါးရာက ဘုရင်ကိုယ်တိုင် ဖန်တီးခဲ့တာ။",
+     "my_s": null
     },
     {
      "ko": "그때 백성들은 글자를 몰랐거든요.",
@@ -3753,7 +4269,11 @@
      "en": "Back then, ordinary people did not know letters.",
      "en_s": null,
      "es": "En esa época, la gente común no sabía leer ni escribir.",
-     "es_s": null
+     "es_s": null,
+     "zh": "因为那时候，百姓们都不识字。",
+     "zh_s": null,
+     "my": "အဲဒီတုန်းက ပြည်သူတွေက စာလုံး မသိကြဘူးလေ။",
+     "my_s": null
     },
     {
      "ko": "너무 어려웠어요.",
@@ -3779,7 +4299,11 @@
      "en": "The letters were too hard.",
      "en_s": null,
      "es": "Era demasiado difícil.",
-     "es_s": null
+     "es_s": null,
+     "zh": "那时的文字实在太难了。",
+     "zh_s": null,
+     "my": "စာက အရမ်း ခက်ခဲခဲ့တယ်။",
+     "my_s": null
     },
     {
      "ko": "\"글자를\"의 \"를\"은 무엇을 모르는지, 무엇을 만드는지, 그 대상이 되는 낱말 뒤에 붙어요.",
@@ -3805,7 +4329,11 @@
      "en": "The \"를\" in \"글자를\" goes after the word for the thing an action is done to, like the thing you do not know or the thing you make.",
      "en_s": null,
      "es": "El \"를\" de \"글자를\" va después de la palabra que recibe la acción, es decir, lo que no se sabe o lo que se hace.",
-     "es_s": null
+     "es_s": null,
+     "zh": "\"글자를\" 里的 \"를\"，加在宾语的后面，比如不知道的东西、造出来的东西。",
+     "zh_s": null,
+     "my": "\"글자를\" ထဲက \"를\" ဆိုတာ ဘာကို မသိလဲ၊ ဘာကို ဖန်တီးလဲ ဆိုတဲ့ အလုပ်ခံရတဲ့ စကားလုံးရဲ့ နောက်မှာ တွဲပါတယ်။",
+     "my_s": null
     },
     {
      "ko": "받침이 있으면 \"을\", 없으면 \"를\"을 붙여요.",
@@ -3831,7 +4359,11 @@
      "en": "If the word ends in a final consonant, add \"을\", and if not, add \"를\".",
      "en_s": null,
      "es": "Si hay consonante final, se pone \"을\", y si no, se pone \"를\".",
-     "es_s": null
+     "es_s": null,
+     "zh": "有收音就加 \"을\"，没有就加 \"를\"。",
+     "zh_s": null,
+     "my": "နောက်ဆုံးဗျည်း ရှိရင် \"을\"၊ မရှိရင် \"를\" လို့ တွဲပါတယ်။",
+     "my_s": null
     },
     {
      "ko": "한국어는 이 표시를 낱말 뒤에 붙여요.",
@@ -3857,7 +4389,11 @@
      "en": "Korean puts this marker after the word.",
      "en_s": null,
      "es": "El coreano pone esta partícula después de la palabra.",
-     "es_s": null
+     "es_s": null,
+     "zh": "韩语把这个助词放在词的后面。",
+     "zh_s": null,
+     "my": "ဒီပစ္စည်းဟာ မြန်မာ \"ကို\" လိုမျိုး စကားလုံးရဲ့ နောက်မှာ တွဲပေမယ့်၊ မြန်မာလို အရာဝတ္ထုတွေ နောက်မှာ \"ကို\" ကို အများအားဖြင့် မတွဲဘဲ၊ ကိုရီးယားလို အရာဝတ္ထုတွေ နောက်မှာလည်း တွဲပါတယ်။",
+     "my_s": null
     }
    ],
    "gloss": {
@@ -3874,7 +4410,9 @@
       "si": "අකුරු",
       "mn": "үсгийг",
       "en": "letters",
-      "es": "las letras"
+      "es": "las letras",
+      "zh": "文字",
+      "my": "စာလုံးကို"
      }
     },
     "를": {
@@ -3890,7 +4428,9 @@
       "si": "",
       "mn": "",
       "en": "",
-      "es": ""
+      "es": "",
+      "zh": "",
+      "my": ""
      }
     },
     "세종대왕": {
@@ -3906,7 +4446,9 @@
       "si": "රජතුමා",
       "mn": "хаан",
       "en": "king",
-      "es": "rey"
+      "es": "rey",
+      "zh": "国王",
+      "my": "ဘုရင်"
      }
     },
     "을": {
@@ -3922,7 +4464,9 @@
       "si": "",
       "mn": "",
       "en": "",
-      "es": ""
+      "es": "",
+      "zh": "",
+      "my": ""
      }
     }
    }
@@ -3942,7 +4486,9 @@
     "si": "වාව්! එහෙනම් හැමෝම ගොඩක් සතුටු වෙන්න ඇති!",
     "mn": "Хөөх! Тэгвэл бүгд баярласан байх даа!",
     "en": "Wow! Then everyone must have liked it!",
-    "es": "¡Vaya! ¡Entonces seguro que a todos les encantó!"
+    "es": "¡Vaya! ¡Entonces seguro que a todos les encantó!",
+    "zh": "哇！那大家一定都很高兴吧！",
+    "my": "ဝိုး! ဒါဆို လူတိုင်း ဝမ်းသာခဲ့ကြမှာပဲရှင့်!"
    },
    "pieces": [
     {
@@ -3959,7 +4505,9 @@
       "si": "වාව්",
       "mn": "хөөх",
       "en": "wow",
-      "es": "vaya"
+      "es": "vaya",
+      "zh": "哇",
+      "my": "ဝိုး"
      }
     },
     {
@@ -3976,7 +4524,9 @@
       "si": "එහෙනම්",
       "mn": "тэгвэл",
       "en": "then",
-      "es": "entonces"
+      "es": "entonces",
+      "zh": "那么",
+      "my": "ဒါဆို"
      }
     },
     {
@@ -3993,7 +4543,9 @@
       "si": "හැමෝම",
       "mn": "бүгд",
       "en": "everyone",
-      "es": "todos"
+      "es": "todos",
+      "zh": "大家",
+      "my": "လူတိုင်း"
      }
     },
     {
@@ -4010,7 +4562,9 @@
       "si": "සතුටු වෙන්න ඇති",
       "mn": "баярласан байх даа",
       "en": "must have liked it",
-      "es": "seguro que les encantó"
+      "es": "seguro que les encantó",
+      "zh": "一定很高兴吧",
+      "my": "ဝမ်းသာခဲ့ကြမှာပဲ"
      }
     }
    ],
@@ -4027,7 +4581,9 @@
     "si": "ක්‍රියා පදය + 었겠네요",
     "mn": "үйл үг + 었겠네요",
     "en": "verb + 었겠네요",
-    "es": "verbo + 었겠네요"
+    "es": "verbo + 었겠네요",
+    "zh": "动词 + 었겠네요",
+    "my": "ကြိယာ + 었겠네요"
    },
    "text": {
     "ko": {
@@ -4077,6 +4633,14 @@
     "es": {
      "ex": "¡Vaya! ¡Entonces seguro que a todos les encantó! \"좋아했겠네요\" (joh-a-haess-gess-ne-yo, seguro que les encantó) se usa para suponer algo que uno no vio directamente. Por ahora, apréndalo como un todo.",
      "say": "Ahora dígalo usted. \"와! 다들 좋아했겠네요!\" (wa da-deul joh-a-haess-gess-ne-yo, ¡vaya! ¡seguro que a todos les encantó!)."
+    },
+    "zh": {
+     "ex": "哇！那大家一定都很高兴吧！ \"좋아했겠네요\" (joh-a-haess-gess-ne-yo, 一定很高兴吧) 用在推测没有亲眼看到的事情时。现在请先把它整个记下来。",
+     "say": "现在请你试着说一说。 \"와! 다들 좋아했겠네요!\" (wa da-deul joh-a-haess-gess-ne-yo, 哇！大家一定很高兴吧！)。"
+    },
+    "my": {
+     "ex": "ဝိုး! ဒါဆို လူတိုင်း ဝမ်းသာခဲ့ကြမှာပဲရှင့်! \"좋아했겠네요\" (joh-a-haess-gess-ne-yo, ဝမ်းသာခဲ့ကြမှာပဲ) ဆိုတာ ကိုယ်တိုင် မမြင်ခဲ့ရတဲ့ အရာကို ခန့်မှန်းပြီး ပြောတဲ့အခါ သုံးပါတယ်။ အခုတော့ တစ်ခုလုံးကို အလွတ်ကျက်ထားပါ။",
+     "say": "အခု ပြောကြည့်ပါ။ \"와! 다들 좋아했겠네요!\" (wa da-deul joh-a-haess-gess-ne-yo, ဝိုး! လူတိုင်း ဝမ်းသာခဲ့ကြမှာပဲ!)။"
     }
    },
    "ko_by": {
@@ -4123,6 +4687,14 @@
     "es": {
      "ex": "와! 그럼 다들 좋아했겠네요! \"좋아했겠네요\" (joh-a-haess-gess-ne-yo, seguro que les encantó) 는 직접 보지 않은 일을 짐작해서 말할 때 써요. 지금은 통째로 익혀 두세요.",
      "say": "이제 말해 보세요. \"와! 다들 좋아했겠네요!\" (wa da-deul joh-a-haess-gess-ne-yo, ¡vaya! ¡seguro que a todos les encantó!)"
+    },
+    "zh": {
+     "ex": "와! 그럼 다들 좋아했겠네요! \"좋아했겠네요\" (joh-a-haess-gess-ne-yo, 一定很高兴吧) 는 직접 보지 않은 일을 짐작해서 말할 때 써요. 지금은 통째로 익혀 두세요.",
+     "say": "이제 말해 보세요. \"와! 다들 좋아했겠네요!\" (wa da-deul joh-a-haess-gess-ne-yo, 哇！大家一定很高兴吧！)"
+    },
+    "my": {
+     "ex": "와! 그럼 다들 좋아했겠네요! \"좋아했겠네요\" (joh-a-haess-gess-ne-yo, ဝမ်းသာခဲ့ကြမှာပဲ) 는 직접 보지 않은 일을 짐작해서 말할 때 써요. 지금은 통째로 익혀 두세요.",
+     "say": "이제 말해 보세요. \"와! 다들 좋아했겠네요!\" (wa da-deul joh-a-haess-gess-ne-yo, ဝိုး! လူတိုင်း ဝမ်းသာခဲ့ကြမှာပဲ!)"
     }
    },
    "audio": {
@@ -4174,6 +4746,14 @@
     "es": {
      "ex": null,
      "say": null
+    },
+    "zh": {
+     "ex": null,
+     "say": null
+    },
+    "my": {
+     "ex": null,
+     "say": null
     }
    },
    "sent": [
@@ -4201,7 +4781,11 @@
      "en": "Wow!",
      "en_s": null,
      "es": "¡Vaya!",
-     "es_s": null
+     "es_s": null,
+     "zh": "哇！",
+     "zh_s": null,
+     "my": "ဝိုး!",
+     "my_s": null
     },
     {
      "ko": "그럼 다들 좋아했겠네요!",
@@ -4227,7 +4811,11 @@
      "en": "Then everyone must have liked it!",
      "en_s": null,
      "es": "¡Entonces seguro que a todos les encantó!",
-     "es_s": null
+     "es_s": null,
+     "zh": "那大家一定都很高兴吧！",
+     "zh_s": null,
+     "my": "ဒါဆို လူတိုင်း ဝမ်းသာခဲ့ကြမှာပဲရှင့်!",
+     "my_s": null
     },
     {
      "ko": "\"좋아했겠네요\"는 직접 보지 않은 일을 짐작해서 말할 때 써요.",
@@ -4253,7 +4841,11 @@
      "en": "You use \"좋아했겠네요\" when you guess about something you did not see yourself.",
      "en_s": null,
      "es": "\"좋아했겠네요\" se usa para suponer algo que uno no vio directamente.",
-     "es_s": null
+     "es_s": null,
+     "zh": "\"좋아했겠네요\" 用在推测没有亲眼看到的事情时。",
+     "zh_s": null,
+     "my": "\"좋아했겠네요\" ဆိုတာ ကိုယ်တိုင် မမြင်ခဲ့ရတဲ့ အရာကို ခန့်မှန်းပြီး ပြောတဲ့အခါ သုံးပါတယ်။",
+     "my_s": null
     },
     {
      "ko": "지금은 통째로 익혀 두세요.",
@@ -4279,7 +4871,11 @@
      "en": "For now, just learn it as one whole phrase.",
      "en_s": null,
      "es": "Por ahora, apréndalo como un todo.",
-     "es_s": null
+     "es_s": null,
+     "zh": "现在请先把它整个记下来。",
+     "zh_s": null,
+     "my": "အခုတော့ တစ်ခုလုံးကို အလွတ်ကျက်ထားပါ။",
+     "my_s": null
     }
    ],
    "gloss": {
@@ -4296,7 +4892,9 @@
       "si": "සතුටු වෙන්න ඇති",
       "mn": "баярласан байх даа",
       "en": "must have liked it",
-      "es": "seguro que les encantó"
+      "es": "seguro que les encantó",
+      "zh": "一定很高兴吧",
+      "my": "ဝမ်းသာခဲ့ကြမှာပဲ"
      }
     }
    }
@@ -4316,7 +4914,9 @@
     "si": "නැහැ. ඇමතිවරු ඒකට විරුද්ධ වුණා.",
     "mn": "Үгүй ээ. Түшмэд нь эсэргүүцсэн юм.",
     "en": "No. The king's officials were against it.",
-    "es": "No fue así. Los ministros se opusieron."
+    "es": "No fue así. Los ministros se opusieron.",
+    "zh": "不是哦。大臣们反对了呢。",
+    "my": "မဟုတ်ဘူးကွဲ့။ မှူးမတ်တွေက ကန့်ကွက်ခဲ့ကြတယ်။"
    },
    "pieces": [
     {
@@ -4333,7 +4933,9 @@
       "si": "නැහැ",
       "mn": "үгүй",
       "en": "no",
-      "es": "no"
+      "es": "no",
+      "zh": "不是",
+      "my": "မဟုတ်ဘူး"
      }
     },
     {
@@ -4350,7 +4952,9 @@
       "si": "ඇමතිවරු",
       "mn": "түшмэд",
       "en": "the officials",
-      "es": "los ministros"
+      "es": "los ministros",
+      "zh": "大臣们",
+      "my": "မှူးမတ်တွေက"
      }
     },
     {
@@ -4367,7 +4971,9 @@
       "si": "විරුද්ධ වුණා",
       "mn": "эсэргүүцсэн",
       "en": "were against it",
-      "es": "se opusieron"
+      "es": "se opusieron",
+      "zh": "反对了",
+      "my": "ကန့်ကွက်ခဲ့ကြတယ်"
      }
     }
    ],
@@ -4384,7 +4990,9 @@
     "si": "වචනය + 이 / 가",
     "mn": "үг + 이 / 가",
     "en": "word + 이 / 가",
-    "es": "palabra + 이 / 가"
+    "es": "palabra + 이 / 가",
+    "zh": "词 + 이 / 가",
+    "my": "စကားလုံး + 이 / 가"
    },
    "text": {
     "ko": {
@@ -4434,6 +5042,14 @@
     "es": {
      "ex": "No fue así. Los ministros se opusieron. El \"이\" (i) de \"신하들이\" (sin-ha-deul-i, los ministros) va después de la palabra que es el sujeto de la oración. También se pone con cosas que no son personas, y delante de \"아니다\" (a-ni-da, no ser) se usa la misma forma \"가\" (ga), como en \"글자가 아니구나\" (geul-ja-ga a-ni-gu-na, no es una letra, ya veo), que escuchamos antes. Si hay consonante final, se pone \"이\" (i), y si no, se pone \"가\" (ga).",
      "say": "Ahora dígalo usted. \"왕이 만들었어요\" (wang-i man-deul-eoss-eo-yo, el rey las hizo)."
+    },
+    "zh": {
+     "ex": "不是哦。大臣们反对了呢。 \"신하들이\" (sin-ha-deul-i, 大臣们) 里的 \"이\" (i)，加在作主语的词后面。它也可以加在不是人的东西后面，而且像前面听到的 \"글자가 아니구나\" (geul-ja-ga a-ni-gu-na, 原来不是文字) 那样，在 \"아니다\" (a-ni-da, 不是) 前面也用同样形式的 \"가\" (ga)。有收音就加 \"이\" (i)，没有就加 \"가\" (ga)。",
+     "say": "现在请你试着说一说。 \"왕이 만들었어요\" (wang-i man-deul-eoss-eo-yo, 国王造的)。"
+    },
+    "my": {
+     "ex": "မဟုတ်ဘူးကွဲ့။ မှူးမတ်တွေက ကန့်ကွက်ခဲ့ကြတယ်။ \"신하들이\" (sin-ha-deul-i, မှူးမတ်တွေက) ထဲက \"이\" (i) ဆိုတာ ဝါကျရဲ့ ကတ္တား ဖြစ်တဲ့ စကားလုံးရဲ့ နောက်မှာ တွဲပါတယ်။ လူ မဟုတ်တဲ့ အရာတွေမှာလည်း တွဲပြီး၊ အရင်က ကြားခဲ့တဲ့ \"글자가 아니구나\" (geul-ja-ga a-ni-gu-na, စာလုံး မဟုတ်ဘူးကိုး) လိုပဲ \"아니다\" (a-ni-da, မဟုတ်ဘူး) ရဲ့ ရှေ့မှာလည်း တူညီတဲ့ ပုံစံ \"가\" (ga) ကို သုံးပါတယ်။ နောက်ဆုံးဗျည်း ရှိရင် \"이\" (i)၊ မရှိရင် \"가\" (ga) လို့ တွဲပါတယ်။",
+     "say": "အခု ပြောကြည့်ပါ။ \"왕이 만들었어요\" (wang-i man-deul-eoss-eo-yo, ဘုရင်က ဖန်တီးခဲ့ပါတယ်)။"
     }
    },
    "ko_by": {
@@ -4480,6 +5096,14 @@
     "es": {
      "ex": "아니에요. 신하들이 반대했어요. \"신하들이\" (sin-ha-deul-i, los ministros) 의 \"이\" (i) 는 문장의 주인이 되는 낱말 뒤에 붙어요. 사람이 아닌 것에도 붙고, 앞에서 들은 \"글자가 아니구나\" (geul-ja-ga a-ni-gu-na, no es una letra, ya veo) 처럼 \"아니다\" (a-ni-da, no ser) 앞에서도 같은 모양 \"가\" (ga) 를 써요. 받침이 있으면 \"이\" (i), 없으면 \"가\" (ga) 를 붙여요.",
      "say": "이제 말해 보세요. \"왕이 만들었어요\" (wang-i man-deul-eoss-eo-yo, el rey las hizo)"
+    },
+    "zh": {
+     "ex": "아니에요. 신하들이 반대했어요. \"신하들이\" (sin-ha-deul-i, 大臣们) 의 \"이\" (i) 는 문장의 주인이 되는 낱말 뒤에 붙어요. 사람이 아닌 것에도 붙고, 앞에서 들은 \"글자가 아니구나\" (geul-ja-ga a-ni-gu-na, 原来不是文字) 처럼 \"아니다\" (a-ni-da, 不是) 앞에서도 같은 모양 \"가\" (ga) 를 써요. 받침이 있으면 \"이\" (i), 없으면 \"가\" (ga) 를 붙여요.",
+     "say": "이제 말해 보세요. \"왕이 만들었어요\" (wang-i man-deul-eoss-eo-yo, 国王造的)"
+    },
+    "my": {
+     "ex": "아니에요. 신하들이 반대했어요. \"신하들이\" (sin-ha-deul-i, မှူးမတ်တွေက) 의 \"이\" (i) 는 문장의 주인이 되는 낱말 뒤에 붙어요. 사람이 아닌 것에도 붙고, 앞에서 들은 \"글자가 아니구나\" (geul-ja-ga a-ni-gu-na, စာလုံး မဟုတ်ဘူးကိုး) 처럼 \"아니다\" (a-ni-da, မဟုတ်ဘူး) 앞에서도 같은 모양 \"가\" (ga) 를 써요. 받침이 있으면 \"이\" (i), 없으면 \"가\" (ga) 를 붙여요.",
+     "say": "이제 말해 보세요. \"왕이 만들었어요\" (wang-i man-deul-eoss-eo-yo, ဘုရင်က ဖန်တီးခဲ့ပါတယ်)"
     }
    },
    "audio": {
@@ -4531,6 +5155,14 @@
     "es": {
      "ex": null,
      "say": null
+    },
+    "zh": {
+     "ex": null,
+     "say": null
+    },
+    "my": {
+     "ex": null,
+     "say": null
     }
    },
    "sent": [
@@ -4558,7 +5190,11 @@
      "en": "No.",
      "en_s": null,
      "es": "No fue así.",
-     "es_s": null
+     "es_s": null,
+     "zh": "不是哦。",
+     "zh_s": null,
+     "my": "မဟုတ်ဘူးကွဲ့။",
+     "my_s": null
     },
     {
      "ko": "신하들이 반대했어요.",
@@ -4584,7 +5220,11 @@
      "en": "The king's officials were against it.",
      "en_s": null,
      "es": "Los ministros se opusieron.",
-     "es_s": null
+     "es_s": null,
+     "zh": "大臣们反对了呢。",
+     "zh_s": null,
+     "my": "မှူးမတ်တွေက ကန့်ကွက်ခဲ့ကြတယ်။",
+     "my_s": null
     },
     {
      "ko": "\"신하들이\"의 \"이\"는 문장의 주인이 되는 낱말 뒤에 붙어요.",
@@ -4610,7 +5250,11 @@
      "en": "The \"이\" in \"신하들이\" goes after the word that is the subject of the sentence.",
      "en_s": null,
      "es": "El \"이\" de \"신하들이\" va después de la palabra que es el sujeto de la oración.",
-     "es_s": null
+     "es_s": null,
+     "zh": "\"신하들이\" 里的 \"이\"，加在作主语的词后面。",
+     "zh_s": null,
+     "my": "\"신하들이\" ထဲက \"이\" ဆိုတာ ဝါကျရဲ့ ကတ္တား ဖြစ်တဲ့ စကားလုံးရဲ့ နောက်မှာ တွဲပါတယ်။",
+     "my_s": null
     },
     {
      "ko": "사람이 아닌 것에도 붙고, 앞에서 들은 \"글자가 아니구나\"처럼 \"아니다\" 앞에서도 같은 모양 \"가\"를 써요.",
@@ -4636,7 +5280,11 @@
      "en": "It also goes after things that are not people, and you also use the same form \"가\" before \"아니다\", like in the \"글자가 아니구나\" you heard before.",
      "en_s": null,
      "es": "También se pone con cosas que no son personas, y delante de \"아니다\" se usa la misma forma \"가\", como en \"글자가 아니구나\", que escuchamos antes.",
-     "es_s": null
+     "es_s": null,
+     "zh": "它也可以加在不是人的东西后面，而且像前面听到的 \"글자가 아니구나\" 那样，在 \"아니다\" 前面也用同样形式的 \"가\"。",
+     "zh_s": null,
+     "my": "လူ မဟုတ်တဲ့ အရာတွေမှာလည်း တွဲပြီး၊ အရင်က ကြားခဲ့တဲ့ \"글자가 아니구나\" လိုပဲ \"아니다\" ရဲ့ ရှေ့မှာလည်း တူညီတဲ့ ပုံစံ \"가\" ကို သုံးပါတယ်။",
+     "my_s": null
     },
     {
      "ko": "받침이 있으면 \"이\", 없으면 \"가\"를 붙여요.",
@@ -4662,7 +5310,11 @@
      "en": "If the word ends in a final consonant, add \"이\", and if not, add \"가\".",
      "en_s": null,
      "es": "Si hay consonante final, se pone \"이\", y si no, se pone \"가\".",
-     "es_s": null
+     "es_s": null,
+     "zh": "有收音就加 \"이\"，没有就加 \"가\"。",
+     "zh_s": null,
+     "my": "နောက်ဆုံးဗျည်း ရှိရင် \"이\"၊ မရှိရင် \"가\" လို့ တွဲပါတယ်။",
+     "my_s": null
     }
    ],
    "gloss": {
@@ -4679,7 +5331,9 @@
       "si": "",
       "mn": "",
       "en": "",
-      "es": ""
+      "es": "",
+      "zh": "",
+      "my": ""
      }
     },
     "신하들이": {
@@ -4695,7 +5349,9 @@
       "si": "ඇමතිවරු",
       "mn": "түшмэд",
       "en": "officials",
-      "es": "los ministros"
+      "es": "los ministros",
+      "zh": "大臣们",
+      "my": "မှူးမတ်တွေက"
      }
     },
     "이": {
@@ -4711,7 +5367,9 @@
       "si": "",
       "mn": "",
       "en": "",
-      "es": ""
+      "es": "",
+      "zh": "",
+      "my": ""
      }
     },
     "글자가 아니구나": {
@@ -4727,7 +5385,9 @@
       "si": "ඒක අකුරක් නෙවෙයි නේ",
       "mn": "үсэг биш юм байна",
       "en": "so it is not a letter",
-      "es": "no es una letra, ya veo"
+      "es": "no es una letra, ya veo",
+      "zh": "原来不是文字",
+      "my": "စာလုံး မဟုတ်ဘူးကိုး"
      }
     },
     "아니다": {
@@ -4743,7 +5403,9 @@
       "si": "නෙවෙයි වීම",
       "mn": "биш байх",
       "en": "to not be",
-      "es": "no ser"
+      "es": "no ser",
+      "zh": "不是",
+      "my": "မဟုတ်ဘူး"
      }
     }
    }
@@ -4763,7 +5425,9 @@
     "si": "ඇමතිවරුද? ඇයි?",
     "mn": "Түшмэд үү? Яагаад?",
     "en": "The officials? Why?",
-    "es": "¿Los ministros? ¿Por qué?"
+    "es": "¿Los ministros? ¿Por qué?",
+    "zh": "大臣们吗？为什么呀？",
+    "my": "မှူးမတ်တွေလား ခင်ဗျာ။ ဘာဖြစ်လို့လဲ ခင်ဗျာ။"
    },
    "pieces": [
     {
@@ -4780,7 +5444,9 @@
       "si": "ඇමතිවරුද",
       "mn": "түшмэд үү",
       "en": "the officials",
-      "es": "los ministros"
+      "es": "los ministros",
+      "zh": "大臣们",
+      "my": "မှူးမတ်တွေလား"
      }
     },
     {
@@ -4797,7 +5463,9 @@
       "si": "ඇයි",
       "mn": "яагаад",
       "en": "why",
-      "es": "por qué"
+      "es": "por qué",
+      "zh": "为什么",
+      "my": "ဘာဖြစ်လို့လဲ"
      }
     }
    ],
@@ -4814,7 +5482,9 @@
     "si": "වචනය + 요 / 이요",
     "mn": "үг + 요 / 이요",
     "en": "word + 요 / 이요",
-    "es": "palabra + 요 / 이요"
+    "es": "palabra + 요 / 이요",
+    "zh": "词 + 요 / 이요",
+    "my": "စကားလုံး + 요 / 이요"
    },
    "text": {
     "ko": {
@@ -4864,6 +5534,14 @@
     "es": {
      "ex": "¿Los ministros? ¿Por qué? Basta con añadir \"요\" (yo) a una sola palabra para que suene cortés. Si hay consonante final, también se dice \"이요\" (i-yo). Así son \"글자요\" (geul-ja-yo, letra) y \"세종대왕이요\" (se-jong-dae-wang-i-yo, el rey), que escuchamos antes. Si se sube el tono al final, es una pregunta para confirmar, y si se baja, es una respuesta corta.",
      "say": "Ahora dígalo usted. \"글자요? 왜요?\" (geul-ja-yo wae-yo, ¿una letra? ¿por qué?)."
+    },
+    "zh": {
+     "ex": "大臣们吗？为什么呀？ 在一个词后面只加上 \"요\" (yo)，也能成为礼貌的说法。有收音时也说 \"이요\" (i-yo)。前面听到的 \"글자요\" (geul-ja-yo, 文字) 和 \"세종대왕이요\" (se-jong-dae-wang-i-yo, 国王) 就是这样。句尾上扬就是重复对方的话来发问，句尾下降就是简短的回答。",
+     "say": "现在请你试着说一说。 \"글자요? 왜요?\" (geul-ja-yo wae-yo, 文字？为什么？)。"
+    },
+    "my": {
+     "ex": "မှူးမတ်တွေလား ခင်ဗျာ။ ဘာဖြစ်လို့လဲ ခင်ဗျာ။ စကားလုံး တစ်လုံးတည်းမှာ \"요\" (yo) ကိုပဲ တွဲရင်တောင် ယဉ်ကျေးတဲ့ စကား ဖြစ်သွားပါတယ်။ နောက်ဆုံးဗျည်း ရှိရင် \"이요\" (i-yo) လို့လည်း ပြောပါတယ်။ အရင်က ကြားခဲ့တဲ့ \"글자요\" (geul-ja-yo, စာလုံးပါ) နဲ့ \"세종대왕이요\" (se-jong-dae-wang-i-yo, ဘုရင်) တို့က ဒီလိုပါပဲ။ အဆုံးကို အသံမြှင့်ရင် ပြန်မေးတဲ့ စကား ဖြစ်ပြီး၊ အသံချရင် တိုတိုတုတ်တုတ် ဖြေတဲ့ စကားပါ။",
+     "say": "အခု ပြောကြည့်ပါ။ \"글자요? 왜요?\" (geul-ja-yo wae-yo, စာလုံးလား။ ဘာဖြစ်လို့လဲ။)။"
     }
    },
    "ko_by": {
@@ -4910,6 +5588,14 @@
     "es": {
      "ex": "신하들이요? 왜요? 낱말 하나에 \"요\" (yo) 만 붙여도 공손한 말이 돼요. 받침이 있으면 \"이요\" (i-yo) 라고도 해요. 앞에서 들은 \"글자요\" (geul-ja-yo, letra) 와 \"세종대왕이요\" (se-jong-dae-wang-i-yo, el rey) 가 그래요. 끝을 올리면 되묻는 말이고, 내리면 짧은 대답이에요.",
      "say": "이제 말해 보세요. \"글자요? 왜요?\" (geul-ja-yo wae-yo, ¿una letra? ¿por qué?)"
+    },
+    "zh": {
+     "ex": "신하들이요? 왜요? 낱말 하나에 \"요\" (yo) 만 붙여도 공손한 말이 돼요. 받침이 있으면 \"이요\" (i-yo) 라고도 해요. 앞에서 들은 \"글자요\" (geul-ja-yo, 文字) 와 \"세종대왕이요\" (se-jong-dae-wang-i-yo, 国王) 가 그래요. 끝을 올리면 되묻는 말이고, 내리면 짧은 대답이에요.",
+     "say": "이제 말해 보세요. \"글자요? 왜요?\" (geul-ja-yo wae-yo, 文字？为什么？)"
+    },
+    "my": {
+     "ex": "신하들이요? 왜요? 낱말 하나에 \"요\" (yo) 만 붙여도 공손한 말이 돼요. 받침이 있으면 \"이요\" (i-yo) 라고도 해요. 앞에서 들은 \"글자요\" (geul-ja-yo, စာလုံးပါ) 와 \"세종대왕이요\" (se-jong-dae-wang-i-yo, ဘုရင်) 가 그래요. 끝을 올리면 되묻는 말이고, 내리면 짧은 대답이에요.",
+     "say": "이제 말해 보세요. \"글자요? 왜요?\" (geul-ja-yo wae-yo, စာလုံးလား။ ဘာဖြစ်လို့လဲ။)"
     }
    },
    "audio": {
@@ -4961,6 +5647,14 @@
     "es": {
      "ex": null,
      "say": null
+    },
+    "zh": {
+     "ex": null,
+     "say": null
+    },
+    "my": {
+     "ex": null,
+     "say": null
     }
    },
    "sent": [
@@ -4988,7 +5682,11 @@
      "en": "The officials?",
      "en_s": null,
      "es": "¿Los ministros?",
-     "es_s": null
+     "es_s": null,
+     "zh": "大臣们吗？",
+     "zh_s": null,
+     "my": "မှူးမတ်တွေလား ခင်ဗျာ။",
+     "my_s": null
     },
     {
      "ko": "왜요?",
@@ -5014,7 +5712,11 @@
      "en": "Why?",
      "en_s": null,
      "es": "¿Por qué?",
-     "es_s": null
+     "es_s": null,
+     "zh": "为什么呀？",
+     "zh_s": null,
+     "my": "ဘာဖြစ်လို့လဲ ခင်ဗျာ။",
+     "my_s": null
     },
     {
      "ko": "낱말 하나에 \"요\"만 붙여도 공손한 말이 돼요.",
@@ -5040,7 +5742,11 @@
      "en": "Just adding \"요\" to a single word makes it polite.",
      "en_s": null,
      "es": "Basta con añadir \"요\" a una sola palabra para que suene cortés.",
-     "es_s": null
+     "es_s": null,
+     "zh": "在一个词后面只加上 \"요\"，也能成为礼貌的说法。",
+     "zh_s": null,
+     "my": "စကားလုံး တစ်လုံးတည်းမှာ \"요\" ကိုပဲ တွဲရင်တောင် ယဉ်ကျေးတဲ့ စကား ဖြစ်သွားပါတယ်။",
+     "my_s": null
     },
     {
      "ko": "받침이 있으면 \"이요\"라고도 해요.",
@@ -5066,7 +5772,11 @@
      "en": "If the word ends in a final consonant, you can also say \"이요\".",
      "en_s": null,
      "es": "Si hay consonante final, también se dice \"이요\".",
-     "es_s": null
+     "es_s": null,
+     "zh": "有收音时也说 \"이요\"。",
+     "zh_s": null,
+     "my": "နောက်ဆုံးဗျည်း ရှိရင် \"이요\" လို့လည်း ပြောပါတယ်။",
+     "my_s": null
     },
     {
      "ko": "앞에서 들은 \"글자요\"와 \"세종대왕이요\"가 그래요.",
@@ -5092,7 +5802,11 @@
      "en": "The \"글자요\" and \"세종대왕이요\" you heard before are like this.",
      "en_s": null,
      "es": "Así son \"글자요\" y \"세종대왕이요\", que escuchamos antes.",
-     "es_s": null
+     "es_s": null,
+     "zh": "前面听到的 \"글자요\" 和 \"세종대왕이요\" 就是这样。",
+     "zh_s": null,
+     "my": "အရင်က ကြားခဲ့တဲ့ \"글자요\" နဲ့ \"세종대왕이요\" တို့က ဒီလိုပါပဲ။",
+     "my_s": null
     },
     {
      "ko": "끝을 올리면 되묻는 말이고, 내리면 짧은 대답이에요.",
@@ -5118,7 +5832,11 @@
      "en": "If your voice goes up at the end, you are asking back, and if it goes down, it is a short answer.",
      "en_s": null,
      "es": "Si se sube el tono al final, es una pregunta para confirmar, y si se baja, es una respuesta corta.",
-     "es_s": null
+     "es_s": null,
+     "zh": "句尾上扬就是重复对方的话来发问，句尾下降就是简短的回答。",
+     "zh_s": null,
+     "my": "အဆုံးကို အသံမြှင့်ရင် ပြန်မေးတဲ့ စကား ဖြစ်ပြီး၊ အသံချရင် တိုတိုတုတ်တုတ် ဖြေတဲ့ စကားပါ။",
+     "my_s": null
     }
    ],
    "gloss": {
@@ -5135,7 +5853,9 @@
       "si": "අකුරක්",
       "mn": "үсэг",
       "en": "letters",
-      "es": "letra"
+      "es": "letra",
+      "zh": "文字",
+      "my": "စာလုံးပါ"
      }
     },
     "세종대왕이요": {
@@ -5151,7 +5871,9 @@
       "si": "රජතුමා",
       "mn": "хаан",
       "en": "king",
-      "es": "el rey"
+      "es": "el rey",
+      "zh": "国王",
+      "my": "ဘုရင်"
      }
     },
     "요": {
@@ -5167,7 +5889,9 @@
       "si": "",
       "mn": "",
       "en": "",
-      "es": ""
+      "es": "",
+      "zh": "",
+      "my": ""
      }
     },
     "이요": {
@@ -5183,7 +5907,9 @@
       "si": "",
       "mn": "",
       "en": "",
-      "es": ""
+      "es": "",
+      "zh": "",
+      "my": ""
      }
     }
    }
@@ -5203,7 +5929,9 @@
     "si": "මොකද ඒ කාලේ බලය තිබුණේ අකුරු දන්න අයට විතරයි.",
     "mn": "Учир нь тэр үед зөвхөн үсэг мэддэг хүмүүс л эрх мэдэлтэй байсан юм.",
     "en": "Because back then, only people who knew letters had power.",
-    "es": "Es que en esa época solo tenían poder los que sabían leer y escribir."
+    "es": "Es que en esa época solo tenían poder los que sabían leer y escribir.",
+    "zh": "因为那时候，只有识字的人才有权力呀。",
+    "my": "အဲဒီတုန်းက စာလုံး သိတဲ့သူတွေမှာပဲ အာဏာ ရှိခဲ့လို့လေ။"
    },
    "pieces": [
     {
@@ -5220,7 +5948,9 @@
       "si": "ඒ කාලේ",
       "mn": "тэр үед",
       "en": "back then",
-      "es": "en esa época"
+      "es": "en esa época",
+      "zh": "那时候",
+      "my": "အဲဒီတုန်းက"
      }
     },
     {
@@ -5237,7 +5967,9 @@
       "si": "අකුරු",
       "mn": "үсгийг",
       "en": "letters",
-      "es": "las letras"
+      "es": "las letras",
+      "zh": "文字",
+      "my": "စာလုံးကို"
      }
     },
     {
@@ -5254,7 +5986,9 @@
       "si": "දන්න",
       "mn": "мэддэг",
       "en": "who knew",
-      "es": "que conoce"
+      "es": "que conoce",
+      "zh": "认识的",
+      "my": "သိတဲ့"
      }
     },
     {
@@ -5271,7 +6005,9 @@
       "si": "අයට විතරයි",
       "mn": "хүмүүс л",
       "en": "only people",
-      "es": "solo la gente"
+      "es": "solo la gente",
+      "zh": "只有人",
+      "my": "လူတွေပဲ"
      }
     },
     {
@@ -5288,7 +6024,9 @@
       "si": "බලය",
       "mn": "эрх мэдэл",
       "en": "power",
-      "es": "poder"
+      "es": "poder",
+      "zh": "权力",
+      "my": "အာဏာ"
      }
     },
     {
@@ -5305,7 +6043,9 @@
       "si": "තිබුණේ",
       "mn": "байсан юм",
       "en": "had",
-      "es": "tenía"
+      "es": "tenía",
+      "zh": "因为有",
+      "my": "ရှိခဲ့လို့ပါ"
      }
     }
    ],
@@ -5322,7 +6062,9 @@
     "si": "වචනය + 만",
     "mn": "үг + 만",
     "en": "word + 만",
-    "es": "palabra + 만"
+    "es": "palabra + 만",
+    "zh": "词 + 만",
+    "my": "စကားလုံး + 만"
    },
    "text": {
     "ko": {
@@ -5372,6 +6114,14 @@
     "es": {
      "ex": "Es que en esa época solo tenían poder los que sabían leer y escribir. El \"만\" (man) después de una palabra significa solo eso y nada más. Esta partícula significa lo mismo que \"solo\" en español, pero en coreano no va delante de la palabra, sino detrás. La terminación \"거든요\" (geo-deun-yo) se usa para añadir el motivo de algo.",
      "say": "Ahora dígalo usted. \"왕만 힘이 있었어요\" (wang-man him-i iss-eoss-eo-yo, solo el rey tenía poder)."
+    },
+    "zh": {
+     "ex": "因为那时候，只有识字的人才有权力呀。 词后面的 \"만\" (man) 表示只有那个。意思和中文的\"只\"一样，但中文把\"只\"放在词的前面，韩语把这个助词放在词的后面。词尾 \"거든요\" (geo-deun-yo) 用在补充说明理由的时候。",
+     "say": "现在请你试着说一说。 \"왕만 힘이 있었어요\" (wang-man him-i iss-eoss-eo-yo, 只有国王有权力)。"
+    },
+    "my": {
+     "ex": "အဲဒီတုန်းက စာလုံး သိတဲ့သူတွေမှာပဲ အာဏာ ရှိခဲ့လို့လေ။ စကားလုံးနောက်က \"만\" (man) ဆိုတာ အဲဒါ တစ်ခုတည်းပဲ ဆိုတဲ့ အဓိပ္ပာယ်ပါ။ ဒီပစ္စည်းဟာ မြန်မာ \"ပဲ\" လိုမျိုး စကားလုံးရဲ့ နောက်မှာ တွဲပါတယ်။ \"거든요\" (geo-deun-yo) ဆိုတဲ့ စကားအဆုံးသတ်ကို အကြောင်းရင်းကို ထပ်ဖြည့်ပြီး ပြောပြတဲ့အခါ သုံးပါတယ်။",
+     "say": "အခု ပြောကြည့်ပါ။ \"왕만 힘이 있었어요\" (wang-man him-i iss-eoss-eo-yo, ဘုရင်မှာပဲ အာဏာ ရှိခဲ့ပါတယ်)။"
     }
    },
    "ko_by": {
@@ -5483,6 +6233,22 @@
      "sent": {
       "2": "뜻은 스페인어의 \"solo\"와 같지만, 한국어는 앞이 아니라 뒤에 붙여요."
      }
+    },
+    "zh": {
+     "ex": "그때는 글자를 아는 사람만 힘이 있었거든요. 낱말 뒤의 \"만\" (man) 은 오직 그것뿐이라는 뜻이에요. 뜻은 중국어의 \"只\"와 같지만, 중국어는 \"只\"를 낱말 앞에 두고 한국어는 낱말 뒤에 붙여요. 말끝 \"거든요\" (geo-deun-yo) 는 까닭을 덧붙여 알려 줄 때 써요.",
+     "say": "이제 말해 보세요. \"왕만 힘이 있었어요\" (wang-man him-i iss-eoss-eo-yo, 只有国王有权力)",
+     "slot": "뜻은 중국어의 \"只\"와 같지만, 중국어는 \"只\"를 낱말 앞에 두고 한국어는 낱말 뒤에 붙여요.",
+     "sent": {
+      "2": "뜻은 중국어의 \"只\"와 같지만, 중국어는 \"只\"를 낱말 앞에 두고 한국어는 낱말 뒤에 붙여요."
+     }
+    },
+    "my": {
+     "ex": "그때는 글자를 아는 사람만 힘이 있었거든요. 낱말 뒤의 \"만\" (man) 은 오직 그것뿐이라는 뜻이에요. 미얀마어의 \"ပဲ\"처럼 낱말 뒤에 붙어요. 말끝 \"거든요\" (geo-deun-yo) 는 까닭을 덧붙여 알려 줄 때 써요.",
+     "say": "이제 말해 보세요. \"왕만 힘이 있었어요\" (wang-man him-i iss-eoss-eo-yo, ဘုရင်မှာပဲ အာဏာ ရှိခဲ့ပါတယ်)",
+     "slot": "미얀마어의 \"ပဲ\"처럼 낱말 뒤에 붙어요.",
+     "sent": {
+      "2": "미얀마어의 \"ပဲ\"처럼 낱말 뒤에 붙어요."
+     }
     }
    },
    "audio": {
@@ -5534,6 +6300,14 @@
     "es": {
      "ex": null,
      "say": null
+    },
+    "zh": {
+     "ex": null,
+     "say": null
+    },
+    "my": {
+     "ex": null,
+     "say": null
     }
    },
    "sent": [
@@ -5561,7 +6335,11 @@
      "en": "Because back then, only people who knew letters had power.",
      "en_s": null,
      "es": "Es que en esa época solo tenían poder los que sabían leer y escribir.",
-     "es_s": null
+     "es_s": null,
+     "zh": "因为那时候，只有识字的人才有权力呀。",
+     "zh_s": null,
+     "my": "အဲဒီတုန်းက စာလုံး သိတဲ့သူတွေမှာပဲ အာဏာ ရှိခဲ့လို့လေ။",
+     "my_s": null
     },
     {
      "ko": "낱말 뒤의 \"만\"은 오직 그것뿐이라는 뜻이에요.",
@@ -5587,7 +6365,11 @@
      "en": "\"만\" after a word means only that thing and nothing else.",
      "en_s": null,
      "es": "El \"만\" después de una palabra significa solo eso y nada más.",
-     "es_s": null
+     "es_s": null,
+     "zh": "词后面的 \"만\" 表示只有那个。",
+     "zh_s": null,
+     "my": "စကားလုံးနောက်က \"만\" ဆိုတာ အဲဒါ တစ်ခုတည်းပဲ ဆိုတဲ့ အဓိပ္ပာယ်ပါ။",
+     "my_s": null
     },
     {
      "ko": "이 표시도 낱말 뒤에 붙여요.",
@@ -5613,7 +6395,11 @@
      "en": "It means the same as \"only\" in English, but English puts \"only\" before the word, and Korean puts this marker after the word.",
      "en_s": null,
      "es": "Esta partícula significa lo mismo que \"solo\" en español, pero en coreano no va delante de la palabra, sino detrás.",
-     "es_s": null
+     "es_s": null,
+     "zh": "意思和中文的\"只\"一样，但中文把\"只\"放在词的前面，韩语把这个助词放在词的后面。",
+     "zh_s": null,
+     "my": "ဒီပစ္စည်းဟာ မြန်မာ \"ပဲ\" လိုမျိုး စကားလုံးရဲ့ နောက်မှာ တွဲပါတယ်။",
+     "my_s": null
     },
     {
      "ko": "말끝 \"거든요\"는 까닭을 덧붙여 알려 줄 때 써요.",
@@ -5639,7 +6425,11 @@
      "en": "The ending \"거든요\" is used when you add a reason.",
      "en_s": null,
      "es": "La terminación \"거든요\" se usa para añadir el motivo de algo.",
-     "es_s": null
+     "es_s": null,
+     "zh": "词尾 \"거든요\" 用在补充说明理由的时候。",
+     "zh_s": null,
+     "my": "\"거든요\" ဆိုတဲ့ စကားအဆုံးသတ်ကို အကြောင်းရင်းကို ထပ်ဖြည့်ပြီး ပြောပြတဲ့အခါ သုံးပါတယ်။",
+     "my_s": null
     }
    ],
    "gloss": {
@@ -5656,7 +6446,9 @@
       "si": "",
       "mn": "",
       "en": "",
-      "es": ""
+      "es": "",
+      "zh": "",
+      "my": ""
      }
     },
     "만": {
@@ -5672,7 +6464,9 @@
       "si": "",
       "mn": "",
       "en": "",
-      "es": ""
+      "es": "",
+      "zh": "",
+      "my": ""
      }
     }
    }
@@ -5692,7 +6486,9 @@
     "si": "එහෙනම් අපි? අපිටත් කියවන්න පුළුවන්ද?",
     "mn": "Тэгвэл бид? Бид ч бас уншиж чадах уу?",
     "en": "Then what about us? Can we read too?",
-    "es": "¿Y nosotros? ¿Nosotros también podemos leer?"
+    "es": "¿Y nosotros? ¿Nosotros también podemos leer?",
+    "zh": "那我们呢？我们也能读吗？",
+    "my": "ဒါဆို သမီးတို့ရောရှင့်။ သမီးတို့လည်း ဖတ်နိုင်မလားဟင်။"
    },
    "pieces": [
     {
@@ -5709,7 +6505,9 @@
       "si": "එහෙනම්",
       "mn": "тэгвэл",
       "en": "then",
-      "es": "entonces"
+      "es": "entonces",
+      "zh": "那么",
+      "my": "ဒါဆို"
      }
     },
     {
@@ -5726,7 +6524,9 @@
       "si": "අපි",
       "mn": "бид",
       "en": "what about us",
-      "es": "y nosotros"
+      "es": "y nosotros",
+      "zh": "我们呢",
+      "my": "ကျွန်ုပ်တို့ကရော"
      }
     },
     {
@@ -5743,7 +6543,9 @@
       "si": "අපිටත්",
       "mn": "бид ч",
       "en": "we too",
-      "es": "nosotros también"
+      "es": "nosotros también",
+      "zh": "我们也",
+      "my": "ကျွန်ုပ်တို့လည်း"
      }
     },
     {
@@ -5760,7 +6562,9 @@
       "si": "කියවන්න",
       "mn": "уншиж",
       "en": "read",
-      "es": "poder leer"
+      "es": "poder leer",
+      "zh": "读",
+      "my": "ဖတ်နိုင်"
      }
     },
     {
@@ -5777,7 +6581,9 @@
       "si": "පුළුවන්",
       "mn": "чадна",
       "en": "can",
-      "es": "es posible"
+      "es": "es posible",
+      "zh": "能",
+      "my": "မလား"
      }
     }
    ],
@@ -5794,7 +6600,9 @@
     "si": "වචනය + 도 · 읽 + 을 수 있어요",
     "mn": "үг + 도 · 읽 + 을 수 있어요",
     "en": "word + 도 · 읽 + 을 수 있어요",
-    "es": "palabra + 도 · 읽 + 을 수 있어요"
+    "es": "palabra + 도 · 읽 + 을 수 있어요",
+    "zh": "词 + 도 · 읽 + 을 수 있어요",
+    "my": "စကားလုံး + 도 · 읽 + 을 수 있어요"
    },
    "text": {
     "ko": {
@@ -5844,6 +6652,14 @@
     "es": {
      "ex": "¿Y nosotros? ¿Nosotros también podemos leer? El \"도\" (do) después de una palabra significa que eso también es así. Esta partícula también va después de la palabra. \"읽을 수 있어요\" (ilg-eul su iss-eo-yo, se puede leer) significa que es posible leer. Por ahora, aprenda \"읽을 수 있어요\" (ilg-eul su iss-eo-yo) como un todo.",
      "say": "Ahora dígalo usted. \"저도 읽을 수 있어요\" (jeo-do ilg-eul su iss-eo-yo, yo también puedo leer)."
+    },
+    "zh": {
+     "ex": "那我们呢？我们也能读吗？ 词后面的 \"도\" (do) 表示那个也一样。这个助词也放在词的后面。\"읽을 수 있어요\" (ilg-eul su iss-eo-yo, 能读) 表示能够读。现在请先把 \"읽을 수 있어요\" (ilg-eul su iss-eo-yo) 整个记下来。",
+     "say": "现在请你试着说一说。 \"저도 읽을 수 있어요\" (jeo-do ilg-eul su iss-eo-yo, 我也能读)。"
+    },
+    "my": {
+     "ex": "ဒါဆို သမီးတို့ရောရှင့်။ သမီးတို့လည်း ဖတ်နိုင်မလားဟင်။ စကားလုံးနောက်က \"도\" (do) ဆိုတာ အဲဒါလည်း အဲဒီလိုပဲ ဆိုတဲ့ အဓိပ္ပာယ်ပါ။ ဒီပစ္စည်းဟာ မြန်မာ \"လည်း\" လိုမျိုး စကားလုံးရဲ့ နောက်မှာ တွဲပါတယ်။ \"읽을 수 있어요\" (ilg-eul su iss-eo-yo, ဖတ်နိုင်ပါတယ်) ဆိုတာ ဖတ်လို့ ရတယ် ဆိုတဲ့ အဓိပ္ပာယ်ပါ။ အခုတော့ \"읽을 수 있어요\" (ilg-eul su iss-eo-yo) ကို တစ်ခုလုံး အလွတ်ကျက်ထားပါ။",
+     "say": "အခု ပြောကြည့်ပါ။ \"저도 읽을 수 있어요\" (jeo-do ilg-eul su iss-eo-yo, ကျွန်ုပ်လည်း ဖတ်နိုင်ပါတယ်)။"
     }
    },
    "ko_by": {
@@ -5949,6 +6765,18 @@
     "es": {
      "ex": "그럼 우리는요? 우리도 읽을 수 있어요? 낱말 뒤의 \"도\" (do) 는 그것도 역시 그렇다는 뜻이에요. 이 표시도 낱말 뒤에 붙여요. \"읽을 수 있어요\" (ilg-eul su iss-eo-yo, se puede leer) 는 읽는 것이 가능하다는 뜻이에요. 지금은 \"읽을 수 있어요\" (ilg-eul su iss-eo-yo) 를 통째로 익혀 두세요.",
      "say": "이제 말해 보세요. \"저도 읽을 수 있어요\" (jeo-do ilg-eul su iss-eo-yo, yo también puedo leer)"
+    },
+    "zh": {
+     "ex": "그럼 우리는요? 우리도 읽을 수 있어요? 낱말 뒤의 \"도\" (do) 는 그것도 역시 그렇다는 뜻이에요. 이 표시도 낱말 뒤에 붙여요. \"읽을 수 있어요\" (ilg-eul su iss-eo-yo, 能读) 는 읽는 것이 가능하다는 뜻이에요. 지금은 \"읽을 수 있어요\" (ilg-eul su iss-eo-yo) 를 통째로 익혀 두세요.",
+     "say": "이제 말해 보세요. \"저도 읽을 수 있어요\" (jeo-do ilg-eul su iss-eo-yo, 我也能读)"
+    },
+    "my": {
+     "ex": "그럼 우리는요? 우리도 읽을 수 있어요? 낱말 뒤의 \"도\" (do) 는 그것도 역시 그렇다는 뜻이에요. 미얀마어의 \"လည်း\"처럼 낱말 뒤에 붙어요. \"읽을 수 있어요\" (ilg-eul su iss-eo-yo, ဖတ်နိုင်ပါတယ်) 는 읽는 것이 가능하다는 뜻이에요. 지금은 \"읽을 수 있어요\" (ilg-eul su iss-eo-yo) 를 통째로 익혀 두세요.",
+     "say": "이제 말해 보세요. \"저도 읽을 수 있어요\" (jeo-do ilg-eul su iss-eo-yo, ကျွန်ုပ်လည်း ဖတ်နိုင်ပါတယ်)",
+     "slot": "미얀마어의 \"လည်း\"처럼 낱말 뒤에 붙어요.",
+     "sent": {
+      "3": "미얀마어의 \"လည်း\"처럼 낱말 뒤에 붙어요."
+     }
     }
    },
    "audio": {
@@ -6000,6 +6828,14 @@
     "es": {
      "ex": null,
      "say": null
+    },
+    "zh": {
+     "ex": null,
+     "say": null
+    },
+    "my": {
+     "ex": null,
+     "say": null
     }
    },
    "sent": [
@@ -6027,7 +6863,11 @@
      "en": "Then what about us?",
      "en_s": null,
      "es": "¿Y nosotros?",
-     "es_s": null
+     "es_s": null,
+     "zh": "那我们呢？",
+     "zh_s": null,
+     "my": "ဒါဆို သမီးတို့ရောရှင့်။",
+     "my_s": null
     },
     {
      "ko": "우리도 읽을 수 있어요?",
@@ -6053,7 +6893,11 @@
      "en": "Can we read too?",
      "en_s": null,
      "es": "¿Nosotros también podemos leer?",
-     "es_s": null
+     "es_s": null,
+     "zh": "我们也能读吗？",
+     "zh_s": null,
+     "my": "သမီးတို့လည်း ဖတ်နိုင်မလားဟင်။",
+     "my_s": null
     },
     {
      "ko": "낱말 뒤의 \"도\"는 그것도 역시 그렇다는 뜻이에요.",
@@ -6079,7 +6923,11 @@
      "en": "\"도\" after a word means that the same is true for that thing too.",
      "en_s": null,
      "es": "El \"도\" después de una palabra significa que eso también es así.",
-     "es_s": null
+     "es_s": null,
+     "zh": "词后面的 \"도\" 表示那个也一样。",
+     "zh_s": null,
+     "my": "စကားလုံးနောက်က \"도\" ဆိုတာ အဲဒါလည်း အဲဒီလိုပဲ ဆိုတဲ့ အဓိပ္ပာယ်ပါ။",
+     "my_s": null
     },
     {
      "ko": "이 표시도 낱말 뒤에 붙여요.",
@@ -6105,7 +6953,11 @@
      "en": "This marker also goes after the word.",
      "en_s": null,
      "es": "Esta partícula también va después de la palabra.",
-     "es_s": null
+     "es_s": null,
+     "zh": "这个助词也放在词的后面。",
+     "zh_s": null,
+     "my": "ဒီပစ္စည်းဟာ မြန်မာ \"လည်း\" လိုမျိုး စကားလုံးရဲ့ နောက်မှာ တွဲပါတယ်။",
+     "my_s": null
     },
     {
      "ko": "\"읽을 수 있어요\"는 읽는 것이 가능하다는 뜻이에요.",
@@ -6131,7 +6983,11 @@
      "en": "\"읽을 수 있어요\" means that you are able to read.",
      "en_s": null,
      "es": "\"읽을 수 있어요\" significa que es posible leer.",
-     "es_s": null
+     "es_s": null,
+     "zh": "\"읽을 수 있어요\" 表示能够读。",
+     "zh_s": null,
+     "my": "\"읽을 수 있어요\" ဆိုတာ ဖတ်လို့ ရတယ် ဆိုတဲ့ အဓိပ္ပာယ်ပါ။",
+     "my_s": null
     },
     {
      "ko": "지금은 \"읽을 수 있어요\"를 통째로 익혀 두세요.",
@@ -6157,7 +7013,11 @@
      "en": "For now, just learn \"읽을 수 있어요\" as one whole phrase.",
      "en_s": null,
      "es": "Por ahora, aprenda \"읽을 수 있어요\" como un todo.",
-     "es_s": null
+     "es_s": null,
+     "zh": "现在请先把 \"읽을 수 있어요\" 整个记下来。",
+     "zh_s": null,
+     "my": "အခုတော့ \"읽을 수 있어요\" ကို တစ်ခုလုံး အလွတ်ကျက်ထားပါ။",
+     "my_s": null
     }
    ],
    "gloss": {
@@ -6174,7 +7034,9 @@
       "si": "",
       "mn": "",
       "en": "",
-      "es": ""
+      "es": "",
+      "zh": "",
+      "my": ""
      }
     },
     "읽을 수 있어요": {
@@ -6190,7 +7052,9 @@
       "si": "කියවන්න පුළුවන්",
       "mn": "уншиж чадна",
       "en": "can read",
-      "es": "se puede leer"
+      "es": "se puede leer",
+      "zh": "能读",
+      "my": "ဖတ်နိုင်ပါတယ်"
      }
     }
    }
@@ -6210,7 +7074,9 @@
     "si": "මෙන්න, මෙහෙ බලන්න. මේ තමයි ඒ අකුර. මේක \"아\".",
     "mn": "За, энд харна уу. Энэ бол тэр үсэг. Энэ бол \"아\" үсэг юм.",
     "en": "Now, please look here. This is that letter. It is \"아\".",
-    "es": "A ver, mire aquí. Esta es esa letra. Es \"아\"."
+    "es": "A ver, mire aquí. Esta es esa letra. Es \"아\".",
+    "zh": "来，请看这里。这就是那个文字。它念作 \"아\"。",
+    "my": "ကဲ၊ ဒီမှာ ကြည့်ပါ။ ဒါက အဲဒီ စာလုံးပါ။ \"아\" ပါ။"
    },
    "pieces": [
     {
@@ -6227,7 +7093,9 @@
       "si": "මෙන්න",
       "mn": "за",
       "en": "now",
-      "es": "a ver"
+      "es": "a ver",
+      "zh": "来",
+      "my": "ကဲ"
      }
     },
     {
@@ -6244,7 +7112,9 @@
       "si": "මෙහෙ",
       "mn": "энд",
       "en": "here",
-      "es": "aquí"
+      "es": "aquí",
+      "zh": "这里",
+      "my": "ဒီမှာ"
      }
     },
     {
@@ -6261,7 +7131,9 @@
       "si": "බලන්න",
       "mn": "харна уу",
       "en": "please look",
-      "es": "mire"
+      "es": "mire",
+      "zh": "请看",
+      "my": "ကြည့်ပါ"
      }
     },
     {
@@ -6278,7 +7150,9 @@
       "si": "මේ තමයි",
       "mn": "энэ",
       "en": "this",
-      "es": "esto"
+      "es": "esto",
+      "zh": "这个",
+      "my": "ဒါက"
      }
     },
     {
@@ -6295,7 +7169,9 @@
       "si": "ඒ",
       "mn": "тэр",
       "en": "that",
-      "es": "esa"
+      "es": "esa",
+      "zh": "那个",
+      "my": "အဲဒီ"
      }
     },
     {
@@ -6312,7 +7188,9 @@
       "si": "අකුර",
       "mn": "үсэг",
       "en": "is the letter",
-      "es": "es la letra"
+      "es": "es la letra",
+      "zh": "是文字",
+      "my": "စာလုံးပါ"
      }
     },
     {
@@ -6329,7 +7207,9 @@
       "si": "\"아\" අකුර",
       "mn": "\"아\" үсэг",
       "en": "the letter \"아\"",
-      "es": "la letra \"아\""
+      "es": "la letra \"아\"",
+      "zh": "\"아\" 这个字",
+      "my": "\"아\" စာလုံး"
      }
     },
     {
@@ -6346,7 +7226,9 @@
       "si": "",
       "mn": "юм",
       "en": "is",
-      "es": "es"
+      "es": "es",
+      "zh": "是",
+      "my": "ပါ"
      }
     }
    ],
@@ -6363,7 +7245,9 @@
     "si": "ක්‍රියා පදය + 세요 / 으세요",
     "mn": "үйл үг + 세요 / 으세요",
     "en": "verb + 세요 / 으세요",
-    "es": "verbo + 세요 / 으세요"
+    "es": "verbo + 세요 / 으세요",
+    "zh": "动词 + 세요 / 으세요",
+    "my": "ကြိယာ + 세요 / 으세요"
    },
    "text": {
     "ko": {
@@ -6413,6 +7297,14 @@
     "es": {
      "ex": "A ver, mire aquí. Esta es esa letra. Es \"아\" (a). Si se añade \"세요\" (se-yo) a un verbo, se forma una invitación cortés. Por ejemplo, \"보세요\" (bo-se-yo, mire). Si hay consonante final, normalmente se pone \"으세요\" (eu-se-yo), como en \"읽으세요\" (ilg-eu-se-yo, lea), pero si la consonante final es \"리을\" (ri-eul, nombre de una consonante coreana), esta se cae y solo se pone \"세요\" (se-yo), como en \"만드세요\" (man-deu-se-yo, haga). Se añade así a muchos verbos para invitar a hacer algo con cortesía.",
      "say": "Ahora dígalo usted. \"여기 보세요\" (yeo-gi bo-se-yo, mire aquí)."
+    },
+    "zh": {
+     "ex": "来，请看这里。这就是那个文字。它念作 \"아\" (a)。 在动词后面加上 \"세요\" (se-yo)，就成了礼貌地请别人做某事的说法。比如 \"보세요\" (bo-se-yo, 请看)。有收音时通常像 \"읽으세요\" (ilg-eu-se-yo, 请读) 那样加 \"으세요\" (eu-se-yo)，但如果收音是 \"리을\" (ri-eul, 一个韩语辅音字母的名称)，\"리을\" (ri-eul) 会脱落，只加 \"세요\" (se-yo)，说成 \"만드세요\" (man-deu-se-yo, 请造)。意思和中文的\"请\"差不多，但中文把\"请\"放在动词前面，韩语则把这个词尾加在动词后面。",
+     "say": "现在请你试着说一说。 \"여기 보세요\" (yeo-gi bo-se-yo, 请看这里)。"
+    },
+    "my": {
+     "ex": "ကဲ၊ ဒီမှာ ကြည့်ပါ။ ဒါက အဲဒီ စာလုံးပါ။ \"아\" (a, ကိုရီးယား စာလုံး) ပါ။ ကြိယာမှာ \"세요\" (se-yo) ကို တွဲရင် ယဉ်ယဉ်ကျေးကျေး တိုက်တွန်းတဲ့ စကား ဖြစ်သွားပါတယ်။ \"보세요\" (bo-se-yo, ကြည့်ပါ) လိုပါပဲ။ နောက်ဆုံးဗျည်း ရှိရင် များသောအားဖြင့် \"읽으세요\" (ilg-eu-se-yo, ဖတ်ပါ) လို \"으세요\" (eu-se-yo) ကို တွဲပေမယ့်၊ နောက်ဆုံးဗျည်းက \"리을\" (ri-eul, ကိုရီးယား ဗျည်းတစ်လုံးရဲ့ နာမည်) ဖြစ်ရင် \"리을\" (ri-eul) ပျောက်သွားပြီး \"세요\" (se-yo) ကိုပဲ တွဲလို့ \"만드세요\" (man-deu-se-yo, ဖန်တီးပါ) လို့ ပြောပါတယ်။ မြန်မာ \"ကြည့်ပါ\" ရဲ့ အဆုံးလိုမျိုး၊ ကြိယာ အများအပြားရဲ့ နောက်မှာ တွဲပြီး ယဉ်ယဉ်ကျေးကျေး တိုက်တွန်းပါတယ်။",
+     "say": "အခု ပြောကြည့်ပါ။ \"여기 보세요\" (yeo-gi bo-se-yo, ဒီမှာ ကြည့်ပါ)။"
     }
    },
    "ko_by": {
@@ -6517,6 +7409,22 @@
     "es": {
      "ex": "자, 여기 보세요. 이게 그 글자예요. \"아\" (a) 예요. 움직임을 나타내는 말에 \"세요\" (se-yo) 를 붙이면 공손하게 권하는 말이 돼요. \"보세요\" (bo-se-yo, mire) 처럼요. 받침이 있으면 보통 \"읽으세요\" (ilg-eu-se-yo, lea) 처럼 \"으세요\" (eu-se-yo) 를 붙이지만, 리을 받침은 리을이 빠지고 \"세요\" (se-yo) 만 붙여서 \"만드세요\" (man-deu-se-yo, haga) 처럼 말해요. 많은 말에 이렇게 붙여서 공손하게 권해요.",
      "say": "이제 말해 보세요. \"여기 보세요\" (yeo-gi bo-se-yo, mire aquí)"
+    },
+    "zh": {
+     "ex": "자, 여기 보세요. 이게 그 글자예요. \"아\" (a) 예요. 움직임을 나타내는 말에 \"세요\" (se-yo) 를 붙이면 공손하게 권하는 말이 돼요. \"보세요\" (bo-se-yo, 请看) 처럼요. 받침이 있으면 보통 \"읽으세요\" (ilg-eu-se-yo, 请读) 처럼 \"으세요\" (eu-se-yo) 를 붙이지만, 리을 받침은 리을이 빠지고 \"세요\" (se-yo) 만 붙여서 \"만드세요\" (man-deu-se-yo, 请造) 처럼 말해요. 뜻은 중국어의 \"请\"과 비슷하지만, 중국어는 \"请\"을 움직임 말 앞에 두고 한국어는 움직임 말 뒤에 붙여요.",
+     "say": "이제 말해 보세요. \"여기 보세요\" (yeo-gi bo-se-yo, 请看这里)",
+     "slot": "뜻은 중국어의 \"请\"과 비슷하지만, 중국어는 \"请\"을 움직임 말 앞에 두고 한국어는 움직임 말 뒤에 붙여요.",
+     "sent": {
+      "6": "뜻은 중국어의 \"请\"과 비슷하지만, 중국어는 \"请\"을 움직임 말 앞에 두고 한국어는 움직임 말 뒤에 붙여요."
+     }
+    },
+    "my": {
+     "ex": "자, 여기 보세요. 이게 그 글자예요. \"아\" (a, ကိုရီးယား စာလုံး) 예요. 움직임을 나타내는 말에 \"세요\" (se-yo) 를 붙이면 공손하게 권하는 말이 돼요. \"보세요\" (bo-se-yo, ကြည့်ပါ) 처럼요. 받침이 있으면 보통 \"읽으세요\" (ilg-eu-se-yo, ဖတ်ပါ) 처럼 \"으세요\" (eu-se-yo) 를 붙이지만, 리을 받침은 리을이 빠지고 \"세요\" (se-yo) 만 붙여서 \"만드세요\" (man-deu-se-yo, ဖန်တီးပါ) 처럼 말해요. 미얀마어 \"ကြည့်ပါ\"의 끝처럼, 많은 움직임 말 뒤에 붙여서 공손하게 권해요.",
+     "say": "이제 말해 보세요. \"여기 보세요\" (yeo-gi bo-se-yo, ဒီမှာ ကြည့်ပါ)",
+     "slot": "미얀마어 \"ကြည့်ပါ\"의 끝처럼, 많은 움직임 말 뒤에 붙여서 공손하게 권해요.",
+     "sent": {
+      "6": "미얀마어 \"ကြည့်ပါ\"의 끝처럼, 많은 움직임 말 뒤에 붙여서 공손하게 권해요."
+     }
     }
    },
    "audio": {
@@ -6568,6 +7476,14 @@
     "es": {
      "ex": null,
      "say": null
+    },
+    "zh": {
+     "ex": null,
+     "say": null
+    },
+    "my": {
+     "ex": null,
+     "say": null
     }
    },
    "sent": [
@@ -6595,7 +7511,11 @@
      "en": "Now, please look here.",
      "en_s": null,
      "es": "A ver, mire aquí.",
-     "es_s": null
+     "es_s": null,
+     "zh": "来，请看这里。",
+     "zh_s": null,
+     "my": "ကဲ၊ ဒီမှာ ကြည့်ပါ။",
+     "my_s": null
     },
     {
      "ko": "이게 그 글자예요.",
@@ -6621,7 +7541,11 @@
      "en": "This is that letter.",
      "en_s": null,
      "es": "Esta es esa letra.",
-     "es_s": null
+     "es_s": null,
+     "zh": "这就是那个文字。",
+     "zh_s": null,
+     "my": "ဒါက အဲဒီ စာလုံးပါ။",
+     "my_s": null
     },
     {
      "ko": "\"아\"예요.",
@@ -6647,7 +7571,11 @@
      "en": "It is \"아\".",
      "en_s": null,
      "es": "Es \"아\".",
-     "es_s": null
+     "es_s": null,
+     "zh": "它念作 \"아\"。",
+     "zh_s": null,
+     "my": "\"아\" ပါ။",
+     "my_s": null
     },
     {
      "ko": "움직임을 나타내는 말에 \"세요\"를 붙이면 공손하게 권하는 말이 돼요.",
@@ -6673,7 +7601,11 @@
      "en": "Add \"세요\" to a verb, and it becomes a polite way to ask someone to do something.",
      "en_s": null,
      "es": "Si se añade \"세요\" a un verbo, se forma una invitación cortés.",
-     "es_s": null
+     "es_s": null,
+     "zh": "在动词后面加上 \"세요\"，就成了礼貌地请别人做某事的说法。",
+     "zh_s": null,
+     "my": "ကြိယာမှာ \"세요\" ကို တွဲရင် ယဉ်ယဉ်ကျေးကျေး တိုက်တွန်းတဲ့ စကား ဖြစ်သွားပါတယ်။",
+     "my_s": null
     },
     {
      "ko": "\"보세요\"처럼요.",
@@ -6699,7 +7631,11 @@
      "en": "Like \"보세요\".",
      "en_s": null,
      "es": "Por ejemplo, \"보세요\".",
-     "es_s": null
+     "es_s": null,
+     "zh": "比如 \"보세요\"。",
+     "zh_s": null,
+     "my": "\"보세요\" လိုပါပဲ။",
+     "my_s": null
     },
     {
      "ko": "받침이 있으면 보통 \"읽으세요\"처럼 \"으세요\"를 붙이지만, 리을 받침은 리을이 빠지고 \"세요\"만 붙여서 \"만드세요\"처럼 말해요.",
@@ -6725,7 +7661,11 @@
      "en": "If the word ends in a final consonant, you usually add \"으세요\", like \"읽으세요\", but with a \"리을\" final consonant, the \"리을\" drops and you add only \"세요\", like \"만드세요\".",
      "en_s": null,
      "es": "Si hay consonante final, normalmente se pone \"으세요\", como en \"읽으세요\", pero si la consonante final es \"리을\", esta se cae y solo se pone \"세요\", como en \"만드세요\".",
-     "es_s": null
+     "es_s": null,
+     "zh": "有收音时通常像 \"읽으세요\" 那样加 \"으세요\"，但如果收音是 \"리을\"，\"리을\" 会脱落，只加 \"세요\"，说成 \"만드세요\"。",
+     "zh_s": null,
+     "my": "နောက်ဆုံးဗျည်း ရှိရင် များသောအားဖြင့် \"읽으세요\" လို \"으세요\" ကို တွဲပေမယ့်၊ နောက်ဆုံးဗျည်းက \"리을\" ဖြစ်ရင် \"리을\" ပျောက်သွားပြီး \"세요\" ကိုပဲ တွဲလို့ \"만드세요\" လို့ ပြောပါတယ်။",
+     "my_s": null
     },
     {
      "ko": "많은 말에 이렇게 붙여서 공손하게 권해요.",
@@ -6751,7 +7691,11 @@
      "en": "You add it like this to many verbs to ask politely.",
      "en_s": null,
      "es": "Se añade así a muchos verbos para invitar a hacer algo con cortesía.",
-     "es_s": null
+     "es_s": null,
+     "zh": "意思和中文的\"请\"差不多，但中文把\"请\"放在动词前面，韩语则把这个词尾加在动词后面。",
+     "zh_s": null,
+     "my": "မြန်မာ \"ကြည့်ပါ\" ရဲ့ အဆုံးလိုမျိုး၊ ကြိယာ အများအပြားရဲ့ နောက်မှာ တွဲပြီး ယဉ်ယဉ်ကျေးကျေး တိုက်တွန်းပါတယ်။",
+     "my_s": null
     }
    ],
    "gloss": {
@@ -6768,7 +7712,9 @@
       "si": "බලන්න",
       "mn": "харна уу",
       "en": "please look",
-      "es": "mire"
+      "es": "mire",
+      "zh": "请看",
+      "my": "ကြည့်ပါ"
      }
     },
     "세요": {
@@ -6784,7 +7730,9 @@
       "si": "",
       "mn": "",
       "en": "",
-      "es": ""
+      "es": "",
+      "zh": "",
+      "my": ""
      }
     },
     "아": {
@@ -6800,7 +7748,9 @@
       "si": "කොරියානු අකුරක්",
       "mn": "солонгос үсэг",
       "en": "",
-      "es": ""
+      "es": "",
+      "zh": "",
+      "my": "ကိုရီးယား စာလုံး"
      }
     },
     "으세요": {
@@ -6816,7 +7766,9 @@
       "si": "",
       "mn": "",
       "en": "",
-      "es": ""
+      "es": "",
+      "zh": "",
+      "my": ""
      }
     },
     "읽으세요": {
@@ -6832,7 +7784,9 @@
       "si": "කියවන්න",
       "mn": "уншина уу",
       "en": "please read",
-      "es": "lea"
+      "es": "lea",
+      "zh": "请读",
+      "my": "ဖတ်ပါ"
      }
     },
     "만드세요": {
@@ -6848,7 +7802,9 @@
       "si": "හදන්න",
       "mn": "хийнэ үү",
       "en": "please make",
-      "es": "haga"
+      "es": "haga",
+      "zh": "请造",
+      "my": "ဖန်တီးပါ"
      }
     },
     "리을": {
@@ -6864,7 +7820,9 @@
       "si": "කොරියානු ව්‍යඤ්ජනයක නම",
       "mn": "солонгос гийгүүлэгчийн нэр",
       "en": "name of a Korean consonant",
-      "es": "nombre de una consonante coreana"
+      "es": "nombre de una consonante coreana",
+      "zh": "一个韩语辅音字母的名称",
+      "my": "ကိုရီးယား ဗျည်းတစ်လုံးရဲ့ နာမည်"
      }
     }
    }
@@ -6884,7 +7842,9 @@
     "si": "\"세종대왕\" රජතුමාට කරන්න ඕන වුණේ ඕක නේ. ඕනම කෙනෙකුට ලේසියෙන් කියවන්න පුළුවන් අකුරු. ඒ ඕනම කෙනා කියන්නේ දැන් අපි තමයි.",
     "mn": "Тэгэхээр \"세종대왕\" хааны хийхийг хүссэн зүйл энэ юм байна. Хэн ч амархан уншдаг үсэг. Тэр хэн ч гэдэг нь одоо бид юм.",
     "en": "So that is what \"세종대왕\" wanted to do. Letters that anyone can read easily. And right now, those people are us.",
-    "es": "Así que eso era lo que quería el rey \"세종대왕\". Unas letras que cualquiera pudiera leer fácilmente. Y ese cualquiera hoy somos nosotros."
+    "es": "Así que eso era lo que quería el rey \"세종대왕\". Unas letras que cualquiera pudiera leer fácilmente. Y ese cualquiera hoy somos nosotros.",
+    "zh": "原来这就是 \"세종대왕\" 想做的事啊。一种人人都能轻松读懂的文字。而这里说的人人，就是现在的我们。",
+    "my": "ဒါက \"세종대왕\" မင်းကြီး လုပ်ချင်ခဲ့တာပဲကိုး။ ဘယ်သူမဆို လွယ်လွယ်ကူကူ ဖတ်နိုင်တဲ့ စာလုံးပေါ့။ အဲဒီ ဘယ်သူမဆိုဆိုတာ အခု ကျွန်တော်တို့ပဲ ခင်ဗျာ။"
    },
    "pieces": [
     {
@@ -6901,7 +7861,9 @@
       "si": "ඕක",
       "mn": "тэр",
       "en": "that",
-      "es": "eso"
+      "es": "eso",
+      "zh": "那",
+      "my": "အဲဒါက"
      }
     },
     {
@@ -6918,7 +7880,9 @@
       "si": "\"세종대왕\" රජතුමා",
       "mn": "\"세종대왕\" хаан",
       "en": "\"세종대왕\"",
-      "es": "el rey \"세종대왕\""
+      "es": "el rey \"세종대왕\"",
+      "zh": "\"세종대왕\"",
+      "my": "\"세종대왕\" မင်းကြီး"
      }
     },
     {
@@ -6935,7 +7899,9 @@
       "si": "කරන්න",
       "mn": "хийх",
       "en": "to do",
-      "es": "hacer"
+      "es": "hacer",
+      "zh": "做",
+      "my": "လုပ်"
      }
     },
     {
@@ -6952,7 +7918,9 @@
       "si": "ඕන වුණේ",
       "mn": "хүссэн",
       "en": "wanted",
-      "es": "quería"
+      "es": "quería",
+      "zh": "想",
+      "my": "ချင်ခဲ့တဲ့"
      }
     },
     {
@@ -6969,7 +7937,9 @@
       "si": "නේ",
       "mn": "зүйл юм байна",
       "en": "was the thing",
-      "es": "era lo que"
+      "es": "era lo que",
+      "zh": "原来是那件事啊",
+      "my": "အရာပဲကိုး"
      }
     },
     {
@@ -6986,7 +7956,9 @@
       "si": "ඕනම කෙනෙකුට",
       "mn": "хэн ч",
       "en": "anyone",
-      "es": "cualquiera"
+      "es": "cualquiera",
+      "zh": "任何人",
+      "my": "ဘယ်သူမဆို"
      }
     },
     {
@@ -7003,7 +7975,9 @@
       "si": "ලේසියෙන්",
       "mn": "амархан",
       "en": "easily",
-      "es": "fácilmente"
+      "es": "fácilmente",
+      "zh": "轻松地",
+      "my": "လွယ်လွယ်ကူကူ"
      }
     },
     {
@@ -7020,7 +7994,9 @@
       "si": "කියවන",
       "mn": "уншдаг",
       "en": "read",
-      "es": "que lee"
+      "es": "que lee",
+      "zh": "读的",
+      "my": "ဖတ်တဲ့"
      }
     },
     {
@@ -7037,7 +8013,9 @@
       "si": "අකුරු",
       "mn": "үсэг",
       "en": "letters",
-      "es": "letras"
+      "es": "letras",
+      "zh": "文字",
+      "my": "စာလုံးပေါ့"
      }
     },
     {
@@ -7054,7 +8032,9 @@
       "si": "ඒ",
       "mn": "тэр",
       "en": "that",
-      "es": "ese"
+      "es": "ese",
+      "zh": "那个",
+      "my": "အဲဒီ"
      }
     },
     {
@@ -7071,7 +8051,9 @@
       "si": "ඕනම කෙනා",
       "mn": "хэн ч гэдэг нь",
       "en": "anyone",
-      "es": "cualquiera"
+      "es": "cualquiera",
+      "zh": "任何人",
+      "my": "ဘယ်သူမဆိုဆိုတာ"
      }
     },
     {
@@ -7088,7 +8070,9 @@
       "si": "දැන්",
       "mn": "одоо",
       "en": "now",
-      "es": "ahora"
+      "es": "ahora",
+      "zh": "现在",
+      "my": "အခု"
      }
     },
     {
@@ -7105,7 +8089,9 @@
       "si": "අපි",
       "mn": "бид",
       "en": "is us",
-      "es": "somos nosotros"
+      "es": "somos nosotros",
+      "zh": "是我们",
+      "my": "ကျွန်ုပ်တို့ပါ"
      }
     }
    ],
@@ -7122,7 +8108,9 @@
     "si": "ක්‍රියා පදය + 고 싶어요",
     "mn": "үйл үг + 고 싶어요",
     "en": "verb + 고 싶어요",
-    "es": "verbo + 고 싶어요"
+    "es": "verbo + 고 싶어요",
+    "zh": "动词 + 고 싶어요",
+    "my": "ကြိယာ + 고 싶어요"
    },
    "text": {
     "ko": {
@@ -7172,6 +8160,14 @@
     "es": {
      "ex": "Así que eso era lo que quería el rey \"세종대왕\" (se-jong-dae-wang, rey). Unas letras que cualquiera pudiera leer fácilmente. Y ese cualquiera hoy somos nosotros. Si se añade \"고 싶어요\" (go sip-eo-yo) a un verbo, significa que uno quiere hacer eso. El \"구나\" (gu-na) de \"거구나\" (geo-gu-na, era eso) es la terminación que escuchamos antes, la que se usa cuando uno acaba de descubrir algo.",
      "say": "Ahora dígalo usted. \"저도 읽고 싶어요\" (jeo-do ilg-go sip-eo-yo, yo también quiero leer)."
+    },
+    "zh": {
+     "ex": "原来这就是 \"세종대왕\" (se-jong-dae-wang, 国王) 想做的事啊。一种人人都能轻松读懂的文字。而这里说的人人，就是现在的我们。 在动词后面加上 \"고 싶어요\" (go sip-eo-yo)，表示想做那件事。\"거구나\" (geo-gu-na, 原来是那件事啊) 里的 \"구나\" (gu-na)，就是前面听到的、刚刚明白时用的词尾。",
+     "say": "现在请你试着说一说。 \"저도 읽고 싶어요\" (jeo-do ilg-go sip-eo-yo, 我也想读)。"
+    },
+    "my": {
+     "ex": "ဒါက \"세종대왕\" (se-jong-dae-wang, ဘုရင်) မင်းကြီး လုပ်ချင်ခဲ့တာပဲကိုး။ ဘယ်သူမဆို လွယ်လွယ်ကူကူ ဖတ်နိုင်တဲ့ စာလုံးပေါ့။ အဲဒီ ဘယ်သူမဆိုဆိုတာ အခု ကျွန်တော်တို့ပဲ ခင်ဗျာ။ ကြိယာမှာ \"고 싶어요\" (go sip-eo-yo) ကို တွဲရင် အဲဒါကို လုပ်ချင်တယ် ဆိုတဲ့ အဓိပ္ပာယ်ပါ။ \"거구나\" (geo-gu-na, အရာပဲကိုး) ထဲက \"구나\" (gu-na) ဆိုတာ အရင်က ကြားခဲ့တဲ့၊ အခုမှ သိလိုက်ရတဲ့အခါ သုံးတဲ့ စကားအဆုံးသတ်ပါ။",
+     "say": "အခု ပြောကြည့်ပါ။ \"저도 읽고 싶어요\" (jeo-do ilg-go sip-eo-yo, ကျွန်ုပ်လည်း ဖတ်ချင်ပါတယ်)။"
     }
    },
    "ko_by": {
@@ -7218,6 +8214,14 @@
     "es": {
      "ex": "그게 세종대왕이 하고 싶었던 거구나. 누구나 쉽게 읽는 글자요. 그 누구나가 지금 우리예요. 움직임을 나타내는 말에 \"고 싶어요\" (go sip-eo-yo) 를 붙이면 그것을 하기를 원한다는 뜻이에요. \"거구나\" (geo-gu-na, era eso) 의 \"구나\" (gu-na) 는 앞에서 들은, 방금 알았을 때 쓰는 말끝이에요.",
      "say": "이제 말해 보세요. \"저도 읽고 싶어요\" (jeo-do ilg-go sip-eo-yo, yo también quiero leer)"
+    },
+    "zh": {
+     "ex": "그게 세종대왕이 하고 싶었던 거구나. 누구나 쉽게 읽는 글자요. 그 누구나가 지금 우리예요. 움직임을 나타내는 말에 \"고 싶어요\" (go sip-eo-yo) 를 붙이면 그것을 하기를 원한다는 뜻이에요. \"거구나\" (geo-gu-na, 原来是那件事啊) 의 \"구나\" (gu-na) 는 앞에서 들은, 방금 알았을 때 쓰는 말끝이에요.",
+     "say": "이제 말해 보세요. \"저도 읽고 싶어요\" (jeo-do ilg-go sip-eo-yo, 我也想读)"
+    },
+    "my": {
+     "ex": "그게 세종대왕이 하고 싶었던 거구나. 누구나 쉽게 읽는 글자요. 그 누구나가 지금 우리예요. 움직임을 나타내는 말에 \"고 싶어요\" (go sip-eo-yo) 를 붙이면 그것을 하기를 원한다는 뜻이에요. \"거구나\" (geo-gu-na, အရာပဲကိုး) 의 \"구나\" (gu-na) 는 앞에서 들은, 방금 알았을 때 쓰는 말끝이에요.",
+     "say": "이제 말해 보세요. \"저도 읽고 싶어요\" (jeo-do ilg-go sip-eo-yo, ကျွန်ုပ်လည်း ဖတ်ချင်ပါတယ်)"
     }
    },
    "audio": {
@@ -7269,6 +8273,14 @@
     "es": {
      "ex": null,
      "say": null
+    },
+    "zh": {
+     "ex": null,
+     "say": null
+    },
+    "my": {
+     "ex": null,
+     "say": null
     }
    },
    "sent": [
@@ -7296,7 +8308,11 @@
      "en": "So that is what \"세종대왕\" wanted to do.",
      "en_s": null,
      "es": "Así que eso era lo que quería el rey \"세종대왕\".",
-     "es_s": null
+     "es_s": null,
+     "zh": "原来这就是 \"세종대왕\" 想做的事啊。",
+     "zh_s": null,
+     "my": "ဒါက \"세종대왕\" မင်းကြီး လုပ်ချင်ခဲ့တာပဲကိုး။",
+     "my_s": null
     },
     {
      "ko": "누구나 쉽게 읽는 글자요.",
@@ -7322,7 +8338,11 @@
      "en": "Letters that anyone can read easily.",
      "en_s": null,
      "es": "Unas letras que cualquiera pudiera leer fácilmente.",
-     "es_s": null
+     "es_s": null,
+     "zh": "一种人人都能轻松读懂的文字。",
+     "zh_s": null,
+     "my": "ဘယ်သူမဆို လွယ်လွယ်ကူကူ ဖတ်နိုင်တဲ့ စာလုံးပေါ့။",
+     "my_s": null
     },
     {
      "ko": "그 누구나가 지금 우리예요.",
@@ -7348,7 +8368,11 @@
      "en": "And right now, those people are us.",
      "en_s": null,
      "es": "Y ese cualquiera hoy somos nosotros.",
-     "es_s": null
+     "es_s": null,
+     "zh": "而这里说的人人，就是现在的我们。",
+     "zh_s": null,
+     "my": "အဲဒီ ဘယ်သူမဆိုဆိုတာ အခု ကျွန်တော်တို့ပဲ ခင်ဗျာ။",
+     "my_s": null
     },
     {
      "ko": "움직임을 나타내는 말에 \"고 싶어요\"를 붙이면 그것을 하기를 원한다는 뜻이에요.",
@@ -7374,7 +8398,11 @@
      "en": "Add \"고 싶어요\" to a verb, and it means you want to do that.",
      "en_s": null,
      "es": "Si se añade \"고 싶어요\" a un verbo, significa que uno quiere hacer eso.",
-     "es_s": null
+     "es_s": null,
+     "zh": "在动词后面加上 \"고 싶어요\"，表示想做那件事。",
+     "zh_s": null,
+     "my": "ကြိယာမှာ \"고 싶어요\" ကို တွဲရင် အဲဒါကို လုပ်ချင်တယ် ဆိုတဲ့ အဓိပ္ပာယ်ပါ။",
+     "my_s": null
     },
     {
      "ko": "\"거구나\"의 \"구나\"는 앞에서 들은, 방금 알았을 때 쓰는 말끝이에요.",
@@ -7400,7 +8428,11 @@
      "en": "The \"구나\" in \"거구나\" is the ending you heard before, used when you have just found something out.",
      "en_s": null,
      "es": "El \"구나\" de \"거구나\" es la terminación que escuchamos antes, la que se usa cuando uno acaba de descubrir algo.",
-     "es_s": null
+     "es_s": null,
+     "zh": "\"거구나\" 里的 \"구나\"，就是前面听到的、刚刚明白时用的词尾。",
+     "zh_s": null,
+     "my": "\"거구나\" ထဲက \"구나\" ဆိုတာ အရင်က ကြားခဲ့တဲ့၊ အခုမှ သိလိုက်ရတဲ့အခါ သုံးတဲ့ စကားအဆုံးသတ်ပါ။",
+     "my_s": null
     }
    ],
    "gloss": {
@@ -7417,7 +8449,9 @@
       "si": "එහෙම දෙයක් නේ",
       "mn": "зүйл юм байна",
       "en": "so that was it",
-      "es": "era eso"
+      "es": "era eso",
+      "zh": "原来是那件事啊",
+      "my": "အရာပဲကိုး"
      }
     },
     "고 싶어요": {
@@ -7433,7 +8467,9 @@
       "si": "",
       "mn": "",
       "en": "",
-      "es": ""
+      "es": "",
+      "zh": "",
+      "my": ""
      }
     },
     "구나": {
@@ -7449,7 +8485,9 @@
       "si": "",
       "mn": "",
       "en": "",
-      "es": ""
+      "es": "",
+      "zh": "",
+      "my": ""
      }
     },
     "세종대왕": {
@@ -7465,7 +8503,9 @@
       "si": "රජතුමා",
       "mn": "хаан",
       "en": "king",
-      "es": "rey"
+      "es": "rey",
+      "zh": "国王",
+      "my": "ဘုရင်"
      }
     }
    }

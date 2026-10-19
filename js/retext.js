@@ -14,11 +14,12 @@ export function snapshot() {
   const m = new Map(), core = new Map(), tpl = [], txt = new Map();
   for (const k of uiKeys()) {
     const s = String(t(k)).trim(); if (!s) continue;
-    if (s.includes("{")) { const names = []; const re = new RegExp("^" + s.split(/(\{\w+\})/).map(x => /^\{\w+\}$/.test(x) ? (names.push(x.slice(1, -1)), "(.+?)") : x.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("") + "$", "u"); if (/\p{L}/u.test(s.replace(/\{\w+\}/g, ""))) tpl.push({ re, k, names }); continue; }
+    if (s.includes("{")) { const names = []; const re = new RegExp("^" + s.split(/(\{\w+\})/).map(x => /^\{\w+\}$/.test(x) ? (names.push(x.slice(1, -1)), /^\{(n|m|s|p)\}$/.test(x) ? "([0-9.,:/]+)" : "(.+?)") : x.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("") + "$", "u"); if (/\p{L}/u.test(s.replace(/\{\w+\}/g, ""))) tpl.push({ re, k, names }); continue; }
     txt.set(k, s);
     if (!m.has(s)) m.set(s, k);
     const c = coreOf(s); if (c && c !== s && !core.has(c)) core.set(c, k);
   }
+  tpl.sort((a, b) => b.re.source.length - a.re.source.length); // 숫자 칸({n}{m}{s}{p})은 숫자만 · 긴 틀 먼저 — 짧은 틀(「{n}句」)이 긴 글(「已看到第15句」)을 잘못 잡던 것(다국어부 10-19 zh)
   m.core = core; m.tpl = tpl; m.txt = txt;
   return m;
 }
