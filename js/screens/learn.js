@@ -10,28 +10,28 @@
 //  R7 영상은 늘 맨 위 · 지금 줄은 영상 바로 아래(앞 줄은 영상 뒤로) — 손으로 목록을 움직이면 4초 동안은 따라가지 않음
 //  R8 듣기 모드(대사→설명 · 설명만)도 R1~R6 그대로(영상 대신 소리 조각) · 모드를 바꾸면 멈춤(▶ 로 시작)
 //  R9 다시 들어오면 마지막 줄이 선택된 채 멈춰 있음
-import { noScoreKey } from "../agepolicy.js?v=1016.64"; // 점수 없음 안내 = 나이 때문인지(대표님 10-19)
-import { warmSTT } from "../sttserver.js?v=1016.64";
-import * as sfxL from "../sfx.js?v=1016.64"; // 카드 말하기 최대 길이 = 본보기 길이로(10-07)
-import { t, lang, langName, KO_UI, uiKoOn, preloadKoUi } from "../i18n.js?v=1016.64";
-import { setTx } from "../retext.js?v=1016.64";
-import { langfitRun } from "../langfit.js?v=1016.64";
-import { esc, renderText, glossCards, sayParts } from "../text.js?v=1016.64";
-import { episode } from "../data.js?v=1016.64";
-import { paths } from "../paths.js?v=1016.64";
-import { Sequence } from "../audio.js?v=1016.64";
-import { I, progress, SPEAKER, spkHtml, uiKoBtn, switchUiKo } from "../ui.js?v=1016.64";
-import writeView from "./write.js?v=1016.64";
-import { diagEnv, keepDiag } from "../diag.js?v=1016.64";
-import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1016.64";
-import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace, lateFactor, sylAt, paintAt, karaokeRun, isFull } from "../rhythm.js?v=1016.64";
-import { playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1016.64";
-import { heardHTML, endHint, scoreOf, bestFull, spanOf, sylsAt } from "../heard.js?v=1016.64"; // 덧붙은 말 빼고 견주기(본부 10-11)
-import { recDel, downloadRec, askPersist } from "../recstore.js?v=1016.64";
-import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1016.64";
-import { scoreFx, stopFx } from "../scorefx.js?v=1016.64"; // 점수별 효과(본부 10-05)
-import { record, recordSROnly, srOnlyMode, setSrOnly, isAndroid, srMiss, micWhy, srWhy, canScore, closeMic, logRec, micOpen, seqMode, srOnBlob, devSR, setDevSR, srJudge, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1016.64";
-import { hold, quietWake } from "../wake.js?v=1016.64";
+import { noScoreKey } from "../agepolicy.js?v=1016.68"; // 점수 없음 안내 = 나이 때문인지(대표님 10-19)
+import { warmSTT } from "../sttserver.js?v=1016.68";
+import * as sfxL from "../sfx.js?v=1016.68"; // 카드 말하기 최대 길이 = 본보기 길이로(10-07)
+import { t, lang, langName, KO_UI, uiKoOn, preloadKoUi } from "../i18n.js?v=1016.68";
+import { setTx } from "../retext.js?v=1016.68";
+import { langfitRun } from "../langfit.js?v=1016.68";
+import { esc, renderText, glossCards, sayParts } from "../text.js?v=1016.68";
+import { episode } from "../data.js?v=1016.68";
+import { paths } from "../paths.js?v=1016.68";
+import { Sequence } from "../audio.js?v=1016.68";
+import { I, progress, SPEAKER, spkHtml, uiKoBtn, switchUiKo } from "../ui.js?v=1016.68";
+import writeView from "./write.js?v=1016.68";
+import { diagEnv, keepDiag } from "../diag.js?v=1016.68";
+import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1016.68";
+import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace, lateFactor, sylAt, paintAt, karaokeRun, isFull } from "../rhythm.js?v=1016.68";
+import { playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1016.68";
+import { heardHTML, endHint, scoreOf, bestFull, spanOf, sylsAt } from "../heard.js?v=1016.68"; // 덧붙은 말 빼고 견주기(본부 10-11)
+import { recDel, downloadRec, askPersist } from "../recstore.js?v=1016.68";
+import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1016.68";
+import { scoreFx, stopFx } from "../scorefx.js?v=1016.68"; // 점수별 효과(본부 10-05)
+import { record, recordSROnly, srOnlyMode, setSrOnly, isAndroid, srMiss, micWhy, srWhy, canScore, closeMic, logRec, micOpen, seqMode, srOnBlob, devSR, setDevSR, srJudge, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1016.68";
+import { hold, quietWake } from "../wake.js?v=1016.68";
 
 const RATES = [1, 0.75, 0.5];
 const pref = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } };
@@ -40,6 +40,8 @@ const LEAD = 0.35;  // 자막은 목소리보다 0.35초 먼저 영상 아래에
 const SCROLL_MS = 220; // 줄을 영상 아래로 올리는 시간 — 먼저 와 있어야 해서 짧게
 const FS = '<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>';
 
+// 🎤 단추 글 = data-k 로(⇄ 때 「말하기」가 speak·speak_now 둘 다라 retext 가 엉뚱한 열쇠로 바꾸던 것 · 다국어부 10-19 si)
+const micLbl = () => `🎤 <span data-k="speak_now">${esc(t("speak_now"))}</span>`;
 export default async function learn(app, ep, startId, opts = {}) { /* opts.explain = 그 줄 설명 창을 연 채로(#/explain 주소 · 책 QR) */
   const d = await episode(ep, lang);
   if (seqMode()) warmSTT(); // 카드 말해 보기도 서버 받아쓰기 — 미리 데움(본부 10-12)
@@ -72,7 +74,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
       <p class="kotext ko" lang="ko">${esc(l.ko)}</p>
       ${l.tr ? `<p class="tr">${esc(l.tr)}</p>` : ""}
       <div class="expl"></div>
-      <div class="acts"><button data-act="once">${I.play}<span>${esc(t("listen_line"))}</span></button><button class="menu" data-act="explain">${esc(t("explain"))}</button><button class="menu" data-act="write">${esc(t("write"))}</button><button class="menu" data-act="speak">${esc(t("speak"))}</button></div>
+      <div class="acts"><button data-act="once">${I.play}<span data-k="listen_line">${esc(t("listen_line"))}</span></button><button class="menu" data-act="explain"><span data-k="explain">${esc(t("explain"))}</span></button><button class="menu" data-act="write"><span data-k="write">${esc(t("write"))}</span></button><button class="menu" data-act="speak"><span data-k="speak">${esc(t("speak"))}</span></button></div>
     </li>`).join("")}</ol>
     <div class="ctrl">
       <a class="iconbtn" href="#/list" aria-label="${esc(t("back"))}">${I.back}</a>
@@ -316,7 +318,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
         ${x.pieces?.length || fx ? `<div class="chips">${(x.pieces || []).map(c => `<span class="chip"><b class="ko" lang="ko">${esc(c.ko)}</b> <i>${c.rom != null ? `<span class="rom">${esc(c.rom)}${c.mean && v9L ? ", " : ""}</span>${v9L ? esc(c.mean || "") : ""}` : v9L ? esc(c.gloss || "") : ""}</i></span>`).join("")}${fx ? `<span class="fx">= <b>${esc(fx)}</b></span>` : ""}</div>` : ""}
         <p data-p="0">${v9Sent(i, code)}</p>${pairHTML(i, code, 0)}
         ${l.say ? `<div class="sayb"><p data-p="1" class="sayp">${sayHTML(i, code)}</p>
-          <div class="sbtns" data-keep="${esc(t("keep_short"))}"><button class="mic" data-x="rec">🎤 ${esc(t("speak_now"))}</button><button data-x="model">▶ ${esc(t("model"))}</button><button class="mrate" data-x="mrate" aria-label="${esc(t("speed"))}" aria-pressed="${getRate("m") !== 1}">${rateLabel(getRate("m"))}</button><button data-x="mine" disabled>▶ ${esc(t("my_voice"))}</button><button data-x="keep" title="${esc(t("keep"))}" hidden>${esc(t("keep_short"))}</button><button data-x="savedplay" title="${esc(t("saved_title"))}" hidden>${esc(t("saved_play"))}</button><span class="mini"><button data-x="savedl" class="small" title="${esc(t("download"))}" hidden>⬇ ${esc(t("dl_short"))}</button><button data-x="savedel" class="small" title="${esc(t("del_one"))}" hidden>🗑 ${esc(t("del_short"))}</button></span></div>
+          <div class="sbtns" data-keep="${esc(t("keep_short"))}"><button class="mic" data-x="rec">${micLbl()}</button><button data-x="model">▶ ${esc(t("model"))}</button><button class="mrate" data-x="mrate" aria-label="${esc(t("speed"))}" aria-pressed="${getRate("m") !== 1}">${rateLabel(getRate("m"))}</button><button data-x="mine" disabled>▶ ${esc(t("my_voice"))}</button><button data-x="keep" title="${esc(t("keep"))}" hidden>${esc(t("keep_short"))}</button><button data-x="savedplay" title="${esc(t("saved_title"))}" hidden>${esc(t("saved_play"))}</button><span class="mini"><button data-x="savedl" class="small" title="${esc(t("download"))}" hidden>⬇ ${esc(t("dl_short"))}</button><button data-x="savedel" class="small" title="${esc(t("del_one"))}" hidden>🗑 ${esc(t("del_short"))}</button></span></div>
           <div class="sline"><span class="lvl" hidden><i></i></span><span class="smsg" aria-live="polite" data-empty="— %"></span><span class="fx" aria-hidden="true"></span></div><div class="tbar" hidden><i></i><em class="pace" hidden></em><span class="tt"></span></div><div class="heardline" data-empty="${esc(t("heard_label"))}: —"></div><div class="microw" data-empty="🎤 ${esc(micLabel() || t("mic_pick"))}"><button class="micname" data-x="mics" hidden></button><select class="micsel" hidden></select></div></div>` : ""}
       </div>
 </div>`;
@@ -656,19 +658,19 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     quietWake(false);
     if (st.panel?.i !== i || sp?.ctl !== ctl) return; // 다른 데로 감
     sp.ctl = null; btn.classList.remove("on"); lvl.hidden = true;
-    if (r.cancelled) { btn.textContent = "🎤 " + t("speak_now"); msg.textContent = ""; return; }
-    if (r.error) { btn.textContent = "🎤 " + t("speak_now"); msg.textContent = t(micWhy(r.error)); return; }
+    if (r.cancelled) { btn.innerHTML = micLbl(); msg.textContent = ""; return; }
+    if (r.error) { btn.innerHTML = micLbl(); msg.textContent = t(micWhy(r.error)); return; }
     // 녹음 먼저 → 그 녹음 소리로 받아쓰기 · 말소리는 있었는데 들은 말 0 이고 아직 이 기기에서 된 적 없으면 = 이 기기는 안 됨 → 받아쓰기만(기기 기억) · 0점 대신 「한 번 더」(본부 10-10)
     //  판정 = recorder.js srJudge(검사부 10-11) — 연속 2번 기기 실패라야 받아쓰기만(7일 기억) · 인터넷·중단·말 없음·무음은 세지 않음 · "seq-ok" 여도 실패면 「한 번 더」
     //  기다리는 동안 🎤 막음(보통 모양) · 끝나면 어느 길이든 풂 · 닫기·새 녹음 = 시도 번호가 바뀜 → 버림
-    if (seq && r.blob) { msg.textContent = t("checking"); const me = sp; me.checking = true; btn.disabled = true; btn.setAttribute("aria-disabled", "true"); btn.classList.remove("on"); btn.textContent = "🎤 " + t("speak_now");
+    if (seq && r.blob) { msg.textContent = t("checking"); const me = sp; me.checking = true; btn.disabled = true; btn.setAttribute("aria-disabled", "true"); btn.classList.remove("on"); btn.innerHTML = micLbl();
       const ac = (spAbort = new AbortController()); let s2;
       try { s2 = await srOnBlob(r.blob, { signal: ac.signal }); } finally { if (spAbort === ac) spAbort = null; me.checking = false; btn.disabled = false; btn.setAttribute("aria-disabled", "false"); }
       if (att !== spAtt || st.panel?.i !== i || !sp || s2.info?.aborted) return; // 닫힘·새 시도 = 옛 결과 버림
       const jd = srJudge(s2, 10 ** ((r.diag?.maxDb ?? -120) / 20)); if (!jd.ok && jd.kind === "notrack") s2.heard = []; // 트랙 대신 마이크를 들음 = 들은 말 버림
       r.heard = s2.heard; r.words = s2.info?.wordList || null; r.srErr = s2.srErr; r.diag = { ...(r.diag || {}), sr: s2.ev, seq: `녹음 ${s2.info?.dur}초 최대 ${s2.info?.maxDb}dB · 트랙 ${s2.info?.track} · 트랙 씀 ${s2.info?.trackUsed ?? "?"} · start 예외 ${s2.info?.startErr || "없음"} · ${s2.info?.ms}ms · 들음 ${s2.heard.length} · 판정 ${jd.kind}${jd.count ? ` ${jd.count}/2` : ""} · 기억 ${devSR() || "-"}` };
       if (s2.info?.srv) r.diag.seq += " · " + s2.info.srv; // 서버 걸린 시간(받기·AI · 본부 10-12)
-      if (jd.retry) { btn.textContent = "🎤 " + t("speak_now"); msg.textContent = t("sr_retry_dev"); scoreFx(box.querySelector(".fx"), null); logRec({ where: "card", line: L[i].id, want: L[i].say.ko, ...r.diag, why: "retry-dev", score: null, kind: jd.kind, mode: jd.server ? `서버 안 됨(${jd.kind}) ${jd.count || 1}번째 → ${jd.switched ? "10분 받아쓰기만" : "다음도 서버"}` : jd.switched ? "녹음→받아쓰기 연속 2번 안 됨 → 받아쓰기만" : "녹음→받아쓰기 한 번 더" /* 실제 횟수·까닭대로(본부 10-12) */, heard: [] }); return; } }
+      if (jd.retry) { btn.innerHTML = micLbl(); msg.textContent = t("sr_retry_dev"); scoreFx(box.querySelector(".fx"), null); logRec({ where: "card", line: L[i].id, want: L[i].say.ko, ...r.diag, why: "retry-dev", score: null, kind: jd.kind, mode: jd.server ? `서버 안 됨(${jd.kind}) ${jd.count || 1}번째 → ${jd.switched ? "10분 받아쓰기만" : "다음도 서버"}` : jd.switched ? "녹음→받아쓰기 연속 2번 안 됨 → 받아쓰기만" : "녹음→받아쓰기 한 번 더" /* 실제 횟수·까닭대로(본부 10-12) */, heard: [] }); return; } }
     const switchedSR = !seq && r.blob && isAndroid() && !srOnlyMode() && canScore() ? srMiss(!r.heard.length && (r.diag?.maxDb ?? -120) > -40) : false; // 연속 2번이면 받아쓰기만으로
     let sc = canScore() && r.heard.length ? scoreOf(L[i].say.ko, r.heard) : null; // 덧붙은 말(앞뒤 다른 말)은 빼고 본보기와 맞는 토막만(본부 10-11)
     const env = await diagEnv(); if (att !== spAtt) return; // 그새 새 시도·닫힘(검사부 10-11) · 진단(화면에 안 보임) — 소리 엔진·🔁·녹음 시작 때 재생 중이었는지·출력 장치 + 녹음 소리 자체(malmun_diag · 마지막 3개)
