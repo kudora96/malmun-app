@@ -5,7 +5,7 @@ export const LANG_INFO = {
   "en": {"dir": "ltr", "short": "EN", "stage": "ready"},
   "es": {"dir": "ltr", "short": "Esp"},
   "fr": {"dir": "ltr", "short": "Fr"},
-  "hi": {"dir": "ltr", "lh": 1.5, "short": "हिंदी"},
+  "hi": {"dir": "ltr", "ko_ui": true, "lh": 1.5, "short": "हिंदी"},
   "id": {"dir": "ltr", "short": "Indo"},
   "ja": {"dir": "ltr", "font": "Noto Sans JP", "short": "日"},
   "km": {"dir": "ltr", "font": "Noto Sans Khmer", "lh": 1.8, "minpx": 12, "short": "ខ្មែរ"},
