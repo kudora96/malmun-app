@@ -38,20 +38,26 @@ function refitIfChanged(el) {
   const f = el.__lf; if (!f || f.sig.has(el.textContent)) return;
   el.__lf = null; fitted.delete(el); el.style.minWidth = el.style.maxWidth = el.style.minHeight = el.style.maxHeight = el.style.overflow = el.style.fontSize = el.style.whiteSpace = "";
 }
-function fit(el, snap) {
+// 단추 하나의 바꿀 글 목록(없으면 null) — 이미 잰 단추·숨은 단추·배우는 내용은 빼고
+function prep(el, snap) {
   refitIfChanged(el);
-  if (el.__lf || !el.isConnected || el.closest(SKIP) || !el.getClientRects().length) return;
+  if (el.__lf || !el.isConnected || el.closest(SKIP) || !el.getClientRects().length) return null;
   const nodes = []; const w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
   for (let n; (n = w.nextNode());) { const p = n.parentElement; if (p.closest(SKIP) && !el.matches(".chip.uiko")) continue; let a = altOf(n, snap); if (Array.isArray(a)) a = a.reduce((x, y) => (y.length > x.length ? y : x)); if (a != null && a !== n.nodeValue) nodes.push([n, n.nodeValue, a]); }
-  if (!nodes.length) return;
-  const bs0 = el.style.boxSizing; el.style.boxSizing = "border-box"; // 잴 때부터 테두리까지 한 폭(min-width 와 같은 기준)
-  const box = () => { const c = getComputedStyle(el); return { width: parseFloat(c.width) || el.offsetWidth, height: parseFloat(c.height) || el.offsetHeight }; }; // 레이아웃 px 소수까지(설명 창처럼 통째로 줄여 보이는(scale) 곳도 · 반올림 0.5px 흔들림 없게)
-  const r0 = box();
-  nodes.forEach(([n, , a]) => { n.nodeValue = a; });
-  const r1 = box();
-  nodes.forEach(([n, v]) => { n.nodeValue = v; });
+  return nodes.length ? { el, nodes, bs0: el.style.boxSizing } : null;
+}
+const boxOf = el => { const c = getComputedStyle(el); return { width: parseFloat(c.width) || el.offsetWidth, height: parseFloat(c.height) || el.offsetHeight }; }; // 레이아웃 px 소수까지(설명 창처럼 통째로 줄여 보이는(scale) 곳도 · 반올림 0.5px 흔들림 없게)
+// 한 화면의 새 단추를 「한꺼번에」 두 말로 재기 — 한 줄·한 격자를 나눠 쓰는 단추들은 옆 단추 글 길이로 줄 높이가 바뀜(id 말하기 단추 4칸 · 10-19) → 모두 반대쪽 말로 바꾼 채 한 번 더 잼
+function measureAll(list) {
+  list.forEach(x => { x.el.style.boxSizing = "border-box"; });
+  list.forEach(x => { x.r0 = boxOf(x.el); });
+  list.forEach(x => x.nodes.forEach(([n, , a]) => { n.nodeValue = a; }));
+  list.forEach(x => { x.r1 = boxOf(x.el); x.sig1 = x.el.textContent; });
+  list.forEach(x => x.nodes.forEach(([n, v]) => { n.nodeValue = v; }));
+  list.forEach(x => { x.sig0 = x.el.textContent; });
+}
+function fit({ el, nodes, bs0, r0, r1, sig0, sig1 }) {
   const cur = mode(), alt = cur === "K" ? "L" : "K";
-  const sig0 = el.textContent; nodes.forEach(([n, , a]) => { n.nodeValue = a; }); const sig1 = el.textContent; nodes.forEach(([n, v]) => { n.nodeValue = v; });
   el.__lf = { fs0: getComputedStyle(el).fontSize, scale: { L: 1, K: 1 }, sig: new Set([sig0, sig1]) }; fitted.add(el);
   if (Math.abs(r1.width - r0.width) < 0.05 && Math.abs(r1.height - r0.height) < 0.05) { el.style.boxSizing = bs0; return; } // 두 말 폭이 같음
   const W = Math.max(r0.width, r1.width), H = Math.max(r0.height, r1.height);
@@ -79,7 +85,8 @@ function run(root = document.body) {
   if (!KO_UI.includes(lang)) return; // ⇄ 없는 언어(en 등) = 맞출 반대쪽 말 없음 — 전엔 koReady 가 늘 false 라 run→then→run 끝없는 고리로 화면이 멈췄음(쓰기부 10-15 긴급)
   if (!koReady(lang)) { if (!run.waiting) { run.waiting = true; preloadKoUi().then(() => { run.waiting = false; if (koReady(lang)) run(root); }); } return; }
   if (!snapCache || snapMode !== mode() + lang) { snapCache = snapshot(); snapMode = mode() + lang; }
-  const n0 = fitted.size; root.querySelectorAll(TARGET).forEach(el => fit(el, snapCache));
+  const n0 = fitted.size, list = [...root.querySelectorAll(TARGET)].map(el => prep(el, snapCache)).filter(Boolean);
+  if (list.length) { measureAll(list); list.forEach(fit); }
   if (fitted.size !== n0) window.dispatchEvent(new CustomEvent("malmun:langfit")); // 폭을 새로 고정함 → 머리 줄 줄이기(fitHead 등)가 「두 말 중 긴 쪽」 폭으로 처음부터 다시 재게(⇄ 첫 번째에도 0px)
 }
 const queue = () => { if (!queued) { queued = true; requestAnimationFrame(() => run()); } };

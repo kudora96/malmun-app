@@ -1,0 +1,82 @@
+{
+ "clip_id": "L01-00-01",
+ "lang": "id",
+ "what": "대사 자막층 id — 언어부 S2(10-19) · Claude 초안 A + 제미나이 초안 B 비교 후 고름(s2_drafts.md) · 문장 끝 . ? ! · 한국 이름은 따옴표 한글 · 아이→선생님 saya·kami + Bu · 선생님→아이 다정한 말(부름말 없이) · 원어민 확인 전",
+ "title_t": "\"세종대왕\" — Huruf Ada Pemiliknya",
+ "characters": [
+  {
+   "id": "dubu",
+   "bio": "Robot pembawa acara"
+  },
+  {
+   "id": "kong",
+   "bio": "Anak kucing putih"
+  },
+  {
+   "id": "seonsaengnim",
+   "bio": "Guru perempuan Korea berusia tiga puluh tahun"
+  }
+ ],
+ "subtitles": [
+  {
+   "id": 1,
+   "t": "Silakan masuk. Selamat datang di istana \"경복궁\"."
+  },
+  {
+   "id": 2,
+   "t": "Bu Guru! Saya sudah membuat huruf!"
+  },
+  {
+   "id": 3,
+   "t": "Huruf? Ini gambar."
+  },
+  {
+   "id": 4,
+   "t": "Bukan huruf? Kenapa, Bu?"
+  },
+  {
+   "id": 5,
+   "t": "Huruf itu kesepakatan. Kalau semua orang bisa membacanya bersama, barulah itu huruf."
+  },
+  {
+   "id": 6,
+   "t": "Oh, ternyata kalau hanya saya sendiri yang tahu, itu bukan huruf, ya."
+  },
+  {
+   "id": 7,
+   "t": "Kalau begitu, siapa yang menentukan kesepakatan itu, Bu?"
+  },
+  {
+   "id": 8,
+   "t": "Raja \"세종대왕\". Lima ratus tahun yang lalu, raja sendiri yang membuatnya. Soalnya, waktu itu rakyat tidak mengenal huruf. Hurufnya terlalu sulit."
+  },
+  {
+   "id": 9,
+   "t": "Wah! Kalau begitu, semua orang pasti senang, ya!"
+  },
+  {
+   "id": 10,
+   "t": "Tidak. Para pejabat istana justru menentangnya."
+  },
+  {
+   "id": 11,
+   "t": "Para pejabat istana? Kenapa, Bu?"
+  },
+  {
+   "id": 12,
+   "t": "Soalnya, waktu itu hanya orang yang mengenal huruf yang punya kekuasaan."
+  },
+  {
+   "id": 13,
+   "t": "Lalu, bagaimana dengan kami? Apakah kami juga bisa membacanya, Bu?"
+  },
+  {
+   "id": 14,
+   "t": "Nah, silakan lihat ke sini. Ini dia huruf itu. Ini \"아\"."
+  },
+  {
+   "id": 15,
+   "t": "Ternyata itu yang ingin dilakukan Raja \"세종대왕\". Huruf yang mudah dibaca oleh siapa saja. Dan siapa saja itu adalah kita sekarang."
+  }
+ ]
+}
