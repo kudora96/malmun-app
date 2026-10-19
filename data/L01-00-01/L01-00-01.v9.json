@@ -20,7 +20,8 @@
   "my",
   "pt",
   "km",
-  "ja"
+  "ja",
+  "fr"
  ],
  "say_head": {
   "ko": "새설명_소리_kr/말해보세요_머리_kr.mp3",
@@ -47,7 +48,8 @@
     "my": "ကြွပါ၊ ကြွပါ။ \"경복궁\" နန်းတော်ကို ရောက်လာတာ ကြိုဆိုပါတယ်ရှင်။",
     "pt": "Entrem, por favor. Bem-vindos ao palácio \"경복궁\".",
     "km": "សូមអញ្ជើញចូល។ សូមស្វាគមន៍មកកាន់វាំង \"경복궁\" ចាស។",
-    "ja": "いらっしゃい。\"경복궁\" へようこそ。"
+    "ja": "いらっしゃい。\"경복궁\" へようこそ。",
+    "fr": "Entrez, je vous en prie. Bienvenue au palais \"경복궁\"."
    },
    "pieces": [
     {
@@ -69,7 +71,8 @@
       "my": "မြန်မြန်",
       "pt": "por favor",
       "km": "ឆាប់ៗ",
-      "ja": "さあ、どうぞ"
+      "ja": "さあ、どうぞ",
+      "fr": "entrez"
      }
     },
     {
@@ -91,7 +94,8 @@
       "my": "ကြွပါ",
       "pt": "entre",
       "km": "សូមអញ្ជើញមក",
-      "ja": "いらっしゃい"
+      "ja": "いらっしゃい",
+      "fr": "venez"
      }
     },
     {
@@ -113,7 +117,8 @@
       "my": "\"경복궁\" နန်းတော်ကို",
       "pt": "ao palácio \"경복궁\"",
       "km": "មកកាន់វាំង \"경복궁\"",
-      "ja": "\"경복궁\" に"
+      "ja": "\"경복궁\" に",
+      "fr": "au palais \"경복궁\""
      }
     },
     {
@@ -135,7 +140,8 @@
       "my": "ရောက်လာတဲ့",
       "pt": "ter vindo",
       "km": "ដែលបានមក",
-      "ja": "来た"
+      "ja": "来た",
+      "fr": "être venu"
      }
     },
     {
@@ -157,7 +163,8 @@
       "my": "အရာကို",
       "pt": "isso",
       "km": "ការនោះ",
-      "ja": "こと"
+      "ja": "こと",
+      "fr": "le fait de"
      }
     },
     {
@@ -179,7 +186,8 @@
       "my": "ကြိုဆိုပါတယ်",
       "pt": "dou as boas-vindas",
       "km": "សូមស្វាគមន៍",
-      "ja": "歓迎します"
+      "ja": "歓迎します",
+      "fr": "bienvenue"
      }
     }
    ],
@@ -201,7 +209,8 @@
     "my": "နေရာ + 에 + 와요",
     "pt": "lugar + 에 + 와요",
     "km": "កន្លែង + 에 + 와요",
-    "ja": "場所 + 에 + 와요"
+    "ja": "場所 + 에 + 와요",
+    "fr": "lieu + 에 + 와요"
    },
    "text": {
     "ko": {
@@ -271,6 +280,10 @@
     "ja": {
      "ex": "いらっしゃい。\"경복궁\" (gyeong-bog-gung, 宮殿) へようこそ。 \"어서 오세요\" (eo-seo o-se-yo, いらっしゃい) は、訪ねてきた人を迎えるあいさつです。場所の後ろに \"에\" (e) をつけると、どこに来るのか、どこへ行くのか、どこにあるのかを表します。日本語の助詞 \"に\" と同じように、言葉の後ろにつけます。",
      "say": "では、言ってみてください。 \"한국에 온 걸 환영해요\" (han-gug-e on geol hwan-yeong-hae-yo, 韓国へようこそ)。"
+    },
+    "fr": {
+     "ex": "Entrez, je vous en prie. Bienvenue au palais \"경복궁\" (gyeong-bog-gung, palais). \"어서 오세요\" (eo-seo o-se-yo, bienvenue) est une salutation pour accueillir quelqu'un qui arrive. Placé après un lieu, \"에\" (e) indique où l'on vient, où l'on va ou où l'on se trouve. Le sens est proche de \"au\" en français, mais en coréen, cette particule ne se place pas avant le mot, mais après.",
+     "say": "Maintenant, dites-le. \"한국에 온 걸 환영해요\" (han-gug-e on geol hwan-yeong-hae-yo, bienvenue en Corée)."
     }
    },
    "ko_by": {
@@ -401,6 +414,14 @@
      "sent": {
       "4": "일본어의 \"に\"처럼 낱말 뒤에 붙어요."
      }
+    },
+    "fr": {
+     "ex": "어서 오세요. 경복궁에 온 걸 환영해요. \"어서 오세요\" (eo-seo o-se-yo, bienvenue) 는 찾아온 사람을 맞는 인사예요. 장소 뒤에 \"에\" (e) 를 붙이면 어디에 오는지, 어디에 가는지, 어디에 있는지를 나타내요. 뜻은 프랑스어의 \"au\"와 비슷하지만, 한국어는 앞이 아니라 뒤에 붙여요.",
+     "say": "이제 말해 보세요. \"한국에 온 걸 환영해요\" (han-gug-e on geol hwan-yeong-hae-yo, bienvenue en Corée)",
+     "slot": "뜻은 프랑스어의 \"au\"와 비슷하지만, 한국어는 앞이 아니라 뒤에 붙여요.",
+     "sent": {
+      "4": "뜻은 프랑스어의 \"au\"와 비슷하지만, 한국어는 앞이 아니라 뒤에 붙여요."
+     }
     }
    },
    "audio": {
@@ -472,6 +493,10 @@
     "ja": {
      "ex": null,
      "say": null
+    },
+    "fr": {
+     "ex": null,
+     "say": null
     }
    },
    "sent": [
@@ -509,7 +534,9 @@
      "km": "សូមអញ្ជើញចូល។",
      "km_s": null,
      "ja": "いらっしゃい。",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "Entrez, je vous en prie.",
+     "fr_s": null
     },
     {
      "ko": "경복궁에 온 걸 환영해요.",
@@ -545,7 +572,9 @@
      "km": "សូមស្វាគមន៍មកកាន់វាំង \"경복궁\" ចាស។",
      "km_s": null,
      "ja": "\"경복궁\" へようこそ。",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "Bienvenue au palais \"경복궁\".",
+     "fr_s": null
     },
     {
      "ko": "\"어서 오세요\"는 찾아온 사람을 맞는 인사예요.",
@@ -581,7 +610,9 @@
      "km": "\"어서 오세요\" គឺជាពាក្យស្វាគមន៍ សម្រាប់ទទួលអ្នកដែលមកដល់។",
      "km_s": null,
      "ja": "\"어서 오세요\" は、訪ねてきた人を迎えるあいさつです。",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "\"어서 오세요\" est une salutation pour accueillir quelqu'un qui arrive.",
+     "fr_s": null
     },
     {
      "ko": "장소 뒤에 \"에\"를 붙이면 어디에 오는지, 어디에 가는지, 어디에 있는지를 나타내요.",
@@ -617,7 +648,9 @@
      "km": "បើភ្ជាប់ពាក្យសម្គាល់ \"에\" នៅក្រោយឈ្មោះកន្លែង វាបង្ហាញថា មកកន្លែងណា ទៅកន្លែងណា ឬនៅកន្លែងណា។",
      "km_s": null,
      "ja": "場所の後ろに \"에\" をつけると、どこに来るのか、どこへ行くのか、どこにあるのかを表します。",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "Placé après un lieu, \"에\" indique où l'on vient, où l'on va ou où l'on se trouve.",
+     "fr_s": null
     },
     {
      "ko": "한국어는 이 표시를 낱말 뒤에 붙여요.",
@@ -653,7 +686,9 @@
      "km": "ភាសាកូរ៉េ ភ្ជាប់ពាក្យសម្គាល់នេះ នៅក្រោយពាក្យ។",
      "km_s": null,
      "ja": "日本語の助詞 \"に\" と同じように、言葉の後ろにつけます。",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "Le sens est proche de \"au\" en français, mais en coréen, cette particule ne se place pas avant le mot, mais après.",
+     "fr_s": null
     }
    ],
    "gloss": {
@@ -675,7 +710,8 @@
       "my": "နန်းတော်",
       "pt": "palácio",
       "km": "វាំង",
-      "ja": "宮殿"
+      "ja": "宮殿",
+      "fr": "palais"
      }
     },
     "어서 오세요": {
@@ -696,7 +732,8 @@
       "my": "ကြွပါ, ကြိုဆိုပါတယ်",
       "pt": "entre, por favor",
       "km": "សូមអញ្ជើញចូល",
-      "ja": "いらっしゃい"
+      "ja": "いらっしゃい",
+      "fr": "bienvenue"
      }
     },
     "에": {
@@ -717,7 +754,8 @@
       "my": "",
       "pt": "",
       "km": "",
-      "ja": ""
+      "ja": "",
+      "fr": ""
      }
     }
    }
@@ -742,7 +780,8 @@
     "my": "ဆရာမ! သမီး စာလုံး လုပ်ပြီးပြီရှင့်!",
     "pt": "Professora! Eu fiz uma letra!",
     "km": "អ្នកគ្រូ! ខ្ញុំបង្កើតអក្សរបានហើយ ចា៎ស!",
-    "ja": "先生！文字を作りました！"
+    "ja": "先生！文字を作りました！",
+    "fr": "Madame! J'ai créé une lettre!"
    },
    "pieces": [
     {
@@ -764,7 +803,8 @@
       "my": "ဆရာမ",
       "pt": "professora",
       "km": "អ្នកគ្រូ",
-      "ja": "先生"
+      "ja": "先生",
+      "fr": "madame"
      }
     },
     {
@@ -786,7 +826,8 @@
       "my": "ကျွန်ုပ်",
       "pt": "eu",
       "km": "ខ្ញុំ",
-      "ja": "わたし"
+      "ja": "わたし",
+      "fr": "je"
      }
     },
     {
@@ -808,7 +849,8 @@
       "my": "စာလုံး",
       "pt": "letra",
       "km": "អក្សរ",
-      "ja": "文字"
+      "ja": "文字",
+      "fr": "lettre"
      }
     },
     {
@@ -830,7 +872,8 @@
       "my": "လုပ်ပြီးပြီ",
       "pt": "fiz",
       "km": "បានបង្កើតហើយ",
-      "ja": "作りました"
+      "ja": "作りました",
+      "fr": "ai créé"
      }
     }
    ],
@@ -852,7 +895,8 @@
     "my": "만들 + 었어요",
     "pt": "만들 + 었어요",
     "km": "만들 + 었어요",
-    "ja": "만들 + 었어요"
+    "ja": "만들 + 었어요",
+    "fr": "만들 + 었어요"
    },
    "text": {
     "ko": {
@@ -922,6 +966,10 @@
     "ja": {
      "ex": "先生！文字を作りました！ 語尾 \"었어요\" (eoss-eo-yo) は、もう終わったことを表します。\"만들어요\" (man-deul-eo-yo, 作ります) は、今していることです。\"만들었어요\" (man-deul-eoss-eo-yo, 作りました) は、もうしたことです。前の言葉によって、\"았어요\" (ass-eo-yo) や \"했어요\" (haess-eo-yo) に変わることもあります。",
      "say": "では、言ってみてください。 \"저 글자 만들었어요\" (jeo geul-ja man-deul-eoss-eo-yo, わたしは文字を作りました)。"
+    },
+    "fr": {
+     "ex": "Madame! J'ai créé une lettre! La terminaison \"었어요\" (eoss-eo-yo) indique une action déjà terminée. \"만들어요\" (man-deul-eo-yo, je crée) est une action que l'on fait maintenant. \"만들었어요\" (man-deul-eoss-eo-yo, j'ai créé) est une action déjà faite. Selon le mot qui précède, elle devient aussi \"았어요\" (ass-eo-yo) ou \"했어요\" (haess-eo-yo).",
+     "say": "Maintenant, dites-le. \"저 글자 만들었어요\" (jeo geul-ja man-deul-eoss-eo-yo, j'ai créé une lettre)."
     }
    },
    "ko_by": {
@@ -988,6 +1036,10 @@
     "ja": {
      "ex": "선생님! 저 글자 만들었어요! 말끝 \"었어요\" (eoss-eo-yo) 는 이미 끝난 일을 나타내요. \"만들어요\" (man-deul-eo-yo, 作ります) 는 지금 하는 일이에요. \"만들었어요\" (man-deul-eoss-eo-yo, 作りました) 는 벌써 한 일이에요. 앞말에 따라 \"았어요\" (ass-eo-yo) 나 \"했어요\" (haess-eo-yo) 로 바뀌기도 해요.",
      "say": "이제 말해 보세요. \"저 글자 만들었어요\" (jeo geul-ja man-deul-eoss-eo-yo, わたしは文字を作りました)"
+    },
+    "fr": {
+     "ex": "선생님! 저 글자 만들었어요! 말끝 \"었어요\" (eoss-eo-yo) 는 이미 끝난 일을 나타내요. \"만들어요\" (man-deul-eo-yo, je crée) 는 지금 하는 일이에요. \"만들었어요\" (man-deul-eoss-eo-yo, j'ai créé) 는 벌써 한 일이에요. 앞말에 따라 \"았어요\" (ass-eo-yo) 나 \"했어요\" (haess-eo-yo) 로 바뀌기도 해요.",
+     "say": "이제 말해 보세요. \"저 글자 만들었어요\" (jeo geul-ja man-deul-eoss-eo-yo, j'ai créé une lettre)"
     }
    },
    "audio": {
@@ -1059,6 +1111,10 @@
     "ja": {
      "ex": null,
      "say": null
+    },
+    "fr": {
+     "ex": null,
+     "say": null
     }
    },
    "sent": [
@@ -1096,7 +1152,9 @@
      "km": "អ្នកគ្រូ!",
      "km_s": null,
      "ja": "先生！",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "Madame!",
+     "fr_s": null
     },
     {
      "ko": "저 글자 만들었어요!",
@@ -1132,7 +1190,9 @@
      "km": "ខ្ញុំបង្កើតអក្សរបានហើយ ចា៎ស!",
      "km_s": null,
      "ja": "文字を作りました！",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "J'ai créé une lettre!",
+     "fr_s": null
     },
     {
      "ko": "말끝 \"었어요\"는 이미 끝난 일을 나타내요.",
@@ -1168,7 +1228,9 @@
      "km": "ចុងពាក្យ \"었어요\" បង្ហាញពីការងារដែលបានធ្វើរួចហើយ។",
      "km_s": null,
      "ja": "語尾 \"었어요\" は、もう終わったことを表します。",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "La terminaison \"었어요\" indique une action déjà terminée.",
+     "fr_s": null
     },
     {
      "ko": "\"만들어요\"는 지금 하는 일이에요.",
@@ -1204,7 +1266,9 @@
      "km": "\"만들어요\" គឺជាការងារដែលកំពុងធ្វើឥឡូវនេះ។",
      "km_s": null,
      "ja": "\"만들어요\" は、今していることです。",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "\"만들어요\" est une action que l'on fait maintenant.",
+     "fr_s": null
     },
     {
      "ko": "\"만들었어요\"는 벌써 한 일이에요.",
@@ -1240,7 +1304,9 @@
      "km": "\"만들었어요\" គឺជាការងារដែលបានធ្វើរួចទៅហើយ។",
      "km_s": null,
      "ja": "\"만들었어요\" は、もうしたことです。",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "\"만들었어요\" est une action déjà faite.",
+     "fr_s": null
     },
     {
      "ko": "앞말에 따라 \"았어요\"나 \"했어요\"로 바뀌기도 해요.",
@@ -1276,7 +1342,9 @@
      "km": "អាស្រ័យលើពាក្យនៅខាងមុខ វាក៏អាចប្តូរទៅជា \"았어요\" ឬ \"했어요\" ដែរ។",
      "km_s": null,
      "ja": "前の言葉によって、\"았어요\" や \"했어요\" に変わることもあります。",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "Selon le mot qui précède, elle devient aussi \"았어요\" ou \"했어요\".",
+     "fr_s": null
     }
    ],
    "gloss": {
@@ -1298,7 +1366,8 @@
       "my": "ဖန်တီးတယ်",
       "pt": "faço",
       "km": "បង្កើត",
-      "ja": "作ります"
+      "ja": "作ります",
+      "fr": "je crée"
      }
     },
     "만들었어요": {
@@ -1319,7 +1388,8 @@
       "my": "ဖန်တီးခဲ့တယ်",
       "pt": "fiz",
       "km": "បានបង្កើត",
-      "ja": "作りました"
+      "ja": "作りました",
+      "fr": "j'ai créé"
      }
     },
     "았어요": {
@@ -1340,7 +1410,8 @@
       "my": "",
       "pt": "",
       "km": "",
-      "ja": ""
+      "ja": "",
+      "fr": ""
      }
     },
     "었어요": {
@@ -1361,7 +1432,8 @@
       "my": "",
       "pt": "",
       "km": "",
-      "ja": ""
+      "ja": "",
+      "fr": ""
      }
     },
     "했어요": {
@@ -1382,7 +1454,8 @@
       "my": "",
       "pt": "",
       "km": "",
-      "ja": ""
+      "ja": "",
+      "fr": ""
      }
     }
    }
@@ -1407,7 +1480,8 @@
     "my": "စာလုံးလား။ ဒါက ပုံဆွဲထားတာပဲကွယ်။",
     "pt": "Uma letra? Isso é um desenho.",
     "km": "អក្សរឬ? នេះជារូបគំនូរទេតើ កូន។",
-    "ja": "文字？これは絵だよ。"
+    "ja": "文字？これは絵だよ。",
+    "fr": "Une lettre? Ça, c'est un dessin."
    },
    "pieces": [
     {
@@ -1429,7 +1503,8 @@
       "my": "စာလုံးလား",
       "pt": "letra",
       "km": "អក្សរឬ",
-      "ja": "文字ですか"
+      "ja": "文字ですか",
+      "fr": "une lettre"
      }
     },
     {
@@ -1451,7 +1526,8 @@
       "my": "ဒါက",
       "pt": "isso",
       "km": "នេះ",
-      "ja": "これは"
+      "ja": "これは",
+      "fr": "ça"
      }
     },
     {
@@ -1473,7 +1549,8 @@
       "my": "ပုံပါ",
       "pt": "é um desenho",
       "km": "ជារូបគំនូរ",
-      "ja": "絵です"
+      "ja": "絵です",
+      "fr": "c'est un dessin"
      }
     }
    ],
@@ -1495,7 +1572,8 @@
     "my": "စကားလုံး + 이에요 / 예요",
     "pt": "palavra + 이에요 / 예요",
     "km": "ពាក្យ + 이에요 / 예요",
-    "ja": "言葉 + 이에요 / 예요"
+    "ja": "言葉 + 이에요 / 예요",
+    "fr": "mot + 이에요 / 예요"
    },
    "text": {
     "ko": {
@@ -1565,6 +1643,10 @@
     "ja": {
      "ex": "文字？これは絵だよ。 言葉の後ろに \"이에요\" (i-e-yo) をつけると、それが何かを言う文になります。パッチム、つまり言葉の最後の子音があれば \"이에요\" (i-e-yo)、なければ \"예요\" (ye-yo) をつけます。たとえば \"그림이에요\" (geu-rim-i-e-yo, 絵です)、\"글자예요\" (geul-ja-ye-yo, 文字です) のように使います。",
      "say": "では、言ってみてください。 \"이건 글자예요\" (i-geon geul-ja-ye-yo, これは文字です)。"
+    },
+    "fr": {
+     "ex": "Une lettre? Ça, c'est un dessin. Si l'on ajoute \"이에요\" (i-e-yo) après un mot, on obtient une phrase qui dit ce qu'est cette chose. Si le mot a une consonne finale, on ajoute \"이에요\" (i-e-yo), sinon on ajoute \"예요\" (ye-yo). Par exemple, \"그림이에요\" (geu-rim-i-e-yo, c'est un dessin) et \"글자예요\" (geul-ja-ye-yo, c'est une lettre).",
+     "say": "Maintenant, dites-le. \"이건 글자예요\" (i-geon geul-ja-ye-yo, ceci est une lettre)."
     }
    },
    "ko_by": {
@@ -1631,6 +1713,10 @@
     "ja": {
      "ex": "글자요? 이건 그림이에요. 낱말 뒤에 \"이에요\" (i-e-yo) 를 붙이면 그것이 무엇인지 말하는 문장이 돼요. 받침, 곧 낱말 끝의 자음이 있으면 \"이에요\" (i-e-yo), 없으면 \"예요\" (ye-yo) 를 붙여요. \"그림이에요\" (geu-rim-i-e-yo, 絵です), \"글자예요\" (geul-ja-ye-yo, 文字です) 처럼요.",
      "say": "이제 말해 보세요. \"이건 글자예요\" (i-geon geul-ja-ye-yo, これは文字です)"
+    },
+    "fr": {
+     "ex": "글자요? 이건 그림이에요. 낱말 뒤에 \"이에요\" (i-e-yo) 를 붙이면 그것이 무엇인지 말하는 문장이 돼요. 받침, 곧 낱말 끝의 자음이 있으면 \"이에요\" (i-e-yo), 없으면 \"예요\" (ye-yo) 를 붙여요. \"그림이에요\" (geu-rim-i-e-yo, c'est un dessin), \"글자예요\" (geul-ja-ye-yo, c'est une lettre) 처럼요.",
+     "say": "이제 말해 보세요. \"이건 글자예요\" (i-geon geul-ja-ye-yo, ceci est une lettre)"
     }
    },
    "audio": {
@@ -1702,6 +1788,10 @@
     "ja": {
      "ex": null,
      "say": null
+    },
+    "fr": {
+     "ex": null,
+     "say": null
     }
    },
    "sent": [
@@ -1739,7 +1829,9 @@
      "km": "អក្សរឬ?",
      "km_s": null,
      "ja": "文字？",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "Une lettre?",
+     "fr_s": null
     },
     {
      "ko": "이건 그림이에요.",
@@ -1775,7 +1867,9 @@
      "km": "នេះជារូបគំនូរទេតើ កូន។",
      "km_s": null,
      "ja": "これは絵だよ。",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "Ça, c'est un dessin.",
+     "fr_s": null
     },
     {
      "ko": "낱말 뒤에 \"이에요\"를 붙이면 그것이 무엇인지 말하는 문장이 돼요.",
@@ -1811,7 +1905,9 @@
      "km": "បើភ្ជាប់ \"이에요\" នៅក្រោយពាក្យ វាក្លាយជាប្រយោគដែលប្រាប់ថា នោះជាអ្វី។",
      "km_s": null,
      "ja": "言葉の後ろに \"이에요\" をつけると、それが何かを言う文になります。",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "Si l'on ajoute \"이에요\" après un mot, on obtient une phrase qui dit ce qu'est cette chose.",
+     "fr_s": null
     },
     {
      "ko": "받침, 곧 낱말 끝의 자음이 있으면 \"이에요\", 없으면 \"예요\"를 붙여요.",
@@ -1847,7 +1943,9 @@
      "km": "បើពាក្យនោះមានព្យញ្ជនៈចុង ពោលគឺសំឡេងព្យញ្ជនៈនៅចុងពាក្យ គេភ្ជាប់ \"이에요\" បើគ្មាន គេភ្ជាប់ \"예요\"។",
      "km_s": null,
      "ja": "パッチム、つまり言葉の最後の子音があれば \"이에요\"、なければ \"예요\" をつけます。",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "Si le mot a une consonne finale, on ajoute \"이에요\", sinon on ajoute \"예요\".",
+     "fr_s": null
     },
     {
      "ko": "\"그림이에요\", \"글자예요\"처럼요.",
@@ -1883,7 +1981,9 @@
      "km": "ដូចជា \"그림이에요\" និង \"글자예요\"។",
      "km_s": null,
      "ja": "たとえば \"그림이에요\"、\"글자예요\" のように使います。",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "Par exemple, \"그림이에요\" et \"글자예요\".",
+     "fr_s": null
     }
    ],
    "gloss": {
@@ -1905,7 +2005,8 @@
       "my": "ပုံပါ",
       "pt": "é um desenho",
       "km": "ជារូបគំនូរ",
-      "ja": "絵です"
+      "ja": "絵です",
+      "fr": "c'est un dessin"
      }
     },
     "글자예요": {
@@ -1926,7 +2027,8 @@
       "my": "စာလုံးပါ",
       "pt": "é uma letra",
       "km": "ជាអក្សរ",
-      "ja": "文字です"
+      "ja": "文字です",
+      "fr": "c'est une lettre"
      }
     },
     "예요": {
@@ -1947,7 +2049,8 @@
       "my": "",
       "pt": "",
       "km": "",
-      "ja": ""
+      "ja": "",
+      "fr": ""
      }
     },
     "이에요": {
@@ -1968,7 +2071,8 @@
       "my": "",
       "pt": "",
       "km": "",
-      "ja": ""
+      "ja": "",
+      "fr": ""
      }
     }
    }
@@ -1993,7 +2097,8 @@
     "my": "စာလုံး မဟုတ်ဘူးလားရှင့်။ ဘာဖြစ်လို့လဲဟင်။",
     "pt": "Não é uma letra? Por quê?",
     "km": "មិនមែនជាអក្សរទេឬ អ្នកគ្រូ? ហេតុអ្វីទៅ ចា៎ស?",
-    "ja": "文字じゃないんですか？どうしてですか？"
+    "ja": "文字じゃないんですか？どうしてですか？",
+    "fr": "Ce n'est pas une lettre? Pourquoi?"
    },
    "pieces": [
     {
@@ -2015,7 +2120,8 @@
       "my": "စာလုံး",
       "pt": "letra",
       "km": "អក្សរ",
-      "ja": "文字"
+      "ja": "文字",
+      "fr": "lettre"
      }
     },
     {
@@ -2037,7 +2143,8 @@
       "my": "မဟုတ်ဘူးလား",
       "pt": "não é",
       "km": "មិនមែនទេ",
-      "ja": "ではありません"
+      "ja": "ではありません",
+      "fr": "ce n'est pas"
      }
     },
     {
@@ -2059,7 +2166,8 @@
       "my": "ဘာဖြစ်လို့လဲ",
       "pt": "por quê",
       "km": "ហេតុអ្វី",
-      "ja": "どうしてですか"
+      "ja": "どうしてですか",
+      "fr": "pourquoi"
      }
     }
    ],
@@ -2081,7 +2189,8 @@
     "my": "စကားလုံး + 아니에요",
     "pt": "palavra + 아니에요",
     "km": "ពាក្យ + 아니에요",
-    "ja": "言葉 + 아니에요"
+    "ja": "言葉 + 아니에요",
+    "fr": "mot + 아니에요"
    },
    "text": {
     "ko": {
@@ -2151,6 +2260,10 @@
     "ja": {
      "ex": "文字じゃないんですか？どうしてですか？ \"아니에요\" (a-ni-e-yo, ではありません) は、前に聞いた \"이에요\" (i-e-yo) の反対です。言葉の後ろに置くと、それではないという意味になります。最後を上げて言うと、たずねる言葉になります。",
      "say": "では、言ってみてください。 \"그림 아니에요\" (geu-rim a-ni-e-yo, 絵ではありません)。"
+    },
+    "fr": {
+     "ex": "Ce n'est pas une lettre? Pourquoi? \"아니에요\" (a-ni-e-yo, ce n'est pas) est le contraire du \"이에요\" (i-e-yo) entendu plus tôt. Placé après un mot, il signifie que ce n'est pas cela. Si l'intonation monte à la fin, cela devient une question.",
+     "say": "Maintenant, dites-le. \"그림 아니에요\" (geu-rim a-ni-e-yo, ce n'est pas un dessin)."
     }
    },
    "ko_by": {
@@ -2217,6 +2330,10 @@
     "ja": {
      "ex": "글자 아니에요? 왜요? \"아니에요\" (a-ni-e-yo, ではありません) 는 앞에서 들은 \"이에요\" (i-e-yo) 의 반대예요. 낱말 뒤에 놓으면 그것이 아니라는 뜻이에요. 끝을 올려 말하면 묻는 말이 돼요.",
      "say": "이제 말해 보세요. \"그림 아니에요\" (geu-rim a-ni-e-yo, 絵ではありません)"
+    },
+    "fr": {
+     "ex": "글자 아니에요? 왜요? \"아니에요\" (a-ni-e-yo, ce n'est pas) 는 앞에서 들은 \"이에요\" (i-e-yo) 의 반대예요. 낱말 뒤에 놓으면 그것이 아니라는 뜻이에요. 끝을 올려 말하면 묻는 말이 돼요.",
+     "say": "이제 말해 보세요. \"그림 아니에요\" (geu-rim a-ni-e-yo, ce n'est pas un dessin)"
     }
    },
    "audio": {
@@ -2288,6 +2405,10 @@
     "ja": {
      "ex": null,
      "say": null
+    },
+    "fr": {
+     "ex": null,
+     "say": null
     }
    },
    "sent": [
@@ -2325,7 +2446,9 @@
      "km": "មិនមែនជាអក្សរទេឬ អ្នកគ្រូ?",
      "km_s": null,
      "ja": "文字じゃないんですか？",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "Ce n'est pas une lettre?",
+     "fr_s": null
     },
     {
      "ko": "왜요?",
@@ -2361,7 +2484,9 @@
      "km": "ហេតុអ្វីទៅ ចា៎ស?",
      "km_s": null,
      "ja": "どうしてですか？",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "Pourquoi?",
+     "fr_s": null
     },
     {
      "ko": "\"아니에요\"는 앞에서 들은 \"이에요\"의 반대예요.",
@@ -2397,7 +2522,9 @@
      "km": "\"아니에요\" គឺផ្ទុយពី \"이에요\" ដែលអ្នកបានឮមុននេះ។",
      "km_s": null,
      "ja": "\"아니에요\" は、前に聞いた \"이에요\" の反対です。",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "\"아니에요\" est le contraire du \"이에요\" entendu plus tôt.",
+     "fr_s": null
     },
     {
      "ko": "낱말 뒤에 놓으면 그것이 아니라는 뜻이에요.",
@@ -2433,7 +2560,9 @@
      "km": "បើដាក់វានៅក្រោយពាក្យ មានន័យថា មិនមែនជារបស់នោះទេ។",
      "km_s": null,
      "ja": "言葉の後ろに置くと、それではないという意味になります。",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "Placé après un mot, il signifie que ce n'est pas cela.",
+     "fr_s": null
     },
     {
      "ko": "끝을 올려 말하면 묻는 말이 돼요.",
@@ -2469,7 +2598,9 @@
      "km": "បើនិយាយឡើងសំឡេងនៅចុង វាក្លាយជាសំណួរ។",
      "km_s": null,
      "ja": "最後を上げて言うと、たずねる言葉になります。",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "Si l'intonation monte à la fin, cela devient une question.",
+     "fr_s": null
     }
    ],
    "gloss": {
@@ -2491,7 +2622,8 @@
       "my": "မဟုတ်ပါဘူး",
       "pt": "não é",
       "km": "មិនមែនទេ",
-      "ja": "ではありません"
+      "ja": "ではありません",
+      "fr": "ce n'est pas"
      }
     },
     "이에요": {
@@ -2512,7 +2644,8 @@
       "my": "",
       "pt": "",
       "km": "",
-      "ja": ""
+      "ja": "",
+      "fr": ""
      }
     }
    }
@@ -2537,7 +2670,8 @@
     "my": "စာလုံးဆိုတာ သဘောတူညီချက် တစ်ခုပဲကွယ်။ လူတိုင်း အတူတူ ဖတ်နိုင်မှ စာလုံး ဖြစ်တာပေါ့။",
     "pt": "As letras são um combinado. Só são letras se todo mundo puder ler junto.",
     "km": "អក្សរ គឺជាការព្រមព្រៀងគ្នា ណា៎ កូន។ ទាល់តែគ្រប់គ្នាអាចអានបានដូចគ្នា ទើបហៅថាអក្សរ។",
-    "ja": "文字は約束なんだよ。みんなが読めてこそ、文字なんだ。"
+    "ja": "文字は約束なんだよ。みんなが読めてこそ、文字なんだ。",
+    "fr": "Les lettres sont une convention. Ce ne sont des lettres que si tout le monde peut les lire ensemble."
    },
    "pieces": [
     {
@@ -2559,7 +2693,8 @@
       "my": "စာလုံးဆိုတာ",
       "pt": "as letras",
       "km": "អក្សរ",
-      "ja": "文字は"
+      "ja": "文字は",
+      "fr": "les lettres"
      }
     },
     {
@@ -2581,7 +2716,8 @@
       "my": "သဘောတူညီချက်ပါ",
       "pt": "são um combinado",
       "km": "ជាការព្រមព្រៀង",
-      "ja": "約束です"
+      "ja": "約束です",
+      "fr": "sont une convention"
      }
     },
     {
@@ -2603,7 +2739,8 @@
       "my": "အားလုံး",
       "pt": "todos",
       "km": "ទាំងអស់",
-      "ja": "みんな"
+      "ja": "みんな",
+      "fr": "tout le monde"
      }
     },
     {
@@ -2625,7 +2762,8 @@
       "my": "အတူတူ",
       "pt": "juntos",
       "km": "ជាមួយគ្នា",
-      "ja": "いっしょに"
+      "ja": "いっしょに",
+      "fr": "ensemble"
      }
     },
     {
@@ -2647,7 +2785,8 @@
       "my": "ဖတ်နိုင်",
       "pt": "poder ler",
       "km": "អាចអាន",
-      "ja": "読むことが"
+      "ja": "読むことが",
+      "fr": "pouvoir lire"
      }
     },
     {
@@ -2669,7 +2808,8 @@
       "my": "မှသာ",
       "pt": "só se puder",
       "km": "ទាល់តែបាន",
-      "ja": "できてこそ"
+      "ja": "できてこそ",
+      "fr": "il faut"
      }
     },
     {
@@ -2691,7 +2831,8 @@
       "my": "စာလုံးပါ",
       "pt": "são letras",
       "km": "ទើបជាអក្សរ",
-      "ja": "文字です"
+      "ja": "文字です",
+      "fr": "sont des lettres"
      }
     }
    ],
@@ -2713,7 +2854,8 @@
     "my": "စကားလုံး + 은 / 는",
     "pt": "palavra + 은 / 는",
     "km": "ពាក្យ + 은 / 는",
-    "ja": "言葉 + 은 / 는"
+    "ja": "言葉 + 은 / 는",
+    "fr": "mot + 은 / 는"
    },
    "text": {
     "ko": {
@@ -2783,6 +2925,10 @@
     "ja": {
      "ex": "文字は約束なんだよ。みんなが読めてこそ、文字なんだ。 言葉の後ろの \"는\" (neun) は、今からこれについて話すことを示す助詞です。パッチムがあれば \"은\" (eun)、なければ \"는\" (neun) をつけます。",
      "say": "では、言ってみてください。 \"한글은 글자예요\" (han-geul-eun geul-ja-ye-yo, \"한글\" は文字です)。"
+    },
+    "fr": {
+     "ex": "Les lettres sont une convention. Ce ne sont des lettres que si tout le monde peut les lire ensemble. Le \"는\" (neun) après un mot indique que l'on va maintenant parler de cela. S'il y a une consonne finale, on ajoute \"은\" (eun), sinon on ajoute \"는\" (neun).",
+     "say": "Maintenant, dites-le. \"한글은 글자예요\" (han-geul-eun geul-ja-ye-yo, le \"한글\" est une écriture)."
     }
    },
    "ko_by": {
@@ -2849,6 +2995,10 @@
     "ja": {
      "ex": "글자는 약속이에요. 다 같이 읽을 수 있어야 글자예요. 낱말 뒤의 \"는\" (neun) 은 지금 이것에 대해 말하겠다는 표시예요. 받침이 있으면 \"은\" (eun), 없으면 \"는\" (neun) 을 붙여요.",
      "say": "이제 말해 보세요. \"한글은 글자예요\" (han-geul-eun geul-ja-ye-yo, \"한글\" は文字です)"
+    },
+    "fr": {
+     "ex": "글자는 약속이에요. 다 같이 읽을 수 있어야 글자예요. 낱말 뒤의 \"는\" (neun) 은 지금 이것에 대해 말하겠다는 표시예요. 받침이 있으면 \"은\" (eun), 없으면 \"는\" (neun) 을 붙여요.",
+     "say": "이제 말해 보세요. \"한글은 글자예요\" (han-geul-eun geul-ja-ye-yo, le \"한글\" est une écriture)"
     }
    },
    "audio": {
@@ -2920,6 +3070,10 @@
     "ja": {
      "ex": null,
      "say": null
+    },
+    "fr": {
+     "ex": null,
+     "say": null
     }
    },
    "sent": [
@@ -2957,7 +3111,9 @@
      "km": "អក្សរ គឺជាការព្រមព្រៀងគ្នា ណា៎ កូន។",
      "km_s": null,
      "ja": "文字は約束なんだよ。",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "Les lettres sont une convention.",
+     "fr_s": null
     },
     {
      "ko": "다 같이 읽을 수 있어야 글자예요.",
@@ -2993,7 +3149,9 @@
      "km": "ទាល់តែគ្រប់គ្នាអាចអានបានដូចគ្នា ទើបហៅថាអក្សរ។",
      "km_s": null,
      "ja": "みんなが読めてこそ、文字なんだ。",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "Ce ne sont des lettres que si tout le monde peut les lire ensemble.",
+     "fr_s": null
     },
     {
      "ko": "낱말 뒤의 \"는\"은 지금 이것에 대해 말하겠다는 표시예요.",
@@ -3029,7 +3187,9 @@
      "km": "\"는\" នៅក្រោយពាក្យ ជាពាក្យសម្គាល់ដែលបង្ហាញថា ឥឡូវនឹងនិយាយអំពីរឿងនេះ។",
      "km_s": null,
      "ja": "言葉の後ろの \"는\" は、今からこれについて話すことを示す助詞です。",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "Le \"는\" après un mot indique que l'on va maintenant parler de cela.",
+     "fr_s": null
     },
     {
      "ko": "받침이 있으면 \"은\", 없으면 \"는\"을 붙여요.",
@@ -3065,7 +3225,9 @@
      "km": "បើមានព្យញ្ជនៈចុង គេភ្ជាប់ \"은\" បើគ្មាន គេភ្ជាប់ \"는\"។",
      "km_s": null,
      "ja": "パッチムがあれば \"은\"、なければ \"는\" をつけます。",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "S'il y a une consonne finale, on ajoute \"은\", sinon on ajoute \"는\".",
+     "fr_s": null
     }
    ],
    "gloss": {
@@ -3087,7 +3249,8 @@
       "my": "",
       "pt": "",
       "km": "",
-      "ja": ""
+      "ja": "",
+      "fr": ""
      }
     },
     "은": {
@@ -3108,7 +3271,8 @@
       "my": "",
       "pt": "",
       "km": "",
-      "ja": ""
+      "ja": "",
+      "fr": ""
      }
     }
    }
@@ -3133,7 +3297,8 @@
     "my": "အော်၊ ကိုယ်တစ်ယောက်တည်း သိရုံနဲ့ စာလုံး မဖြစ်ဘူးကိုး။",
     "pt": "Ah, então se só eu sei, não é uma letra.",
     "km": "អូ៎ បើខ្ញុំដឹងតែម្នាក់ឯង មិនមែនជាអក្សរទេតើ។",
-    "ja": "あ、自分ひとりだけが分かっても、文字じゃないんだ。"
+    "ja": "あ、自分ひとりだけが分かっても、文字じゃないんだ。",
+    "fr": "Ah, si c'est seulement moi qui la connais, ce n'est pas une lettre."
    },
    "pieces": [
     {
@@ -3155,7 +3320,8 @@
       "my": "အော်",
       "pt": "ah",
       "km": "អូ៎",
-      "ja": "あ"
+      "ja": "あ",
+      "fr": "ah"
      }
     },
     {
@@ -3177,7 +3343,8 @@
       "my": "ကိုယ်",
       "pt": "eu",
       "km": "ខ្ញុំ",
-      "ja": "わたし"
+      "ja": "わたし",
+      "fr": "moi"
      }
     },
     {
@@ -3199,7 +3366,8 @@
       "my": "တစ်ယောက်တည်း",
       "pt": "a sós",
       "km": "ម្នាក់ឯង",
-      "ja": "ひとりで"
+      "ja": "ひとりで",
+      "fr": "seul"
      }
     },
     {
@@ -3221,7 +3389,8 @@
       "my": "သိရင်",
       "pt": "se souber",
       "km": "បើដឹង",
-      "ja": "分かったら"
+      "ja": "分かったら",
+      "fr": "si je connais"
      }
     },
     {
@@ -3243,7 +3412,8 @@
       "my": "စာလုံး",
       "pt": "letra",
       "km": "អក្សរ",
-      "ja": "文字では"
+      "ja": "文字では",
+      "fr": "une lettre"
      }
     },
     {
@@ -3265,7 +3435,8 @@
       "my": "မဟုတ်ဘူးကိုး",
       "pt": "então não é",
       "km": "មិនមែនទេតើ",
-      "ja": "ないんだ"
+      "ja": "ないんだ",
+      "fr": "ce n'est pas, je vois"
      }
     }
    ],
@@ -3287,7 +3458,8 @@
     "my": "စကားအဆုံးသတ် -구나",
     "pt": "terminação -구나",
     "km": "ចុងពាក្យ -구나",
-    "ja": "語尾 -구나"
+    "ja": "語尾 -구나",
+    "fr": "terminaison -구나"
    },
    "text": {
     "ko": {
@@ -3357,6 +3529,10 @@
     "ja": {
      "ex": "あ、自分ひとりだけが分かっても、文字じゃないんだ。 語尾 \"구나\" (gu-na) は、今気づいたことをひとりごとのように言うときに使います。ひとりごとなので、丁寧な語尾ではありません。\"구나\" (gu-na) には \"요\" (yo) をつけません。",
      "say": "では、言ってみてください。 \"아, 글자가 아니구나\" (a geul-ja-ga a-ni-gu-na, あ！文字じゃないんだ)。"
+    },
+    "fr": {
+     "ex": "Ah, si c'est seulement moi qui la connais, ce n'est pas une lettre. La terminaison \"구나\" (gu-na) s'emploie pour dire, comme à soi-même, une chose que l'on vient de découvrir. Comme on se parle à soi-même, ce n'est pas une terminaison polie. On n'ajoute pas \"요\" (yo) à \"구나\" (gu-na).",
+     "say": "Maintenant, dites-le. \"아, 글자가 아니구나\" (a geul-ja-ga a-ni-gu-na, ah ce n'est pas une lettre)."
     }
    },
    "ko_by": {
@@ -3423,6 +3599,10 @@
     "ja": {
      "ex": "아, 저 혼자 알면 글자가 아니구나. 말끝 \"구나\" (gu-na) 는 방금 알게 된 것을 혼잣말처럼 말할 때 써요. 혼잣말이라서 공손한 말끝이 아니에요. \"구나\" (gu-na) 에는 \"요\" (yo) 를 붙이지 않아요.",
      "say": "이제 말해 보세요. \"아, 글자가 아니구나\" (a geul-ja-ga a-ni-gu-na, あ！文字じゃないんだ)"
+    },
+    "fr": {
+     "ex": "아, 저 혼자 알면 글자가 아니구나. 말끝 \"구나\" (gu-na) 는 방금 알게 된 것을 혼잣말처럼 말할 때 써요. 혼잣말이라서 공손한 말끝이 아니에요. \"구나\" (gu-na) 에는 \"요\" (yo) 를 붙이지 않아요.",
+     "say": "이제 말해 보세요. \"아, 글자가 아니구나\" (a geul-ja-ga a-ni-gu-na, ah ce n'est pas une lettre)"
     }
    },
    "audio": {
@@ -3494,6 +3674,10 @@
     "ja": {
      "ex": null,
      "say": null
+    },
+    "fr": {
+     "ex": null,
+     "say": null
     }
    },
    "sent": [
@@ -3531,7 +3715,9 @@
      "km": "អូ៎ បើខ្ញុំដឹងតែម្នាក់ឯង មិនមែនជាអក្សរទេតើ។",
      "km_s": null,
      "ja": "あ、自分ひとりだけが分かっても、文字じゃないんだ。",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "Ah, si c'est seulement moi qui la connais, ce n'est pas une lettre.",
+     "fr_s": null
     },
     {
      "ko": "말끝 \"구나\"는 방금 알게 된 것을 혼잣말처럼 말할 때 써요.",
@@ -3567,7 +3753,9 @@
      "km": "ចុងពាក្យ \"구나\" ប្រើពេលនិយាយអំពីរឿងដែលទើបតែដឹង ដូចជានិយាយម្នាក់ឯង។",
      "km_s": null,
      "ja": "語尾 \"구나\" は、今気づいたことをひとりごとのように言うときに使います。",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "La terminaison \"구나\" s'emploie pour dire, comme à soi-même, une chose que l'on vient de découvrir.",
+     "fr_s": null
     },
     {
      "ko": "혼잣말이라서 공손한 말끝이 아니에요.",
@@ -3603,7 +3791,9 @@
      "km": "ដោយសារជាការនិយាយម្នាក់ឯង វាមិនមែនជាចុងពាក្យគួរសមទេ។",
      "km_s": null,
      "ja": "ひとりごとなので、丁寧な語尾ではありません。",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "Comme on se parle à soi-même, ce n'est pas une terminaison polie.",
+     "fr_s": null
     },
     {
      "ko": "\"구나\"에는 \"요\"를 붙이지 않아요.",
@@ -3639,7 +3829,9 @@
      "km": "គេមិនភ្ជាប់ \"요\" នៅក្រោយ \"구나\" ទេ។",
      "km_s": null,
      "ja": "\"구나\" には \"요\" をつけません。",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "On n'ajoute pas \"요\" à \"구나\".",
+     "fr_s": null
     }
    ],
    "gloss": {
@@ -3661,7 +3853,8 @@
       "my": "",
       "pt": "",
       "km": "",
-      "ja": ""
+      "ja": "",
+      "fr": ""
      }
     },
     "요": {
@@ -3682,7 +3875,8 @@
       "my": "",
       "pt": "",
       "km": "",
-      "ja": ""
+      "ja": "",
+      "fr": ""
      }
     }
    }
@@ -3707,7 +3901,8 @@
     "my": "ဒါဆို အဲဒီ သဘောတူညီချက်ကို ဘယ်သူက သတ်မှတ်ခဲ့တာလဲ ခင်ဗျာ။",
     "pt": "Então quem decidiu esse combinado?",
     "km": "ចុះតើនរណាជាអ្នកកំណត់ការព្រមព្រៀងនោះ បាទ អ្នកគ្រូ?",
-    "ja": "じゃあ、その約束は誰が決めたんですか？"
+    "ja": "じゃあ、その約束は誰が決めたんですか？",
+    "fr": "Alors, qui a fixé cette convention?"
    },
    "pieces": [
     {
@@ -3729,7 +3924,8 @@
       "my": "ဒါဆို",
       "pt": "então",
       "km": "ចុះ",
-      "ja": "じゃあ"
+      "ja": "じゃあ",
+      "fr": "alors"
      }
     },
     {
@@ -3751,7 +3947,8 @@
       "my": "အဲဒီ",
       "pt": "esse",
       "km": "នោះ",
-      "ja": "その"
+      "ja": "その",
+      "fr": "cette"
      }
     },
     {
@@ -3773,7 +3970,8 @@
       "my": "သဘောတူညီချက်ကို",
       "pt": "o combinado",
       "km": "ការព្រមព្រៀង",
-      "ja": "約束は"
+      "ja": "約束は",
+      "fr": "convention"
      }
     },
     {
@@ -3795,7 +3993,8 @@
       "my": "ဘယ်သူက",
       "pt": "quem",
       "km": "អ្នកណា",
-      "ja": "誰が"
+      "ja": "誰が",
+      "fr": "qui"
      }
     },
     {
@@ -3817,7 +4016,8 @@
       "my": "သတ်မှတ်ခဲ့သလဲ",
       "pt": "decidiu",
       "km": "បានកំណត់",
-      "ja": "決めましたか"
+      "ja": "決めましたか",
+      "fr": "a fixé"
      }
     }
    ],
@@ -3839,7 +4039,8 @@
     "my": "누가 + 했어요?",
     "pt": "누가 + 했어요?",
     "km": "누가 + 했어요?",
-    "ja": "누가 + 했어요?"
+    "ja": "누가 + 했어요?",
+    "fr": "누가 + 했어요?"
    },
    "text": {
     "ko": {
@@ -3909,6 +4110,10 @@
     "ja": {
      "ex": "じゃあ、その約束は誰が決めたんですか？ \"누가\" (nu-ga, 誰が) は、\"누구\" (nu-gu, 誰) に \"가\" (ga) がついた縮約形です。そのことをした人が誰なのかをたずねるときに使います。\"정했어요\" (jeong-haess-eo-yo, 決めました) の \"했어요\" (haess-eo-yo) は、前に聞いた \"었어요\" (eoss-eo-yo) と同じ語尾です。もう終わったことを表します。",
      "say": "では、言ってみてください。 \"누가 만들었어요?\" (nu-ga man-deul-eoss-eo-yo, 誰が作りましたか？)。"
+    },
+    "fr": {
+     "ex": "Alors, qui a fixé cette convention? \"누가\" (nu-ga, qui) est la forme abrégée que l'on obtient en ajoutant \"가\" (ga) à \"누구\" (nu-gu, qui). On l'emploie pour demander qui a fait quelque chose. Le \"했어요\" (haess-eo-yo) de \"정했어요\" (jeong-haess-eo-yo, a décidé) est la même terminaison que le \"었어요\" (eoss-eo-yo) entendu plus tôt. Elle indique une action déjà terminée.",
+     "say": "Maintenant, dites-le. \"누가 만들었어요?\" (nu-ga man-deul-eoss-eo-yo, qui l'a créé?)."
     }
    },
    "ko_by": {
@@ -3975,6 +4180,10 @@
     "ja": {
      "ex": "그럼 그 약속은 누가 정했어요? \"누가\" (nu-ga, 誰が) 는 \"누구\" (nu-gu, 誰) 에 \"가\" (ga) 가 붙으면서 줄어든 말이에요. 그 일을 한 사람이 누구인지 물을 때 써요. \"정했어요\" (jeong-haess-eo-yo, 決めました) 의 \"했어요\" (haess-eo-yo) 는 앞에서 들은 \"었어요\" (eoss-eo-yo) 와 같은 말끝이에요. 이미 끝난 일을 나타내요.",
      "say": "이제 말해 보세요. \"누가 만들었어요?\" (nu-ga man-deul-eoss-eo-yo, 誰が作りましたか？)"
+    },
+    "fr": {
+     "ex": "그럼 그 약속은 누가 정했어요? \"누가\" (nu-ga, qui) 는 \"누구\" (nu-gu, qui) 에 \"가\" (ga) 가 붙으면서 줄어든 말이에요. 그 일을 한 사람이 누구인지 물을 때 써요. \"정했어요\" (jeong-haess-eo-yo, a décidé) 의 \"했어요\" (haess-eo-yo) 는 앞에서 들은 \"었어요\" (eoss-eo-yo) 와 같은 말끝이에요. 이미 끝난 일을 나타내요.",
+     "say": "이제 말해 보세요. \"누가 만들었어요?\" (nu-ga man-deul-eoss-eo-yo, qui l'a créé?)"
     }
    },
    "audio": {
@@ -4046,6 +4255,10 @@
     "ja": {
      "ex": null,
      "say": null
+    },
+    "fr": {
+     "ex": null,
+     "say": null
     }
    },
    "sent": [
@@ -4083,7 +4296,9 @@
      "km": "ចុះតើនរណាជាអ្នកកំណត់ការព្រមព្រៀងនោះ បាទ អ្នកគ្រូ?",
      "km_s": null,
      "ja": "じゃあ、その約束は誰が決めたんですか？",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "Alors, qui a fixé cette convention?",
+     "fr_s": null
     },
     {
      "ko": "\"누가\"는 \"누구\"에 \"가\"가 붙으면서 줄어든 말이에요.",
@@ -4119,7 +4334,9 @@
      "km": "\"누가\" គឺជាទម្រង់ខ្លី ដែលកើតឡើងពេល \"가\" ភ្ជាប់នឹង \"누구\"។",
      "km_s": null,
      "ja": "\"누가\" は、\"누구\" に \"가\" がついた縮約形です。",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "\"누가\" est la forme abrégée que l'on obtient en ajoutant \"가\" à \"누구\".",
+     "fr_s": null
     },
     {
      "ko": "그 일을 한 사람이 누구인지 물을 때 써요.",
@@ -4155,7 +4372,9 @@
      "km": "គេប្រើវាពេលសួរថា អ្នកណាជាអ្នកធ្វើការងារនោះ។",
      "km_s": null,
      "ja": "そのことをした人が誰なのかをたずねるときに使います。",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "On l'emploie pour demander qui a fait quelque chose.",
+     "fr_s": null
     },
     {
      "ko": "\"정했어요\"의 \"했어요\"는 앞에서 들은 \"었어요\"와 같은 말끝이에요.",
@@ -4191,7 +4410,9 @@
      "km": "\"했어요\" នៅក្នុង \"정했어요\" គឺជាចុងពាក្យដូចគ្នានឹង \"었어요\" ដែលអ្នកបានឮមុននេះ។",
      "km_s": null,
      "ja": "\"정했어요\" の \"했어요\" は、前に聞いた \"었어요\" と同じ語尾です。",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "Le \"했어요\" de \"정했어요\" est la même terminaison que le \"었어요\" entendu plus tôt.",
+     "fr_s": null
     },
     {
      "ko": "이미 끝난 일을 나타내요.",
@@ -4227,7 +4448,9 @@
      "km": "វាបង្ហាញពីការងារដែលបានធ្វើរួចហើយ។",
      "km_s": null,
      "ja": "もう終わったことを表します。",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "Elle indique une action déjà terminée.",
+     "fr_s": null
     }
    ],
    "gloss": {
@@ -4249,7 +4472,8 @@
       "my": "",
       "pt": "",
       "km": "",
-      "ja": ""
+      "ja": "",
+      "fr": ""
      }
     },
     "누가": {
@@ -4270,7 +4494,8 @@
       "my": "ဘယ်သူက",
       "pt": "quem",
       "km": "អ្នកណា",
-      "ja": "誰が"
+      "ja": "誰が",
+      "fr": "qui"
      }
     },
     "누구": {
@@ -4291,7 +4516,8 @@
       "my": "ဘယ်သူ",
       "pt": "quem",
       "km": "អ្នកណា",
-      "ja": "誰"
+      "ja": "誰",
+      "fr": "qui"
      }
     },
     "었어요": {
@@ -4312,7 +4538,8 @@
       "my": "",
       "pt": "",
       "km": "",
-      "ja": ""
+      "ja": "",
+      "fr": ""
      }
     },
     "정했어요": {
@@ -4333,7 +4560,8 @@
       "my": "သတ်မှတ်ခဲ့တယ်",
       "pt": "decidiu",
       "km": "បានកំណត់",
-      "ja": "決めました"
+      "ja": "決めました",
+      "fr": "a décidé"
      }
     },
     "했어요": {
@@ -4354,7 +4582,8 @@
       "my": "",
       "pt": "",
       "km": "",
-      "ja": ""
+      "ja": "",
+      "fr": ""
      }
     }
    }
@@ -4379,7 +4608,8 @@
     "my": "\"세종대왕\" မင်းကြီးပေါ့ကွယ်။ လွန်ခဲ့တဲ့ နှစ်ငါးရာက ဘုရင်ကိုယ်တိုင် ဖန်တီးခဲ့တာ။ အဲဒီတုန်းက ပြည်သူတွေက စာလုံး မသိကြဘူးလေ။ စာက အရမ်း ခက်ခဲခဲ့တယ်။",
     "pt": "Foi o rei \"세종대왕\". Há quinhentos anos, o próprio rei fez as letras. Naquela época, o povo não conhecia as letras. Era difícil demais.",
     "km": "គឺស្តេច \"세종대왕\" ណា៎ កូន។ កាលពីប្រាំរយឆ្នាំមុន ស្តេចបានបង្កើតវាដោយផ្ទាល់។ ព្រោះកាលនោះ ប្រជារាស្ត្រមិនចេះអក្សរទេ។ អក្សរពិបាកពេក។",
-    "ja": "\"세종대왕\" だよ。五百年前、王様が自分で作ったんだ。そのころ、民は文字を知らなかったからね。難しすぎたんだよ。"
+    "ja": "\"세종대왕\" だよ。五百年前、王様が自分で作ったんだ。そのころ、民は文字を知らなかったからね。難しすぎたんだよ。",
+    "fr": "Le roi \"세종대왕\". Il y a cinq cents ans, le roi a créé lui-même les lettres. À l'époque, les gens du peuple ne savaient pas lire. C'était trop difficile."
    },
    "pieces": [
     {
@@ -4401,7 +4631,8 @@
       "my": "\"세종대왕\" မင်းကြီးပါ",
       "pt": "o rei \"세종대왕\"",
       "km": "ស្តេច \"세종대왕\"",
-      "ja": "\"세종대왕\" です"
+      "ja": "\"세종대왕\" です",
+      "fr": "le roi \"세종대왕\""
      }
     },
     {
@@ -4423,7 +4654,8 @@
       "my": "ငါးရာ",
       "pt": "quinhentos",
       "km": "ប្រាំរយ",
-      "ja": "五百"
+      "ja": "五百",
+      "fr": "cinq cents"
      }
     },
     {
@@ -4445,7 +4677,8 @@
       "my": "နှစ်",
       "pt": "anos",
       "km": "ឆ្នាំ",
-      "ja": "年"
+      "ja": "年",
+      "fr": "ans"
      }
     },
     {
@@ -4467,7 +4700,8 @@
       "my": "အရင်က",
       "pt": "há",
       "km": "មុន",
-      "ja": "前に"
+      "ja": "前に",
+      "fr": "il y a"
      }
     },
     {
@@ -4489,7 +4723,8 @@
       "my": "ဘုရင်က",
       "pt": "o rei",
       "km": "ស្តេច",
-      "ja": "王様が"
+      "ja": "王様が",
+      "fr": "le roi"
      }
     },
     {
@@ -4511,7 +4746,8 @@
       "my": "ကိုယ်တိုင်",
       "pt": "em pessoa",
       "km": "ដោយផ្ទាល់",
-      "ja": "自分で"
+      "ja": "自分で",
+      "fr": "lui-même"
      }
     },
     {
@@ -4533,7 +4769,8 @@
       "my": "ဖန်တီးခဲ့တယ်",
       "pt": "fez",
       "km": "បានបង្កើត",
-      "ja": "作りました"
+      "ja": "作りました",
+      "fr": "a créé"
      }
     },
     {
@@ -4555,7 +4792,8 @@
       "my": "အဲဒီတုန်းက",
       "pt": "naquela época",
       "km": "កាលនោះ",
-      "ja": "そのころ"
+      "ja": "そのころ",
+      "fr": "à l'époque"
      }
     },
     {
@@ -4577,7 +4815,8 @@
       "my": "ပြည်သူတွေက",
       "pt": "o povo",
       "km": "ប្រជារាស្ត្រ",
-      "ja": "民は"
+      "ja": "民は",
+      "fr": "les gens du peuple"
      }
     },
     {
@@ -4599,7 +4838,8 @@
       "my": "စာလုံးကို",
       "pt": "as letras",
       "km": "អក្សរ",
-      "ja": "文字を"
+      "ja": "文字を",
+      "fr": "les lettres"
      }
     },
     {
@@ -4621,7 +4861,8 @@
       "my": "မသိခဲ့ကြလို့ပါ",
       "pt": "não conhecia",
       "km": "ព្រោះមិនចេះ",
-      "ja": "知らなかったからです"
+      "ja": "知らなかったからです",
+      "fr": "ne connaissaient pas"
      }
     },
     {
@@ -4643,7 +4884,8 @@
       "my": "အရမ်း",
       "pt": "demais",
       "km": "ពេក",
-      "ja": "とても"
+      "ja": "とても",
+      "fr": "trop"
      }
     },
     {
@@ -4665,7 +4907,8 @@
       "my": "ခက်ခဲခဲ့တယ်",
       "pt": "era difícil",
       "km": "ពិបាក",
-      "ja": "難しかったです"
+      "ja": "難しかったです",
+      "fr": "c'était difficile"
      }
     }
    ],
@@ -4687,7 +4930,8 @@
     "my": "စကားလုံး + 을 / 를 + ကြိယာ",
     "pt": "palavra + 을 / 를 + verbo",
     "km": "ពាក្យ + 을 / 를 + កិរិយាសព្ទ",
-    "ja": "言葉 + 을 / 를 + 動詞"
+    "ja": "言葉 + 을 / 를 + 動詞",
+    "fr": "mot + 을 / 를 + verbe"
    },
    "text": {
     "ko": {
@@ -4757,6 +5001,10 @@
     "ja": {
      "ex": "\"세종대왕\" (se-jong-dae-wang, 王) だよ。五百年前、王様が自分で作ったんだ。そのころ、民は文字を知らなかったからね。難しすぎたんだよ。 \"글자를\" (geul-ja-reul, 文字を) の \"를\" (reul) は、何を知らないのか、何を作るのか、その対象になる言葉、つまり目的語の後ろにつきます。パッチムがあれば \"을\" (eul)、なければ \"를\" (reul) をつけます。日本語の \"を\" と同じように言葉の後ろにつけますが、人に会うときは日本語では \"に\" を使い、韓国語ではそこにも \"를\" (reul) をつけます。",
      "say": "では、言ってみてください。 \"저는 글자를 만들었어요\" (jeo-neun geul-ja-reul man-deul-eoss-eo-yo, わたしは文字を作りました)。"
+    },
+    "fr": {
+     "ex": "Le roi \"세종대왕\" (se-jong-dae-wang, roi). Il y a cinq cents ans, le roi a créé lui-même les lettres. À l'époque, les gens du peuple ne savaient pas lire. C'était trop difficile. Le \"를\" (reul) de \"글자를\" (geul-ja-reul, les lettres) se place après le mot qui reçoit l'action, c'est-à-dire ce que l'on ne connaît pas ou ce que l'on crée. S'il y a une consonne finale, on ajoute \"을\" (eul), sinon on ajoute \"를\" (reul). Le coréen place cette particule après le mot.",
+     "say": "Maintenant, dites-le. \"저는 글자를 만들었어요\" (jeo-neun geul-ja-reul man-deul-eoss-eo-yo, j'ai créé les lettres)."
     }
    },
    "ko_by": {
@@ -4875,6 +5123,10 @@
      "sent": {
       "6": "일본어의 \"を\"처럼 낱말 뒤에 붙지만, 일본어는 사람을 만날 때 \"に\"를 쓰고 한국어는 거기에도 \"를\"을 붙여요."
      }
+    },
+    "fr": {
+     "ex": "세종대왕이요. 오백 년 전에 왕이 직접 만들었어요. 그때 백성들은 글자를 몰랐거든요. 너무 어려웠어요. \"글자를\" (geul-ja-reul, les lettres) 의 \"를\" (reul) 은 무엇을 모르는지, 무엇을 만드는지, 그 대상이 되는 낱말 뒤에 붙어요. 받침이 있으면 \"을\" (eul), 없으면 \"를\" (reul) 을 붙여요. 한국어는 이 표시를 낱말 뒤에 붙여요.",
+     "say": "이제 말해 보세요. \"저는 글자를 만들었어요\" (jeo-neun geul-ja-reul man-deul-eoss-eo-yo, j'ai créé les lettres)"
     }
    },
    "audio": {
@@ -4946,6 +5198,10 @@
     "ja": {
      "ex": null,
      "say": null
+    },
+    "fr": {
+     "ex": null,
+     "say": null
     }
    },
    "sent": [
@@ -4983,7 +5239,9 @@
      "km": "គឺស្តេច \"세종대왕\" ណា៎ កូន។",
      "km_s": null,
      "ja": "\"세종대왕\" だよ。",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "Le roi \"세종대왕\".",
+     "fr_s": null
     },
     {
      "ko": "오백 년 전에 왕이 직접 만들었어요.",
@@ -5019,7 +5277,9 @@
      "km": "កាលពីប្រាំរយឆ្នាំមុន ស្តេចបានបង្កើតវាដោយផ្ទាល់។",
      "km_s": null,
      "ja": "五百年前、王様が自分で作ったんだ。",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "Il y a cinq cents ans, le roi a créé lui-même les lettres.",
+     "fr_s": null
     },
     {
      "ko": "그때 백성들은 글자를 몰랐거든요.",
@@ -5055,7 +5315,9 @@
      "km": "ព្រោះកាលនោះ ប្រជារាស្ត្រមិនចេះអក្សរទេ។",
      "km_s": null,
      "ja": "そのころ、民は文字を知らなかったからね。",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "À l'époque, les gens du peuple ne savaient pas lire.",
+     "fr_s": null
     },
     {
      "ko": "너무 어려웠어요.",
@@ -5091,7 +5353,9 @@
      "km": "អក្សរពិបាកពេក។",
      "km_s": null,
      "ja": "難しすぎたんだよ。",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "C'était trop difficile.",
+     "fr_s": null
     },
     {
      "ko": "\"글자를\"의 \"를\"은 무엇을 모르는지, 무엇을 만드는지, 그 대상이 되는 낱말 뒤에 붙어요.",
@@ -5127,7 +5391,9 @@
      "km": "\"를\" នៅក្នុង \"글자를\" ភ្ជាប់នៅក្រោយពាក្យដែលជាកម្មវត្ថុ ពោលគឺមិនស្គាល់អ្វី ឬបង្កើតអ្វី។",
      "km_s": null,
      "ja": "\"글자를\" の \"를\" は、何を知らないのか、何を作るのか、その対象になる言葉、つまり目的語の後ろにつきます。",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "Le \"를\" de \"글자를\" se place après le mot qui reçoit l'action, c'est-à-dire ce que l'on ne connaît pas ou ce que l'on crée.",
+     "fr_s": null
     },
     {
      "ko": "받침이 있으면 \"을\", 없으면 \"를\"을 붙여요.",
@@ -5163,7 +5429,9 @@
      "km": "បើមានព្យញ្ជនៈចុង គេភ្ជាប់ \"을\" បើគ្មាន គេភ្ជាប់ \"를\"។",
      "km_s": null,
      "ja": "パッチムがあれば \"을\"、なければ \"를\" をつけます。",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "S'il y a une consonne finale, on ajoute \"을\", sinon on ajoute \"를\".",
+     "fr_s": null
     },
     {
      "ko": "한국어는 이 표시를 낱말 뒤에 붙여요.",
@@ -5199,7 +5467,9 @@
      "km": "ភាសាកូរ៉េ ភ្ជាប់ពាក្យសម្គាល់នេះ នៅក្រោយពាក្យ។",
      "km_s": null,
      "ja": "日本語の \"を\" と同じように言葉の後ろにつけますが、人に会うときは日本語では \"に\" を使い、韓国語ではそこにも \"를\" をつけます。",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "Le coréen place cette particule après le mot.",
+     "fr_s": null
     }
    ],
    "gloss": {
@@ -5221,7 +5491,8 @@
       "my": "စာလုံးကို",
       "pt": "as letras",
       "km": "អក្សរ",
-      "ja": "文字を"
+      "ja": "文字を",
+      "fr": "les lettres"
      }
     },
     "를": {
@@ -5242,7 +5513,8 @@
       "my": "",
       "pt": "",
       "km": "",
-      "ja": ""
+      "ja": "",
+      "fr": ""
      }
     },
     "세종대왕": {
@@ -5263,7 +5535,8 @@
       "my": "ဘုရင်",
       "pt": "rei",
       "km": "ស្តេច",
-      "ja": "王"
+      "ja": "王",
+      "fr": "roi"
      }
     },
     "을": {
@@ -5284,7 +5557,8 @@
       "my": "",
       "pt": "",
       "km": "",
-      "ja": ""
+      "ja": "",
+      "fr": ""
      }
     }
    }
@@ -5309,7 +5583,8 @@
     "my": "ဝိုး! ဒါဆို လူတိုင်း ဝမ်းသာခဲ့ကြမှာပဲရှင့်!",
     "pt": "Nossa! Então todo mundo deve ter adorado!",
     "km": "អូហូ! អ៊ីចឹង ប្រាកដជាគ្រប់គ្នាសប្បាយចិត្តហើយ ចា៎ស!",
-    "ja": "わあ！じゃあ、みんな喜んだでしょうね！"
+    "ja": "わあ！じゃあ、みんな喜んだでしょうね！",
+    "fr": "Waouh! Alors tout le monde a dû être ravi!"
    },
    "pieces": [
     {
@@ -5331,7 +5606,8 @@
       "my": "ဝိုး",
       "pt": "nossa",
       "km": "អូហូ",
-      "ja": "わあ"
+      "ja": "わあ",
+      "fr": "waouh"
      }
     },
     {
@@ -5353,7 +5629,8 @@
       "my": "ဒါဆို",
       "pt": "então",
       "km": "អ៊ីចឹង",
-      "ja": "じゃあ"
+      "ja": "じゃあ",
+      "fr": "alors"
      }
     },
     {
@@ -5375,7 +5652,8 @@
       "my": "လူတိုင်း",
       "pt": "todo mundo",
       "km": "គ្រប់គ្នា",
-      "ja": "みんな"
+      "ja": "みんな",
+      "fr": "tout le monde"
      }
     },
     {
@@ -5397,7 +5675,8 @@
       "my": "ဝမ်းသာခဲ့ကြမှာပဲ",
       "pt": "deve ter adorado",
       "km": "ប្រាកដជាសប្បាយចិត្ត",
-      "ja": "喜んだでしょうね"
+      "ja": "喜んだでしょうね",
+      "fr": "a dû être ravi"
      }
     }
    ],
@@ -5419,7 +5698,8 @@
     "my": "ကြိယာ + 었겠네요",
     "pt": "verbo + 었겠네요",
     "km": "កិរិយាសព្ទ + 었겠네요",
-    "ja": "動詞 + 었겠네요"
+    "ja": "動詞 + 었겠네요",
+    "fr": "verbe + 었겠네요"
    },
    "text": {
     "ko": {
@@ -5489,6 +5769,10 @@
     "ja": {
      "ex": "わあ！じゃあ、みんな喜んだでしょうね！ \"좋아했겠네요\" (joh-a-haess-gess-ne-yo, 喜んだでしょうね) は、自分で見ていないことを推し量って言うときに使います。今はまるごと覚えておいてください。",
      "say": "では、言ってみてください。 \"와! 다들 좋아했겠네요!\" (wa da-deul joh-a-haess-gess-ne-yo, わあ！みんな喜んだでしょうね！)。"
+    },
+    "fr": {
+     "ex": "Waouh! Alors tout le monde a dû être ravi! \"좋아했겠네요\" (joh-a-haess-gess-ne-yo, ils ont dû être ravis) s'emploie pour deviner quelque chose que l'on n'a pas vu soi-même. Pour l'instant, apprenez-le tel quel.",
+     "say": "Maintenant, dites-le. \"와! 다들 좋아했겠네요!\" (wa da-deul joh-a-haess-gess-ne-yo, waouh! tout le monde a dû être ravi!)."
     }
    },
    "ko_by": {
@@ -5555,6 +5839,10 @@
     "ja": {
      "ex": "와! 그럼 다들 좋아했겠네요! \"좋아했겠네요\" (joh-a-haess-gess-ne-yo, 喜んだでしょうね) 는 직접 보지 않은 일을 짐작해서 말할 때 써요. 지금은 통째로 익혀 두세요.",
      "say": "이제 말해 보세요. \"와! 다들 좋아했겠네요!\" (wa da-deul joh-a-haess-gess-ne-yo, わあ！みんな喜んだでしょうね！)"
+    },
+    "fr": {
+     "ex": "와! 그럼 다들 좋아했겠네요! \"좋아했겠네요\" (joh-a-haess-gess-ne-yo, ils ont dû être ravis) 는 직접 보지 않은 일을 짐작해서 말할 때 써요. 지금은 통째로 익혀 두세요.",
+     "say": "이제 말해 보세요. \"와! 다들 좋아했겠네요!\" (wa da-deul joh-a-haess-gess-ne-yo, waouh! tout le monde a dû être ravi!)"
     }
    },
    "audio": {
@@ -5626,6 +5914,10 @@
     "ja": {
      "ex": null,
      "say": null
+    },
+    "fr": {
+     "ex": null,
+     "say": null
     }
    },
    "sent": [
@@ -5663,7 +5955,9 @@
      "km": "អូហូ!",
      "km_s": null,
      "ja": "わあ！",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "Waouh!",
+     "fr_s": null
     },
     {
      "ko": "그럼 다들 좋아했겠네요!",
@@ -5699,7 +5993,9 @@
      "km": "អ៊ីចឹង ប្រាកដជាគ្រប់គ្នាសប្បាយចិត្តហើយ ចា៎ស!",
      "km_s": null,
      "ja": "じゃあ、みんな喜んだでしょうね！",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "Alors tout le monde a dû être ravi!",
+     "fr_s": null
     },
     {
      "ko": "\"좋아했겠네요\"는 직접 보지 않은 일을 짐작해서 말할 때 써요.",
@@ -5735,7 +6031,9 @@
      "km": "\"좋아했겠네요\" ប្រើពេលនិយាយទាយ អំពីរឿងដែលខ្លួនមិនបានឃើញផ្ទាល់។",
      "km_s": null,
      "ja": "\"좋아했겠네요\" は、自分で見ていないことを推し量って言うときに使います。",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "\"좋아했겠네요\" s'emploie pour deviner quelque chose que l'on n'a pas vu soi-même.",
+     "fr_s": null
     },
     {
      "ko": "지금은 통째로 익혀 두세요.",
@@ -5771,7 +6069,9 @@
      "km": "ឥឡូវនេះ សូមចាំវាទាំងមូលសិន។",
      "km_s": null,
      "ja": "今はまるごと覚えておいてください。",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "Pour l'instant, apprenez-le tel quel.",
+     "fr_s": null
     }
    ],
    "gloss": {
@@ -5793,7 +6093,8 @@
       "my": "ဝမ်းသာခဲ့ကြမှာပဲ",
       "pt": "deve ter adorado",
       "km": "ប្រាកដជាសប្បាយចិត្ត",
-      "ja": "喜んだでしょうね"
+      "ja": "喜んだでしょうね",
+      "fr": "ils ont dû être ravis"
      }
     }
    }
@@ -5818,7 +6119,8 @@
     "my": "မဟုတ်ဘူးကွဲ့။ မှူးမတ်တွေက ကန့်ကွက်ခဲ့ကြတယ်။",
     "pt": "Não. Os ministros foram contra.",
     "km": "មិនមែនទេ កូន។ ពួកមន្ត្រីបានជំទាស់។",
-    "ja": "ううん、ちがうよ。家臣たちが反対したんだ。"
+    "ja": "ううん、ちがうよ。家臣たちが反対したんだ。",
+    "fr": "Eh non. Les ministres s'y sont opposés."
    },
    "pieces": [
     {
@@ -5840,7 +6142,8 @@
       "my": "မဟုတ်ဘူး",
       "pt": "não",
       "km": "មិនមែនទេ",
-      "ja": "ちがいます"
+      "ja": "ちがいます",
+      "fr": "non"
      }
     },
     {
@@ -5862,7 +6165,8 @@
       "my": "မှူးမတ်တွေက",
       "pt": "os ministros",
       "km": "ពួកមន្ត្រី",
-      "ja": "家臣たちが"
+      "ja": "家臣たちが",
+      "fr": "les ministres"
      }
     },
     {
@@ -5884,7 +6188,8 @@
       "my": "ကန့်ကွက်ခဲ့ကြတယ်",
       "pt": "foram contra",
       "km": "បានជំទាស់",
-      "ja": "反対しました"
+      "ja": "反対しました",
+      "fr": "se sont opposés"
      }
     }
    ],
@@ -5906,7 +6211,8 @@
     "my": "စကားလုံး + 이 / 가",
     "pt": "palavra + 이 / 가",
     "km": "ពាក្យ + 이 / 가",
-    "ja": "言葉 + 이 / 가"
+    "ja": "言葉 + 이 / 가",
+    "fr": "mot + 이 / 가"
    },
    "text": {
     "ko": {
@@ -5976,6 +6282,10 @@
     "ja": {
      "ex": "ううん、ちがうよ。家臣たちが反対したんだ。 \"신하들이\" (sin-ha-deul-i, 家臣たちが) の \"이\" (i) は、文の主語になる言葉の後ろにつきます。人でないものにもつき、前に聞いた \"글자가 아니구나\" (geul-ja-ga a-ni-gu-na, 文字じゃないんだ) のように、\"아니다\" (a-ni-da, ではない) の前でも同じ形の \"가\" (ga) を使います。パッチムがあれば \"이\" (i)、なければ \"가\" (ga) をつけます。",
      "say": "では、言ってみてください。 \"왕이 만들었어요\" (wang-i man-deul-eoss-eo-yo, 王様が作りました)。"
+    },
+    "fr": {
+     "ex": "Eh non. Les ministres s'y sont opposés. Le \"이\" (i) de \"신하들이\" (sin-ha-deul-i, les ministres) se place après le mot qui est le sujet de la phrase. Il se met aussi après ce qui n'est pas une personne, et devant \"아니다\" (a-ni-da, ne pas être), on utilise la même forme \"가\" (ga), comme dans \"글자가 아니구나\" (geul-ja-ga a-ni-gu-na, ce n'est pas une lettre, je vois), entendu plus tôt. S'il y a une consonne finale, on ajoute \"이\" (i), sinon on ajoute \"가\" (ga).",
+     "say": "Maintenant, dites-le. \"왕이 만들었어요\" (wang-i man-deul-eoss-eo-yo, le roi les a créées)."
     }
    },
    "ko_by": {
@@ -6042,6 +6352,10 @@
     "ja": {
      "ex": "아니에요. 신하들이 반대했어요. \"신하들이\" (sin-ha-deul-i, 家臣たちが) 의 \"이\" (i) 는 문장의 주인이 되는 낱말 뒤에 붙어요. 사람이 아닌 것에도 붙고, 앞에서 들은 \"글자가 아니구나\" (geul-ja-ga a-ni-gu-na, 文字じゃないんだ) 처럼 \"아니다\" (a-ni-da, ではない) 앞에서도 같은 모양 \"가\" (ga) 를 써요. 받침이 있으면 \"이\" (i), 없으면 \"가\" (ga) 를 붙여요.",
      "say": "이제 말해 보세요. \"왕이 만들었어요\" (wang-i man-deul-eoss-eo-yo, 王様が作りました)"
+    },
+    "fr": {
+     "ex": "아니에요. 신하들이 반대했어요. \"신하들이\" (sin-ha-deul-i, les ministres) 의 \"이\" (i) 는 문장의 주인이 되는 낱말 뒤에 붙어요. 사람이 아닌 것에도 붙고, 앞에서 들은 \"글자가 아니구나\" (geul-ja-ga a-ni-gu-na, ce n'est pas une lettre, je vois) 처럼 \"아니다\" (a-ni-da, ne pas être) 앞에서도 같은 모양 \"가\" (ga) 를 써요. 받침이 있으면 \"이\" (i), 없으면 \"가\" (ga) 를 붙여요.",
+     "say": "이제 말해 보세요. \"왕이 만들었어요\" (wang-i man-deul-eoss-eo-yo, le roi les a créées)"
     }
    },
    "audio": {
@@ -6113,6 +6427,10 @@
     "ja": {
      "ex": null,
      "say": null
+    },
+    "fr": {
+     "ex": null,
+     "say": null
     }
    },
    "sent": [
@@ -6150,7 +6468,9 @@
      "km": "មិនមែនទេ កូន។",
      "km_s": null,
      "ja": "ううん、ちがうよ。",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "Eh non.",
+     "fr_s": null
     },
     {
      "ko": "신하들이 반대했어요.",
@@ -6186,7 +6506,9 @@
      "km": "ពួកមន្ត្រីបានជំទាស់។",
      "km_s": null,
      "ja": "家臣たちが反対したんだ。",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "Les ministres s'y sont opposés.",
+     "fr_s": null
     },
     {
      "ko": "\"신하들이\"의 \"이\"는 문장의 주인이 되는 낱말 뒤에 붙어요.",
@@ -6222,7 +6544,9 @@
      "km": "\"이\" នៅក្នុង \"신하들이\" ភ្ជាប់នៅក្រោយពាក្យដែលជាប្រធាននៃប្រយោគ។",
      "km_s": null,
      "ja": "\"신하들이\" の \"이\" は、文の主語になる言葉の後ろにつきます。",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "Le \"이\" de \"신하들이\" se place après le mot qui est le sujet de la phrase.",
+     "fr_s": null
     },
     {
      "ko": "사람이 아닌 것에도 붙고, 앞에서 들은 \"글자가 아니구나\"처럼 \"아니다\" 앞에서도 같은 모양 \"가\"를 써요.",
@@ -6258,7 +6582,9 @@
      "km": "វាភ្ជាប់នឹងអ្វីដែលមិនមែនជាមនុស្សផងដែរ ហើយនៅមុខ \"아니다\" ក៏ប្រើទម្រង់ដូចគ្នា \"가\" ដូចក្នុង \"글자가 아니구나\" ដែលអ្នកបានឮមុននេះ។",
      "km_s": null,
      "ja": "人でないものにもつき、前に聞いた \"글자가 아니구나\" のように、\"아니다\" の前でも同じ形の \"가\" を使います。",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "Il se met aussi après ce qui n'est pas une personne, et devant \"아니다\", on utilise la même forme \"가\", comme dans \"글자가 아니구나\", entendu plus tôt.",
+     "fr_s": null
     },
     {
      "ko": "받침이 있으면 \"이\", 없으면 \"가\"를 붙여요.",
@@ -6294,7 +6620,9 @@
      "km": "បើមានព្យញ្ជនៈចុង គេភ្ជាប់ \"이\" បើគ្មាន គេភ្ជាប់ \"가\"។",
      "km_s": null,
      "ja": "パッチムがあれば \"이\"、なければ \"가\" をつけます。",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "S'il y a une consonne finale, on ajoute \"이\", sinon on ajoute \"가\".",
+     "fr_s": null
     }
    ],
    "gloss": {
@@ -6316,7 +6644,8 @@
       "my": "",
       "pt": "",
       "km": "",
-      "ja": ""
+      "ja": "",
+      "fr": ""
      }
     },
     "신하들이": {
@@ -6337,7 +6666,8 @@
       "my": "မှူးမတ်တွေက",
       "pt": "os ministros",
       "km": "ពួកមន្ត្រី",
-      "ja": "家臣たちが"
+      "ja": "家臣たちが",
+      "fr": "les ministres"
      }
     },
     "이": {
@@ -6358,7 +6688,8 @@
       "my": "",
       "pt": "",
       "km": "",
-      "ja": ""
+      "ja": "",
+      "fr": ""
      }
     },
     "글자가 아니구나": {
@@ -6379,7 +6710,8 @@
       "my": "စာလုံး မဟုတ်ဘူးကိုး",
       "pt": "então não é uma letra",
       "km": "មិនមែនជាអក្សរទេតើ",
-      "ja": "文字じゃないんだ"
+      "ja": "文字じゃないんだ",
+      "fr": "ce n'est pas une lettre, je vois"
      }
     },
     "아니다": {
@@ -6400,7 +6732,8 @@
       "my": "မဟုတ်ဘူး",
       "pt": "não ser",
       "km": "មិនមែន",
-      "ja": "ではない"
+      "ja": "ではない",
+      "fr": "ne pas être"
      }
     }
    }
@@ -6425,7 +6758,8 @@
     "my": "မှူးမတ်တွေလား ခင်ဗျာ။ ဘာဖြစ်လို့လဲ ခင်ဗျာ။",
     "pt": "Os ministros? Por quê?",
     "km": "ពួកមន្ត្រីឬ បាទ? ហេតុអ្វីទៅ បាទ?",
-    "ja": "家臣たちがですか？どうしてですか？"
+    "ja": "家臣たちがですか？どうしてですか？",
+    "fr": "Les ministres? Pourquoi?"
    },
    "pieces": [
     {
@@ -6447,7 +6781,8 @@
       "my": "မှူးမတ်တွေလား",
       "pt": "os ministros",
       "km": "ពួកមន្ត្រីឬ",
-      "ja": "家臣たちがですか"
+      "ja": "家臣たちがですか",
+      "fr": "les ministres"
      }
     },
     {
@@ -6469,7 +6804,8 @@
       "my": "ဘာဖြစ်လို့လဲ",
       "pt": "por quê",
       "km": "ហេតុអ្វី",
-      "ja": "どうしてですか"
+      "ja": "どうしてですか",
+      "fr": "pourquoi"
      }
     }
    ],
@@ -6491,7 +6827,8 @@
     "my": "စကားလုံး + 요 / 이요",
     "pt": "palavra + 요 / 이요",
     "km": "ពាក្យ + 요 / 이요",
-    "ja": "言葉 + 요 / 이요"
+    "ja": "言葉 + 요 / 이요",
+    "fr": "mot + 요 / 이요"
    },
    "text": {
     "ko": {
@@ -6561,6 +6898,10 @@
     "ja": {
      "ex": "家臣たちがですか？どうしてですか？ 言葉ひとつに \"요\" (yo) をつけるだけで、丁寧な言い方になります。パッチムがあれば \"이요\" (i-yo) とも言います。前に聞いた \"글자요\" (geul-ja-yo, 文字です) と \"세종대왕이요\" (se-jong-dae-wang-i-yo, 王) がそうです。最後を上げると聞き返す言葉になり、下げると短い答えになります。",
      "say": "では、言ってみてください。 \"글자요? 왜요?\" (geul-ja-yo wae-yo, 文字ですか？どうしてですか？)。"
+    },
+    "fr": {
+     "ex": "Les ministres? Pourquoi? Il suffit d'ajouter \"요\" (yo) à un seul mot pour parler poliment. S'il y a une consonne finale, on dit aussi \"이요\" (i-yo). C'est le cas de \"글자요\" (geul-ja-yo, lettre) et de \"세종대왕이요\" (se-jong-dae-wang-i-yo, le roi), entendus plus tôt. Si l'intonation monte à la fin, c'est une question pour vérifier, et si elle descend, c'est une réponse courte.",
+     "say": "Maintenant, dites-le. \"글자요? 왜요?\" (geul-ja-yo wae-yo, une lettre? pourquoi?)."
     }
    },
    "ko_by": {
@@ -6627,6 +6968,10 @@
     "ja": {
      "ex": "신하들이요? 왜요? 낱말 하나에 \"요\" (yo) 만 붙여도 공손한 말이 돼요. 받침이 있으면 \"이요\" (i-yo) 라고도 해요. 앞에서 들은 \"글자요\" (geul-ja-yo, 文字です) 와 \"세종대왕이요\" (se-jong-dae-wang-i-yo, 王) 가 그래요. 끝을 올리면 되묻는 말이고, 내리면 짧은 대답이에요.",
      "say": "이제 말해 보세요. \"글자요? 왜요?\" (geul-ja-yo wae-yo, 文字ですか？どうしてですか？)"
+    },
+    "fr": {
+     "ex": "신하들이요? 왜요? 낱말 하나에 \"요\" (yo) 만 붙여도 공손한 말이 돼요. 받침이 있으면 \"이요\" (i-yo) 라고도 해요. 앞에서 들은 \"글자요\" (geul-ja-yo, lettre) 와 \"세종대왕이요\" (se-jong-dae-wang-i-yo, le roi) 가 그래요. 끝을 올리면 되묻는 말이고, 내리면 짧은 대답이에요.",
+     "say": "이제 말해 보세요. \"글자요? 왜요?\" (geul-ja-yo wae-yo, une lettre? pourquoi?)"
     }
    },
    "audio": {
@@ -6698,6 +7043,10 @@
     "ja": {
      "ex": null,
      "say": null
+    },
+    "fr": {
+     "ex": null,
+     "say": null
     }
    },
    "sent": [
@@ -6735,7 +7084,9 @@
      "km": "ពួកមន្ត្រីឬ បាទ?",
      "km_s": null,
      "ja": "家臣たちがですか？",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "Les ministres?",
+     "fr_s": null
     },
     {
      "ko": "왜요?",
@@ -6771,7 +7122,9 @@
      "km": "ហេតុអ្វីទៅ បាទ?",
      "km_s": null,
      "ja": "どうしてですか？",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "Pourquoi?",
+     "fr_s": null
     },
     {
      "ko": "낱말 하나에 \"요\"만 붙여도 공손한 말이 돼요.",
@@ -6807,7 +7160,9 @@
      "km": "សូម្បីតែភ្ជាប់តែ \"요\" នឹងពាក្យមួយ ក៏ក្លាយជាពាក្យគួរសមដែរ។",
      "km_s": null,
      "ja": "言葉ひとつに \"요\" をつけるだけで、丁寧な言い方になります。",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "Il suffit d'ajouter \"요\" à un seul mot pour parler poliment.",
+     "fr_s": null
     },
     {
      "ko": "받침이 있으면 \"이요\"라고도 해요.",
@@ -6843,7 +7198,9 @@
      "km": "បើមានព្យញ្ជនៈចុង គេក៏និយាយ \"이요\" ដែរ។",
      "km_s": null,
      "ja": "パッチムがあれば \"이요\" とも言います。",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "S'il y a une consonne finale, on dit aussi \"이요\".",
+     "fr_s": null
     },
     {
      "ko": "앞에서 들은 \"글자요\"와 \"세종대왕이요\"가 그래요.",
@@ -6879,7 +7236,9 @@
      "km": "\"글자요\" និង \"세종대왕이요\" ដែលអ្នកបានឮមុននេះ ក៏ដូច្នោះដែរ។",
      "km_s": null,
      "ja": "前に聞いた \"글자요\" と \"세종대왕이요\" がそうです。",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "C'est le cas de \"글자요\" et de \"세종대왕이요\", entendus plus tôt.",
+     "fr_s": null
     },
     {
      "ko": "끝을 올리면 되묻는 말이고, 내리면 짧은 대답이에요.",
@@ -6915,7 +7274,9 @@
      "km": "បើឡើងសំឡេងនៅចុង វាជាការសួរបញ្ជាក់វិញ បើបន្ទាបសំឡេង វាជាចម្លើយខ្លី។",
      "km_s": null,
      "ja": "最後を上げると聞き返す言葉になり、下げると短い答えになります。",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "Si l'intonation monte à la fin, c'est une question pour vérifier, et si elle descend, c'est une réponse courte.",
+     "fr_s": null
     }
    ],
    "gloss": {
@@ -6937,7 +7298,8 @@
       "my": "စာလုံးပါ",
       "pt": "letra",
       "km": "អក្សរ",
-      "ja": "文字です"
+      "ja": "文字です",
+      "fr": "lettre"
      }
     },
     "세종대왕이요": {
@@ -6958,7 +7320,8 @@
       "my": "ဘုရင်",
       "pt": "o rei",
       "km": "ស្តេច",
-      "ja": "王"
+      "ja": "王",
+      "fr": "le roi"
      }
     },
     "요": {
@@ -6979,7 +7342,8 @@
       "my": "",
       "pt": "",
       "km": "",
-      "ja": ""
+      "ja": "",
+      "fr": ""
      }
     },
     "이요": {
@@ -7000,7 +7364,8 @@
       "my": "",
       "pt": "",
       "km": "",
-      "ja": ""
+      "ja": "",
+      "fr": ""
      }
     }
    }
@@ -7025,7 +7390,8 @@
     "my": "အဲဒီတုန်းက စာလုံး သိတဲ့သူတွေမှာပဲ အာဏာ ရှိခဲ့လို့လေ။",
     "pt": "É que, naquela época, só quem conhecia as letras tinha poder.",
     "km": "ព្រោះកាលនោះ មានតែអ្នកចេះអក្សរប៉ុណ្ណោះ ទើបមានអំណាច។",
-    "ja": "そのころは、文字を知っている人だけが力を持っていたからね。"
+    "ja": "そのころは、文字を知っている人だけが力を持っていたからね。",
+    "fr": "C'est qu'à l'époque, seuls ceux qui savaient lire avaient du pouvoir."
    },
    "pieces": [
     {
@@ -7047,7 +7413,8 @@
       "my": "အဲဒီတုန်းက",
       "pt": "naquela época",
       "km": "កាលនោះ",
-      "ja": "そのころは"
+      "ja": "そのころは",
+      "fr": "à l'époque"
      }
     },
     {
@@ -7069,7 +7436,8 @@
       "my": "စာလုံးကို",
       "pt": "as letras",
       "km": "អក្សរ",
-      "ja": "文字を"
+      "ja": "文字を",
+      "fr": "les lettres"
      }
     },
     {
@@ -7091,7 +7459,8 @@
       "my": "သိတဲ့",
       "pt": "que conhece",
       "km": "ដែលចេះ",
-      "ja": "知っている"
+      "ja": "知っている",
+      "fr": "qui connaissent"
      }
     },
     {
@@ -7113,7 +7482,8 @@
       "my": "လူတွေပဲ",
       "pt": "só a pessoa",
       "km": "តែមនុស្ស",
-      "ja": "人だけが"
+      "ja": "人だけが",
+      "fr": "seulement les gens"
      }
     },
     {
@@ -7135,7 +7505,8 @@
       "my": "အာဏာ",
       "pt": "poder",
       "km": "អំណាច",
-      "ja": "力が"
+      "ja": "力が",
+      "fr": "du pouvoir"
      }
     },
     {
@@ -7157,7 +7528,8 @@
       "my": "ရှိခဲ့လို့ပါ",
       "pt": "tinha",
       "km": "ព្រោះមាន",
-      "ja": "あったからです"
+      "ja": "あったからです",
+      "fr": "avaient"
      }
     }
    ],
@@ -7179,7 +7551,8 @@
     "my": "စကားလုံး + 만",
     "pt": "palavra + 만",
     "km": "ពាក្យ + 만",
-    "ja": "言葉 + 만"
+    "ja": "言葉 + 만",
+    "fr": "mot + 만"
    },
    "text": {
     "ko": {
@@ -7249,6 +7622,10 @@
     "ja": {
      "ex": "そのころは、文字を知っている人だけが力を持っていたからね。 言葉の後ろの \"만\" (man) は、ただそれだけという意味です。日本語の助詞 \"だけ\" と同じように、言葉の後ろにつけます。語尾 \"거든요\" (geo-deun-yo) は、理由を付け加えて知らせるときに使います。",
      "say": "では、言ってみてください。 \"왕만 힘이 있었어요\" (wang-man him-i iss-eoss-eo-yo, 王様だけが力を持っていました)。"
+    },
+    "fr": {
+     "ex": "C'est qu'à l'époque, seuls ceux qui savaient lire avaient du pouvoir. Le \"만\" (man) après un mot signifie que c'est seulement cela et rien d'autre. Le sens est le même que \"seuls\" en français, mais en coréen, cette particule ne se place pas avant le mot, mais après. La terminaison \"거든요\" (geo-deun-yo) s'emploie pour ajouter une raison.",
+     "say": "Maintenant, dites-le. \"왕만 힘이 있었어요\" (wang-man him-i iss-eoss-eo-yo, seul le roi avait du pouvoir)."
     }
    },
    "ko_by": {
@@ -7400,6 +7777,14 @@
      "sent": {
       "2": "일본어의 \"だけ\"처럼 낱말 뒤에 붙어요."
      }
+    },
+    "fr": {
+     "ex": "그때는 글자를 아는 사람만 힘이 있었거든요. 낱말 뒤의 \"만\" (man) 은 오직 그것뿐이라는 뜻이에요. 뜻은 프랑스어의 \"seuls\"과 같지만, 한국어는 앞이 아니라 뒤에 붙여요. 말끝 \"거든요\" (geo-deun-yo) 는 까닭을 덧붙여 알려 줄 때 써요.",
+     "say": "이제 말해 보세요. \"왕만 힘이 있었어요\" (wang-man him-i iss-eoss-eo-yo, seul le roi avait du pouvoir)",
+     "slot": "뜻은 프랑스어의 \"seuls\"과 같지만, 한국어는 앞이 아니라 뒤에 붙여요.",
+     "sent": {
+      "2": "뜻은 프랑스어의 \"seuls\"과 같지만, 한국어는 앞이 아니라 뒤에 붙여요."
+     }
     }
    },
    "audio": {
@@ -7471,6 +7856,10 @@
     "ja": {
      "ex": null,
      "say": null
+    },
+    "fr": {
+     "ex": null,
+     "say": null
     }
    },
    "sent": [
@@ -7508,7 +7897,9 @@
      "km": "ព្រោះកាលនោះ មានតែអ្នកចេះអក្សរប៉ុណ្ណោះ ទើបមានអំណាច។",
      "km_s": null,
      "ja": "そのころは、文字を知っている人だけが力を持っていたからね。",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "C'est qu'à l'époque, seuls ceux qui savaient lire avaient du pouvoir.",
+     "fr_s": null
     },
     {
      "ko": "낱말 뒤의 \"만\"은 오직 그것뿐이라는 뜻이에요.",
@@ -7544,7 +7935,9 @@
      "km": "\"만\" នៅក្រោយពាក្យ មានន័យថា មានតែរបស់នោះប៉ុណ្ណោះ។",
      "km_s": null,
      "ja": "言葉の後ろの \"만\" は、ただそれだけという意味です。",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "Le \"만\" après un mot signifie que c'est seulement cela et rien d'autre.",
+     "fr_s": null
     },
     {
      "ko": "이 표시도 낱말 뒤에 붙여요.",
@@ -7580,7 +7973,9 @@
      "km": "អត្ថន័យដូច \"តែ\" ក្នុងភាសាខ្មែរ ប៉ុន្តែភាសាខ្មែរដាក់ \"តែ\" នៅមុខពាក្យ រីឯភាសាកូរ៉េ ភ្ជាប់ពាក្យសម្គាល់នេះ នៅក្រោយពាក្យ។",
      "km_s": null,
      "ja": "日本語の助詞 \"だけ\" と同じように、言葉の後ろにつけます。",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "Le sens est le même que \"seuls\" en français, mais en coréen, cette particule ne se place pas avant le mot, mais après.",
+     "fr_s": null
     },
     {
      "ko": "말끝 \"거든요\"는 까닭을 덧붙여 알려 줄 때 써요.",
@@ -7616,7 +8011,9 @@
      "km": "ចុងពាក្យ \"거든요\" ប្រើពេលប្រាប់មូលហេតុបន្ថែម។",
      "km_s": null,
      "ja": "語尾 \"거든요\" は、理由を付け加えて知らせるときに使います。",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "La terminaison \"거든요\" s'emploie pour ajouter une raison.",
+     "fr_s": null
     }
    ],
    "gloss": {
@@ -7638,7 +8035,8 @@
       "my": "",
       "pt": "",
       "km": "",
-      "ja": ""
+      "ja": "",
+      "fr": ""
      }
     },
     "만": {
@@ -7659,7 +8057,8 @@
       "my": "",
       "pt": "",
       "km": "",
-      "ja": ""
+      "ja": "",
+      "fr": ""
      }
     }
    }
@@ -7684,7 +8083,8 @@
     "my": "ဒါဆို သမီးတို့ရောရှင့်။ သမီးတို့လည်း ဖတ်နိုင်မလားဟင်။",
     "pt": "Então, e nós? Nós também podemos ler?",
     "km": "ចុះពួកយើងវិញ ចា៎ស? ពួកយើងក៏អាចអានបានដែរទេ អ្នកគ្រូ?",
-    "ja": "じゃあ、私たちはどうですか？私たちも読めますか？"
+    "ja": "じゃあ、私たちはどうですか？私たちも読めますか？",
+    "fr": "Et nous, alors? Nous aussi, nous pouvons lire?"
    },
    "pieces": [
     {
@@ -7706,7 +8106,8 @@
       "my": "ဒါဆို",
       "pt": "então",
       "km": "ចុះ",
-      "ja": "じゃあ"
+      "ja": "じゃあ",
+      "fr": "alors"
      }
     },
     {
@@ -7728,7 +8129,8 @@
       "my": "ကျွန်ုပ်တို့ကရော",
       "pt": "e nós",
       "km": "ពួកយើងវិញ",
-      "ja": "私たちは"
+      "ja": "私たちは",
+      "fr": "et nous"
      }
     },
     {
@@ -7750,7 +8152,8 @@
       "my": "ကျွန်ုပ်တို့လည်း",
       "pt": "nós também",
       "km": "ពួកយើងក៏",
-      "ja": "私たちも"
+      "ja": "私たちも",
+      "fr": "nous aussi"
      }
     },
     {
@@ -7772,7 +8175,8 @@
       "my": "ဖတ်နိုင်",
       "pt": "poder ler",
       "km": "អាចអាន",
-      "ja": "読むことが"
+      "ja": "読むことが",
+      "fr": "pouvoir lire"
      }
     },
     {
@@ -7794,7 +8198,8 @@
       "my": "မလား",
       "pt": "é possível",
       "km": "បាន",
-      "ja": "できます"
+      "ja": "できます",
+      "fr": "c'est possible"
      }
     }
    ],
@@ -7816,7 +8221,8 @@
     "my": "စကားလုံး + 도 · 읽 + 을 수 있어요",
     "pt": "palavra + 도 · 읽 + 을 수 있어요",
     "km": "ពាក្យ + 도 · 읽 + 을 수 있어요",
-    "ja": "言葉 + 도 · 읽 + 을 수 있어요"
+    "ja": "言葉 + 도 · 읽 + 을 수 있어요",
+    "fr": "mot + 도 · 읽 + 을 수 있어요"
    },
    "text": {
     "ko": {
@@ -7886,6 +8292,10 @@
     "ja": {
      "ex": "じゃあ、私たちはどうですか？私たちも読めますか？ 言葉の後ろの \"도\" (do) は、それも同じだという意味です。日本語の助詞 \"も\" と同じように、言葉の後ろにつけます。\"읽을 수 있어요\" (ilg-eul su iss-eo-yo, 読めます) は、読むことができるという意味です。今は \"읽을 수 있어요\" (ilg-eul su iss-eo-yo) をまるごと覚えておいてください。",
      "say": "では、言ってみてください。 \"저도 읽을 수 있어요\" (jeo-do ilg-eul su iss-eo-yo, わたしも読めます)。"
+    },
+    "fr": {
+     "ex": "Et nous, alors? Nous aussi, nous pouvons lire? Le \"도\" (do) après un mot signifie que c'est aussi le cas pour cela. Cette particule se place aussi après le mot. \"읽을 수 있어요\" (ilg-eul su iss-eo-yo, on peut lire) signifie qu'il est possible de lire. Pour l'instant, apprenez \"읽을 수 있어요\" (ilg-eul su iss-eo-yo) tel quel.",
+     "say": "Maintenant, dites-le. \"저도 읽을 수 있어요\" (jeo-do ilg-eul su iss-eo-yo, moi aussi je peux lire)."
     }
    },
    "ko_by": {
@@ -8023,6 +8433,10 @@
      "sent": {
       "3": "일본어의 \"も\"처럼 낱말 뒤에 붙어요."
      }
+    },
+    "fr": {
+     "ex": "그럼 우리는요? 우리도 읽을 수 있어요? 낱말 뒤의 \"도\" (do) 는 그것도 역시 그렇다는 뜻이에요. 이 표시도 낱말 뒤에 붙여요. \"읽을 수 있어요\" (ilg-eul su iss-eo-yo, on peut lire) 는 읽는 것이 가능하다는 뜻이에요. 지금은 \"읽을 수 있어요\" (ilg-eul su iss-eo-yo) 를 통째로 익혀 두세요.",
+     "say": "이제 말해 보세요. \"저도 읽을 수 있어요\" (jeo-do ilg-eul su iss-eo-yo, moi aussi je peux lire)"
     }
    },
    "audio": {
@@ -8094,6 +8508,10 @@
     "ja": {
      "ex": null,
      "say": null
+    },
+    "fr": {
+     "ex": null,
+     "say": null
     }
    },
    "sent": [
@@ -8131,7 +8549,9 @@
      "km": "ចុះពួកយើងវិញ ចា៎ស?",
      "km_s": null,
      "ja": "じゃあ、私たちはどうですか？",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "Et nous, alors?",
+     "fr_s": null
     },
     {
      "ko": "우리도 읽을 수 있어요?",
@@ -8167,7 +8587,9 @@
      "km": "ពួកយើងក៏អាចអានបានដែរទេ អ្នកគ្រូ?",
      "km_s": null,
      "ja": "私たちも読めますか？",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "Nous aussi, nous pouvons lire?",
+     "fr_s": null
     },
     {
      "ko": "낱말 뒤의 \"도\"는 그것도 역시 그렇다는 뜻이에요.",
@@ -8203,7 +8625,9 @@
      "km": "\"도\" នៅក្រោយពាក្យ មានន័យថា របស់នោះក៏ដូច្នោះដែរ។",
      "km_s": null,
      "ja": "言葉の後ろの \"도\" は、それも同じだという意味です。",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "Le \"도\" après un mot signifie que c'est aussi le cas pour cela.",
+     "fr_s": null
     },
     {
      "ko": "이 표시도 낱말 뒤에 붙여요.",
@@ -8239,7 +8663,9 @@
      "km": "អត្ថន័យដូច \"ក៏\" ក្នុងភាសាខ្មែរ ប៉ុន្តែភាសាខ្មែរដាក់ \"ក៏\" នៅមុខកិរិយាសព្ទ រីឯភាសាកូរ៉េ ភ្ជាប់ពាក្យសម្គាល់នេះ នៅក្រោយពាក្យ។",
      "km_s": null,
      "ja": "日本語の助詞 \"も\" と同じように、言葉の後ろにつけます。",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "Cette particule se place aussi après le mot.",
+     "fr_s": null
     },
     {
      "ko": "\"읽을 수 있어요\"는 읽는 것이 가능하다는 뜻이에요.",
@@ -8275,7 +8701,9 @@
      "km": "\"읽을 수 있어요\" មានន័យថា អាចអានបាន។",
      "km_s": null,
      "ja": "\"읽을 수 있어요\" は、読むことができるという意味です。",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "\"읽을 수 있어요\" signifie qu'il est possible de lire.",
+     "fr_s": null
     },
     {
      "ko": "지금은 \"읽을 수 있어요\"를 통째로 익혀 두세요.",
@@ -8311,7 +8739,9 @@
      "km": "ឥឡូវនេះ សូមចាំ \"읽을 수 있어요\" ទាំងមូលសិន។",
      "km_s": null,
      "ja": "今は \"읽을 수 있어요\" をまるごと覚えておいてください。",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "Pour l'instant, apprenez \"읽을 수 있어요\" tel quel.",
+     "fr_s": null
     }
    ],
    "gloss": {
@@ -8333,7 +8763,8 @@
       "my": "",
       "pt": "",
       "km": "",
-      "ja": ""
+      "ja": "",
+      "fr": ""
      }
     },
     "읽을 수 있어요": {
@@ -8354,7 +8785,8 @@
       "my": "ဖတ်နိုင်ပါတယ်",
       "pt": "dá para ler",
       "km": "អាចអានបាន",
-      "ja": "読めます"
+      "ja": "読めます",
+      "fr": "on peut lire"
      }
     }
    }
@@ -8379,7 +8811,8 @@
     "my": "ကဲ၊ ဒီမှာ ကြည့်ပါ။ ဒါက အဲဒီ စာလုံးပါ။ \"아\" ပါ။",
     "pt": "Vamos lá, olhe aqui. Esta é aquela letra. É \"아\".",
     "km": "មក សូមមើលត្រង់នេះ។ នេះហើយជាអក្សរនោះ។ គឺអក្សរ \"아\" ហ្នឹងឯង។",
-    "ja": "さあ、ここを見てください。これがその文字だよ。\"아\" だよ。"
+    "ja": "さあ、ここを見てください。これがその文字だよ。\"아\" だよ。",
+    "fr": "Allez, regardez ici. Voici la lettre en question. C'est \"아\"."
    },
    "pieces": [
     {
@@ -8401,7 +8834,8 @@
       "my": "ကဲ",
       "pt": "vamos lá",
       "km": "មក",
-      "ja": "さあ"
+      "ja": "さあ",
+      "fr": "allez"
      }
     },
     {
@@ -8423,7 +8857,8 @@
       "my": "ဒီမှာ",
       "pt": "aqui",
       "km": "ត្រង់នេះ",
-      "ja": "ここ"
+      "ja": "ここ",
+      "fr": "ici"
      }
     },
     {
@@ -8445,7 +8880,8 @@
       "my": "ကြည့်ပါ",
       "pt": "olhe",
       "km": "សូមមើល",
-      "ja": "見てください"
+      "ja": "見てください",
+      "fr": "regardez"
      }
     },
     {
@@ -8467,7 +8903,8 @@
       "my": "ဒါက",
       "pt": "isto",
       "km": "នេះ",
-      "ja": "これが"
+      "ja": "これが",
+      "fr": "ceci"
      }
     },
     {
@@ -8489,7 +8926,8 @@
       "my": "အဲဒီ",
       "pt": "aquela",
       "km": "នោះ",
-      "ja": "その"
+      "ja": "その",
+      "fr": "en question"
      }
     },
     {
@@ -8511,7 +8949,8 @@
       "my": "စာလုံးပါ",
       "pt": "é a letra",
       "km": "ជាអក្សរ",
-      "ja": "文字です"
+      "ja": "文字です",
+      "fr": "est la lettre"
      }
     },
     {
@@ -8533,7 +8972,8 @@
       "my": "\"아\" စာလုံး",
       "pt": "a letra \"아\"",
       "km": "អក្សរ \"아\"",
-      "ja": "\"아\" という文字"
+      "ja": "\"아\" という文字",
+      "fr": "la lettre \"아\""
      }
     },
     {
@@ -8555,7 +8995,8 @@
       "my": "ပါ",
       "pt": "é",
       "km": "គឺ",
-      "ja": "です"
+      "ja": "です",
+      "fr": "c'est"
      }
     }
    ],
@@ -8577,7 +9018,8 @@
     "my": "ကြိယာ + 세요 / 으세요",
     "pt": "verbo + 세요 / 으세요",
     "km": "កិរិយាសព្ទ + 세요 / 으세요",
-    "ja": "動詞 + 세요 / 으세요"
+    "ja": "動詞 + 세요 / 으세요",
+    "fr": "verbe + 세요 / 으세요"
    },
    "text": {
     "ko": {
@@ -8647,6 +9089,10 @@
     "ja": {
      "ex": "さあ、ここを見てください。これがその文字だよ。\"아\" (a) だよ。 動詞に \"세요\" (se-yo) をつけると、丁寧にすすめる言い方になります。たとえば \"보세요\" (bo-se-yo, 見てください) です。パッチムがあれば、ふつうは \"읽으세요\" (ilg-eu-se-yo, 読んでください) のように \"으세요\" (eu-se-yo) をつけますが、\"리을\" (ri-eul, 韓国語の子音字の名前) のパッチムは \"리을\" (ri-eul) が落ちて \"세요\" (se-yo) だけをつけ、\"만드세요\" (man-deu-se-yo, 作ってください) のように言います。日本語の \"見てください\" のように、多くの動詞の後ろにつけて丁寧にすすめます。",
      "say": "では、言ってみてください。 \"여기 보세요\" (yeo-gi bo-se-yo, ここを見てください)。"
+    },
+    "fr": {
+     "ex": "Allez, regardez ici. Voici la lettre en question. C'est \"아\" (a). Si l'on ajoute \"세요\" (se-yo) à un verbe, on obtient une invitation polie. Par exemple, \"보세요\" (bo-se-yo, regardez). S'il y a une consonne finale, on ajoute en général \"으세요\" (eu-se-yo), comme dans \"읽으세요\" (ilg-eu-se-yo, lisez), mais avec la consonne finale \"리을\" (ri-eul, nom d'une consonne coréenne), celle-ci tombe et on ajoute seulement \"세요\" (se-yo), comme dans \"만드세요\" (man-deu-se-yo, créez). Comme la terminaison de \"regardez\" en français, on l'ajoute ainsi à beaucoup de verbes pour inviter poliment à faire quelque chose.",
+     "say": "Maintenant, dites-le. \"여기 보세요\" (yeo-gi bo-se-yo, regardez ici)."
     }
    },
    "ko_by": {
@@ -8787,6 +9233,14 @@
      "sent": {
       "6": "일본어 \"見てください\"처럼, 많은 움직임 말 뒤에 붙여서 공손하게 권해요."
      }
+    },
+    "fr": {
+     "ex": "자, 여기 보세요. 이게 그 글자예요. \"아\" (a) 예요. 움직임을 나타내는 말에 \"세요\" (se-yo) 를 붙이면 공손하게 권하는 말이 돼요. \"보세요\" (bo-se-yo, regardez) 처럼요. 받침이 있으면 보통 \"읽으세요\" (ilg-eu-se-yo, lisez) 처럼 \"으세요\" (eu-se-yo) 를 붙이지만, 리을 받침은 리을이 빠지고 \"세요\" (se-yo) 만 붙여서 \"만드세요\" (man-deu-se-yo, créez) 처럼 말해요. 프랑스어 \"regardez\"의 끝처럼, 많은 움직임 말 뒤에 붙여서 공손하게 권해요.",
+     "say": "이제 말해 보세요. \"여기 보세요\" (yeo-gi bo-se-yo, regardez ici)",
+     "slot": "프랑스어 \"regardez\"의 끝처럼, 많은 움직임 말 뒤에 붙여서 공손하게 권해요.",
+     "sent": {
+      "6": "프랑스어 \"regardez\"의 끝처럼, 많은 움직임 말 뒤에 붙여서 공손하게 권해요."
+     }
     }
    },
    "audio": {
@@ -8858,6 +9312,10 @@
     "ja": {
      "ex": null,
      "say": null
+    },
+    "fr": {
+     "ex": null,
+     "say": null
     }
    },
    "sent": [
@@ -8895,7 +9353,9 @@
      "km": "មក សូមមើលត្រង់នេះ។",
      "km_s": null,
      "ja": "さあ、ここを見てください。",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "Allez, regardez ici.",
+     "fr_s": null
     },
     {
      "ko": "이게 그 글자예요.",
@@ -8931,7 +9391,9 @@
      "km": "នេះហើយជាអក្សរនោះ។",
      "km_s": null,
      "ja": "これがその文字だよ。",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "Voici la lettre en question.",
+     "fr_s": null
     },
     {
      "ko": "\"아\"예요.",
@@ -8967,7 +9429,9 @@
      "km": "គឺអក្សរ \"아\" ហ្នឹងឯង។",
      "km_s": null,
      "ja": "\"아\" だよ。",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "C'est \"아\".",
+     "fr_s": null
     },
     {
      "ko": "움직임을 나타내는 말에 \"세요\"를 붙이면 공손하게 권하는 말이 돼요.",
@@ -9003,7 +9467,9 @@
      "km": "បើភ្ជាប់ \"세요\" នឹងកិរិយាសព្ទ វាក្លាយជាពាក្យអញ្ជើញឬស្នើយ៉ាងគួរសម។",
      "km_s": null,
      "ja": "動詞に \"세요\" をつけると、丁寧にすすめる言い方になります。",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "Si l'on ajoute \"세요\" à un verbe, on obtient une invitation polie.",
+     "fr_s": null
     },
     {
      "ko": "\"보세요\"처럼요.",
@@ -9039,7 +9505,9 @@
      "km": "ដូចជា \"보세요\"។",
      "km_s": null,
      "ja": "たとえば \"보세요\" です。",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "Par exemple, \"보세요\".",
+     "fr_s": null
     },
     {
      "ko": "받침이 있으면 보통 \"읽으세요\"처럼 \"으세요\"를 붙이지만, 리을 받침은 리을이 빠지고 \"세요\"만 붙여서 \"만드세요\"처럼 말해요.",
@@ -9075,7 +9543,9 @@
      "km": "បើមានព្យញ្ជនៈចុង ជាធម្មតាគេភ្ជាប់ \"으세요\" ដូច \"읽으세요\" ប៉ុន្តែបើព្យញ្ជនៈចុងជា \"리을\" នោះ \"리을\" បាត់ទៅ ហើយគេភ្ជាប់តែ \"세요\" ដូចការនិយាយ \"만드세요\"។",
      "km_s": null,
      "ja": "パッチムがあれば、ふつうは \"읽으세요\" のように \"으세요\" をつけますが、\"리을\" のパッチムは \"리을\" が落ちて \"세요\" だけをつけ、\"만드세요\" のように言います。",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "S'il y a une consonne finale, on ajoute en général \"으세요\", comme dans \"읽으세요\", mais avec la consonne finale \"리을\", celle-ci tombe et on ajoute seulement \"세요\", comme dans \"만드세요\".",
+     "fr_s": null
     },
     {
      "ko": "많은 말에 이렇게 붙여서 공손하게 권해요.",
@@ -9111,7 +9581,9 @@
      "km": "អត្ថន័យដូច \"សូម\" ក្នុងភាសាខ្មែរ ប៉ុន្តែភាសាខ្មែរដាក់ \"សូម\" នៅមុខកិរិយាសព្ទ រីឯភាសាកូរ៉េ ភ្ជាប់វានៅក្រោយកិរិយាសព្ទជាច្រើន ដើម្បីអញ្ជើញឬស្នើយ៉ាងគួរសម។",
      "km_s": null,
      "ja": "日本語の \"見てください\" のように、多くの動詞の後ろにつけて丁寧にすすめます。",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "Comme la terminaison de \"regardez\" en français, on l'ajoute ainsi à beaucoup de verbes pour inviter poliment à faire quelque chose.",
+     "fr_s": null
     }
    ],
    "gloss": {
@@ -9133,7 +9605,8 @@
       "my": "ကြည့်ပါ",
       "pt": "olhe",
       "km": "សូមមើល",
-      "ja": "見てください"
+      "ja": "見てください",
+      "fr": "regardez"
      }
     },
     "세요": {
@@ -9154,7 +9627,8 @@
       "my": "",
       "pt": "",
       "km": "",
-      "ja": ""
+      "ja": "",
+      "fr": ""
      }
     },
     "아": {
@@ -9175,7 +9649,8 @@
       "my": "ကိုရီးယား စာလုံး",
       "pt": "",
       "km": "អក្សរកូរ៉េ",
-      "ja": ""
+      "ja": "",
+      "fr": ""
      }
     },
     "으세요": {
@@ -9196,7 +9671,8 @@
       "my": "",
       "pt": "",
       "km": "",
-      "ja": ""
+      "ja": "",
+      "fr": ""
      }
     },
     "읽으세요": {
@@ -9217,7 +9693,8 @@
       "my": "ဖတ်ပါ",
       "pt": "leia",
       "km": "សូមអាន",
-      "ja": "読んでください"
+      "ja": "読んでください",
+      "fr": "lisez"
      }
     },
     "만드세요": {
@@ -9238,7 +9715,8 @@
       "my": "ဖန်တီးပါ",
       "pt": "faça",
       "km": "សូមបង្កើត",
-      "ja": "作ってください"
+      "ja": "作ってください",
+      "fr": "créez"
      }
     },
     "리을": {
@@ -9259,7 +9737,8 @@
       "my": "ကိုရီးယား ဗျည်းတစ်လုံးရဲ့ နာမည်",
       "pt": "nome de uma consoante coreana",
       "km": "ឈ្មោះព្យញ្ជនៈកូរ៉េមួយ",
-      "ja": "韓国語の子音字の名前"
+      "ja": "韓国語の子音字の名前",
+      "fr": "nom d'une consonne coréenne"
      }
     }
    }
@@ -9284,7 +9763,8 @@
     "my": "ဒါက \"세종대왕\" မင်းကြီး လုပ်ချင်ခဲ့တာပဲကိုး။ ဘယ်သူမဆို လွယ်လွယ်ကူကူ ဖတ်နိုင်တဲ့ စာလုံးပေါ့။ အဲဒီ ဘယ်သူမဆိုဆိုတာ အခု ကျွန်တော်တို့ပဲ ခင်ဗျာ။",
     "pt": "Então era isso que o rei \"세종대왕\" queria fazer. Letras que qualquer um pudesse ler com facilidade. E esse qualquer um, hoje, somos nós.",
     "km": "នោះហើយ ជាអ្វីដែលស្តេច \"세종대왕\" ចង់ធ្វើតើ។ គឺអក្សរដែលអ្នកណាក៏អាចអានបានយ៉ាងងាយ បាទ។ ហើយអ្នកណាក៏បាននោះ ឥឡូវនេះគឺពួកយើងហ្នឹងឯង បាទ។",
-    "ja": "そうか、それが \"세종대왕\" のしたかったことなんだ。誰でも簡単に読める文字ですね。その誰でもというのが、今の私たちなんですね。"
+    "ja": "そうか、それが \"세종대왕\" のしたかったことなんだ。誰でも簡単に読める文字ですね。その誰でもというのが、今の私たちなんですね。",
+    "fr": "Alors c'est ça que voulait faire le roi \"세종대왕\". Des lettres que tout le monde peut lire facilement. Et ce tout le monde, aujourd'hui, c'est nous."
    },
    "pieces": [
     {
@@ -9306,7 +9786,8 @@
       "my": "အဲဒါက",
       "pt": "isso",
       "km": "នោះ",
-      "ja": "それが"
+      "ja": "それが",
+      "fr": "cela"
      }
     },
     {
@@ -9328,7 +9809,8 @@
       "my": "\"세종대왕\" မင်းကြီး",
       "pt": "o rei \"세종대왕\"",
       "km": "ស្តេច \"세종대왕\"",
-      "ja": "\"세종대왕\" が"
+      "ja": "\"세종대왕\" が",
+      "fr": "le roi \"세종대왕\""
      }
     },
     {
@@ -9350,7 +9832,8 @@
       "my": "လုပ်",
       "pt": "fazer",
       "km": "ធ្វើ",
-      "ja": "する"
+      "ja": "する",
+      "fr": "faire"
      }
     },
     {
@@ -9372,7 +9855,8 @@
       "my": "ချင်ခဲ့တဲ့",
       "pt": "queria",
       "km": "ដែលចង់",
-      "ja": "したかった"
+      "ja": "したかった",
+      "fr": "voulait"
      }
     },
     {
@@ -9394,7 +9878,8 @@
       "my": "အရာပဲကိုး",
       "pt": "era o que",
       "km": "ជាអ្វីនោះតើ",
-      "ja": "ことなんだ"
+      "ja": "ことなんだ",
+      "fr": "c'était donc"
      }
     },
     {
@@ -9416,7 +9901,8 @@
       "my": "ဘယ်သူမဆို",
       "pt": "qualquer um",
       "km": "អ្នកណាក៏បាន",
-      "ja": "誰でも"
+      "ja": "誰でも",
+      "fr": "tout le monde"
      }
     },
     {
@@ -9438,7 +9924,8 @@
       "my": "လွယ်လွယ်ကူကူ",
       "pt": "com facilidade",
       "km": "យ៉ាងងាយ",
-      "ja": "簡単に"
+      "ja": "簡単に",
+      "fr": "facilement"
      }
     },
     {
@@ -9460,7 +9947,8 @@
       "my": "ဖတ်တဲ့",
       "pt": "que lê",
       "km": "ដែលអាន",
-      "ja": "読む"
+      "ja": "読む",
+      "fr": "que l'on lit"
      }
     },
     {
@@ -9482,7 +9970,8 @@
       "my": "စာလုံးပေါ့",
       "pt": "letras",
       "km": "អក្សរ",
-      "ja": "文字です"
+      "ja": "文字です",
+      "fr": "des lettres"
      }
     },
     {
@@ -9504,7 +9993,8 @@
       "my": "အဲဒီ",
       "pt": "esse",
       "km": "នោះ",
-      "ja": "その"
+      "ja": "その",
+      "fr": "ce"
      }
     },
     {
@@ -9526,7 +10016,8 @@
       "my": "ဘယ်သူမဆိုဆိုတာ",
       "pt": "qualquer um",
       "km": "អ្នកណាក៏បាន",
-      "ja": "誰でもが"
+      "ja": "誰でもが",
+      "fr": "tout le monde"
      }
     },
     {
@@ -9548,7 +10039,8 @@
       "my": "အခု",
       "pt": "agora",
       "km": "ឥឡូវនេះ",
-      "ja": "今"
+      "ja": "今",
+      "fr": "aujourd'hui"
      }
     },
     {
@@ -9570,7 +10062,8 @@
       "my": "ကျွန်ုပ်တို့ပါ",
       "pt": "somos nós",
       "km": "គឺពួកយើង",
-      "ja": "私たちです"
+      "ja": "私たちです",
+      "fr": "c'est nous"
      }
     }
    ],
@@ -9592,7 +10085,8 @@
     "my": "ကြိယာ + 고 싶어요",
     "pt": "verbo + 고 싶어요",
     "km": "កិរិយាសព្ទ + 고 싶어요",
-    "ja": "動詞 + 고 싶어요"
+    "ja": "動詞 + 고 싶어요",
+    "fr": "verbe + 고 싶어요"
    },
    "text": {
     "ko": {
@@ -9662,6 +10156,10 @@
     "ja": {
      "ex": "そうか、それが \"세종대왕\" (se-jong-dae-wang, 王) のしたかったことなんだ。誰でも簡単に読める文字ですね。その誰でもというのが、今の私たちなんですね。 動詞に \"고 싶어요\" (go sip-eo-yo) をつけると、それをしたいという意味になります。\"거구나\" (geo-gu-na, ことなんだ) の \"구나\" (gu-na) は前に聞いた語尾で、今気づいたときに使います。",
      "say": "では、言ってみてください。 \"저도 읽고 싶어요\" (jeo-do ilg-go sip-eo-yo, わたしも読みたいです)。"
+    },
+    "fr": {
+     "ex": "Alors c'est ça que voulait faire le roi \"세종대왕\" (se-jong-dae-wang, roi). Des lettres que tout le monde peut lire facilement. Et ce tout le monde, aujourd'hui, c'est nous. Si l'on ajoute \"고 싶어요\" (go sip-eo-yo) à un verbe, cela signifie que l'on veut faire cette action. Le \"구나\" (gu-na) de \"거구나\" (geo-gu-na, c'était donc ça) est la terminaison entendue plus tôt, celle que l'on emploie quand on vient de découvrir quelque chose.",
+     "say": "Maintenant, dites-le. \"저도 읽고 싶어요\" (jeo-do ilg-go sip-eo-yo, moi aussi je veux lire)."
     }
    },
    "ko_by": {
@@ -9728,6 +10226,10 @@
     "ja": {
      "ex": "그게 세종대왕이 하고 싶었던 거구나. 누구나 쉽게 읽는 글자요. 그 누구나가 지금 우리예요. 움직임을 나타내는 말에 \"고 싶어요\" (go sip-eo-yo) 를 붙이면 그것을 하기를 원한다는 뜻이에요. \"거구나\" (geo-gu-na, ことなんだ) 의 \"구나\" (gu-na) 는 앞에서 들은, 방금 알았을 때 쓰는 말끝이에요.",
      "say": "이제 말해 보세요. \"저도 읽고 싶어요\" (jeo-do ilg-go sip-eo-yo, わたしも読みたいです)"
+    },
+    "fr": {
+     "ex": "그게 세종대왕이 하고 싶었던 거구나. 누구나 쉽게 읽는 글자요. 그 누구나가 지금 우리예요. 움직임을 나타내는 말에 \"고 싶어요\" (go sip-eo-yo) 를 붙이면 그것을 하기를 원한다는 뜻이에요. \"거구나\" (geo-gu-na, c'était donc ça) 의 \"구나\" (gu-na) 는 앞에서 들은, 방금 알았을 때 쓰는 말끝이에요.",
+     "say": "이제 말해 보세요. \"저도 읽고 싶어요\" (jeo-do ilg-go sip-eo-yo, moi aussi je veux lire)"
     }
    },
    "audio": {
@@ -9799,6 +10301,10 @@
     "ja": {
      "ex": null,
      "say": null
+    },
+    "fr": {
+     "ex": null,
+     "say": null
     }
    },
    "sent": [
@@ -9836,7 +10342,9 @@
      "km": "នោះហើយ ជាអ្វីដែលស្តេច \"세종대왕\" ចង់ធ្វើតើ។",
      "km_s": null,
      "ja": "そうか、それが \"세종대왕\" のしたかったことなんだ。",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "Alors c'est ça que voulait faire le roi \"세종대왕\".",
+     "fr_s": null
     },
     {
      "ko": "누구나 쉽게 읽는 글자요.",
@@ -9872,7 +10380,9 @@
      "km": "គឺអក្សរដែលអ្នកណាក៏អាចអានបានយ៉ាងងាយ បាទ។",
      "km_s": null,
      "ja": "誰でも簡単に読める文字ですね。",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "Des lettres que tout le monde peut lire facilement.",
+     "fr_s": null
     },
     {
      "ko": "그 누구나가 지금 우리예요.",
@@ -9908,7 +10418,9 @@
      "km": "ហើយអ្នកណាក៏បាននោះ ឥឡូវនេះគឺពួកយើងហ្នឹងឯង បាទ។",
      "km_s": null,
      "ja": "その誰でもというのが、今の私たちなんですね。",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "Et ce tout le monde, aujourd'hui, c'est nous.",
+     "fr_s": null
     },
     {
      "ko": "움직임을 나타내는 말에 \"고 싶어요\"를 붙이면 그것을 하기를 원한다는 뜻이에요.",
@@ -9944,7 +10456,9 @@
      "km": "បើភ្ជាប់ \"고 싶어요\" នឹងកិរិយាសព្ទ មានន័យថា ចង់ធ្វើសកម្មភាពនោះ។",
      "km_s": null,
      "ja": "動詞に \"고 싶어요\" をつけると、それをしたいという意味になります。",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "Si l'on ajoute \"고 싶어요\" à un verbe, cela signifie que l'on veut faire cette action.",
+     "fr_s": null
     },
     {
      "ko": "\"거구나\"의 \"구나\"는 앞에서 들은, 방금 알았을 때 쓰는 말끝이에요.",
@@ -9980,7 +10494,9 @@
      "km": "\"구나\" នៅក្នុង \"거구나\" គឺជាចុងពាក្យដែលប្រើពេលទើបតែដឹង ដែលអ្នកបានឮមុននេះ។",
      "km_s": null,
      "ja": "\"거구나\" の \"구나\" は前に聞いた語尾で、今気づいたときに使います。",
-     "ja_s": null
+     "ja_s": null,
+     "fr": "Le \"구나\" de \"거구나\" est la terminaison entendue plus tôt, celle que l'on emploie quand on vient de découvrir quelque chose.",
+     "fr_s": null
     }
    ],
    "gloss": {
@@ -10002,7 +10518,8 @@
       "my": "အရာပဲကိုး",
       "pt": "era isso",
       "km": "ជាអ្វីនោះតើ",
-      "ja": "ことなんだ"
+      "ja": "ことなんだ",
+      "fr": "c'était donc ça"
      }
     },
     "고 싶어요": {
@@ -10023,7 +10540,8 @@
       "my": "",
       "pt": "",
       "km": "",
-      "ja": ""
+      "ja": "",
+      "fr": ""
      }
     },
     "구나": {
@@ -10044,7 +10562,8 @@
       "my": "",
       "pt": "",
       "km": "",
-      "ja": ""
+      "ja": "",
+      "fr": ""
      }
     },
     "세종대왕": {
@@ -10065,7 +10584,8 @@
       "my": "ဘုရင်",
       "pt": "rei",
       "km": "ស្តេច",
-      "ja": "王"
+      "ja": "王",
+      "fr": "roi"
      }
     }
    }

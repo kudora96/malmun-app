@@ -1,0 +1,82 @@
+{
+ "clip_id": "L01-00-01",
+ "lang": "fr",
+ "what": "대사 자막층 fr — 언어부 S2(10-19) · Claude 초안 A + 제미나이 초안 B 비교 후 고름(s2_drafts.md) · 프랑스 표준 · 아이→선생님 vous · 선생님→아이 tu(대사엔 tu 동사 자리 없음) · 1번 인사 = 시청자 포함 vous · 14번 = vous 권유 regardez(「-세요」 줄) · ? ! : ; 앞 공백 없음(앱 규칙) · « » 없음 · 한국 이름은 따옴표 한글 · 원어민 확인 전",
+ "title_t": "\"세종대왕\": les lettres ont un maître",
+ "characters": [
+  {
+   "id": "dubu",
+   "bio": "Un robot qui anime l'émission"
+  },
+  {
+   "id": "kong",
+   "bio": "Un petit chaton blanc"
+  },
+  {
+   "id": "seonsaengnim",
+   "bio": "Une professeure coréenne de trente ans"
+  }
+ ],
+ "subtitles": [
+  {
+   "id": 1,
+   "t": "Entrez, je vous en prie. Bienvenue au palais \"경복궁\"."
+  },
+  {
+   "id": 2,
+   "t": "Madame! J'ai créé une lettre!"
+  },
+  {
+   "id": 3,
+   "t": "Une lettre? Ça, c'est un dessin."
+  },
+  {
+   "id": 4,
+   "t": "Ce n'est pas une lettre? Pourquoi?"
+  },
+  {
+   "id": 5,
+   "t": "Les lettres sont une convention. Ce ne sont des lettres que si tout le monde peut les lire ensemble."
+  },
+  {
+   "id": 6,
+   "t": "Ah, si c'est seulement moi qui la connais, ce n'est pas une lettre."
+  },
+  {
+   "id": 7,
+   "t": "Alors, qui a fixé cette convention?"
+  },
+  {
+   "id": 8,
+   "t": "Le roi \"세종대왕\". Il y a cinq cents ans, le roi a créé lui-même les lettres. À l'époque, les gens du peuple ne savaient pas lire. C'était trop difficile."
+  },
+  {
+   "id": 9,
+   "t": "Waouh! Alors tout le monde a dû être ravi!"
+  },
+  {
+   "id": 10,
+   "t": "Eh non. Les ministres s'y sont opposés."
+  },
+  {
+   "id": 11,
+   "t": "Les ministres? Pourquoi?"
+  },
+  {
+   "id": 12,
+   "t": "C'est qu'à l'époque, seuls ceux qui savaient lire avaient du pouvoir."
+  },
+  {
+   "id": 13,
+   "t": "Et nous, alors? Nous aussi, nous pouvons lire?"
+  },
+  {
+   "id": 14,
+   "t": "Allez, regardez ici. Voici la lettre en question. C'est \"아\"."
+  },
+  {
+   "id": 15,
+   "t": "Alors c'est ça que voulait faire le roi \"세종대왕\". Des lettres que tout le monde peut lire facilement. Et ce tout le monde, aujourd'hui, c'est nous."
+  }
+ ]
+}
