@@ -3,7 +3,7 @@
 export const LANG_INFO = {
   "bn": {"dir": "ltr", "ko_ui": true, "lh": 1.5, "short": "বাং"},
   "en": {"dir": "ltr", "short": "EN", "stage": "ready"},
-  "es": {"dir": "ltr", "short": "Esp"},
+  "es": {"dir": "ltr", "ko_ui": true, "short": "Esp"},
   "fr": {"dir": "ltr", "short": "Fr"},
   "hi": {"dir": "ltr", "ko_ui": true, "lh": 1.5, "short": "हिंदी"},
   "id": {"dir": "ltr", "short": "Indo"},

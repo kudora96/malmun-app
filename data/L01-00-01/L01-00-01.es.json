@@ -1,0 +1,82 @@
+{
+ "clip_id": "L01-00-01",
+ "lang": "es",
+ "what": "대사 자막층 es — 언어부 S2(10-19) · Claude 초안 A + 제미나이 초안 B 비교 후 고름(s2_drafts.md) · 중립 스페인어(중남미·스페인 · vosotros 없음) · 아이→선생님 공손 · 선생님→아이 tú(대사엔 tú 동사 자리 없음) · 1번 인사 = 시청자 포함 ustedes · 14번 = usted 권유 mire(「-세요」 줄) · 한국 이름은 따옴표 한글 · 원어민 확인 전",
+ "title_t": "\"세종대왕\": las letras tienen dueño",
+ "characters": [
+  {
+   "id": "dubu",
+   "bio": "Un robot que presenta el programa"
+  },
+  {
+   "id": "kong",
+   "bio": "Una gatita blanca"
+  },
+  {
+   "id": "seonsaengnim",
+   "bio": "Profesora coreana de treinta años"
+  }
+ ],
+ "subtitles": [
+  {
+   "id": 1,
+   "t": "Adelante, pasen. Bienvenidos al palacio \"경복궁\"."
+  },
+  {
+   "id": 2,
+   "t": "¡Profesora! ¡Hice una letra!"
+  },
+  {
+   "id": 3,
+   "t": "¿Una letra? Esto es un dibujo."
+  },
+  {
+   "id": 4,
+   "t": "¿No es una letra? ¿Por qué?"
+  },
+  {
+   "id": 5,
+   "t": "Las letras son un acuerdo. Solo son letras si todos pueden leerlas juntos."
+  },
+  {
+   "id": 6,
+   "t": "Ah, ya veo: si solo yo la conozco, no es una letra."
+  },
+  {
+   "id": 7,
+   "t": "Entonces, ¿quién estableció ese acuerdo?"
+  },
+  {
+   "id": 8,
+   "t": "El rey \"세종대왕\". Hace quinientos años, el propio rey hizo las letras. En esa época, la gente común no sabía leer ni escribir. Era demasiado difícil."
+  },
+  {
+   "id": 9,
+   "t": "¡Vaya! ¡Entonces seguro que a todos les encantó!"
+  },
+  {
+   "id": 10,
+   "t": "No fue así. Los ministros se opusieron."
+  },
+  {
+   "id": 11,
+   "t": "¿Los ministros? ¿Por qué?"
+  },
+  {
+   "id": 12,
+   "t": "Es que en esa época solo tenían poder los que sabían leer y escribir."
+  },
+  {
+   "id": 13,
+   "t": "¿Y nosotros? ¿Nosotros también podemos leer?"
+  },
+  {
+   "id": 14,
+   "t": "A ver, mire aquí. Esta es esa letra. Es \"아\"."
+  },
+  {
+   "id": 15,
+   "t": "Así que eso era lo que quería el rey \"세종대왕\". Unas letras que cualquiera pudiera leer fácilmente. Y ese cualquiera hoy somos nosotros."
+  }
+ ]
+}
