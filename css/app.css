@@ -1487,3 +1487,4 @@ html.bigview,html.bigview body{overflow:hidden}
 .whybox{max-height:50dvh;overflow:auto;padding:8px 10px;border-radius:10px;background:var(--hi-soft);color:var(--ink);font-size:13.5px;line-height:1.55;overflow-wrap:anywhere;text-align:start}
 .whybox.err{background:var(--bg);border:1px dashed var(--line);color:var(--mute)}
 .whybox .wait{color:var(--mute)}
+.bgmb-anchor{display:none!important} /* 음악 끔(10-19) — ♪ 자리 표시만 · ⛶ 칩 기준 */

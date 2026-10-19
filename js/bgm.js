@@ -5,8 +5,8 @@
 //  · 켜기/끄기 = ♪ 단추(ui.js bgmBtn · 모든 창 · 처음 켬 · 기억 malmun.bgm) · 🎵 음악 상자(ui.js openMusicBox)에서 곡 골라 듣기
 //  · 파일 = 소리부 05_audio/_bgm(직접 합성 · 저작권 없음) — 곡마다 [loopStart, loopEnd] 한 번 → 끝나면 다른 곡(같은 곡 연속 없음 · 앱을 다시 열어도 지난 곡 다음)
 //  · 점검(?mute=1 · __sfxVolume 아주 작게)에선 안 틂
-import { audioCtx } from "./wake.js?v=1016.47";
-import { paths } from "./paths.js?v=1016.47";
+import { audioCtx } from "./wake.js?v=1016.48";
+import { paths } from "./paths.js?v=1016.48";
 
 const KEY = "malmun.bgm", LAST = "malmun.bgmLast", VOL = "malmun.bgmVol";
 // 곡 목록(늘리기 = 한 줄) — 소리부 「철학판」 36곡(본부 10-16 대표님 ㅇ · 05_audio/_bgm/med · bgm_catalog.json style "med") = 12곡 × 결 3(잔잔 = 공부 화면 · 밝은 = 첫 화면·목록 · 힘찬 = 음악 상자에서만)
@@ -68,7 +68,9 @@ const load = i => { if (!loads.has(i)) loads.set(i, fetch(paths.bgm(TRACKS[i].fi
 const poolVer = () => (scene === "" || scene === "list" ? "bright" : "calm");
 const pick = () => { let last = cur, first = false; if (last < 0) try { const v = localStorage.getItem(LAST); first = v == null; last = +(v ?? -1); } catch {} const f0 = TRACKS.findIndex(x => x.file === FIRST); if (first && f0 >= 0 && TRACKS[f0].ver === poolVer()) return f0; const ids = TRACKS.map((_, i) => i), pool = ids.filter(i => TRACKS[i].ver === poolVer()), c = (pool.length ? pool : ids).filter(i => i !== last); return c.length ? c[Math.floor(Math.random() * c.length)] : (pool[0] ?? 0); };
 
-const playOk = () => bgmOn() && !muted() && document.visibilityState === "visible";
+// 배경음악 끔(대표님 10-19 「계속 들어보니 방해가 되는게 맞아 · 음악 메뉴는 전체적으로 지우자 · 백업으로」) — MUSIC_ON = true 로 바꾸면 ♪·음악 상자·배경음악이 그대로 돌아옴(곡 파일·목록은 그대로 둠)
+export const MUSIC_ON = false;
+const playOk = () => MUSIC_ON && bgmOn() && !muted() && document.visibilityState === "visible";
 // 지금 있어야 할 음량(0~1) — 화면 · 앱 소리 · 마이크 · 막음(hold)
 const level = () => { for (const m of media) if (!m.isConnected || m.paused || m.ended) media.delete(m); /* 화면에서 사라진 영상·소리(멈춤 신호 없이 빠짐)는 뺌 — 안 빼면 덕킹이 안 풀림(ur 320 점검) */ if (mic || holds) return 0; const g = scene in SCENE_GAIN ? SCENE_GAIN[scene] : STUDY; return g * bgmVol() * (sounds > 0 || media.size ? DUCK : 1) * Math.min(1, window.__sfxVolume ?? 1); };
 function setGain(now = false) {

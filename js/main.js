@@ -1,13 +1,13 @@
-import { detectLang, setLang, LANGS, t } from "./i18n.js?v=1016.47";
-import { VERSION } from "./version.js?v=1016.47";
-import { bgmScene } from "./bgm.js?v=1016.47";
-import welcome from "./screens/welcome.js?v=1016.47";
-import list from "./screens/list.js?v=1016.47";
-import learn from "./screens/learn.js?v=1016.47";
-import write from "./screens/write.js?v=1016.47";
-import speak from "./screens/speak.js?v=1016.47";
-import diag from "./screens/diag.js?v=1016.47";
-import "./errlog.js?v=1016.47"; // 오류 기록(진단 화면용 · 기록만)
+import { detectLang, setLang, LANGS, t } from "./i18n.js?v=1016.48";
+import { VERSION } from "./version.js?v=1016.48";
+import { bgmScene } from "./bgm.js?v=1016.48";
+import welcome from "./screens/welcome.js?v=1016.48";
+import list from "./screens/list.js?v=1016.48";
+import learn from "./screens/learn.js?v=1016.48";
+import write from "./screens/write.js?v=1016.48";
+import speak from "./screens/speak.js?v=1016.48";
+import diag from "./screens/diag.js?v=1016.48";
+import "./errlog.js?v=1016.48"; // 오류 기록(진단 화면용 · 기록만)
 
 const app = document.getElementById("app");
 const explain = (app, ep, id) => learn(app, ep, id, { explain: true }); /* #/explain/{편}/{줄} = 학습 화면 + 그 줄 새(v9) 설명 창(10-12 · 옛 explain.js 화면 대신 · 책 QR 주소 그대로) */

@@ -1,10 +1,10 @@
-import { bgmOn, setBgm, TRACKS, playTrack, bgmNow, onBgmChange, bgmVol, setBgmVol, playNext } from "./bgm.js?v=1016.47";
-import { paths } from "./paths.js?v=1016.47";
-import { t, tL, tAlt, lang, langName, LANGS, READY, setLang, KO_UI, uiKoOn, setUiKo, langShort, preloadKoUi } from "./i18n.js?v=1016.47";
-import { snapshot, retext } from "./retext.js?v=1016.47";
-import "./langfit.js?v=1016.47"; // ⇄ 때 단추 크기·자리 고정(다국어부 10-15)
-import { VERSION } from "./version.js?v=1016.47";
-import { esc } from "./text.js?v=1016.47";
+import { MUSIC_ON, bgmOn, setBgm, TRACKS, playTrack, bgmNow, onBgmChange, bgmVol, setBgmVol, playNext } from "./bgm.js?v=1016.48";
+import { paths } from "./paths.js?v=1016.48";
+import { t, tL, tAlt, lang, langName, LANGS, READY, setLang, KO_UI, uiKoOn, setUiKo, langShort, preloadKoUi } from "./i18n.js?v=1016.48";
+import { snapshot, retext } from "./retext.js?v=1016.48";
+import "./langfit.js?v=1016.48"; // ⇄ 때 단추 크기·자리 고정(다국어부 10-15)
+import { VERSION } from "./version.js?v=1016.48";
+import { esc } from "./text.js?v=1016.48";
 
 const svg = (d, fill) => `<svg class="ico" viewBox="0 0 24 24" ${fill ? 'fill="currentColor"' : 'fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"'} aria-hidden="true">${d}</svg>`;
 export const I = {
@@ -25,7 +25,7 @@ export const langChip = () => `<button class="chip" data-act="lang" aria-label="
 export const uiKoBtn = () => bgmBtn() + uikoChip();
 export const uikoChip = () => (KO_UI.includes(lang) ? `<button class="chip uiko" data-act="uiko" aria-pressed="${uiKoOn()}" aria-label="${esc(langName(lang))} ⇄ 한국어"><span class="a" lang="${lang}">${esc(langShort(lang))}</span>⇄<span class="b" lang="ko">한</span></button>` : "");
 // ♪ 「음악」 = 🎵 음악 상자 열기(대표님 10-16 · 모든 창 = uiKoBtn() 앞 · ⇄ 없는 언어에도 · 크기 고정 · 끔 = 흐리게 빗금(data-on) · 누르기는 아래 문서 한 곳)
-export const bgmBtn = () => `<button class="chip bgmb" data-act="bgm" data-on="${bgmOn()}" aria-haspopup="dialog" aria-label="${esc(t("music_box"))}" title="${esc(t("music_box"))}"><span aria-hidden="true">♪</span><span class="lt" data-k="bgm_short">${esc(t("bgm_short"))}</span></button>`;
+export const bgmBtn = () => !MUSIC_ON ? `<span class="bgmb-anchor" hidden></span>` : `<button class="chip bgmb" data-act="bgm" data-on="${bgmOn()}" aria-haspopup="dialog" aria-label="${esc(t("music_box"))}" title="${esc(t("music_box"))}"><span aria-hidden="true">♪</span><span class="lt" data-k="bgm_short">${esc(t("bgm_short"))}</span></button>`;
 export async function toggleUiKo(after) { await switchUiKo(!uiKoOn()); after?.(); }
 export async function switchUiKo(ko) {
   if (!KO_UI.includes(lang) || ko === uiKoOn()) return;
@@ -43,7 +43,7 @@ if (!window.__uikoWired) { // 문서 한 곳에서 받기(화면이 따로 손�
   window.__uikoWired = true;
   // 잡기 단계(capture)에서 받고 멈춤 — 화면의 「바깥 누르면 닫힘」(? 방법·말풍선·마이크 목록) 손잡이까지 가지 않게 → ⇄ = 그 상태 그대로 글만(본부 10-15 투덜이 원칙)
   document.addEventListener("click", e => { const b = e.target.closest?.("[data-act=uiko]"); if (!b) return; e.preventDefault(); e.stopPropagation(); switchUiKo(!uiKoOn()); }, true);
-  document.addEventListener("click", e => { if (e.target.closest?.("[data-act=bgm], [data-act=musicbox]")) openMusicBox(); });
+  document.addEventListener("click", e => { if (MUSIC_ON && e.target.closest?.("[data-act=bgm], [data-act=musicbox]")) openMusicBox(); });
   preloadKoUi();
 }
 // 🎵 음악 상자(본부 10-15 · 대표님 10-16 ♪ 로 엶) — 켜기/끄기 · 🔊 음량 막대(기억) · 지금 나오는 곡 · ⏭ 다음 곡 · 곡 목록(▶ 듣기 · ⬇ 내려받기 mp3 · 직접 만든 곡이라 자유) · 머리에 ⇄

@@ -11,7 +11,7 @@
     location.hash = "#/list"; await W(500); location.hash = "#/learn/L01-00-01"; await W(2200);
     const l = document.querySelectorAll(".line")[0]; l.click(); await W(400); l.querySelector(`[data-act=${kind}]`).click(); await W(2600);
     document.querySelector(".helpbox:not([hidden])")?.click(); await W(200);
-    const b = document.querySelector(".bigb"), inHead = !!b && vis(b) && !!panel()?.contains(b) && b.nextElementSibling?.classList.contains("bgmb");
+    const b = document.querySelector(".bigb"), inHead = !!b && vis(b) && !!panel()?.contains(b) && b.nextElementSibling?.matches(".bgmb, .bgmb-anchor");
     ok(inHead && learn().classList.contains("big") === land, `${kind} · ⛶ 칩 = 창 머리 줄 ♪ 앞 · ${land ? "가로 = 저절로 크게" : "기본 꺼짐"}`, b ? `${b.parentElement?.className}` : "없음");
     if (land) { b.click(); await W(1200); } // 가로: 먼저 작게(기준 자리)
     const before = R(panel()), sw0 = document.documentElement.scrollWidth;
