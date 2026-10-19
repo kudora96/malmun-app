@@ -53,3 +53,18 @@ PC·아이폰은 지금 방식 그대로입니다.
 - 녹음 크기 1MB 넘으면 거절(보통 15초 녹음은 100KB 안쪽).
 - 녹음·받아쓴 글을 저장하지 않음(R2·KV·로그 없음). KV 에는 날짜+기기 번호별 **횟수 숫자만**(이틀 뒤 저절로 지워짐).
 - 실제 폰 3~4종에서 첫 시험 필요: 특히 아이폰/일부 안드로이드의 `audio/mp4` 녹음을 모델이 잘 받는지.
+
+## 「왜 틀렸어요?」(/explain · 10-19) 켜기 — 대표님 직접
+같은 Worker「stt」에 경로 `/explain` 이 더해졌습니다(받아쓰기와 같은 주소). Claude(Haiku 5.5)를 부르므로 **운영용 API 키**가 필요합니다.
+1. https://console.anthropic.com → 「기본 워크스페이스」 → API Keys → **Create Key** · 이름 `malmun-app-prod` · 만료 90일. 키는 어디에도 적지 않습니다.
+2. Console → Limits(또는 Billing)에서 달 지출 상한을 정해 두면 이중 안전(앱 Worker 도 `EX_MONTH_USD`(지금 $20) 넘으면 그달 쉼).
+3. PC 명령 창:
+```
+cd C:\malmun-app-dev\worker\stt
+npm install
+npx wrangler secret put ANTHROPIC_API_KEY      ← 물으면 키를 붙여 넣기(화면에 안 보임)
+npx wrangler deploy
+```
+4. 확인: 앱 주소 끝에 `?why=1` 을 붙여 열고(이 기기에서만 켜짐 · `?why=0` 끔) 말하기에서 일부러 틀리게 말하면 「왜 틀렸어요?」 단추가 보입니다.
+- 상한: 기기당 하루 `EX_DEV_CAP`(30) · 전체 하루 `EX_ALL_CAP`(3000) · 달 `EX_MONTH_USD`($20 추정) — wrangler.toml 에서 바꿈.
+- 학습자 문장·답은 저장하지 않습니다(로그 끔 · KV 에는 숫자만).
