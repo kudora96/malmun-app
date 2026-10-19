@@ -1,6 +1,6 @@
 // 저장한 내 녹음 관리 — 지우기 · 이 편 모두 지우기 · 내려받기 · 오래 남게(본부 10-04 · 투덜이 승인)
-import { audioCtx } from "./wake.js?v=1016.57";
-import { leadOf, gainOf, FADE, voicedEnd } from "./playmine.js?v=1016.57";
+import { audioCtx } from "./wake.js?v=1016.58";
+import { leadOf, gainOf, refDb, FADE, voicedEnd } from "./playmine.js?v=1016.58";
 // 녹음·재생·점수 경로는 건드리지 않는다 — IndexedDB 「malmun」/rec(말하기 창 recGet·recPut 과 같은 곳)만 다룬다
 const open = () => new Promise((res, rej) => {
   const r = indexedDB.open("malmun", 1);
@@ -50,10 +50,10 @@ export function wavOf(buf, t0, t1, g = 1) {
   for (let i = 0; i < pcm.length; i++) { const x = Math.max(-1, Math.min(1, pcm[i] * g * (i < fade ? i / fade : 1))); v.setInt16(44 + i * 2, Math.round(x < 0 ? x * 0x8000 : x * 0x7fff), true); }
   return new Blob([v], { type: "audio/wav" });
 }
-export async function downloadRec(blob, name) {
+export async function downloadRec(blob, name, ref) { // ref = 견본 소리 주소 → 그 말소리 크기로(재생과 같은 크기 · 대표님 10-19)
   try {
     const buf = await audioCtx().decodeAudioData(await blob.slice(0).arrayBuffer());
-    return save(wavOf(buf, leadOf(buf), voicedEnd(buf), gainOf(buf)), `${name}.wav`); // 재생과 같은 크기(gainOf)
+    return save(wavOf(buf, leadOf(buf), voicedEnd(buf), gainOf(buf, await refDb(ref))), `${name}.wav`); // 재생과 같은 크기(gainOf)
   } catch { return save(blob, `${name}.${EXT(blob.type || "")}`); } // 풀기 실패 → 원본 그대로
 }
 

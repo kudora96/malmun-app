@@ -5,13 +5,13 @@
 //  · 재생: 본보기 → 0.4초 → 내 목소리 · 재생 위치 세로 막대 + 지금 음절 강조 · 파형·음절 칸을 누르면 그 줄 그 음절부터
 //  녹음·점수 계산·[내 목소리] 재생(playmine.js playMine)은 그대로 — 여기는 그리기·DTW·비교 화면 안 재생만
 //  (본보기는 sfx.play 그대로 · 내 목소리는 playmine 과 같은 방식: decodeAudioData → BufferSource.start(t, offset) → Gain)
-import { prepare, rhythmScore, loadAlign, isSyl, R_FULL, cutWin, snapSyl } from "./rhythm.js?v=1016.57";
-import { esc, koq } from "./text.js?v=1016.57";
-import { align } from "./score.js?v=1016.57";
-import { audioCtx } from "./wake.js?v=1016.57";
-import { leadOf, gainOf, FADE, FADE_OUT, voicedEnd } from "./playmine.js?v=1016.57";
-import { speechEnd, wavOf } from "./recstore.js?v=1016.57";
-import * as sfx from "./sfx.js?v=1016.57";
+import { prepare, rhythmScore, loadAlign, isSyl, R_FULL, cutWin, snapSyl } from "./rhythm.js?v=1016.58";
+import { esc, koq } from "./text.js?v=1016.58";
+import { align } from "./score.js?v=1016.58";
+import { audioCtx } from "./wake.js?v=1016.58";
+import { leadOf, gainOf, speechDb, FADE, FADE_OUT, voicedEnd } from "./playmine.js?v=1016.58";
+import { speechEnd, wavOf } from "./recstore.js?v=1016.58";
+import * as sfx from "./sfx.js?v=1016.58";
 
 // host 안에 그린다 → { close() } · o = { ep, key, url(본보기), text(본보기 글), blob(내 녹음), heard(들은 말 글자 · 없으면 색 없음), t(문구), win(덧붙은 말이 있을 때 토막 구간 { s, e } · 10-11) }
 // 속도 단계(본부 10-07 · 투덜이 「견본에도 각각」) — 줄마다 자기 속도 · 누를 때마다 1 → 0.9 → 0.75 → 0.6 → 0.5 → 1 · 0.5 아래는 늘이기가 끊겨 뺌 · 고른 값 기억
@@ -41,7 +41,7 @@ export async function openCompare(host, o) {
   if (!mbuf || !ybuf) { host.innerHTML = `<div class="cmpw"><p class="cmpmsg">${esc(t("cmp_none"))}</p></div>`; return { close() { st.alive = false; } }; }
   // 본보기 음절(정렬 파일 · 없으면 말 구간을 고르게 나눈 임시 칸)
   // 음절 칸 = 리듬 점수와 같은 함수(js/rhythm.js prepare) · 본보기 = align.json · 내 목소리 = DTW
-  const { W, msyl, ysyl: ysyl0, ends, groups: rgroups, mLead, mStop, mEnd, mLead0, ref, yLead, yStop } = prepare({ al, key: o.key, text: o.text, mbuf, ybuf }), yGain = gainOf(ybuf);
+  const { W, msyl, ysyl: ysyl0, ends, groups: rgroups, mLead, mStop, mEnd, mLead0, ref, yLead, yStop } = prepare({ al, key: o.key, text: o.text, mbuf, ybuf }), yGain = gainOf(ybuf, mbuf ? speechDb(mbuf) : undefined); // 견본과 같은 말소리 크기(대표님 10-19)
   const rh = rhythmScore({ msyl, ysyl: ysyl0, mbuf, ybuf, ends, heard: o.heard, groups: rgroups }); // 리듬이 가장 많이 깎인 음절 = 두 줄 그 칸에 주황 테두리
   // 맞음/틀림 — 점수와 같은 정렬(본보기 음절마다 m 맞음 · s 바뀜 · d 빠짐)
   // 내 목소리 칸에는 「들은 글자」(본부 10-06): 바뀜 = 큰 빨강 들은 글자 + 위 작게 흐린 본보기 글자 · 빠짐 = 흐린 점선 칸 · 덧붙은 소리 = 회색 작은 칸(앞 음절 끝에)

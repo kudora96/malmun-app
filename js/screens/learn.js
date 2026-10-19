@@ -10,28 +10,28 @@
 //  R7 영상은 늘 맨 위 · 지금 줄은 영상 바로 아래(앞 줄은 영상 뒤로) — 손으로 목록을 움직이면 4초 동안은 따라가지 않음
 //  R8 듣기 모드(대사→설명 · 설명만)도 R1~R6 그대로(영상 대신 소리 조각) · 모드를 바꾸면 멈춤(▶ 로 시작)
 //  R9 다시 들어오면 마지막 줄이 선택된 채 멈춰 있음
-import { noScoreKey } from "../agepolicy.js?v=1016.57"; // 점수 없음 안내 = 나이 때문인지(대표님 10-19)
-import { warmSTT } from "../sttserver.js?v=1016.57";
-import * as sfxL from "../sfx.js?v=1016.57"; // 카드 말하기 최대 길이 = 본보기 길이로(10-07)
-import { t, lang, langName, KO_UI, uiKoOn, preloadKoUi } from "../i18n.js?v=1016.57";
-import { setTx } from "../retext.js?v=1016.57";
-import { langfitRun } from "../langfit.js?v=1016.57";
-import { esc, renderText, glossCards, sayParts } from "../text.js?v=1016.57";
-import { episode } from "../data.js?v=1016.57";
-import { paths } from "../paths.js?v=1016.57";
-import { Sequence } from "../audio.js?v=1016.57";
-import { I, progress, SPEAKER, spkHtml, uiKoBtn, switchUiKo } from "../ui.js?v=1016.57";
-import writeView from "./write.js?v=1016.57";
-import { diagEnv, keepDiag } from "../diag.js?v=1016.57";
-import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1016.57";
-import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace, lateFactor, sylAt, paintAt, karaokeRun, isFull } from "../rhythm.js?v=1016.57";
-import { playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1016.57";
-import { heardHTML, endHint, scoreOf, bestFull, spanOf, sylsAt } from "../heard.js?v=1016.57"; // 덧붙은 말 빼고 견주기(본부 10-11)
-import { recDel, downloadRec, askPersist } from "../recstore.js?v=1016.57";
-import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1016.57";
-import { scoreFx, stopFx } from "../scorefx.js?v=1016.57"; // 점수별 효과(본부 10-05)
-import { record, recordSROnly, srOnlyMode, setSrOnly, isAndroid, srMiss, micWhy, srWhy, canScore, closeMic, logRec, micOpen, seqMode, srOnBlob, devSR, setDevSR, srJudge, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1016.57";
-import { hold, quietWake } from "../wake.js?v=1016.57";
+import { noScoreKey } from "../agepolicy.js?v=1016.58"; // 점수 없음 안내 = 나이 때문인지(대표님 10-19)
+import { warmSTT } from "../sttserver.js?v=1016.58";
+import * as sfxL from "../sfx.js?v=1016.58"; // 카드 말하기 최대 길이 = 본보기 길이로(10-07)
+import { t, lang, langName, KO_UI, uiKoOn, preloadKoUi } from "../i18n.js?v=1016.58";
+import { setTx } from "../retext.js?v=1016.58";
+import { langfitRun } from "../langfit.js?v=1016.58";
+import { esc, renderText, glossCards, sayParts } from "../text.js?v=1016.58";
+import { episode } from "../data.js?v=1016.58";
+import { paths } from "../paths.js?v=1016.58";
+import { Sequence } from "../audio.js?v=1016.58";
+import { I, progress, SPEAKER, spkHtml, uiKoBtn, switchUiKo } from "../ui.js?v=1016.58";
+import writeView from "./write.js?v=1016.58";
+import { diagEnv, keepDiag } from "../diag.js?v=1016.58";
+import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1016.58";
+import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace, lateFactor, sylAt, paintAt, karaokeRun, isFull } from "../rhythm.js?v=1016.58";
+import { playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1016.58";
+import { heardHTML, endHint, scoreOf, bestFull, spanOf, sylsAt } from "../heard.js?v=1016.58"; // 덧붙은 말 빼고 견주기(본부 10-11)
+import { recDel, downloadRec, askPersist } from "../recstore.js?v=1016.58";
+import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1016.58";
+import { scoreFx, stopFx } from "../scorefx.js?v=1016.58"; // 점수별 효과(본부 10-05)
+import { record, recordSROnly, srOnlyMode, setSrOnly, isAndroid, srMiss, micWhy, srWhy, canScore, closeMic, logRec, micOpen, seqMode, srOnBlob, devSR, setDevSR, srJudge, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1016.58";
+import { hold, quietWake } from "../wake.js?v=1016.58";
 
 const RATES = [1, 0.75, 0.5];
 const pref = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } };
@@ -609,7 +609,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   const hushSay = () => { sp?.slow?.pause(); sp?.audio?.pause(); sfxL.stopAll(); };
   const playRec = b => { // 말 시작 자리부터 — 풀어서 그 자리부터 직결 재생(js/playmine.js · <audio> 자리 옮기기 안 씀) · 한 번만
     ex.stop(); clearTimeout(st.gap); st.gap = 0; st.exLoop = null; sp.audio?.pause();
-    return (sp.audio = playMineRec(b, { keepFirst: keepFirstOf(L[sp.i]?.say?.ko) }));
+    return (sp.audio = playMineRec(b, { keepFirst: keepFirstOf(L[sp.i]?.say?.ko), ref: L[sp.i]?.say?.src }));
   };
   // [내 목소리] = 방금 녹음(잘됐든 못됐든) · 80% 넘으면 [저장] → 눌러야 저장 · 저장한 것은 「저장됨 ▶」 · 열 때 예전 점수 안 보임(투덜이 10-04)
   async function spInit(i) {
@@ -769,7 +769,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
       });
       return;
     }
-    if (k === "savedl") { if (sp?.saved?.blob) downloadRec(sp.saved.blob, `malmun_${sayKey(i).split("/")[1]}_${sp.saved.score ?? ""}`); return; } // 원본 그대로 파일로
+    if (k === "savedl") { if (sp?.saved?.blob) downloadRec(sp.saved.blob, `malmun_${sayKey(i).split("/")[1]}_${sp.saved.score ?? ""}`, L[i].say.src); return; } // 원본 그대로 파일로
     if (k === "savedel") { // 이 녹음만 지우기 — 한 번 묻고
       if (!sp?.saved || !confirm(t("del_one_q"))) return;
       recDel(sayKey(i)); sp.audio?.pause(); sp.saved = null;
