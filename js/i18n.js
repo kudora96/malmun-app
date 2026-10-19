@@ -80,7 +80,8 @@ export async function setLang(code, remember = false) {
   lang = code;
   if (remember) store(false, code);
   const load = c => fetch(`lang/${c}.json?v=${VERSION}`).then(r => (r.ok ? r.json() : {})).catch(() => ({}));
-  [fallback, strings] = await Promise.all([load("en"), code === "en" ? Promise.resolve({}) : load(code)]);
+  // 빠진 열쇠는 영어가 아니라 한국어로(대표님 10-19 원칙 「화면 글은 한국어 ⇄ 학습자 언어뿐 · 영어 섞임 금지」) — en 학습자만 en 이 자기 말
+  [fallback, strings] = await Promise.all([load(code === "en" ? "en" : "ko"), code === "en" ? Promise.resolve({}) : load(code)]);
   await loadKoUi(); preloadKoUi(code); // 한국어 토글 글은 미리 받아 둠(누르면 바로 · 기다리지 않음)
   document.documentElement.lang = code;
   const info = LANG_INFO[code] || {}; /* 그 언어일 때만 글꼴 링크 · 줄 높이는 --lang-lh(css 다국어부 구역) */
