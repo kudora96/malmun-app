@@ -311,6 +311,8 @@
  "ink_pink": "Merah muda",
  "ink_sky": "Biru langit",
  "ink_gray": "Abu-abu",
+ "line_game": "Permainan",
+ "hold_name": "Lupa? Tekan lama tombol untuk melihat namanya",
  "birth_q": "Pilih tahun kelahiran Anda",
  "birth_sub": "Kami menyesuaikan fitur dengan usia Anda. Data ini tidak dikirim ke luar perangkat ini.",
  "birth_year": "Tahun lahir",
@@ -320,6 +322,15 @@
  "birth_ok": "Oke",
  "age_teen_note": "Anda bisa berlatih berbicara. Rekaman diubah menjadi teks lalu langsung dihapus. Fitur AI terbuka mulai usia {n} tahun.",
  "age_kid_note": "Anda bisa memakai semua video, penjelasan, dan bunyi huruf. Rekaman bicara hanya digunakan di perangkat ini. Fitur AI terbuka mulai usia {n} tahun.",
- "line_game": "Permainan",
- "hold_name": "Lupa? Tekan lama tombol untuk melihat namanya"
+ "rp_menu": "Laporkan kesalahan",
+ "rp_q": "Apa yang terlihat salah?",
+ "rp_k_tr": "Terjemahannya aneh",
+ "rp_k_snd": "Suaranya aneh",
+ "rp_k_glyph": "Huruf atau goresan salah",
+ "rp_k_ai": "Jawaban AI aneh",
+ "rp_k_etc": "Lainnya",
+ "rp_ph": "(Opsional) Tulis singkat · 100 karakter",
+ "rp_send": "Kirim",
+ "rp_thx": "Terima kasih! Kami akan memeriksa dan memperbaikinya.",
+ "rp_limit": "Hari ini tidak bisa melapor lagi. Silakan beri tahu kami besok."
 }

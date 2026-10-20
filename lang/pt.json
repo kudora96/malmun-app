@@ -311,6 +311,8 @@
  "ink_pink": "Rosa",
  "ink_sky": "Azul-celeste",
  "ink_gray": "Cinza",
+ "line_game": "Jogo",
+ "hold_name": "Esqueceu? Mantenha um botão pressionado para ver o nome",
  "birth_q": "Escolha o ano em que você nasceu",
  "birth_sub": "Ajustamos os recursos à sua idade. Essa informação não sai deste aparelho.",
  "birth_year": "Ano de nascimento",
@@ -320,6 +322,15 @@
  "birth_ok": "Confirmar",
  "age_teen_note": "Você pode praticar a fala. As gravações são transformadas em texto e apagadas na hora. Os recursos de IA ficam disponíveis a partir dos {n} anos.",
  "age_kid_note": "Você pode usar todos os vídeos, explicações e sons das letras. As gravações de fala só são usadas neste aparelho. Os recursos de IA ficam disponíveis a partir dos {n} anos.",
- "line_game": "Jogo",
- "hold_name": "Esqueceu? Mantenha um botão pressionado para ver o nome"
+ "rp_menu": "Avisar um erro",
+ "rp_q": "O que parece errado?",
+ "rp_k_tr": "A tradução está estranha",
+ "rp_k_snd": "O som está estranho",
+ "rp_k_glyph": "A letra ou o traço está errado",
+ "rp_k_ai": "Resposta da IA estranha",
+ "rp_k_etc": "Outro",
+ "rp_ph": "(Opcional) Escreva em poucas palavras · 100 caracteres",
+ "rp_send": "Enviar",
+ "rp_thx": "Obrigado! Vamos verificar e corrigir.",
+ "rp_limit": "Hoje não dá para enviar mais avisos. Conte para nós de novo amanhã."
 }
