@@ -1052,6 +1052,8 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     if (!subsOn() || !fsTip || pref("malmun.subtip1")) return;
     pref("malmun.subtip1", "1");
     fsTip.hidden = false; clearTimeout(tipT); tipT = setTimeout(() => { fsTip.hidden = true; }, 8000);
+    fsTip.style.removeProperty("max-width"); // 가로 폰 = 막대 위 왼쪽 → ⛶ 왼쪽까지만
+    if (matchMedia("(orientation: landscape) and (max-height: 500px)").matches) { const fb = app.querySelector("[data-act=fs]").getBoundingClientRect(), sk = app.querySelector(".seek").getBoundingClientRect(); fsTip.style.maxWidth = Math.max(160, fb.left - sk.left - 10) + "px"; }
   }
   const onFsChange = () => { if (document.fullscreenElement) hideTip(); };
   document.addEventListener("fullscreenchange", onFsChange);
