@@ -67,7 +67,8 @@ export const table = () => Object.keys(POLICY.features).map(f => ({ f, ko: FEATU
 // 18세 미만 등 「서버 받아쓰기」가 막힌 학습자: 브라우저 받아쓰기(기본 = 구글·애플 서버)도 막음 → 기기 안(processLocally) 한국어가 「available」일 때만 그것으로 채점
 //  그 밖에는 받아쓰기 없음(앱은 채점 없이 녹음·내 목소리·견주기만) · 자동으로 서버로 넘어가지 않음(age_policy 7-2)
 export let onDeviceKo = "?";
-(function guardSR() {
+// 첫 실행 태어난 해를 넣은 뒤에도 다시 불러 그 자리에서 막음(birth.js)
+export function applyGate() {
   if (!gateOn() || allowed("sttServer")) return;
   const Orig = window.SpeechRecognition || window.webkitSpeechRecognition;
   const off = () => { try { window.SpeechRecognition = undefined; window.webkitSpeechRecognition = undefined; } catch {} };
@@ -79,7 +80,8 @@ export let onDeviceKo = "?";
     class LocalSR extends Orig { constructor() { super(); this.processLocally = true; } }
     window.SpeechRecognition = window.webkitSpeechRecognition = LocalSR;
   }).catch(() => { onDeviceKo = "확인 실패"; });
-})();
+}
+applyGate();
 
 // 채점이 안 될 때 본 화면 안내 — 나이 때문이면 평소 안내 그대로(「말해 보세요」 · 대표님 10-19 「화면 틀은 그대로 · 본문에 나이 글 띄우지 말 것」) · 아니면 지금 안내(브라우저 탓)
 const ageBlocked = () => gateOn() && !allowed("sttServer") && onDeviceKo !== "available";

@@ -1,7 +1,8 @@
-import { t } from "../i18n.js?v=1020.6";
-import { esc } from "../text.js?v=1020.6";
-import { langChip, openLangSheet, uiKoBtn, spkHtml } from "../ui.js?v=1020.6";
-import { rerender } from "../main.js?v=1020.6";
+import { t } from "../i18n.js?v=1020.5";
+import { esc } from "../text.js?v=1020.5";
+import { langChip, openLangSheet, uiKoBtn, spkHtml } from "../ui.js?v=1020.5";
+import { rerender } from "../main.js?v=1020.5";
+import { needBirth, askBirth } from "../birth.js?v=1020.5";
 
 const KEY = "malmun.started";
 const started = () => { try { return localStorage.getItem(KEY) === "1"; } catch { return false; } };
@@ -27,5 +28,10 @@ export default function welcome(app) {
   const tipOff = () => { try { localStorage.setItem(TIP, "1"); } catch {} tip?.remove(); tip = null; lb.classList.remove("tiphi"); };
   try { if (!localStorage.getItem(TIP) && !started()) { const r = lb.getBoundingClientRect(); tip = document.createElement("div"); tip.className = "langtip"; tip.setAttribute("role", "status"); tip.innerHTML = `<b>${spkHtml("선생님")}</b><span dir="auto">🌐 ${esc(t("lang_hint"))}</span>`; tip.style.top = (r.bottom + window.scrollY + 10) + "px"; app.querySelector(".scr.welcome").append(tip); lb.classList.add("tiphi"); tip.onclick = tipOff; } } catch {}
   // ⇄ 는 retext 가 그 자리에서 글만 바꿈(다시 그리지 않음 · 본부 10-15)
-  app.querySelector(".cta").onclick = () => { try { localStorage.setItem(KEY, "1"); } catch {} };
+  // 처음 [시작하기] = 그 위 선생님 풍선말로 태어난 해 + 사는 나라(대표님 10-20 · 틀 0px · birth.js) → 확인 뒤 편 목록
+  const cta = app.querySelector(".cta");
+  cta.onclick = e => {
+    if (needBirth()) { e.preventDefault(); tipOff(); askBirth(app.querySelector(".scr.welcome"), cta, () => { try { localStorage.setItem(KEY, "1"); } catch {} location.hash = "#/list"; }); return; }
+    try { localStorage.setItem(KEY, "1"); } catch {}
+  };
 }
