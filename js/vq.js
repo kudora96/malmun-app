@@ -1,12 +1,12 @@
 // 영상 화질 자동(본부 10-20 대표님 「화질 올리면 인터넷 느린 나라에서 안 돌아감」) — 고르는 단추 없음 · 화면 틀 0px
-//  기본 720p · 느린 망(effectiveType slow-2g·2g·3g · 데이터 절약 saveData · downlink < 1.5Mbps)이면 처음부터 480p
+//  기본 720p · 느린 망(effectiveType slow-2g·2g·3g · 데이터 절약 saveData)이면 처음부터 480p
 //  재생 중 버퍼링이 잦으면(1분 안 3번 · 또는 한 번 4초 넘게 멈춤) 480p 로 바꾸고 같은 자리·같은 재생 상태로 이어 감 · 그 기기는 하루 동안 480p 로 시작
 //  1080p 는 앱에서 안 씀(원본 보관) · R2 = video/720/{ep}.mp4 · video/480/{ep}.mp4(영상1팀 06_release\video\720·480) · 없으면 다음 것(480 → 옛 video/{ep}.mp4)
 import { paths } from "./paths.js?v=1020.7";
 
 const K = "malmun.vq480";
 const get = () => { try { return +localStorage.getItem(K) || 0; } catch { return 0; } };
-const slowNet = () => { const c = navigator.connection; if (!c) return false; return !!c.saveData || /(^|-)(2g|3g)$/.test(c.effectiveType || "") || (c.downlink > 0 && c.downlink < 1.5); };
+const slowNet = () => { const c = navigator.connection; if (!c) return false; return !!c.saveData || /(^|-)(2g|3g)$/.test(c.effectiveType || ""); }; // downlink 숫자는 브라우저 어림값이라 흔들림 → 쓰지 않음(effectiveType 이 이미 그걸로 정함)
 export const startQ = () => (slowNet() || Date.now() - get() < 864e5 ? "480" : "720");
 const chain = (ep, q) => (q === "480" ? ["480"] : ["720", "480"]).map(x => paths.video(ep, x)).concat(paths.video(ep));
 
