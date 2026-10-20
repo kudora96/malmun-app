@@ -37,6 +37,7 @@ import { langfitRun } from "../langfit.js?v=1020.5";
 import { esc, renderText, glossCards, sayParts } from "../text.js?v=1020.5";
 import { episode } from "../data.js?v=1020.5";
 import { paths, MEDIA } from "../paths.js?v=1020.5";
+import { attachVq } from "../vq.js?v=1020.5";
 import { Sequence } from "../audio.js?v=1020.5";
 import { I, progress, SPEAKER, spkHtml, uiKoBtn, uikoChip, switchUiKo } from "../ui.js?v=1020.5";
 import writeView from "./write.js?v=1020.5";
@@ -76,7 +77,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     <div class="stick">
     <div class="vstage">
     <div class="vmain"><div class="vtitle"><div class="tt"><b class="ko" lang="ko">${esc(d.title || "")}</b>${d.title_t ? `<span class="sub">${esc(d.title_t)}</span>` : ""}</div>${uiKoBtn()}<span class="n"></span></div>
-    <div class="varea"><div class="video" id="vwrap"><video playsinline preload="metadata" poster="${paths.poster(ep)}" src="${paths.video(ep)}"></video>
+    <div class="varea"><div class="video" id="vwrap"><video playsinline preload="metadata" poster="${paths.poster(ep)}"></video>
       <span class="vplay" aria-hidden="true">${I.play}</span>
       <div class="cap" aria-live="polite"></div>
       <button class="vfs" data-act="fs" aria-label="${esc(t("fullscreen"))}">${FS}</button><span class="vuiko">${uikoChip()}</span>
@@ -107,6 +108,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   </section>`;
 
   const v = app.querySelector("video");
+  const vqOff = attachVq(v, ep); // 화질 자동 720 ⇄ 480(느린 망·잦은 버퍼링 · 단추 없음)
   const items = [...app.querySelectorAll(".line")];
   // 두 말 위아래 = ⇄ 상태(대표님 10-19·10-20 「한↔네팔어 바뀌면 위아래도 바뀌어야」) — 학습자 말 화면이면 학습자 말이 위 · 한국어 화면이면 한국어가 위
   //  편 제목 · 영상 아래 큰 자막 · 줄 카드(지금 줄·대화 풍선) — 위 자리 = 큰 글·진한 색(큰 자막은 두 줄 같은 크기) · ⇄ 없는 언어(영어 등)는 지금 그대로
@@ -1076,5 +1078,5 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   if (reopen) openPanel(reopen.kind, reopen.i, { restore: reopen }); // ने⇄한 토글 전 창·자리
   else if (opts.explain) openPanel("explain", st.cur, { autoplay: true }); /* #/explain/{편}/{줄} = 그 줄 v9 설명 창(첫 터치 전엔 소리가 막힐 수 있음 — ▶ 로 시작) */
   const release = hold(); // 소리 장치 깨워 두기(첫소리 먹힘 방지)
-  return () => { if (gm.el) closeGame(true); removeEventListener("resize", onTurn); mqLand.removeEventListener?.("change", onLand); document.removeEventListener("keydown", onBigKey, true); document.documentElement.classList.remove("bigview"); clearTimeout(tipT); document.removeEventListener("fullscreenchange", onFsChange); clearInterval(edgeT); clearInterval(litT); clearInterval(seekTimer); clearInterval(hlTimer); document.removeEventListener("pointerdown", onDocDown, true); removeEventListener("popstate", onPop); removeEventListener("malmun:uilang", onUiLang); document.removeEventListener("visibilitychange", onHide); clearTimeout(st.animEnd); release(); st.panel?.cleanup?.(); ex.stop(); removeEventListener("resize", pad); removeEventListener("resize", onFit); clearInterval(timer); clearTimeout(st.gap); document.removeEventListener("keydown", onKey); seq.stop(); v.pause(); v.removeAttribute("src"); v.load(); };
+  return () => { if (gm.el) closeGame(true); removeEventListener("resize", onTurn); mqLand.removeEventListener?.("change", onLand); document.removeEventListener("keydown", onBigKey, true); document.documentElement.classList.remove("bigview"); clearTimeout(tipT); document.removeEventListener("fullscreenchange", onFsChange); clearInterval(edgeT); clearInterval(litT); clearInterval(seekTimer); clearInterval(hlTimer); document.removeEventListener("pointerdown", onDocDown, true); removeEventListener("popstate", onPop); removeEventListener("malmun:uilang", onUiLang); document.removeEventListener("visibilitychange", onHide); clearTimeout(st.animEnd); release(); st.panel?.cleanup?.(); ex.stop(); removeEventListener("resize", pad); removeEventListener("resize", onFit); clearInterval(timer); clearTimeout(st.gap); document.removeEventListener("keydown", onKey); seq.stop(); vqOff(); v.pause(); v.removeAttribute("src"); v.load(); };
 }
