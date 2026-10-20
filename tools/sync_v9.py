@@ -51,6 +51,21 @@ def sync(ep, dry=False):
             for k in [k for k, r in lg.items() if r in missing]: lg[k] = None
         for kb in (l.get("ko_by") or {}).values():
             if kb.get("audio_ex") in missing: kb.pop("audio_ex", None); kb.pop("sent_s", None)
+    # 문장 시작 시각({xx}_s)이 비어 있으면 소리부 _lang_narrate.json(설명 파일마다 sent_s)에서 채움 — 없으면 앱이 늘 마지막 문장만 칠함(검사1팀 10-21)
+    filled = 0
+    for code in d.get("langs", []):
+        if code == "ko": continue
+        nj = os.path.join(root, f"새설명_소리_{code}", "_lang_narrate.json")
+        if not os.path.exists(nj): continue
+        try: items = json.load(open(nj, encoding="utf-8")).get("items") or []
+        except Exception: continue
+        by = {it.get("file"): it.get("sent_s") for it in items if it.get("sent_s")}
+        for l in d["lines"]:
+            ss = by.get(f"{ep}_{l['n']:02d}_{code}_설명.mp3"); sent = l.get("sent") or []
+            if not ss or len(ss) != len(sent): continue
+            for j, sj in enumerate(sent):
+                if sj.get(code) is not None and sj.get(f"{code}_s") is None: sj[f"{code}_s"] = ss[j]; filled += 1
+    if filled: print("문장 시각 채움:", filled)
     # 말하기 본보기 = 문장만 읽은 소리(본부 10-03 · app.json 에 칸이 없어 이름 규칙으로) → audio.ko.sentence
     for l in d["lines"]:
         rel = f"새설명_소리_kr/{ep}_{l['n']:02d}_말해보세요_문장.mp3"
