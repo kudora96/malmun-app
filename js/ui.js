@@ -1,10 +1,10 @@
-import { MUSIC_ON, bgmOn, setBgm, TRACKS, playTrack, bgmNow, onBgmChange, bgmVol, setBgmVol, playNext } from "./bgm.js?v=1016.87";
-import { paths } from "./paths.js?v=1016.87";
-import { t, tL, tAlt, lang, langName, LANGS, READY, setLang, KO_UI, uiKoOn, setUiKo, langShort, preloadKoUi } from "./i18n.js?v=1016.87";
-import { snapshot, retext } from "./retext.js?v=1016.87";
-import "./langfit.js?v=1016.87"; // ⇄ 때 단추 크기·자리 고정(다국어부 10-15)
-import { VERSION } from "./version.js?v=1016.87";
-import { esc } from "./text.js?v=1016.87";
+import { MUSIC_ON, bgmOn, setBgm, TRACKS, playTrack, bgmNow, onBgmChange, bgmVol, setBgmVol, playNext } from "./bgm.js?v=1016.88";
+import { paths } from "./paths.js?v=1016.88";
+import { t, tL, tAlt, lang, langName, LANGS, READY, setLang, KO_UI, uiKoOn, setUiKo, langShort, preloadKoUi } from "./i18n.js?v=1016.88";
+import { snapshot, retext } from "./retext.js?v=1016.88";
+import "./langfit.js?v=1016.88"; // ⇄ 때 단추 크기·자리 고정(다국어부 10-15)
+import { VERSION } from "./version.js?v=1016.88";
+import { esc } from "./text.js?v=1016.88";
 
 const svg = (d, fill) => `<svg class="ico" viewBox="0 0 24 24" ${fill ? 'fill="currentColor"' : 'fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"'} aria-hidden="true">${d}</svg>`;
 export const I = {
