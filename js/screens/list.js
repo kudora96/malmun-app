@@ -13,7 +13,19 @@ const mmss = s => `${Math.floor(s / 60)}:${String(Math.round(s % 60)).padStart(2
 const koRuns = s => esc(s).replace(/[ᄀ-ᇿ㄰-㆏가-힣]+/g, m => `<span class="ko" lang="ko">${m}</span>`); // 학습자 말 제목 속 배우는 한글 조각(ㄱ→ㄲ · ㅏㅗ)은 한국어로 표시
 const ttl = (id, ko, tt) => { const tr = tt[id]; if (!tr) return `<span class="ko" lang="ko">${esc(ko)}</span>`; const k = uiKoOn(); return `<span class="ept" data-ko="${esc(ko)}" data-tr="${esc(tr)}"><span class="cur" lang="${k ? "ko" : lang}">${k ? esc(ko) : koRuns(tr)}</span><span class="gh" aria-hidden="true" lang="ko">${esc(ko)}</span><span class="gh" aria-hidden="true" lang="${lang}">${koRuns(tr)}</span></span>`; };
 const reTitles = () => { const k = uiKoOn(); for (const e of document.querySelectorAll(".list .ept")) { const c = e.querySelector(".cur"); c.innerHTML = k ? esc(e.dataset.ko) : koRuns(e.dataset.tr); c.lang = k ? "ko" : lang; } };
-if (!window.__eptWired) { window.__eptWired = true; addEventListener("malmun:uilang", reTitles); }
+// 단원 이름(머리 줄 큰 글 · 본부 10-20 「모든 창 ⇄」) — 한국어 = 손글씨 그대로 · 학습자 말 = 앱 글꼴로 바꾸고 한국어 때 칸 높이(최대 2줄) 안에 들 때까지 글자만 줄임 → ⇄ 때 칸 0px
+//  .ut = .bar .t 와 같은 모양이지만 이름이 달라 langfit(.bar .t 잠금)·retext 가 손대지 않음(이 함수 혼자 맞춤)
+function fitUnit() {
+  const u = document.querySelector(".list .bar .ut"); if (!u) return;
+  const k = uiKoOn() || !u.dataset.tr;
+  u.style.height = ""; u.style.fontSize = ""; u.classList.add("ko"); u.lang = "ko"; u.textContent = u.dataset.ko;
+  const H = u.offsetHeight; // 한국어 손글씨 칸 높이 = 기준
+  if (k) return void (u.style.height = H + "px");
+  u.classList.remove("ko"); u.lang = lang; u.innerHTML = `<span>${koRuns(u.dataset.tr)}</span>`; u.style.height = H + "px";
+  const lh = () => parseFloat(getComputedStyle(u).lineHeight) || 1;
+  for (let f = 26; f >= 11; f--) { u.style.fontSize = f + "px"; if (u.scrollHeight <= H + 1 && u.scrollHeight / lh() < 2.5 && u.scrollWidth <= u.clientWidth + 1) break; }
+}
+if (!window.__eptWired) { window.__eptWired = true; addEventListener("malmun:uilang", () => { reTitles(); fitUnit(); }); let rz = 0; addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(fitUnit, 150); }); }
 
 export default async function list(app, unit = "L01-00") {
   const [cat, tt] = await Promise.all([catalog(), epTitles()]);
@@ -22,7 +34,7 @@ export default async function list(app, unit = "L01-00") {
   const p = first ? progress.get(first.id) : {};
   const seen = Math.min(p.line || 0, first?.lines || 0);
   app.innerHTML = `<section class="scr list">
-    <div class="bar"><div class="grow"><div class="t ko" lang="ko">${esc(cat.units[unit] || unit)}</div>
+    <div class="bar"><div class="grow"><div class="ut ko" lang="ko" data-ko="${esc(cat.units[unit] || unit)}"${tt[unit] ? ` data-tr="${esc(tt[unit])}"` : ""}>${esc(cat.units[unit] || unit)}</div>
       <div class="sub">${esc(unit)} · <span>${esc(t("n_episodes", { n: eps.length }))}</span></div></div><span class="hbt">${uiKoBtn()}${langChip()}</span></div>
     ${first ? `<a class="hero" href="#/learn/${first.id}"><img src="img/${first.id}.jpg" alt="">
       <div><div class="ttl">${esc(first.id.slice(-2))} ${ttl(first.id, first.title, tt)}</div>
@@ -36,6 +48,7 @@ export default async function list(app, unit = "L01-00") {
     <p class="ver">v${esc(VERSION)}</p>
   </section>`;
   app.querySelector("[data-act=lang]").onclick = () => openLangSheet(rerender);
+  fitUnit(); document.fonts?.ready.then(fitUnit); // 손글씨 글꼴이 늦게 오면 다시 잼
   // 「ने⇄한」 누르기는 ui.js 문서 한 곳이 받음(앱 전체 같이) · {n} 칸 글도 retext 가 그 자리에서 바꿈 → 다시 그리지 않음(스크롤·열린 언어 창 그대로 · 본부 10-15 「⇄ = 상태 그대로 글만」)
   // 이 편 녹음 모두 지우기(녹음이 있을 때만 보임 · 한 번 묻고 · 진단 녹음도 같이)
   const da = app.querySelector(".delall button");
