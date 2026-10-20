@@ -1,7 +1,7 @@
 // 획 자료·자모 칸·획순 칠 — 글자부 파일(10-12 쓰기부가 js/screens/write.js 에서 떼어 냄 · 본부 「획순 칠·획 자료 처리는 글자부 몫」)
 //  createStrokes(ctx) = 쓰기 화면 하나마다 한 번 · 글꼴 그림(glyph·glyphImg)·마스크(pix)·덩어리(compsOf)는 쓰기 화면이 넘겨 줌(회색 안내·판정과 픽셀까지 같은 그림)
 //  돌려주는 것: 자모 칸(unitsOf · ringFix · deCrumb) · 획 자료(STK · stkReady · strokesOf · snap · fitOf) · 칠(inkOwners · brushPath · brushStroke · revealOrder) · 점검용(centerOf · traceOf) · 캐시(글꼴이 늦게 오면 쓰기 화면이 비움)
-import { units as jamoUnits, shapeFix } from "./jamobox.js?v=1020.3";
+import { units as jamoUnits, shapeFix } from "./jamobox.js?v=1020.5";
 
 export function createStrokes({ glyph, glyphImg, pix, hfontKey, gCache, compsOf, PEN, GN }) {
   // 점검 도구용 — 글자 가운데 선(거리 변환 능선 점들) = 조심스럽게 가운데를 따라 그린 사람
