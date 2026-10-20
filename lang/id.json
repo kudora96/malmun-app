@@ -311,6 +311,15 @@
  "ink_pink": "Merah muda",
  "ink_sky": "Biru langit",
  "ink_gray": "Abu-abu",
+ "birth_q": "Pilih tahun kelahiran Anda",
+ "birth_sub": "Kami menyesuaikan fitur dengan usia Anda. Data ini tidak dikirim ke luar perangkat ini.",
+ "birth_year": "Tahun lahir",
+ "birth_country": "Negara tempat tinggal",
+ "birth_why": "Mengapa kami bertanya?",
+ "birth_why_a": "Beberapa fitur (penilaian rekaman bicara dan AI) bergantung pada usia dan negara.",
+ "birth_ok": "Oke",
+ "age_teen_note": "Anda bisa berlatih berbicara. Rekaman diubah menjadi teks lalu langsung dihapus. Fitur AI terbuka mulai usia {n} tahun.",
+ "age_kid_note": "Anda bisa memakai semua video, penjelasan, dan bunyi huruf. Rekaman bicara hanya digunakan di perangkat ini. Fitur AI terbuka mulai usia {n} tahun.",
  "line_game": "Permainan",
  "hold_name": "Lupa? Tekan lama tombol untuk melihat namanya"
 }

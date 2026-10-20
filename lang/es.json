@@ -311,6 +311,15 @@
  "ink_pink": "Rosa",
  "ink_sky": "Celeste",
  "ink_gray": "Gris",
+ "birth_q": "Elija el año en que nació",
+ "birth_sub": "Ajustamos las funciones a su edad. Este dato no sale de este dispositivo.",
+ "birth_year": "Año de nacimiento",
+ "birth_country": "País donde vive",
+ "birth_why": "¿Por qué lo preguntamos?",
+ "birth_why_a": "Algunas funciones (evaluación de grabaciones de habla e IA) dependen de su edad y país.",
+ "birth_ok": "Aceptar",
+ "age_teen_note": "Puede practicar la expresión oral. Las grabaciones se pasan a texto y se borran enseguida. Las funciones de IA están disponibles a partir de los {n} años.",
+ "age_kid_note": "Puede usar todos los videos, las explicaciones y los sonidos de las letras. Las grabaciones de habla solo se usan en este dispositivo. Las funciones de IA están disponibles a partir de los {n} años.",
  "line_game": "Juego",
  "hold_name": "¿Lo olvidó? Mantenga pulsado un botón para ver su nombre"
 }

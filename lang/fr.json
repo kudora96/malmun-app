@@ -311,6 +311,15 @@
  "ink_pink": "Rose",
  "ink_sky": "Bleu ciel",
  "ink_gray": "Gris",
+ "birth_q": "Choisissez votre année de naissance",
+ "birth_sub": "Nous adaptons les fonctions à votre âge. Cette information ne quitte pas cet appareil.",
+ "birth_year": "Année de naissance",
+ "birth_country": "Pays de résidence",
+ "birth_why": "Pourquoi cette question?",
+ "birth_why_a": "Certaines fonctions (notation des enregistrements oraux et IA) dépendent de l'âge et du pays.",
+ "birth_ok": "Valider",
+ "age_teen_note": "Vous pouvez vous entraîner à parler. Les enregistrements sont transformés en texte puis effacés aussitôt. Les fonctions d'IA sont disponibles à partir de {n} ans.",
+ "age_kid_note": "Toutes les vidéos, explications et sons des lettres sont disponibles. Les enregistrements oraux ne sont utilisés que sur cet appareil. Les fonctions d'IA sont disponibles à partir de {n} ans.",
  "line_game": "Jeu",
  "hold_name": "Un oubli? Restez appuyé sur un bouton pour voir son nom"
 }

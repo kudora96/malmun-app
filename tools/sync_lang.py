@@ -158,6 +158,10 @@ def main(argv):
         if stage0 == "none": info[c].pop("stage", None)  # --stage none = 글만 넣고 선택 목록엔 「곧」(본부 신호 전 · 10-19)
         else: info[c].setdefault("stage", stage0)
         out.append(f"{c} ✓ 글 {n - len(miss)}/{n}" + (f"(en 으로 {len(miss)})" if miss else "") + f" · {info[c]['dir']}" + (f" · {info[c]['font']}" if info[c].get("font") else "") + f" · {info[c].get('stage', '곧(단계 없음)')}")
+    # en = 화면 글(lang/en.json)은 개발1팀 정본이라 안 덮지만 편 자료(줄 번역·인물·제목)는 언어부 것 → 늘 함께(10-20 본부 🔴 en 줄 번역 빈칸 · 전엔 en 을 통째로 건너뜀)
+    en_src = os.path.join(LANG, "en", f"{ep}.en.json")
+    if os.path.exists(en_src):
+        copy(en_src, os.path.join(APP, "data", ep, f"{ep}.en.json"), dry); out.append(f"en 편 자료 ✓ {ep}.en.json")
     tl = sync_titles(codes, dry)
     if tl: out.append("제목: " + " ".join(f"{c} {n}" for c, n in tl))
     if not dry:

@@ -311,6 +311,15 @@
  "ink_pink": "Hồng",
  "ink_sky": "Xanh da trời",
  "ink_gray": "Xám",
+ "birth_q": "Chọn năm sinh của bạn",
+ "birth_sub": "Chúng tôi điều chỉnh tính năng theo độ tuổi. Thông tin này không rời khỏi thiết bị này.",
+ "birth_year": "Năm sinh",
+ "birth_country": "Quốc gia bạn đang sống",
+ "birth_why": "Vì sao hỏi?",
+ "birth_why_a": "Một số tính năng (chấm điểm ghi âm khi nói và AI) tùy theo tuổi và quốc gia.",
+ "birth_ok": "Xác nhận",
+ "age_teen_note": "Bạn có thể luyện nói. Bản ghi âm được chuyển thành chữ rồi xóa ngay. Tính năng AI mở từ {n} tuổi.",
+ "age_kid_note": "Bạn dùng được tất cả video, giải thích và âm chữ. Bản ghi âm khi nói chỉ được dùng trên thiết bị này. Tính năng AI mở từ {n} tuổi.",
  "line_game": "Trò chơi",
  "hold_name": "Quên? Nhấn giữ nút để xem tên"
 }
