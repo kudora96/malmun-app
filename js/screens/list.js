@@ -30,8 +30,7 @@ function fitUnit() {
 if (!window.__eptWired) { window.__eptWired = true; addEventListener("malmun:uilang", () => { reTitles(); fitUnit(); }); let rz = 0; addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(fitUnit, 150); }); }
 
 export default async function list(app, unit = "L01-00") {
-  const hand = getComputedStyle(document.documentElement).getPropertyValue("--f-hand").trim(); // 단원 이름 칸 높이 = 손글씨 기준 → 그리기 전에 글꼴부터(학습자 말 화면엔 손글씨가 안 쓰여 늦게 와서 첫 높이가 바뀌던 것 · tl 320)
-  const [cat, tt] = await Promise.all([catalog(), epTitles(), hand && document.fonts ? Promise.race([document.fonts.load(`700 28px ${hand}`, "한글과 발음"), new Promise(r => setTimeout(r, 800))]).catch(() => {}) : 0]);
+  const [cat, tt] = await Promise.all([catalog(), epTitles()]); // 손글씨 글꼴은 기다리지 않음(첫 화면 늦어짐) — fitUnit 이 글꼴이 오면 다시 잼
   const eps = cat.episodes.filter(e => e.id.startsWith(unit));
   const first = eps.find(e => e.ready);
   const p = first ? progress.get(first.id) : {};

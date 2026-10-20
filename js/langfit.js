@@ -21,7 +21,7 @@ function altOf(node, snap) {
   let k = snap.get(tv); if (k) { const a = tAlt(k); return a == null ? null : v.replace(tv, a); }
   const m = EDGE.exec(v), c = m?.[2].trim();
   k = c && (snap.get(c) || snap.core.get(c)); if (k) { const a = tAlt(k); return a == null ? null : m[1] + (snap.txt.get(k) === c ? a : coreOf(a)) + m[3]; }
-  for (const { re, k: tk0, names } of snap.tpl) { const r = re.exec(tv); if (!r) continue; const tk = tk0.replace(/_(zero|one|two|few|many|other)$/, ""); let a = uiKoOn() ? (tAlt(tk0) ?? tAlt(tk)) : tAlt(tk); /* 한국어판엔 복수형 열쇠가 없음 → 한국어 쪽은 바탕 열쇠 */ if (a == null) return null; names.forEach((n, i) => { a = a.replace(`{${n}}`, r[i + 1]); }); return v.replace(tv, a); } // {칸} 틀 글(「31편」 · 「5 / 15」)
+  for (const { re, k: tk0, names } of snap.tpl) { const r = re.exec(tv); if (!r) continue; const tk = tk0.replace(/_(zero|one|two|few|many|other)$/, ""); const ni = names.indexOf("n"), pk = ni >= 0 && uiKoOn() ? `${tk}_${new Intl.PluralRules(lang).select(+String(r[ni + 1]).replace(/[^0-9.]/g, ""))}` : null; /* 한국어 화면에서 학습자 말 쪽 = 그 말 복수형 열쇠(n_episodes_other 등) — 전엔 바탕 열쇠가 없어 한국어로 재서 tl 320 ⇄ 때 18.6px(10-20) */ let a = uiKoOn() ? ((pk && tAlt(pk)) ?? tAlt(tk0) ?? tAlt(tk)) : tAlt(tk); /* 한국어판엔 복수형 열쇠가 없음 → 한국어 쪽은 바탕 열쇠 */ if (a == null) return null; names.forEach((n, i) => { a = a.replace(`{${n}}`, r[i + 1]); }); return v.replace(tv, a); } // {칸} 틀 글(「31편」 · 「5 / 15」)
   const nt = /^([\s\p{S}\p{P}]*)(.*?\p{L}[\p{L}\p{M}]*)(\s*[\d.,:/×%]+.*)$/u.exec(tv);
   if (nt) { k = snap.get(nt[2].trim()) || snap.core.get(nt[2].trim()); if (k) { const a = tAlt(k); return a == null ? null : v.replace(tv, nt[1] + coreOf(a) + nt[3]); } }
   return null;
@@ -93,7 +93,7 @@ const queue = () => { if (!queued) { queued = true; requestAnimationFrame(() => 
 
 if (!window.__langfitWired) {
   window.__langfitWired = true;
-  new MutationObserver(queue).observe(document.body, { childList: true, characterData: true, subtree: true, attributes: true, attributeFilter: ["hidden", "class", "open", "aria-expanded"] }); // 숨었다 나타나는 창(hidden·class)도 — 보일 때 잼
+  new MutationObserver(recs => { if (recs.some(r => !(r.target.nodeType === 1 ? r.target : r.target.parentElement)?.closest?.(".ut"))) queue(); }).observe(document.body, { childList: true, characterData: true, subtree: true, attributes: true, attributeFilter: ["hidden", "class", "open", "aria-expanded"] }); // 숨었다 나타나는 창(hidden·class)도 — 보일 때 잼 · 단원 이름(.ut)은 list.js fitUnit 이 혼자 맞춤 → 그 안 바뀜으로 옆 줄을 다시 재지 않음(tl 320 ⇄ 때 18.6px · 10-20)
   // ⇄ 직후(retext 가 글을 바꾼 같은 순간) — 모드별 글자 배율만 바꿈(폭은 이미 고정) · 사라진 단추는 잊음
   window.addEventListener("malmun:uilang", () => { snapCache = null; for (const el of fitted) { if (!el.isConnected) { fitted.delete(el); continue; } applyScale(el); } });
   // 언어 자체를 바꾸면(지구 단추) 다시 잼
