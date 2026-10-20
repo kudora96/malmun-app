@@ -1,10 +1,10 @@
-import { MUSIC_ON, bgmOn, setBgm, TRACKS, playTrack, bgmNow, onBgmChange, bgmVol, setBgmVol, playNext } from "./bgm.js?v=1020.9";
-import { paths } from "./paths.js?v=1020.9";
-import { t, tL, tAlt, lang, langName, LANGS, READY, setLang, KO_UI, uiKoOn, setUiKo, langShort, preloadKoUi } from "./i18n.js?v=1020.9";
-import { snapshot, retext } from "./retext.js?v=1020.9";
-import "./langfit.js?v=1020.9"; // ⇄ 때 단추 크기·자리 고정(다국어부 10-15)
-import { VERSION } from "./version.js?v=1020.9";
-import { esc } from "./text.js?v=1020.9";
+import { MUSIC_ON, bgmOn, setBgm, TRACKS, playTrack, bgmNow, onBgmChange, bgmVol, setBgmVol, playNext } from "./bgm.js?v=1020.10";
+import { paths } from "./paths.js?v=1020.10";
+import { t, tL, tAlt, lang, langName, LANGS, READY, setLang, KO_UI, uiKoOn, setUiKo, langShort, preloadKoUi } from "./i18n.js?v=1020.10";
+import { snapshot, retext } from "./retext.js?v=1020.10";
+import "./langfit.js?v=1020.10"; // ⇄ 때 단추 크기·자리 고정(다국어부 10-15)
+import { VERSION } from "./version.js?v=1020.10";
+import { esc } from "./text.js?v=1020.10";
 
 const svg = (d, fill) => `<svg class="ico" viewBox="0 0 24 24" ${fill ? 'fill="currentColor"' : 'fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"'} aria-hidden="true">${d}</svg>`;
 export const I = {
@@ -99,12 +99,13 @@ export function openMusicBox() {
       catch { const d = Object.assign(document.createElement("div"), { className: "toast", textContent: t("music_dl_fail") }); document.body.append(d); setTimeout(() => d.remove(), 3000); } finally { db.disabled = false; } }
   };
 }
+// 「(곧)」 = 지금 말 글 + 보이지 않는 반대 말 겹(::after · retext 가 안 건드림) → 칸 = 큰 쪽 · ⇄ 때 줄바꿈 0px(es·my 21.7px · 다국어부 10-20)
 export function openLangSheet(onPick) {
   const root = document.getElementById("sheet-root");
   root.innerHTML = `<div class="sheet-dim" data-close></div>
     <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-h"><span class="grab"></span>
     <h2 id="sheet-h">${esc(t("lang_title"))}${uiKoBtn()}</h2><p>${esc(t("lang_hint"))}</p>
-    <ul>${LANGS.map(([c, n]) => { const ok = READY.includes(c) || c === lang; return `<li><button data-lang="${c}" aria-current="${c === lang}" lang="${c}"${ok ? "" : ' disabled aria-disabled="true"'}>${esc(n)}${ok ? "" : ` <small>(${esc(t("lang_soon"))})</small>`}</button></li>`; }).join("")}</ul><p class="ver">v${esc(VERSION)}</p></div>`;
+    <ul>${LANGS.map(([c, n]) => { const ok = READY.includes(c) || c === lang; return `<li><button data-lang="${c}" aria-current="${c === lang}" lang="${c}"${ok ? "" : ' disabled aria-disabled="true"'}>${esc(n)}${ok ? "" : ` <small class="sn"><span>(${esc(t("lang_soon"))})</span><span class="g" aria-hidden="true" data-t="(${esc(t("lang_soon"))})"></span><span class="g" aria-hidden="true" data-t="(${esc(tAlt("lang_soon") ?? t("lang_soon"))})"></span></small>`}</button></li>`; }).join("")}</ul><p class="ver">v${esc(VERSION)}</p></div>`;
   const close = () => { root.innerHTML = ""; document.removeEventListener("keydown", key); };
   const key = e => { if (e.key === "Escape") close(); };
   document.addEventListener("keydown", key);
