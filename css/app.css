@@ -328,7 +328,7 @@ a{color:inherit;text-decoration:none}
 .v9bar .pb{padding:5px 12px;border-radius:999px;border:1px solid var(--hi);color:var(--hi);font-size:13px;font-weight:700}
 .v9bar .pb[aria-pressed=true]{background:var(--hi);color:#fff}
 .v9body{padding:5px 12px 6px;display:flex;flex-direction:column;gap:5px}
-.exv.v9 .v9body{flex:1 1 0;min-height:0}.v9body .sayb{margin-top:auto;flex:none} /* 「말해 보세요」 칸 = 본문 맨 아래 고정(⇄ 로 본문 길이가 바뀌어도 단추 자리 0px · 다국어부 10-15) · 본문 칸 높이 = 남은 자리 그대로(1 1 0 · 내용 따라 늘면 아래 줄이 0.5~18px 밀리던 것 → 넘치면 fitBody 가 글을 줄임 · 개발2팀 10-21) */
+.exv.v9 .v9body{flex:1 0 auto}.v9body .sayb{margin-top:auto} /* 「말해 보세요」 칸 = 본문 맨 아래 고정(⇄ 로 본문 길이가 바뀌어도 단추 자리 0px · 다국어부 10-15) · 본문이 남은 자리를 소수점이라도 넘으면 fitBody 가 글을 줄임(개발2팀 10-21) */
 .v9body .chips{display:flex;flex-wrap:wrap;gap:3px 4px;line-height:1.35}
 .v9body .chip{background:var(--bubble);border-radius:6px;padding:1px 6px;font-size:11.5px}
 .v9body .chip b{font-size:12.5px;white-space:nowrap} /* 「읽을 수」처럼 띄어 쓴 조각도 한 덩어리로 */

@@ -230,16 +230,13 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     const body = panel.querySelector(".v9body"); if (!body) return;
     const tg = [...body.children].filter(c => !c.classList.contains("sayb")).concat([...body.querySelectorAll(".sayb > p")]);
     tg.forEach(c => c.style.removeProperty("zoom"));
-    const say = body.querySelector(":scope > .sayb"), cs = getComputedStyle(body);
-    const spill = () => { if (!say) return false; const br = body.getBoundingClientRect(), z = br.height / (parseFloat(cs.height) || br.height || 1); return say.getBoundingClientRect().bottom > br.bottom - (parseFloat(cs.paddingBottom) || 0) * z + 0.05; }; // 소수점까지(scrollHeight 는 정수라 1.7px 넘침을 못 봄)
+    const spill = () => body.getBoundingClientRect().bottom > panel.getBoundingClientRect().bottom + 0.05; // 본문 칸이 창 아래를 소수점이라도 넘음(scrollHeight 는 정수라 못 봄) → 본문 칸이 남은 자리보다 커져 아래 「말해 보세요」 줄이 0.5~18px 밀리던 것
     const over = () => panel.scrollHeight > panel.clientHeight || spill(); // 본문 칸(높이 고정) 안에 「말해 보세요」 칸까지 다 들어갈 때까지 — 그 줄 자리 0px(다국어부 10-20 hi·si·zh 등)
     for (let z = 0.96; z >= 0.6 && over(); z -= 0.04) tg.forEach(c => (c.style.zoom = z.toFixed(2)));
   }
-  // 설명 창 「말해 보세요」 단추 폭 = 소수점 올림으로 고정(늘기만 · ⇄ 때 0.1~0.2px 폭 차이로 뒤 단추가 0.5px 옆으로 밀리던 것 · 다국어부 10-20 id·si·ru)
-  function lockSay() { for (const b of panel.querySelectorAll(".v9body .sbtns > button")) { if (!b.offsetParent) continue; let z = 1; for (let e = b; e && e !== panel.parentElement; e = e.parentElement) z *= parseFloat(e.style.zoom) || 1; const m = parseFloat(b.style.minWidth) || 0, w = Math.ceil(Math.max(m, b.getBoundingClientRect().width / z)) + 1; if (w > m + 0.5) b.style.minWidth = w + "px"; } } // langfit 「두 말 중 긴 쪽」 폭 + 올림 1px(그 값이 0.2px 모자라 ⇄ 때 폭이 늘던 것 · id·si·ru)
   function fitPanel() {
     const kind = st.panel?.kind; if (kind !== "explain" && kind !== "speak") return;
-    if (kind === "explain") queueMicrotask(() => { if (!st.uiFit && st.panel?.kind === "explain") fitBody(); lockSay(); }); // 처음 맞춤도 ⇄ 와 같은 규칙(「말해 보세요」 칸이 본문 칸 밖으로 넘치면 글만 줄임) → ⇄ 전·후 같은 자리
+    if (kind === "explain") queueMicrotask(() => { if (!st.uiFit && st.panel?.kind === "explain") fitBody(); }); // 처음 맞춤도 ⇄ 와 같은 규칙(「말해 보세요」 칸이 본문 칸 밖으로 넘치면 글만 줄임) → ⇄ 전·후 같은 자리
     if (st.uiFit && kind === "explain") return fitBody();
     const kids = [...panel.children].filter(c => !c.classList.contains("vplay"));
     kids.forEach(c => c.style.removeProperty("min-height")); // 아래 「창 높이 채움」은 잴 때 빼고
