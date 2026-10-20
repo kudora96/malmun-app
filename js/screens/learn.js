@@ -230,14 +230,11 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     const body = panel.querySelector(".v9body"); if (!body) return;
     const tg = [...body.children].filter(c => !c.classList.contains("sayb")).concat([...body.querySelectorAll(".sayb > p")]);
     tg.forEach(c => c.style.removeProperty("zoom"));
-    const spill = () => body.getBoundingClientRect().bottom > panel.getBoundingClientRect().bottom + 0.05; // 본문 칸이 창 아래를 소수점이라도 넘음(scrollHeight 는 정수라 못 봄) → 본문 칸이 남은 자리보다 커져 아래 「말해 보세요」 줄이 0.5~18px 밀리던 것
-    const over = () => panel.scrollHeight > panel.clientHeight || spill(); // 본문 칸(높이 고정) 안에 「말해 보세요」 칸까지 다 들어갈 때까지 — 그 줄 자리 0px(다국어부 10-20 hi·si·zh 등)
-    for (let z = 0.96; z >= 0.6 && over(); z -= 0.04) tg.forEach(c => (c.style.zoom = z.toFixed(2)));
+    for (let z = 0.96; z >= 0.6 && panel.scrollHeight > panel.clientHeight; z -= 0.04) tg.forEach(c => (c.style.zoom = z.toFixed(2)));
   }
   function fitPanel() {
     const kind = st.panel?.kind; if (kind !== "explain" && kind !== "speak") return;
-    if (kind === "explain") queueMicrotask(() => { if (!st.uiFit && st.panel?.kind === "explain") fitBody(); }); // 처음 맞춤도 ⇄ 와 같은 규칙(「말해 보세요」 칸이 본문 칸 밖으로 넘치면 글만 줄임) → ⇄ 전·후 같은 자리
-    if (st.uiFit && kind === "explain") return fitBody();
+    if (st.uiFit && kind === "explain") return fitBody(); // ⇄ 뒤엔 창을 연 뒤 늦게 오는 맞춤(0.3초·글꼴)도 본문만 — 창 크기 그대로
     const kids = [...panel.children].filter(c => !c.classList.contains("vplay"));
     kids.forEach(c => c.style.removeProperty("min-height")); // 아래 「창 높이 채움」은 잴 때 빼고
     // 설명 = 칸을 꽉 채우는 가장 큰 크기(짧은 줄은 키우고 긴 줄은 줄임 · 15px → 최대 20px · 칩·간격도 같은 비율 — 본부 10-06) · 말하기 = 넘칠 때만 줄임
