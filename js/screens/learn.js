@@ -10,28 +10,28 @@
 //  R7 영상은 늘 맨 위 · 지금 줄은 영상 바로 아래(앞 줄은 영상 뒤로) — 손으로 목록을 움직이면 4초 동안은 따라가지 않음
 //  R8 듣기 모드(대사→설명 · 설명만)도 R1~R6 그대로(영상 대신 소리 조각) · 모드를 바꾸면 멈춤(▶ 로 시작)
 //  R9 다시 들어오면 마지막 줄이 선택된 채 멈춰 있음
-import { noScoreKey } from "../agepolicy.js?v=1016.81"; // 점수 없음 안내 = 나이 때문인지(대표님 10-19)
-import { warmSTT } from "../sttserver.js?v=1016.81";
-import * as sfxL from "../sfx.js?v=1016.81"; // 카드 말하기 최대 길이 = 본보기 길이로(10-07)
-import { t, lang, langName, KO_UI, uiKoOn, preloadKoUi } from "../i18n.js?v=1016.81";
-import { setTx } from "../retext.js?v=1016.81";
-import { langfitRun } from "../langfit.js?v=1016.81";
-import { esc, renderText, glossCards, sayParts } from "../text.js?v=1016.81";
-import { episode } from "../data.js?v=1016.81";
-import { paths } from "../paths.js?v=1016.81";
-import { Sequence } from "../audio.js?v=1016.81";
-import { I, progress, SPEAKER, spkHtml, uiKoBtn, switchUiKo } from "../ui.js?v=1016.81";
-import writeView from "./write.js?v=1016.81";
-import { diagEnv, keepDiag } from "../diag.js?v=1016.81";
-import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1016.81";
-import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace, lateFactor, sylAt, paintAt, karaokeRun, isFull } from "../rhythm.js?v=1016.81";
-import { playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1016.81";
-import { heardHTML, endHint, scoreOf, bestFull, spanOf, sylsAt } from "../heard.js?v=1016.81"; // 덧붙은 말 빼고 견주기(본부 10-11)
-import { recDel, downloadRec, askPersist } from "../recstore.js?v=1016.81";
-import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1016.81";
-import { scoreFx, stopFx } from "../scorefx.js?v=1016.81"; // 점수별 효과(본부 10-05)
-import { record, recordSROnly, srOnlyMode, setSrOnly, isAndroid, srMiss, micWhy, srWhy, canScore, closeMic, logRec, micOpen, seqMode, srOnBlob, devSR, setDevSR, srJudge, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1016.81";
-import { hold, quietWake } from "../wake.js?v=1016.81";
+import { noScoreKey } from "../agepolicy.js?v=1016.87"; // 점수 없음 안내 = 나이 때문인지(대표님 10-19)
+import { warmSTT } from "../sttserver.js?v=1016.87";
+import * as sfxL from "../sfx.js?v=1016.87"; // 카드 말하기 최대 길이 = 본보기 길이로(10-07)
+import { t, lang, langName, KO_UI, uiKoOn, preloadKoUi } from "../i18n.js?v=1016.87";
+import { setTx } from "../retext.js?v=1016.87";
+import { langfitRun } from "../langfit.js?v=1016.87";
+import { esc, renderText, glossCards, sayParts } from "../text.js?v=1016.87";
+import { episode } from "../data.js?v=1016.87";
+import { paths } from "../paths.js?v=1016.87";
+import { Sequence } from "../audio.js?v=1016.87";
+import { I, progress, SPEAKER, spkHtml, uiKoBtn, switchUiKo } from "../ui.js?v=1016.87";
+import writeView from "./write.js?v=1016.87";
+import { diagEnv, keepDiag } from "../diag.js?v=1016.87";
+import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1016.87";
+import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace, lateFactor, sylAt, paintAt, karaokeRun, isFull } from "../rhythm.js?v=1016.87";
+import { playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1016.87";
+import { heardHTML, endHint, scoreOf, bestFull, spanOf, sylsAt } from "../heard.js?v=1016.87"; // 덧붙은 말 빼고 견주기(본부 10-11)
+import { recDel, downloadRec, askPersist } from "../recstore.js?v=1016.87";
+import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1016.87";
+import { scoreFx, stopFx } from "../scorefx.js?v=1016.87"; // 점수별 효과(본부 10-05)
+import { record, recordSROnly, srOnlyMode, setSrOnly, isAndroid, srMiss, micWhy, srWhy, canScore, closeMic, logRec, micOpen, seqMode, srOnBlob, devSR, setDevSR, srJudge, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1016.87";
+import { hold, quietWake } from "../wake.js?v=1016.87";
 
 const RATES = [1, 0.75, 0.5];
 const pref = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } };
@@ -90,6 +90,27 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
 
   const v = app.querySelector("video");
   const items = [...app.querySelectorAll(".line")];
+  // 두 말 위아래 = ⇄ 상태(대표님 10-19·10-20 「한↔네팔어 바뀌면 위아래도 바뀌어야」) — 학습자 말 화면이면 학습자 말이 위 · 한국어 화면이면 한국어가 위
+  //  편 제목 · 영상 아래 큰 자막 · 줄 카드(지금 줄·대화 풍선) — 위 자리 = 큰 글·진한 색(큰 자막은 두 줄 같은 크기) · ⇄ 없는 언어(영어 등)는 지금 그대로
+  const lFirst = () => KO_UI.includes(lang) && !uiKoOn();
+  function applyFirst() { swapTo(lFirst()); }
+  // ⇄ 위아래가 바뀌어도 칸 높이 0px — 제목 칸·줄 카드마다 두 상태(한국어 위·학습자 말 위)를 재서 큰 쪽을 min-height 로(태국어·우르두 제목이 한 상태에서만 두 줄 → 영상 18px 밀리던 것)
+  function lockBoth() {
+    if (!KO_UI.includes(lang)) return;
+    const sc = app.querySelector(".scr.learn"), ttl = app.querySelector(".vtitle"), els = [ttl, ...items].filter(Boolean);
+    els.forEach(e => e.style.removeProperty("min-height"));
+    const hs = () => els.map(e => e.getBoundingClientRect().height), on0 = sc.classList.contains("lfirst");
+    const H = document.documentElement, u0 = H.classList.contains("uiko"); // 반대 상태 = 위아래 + ⇄ 글꼴 규칙(html.uiko)까지(우르두 글꼴 · 15px)
+    const a = hs(); swapTo(!on0); H.classList.toggle("uiko", !u0); fitTitle(ttl); const b = hs(); swapTo(on0); H.classList.toggle("uiko", u0); fitTitle(ttl);
+    els.forEach((e, k) => { const m = Math.max(a[k], b[k]); if (Math.abs(a[k] - b[k]) > 0.5) e.style.minHeight = m.toFixed(1) + "px"; }); // 두 상태가 다르면 큰 쪽으로(어느 상태에서 열어도)
+    sc.classList.add("lockh");
+  }
+  function swapTo(on) {
+    app.querySelector(".scr.learn")?.classList.toggle("lfirst", on);
+    for (const li of items) { const ko = li.querySelector(".kotext"), tr = li.querySelector(":scope > .tr"); if (!ko || !tr) continue; if (on && ko.nextElementSibling === tr) ko.before(tr); else if (!on && tr.nextElementSibling === ko) ko.after(tr); }
+    const tt = app.querySelector(".vtitle .tt"), b = tt?.querySelector(":scope > b"), sub = tt?.querySelector(":scope > .sub"); if (b && sub) { if (on && b.nextElementSibling === sub) b.before(sub); else if (!on && sub.nextElementSibling === b) b.after(sub); }
+  }
+  applyFirst();
   const playBtn = app.querySelector("[data-act=play]");
   // 맨 앞 줄에선 |◀, 맨 끝 줄에선 ▶| 못 누름(투덜이 10-08 — 다른 ◀ ▶ 처럼) · 설명·쓰기 창이면 그 창의 줄 기준
   const prevBtn = app.querySelector(".ctrl [data-act=prev]"), nextBtn = app.querySelector(".ctrl [data-act=next]");
@@ -138,9 +159,9 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     if (st.cardKeep === i) return; // ⇄ 뒤 같은 카드 = 맞춘 단계 그대로(⇄ 0px · 다국어부 10-19 ru 375 카드 단추 줄 14~21px) · 다른 줄·창 크기가 바뀌면 다시 맞춤
     st.cardKeep = -1;
     items.forEach(li => { li.classList.remove("fitc", "tr2", "tr1", "ac1"); li.style.removeProperty("--kf"); li.style.removeProperty("--tf"); });
-    const el = items[i]; if (!el) return; // 네 창(영상·설명·쓰기·말하기) 모두 같은 카드 자리·같은 글 크기(본부 10-06 「한 틀」)
+    const el = items[i]; if (!el) return; const mh0 = el.style.minHeight; el.style.removeProperty("min-height"); queueMicrotask(() => { if (mh0) el.style.minHeight = mh0; }); // 맞출 땐 글 높이로만(⇄ 고정 높이는 맞춘 뒤 다시) // 네 창(영상·설명·쓰기·말하기) 모두 같은 카드 자리·같은 글 크기(본부 10-06 「한 틀」)
     const avail = ctrlBar.getBoundingClientRect().top - stick.getBoundingClientRect().bottom - 14;
-    const ko = el.querySelector(".kotext"), tr = el.querySelector(".tr");
+    const ko = el.querySelector(lFirst() ? ".tr" : ".kotext"), tr = el.querySelector(lFirst() ? ".kotext" : ".tr"); // 위 자리 = --kf · 아래 = --tf(⇄ 위아래)
     let kf = parseFloat(getComputedStyle(ko).fontSize), tf = tr ? parseFloat(getComputedStyle(tr).fontSize) : 0;
     el.classList.add("fitc");
     for (let k = 0; k < 16 && el.offsetHeight > avail && kf > 11; k++) { kf -= 1; tf = Math.max(10, tf - 0.7); el.style.setProperty("--kf", kf + "px"); el.style.setProperty("--tf", tf + "px"); }
@@ -210,7 +231,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     if (st.uiFit && st.panel.kind === "explain") return fitBody(); // ⇄ 뒤 = 창 크기 그대로 · 본문 글만 맞춤
     if (Math.abs(h - (st.fitH || 0)) > 2 || panel.scrollHeight > panel.clientHeight) fitPanel();
   }, 120); }).observe(app.querySelector(".panel"), { subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: ["hidden", "class", "aria-pressed"] });
-  const onFit = () => { st.uiFit = false; st.cardKeep = -1; fitPanel(); vsubFill(st.cur); fitCard(st.cur); clearTimeout(st.fitT); st.fitT = setTimeout(() => keepVisible(st.cur), 120); }; // 창 크기가 바뀌면(브라우저가 스크롤을 옮겨도) 지금 줄 카드를 제자리로 — 손 스크롤 중이면 그대로
+  const onFit = () => { st.uiFit = false; st.cardKeep = -1; lockBoth(); fitPanel(); vsubFill(st.cur); fitCard(st.cur); clearTimeout(st.fitT); st.fitT = setTimeout(() => keepVisible(st.cur), 120); }; // 창 크기가 바뀌면(브라우저가 스크롤을 옮겨도) 지금 줄 카드를 제자리로 — 손 스크롤 중이면 그대로
   addEventListener("resize", onFit);
   addEventListener("resize", pad); pad();
   ["touchmove", "wheel"].forEach(e => window.addEventListener(e, () => { st.handScroll = Date.now(); }, { passive: true }));
@@ -955,6 +976,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   v.addEventListener("click", togglePlay);
   // 「ने⇄한」 = 언어 하나(안 A) — 어느 화면·창의 단추든(ui.js 문서 한 곳이 받음 · 다국어부 10-14) 앱 글이 바뀌면 설명 소리·본문도 그 언어로(듣는 중이면 같은 문장부터) · 설명 막대 안 고르기(uiLang)는 제 손잡이가 이미 맞춤
   const onUiLang = () => {
+    applyFirst(); st.cardKeep = -1; requestAnimationFrame(() => { fitTitle(app.querySelector(".vtitle")); vsubFill(st.cur); fitCard(st.cur); }); // 위아래 바뀜 → 다시 맞춤
     if (!app.querySelector(".scr.learn")) return removeEventListener("malmun:uilang", onUiLang);
     setRateWord(t("speed")); // 속도 알약 말(rateLabel)도 새 언어로(다국어부 10-14)
     st.cardKeep = st.cur; // 지금 카드 맞춤 단계 고정(⇄ 0px)
@@ -999,7 +1021,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   ready = true; // 이제 카드 맞춤(fitCard)이 쓰는 막대·창이 다 있음
   try { history.scrollRestoration = "manual"; } catch {} // 새로 열 때 브라우저가 옛 스크롤 자리로 되돌리지 않게(본부 10-06 — 처음 몇 초 7·8번 카드가 보임)
   select(st.cur, { scroll: false });
-  pad(); fitCard(st.cur); if (st.cur > 0) underVideo(items[st.cur], true); // 첫 프레임부터 제자리(움직임 없이 바로)
+  lockBoth(); document.fonts?.ready.then(() => { if (app.querySelector(".scr.learn")) { lockBoth(); fitCard(st.cur); } }); pad(); fitCard(st.cur); if (st.cur > 0) underVideo(items[st.cur], true); // 첫 프레임부터 제자리(움직임 없이 바로)
   // 글꼴·영상 크기가 다 잡힌 뒤 한 번 더(처음 열 때 지금 줄이 영상 아래로 안 오던 문제) — 그사이 손으로 움직였으면 하지 않음
   const settle = () => { if (st.cur > 0 && Date.now() - st.handScroll > 4000 && !playing() && !st.panel) { pad(); fitCard(st.cur); underVideo(items[st.cur], true); } };
   document.fonts?.ready.then(() => setTimeout(settle, 50));
