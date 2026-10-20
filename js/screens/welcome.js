@@ -1,14 +1,15 @@
-import { t } from "../i18n.js?v=1016.92";
-import { esc } from "../text.js?v=1016.92";
-import { langChip, openLangSheet, uiKoBtn, spkHtml } from "../ui.js?v=1016.92";
-import { rerender } from "../main.js?v=1016.92";
+import { t } from "../i18n.js?v=1016.93";
+import { esc } from "../text.js?v=1016.93";
+import { langChip, openLangSheet, uiKoBtn, spkHtml } from "../ui.js?v=1016.93";
+import { rerender } from "../main.js?v=1016.93";
 
 const KEY = "malmun.started";
 const started = () => { try { return localStorage.getItem(KEY) === "1"; } catch { return false; } };
 
 export default function welcome(app) {
   // 두 번째부터는 바로 편 목록
-  if (started() && !location.hash.includes("hello")) { location.replace("#/list"); return; }
+  // 다시 열면 = 마지막 편·줄에서 멈춘 채 이어 보기(검사부 여정 10-20 · 새 단추 없이 동작으로) · 기록 없으면 편 목록
+  if (started() && !location.hash.includes("hello")) { let last = null; try { last = JSON.parse(localStorage.getItem("malmun.last") || "null"); } catch {} location.replace(last?.ep && /^[A-Za-z0-9-]+$/.test(last.ep) ? `#/learn/${last.ep}/${encodeURIComponent(last.id)}` : "#/list"); return; }
   app.innerHTML = `<section class="scr welcome">
     <div class="top">${uiKoBtn()}${langChip()}</div>
     <div class="board"><img src="img/L01-00-01.jpg" alt=""></div>
