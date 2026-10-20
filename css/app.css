@@ -1530,3 +1530,6 @@ html.bigview,html.bigview body{overflow:hidden}
 #vwrap:fullscreen>.vuiko .chip.uiko[aria-pressed=false] .a,#vwrap:fullscreen>.vuiko .chip.uiko[aria-pressed=true] .b{opacity:1;color:#ffd27a}
 /* 머리 줄 붙박이(대표님 10-20 「ㅇ」 · 모든 창 ⇄) — 편 목록·진단을 내려도 머리 줄(⇄ 포함)이 위에 · 칸 크기·자리 0px(위치만 sticky · 바탕색만 덧칠) */
 .list > .bar,.diag > .bar{position:sticky;top:0;z-index:5;background:var(--bg);box-shadow:0 1px 0 var(--line)} /* 아래 선 = 그림자(높이 0px) */
+/* 편·단원 제목 학습자 말 ⇄ 한국어(다국어부 10-20) — 세 겹(.cur·한국어·학습자 말)을 한 칸에 겹쳐 칸 = 큰 쪽 → ⇄ 때 0px */
+.ept{display:grid;min-width:0}.ept>*{grid-area:1/1;min-width:0;overflow-wrap:break-word}.ept>.gh{visibility:hidden}
+.hero .ttl:has(>.ept){display:flex;gap:.3em}.hero .ttl>.ept{flex:1}
