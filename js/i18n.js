@@ -1,5 +1,5 @@
-import { VERSION } from "./version.js?v=1016.93";
-import { LANG_INFO } from "./langs.js?v=1016.93";
+import { VERSION } from "./version.js?v=1016.96";
+import { LANG_INFO } from "./langs.js?v=1016.96";
 // 학습자 언어 — 고르게 하지 않는다(CLAUDE.md).
 // ① 저장된 선택 ② 폰 언어가 22개 중 하나 ③ 폰 시간대로 나라 짐작 ④ 영어
 export const LANGS = [
@@ -15,7 +15,7 @@ const DEV_HOST = /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
 // stage: ready = 공개 · pilot = 개발 주소(localhost·127.0.0.1)에서만(시범 언어 · 공개 판은 본부 신호 전까지 「곧」)
 const stageOf = c => LANG_INFO[c]?.stage;
 // 대표님 확인용 「모든 언어」(본부 10-20 · ?all=1 기억 · ?all=0 끔) — 출시 단계와 상관없이 언어 창에서 모든 언어를 고를 수 있음(학습자에게는 안 보임)
-const ALL_LANG = (() => { try { const m = /[?&]all=([01])(&|$)/.exec(location.search); if (m) m[1] === "1" ? localStorage.setItem("malmun.alllang", "1") : localStorage.removeItem("malmun.alllang"); return localStorage.getItem("malmun.alllang") === "1"; } catch { return false; } })();
+const ALL_LANG = (() => { try { const m = /[?&#/]all=([01])(?![0-9])/.exec(location.href); /* 주소 어디든(점검 도구가 ?all=1/?lang=ne 처럼 붙여도 · 검사부 10-20) */ if (m) m[1] === "1" ? localStorage.setItem("malmun.alllang", "1") : localStorage.removeItem("malmun.alllang"); return localStorage.getItem("malmun.alllang") === "1"; } catch { return false; } })();
 export const READY = CODES.filter(c => ALL_LANG || stageOf(c) === "ready" || (DEV_HOST && stageOf(c) === "pilot"));
 const RTL = new Set(CODES.filter(c => LANG_INFO[c]?.dir === "rtl"));
 // 폰 언어 코드가 우리 코드와 다른 것
