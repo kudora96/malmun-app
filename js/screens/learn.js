@@ -80,12 +80,12 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
       <span class="vplay" aria-hidden="true">${I.play}</span>
       <div class="cap" aria-live="polite"></div>
       <button class="vfs" data-act="fs" aria-label="${esc(t("fullscreen"))}">${FS}</button><span class="vuiko">${uikoChip()}</span>
-      <button class="vsubt" data-act="subs" aria-pressed="${subsOn()}" aria-label="${esc(t("subs_aria"))}" title="${esc(t("subs_aria"))}"><span class="cc" aria-hidden="true">CC</span><span class="w">${esc(t("subs"))}</span></button>
-      <div class="fstip" role="status" hidden><span class="who">${spkHtml("선생님")}</span><p>${esc(t("subs_tip"))}</p><button class="x" data-act="tipx" aria-label="${esc(t("close_word"))}">✕</button></div></div></div><div class="vsub" hidden aria-hidden="true"><div class="in"></div></div></div>
+      </div></div><div class="vsub" hidden aria-hidden="true"><div class="in"></div></div></div>
     <div class="panel" hidden></div>
     </div>
     <button class="bigb" data-act="big" aria-pressed="false" hidden aria-label="${esc(t("big_view"))}" title="${esc(t("big_view"))}"><span aria-hidden="true">⛶</span><span class="off" data-k="big_short">${esc(t("big_short"))}</span><span class="on" data-k="big_off">${esc(t("big_off"))}</span></button>
-    <div class="seek" data-off><span class="t0">0:00</span><div class="trk" aria-label="${esc(t("seek_bar"))}"><div class="rail"><i></i></div></div><span class="t1">0:00</span></div>
+    <div class="seek" data-off><span class="t0">0:00</span><div class="trk" aria-label="${esc(t("seek_bar"))}"><div class="rail"><i></i></div></div><span class="t1">0:00</span><button class="vsubt" data-act="subs" aria-pressed="${subsOn()}" aria-label="${esc(t("subs_aria"))}" title="${esc(t("subs_aria"))}"><span class="cc" aria-hidden="true">CC</span></button>
+      <div class="fstip" role="status" hidden><span class="who">${spkHtml("선생님")}</span><p data-k="subs_tip">${esc(t("subs_tip"))}</p><button class="x" data-act="tipx" aria-label="${esc(t("close_word"))}">✕</button></div></div>
     </div>
     <ol class="lines">${L.map((l, i) => `<li class="line sp-${SPEAKER[l.speaker] || "x"} ${l.speaker === "선생님" ? "" : "right"}" data-i="${i}" data-peek="👁 ${esc(t("subs_peek"))}">
       <span class="who">${spkHtml(l.speaker)}</span>
@@ -1038,7 +1038,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     else if (w.requestFullscreen) w.requestFullscreen().catch(() => v.webkitEnterFullscreen?.());
     else v.webkitEnterFullscreen?.();
   };
-  // 자막 켬/끔(영상 창 · 전체 화면 안에서도 보이게 #vwrap 안) — 끄면 전체 화면 자막·영상 밑 큰 자막·줄 카드 글을 가림(소리는 그대로)
+  // 자막 켬/끔 = 영상 밖 재생 막대 끝 작은 CC 칩(대표님 10-19 「영상 안엔 전체 보기만」 · 높이 0px) — 끄면 전체 화면 자막·영상 밑 큰 자막·줄 카드 글을 가림(소리는 그대로)
   const fsTip = app.querySelector(".fstip"); let tipT = 0;
   const hideTip = () => { clearTimeout(tipT); fsTip.hidden = true; };
   app.querySelector("[data-act=subs]").onclick = e => {
@@ -1047,14 +1047,15 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     if (!on) hideTip();
   };
   app.querySelector("[data-act=tipx]").onclick = hideTip;
-  // 선생님 말풍선 — 전체 영상·전체 화면을 열 때 처음 3번만 · 8초 뒤 저절로 닫힘 · 자막이 이미 꺼져 있으면 안 띄움
+  // 선생님 말풍선 = 영상 밖(재생 막대 CC 칩을 가리킴 · 겹쳐 뜸 = 0px) — 전체 영상을 처음 열 때 한 번만(대표님 10-19) · 8초 뒤 저절로 닫힘 · 자막이 이미 꺼져 있으면 안 띄움 · 전체 화면에 들어가면 닫음
   function fullTip() {
-    if (!subsOn() || !fsTip) return;
-    const n = +(pref("malmun.fullsubtip") || 0); if (n >= 3) return;
-    pref("malmun.fullsubtip", String(n + 1));
+    if (!subsOn() || !fsTip || pref("malmun.subtip1")) return;
+    pref("malmun.subtip1", "1");
     fsTip.hidden = false; clearTimeout(tipT); tipT = setTimeout(() => { fsTip.hidden = true; }, 8000);
+    fsTip.style.removeProperty("max-width"); // 가로 폰 = 막대 위 왼쪽 → ⛶ 왼쪽까지만
+    if (matchMedia("(orientation: landscape) and (max-height: 500px)").matches) { const fb = app.querySelector("[data-act=fs]").getBoundingClientRect(), sk = app.querySelector(".seek").getBoundingClientRect(); fsTip.style.maxWidth = Math.max(160, fb.left - sk.left - 10) + "px"; }
   }
-  const onFsChange = () => { if (document.fullscreenElement === app.querySelector("#vwrap")) fullTip(); };
+  const onFsChange = () => { if (document.fullscreenElement) hideTip(); };
   document.addEventListener("fullscreenchange", onFsChange);
   const onKey = e => { if (e.code !== "Space" || /^(INPUT|BUTTON|TEXTAREA|A)$/.test(e.target.tagName)) return; e.preventDefault(); togglePlay(); };
   document.addEventListener("keydown", onKey);
