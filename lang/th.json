@@ -310,5 +310,7 @@
  "ink_orange": "ส้ม",
  "ink_pink": "ชมพู",
  "ink_sky": "ฟ้า",
- "ink_gray": "เทา"
+ "ink_gray": "เทา",
+ "line_game": "เกม",
+ "hold_name": "ลืมหรือ? กดปุ่มค้างไว้เพื่อดูชื่อ"
 }

@@ -310,5 +310,7 @@
  "ink_orange": "Naranja",
  "ink_pink": "Rosa",
  "ink_sky": "Celeste",
- "ink_gray": "Gris"
+ "ink_gray": "Gris",
+ "line_game": "Juego",
+ "hold_name": "¿Lo olvidó? Mantenga pulsado un botón para ver su nombre"
 }

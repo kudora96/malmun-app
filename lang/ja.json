@@ -1,5 +1,5 @@
 {
- "_note": "ja 앱 글 — 언어부 09_lang/ui (check_ui ✗0 · ⚠0)",
+ "_note": "ja 앱 글 — 언어부 09_lang/ui (check_ui ✗0 · ⚠1)",
  "lang_title": "言語",
  "lang_hint": "スマホの設定に合わせて自動で選ばれました。いつでも変えられます。",
  "uiko_back_tip": "いつでも{b}を押すと、自分の言語に戻れます",
@@ -310,5 +310,7 @@
  "ink_orange": "オレンジ",
  "ink_pink": "ピンク",
  "ink_sky": "空色",
- "ink_gray": "灰色"
+ "ink_gray": "灰色",
+ "line_game": "ゲーム",
+ "hold_name": "忘れたら、ボタンを長押しすると名前が見えます"
 }

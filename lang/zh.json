@@ -1,5 +1,5 @@
 {
- "_note": "zh 앱 글 — 언어부 09_lang/ui (check_ui ✗0 · ⚠4)",
+ "_note": "zh 앱 글 — 언어부 09_lang/ui (check_ui ✗0 · ⚠5)",
  "lang_title": "语言",
  "lang_hint": "已根据手机设置自动选择，随时可以更改。",
  "uiko_back_tip": "随时点 {b} 即可切换回你的语言",
@@ -310,5 +310,7 @@
  "ink_orange": "橙色",
  "ink_pink": "粉色",
  "ink_sky": "天蓝",
- "ink_gray": "灰色"
+ "ink_gray": "灰色",
+ "line_game": "游戏",
+ "hold_name": "忘了？长按按钮就能看到名称"
 }
