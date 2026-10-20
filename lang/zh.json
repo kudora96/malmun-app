@@ -1,5 +1,5 @@
 {
- "_note": "zh 앱 글 — 언어부 09_lang/ui (check_ui ✗0 · ⚠4)",
+ "_note": "zh 앱 글 — 언어부 09_lang/ui (check_ui ✗0 · ⚠6)",
  "lang_title": "语言",
  "lang_hint": "已根据手机设置自动选择，随时可以更改。",
  "uiko_back_tip": "随时点 {b} 即可切换回你的语言",
@@ -310,5 +310,16 @@
  "ink_orange": "橙色",
  "ink_pink": "粉色",
  "ink_sky": "天蓝",
- "ink_gray": "灰色"
+ "ink_gray": "灰色",
+ "birth_q": "请选择出生年份",
+ "birth_sub": "我们按年龄调整功能。这些信息不会离开本设备。",
+ "birth_year": "出生年份",
+ "birth_country": "居住国家",
+ "birth_why": "为什么要问？",
+ "birth_why_a": "部分功能（口语录音评分和人工智能）因年龄和国家而不同。",
+ "birth_ok": "确定",
+ "age_teen_note": "可以练习口语。录音转成文字后会立即删除。人工智能功能{n}岁起开放。",
+ "age_kid_note": "所有视频、讲解和字母读音都可以使用。口语录音仅在本设备上使用。人工智能功能{n}岁起开放。",
+ "line_game": "游戏",
+ "hold_name": "忘了？长按按钮就能看到名称"
 }

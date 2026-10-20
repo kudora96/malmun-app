@@ -2,7 +2,7 @@
 //  ① 조합한 글(점수 줄 · 「🎤 말하세요」 등) = setTx(el, () => 글) 로 쓴 곳 → 그 함수를 다시 불러 새 언어로
 //  ② 글 전체가 t(열쇠) 하나인 글·aria-label·title·data-peek → 바꾸기 전 글로 열쇠를 찾아 새 글로(앞뒤 기호 「🎤 」「▶ 」는 그대로)
 //  배우는 한국어·대사 뜻(대사·낱말·설명 본문·학습자 말 뜻)은 건드리지 않음 · 끝에 malmun:uilang 이벤트(말하기·쓰기 창이 상태로 다시 씀)
-import { t, uiKeys } from "./i18n.js?v=1020.3";
+import { t, uiKeys } from "./i18n.js?v=1020.7";
 
 export const setTx = (el, fn) => { if (!el) return; el.__tx = fn; el.textContent = el.__txv = fn(); }; // 뒤에 다른 글로 바뀌면(textContent = …) 그 함수는 안 씀
 export const clearTx = el => { if (el) el.__tx = null; };
@@ -25,7 +25,7 @@ export function snapshot() {
 }
 
 // 배우는 내용(설명 본문·낱말·대사)은 그대로 · 설명 카드 안 단추(「말해 보세요」·견본·속도·로마자·닫기)는 바꿈(다국어부 10-14 — 전엔 .v9body 통째로 빠져 안 바뀜)
-const SKIP = "[lang=ko], .kotext, .ko, .v9body :is(p,.pair,.pairln,.glosses,.saybig,.sayrom,.ex,.sn), .glosses, .saybig, .tr, .rom, .mean, .who, .vsub, script, style, textarea, input";
+const SKIP = "[lang=ko], .ept, .ut, .kotext, .ko, .v9body :is(p,.pair,.pairln,.glosses,.saybig,.sayrom,.ex,.sn), .glosses, .saybig, .tr, .rom, .mean, .who, .vsub, script, style, textarea, input";
 const EDGE = /^([\s\p{S}\p{P}]*?)(\p{L}[\s\S]*?\S|\p{L})([\s\p{S}\p{P}]*)$/u; // 앞뒤 기호·빈칸 / 가운데 글
 function coreOf(s) { return EDGE.exec(String(s).trim())?.[2] ?? String(s).trim(); }
 // 글 자리(mem)마다 찾은 열쇠를 기억 — 한국어 「닫기」처럼 한 글이 열쇠 둘(close·close_btn)이면, 기억한 열쇠의 「바꾸기 전」 글이 지금 글과 같을 때 그 열쇠로(돌아올 때 엉뚱한 말로 가지 않게)

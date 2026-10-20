@@ -310,5 +310,16 @@
  "ink_orange": "Toʻq sariq",
  "ink_pink": "Pushti",
  "ink_sky": "Havorang",
- "ink_gray": "Kulrang"
+ "ink_gray": "Kulrang",
+ "birth_q": "Tugʻilgan yilingizni tanlang",
+ "birth_sub": "Imkoniyatlarni yoshingizga moslaymiz. Bu maʼlumot ushbu qurilmadan tashqariga chiqmaydi.",
+ "birth_year": "Tugʻilgan yil",
+ "birth_country": "Yashaydigan mamlakat",
+ "birth_why": "Nega soʻraymiz?",
+ "birth_why_a": "Baʼzi imkoniyatlar (nutq yozuvini baholash va sunʼiy intellekt) yosh va mamlakatga bogʻliq.",
+ "birth_ok": "Tasdiqlash",
+ "age_teen_note": "Gapirishni mashq qilishingiz mumkin. Yozuv matnga aylantirilgach, darhol oʻchiriladi. Sunʼiy intellekt imkoniyatlari {n} yoshdan ochiladi.",
+ "age_kid_note": "Barcha video, izoh va harf tovushlaridan foydalanishingiz mumkin. Nutq yozuvlaridan faqat shu qurilmaning oʻzida foydalaniladi. Sunʼiy intellekt imkoniyatlari {n} yoshdan ochiladi.",
+ "line_game": "Oʻyin",
+ "hold_name": "Unutdingizmi? Nomini koʻrish uchun tugmani bosib turing"
 }
