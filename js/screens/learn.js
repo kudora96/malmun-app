@@ -38,6 +38,7 @@ import { esc, renderText, glossCards, sayParts } from "../text.js?v=1020.5";
 import { episode } from "../data.js?v=1020.5";
 import { paths, MEDIA } from "../paths.js?v=1020.5";
 import { attachVq } from "../vq.js?v=1020.5";
+import { setReportCtx } from "../report.js?v=1020.5";
 import { Sequence } from "../audio.js?v=1020.5";
 import { I, progress, SPEAKER, spkHtml, uiKoBtn, uikoChip, switchUiKo } from "../ui.js?v=1020.5";
 import writeView from "./write.js?v=1020.5";
@@ -109,6 +110,16 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
 
   const v = app.querySelector("video");
   const vqOff = attachVq(v, ep); // 화질 자동 720 ⇄ 480(느린 망·잦은 버퍼링 · 단추 없음)
+  // 길게 누르기 → 「잘못된 것 신고」(report.js · 대표님 10-20) — 줄 카드 · 영상 밑 자막 · 위 창(설명·말하기·쓰기) · 「왜 틀렸어요?」 답 창(종류 = AI 답)
+  const rpOff = setReportCtx(el => {
+    const cur = st.panel ? st.panel.i : st.cur, id = i => L[i]?.id ?? String(i + 1);
+    if (el.closest(".whys")) return { screen: "why", kind: "ai", ep, line: id(cur), el: el.closest(".whys") };
+    if (!app.contains(el)) return null;
+    const li = el.closest(".line"); if (li) return { screen: "learn", ep, line: id(+li.dataset.i), el: li };
+    if (st.panel && el.closest(".panel")) return { screen: ["explain", "speak", "write"].includes(st.panel.kind) ? st.panel.kind : "other", ep, line: id(st.panel.i), el: el.closest(".panel") };
+    if (el.closest(".vsub")) return { screen: "learn", ep, line: id(st.cur), el: el.closest(".vsub") };
+    return null;
+  });
   const items = [...app.querySelectorAll(".line")];
   // 두 말 위아래 = ⇄ 상태(대표님 10-19·10-20 「한↔네팔어 바뀌면 위아래도 바뀌어야」) — 학습자 말 화면이면 학습자 말이 위 · 한국어 화면이면 한국어가 위
   //  편 제목 · 영상 아래 큰 자막 · 줄 카드(지금 줄·대화 풍선) — 위 자리 = 큰 글·진한 색(큰 자막은 두 줄 같은 크기) · ⇄ 없는 언어(영어 등)는 지금 그대로
@@ -1078,5 +1089,5 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   if (reopen) openPanel(reopen.kind, reopen.i, { restore: reopen }); // ने⇄한 토글 전 창·자리
   else if (opts.explain) openPanel("explain", st.cur, { autoplay: true }); /* #/explain/{편}/{줄} = 그 줄 v9 설명 창(첫 터치 전엔 소리가 막힐 수 있음 — ▶ 로 시작) */
   const release = hold(); // 소리 장치 깨워 두기(첫소리 먹힘 방지)
-  return () => { if (gm.el) closeGame(true); removeEventListener("resize", onTurn); mqLand.removeEventListener?.("change", onLand); document.removeEventListener("keydown", onBigKey, true); document.documentElement.classList.remove("bigview"); clearTimeout(tipT); document.removeEventListener("fullscreenchange", onFsChange); clearInterval(edgeT); clearInterval(litT); clearInterval(seekTimer); clearInterval(hlTimer); document.removeEventListener("pointerdown", onDocDown, true); removeEventListener("popstate", onPop); removeEventListener("malmun:uilang", onUiLang); document.removeEventListener("visibilitychange", onHide); clearTimeout(st.animEnd); release(); st.panel?.cleanup?.(); ex.stop(); removeEventListener("resize", pad); removeEventListener("resize", onFit); clearInterval(timer); clearTimeout(st.gap); document.removeEventListener("keydown", onKey); seq.stop(); vqOff(); v.pause(); v.removeAttribute("src"); v.load(); };
+  return () => { if (gm.el) closeGame(true); removeEventListener("resize", onTurn); mqLand.removeEventListener?.("change", onLand); document.removeEventListener("keydown", onBigKey, true); document.documentElement.classList.remove("bigview"); clearTimeout(tipT); document.removeEventListener("fullscreenchange", onFsChange); clearInterval(edgeT); clearInterval(litT); clearInterval(seekTimer); clearInterval(hlTimer); document.removeEventListener("pointerdown", onDocDown, true); removeEventListener("popstate", onPop); removeEventListener("malmun:uilang", onUiLang); document.removeEventListener("visibilitychange", onHide); clearTimeout(st.animEnd); release(); st.panel?.cleanup?.(); ex.stop(); removeEventListener("resize", pad); removeEventListener("resize", onFit); clearInterval(timer); clearTimeout(st.gap); document.removeEventListener("keydown", onKey); seq.stop(); vqOff(); rpOff(); v.pause(); v.removeAttribute("src"); v.load(); };
 }

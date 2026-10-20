@@ -1548,3 +1548,19 @@ html.bigview,html.bigview body{overflow:hidden}
 #vwrap:fullscreen>.vuiko .chip.uiko[aria-pressed=false] .a,#vwrap:fullscreen>.vuiko .chip.uiko[aria-pressed=true] .b{opacity:1;color:#ffd27a}
 /* 머리 줄 붙박이(대표님 10-20 「ㅇ」 · 모든 창 ⇄) — 편 목록·진단을 내려도 머리 줄(⇄ 포함)이 위에 · 칸 크기·자리 0px(위치만 sticky · 바탕색만 덧칠) */
 .list > .bar,.diag > .bar{position:sticky;top:0;z-index:5;background:var(--bg);box-shadow:0 1px 0 var(--line)} /* 아래 선 = 그림자(높이 0px) */
+/* 「잘못된 것 신고」(report.js · 대표님 10-20) — 길게 누르기 → 겹쳐 뜨는 풍선(틀 0px) · 음악 상자·답 창(.sheet)보다 위 */
+.rpmenu,.rptip{position:fixed;z-index:10050;box-sizing:border-box;background:var(--card);border:2px solid var(--hi);border-radius:14px;box-shadow:0 4px 14px rgba(0,0,0,.22);color:var(--ink);text-align:start}
+.rpmenu{padding:4px}
+.rpmenu button{min-height:40px;padding:6px 14px;border-radius:10px;border:1px solid var(--line);background:var(--bg2);color:var(--ink);font-size:14px;font-weight:600;white-space:nowrap}
+.rptip{left:12px;right:12px;max-width:520px;margin:0 auto;padding:10px 12px 12px;display:grid;gap:8px;grid-template-columns:minmax(0,1fr)}
+.rptip .who{font-size:12px;color:var(--hi)}
+.rptip .q{margin:0;font-size:15px;font-weight:700;line-height:1.4;unicode-bidi:plaintext}
+.rptip .ks{display:flex;flex-wrap:wrap;gap:6px}
+.rptip .ks button{min-height:36px;padding:4px 12px;border-radius:999px;border:1px solid var(--line);background:var(--bg2);color:var(--ink);font-size:13px;line-height:1.25;max-width:100%}
+.rptip .ks button[aria-pressed=true]{background:var(--hi);border-color:var(--hi);color:#fff}
+.rptip textarea{box-sizing:border-box;width:100%;min-height:52px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);font:inherit;font-size:14px;padding:6px 8px;resize:none}
+.rptip .bt{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.rptip .bt button{min-height:40px;padding:6px 18px;border-radius:10px;border:1px solid var(--line);background:var(--bg2);color:var(--ink);font-size:14px}
+.rptip .bt .go{background:var(--ink);color:var(--bg);border-color:var(--ink);font-weight:700}
+.rptip .bt .go:disabled{opacity:.35;cursor:not-allowed}
+.rphi{box-shadow:0 0 0 3px var(--hi)!important}

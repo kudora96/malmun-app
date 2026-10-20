@@ -318,5 +318,16 @@
  "birth_why_a": "Some features (speaking checks and AI) depend on your age and country.",
  "birth_ok": "OK",
  "age_teen_note": "You can practice speaking. Recordings are turned into text and deleted right away. AI features open at age {n}.",
- "age_kid_note": "You can use all videos, explanations and letter sounds. Speaking recordings stay on this device only. AI features open at age {n}."
+ "age_kid_note": "You can use all videos, explanations and letter sounds. Speaking recordings are used only on this device. AI features open at age {n}.",
+ "rp_menu": "Report a problem",
+ "rp_q": "What looks wrong?",
+ "rp_k_tr": "Translation is odd",
+ "rp_k_snd": "Sound is odd",
+ "rp_k_glyph": "Letter or stroke is wrong",
+ "rp_k_ai": "AI answer is odd",
+ "rp_k_etc": "Other",
+ "rp_ph": "(Optional) Tell us briefly · 100 characters",
+ "rp_send": "Send",
+ "rp_thx": "Thank you! We'll check and fix it.",
+ "rp_limit": "No more reports today. Please tell us again tomorrow."
 }
