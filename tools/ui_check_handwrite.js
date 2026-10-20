@@ -75,7 +75,7 @@
     ok(H1 !== H0 && H1?.ch !== undefined, "ⓒ 「다음 ▶」 → 다음 글자", `「${ch0}」 → 「${H1?.ch}」`);
     // ⓕ 손 뗀 채 1.2초 → 저절로 판정(통과면 머묾 → 다음 ▶)
     for (let k = 0; k < 60 && wr().busy(); k++) await W(100);
-    const ch1 = H1.ch; await draw(wr().traceOf(ch1)); for (let k = 0; k < 40 && !H1.passed; k++) await W(100);
+    const ch1 = H1.ch; await draw(wr().centerOf(ch1)); /* 가운데 선을 따라 씀(대표님 10-20 가운데 기준 — 회색 칠하기 낙서 traceOf 는 이제 100 아님) */ for (let k = 0; k < 40 && !H1.passed; k++) await W(100);
     const auto = H1.passed; for (let k = 0; k < 60 && wr().busy(); k++) await W(100); $("[data-act=hnext]")?.click(); for (let k = 0; k < 80 && wr().hand() === H1; k++) await W(100);
     ok(auto && wr().hand() !== H1, "ⓕ 다 그리고 손 뗀 채 1.2초 → 저절로 판정(통과) → 다음 ▶", `「${ch1}」 → 「${wr().hand()?.ch}」`);
     // ⓘ 획순(본부 10-07 2단계) — 세·종·왕·읽·이: 자료 획 차례대로 = 알림 0 · 중성 먼저 = 순서 알림 · 가로획 거꾸로 = 방향 알림 · 자료 점이 글꼴 획에서 많이 벗어난 자모 보고
