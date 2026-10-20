@@ -5,6 +5,7 @@
 //  하루 상한 = KV「CAP」 숫자 세기(기기당 DEV_CAP · 전체 ALL_CAP) — KV 는 원자적이 아니라 대략(남용 막기용)
 //  CORS = https://kudora96.github.io · http://localhost:* · http://127.0.0.1:* 만
 import { explain } from "./explain.js"; // 「왜 틀렸어요?」(본부 10-19)
+import { report, purge } from "./report.js"; // 「잘못된 것 신고」(10-20 · D1 「DB」 묶은 뒤 켜짐)
 const MODEL = "@cf/openai/whisper-large-v3-turbo";
 const MAX_BYTES = 1024 * 1024; // 약 1MB(opus 15초는 보통 100KB 안쪽)
 const TYPES = /^audio\/(webm|mp4|ogg|mpeg|aac|x-m4a|wav)\b/i;
@@ -58,6 +59,15 @@ export default {
       const r = await explain(env, ctx, dev, body);
       return json(o, r.status, r.out);
     }
+    if (url.pathname === "/report") { // 신고 — JSON 받아 D1 에 한 줄(report.js)
+      if (req.method !== "POST") return json(o, 405, { error: "method not allowed" });
+      if (!allowOrigin(o)) return json(o, 403, { error: "origin not allowed" });
+      const dev = req.headers.get("X-Dev") || "";
+      if (!/^[A-Za-z0-9-]{8,64}$/.test(dev)) return json(o, 400, { error: "bad device id" });
+      if (!/^application\/json(;|$)/i.test(req.headers.get("Content-Type") || "")) return json(o, 415, { error: "json only" });
+      let body; try { const t = await req.text(); if (t.length > 2048) return json(o, 413, { error: "too large" }); body = JSON.parse(t); } catch { return json(o, 400, { error: "bad json" }); }
+      try { const r = await report(env, dev, body); return json(o, r.status, r.out); } catch { return json(o, 500, { error: "save failed" }); }
+    }
     if (url.pathname !== "/stt") return json(o, 404, { error: "not found" });
     if (req.method !== "POST") return json(o, 405, { error: "method not allowed" });
     if (!allowOrigin(o)) return json(o, 403, { error: "origin not allowed" });
@@ -82,4 +92,6 @@ export default {
     for (const sg of out?.segments || []) for (const w of sg?.words || []) { const t = String(w.word || "").trim(); if (t) words.push({ w: t, s: Math.round((+w.start || 0) * 100) / 100, e: Math.round((+w.end || 0) * 100) / 100 }); }
     return json(o, 200, { text: String(out?.text || "").trim(), words }, timing(tUp, tAi, tTot));
   },
+  // 하루 한 번(wrangler.toml [triggers]) — 90일 넘은 신고 지우기
+  async scheduled(ev, env, ctx) { ctx.waitUntil(purge(env)); },
 };

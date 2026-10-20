@@ -35,25 +35,27 @@ function gameWords(vl, uw, lg, ep) {   // 뜻 조각(v9 pieces)과 소리 낱말
   }
   return out;
 }
-import { setTx } from "../retext.js?v=1020.8";
-import { langfitRun } from "../langfit.js?v=1020.8";
-import { esc, renderText, glossCards, sayParts } from "../text.js?v=1020.8";
-import { episode } from "../data.js?v=1020.8";
-import { paths, MEDIA } from "../paths.js?v=1020.8";
-import { Sequence } from "../audio.js?v=1020.8";
-import { I, progress, SPEAKER, spkHtml, uiKoBtn, uikoChip, switchUiKo } from "../ui.js?v=1020.8";
-import writeView from "./write.js?v=1020.8";
-import { diagEnv, keepDiag } from "../diag.js?v=1020.8";
-import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1020.8";
-import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace, lateFactor, sylAt, paintAt, karaokeRun, isFull } from "../rhythm.js?v=1020.8";
-import { playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1020.8";
-import { heardHTML, endHint, scoreOf, bestFull, spanOf, sylsAt } from "../heard.js?v=1020.8"; // 덧붙은 말 빼고 견주기(본부 10-11)
-import { recDel, downloadRec, askPersist } from "../recstore.js?v=1020.8";
-import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1020.8";
-import { scoreFx, stopFx } from "../scorefx.js?v=1020.8"; // 점수별 효과(본부 10-05)
-import { record, recordSROnly, srOnlyMode, setSrOnly, isAndroid, srMiss, micWhy, srWhy, canScore, closeMic, logRec, micOpen, seqMode, srOnBlob, devSR, setDevSR, srJudge, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1020.8";
-import { hold, quietWake } from "../wake.js?v=1020.8";
-import { hold as bgmHold } from "../bgm.js?v=1020.8"; // 🎮 게임 중 배경음악 멈춤
+import { setTx } from "../retext.js?v=1020.7";
+import { langfitRun } from "../langfit.js?v=1020.7";
+import { esc, renderText, glossCards, sayParts } from "../text.js?v=1020.7";
+import { episode } from "../data.js?v=1020.7";
+import { paths, MEDIA } from "../paths.js?v=1020.7";
+import { attachVq } from "../vq.js?v=1020.7";
+import { setReportCtx } from "../report.js?v=1020.7";
+import { Sequence } from "../audio.js?v=1020.7";
+import { I, progress, SPEAKER, spkHtml, uiKoBtn, uikoChip, switchUiKo } from "../ui.js?v=1020.7";
+import writeView from "./write.js?v=1020.7";
+import { diagEnv, keepDiag } from "../diag.js?v=1020.7";
+import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1020.7";
+import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace, lateFactor, sylAt, paintAt, karaokeRun, isFull } from "../rhythm.js?v=1020.7";
+import { playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1020.7";
+import { heardHTML, endHint, scoreOf, bestFull, spanOf, sylsAt } from "../heard.js?v=1020.7"; // 덧붙은 말 빼고 견주기(본부 10-11)
+import { recDel, downloadRec, askPersist } from "../recstore.js?v=1020.7";
+import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1020.7";
+import { scoreFx, stopFx } from "../scorefx.js?v=1020.7"; // 점수별 효과(본부 10-05)
+import { record, recordSROnly, srOnlyMode, setSrOnly, isAndroid, srMiss, micWhy, srWhy, canScore, closeMic, logRec, micOpen, seqMode, srOnBlob, devSR, setDevSR, srJudge, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1020.7";
+import { hold, quietWake } from "../wake.js?v=1020.7";
+import { hold as bgmHold } from "../bgm.js?v=1020.7"; // 🎮 게임 중 배경음악 멈춤
 
 const RATES = [1, 0.75, 0.5];
 const pref = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } };
@@ -80,7 +82,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     <div class="stick">
     <div class="vstage">
     <div class="vmain"><div class="vtitle"><div class="tt"><b class="ko" lang="ko">${esc(d.title || "")}</b>${d.title_t ? `<span class="sub">${esc(d.title_t)}</span>` : ""}</div>${uiKoBtn()}<span class="n"></span></div>
-    <div class="varea"><div class="video" id="vwrap"><video playsinline preload="metadata" poster="${paths.poster(ep)}" src="${paths.video(ep)}"></video>
+    <div class="varea"><div class="video" id="vwrap"><video playsinline preload="metadata" poster="${paths.poster(ep)}"></video>
       <span class="vplay" aria-hidden="true">${I.play}</span>
       <div class="cap" aria-live="polite"></div>
       <button class="vfs" data-act="fs" aria-label="${esc(t("fullscreen"))}">${FS}</button><span class="vuiko">${uikoChip()}</span>
@@ -111,6 +113,17 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   </section>`;
 
   const v = app.querySelector("video");
+  const vqOff = attachVq(v, ep); // 화질 자동 720 ⇄ 480(느린 망·잦은 버퍼링 · 단추 없음)
+  // 길게 누르기 → 「잘못된 것 신고」(report.js · 대표님 10-20) — 줄 카드 · 영상 밑 자막 · 위 창(설명·말하기·쓰기) · 「왜 틀렸어요?」 답 창(종류 = AI 답)
+  const rpOff = setReportCtx(el => {
+    const cur = st.panel ? st.panel.i : st.cur, id = i => L[i]?.id ?? String(i + 1);
+    if (el.closest(".whys")) return { screen: "why", kind: "ai", ep, line: id(cur), el: el.closest(".whys") };
+    if (!app.contains(el)) return null;
+    const li = el.closest(".line"); if (li) return { screen: "learn", ep, line: id(+li.dataset.i), el: li };
+    if (st.panel && el.closest(".panel")) return { screen: ["explain", "speak", "write"].includes(st.panel.kind) ? st.panel.kind : "other", ep, line: id(st.panel.i), el: el.closest(".panel") };
+    if (el.closest(".vsub")) return { screen: "learn", ep, line: id(st.cur), el: el.closest(".vsub") };
+    return null;
+  });
   const items = [...app.querySelectorAll(".line")];
   // 두 말 위아래 = ⇄ 상태(대표님 10-19·10-20 「한↔네팔어 바뀌면 위아래도 바뀌어야」) — 학습자 말 화면이면 학습자 말이 위 · 한국어 화면이면 한국어가 위
   //  편 제목 · 영상 아래 큰 자막 · 줄 카드(지금 줄·대화 풍선) — 위 자리 = 큰 글·진한 색(큰 자막은 두 줄 같은 크기) · ⇄ 없는 언어(영어 등)는 지금 그대로
@@ -1096,5 +1109,5 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   if (reopen) openPanel(reopen.kind, reopen.i, { restore: reopen }); // ने⇄한 토글 전 창·자리
   else if (opts.explain) openPanel("explain", st.cur, { autoplay: true }); /* #/explain/{편}/{줄} = 그 줄 v9 설명 창(첫 터치 전엔 소리가 막힐 수 있음 — ▶ 로 시작) */
   const release = hold(); // 소리 장치 깨워 두기(첫소리 먹힘 방지)
-  return () => { tipOff(); clearTimeout(tip.wait); tip.step = -1; document.removeEventListener("pointerdown", tipTap, true); window.removeEventListener("malmun:uilang", onUiTip); if (gm.el) closeGame(true); removeEventListener("resize", onTurn); mqLand.removeEventListener?.("change", onLand); document.removeEventListener("keydown", onBigKey, true); document.documentElement.classList.remove("bigview"); clearTimeout(tipT); document.removeEventListener("fullscreenchange", onFsChange); clearInterval(edgeT); clearInterval(litT); clearInterval(seekTimer); clearInterval(hlTimer); document.removeEventListener("pointerdown", onDocDown, true); removeEventListener("popstate", onPop); removeEventListener("malmun:uilang", onUiLang); document.removeEventListener("visibilitychange", onHide); clearTimeout(st.animEnd); release(); st.panel?.cleanup?.(); ex.stop(); removeEventListener("resize", pad); removeEventListener("resize", onFit); clearInterval(timer); clearTimeout(st.gap); document.removeEventListener("keydown", onKey); seq.stop(); v.pause(); v.removeAttribute("src"); v.load(); };
+  return () => { tipOff(); clearTimeout(tip.wait); tip.step = -1; document.removeEventListener("pointerdown", tipTap, true); window.removeEventListener("malmun:uilang", onUiTip); if (gm.el) closeGame(true); removeEventListener("resize", onTurn); mqLand.removeEventListener?.("change", onLand); document.removeEventListener("keydown", onBigKey, true); document.documentElement.classList.remove("bigview"); clearTimeout(tipT); document.removeEventListener("fullscreenchange", onFsChange); clearInterval(edgeT); clearInterval(litT); clearInterval(seekTimer); clearInterval(hlTimer); document.removeEventListener("pointerdown", onDocDown, true); removeEventListener("popstate", onPop); removeEventListener("malmun:uilang", onUiLang); document.removeEventListener("visibilitychange", onHide); clearTimeout(st.animEnd); release(); st.panel?.cleanup?.(); ex.stop(); removeEventListener("resize", pad); removeEventListener("resize", onFit); clearInterval(timer); clearTimeout(st.gap); document.removeEventListener("keydown", onKey); seq.stop(); vqOff(); rpOff(); v.pause(); v.removeAttribute("src"); v.load(); };
 }
