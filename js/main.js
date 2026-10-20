@@ -1,14 +1,14 @@
-import "./agepolicy.js?v=1016.99"; // 기능별 나이(대표님 10-19) — 받아쓰기 막기는 다른 것보다 먼저
-import { detectLang, setLang, LANGS, t } from "./i18n.js?v=1016.99";
-import { VERSION } from "./version.js?v=1016.99";
-import { bgmScene } from "./bgm.js?v=1016.99";
-import welcome from "./screens/welcome.js?v=1016.99";
-import list from "./screens/list.js?v=1016.99";
-import learn from "./screens/learn.js?v=1016.99";
-import write from "./screens/write.js?v=1016.99";
-import speak from "./screens/speak.js?v=1016.99";
-import diag from "./screens/diag.js?v=1016.99";
-import "./errlog.js?v=1016.99"; // 오류 기록(진단 화면용 · 기록만)
+import "./agepolicy.js?v=1020.1"; // 기능별 나이(대표님 10-19) — 받아쓰기 막기는 다른 것보다 먼저
+import { detectLang, setLang, LANGS, t } from "./i18n.js?v=1020.1";
+import { VERSION } from "./version.js?v=1020.1";
+import { bgmScene } from "./bgm.js?v=1020.1";
+import welcome from "./screens/welcome.js?v=1020.1";
+import list from "./screens/list.js?v=1020.1";
+import learn from "./screens/learn.js?v=1020.1";
+import write from "./screens/write.js?v=1020.1";
+import speak from "./screens/speak.js?v=1020.1";
+import diag from "./screens/diag.js?v=1020.1";
+import "./errlog.js?v=1020.1"; // 오류 기록(진단 화면용 · 기록만)
 
 const app = document.getElementById("app");
 const explain = (app, ep, id) => learn(app, ep, id, { explain: true }); /* #/explain/{편}/{줄} = 학습 화면 + 그 줄 새(v9) 설명 창(10-12 · 옛 explain.js 화면 대신 · 책 QR 주소 그대로) */
@@ -30,6 +30,7 @@ async function route() {
     else args = clean;
   } else args = args.map(dec);
   cleanup?.(); cleanup = null;
+  try { window.scrollTo(0, 0); } catch {} // 화면을 바꾸면 맨 위부터(다국어부 10-20 — 말하기 창 연 채 #/diag 로 가면 108px 내려간 채 열림)
   document.getElementById("sheet-root").innerHTML = "";
   const screen = routes[name] || welcome;
   bgmScene(routes[name] ? name : ""); // 배경음악 = 첫 화면·편 목록만(본부 10-15)
