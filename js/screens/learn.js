@@ -10,28 +10,46 @@
 //  R7 영상은 늘 맨 위 · 지금 줄은 영상 바로 아래(앞 줄은 영상 뒤로) — 손으로 목록을 움직이면 4초 동안은 따라가지 않음
 //  R8 듣기 모드(대사→설명 · 설명만)도 R1~R6 그대로(영상 대신 소리 조각) · 모드를 바꾸면 멈춤(▶ 로 시작)
 //  R9 다시 들어오면 마지막 줄이 선택된 채 멈춰 있음
-import { noScoreKey } from "../agepolicy.js?v=1016.97"; // 점수 없음 안내 = 나이 때문인지(대표님 10-19)
-import { warmSTT } from "../sttserver.js?v=1016.97";
-import * as sfxL from "../sfx.js?v=1016.97"; // 카드 말하기 최대 길이 = 본보기 길이로(10-07)
-import { t, lang, langName, KO_UI, uiKoOn, preloadKoUi } from "../i18n.js?v=1016.97";
-import { setTx } from "../retext.js?v=1016.97";
-import { langfitRun } from "../langfit.js?v=1016.97";
-import { esc, renderText, glossCards, sayParts } from "../text.js?v=1016.97";
-import { episode } from "../data.js?v=1016.97";
-import { paths } from "../paths.js?v=1016.97";
-import { Sequence } from "../audio.js?v=1016.97";
-import { I, progress, SPEAKER, spkHtml, uiKoBtn, switchUiKo } from "../ui.js?v=1016.97";
-import writeView from "./write.js?v=1016.97";
-import { diagEnv, keepDiag } from "../diag.js?v=1016.97";
-import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1016.97";
-import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace, lateFactor, sylAt, paintAt, karaokeRun, isFull } from "../rhythm.js?v=1016.97";
-import { playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1016.97";
-import { heardHTML, endHint, scoreOf, bestFull, spanOf, sylsAt } from "../heard.js?v=1016.97"; // 덧붙은 말 빼고 견주기(본부 10-11)
-import { recDel, downloadRec, askPersist } from "../recstore.js?v=1016.97";
-import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1016.97";
-import { scoreFx, stopFx } from "../scorefx.js?v=1016.97"; // 점수별 효과(본부 10-05)
-import { record, recordSROnly, srOnlyMode, setSrOnly, isAndroid, srMiss, micWhy, srWhy, canScore, closeMic, logRec, micOpen, seqMode, srOnBlob, devSR, setDevSR, srJudge, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1016.97";
-import { hold, quietWake } from "../wake.js?v=1016.97";
+import { noScoreKey } from "../agepolicy.js?v=1016.98"; // 점수 없음 안내 = 나이 때문인지(대표님 10-19)
+import { warmSTT } from "../sttserver.js?v=1016.98";
+import * as sfxL from "../sfx.js?v=1016.98"; // 카드 말하기 최대 길이 = 본보기 길이로(10-07)
+import { t, lang, langName, KO_UI, uiKoOn, preloadKoUi } from "../i18n.js?v=1016.98";
+// 🎮 줄 게임(게임부 10-20) — 배우기 화면 위 겹침(iframe)으로 game/line.html · 신호 malmun-line / -ready / -done(10_game/shooter/design.md §74)
+const GAME_DONE = "malmun.game.done";
+const gameDone = (ep, id) => { try { return (JSON.parse(localStorage.getItem(GAME_DONE) || "[]")).includes(`${ep}:${id}`); } catch { return false; } };
+const gameMark = (ep, id) => { try { const a = JSON.parse(localStorage.getItem(GAME_DONE) || "[]"); if (!a.includes(`${ep}:${id}`)) { a.push(`${ep}:${id}`); localStorage.setItem(GAME_DONE, JSON.stringify(a)); } } catch {} };
+const gnorm = x => (x || "").replace(/[\s.,!?…「」『』"'·]/g, "");
+function gameWords(vl, uw, lg, ep) {   // 뜻 조각(v9 pieces)과 소리 낱말(units)을 글자로 맞춰 묶음 — 10_game/tools/build_line.py 와 같은 규칙
+  const pieces = vl?.pieces?.length ? vl.pieces : uw.map(w => ({ ko: w.say || w.text, mean_by: {} })), out = [];
+  let pi = 0, ui = 0;
+  while (pi < pieces.length && ui < uw.length) {
+    const pg = [pieces[pi]], ug = [uw[ui]]; let pk = gnorm(pieces[pi].ko), uk = gnorm(uw[ui].say || uw[ui].text); pi++; ui++;
+    while (pk !== uk && (pi < pieces.length || ui < uw.length)) {
+      if (pk.length < uk.length && pi < pieces.length) { pg.push(pieces[pi]); pk += gnorm(pieces[pi].ko); pi++; }
+      else if (ui < uw.length) { ug.push(uw[ui]); uk += gnorm(uw[ui].say || uw[ui].text); ui++; } else break;
+    }
+    out.push({ ko: pg.map(p => p.ko).join(" "), mean: pg.map(p => (p.mean_by || {})[lg] || "").filter(Boolean).join(" "), audio: ug.map(w => paths.unit(ep, w.id)) });
+  }
+  return out;
+}
+import { setTx } from "../retext.js?v=1016.98";
+import { langfitRun } from "../langfit.js?v=1016.98";
+import { esc, renderText, glossCards, sayParts } from "../text.js?v=1016.98";
+import { episode } from "../data.js?v=1016.98";
+import { paths, MEDIA } from "../paths.js?v=1016.98";
+import { Sequence } from "../audio.js?v=1016.98";
+import { I, progress, SPEAKER, spkHtml, uiKoBtn, switchUiKo } from "../ui.js?v=1016.98";
+import writeView from "./write.js?v=1016.98";
+import { diagEnv, keepDiag } from "../diag.js?v=1016.98";
+import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1016.98";
+import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace, lateFactor, sylAt, paintAt, karaokeRun, isFull } from "../rhythm.js?v=1016.98";
+import { playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1016.98";
+import { heardHTML, endHint, scoreOf, bestFull, spanOf, sylsAt } from "../heard.js?v=1016.98"; // 덧붙은 말 빼고 견주기(본부 10-11)
+import { recDel, downloadRec, askPersist } from "../recstore.js?v=1016.98";
+import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1016.98";
+import { scoreFx, stopFx } from "../scorefx.js?v=1016.98"; // 점수별 효과(본부 10-05)
+import { record, recordSROnly, srOnlyMode, setSrOnly, isAndroid, srMiss, micWhy, srWhy, canScore, closeMic, logRec, micOpen, seqMode, srOnBlob, devSR, setDevSR, srJudge, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1016.98";
+import { hold, quietWake } from "../wake.js?v=1016.98";
 
 const RATES = [1, 0.75, 0.5];
 const pref = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } };
@@ -74,7 +92,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
       <p class="kotext ko" lang="ko">${esc(l.ko)}</p>
       ${l.tr ? `<p class="tr">${esc(l.tr)}</p>` : ""}
       <div class="expl"></div>
-      <div class="acts"><button data-act="once">${I.play}<span data-k="listen_line">${esc(t("listen_line"))}</span></button><button class="menu" data-act="explain"><span data-k="explain">${esc(t("explain"))}</span></button><button class="menu" data-act="write"><span data-k="write">${esc(t("write"))}</span></button><button class="menu" data-act="speak"><span data-k="speak">${esc(t("speak"))}</span></button></div>
+      <div class="acts"><button data-act="once">${I.play}<span data-k="listen_line">${esc(t("listen_line"))}</span></button><button class="menu" data-act="explain"><span data-k="explain">${esc(t("explain"))}</span></button><button class="menu" data-act="write"><span data-k="write">${esc(t("write"))}</span></button><button class="menu" data-act="speak"><span data-k="speak">${esc(t("speak"))}</span></button><button class="menu gamebtn${gameDone(ep, l.id) ? " gdone" : ""}" data-act="game" aria-label="🎮">🎮</button></div>
     </li>`).join("")}</ol>
     <div class="ctrl">
       <a class="iconbtn" href="#/list" aria-label="${esc(t("back"))}">${I.back}</a>
@@ -527,10 +545,33 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     navLog("back");
     if (nav.depth === 0 && !st.panel && history.state?.malmun) { history.back(); return; } // 남은 창 칸 = 한 칸 더 뒤로
     if (nav.depth > 0) nav.depth--; // 폰 뒤로 = 쌓은 칸 하나가 빠짐
+    if (gm.el) { closeGame(true); return; } // 🎮 겹침부터
     if (panel.__sp?.closeList?.()) return; // 마이크 목록부터
     if (st.panel) closePanel(true);
   };
   addEventListener("popstate", onPop);
+  // ── 🎮 줄 게임 겹침 — 열 때 영상·소리 멈춤 · 배우기 화면은 그대로(같은 줄·같은 자리) · 닫기 = 게임의 돌아가기·나가기 · 폰 뒤로 가기
+  const gm = { el: null, i: -1, v9: null, onMsg: null };
+  const abs = u => new URL(u, location.href).href; // iframe(game/) 안에서도 맞는 주소
+  async function openGame(i) {
+    if (gm.el) return; stopAll(); ex.stop(); st.once = false; sync();
+    const l = L[i]; gm.i = i;
+    if (!gm.v9) gm.v9 = await fetch(paths.data(ep, ".v9")).then(r => r.ok ? r.json() : null).catch(() => null);
+    const vl = gm.v9?.lines?.find(x => x.n === i + 1) || null, uw = l.units?.words || [];
+    const data = { type: "malmun-line", ep, n: l.id, lang, view: uiKoOn() ? "ko" : lang, snd: new URL(`${MEDIA}/game/`, location.href).href,
+      line: { ko: l.ko, l1: l.tr || "", audio: l.lineAudio ? [abs(paths.audio(ep, l.lineAudio))] : [] }, words: gameWords(vl, uw, lang, ep).map(w => ({ ...w, audio: w.audio.map(abs) })) };
+    const wrap = document.createElement("div"); wrap.className = "gamewrap"; wrap.innerHTML = `<iframe title="🎮" src="game/line.html?v=1020.2${/[?&]mute=1/.test(location.search) ? "&mute=1" : ""}" allow="autoplay"></iframe>`;
+    document.body.appendChild(wrap); gm.el = wrap; navPush();
+    const fr = wrap.querySelector("iframe");
+    gm.onMsg = e => { if (!gm.el || e.source !== fr.contentWindow) return; const m = e.data || {};
+      if (m.type === "malmun-line-ready") fr.contentWindow.postMessage(data, "*");
+      else if (m.type === "malmun-line-done") { if (m.cleared) { gameMark(ep, l.id); items[i]?.querySelector("[data-act=game]")?.classList.add("gdone"); } closeGame(false); } };
+    addEventListener("message", gm.onMsg);
+  }
+  function closeGame(fromPop) {
+    if (!gm.el) return; removeEventListener("message", gm.onMsg); gm.el.remove(); gm.el = null; gm.onMsg = null;
+    if (!fromPop) navPop(); select(gm.i, { scroll: false }); sync();
+  }
   // 탭이 숨으면(다른 탭·앱) 문장·설명 소리 멈춤(본부 10-15 — 뒤에 둔 탭에서 소리가 「자주」 남) · 돌아와도 저절로 다시 틀지 않음(▶ 로 이어서)
   const onHide = () => { if (!document.hidden) return; if (playing()) { clearTimeout(st.gap); st.gap = 0; if (st.panel?.kind === "explain") ex.pause(); else if (!st.panel) { if (st.mode === "video") v.pause(); else seq.pause(); } sync(); } };
   document.addEventListener("visibilitychange", onHide);
@@ -947,6 +988,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     if (!st.panel && app.querySelector(".learn").classList.contains("nosub") && !e.target.closest("button") && (e.target.closest(".kotext, .tr") || e.clientY - li.getBoundingClientRect().top < 30 && li.getBoundingClientRect().right - e.clientX < 110)) {
       const on = !li.classList.contains("peek"); items.forEach(x => x.classList.remove("peek")); li.classList.toggle("peek", on); return;
     }
+    if (e.target.closest("[data-act=game]")) return openGame(+li.dataset.i);
     const i = +li.dataset.i, m = e.target.closest("[data-act=explain],[data-act=write],[data-act=speak]");
     // 설명·쓰기 = 위 창을 영상 ⇄ 그 메뉴로 바꾸는 토글(설명은 열면 바로 읽어 줌)
     if (m) return st.panel?.kind === m.dataset.act && st.panel.i === i ? closePanel() : openPanel(m.dataset.act, i, { autoplay: m.dataset.act === "explain" });
@@ -1033,5 +1075,5 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   if (reopen) openPanel(reopen.kind, reopen.i, { restore: reopen }); // ने⇄한 토글 전 창·자리
   else if (opts.explain) openPanel("explain", st.cur, { autoplay: true }); /* #/explain/{편}/{줄} = 그 줄 v9 설명 창(첫 터치 전엔 소리가 막힐 수 있음 — ▶ 로 시작) */
   const release = hold(); // 소리 장치 깨워 두기(첫소리 먹힘 방지)
-  return () => { removeEventListener("resize", onTurn); mqLand.removeEventListener?.("change", onLand); document.removeEventListener("keydown", onBigKey, true); document.documentElement.classList.remove("bigview"); clearTimeout(tipT); document.removeEventListener("fullscreenchange", onFsChange); clearInterval(edgeT); clearInterval(litT); clearInterval(seekTimer); clearInterval(hlTimer); document.removeEventListener("pointerdown", onDocDown, true); removeEventListener("popstate", onPop); removeEventListener("malmun:uilang", onUiLang); document.removeEventListener("visibilitychange", onHide); clearTimeout(st.animEnd); release(); st.panel?.cleanup?.(); ex.stop(); removeEventListener("resize", pad); removeEventListener("resize", onFit); clearInterval(timer); clearTimeout(st.gap); document.removeEventListener("keydown", onKey); seq.stop(); v.pause(); v.removeAttribute("src"); v.load(); };
+  return () => { if (gm.el) closeGame(true); removeEventListener("resize", onTurn); mqLand.removeEventListener?.("change", onLand); document.removeEventListener("keydown", onBigKey, true); document.documentElement.classList.remove("bigview"); clearTimeout(tipT); document.removeEventListener("fullscreenchange", onFsChange); clearInterval(edgeT); clearInterval(litT); clearInterval(seekTimer); clearInterval(hlTimer); document.removeEventListener("pointerdown", onDocDown, true); removeEventListener("popstate", onPop); removeEventListener("malmun:uilang", onUiLang); document.removeEventListener("visibilitychange", onHide); clearTimeout(st.animEnd); release(); st.panel?.cleanup?.(); ex.stop(); removeEventListener("resize", pad); removeEventListener("resize", onFit); clearInterval(timer); clearTimeout(st.gap); document.removeEventListener("keydown", onKey); seq.stop(); v.pause(); v.removeAttribute("src"); v.load(); };
 }
