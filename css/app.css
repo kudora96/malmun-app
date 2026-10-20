@@ -1577,3 +1577,6 @@ html.bigview,html.bigview body{overflow:hidden}
 .ept{display:grid;min-width:0}.ept>*{grid-area:1/1;min-width:0;overflow-wrap:break-word}.ept>.gh{visibility:hidden}
 .hero .ttl:has(>.ept){display:flex;gap:.3em}.hero .ttl>.ept{flex:1}
 .bar .ut{font-size:28px;font-weight:700;line-height:1.05;overflow:hidden;overflow-wrap:break-word}.bar .ut.ko{font-family:var(--f-hand)}.bar .ut:not(.ko){line-height:1.15;overflow-wrap:normal;hyphens:auto;display:grid;align-content:center} /* 단원 이름 = .bar .t 모양 · 손글씨는 한국어일 때만 · 학습자 말 글자 크기는 list.js fitUnit */
+.write .info .slotrow{position:relative}.write .info .slotrow > .whyrow.wwhy{position:absolute;top:50%;transform:translateY(-50%);margin:0;z-index:2}.write .info .slotrow > .whyrow.wwhy .whyb{font-size:12px;padding:2px 8px;white-space:nowrap;overflow:hidden;text-overflow:clip;box-shadow:0 1px 4px rgba(0,0,0,.15)} /* 「왜 틀렸어요?」 = 자모 칸 옆 덮개(쓰기부 10-20 · 틀 0px) */
+.write .info .slotrow > .whyrow.wwhy.ic .whyb [data-k]{display:none}
+.write .info .slotrow > .whyrow.wwhy.two .whyb{white-space:normal;line-height:1.1;text-align:start;padding:2px 8px;border-radius:12px}
