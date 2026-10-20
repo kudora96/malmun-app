@@ -10,7 +10,7 @@
     try {
       // 점검마다 학습자 기억값 지우기(앞 점검이 남긴 손글씨·받아쓰기만·속도 등에 안 흔들리게) · 말하기는 맨 앞(다른 점검이 가로챈 함수 영향 없음)
       try { for (const k of Object.keys(localStorage)) if (k.startsWith("malmun.") && !/^malmun\.(lang|p\.)/.test(k)) localStorage.removeItem(k); } catch {} try { for (const k of Object.keys(sessionStorage)) if (k.startsWith("malmun.")) sessionStorage.removeItem(k); } catch {} try { await (await import(`/js/i18n.js?v=${document.documentElement.dataset.v}`)).setUiKo(false); } catch {} /* 기억값을 지워도 메모리의 한국어 앱 글(koUi)은 남음 → 같이 끔(언어 하나 · 10-13) */ delete window.__noSrSwitch; window.__noSeq = true; /* 안드로이드 흉내에서도 옛 「같이」 방식으로 점검 · 「녹음 먼저」는 seq 점검이 따로 */
-      window.__sttURL = "off"; // 점검은 진짜 서버(2안) 안 부름 — server_stt 점검만 가짜 주소로 바꿔 끼움
+      try { localStorage.setItem("malmun.actstip", "1"); } catch {} /* 줄 카드 차례 풍선말(쓰기부 10-20)은 점검 중 안 띄움 — 떠 있으면 누름을 가로채 쓰기 점검이 깨짐 · cardicons 점검은 __actsTip 으로 따로 켬 */ window.__sttURL = "off"; // 점검은 진짜 서버(2안) 안 부름 — server_stt 점검만 가짜 주소로 바꿔 끼움
       location.hash = "#/list"; await W(400); location.hash = "#/learn/L01-00-01"; await W(2500);
       let src = await (await fetch(`/tools/ui_check_${n}.js?` + Date.now())).text();
       if (n === "speak") src = src.replace(/history\.back\(\)/g, 'window.dispatchEvent(new PopStateEvent("popstate",{state:null}))'); // 말하기 점검만(뒤로 가기 점검은 진짜 history.back)
