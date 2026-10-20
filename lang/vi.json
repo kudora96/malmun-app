@@ -1,5 +1,5 @@
 {
- "_note": "vi 앱 글 — 언어부 09_lang/ui (check_ui ✗0 · ⚠5)",
+ "_note": "vi 앱 글 — 언어부 09_lang/ui (check_ui ✗0 · ⚠17)",
  "lang_title": "Ngôn ngữ",
  "lang_hint": "Được chọn theo cài đặt điện thoại của bạn. Bạn có thể đổi bất cứ lúc nào.",
  "uiko_back_tip": "Chạm {b} bất cứ lúc nào để quay lại ngôn ngữ của bạn.",
@@ -173,6 +173,7 @@
  "ink_navy": "Xanh đậm",
  "ink_blue": "Xanh dương",
  "ink_red": "Đỏ",
+ "ink_yellow": "Vàng",
  "ink_green": "Xanh lá",
  "ink_purple": "Tím",
  "ink_brown": "Nâu",
@@ -180,6 +181,7 @@
  "wx_shake": "Nét {n} ({j}) bị run — viết một lần cho liền",
  "wx_keep_star": "Giữ chữ này",
  "wx_keep": "Lưu niệm",
+ "wx_keep_tip": "Bạn có thể lưu chữ viết 100 điểm",
  "keep_title": "Lưu niệm",
  "keep_char": "Một chữ",
  "keep_word": "Cả từ",
