@@ -10,28 +10,28 @@
 //  R7 영상은 늘 맨 위 · 지금 줄은 영상 바로 아래(앞 줄은 영상 뒤로) — 손으로 목록을 움직이면 4초 동안은 따라가지 않음
 //  R8 듣기 모드(대사→설명 · 설명만)도 R1~R6 그대로(영상 대신 소리 조각) · 모드를 바꾸면 멈춤(▶ 로 시작)
 //  R9 다시 들어오면 마지막 줄이 선택된 채 멈춰 있음
-import { noScoreKey } from "../agepolicy.js?v=1016.75"; // 점수 없음 안내 = 나이 때문인지(대표님 10-19)
-import { warmSTT } from "../sttserver.js?v=1016.75";
-import * as sfxL from "../sfx.js?v=1016.75"; // 카드 말하기 최대 길이 = 본보기 길이로(10-07)
-import { t, lang, langName, KO_UI, uiKoOn, preloadKoUi } from "../i18n.js?v=1016.75";
-import { setTx } from "../retext.js?v=1016.75";
-import { langfitRun } from "../langfit.js?v=1016.75";
-import { esc, renderText, glossCards, sayParts } from "../text.js?v=1016.75";
-import { episode } from "../data.js?v=1016.75";
-import { paths } from "../paths.js?v=1016.75";
-import { Sequence } from "../audio.js?v=1016.75";
-import { I, progress, SPEAKER, spkHtml, uiKoBtn, switchUiKo } from "../ui.js?v=1016.75";
-import writeView from "./write.js?v=1016.75";
-import { diagEnv, keepDiag } from "../diag.js?v=1016.75";
-import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1016.75";
-import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace, lateFactor, sylAt, paintAt, karaokeRun, isFull } from "../rhythm.js?v=1016.75";
-import { playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1016.75";
-import { heardHTML, endHint, scoreOf, bestFull, spanOf, sylsAt } from "../heard.js?v=1016.75"; // 덧붙은 말 빼고 견주기(본부 10-11)
-import { recDel, downloadRec, askPersist } from "../recstore.js?v=1016.75";
-import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1016.75";
-import { scoreFx, stopFx } from "../scorefx.js?v=1016.75"; // 점수별 효과(본부 10-05)
-import { record, recordSROnly, srOnlyMode, setSrOnly, isAndroid, srMiss, micWhy, srWhy, canScore, closeMic, logRec, micOpen, seqMode, srOnBlob, devSR, setDevSR, srJudge, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1016.75";
-import { hold, quietWake } from "../wake.js?v=1016.75";
+import { noScoreKey } from "../agepolicy.js?v=1016.76"; // 점수 없음 안내 = 나이 때문인지(대표님 10-19)
+import { warmSTT } from "../sttserver.js?v=1016.76";
+import * as sfxL from "../sfx.js?v=1016.76"; // 카드 말하기 최대 길이 = 본보기 길이로(10-07)
+import { t, lang, langName, KO_UI, uiKoOn, preloadKoUi } from "../i18n.js?v=1016.76";
+import { setTx } from "../retext.js?v=1016.76";
+import { langfitRun } from "../langfit.js?v=1016.76";
+import { esc, renderText, glossCards, sayParts } from "../text.js?v=1016.76";
+import { episode } from "../data.js?v=1016.76";
+import { paths } from "../paths.js?v=1016.76";
+import { Sequence } from "../audio.js?v=1016.76";
+import { I, progress, SPEAKER, spkHtml, uiKoBtn, switchUiKo } from "../ui.js?v=1016.76";
+import writeView from "./write.js?v=1016.76";
+import { diagEnv, keepDiag } from "../diag.js?v=1016.76";
+import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1016.76";
+import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace, lateFactor, sylAt, paintAt, karaokeRun, isFull } from "../rhythm.js?v=1016.76";
+import { playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1016.76";
+import { heardHTML, endHint, scoreOf, bestFull, spanOf, sylsAt } from "../heard.js?v=1016.76"; // 덧붙은 말 빼고 견주기(본부 10-11)
+import { recDel, downloadRec, askPersist } from "../recstore.js?v=1016.76";
+import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1016.76";
+import { scoreFx, stopFx } from "../scorefx.js?v=1016.76"; // 점수별 효과(본부 10-05)
+import { record, recordSROnly, srOnlyMode, setSrOnly, isAndroid, srMiss, micWhy, srWhy, canScore, closeMic, logRec, micOpen, seqMode, srOnBlob, devSR, setDevSR, srJudge, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1016.76";
+import { hold, quietWake } from "../wake.js?v=1016.76";
 
 const RATES = [1, 0.75, 0.5];
 const pref = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } };
@@ -271,7 +271,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     v.currentTime = L[it.i].start;
     const box = items[it.i].querySelector(".expl");
     const vx = L[it.i].v9;
-    if (it.p >= 0 && vx) { box.innerHTML = `<p>${v9Sent(it.i, it.lang || v9code(sndOf(it.i)))}</p>${pairHTML(it.i, it.lang || v9code(sndOf(it.i)), 0)}`; box.classList.add("on"); } // 카드와 같은 모양(문장 span · 괄호 없음 · 누르면 말풍선)
+    if (it.p >= 0 && vx) { box.innerHTML = `<p>${v9Sent(it.i, it.lang || v9code(txtOf(it.i)))}</p>${pairHTML(it.i, it.lang || v9code(txtOf(it.i)), 0)}`; box.classList.add("on"); } // 카드와 같은 모양(문장 span · 괄호 없음 · 누르면 말풍선)
     else if (it.p >= 0) { box.innerHTML = renderText(L[it.i].krParas[it.p] || ""); box.classList.add("on"); }
     else box.classList.remove("on");
     sync();
@@ -291,6 +291,8 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   // 소리 = 언어 이름이 붙은 ▶ 단추 둘(누른 언어를 기억 → 듣기 모드도 그 언어) · 글 = 설명 글 바로 위 작은 탭 · 처음엔 둘 다 학습자 언어
   // 아이콘만 있는 단추 없음 · 안쪽 스크롤 없음(폰 375×812 한 화면) · 「이제 말해 보세요」는 카드 안에서 녹음→점수→내 목소리(카드를 떠나지 않음)
   const v9L = d.v9L, v9pref = () => { try { return { snd: "L", txt: "L", ...JSON.parse(pref("malmun.v9") || "{}") }; } catch { return { snd: "L", txt: "L" }; } };
+  // 글 언어 = 소리와 따로(검사부 10-20 th — 학습자 말 낭독이 아직 없으면 글까지 한국어로 바뀌던 것) · 학습자 말 글이 있으면 그 글(소리는 한국어로)
+  const txtOf = i => { const s0 = v9pref().txt; return s0 === "L" && !L[i]?.v9?.text?.[v9L] ? "ko" : s0; };
   const sndOf = i => { const s0 = v9pref().snd; return s0 === "L" && !L[i]?.v9?.audio?.[v9L]?.ex ? "ko" : s0; }; // 학습자 말 설명 소리가 아직 없는 줄(시범 언어 글만 단계) = 한국어 소리로(시각도 한국어 · 언어부 10-12)
   const v9set = (k, v) => { const P = v9pref(); P[k] = v; pref("malmun.v9", JSON.stringify(P)); };
   // 언어 하나(본부 10-13 투덜이 지적 ① · 안 A) — 앱 글 한국어(ने⇄한 = uiKo) = 설명 소리·본문도 한국어 · 학습자 말이면 모두 학습자 말
@@ -309,10 +311,10 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     const fx = x.formula_by?.[tc] || x.formula;
     const playBtn = k => `<button class="pb" data-x="ex" data-v="${k}" aria-pressed="false"><span class="ic" aria-hidden="true">▶</span> ${esc(v9name(k))}</button>`;
     // 맨 위 한 줄(본부 10-05 투덜이 승인): 「듣기」 동그란 재생 묶음 · 「읽기」 탭 묶음 · ✕ — 이름표 = 학습자 언어 + (한국어)
-    const k = sndOf(i), code = v9code(k);
+    const k = sndOf(i), code = v9code(txtOf(i));
     const lab = (key, ko) => `<span class="glab"><span data-k="${key}">${esc(t(key))}</span>${lang === "ko" ? "" : ` <small lang="ko">(${ko})</small>`}</span>`;
     return `<div class="exv v9${romOn() ? "" : " norom"}">
-      <div class="v9bar">${lab("v9_listen", "듣기")}<span class="seg snd">${v9L && x.audio?.[v9L]?.ex ? playBtn("L") : ""}${playBtn("ko")}</span>${x.sent?.length ? `<span class="snum" aria-live="off">1/${x.sent.length}</span>` : ""}${uiKoBtn()}<button class="romb" data-x="v9rom" aria-pressed="${romOn()}"><span data-k="v9_rom">${esc(t("v9_rom"))}</span></button><button class="pb closex" data-x="close" title="${esc(t("close_word"))}" aria-label="${esc(t("close_word"))}"><span class="cx">✕</span><span class="cw"> ${esc(t("close_word"))}</span></button><div class="v9tip" hidden>${esc(t("v9_tip"))}</div></div>
+      <div class="v9bar">${lab("v9_listen", "듣기")}<span class="seg snd">${v9L ? (x.audio?.[v9L]?.ex ? playBtn("L") : `<button class="pb nosnd" disabled aria-disabled="true"><span class="ic" aria-hidden="true">🔇</span> ${esc(v9name("L"))}</button>`) : ""}${playBtn("ko")}</span>${x.sent?.length ? `<span class="snum" aria-live="off">1/${x.sent.length}</span>` : ""}${uiKoBtn()}<button class="romb" data-x="v9rom" aria-pressed="${romOn()}"><span data-k="v9_rom">${esc(t("v9_rom"))}</span></button><button class="pb closex" data-x="close" title="${esc(t("close_word"))}" aria-label="${esc(t("close_word"))}"><span class="cx">✕</span><span class="cw"> ${esc(t("close_word"))}</span></button><div class="v9tip" hidden>${esc(t("v9_tip"))}</div></div>
       ${v9L ? "" : `<div class="v9soon">${esc(t("v9_lang_soon"))}</div>`}<div class="v9pop" hidden></div>
       <div class="v9body">
         ${x.pieces?.length || fx ? `<div class="chips">${(x.pieces || []).map(c => `<span class="chip"><b class="ko" lang="ko">${esc(c.ko)}</b> <i>${c.rom != null ? `<span class="rom">${esc(c.rom)}${c.mean && v9L ? ", " : ""}</span>${v9L ? esc(c.mean || "") : ""}` : v9L ? esc(c.gloss || "") : ""}</i></span>`).join("")}${fx ? `<span class="fx">= <b>${esc(fx)}</b></span>` : ""}</div>` : ""}

@@ -1493,3 +1493,4 @@ html.bigview,html.bigview body{overflow:hidden}
 @media (orientation:portrait) and (min-width:600px){ /* 넓은 세로 화면(PC 880×900 · 태블릿) = 자판 단추가 커서(54px) 폰 기준 440px 로는 자판 맨 아래 줄이 화면 밖 → 글자 칸만 조금 작게(틀 그대로 · 폰은 그대로 · 대표님 10-19 PC 점검) */
   .learn.big .panel .write .work:not(.handmode)>.stage .box{--bx:max(min(62vw,34dvh),min(84vw,100dvh - 530px))}
 }
+.v9bar .pb.nosnd{opacity:.55;cursor:default} /* 학습자 말 낭독 아직 없음(글은 그 말 · 검사부 10-20) */
