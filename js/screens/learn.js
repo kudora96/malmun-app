@@ -20,7 +20,7 @@ import { esc, renderText, glossCards, sayParts } from "../text.js?v=1016.96";
 import { episode } from "../data.js?v=1016.96";
 import { paths } from "../paths.js?v=1016.96";
 import { Sequence } from "../audio.js?v=1016.96";
-import { I, progress, SPEAKER, spkHtml, uiKoBtn, switchUiKo } from "../ui.js?v=1016.96";
+import { I, progress, SPEAKER, spkHtml, uiKoBtn, uikoChip, switchUiKo } from "../ui.js?v=1016.96";
 import writeView from "./write.js?v=1016.96";
 import { diagEnv, keepDiag } from "../diag.js?v=1016.96";
 import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1016.96";
@@ -61,7 +61,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     <div class="varea"><div class="video" id="vwrap"><video playsinline preload="metadata" poster="${paths.poster(ep)}" src="${paths.video(ep)}"></video>
       <span class="vplay" aria-hidden="true">${I.play}</span>
       <div class="cap" aria-live="polite"></div>
-      <button class="vfs" data-act="fs" aria-label="${esc(t("fullscreen"))}">${FS}</button>
+      <button class="vfs" data-act="fs" aria-label="${esc(t("fullscreen"))}">${FS}</button><span class="vuiko">${uikoChip()}</span>
       <button class="vsubt" data-act="subs" aria-pressed="${subsOn()}" aria-label="${esc(t("subs_aria"))}" title="${esc(t("subs_aria"))}"><span class="cc" aria-hidden="true">CC</span><span class="w">${esc(t("subs"))}</span></button>
       <div class="fstip" role="status" hidden><span class="who">${spkHtml("선생님")}</span><p>${esc(t("subs_tip"))}</p><button class="x" data-act="tipx" aria-label="${esc(t("close_word"))}">✕</button></div></div></div><div class="vsub" hidden aria-hidden="true"><div class="in"></div></div></div>
     <div class="panel" hidden></div>

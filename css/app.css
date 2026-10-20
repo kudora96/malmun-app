@@ -1516,3 +1516,10 @@ html.bigview,html.bigview body{overflow:hidden}
 .welcome{position:relative}.welcome .langtip{position:absolute;right:16px;z-index:20;max-width:240px;background:var(--card);border:2px solid var(--hi);border-radius:14px;padding:8px 12px;font-size:14px;line-height:1.4;box-shadow:0 4px 12px rgba(0,0,0,.15);color:var(--ink);cursor:pointer;display:grid;gap:2px}
 .welcome .langtip b{font-size:12px;color:var(--hi)}.welcome .langtip::before{content:"";position:absolute;top:-9px;right:22px;width:14px;height:14px;background:var(--card);border-left:2px solid var(--hi);border-top:2px solid var(--hi);transform:rotate(45deg)}
 .welcome .tiphi{box-shadow:0 0 0 3px var(--hi)}
+/* 전체 화면 영상에도 ⇄(다국어부 10-20 · 대표님 「모든 창에 ⇄ 기본」) — 전체 화면일 때만 오른쪽 위 · 평소 화면 틀 0px(숨김) */
+#vwrap>.vuiko{display:none}
+#vwrap:fullscreen>.vuiko{display:block;position:absolute;right:16px;top:16px;z-index:3}
+#vwrap:fullscreen:has(>.vuiko>.chip) .fstip{max-width:min(calc(100% - 152px),560px)} /* 첫 안내 풍선이 ⇄ 를 덮지 않게(375 세로) — 풍선 안 글만 줄바꿈 */
+#vwrap:fullscreen>.vuiko .chip.uiko{min-height:36px;padding:4px 12px;font-size:14px;border-radius:8px;border:1px solid rgba(255,255,255,.6);color:#fff;background:rgba(0,0,0,.5)} /* 검은 영상 위 = 자막 단추(CC)와 같은 색 */
+#vwrap:fullscreen>.vuiko .chip.uiko .a,#vwrap:fullscreen>.vuiko .chip.uiko .b{opacity:.6;color:#fff}
+#vwrap:fullscreen>.vuiko .chip.uiko[aria-pressed=false] .a,#vwrap:fullscreen>.vuiko .chip.uiko[aria-pressed=true] .b{opacity:1;color:#ffd27a}
