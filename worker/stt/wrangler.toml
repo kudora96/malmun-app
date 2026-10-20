@@ -24,3 +24,14 @@ ALL_CAP = "20000"  # 전체 하루 횟수(돈 새는 것 막기)
 EX_DEV_CAP = "30"     # 기기당 하루 횟수
 EX_ALL_CAP = "3000"   # 전체 하루 횟수
 EX_MONTH_USD = "20"   # 달 지출 상한(추정 $ · 넘으면 그달 끝까지 쉼)
+RP_DEV_CAP = "10"     # 신고 기기당 하루 건수
+
+# 「잘못된 것 신고」(/report · 10-20) — 대표님이 D1 DB 를 만든 뒤(_hq\cloudflare_steps_2026-10-21.md) 아래 두 칸의 # 를 지우고 database_id 를 넣기
+#  묶기 전에는 /report 가 503 「no db」 → 앱은 기기 안에 모아 두었다가 다음에 다시 보냄
+# [[d1_databases]]
+# binding = "DB"
+# database_name = "malmun-reports"
+# database_id = "여기에-대표님이-만든-DB-id"
+#
+# [triggers]
+# crons = ["17 3 * * *"]   # 매일 03:17 UTC — 90일 넘은 신고 지우기

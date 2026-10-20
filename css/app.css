@@ -1566,7 +1566,7 @@ html.bigview,html.bigview body{overflow:hidden}
 .line .acts.ib5 button.ib .ico{width:20px;height:20px}
 .line.fitc .acts.ib5 button.ib{height:32px}
 .line .acts.ib5 button.gamebtn{position:relative}
-.actstip{position:fixed;z-index:80;max-width:calc(100vw - 24px);padding:7px 12px;border-radius:12px;background:#18302a;color:#fff;font-size:14px;line-height:1.35;box-shadow:0 6px 18px rgba(0,0,0,.3);pointer-events:none;animation:keepTipIn .2s ease-out}
+.actstip{position:fixed;z-index:80;max-width:calc(100vw - 24px);padding:7px 12px;border-radius:12px;background:#18302a;color:#fff;font-size:14px;line-height:1.35;box-shadow:0 6px 18px rgba(0,0,0,.3);pointer-events:auto;cursor:pointer;animation:keepTipIn .2s ease-out}
 .actstip b{font-weight:800}.actstip i{font-style:normal;opacity:.7;font-size:12px;margin-inline-start:8px}.actstip small{display:block;font-size:12px;opacity:.8;font-weight:600}.actstip small.hold{opacity:.65;font-weight:500;margin-top:2px}
 .actstip::after{content:"";position:absolute;top:100%;left:var(--ax,50%);margin-left:-7px;border:7px solid transparent;border-top-color:#18302a}
 .chip.bgmb[data-act=bgmtog]{width:36px;min-width:36px;padding:0;border-radius:999px}.chip.bgmb[data-act=bgmtog] .bi{display:flex}.chip.bgmb[data-act=bgmtog] svg{width:18px;height:18px}
@@ -1577,3 +1577,22 @@ html.bigview,html.bigview body{overflow:hidden}
 .ept{display:grid;min-width:0}.ept>*{grid-area:1/1;min-width:0;overflow-wrap:break-word}.ept>.gh{visibility:hidden}
 .hero .ttl:has(>.ept){display:flex;gap:.3em}.hero .ttl>.ept{flex:1}
 .bar .ut{font-size:28px;font-weight:700;line-height:1.05;overflow:hidden;overflow-wrap:break-word}.bar .ut.ko{font-family:var(--f-hand)}.bar .ut:not(.ko){line-height:1.15;overflow-wrap:normal;hyphens:auto;display:grid;align-content:center} /* 단원 이름 = .bar .t 모양 · 손글씨는 한국어일 때만 · 학습자 말 글자 크기는 list.js fitUnit */
+/* 「잘못된 것 신고」(report.js · 대표님 10-20) — 길게 누르기 → 겹쳐 뜨는 풍선(틀 0px) · 음악 상자·답 창(.sheet)보다 위 */
+.rpmenu,.rptip{position:fixed;z-index:10050;box-sizing:border-box;background:var(--card);border:2px solid var(--hi);border-radius:14px;box-shadow:0 4px 14px rgba(0,0,0,.22);color:var(--ink);text-align:start}
+.rpmenu{padding:4px}
+.rpmenu button{min-height:40px;padding:6px 14px;border-radius:10px;border:1px solid var(--line);background:var(--bg2);color:var(--ink);font-size:14px;font-weight:600;white-space:nowrap}
+.rptip{left:12px;right:12px;max-width:520px;margin:0 auto;padding:10px 12px 12px;display:grid;gap:8px;grid-template-columns:minmax(0,1fr)}
+.rptip .who{font-size:12px;color:var(--hi)}
+.rptip .q{margin:0;font-size:15px;font-weight:700;line-height:1.4;unicode-bidi:plaintext}
+.rptip .ks{display:flex;flex-wrap:wrap;gap:6px}
+.rptip .ks button{min-height:36px;padding:4px 12px;border-radius:999px;border:1px solid var(--line);background:var(--bg2);color:var(--ink);font-size:13px;line-height:1.25;max-width:100%}
+.rptip .ks button[aria-pressed=true]{background:var(--hi);border-color:var(--hi);color:#fff}
+.rptip textarea{box-sizing:border-box;width:100%;min-height:52px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);font:inherit;font-size:14px;padding:6px 8px;resize:none}
+.rptip .bt{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.rptip .bt button{min-height:40px;padding:6px 18px;border-radius:10px;border:1px solid var(--line);background:var(--bg2);color:var(--ink);font-size:14px}
+.rptip .bt .go{background:var(--ink);color:var(--bg);border-color:var(--ink);font-weight:700}
+.rptip .bt .go:disabled{opacity:.35;cursor:not-allowed}
+.rphi{box-shadow:0 0 0 3px var(--hi)!important}
+.write .info .slotrow{position:relative}.write .info .slotrow > .whyrow.wwhy{position:absolute;top:50%;transform:translateY(-50%);margin:0;z-index:2}.write .info .slotrow > .whyrow.wwhy .whyb{font-size:12px;padding:2px 8px;white-space:nowrap;overflow:hidden;text-overflow:clip;box-shadow:0 1px 4px rgba(0,0,0,.15)} /* 「왜 틀렸어요?」 = 자모 칸 옆 덮개(쓰기부 10-20 · 틀 0px) */
+.write .info .slotrow > .whyrow.wwhy.ic .whyb [data-k]{display:none}
+.write .info .slotrow > .whyrow.wwhy.two .whyb{white-space:normal;line-height:1.1;text-align:start;padding:2px 8px;border-radius:12px}

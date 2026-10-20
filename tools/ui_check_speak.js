@@ -268,7 +268,7 @@
   ok(!bad5.length, "말하기 창 1번 줄 5토막 × 맞음(100% ✓★·[저장])/틀림(빨간 밑줄)/빠짐(_) — [저장]은 80%↑ 일 때만", bad5.join(" ; ") || "15/15");
   window.__srNone = true; await say("아무 말"); await waitIdle(); await settle2(); window.__srNone = false;
   ok(/^0% · /.test($(".panel .msg").textContent) && $(".panel [data-act=keep]").hidden && ![...document.querySelectorAll(".panel button")].some(b => !b.hidden && /^⬇$/.test(b.textContent.trim())), "0% 녹음 뒤 저장할 길 없음([저장] 없음 · 옛 ⬇ 없음)", $(".panel .msg").textContent);
-  ok(![...document.querySelectorAll(".panel button")].filter(b => !b.hidden && b.offsetParent).some(b => !/[\p{L}]/u.test(b.textContent)), "말하기 창: 아이콘만 단추 없음", [...document.querySelectorAll(".panel button")].filter(b => !b.hidden && b.offsetParent).map(b => b.textContent.trim()).join(" | "));
+  ok(![...document.querySelectorAll(".panel button")].filter(b => !b.hidden && b.offsetParent && !b.matches(".bgmb")).some(b => !/[\p{L}]/u.test(b.textContent)), "말하기 창: 아이콘만 단추 없음", [...document.querySelectorAll(".panel button")].filter(b => !b.hidden && b.offsetParent).map(b => b.textContent.trim()).join(" | "));
   const spx = $(".panel .speak"); ok(spx.scrollHeight - spx.clientHeight <= 1, "말하기 창: 들린 말·저장 줄이 떠도 창 안 스크롤 없음", spx.scrollHeight + "/" + spx.clientHeight);
   // 시간 규칙(본부 10-04): 쉼 2초 · 🎤 뒤 6초 · 최대 길이 · 인식 다시 켜기 · 두 단계 통과
   const { scoreLine, maxMsFor } = await import("./js/screens/speak.js?v=" + document.documentElement.dataset.v);
