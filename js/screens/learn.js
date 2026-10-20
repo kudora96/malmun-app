@@ -230,16 +230,17 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     const body = panel.querySelector(".v9body"); if (!body) return;
     const tg = [...body.children].filter(c => !c.classList.contains("sayb")).concat([...body.querySelectorAll(".sayb > p")]);
     tg.forEach(c => c.style.removeProperty("zoom"));
-    const over = () => panel.scrollHeight > panel.clientHeight || (st.uiFit && st.v9H > 0 && body.getBoundingClientRect().height > st.v9H + 0.01); // ⇄ 뒤 = 본문 칸이 ⇄ 전 높이보다 커지지 않게(소수점만 넘쳐도 아래 「말해 보세요」 줄이 0.5~0.9px 밀리던 것 · 다국어부 10-20 hi·ru 등)
+    const say = body.querySelector(":scope > .sayb"), cs = getComputedStyle(body);
+    const spill = () => { if (!say) return false; const br = body.getBoundingClientRect(), z = br.height / (parseFloat(cs.height) || br.height || 1); return say.getBoundingClientRect().bottom > br.bottom - (parseFloat(cs.paddingBottom) || 0) * z + 0.05; }; // 소수점까지(scrollHeight 는 정수라 1.7px 넘침을 못 봄)
+    const over = () => panel.scrollHeight > panel.clientHeight || spill(); // 본문 칸(높이 고정) 안에 「말해 보세요」 칸까지 다 들어갈 때까지 — 그 줄 자리 0px(다국어부 10-20 hi·si·zh 등)
     for (let z = 0.96; z >= 0.6 && over(); z -= 0.04) tg.forEach(c => (c.style.zoom = z.toFixed(2)));
   }
   // 설명 창 「말해 보세요」 단추 폭 = 소수점 올림으로 고정(늘기만 · ⇄ 때 0.1~0.2px 폭 차이로 뒤 단추가 0.5px 옆으로 밀리던 것 · 다국어부 10-20 id·si·ru)
   function lockSay() { for (const b of panel.querySelectorAll(".v9body .sbtns > button")) { if (!b.offsetParent) continue; let z = 1; for (let e = b; e && e !== panel.parentElement; e = e.parentElement) z *= parseFloat(e.style.zoom) || 1; const m = parseFloat(b.style.minWidth) || 0, w = Math.ceil(Math.max(m, b.getBoundingClientRect().width / z)) + 1; if (w > m + 0.5) b.style.minWidth = w + "px"; } } // langfit 「두 말 중 긴 쪽」 폭 + 올림 1px(그 값이 0.2px 모자라 ⇄ 때 폭이 늘던 것 · id·si·ru)
   function fitPanel() {
     const kind = st.panel?.kind; if (kind !== "explain" && kind !== "speak") return;
-    if (kind === "explain") queueMicrotask(lockSay);
+    if (kind === "explain") queueMicrotask(() => { if (!st.uiFit && st.panel?.kind === "explain") fitBody(); lockSay(); }); // 처음 맞춤도 ⇄ 와 같은 규칙(「말해 보세요」 칸이 본문 칸 밖으로 넘치면 글만 줄임) → ⇄ 전·후 같은 자리
     if (st.uiFit && kind === "explain") return fitBody();
-    panel.querySelector(".v9body")?.style.removeProperty("min-height"); // ⇄ 때 고정한 본문 칸 최소 높이(아래 onUiLang)를 풀고 다시 맞춤 // ⇄ 뒤엔 창을 연 뒤 늦게 오는 맞춤(0.3초·글꼴)도 본문만 — 창 크기 그대로
     const kids = [...panel.children].filter(c => !c.classList.contains("vplay"));
     kids.forEach(c => c.style.removeProperty("min-height")); // 아래 「창 높이 채움」은 잴 때 빼고
     // 설명 = 칸을 꽉 채우는 가장 큰 크기(짧은 줄은 키우고 긴 줄은 줄임 · 15px → 최대 20px · 칩·간격도 같은 비율 — 본부 10-06) · 말하기 = 넘칠 때만 줄임
@@ -1061,7 +1062,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     if (!app.querySelector(".scr.learn")) return removeEventListener("malmun:uilang", onUiLang);
     setRateWord(t("speed")); // 속도 알약 말(rateLabel)도 새 언어로(다국어부 10-14)
     st.cardKeep = st.cur; // 지금 카드 맞춤 단계 고정(⇄ 0px)
-    if (st.panel?.kind === "explain") { if (!st.uiFit) { const bd = panel.querySelector(".v9body"); st.v9H = bd?.getBoundingClientRect().height || 0; if (bd && st.v9H) bd.style.minHeight = st.v9H + "px"; /* 본문 칸 최소 높이 = ⇄ 전 → 글이 짧아져도 아래 「말해 보세요」 줄 자리 그대로(si 0.7px) · 길어지면 fitBody 가 줄임 */ } st.uiFit = true; } // 이 창이 닫히거나 다른 줄로 갈 때까지 창 크기 고정 · v9H = ⇄ 전 본문 칸 높이(fitBody 한도)
+    if (st.panel?.kind === "explain") st.uiFit = true; // 이 창이 닫히거나 다른 줄로 갈 때까지 창 크기 고정
     if (st.uiBar) return; const w = uiKoOn() ? "ko" : "L";
     v9set("snd", w); v9set("txt", w);
     const p = st.panel; if (p?.kind !== "explain" || !L[p.i]?.v9) return;
