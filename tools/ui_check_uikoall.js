@@ -44,6 +44,14 @@
       const sheet = sheetRoot()?.querySelector("[role=dialog]");
       const scope = sheet && vis(sheet) ? sheet : document;
       const ok = [...scope.querySelectorAll("[data-act=uiko]")].some(usable);
+      // 끝까지 내린 뒤에도(대표님 10-20 「머리 줄 붙박이」) — 창·화면 안 스크롤 칸을 모두 맨 아래로
+      if (ok && !window.__noScroll) {
+        const sc = [document.scrollingElement, ...[...(scope === document ? document.body : scope).querySelectorAll("*")].filter(e => vis(e) && e.scrollHeight > e.clientHeight + 20 && /auto|scroll/.test(getComputedStyle(e).overflowY))];
+        const back = sc.map(e => [e, e.scrollTop]); sc.forEach(e => (e.scrollTop = e.scrollHeight)); await W(400);
+        const ok2 = [...scope.querySelectorAll("[data-act=uiko]")].some(usable);
+        back.forEach(([e, y]) => (e.scrollTop = y)); await W(200);
+        if (!ok2) { total++; out.push(`✗ ${st} 끝까지 내리면 ⇄ 사라짐(스크롤 칸 ${sc.map(e => e === document.scrollingElement ? "화면" : "." + String(e.className).split(" ")[0]).join(",")})`); continue; }
+      }
       if (ok) out.push(`✓ ${st}`);
       else { total++; const why = [...scope.querySelectorAll("[data-act=uiko]")].map(b => { const r = b.getBoundingClientRect(), h = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); return vis(b) ? `${r.left | 0},${r.top | 0} 덮음=${h ? (h.className || h.tagName) : "화면 밖"}` : "숨김"; }).join(" / "); out.push(`✗ ${st} ⇄ 없음${scope !== document ? `(겹친 창 .${sheet.className.split(" ").join(".")} 안)` : ""}${why ? ` · ${why}` : ""}`); }
     } catch (e) { out.push(`✗ ${st} 실행 오류 ${e.message}`); total++; }

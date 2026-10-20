@@ -1528,3 +1528,5 @@ html.bigview,html.bigview body{overflow:hidden}
 #vwrap:fullscreen>.vuiko .chip.uiko{min-height:36px;padding:4px 12px;font-size:14px;border-radius:8px;border:1px solid rgba(255,255,255,.6);color:#fff;background:rgba(0,0,0,.5)} /* 검은 영상 위 = 자막 단추(CC)와 같은 색 */
 #vwrap:fullscreen>.vuiko .chip.uiko .a,#vwrap:fullscreen>.vuiko .chip.uiko .b{opacity:.6;color:#fff}
 #vwrap:fullscreen>.vuiko .chip.uiko[aria-pressed=false] .a,#vwrap:fullscreen>.vuiko .chip.uiko[aria-pressed=true] .b{opacity:1;color:#ffd27a}
+/* 머리 줄 붙박이(대표님 10-20 「ㅇ」 · 모든 창 ⇄) — 편 목록·진단을 내려도 머리 줄(⇄ 포함)이 위에 · 칸 크기·자리 0px(위치만 sticky · 바탕색만 덧칠) */
+.list > .bar,.diag > .bar{position:sticky;top:0;z-index:5;background:var(--bg);box-shadow:0 1px 0 var(--line)} /* 아래 선 = 그림자(높이 0px) */
