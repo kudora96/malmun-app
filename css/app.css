@@ -1566,7 +1566,7 @@ html.bigview,html.bigview body{overflow:hidden}
 .line .acts.ib5 button.ib .ico{width:20px;height:20px}
 .line.fitc .acts.ib5 button.ib{height:32px}
 .line .acts.ib5 button.gamebtn{position:relative}
-.actstip{position:fixed;z-index:80;max-width:calc(100vw - 24px);padding:7px 12px;border-radius:12px;background:#18302a;color:#fff;font-size:14px;line-height:1.35;box-shadow:0 6px 18px rgba(0,0,0,.3);pointer-events:none;animation:keepTipIn .2s ease-out}
+.actstip{position:fixed;z-index:80;max-width:calc(100vw - 24px);padding:7px 12px;border-radius:12px;background:#18302a;color:#fff;font-size:14px;line-height:1.35;box-shadow:0 6px 18px rgba(0,0,0,.3);pointer-events:auto;cursor:pointer;animation:keepTipIn .2s ease-out}
 .actstip b{font-weight:800}.actstip i{font-style:normal;opacity:.7;font-size:12px;margin-inline-start:8px}.actstip small{display:block;font-size:12px;opacity:.8;font-weight:600}.actstip small.hold{opacity:.65;font-weight:500;margin-top:2px}
 .actstip::after{content:"";position:absolute;top:100%;left:var(--ax,50%);margin-left:-7px;border:7px solid transparent;border-top-color:#18302a}
 .chip.bgmb[data-act=bgmtog]{width:36px;min-width:36px;padding:0;border-radius:999px}.chip.bgmb[data-act=bgmtog] .bi{display:flex}.chip.bgmb[data-act=bgmtog] svg{width:18px;height:18px}

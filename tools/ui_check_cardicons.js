@@ -17,8 +17,11 @@
   ok(!bad.b.length, "ⓑ ⇄ 전후 카드 높이·카드 안 단추 자리 0px", bad.b.join(" · "));
   // ⓒ 차례 풍선말
   { localStorage.removeItem("malmun.actstip"); window.__actsTip = 1; const app = $("#app") || document.body, start = [...document.querySelectorAll("*")].find(e => e.__actsTip)?.__actsTip; start?.(); await W(200);
-    const seq = []; for (let k = 0; k < 6; k++) { const t0 = $(".actstip"); seq.push(t0 ? (t0.querySelector("i")?.textContent || "?") : "-"); document.body.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, cancelable: true })); document.body.click(); await W(150); }
-    ok(seq.join(",") === "1/5,2/5,3/5,4/5,5/5,-" && localStorage.getItem("malmun.actstip") === "1" && !$(".panel .scr"), "ⓒ 처음 한 번 차례 풍선말 1/5 → 5/5 → 끝 · 기억 · 누름은 단추로 안 감", seq.join(",")); delete window.__actsTip; }
+    const seq = []; for (let k = 0; k < 6; k++) { const t0 = $(".actstip"); seq.push(t0 ? (t0.querySelector("i")?.textContent || "?") : "-"); if (t0) { t0.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, cancelable: true })); t0.click(); } await W(150); }
+    ok(seq.join(",") === "1/5,2/5,3/5,4/5,5/5,-" && localStorage.getItem("malmun.actstip") === "1", "ⓒ 처음 한 번 차례 풍선말 — 풍선말을 누르면 1/5 → 5/5 → 끝 · 기억", seq.join(","));
+    localStorage.removeItem("malmun.actstip"); start?.(); await W(200); const had = !!$(".actstip"), wb = btns().find(x => x.dataset.act === "write"); wb.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, cancelable: true })); wb.dispatchEvent(new PointerEvent("pointerup", { bubbles: true })); wb.click(); await W(1500);
+    ok(had && !$(".actstip") && !!$(".panel .write") && localStorage.getItem("malmun.actstip") === "1", "ⓒ 풍선말이 떠 있어도 다른 곳(✎ 쓰기) 누름 = 그대로 통과(쓰기 창 열림) · 풍선말 닫힘", `떠 있음 ${had} · 쓰기 창 ${!!$(".panel .write")}`); $(".panel [data-act=close]")?.click(); await W(400);
+    delete window.__actsTip; }
   // ⓓ 길게 누르기
   { const b = btns().find(x => x.dataset.act === "write"); b.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, cancelable: true, pointerType: "touch" })); await W(650); const t0 = $(".actstip")?.querySelector("b")?.textContent; b.dispatchEvent(new PointerEvent("pointerup", { bubbles: true })); b.click(); await W(500);
     ok(t0 === b.getAttribute("aria-label") && !$(".panel .write"), "ⓓ 길게 누르면 이름 풍선말 · 쓰기 창은 안 열림", `${t0} · 창 ${!!$(".panel .write")}`); await W(1900); ok(!$(".actstip"), "ⓓ 이름 풍선말은 잠깐 뒤 사라짐"); }
