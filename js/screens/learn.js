@@ -230,7 +230,8 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     const body = panel.querySelector(".v9body"); if (!body) return;
     const tg = [...body.children].filter(c => !c.classList.contains("sayb")).concat([...body.querySelectorAll(".sayb > p")]);
     tg.forEach(c => c.style.removeProperty("zoom"));
-    for (let z = 0.96; z >= 0.6 && panel.scrollHeight > panel.clientHeight; z -= 0.04) tg.forEach(c => (c.style.zoom = z.toFixed(2)));
+    const over = () => panel.scrollHeight > panel.clientHeight || (st.uiFit && st.v9H > 0 && body.getBoundingClientRect().height > st.v9H + 0.01); // ⇄ 뒤 = 본문 칸이 ⇄ 전 높이보다 커지지 않게(소수점만 넘쳐도 아래 「말해 보세요」 줄이 0.5~0.9px 밀리던 것 · 다국어부 10-20 hi·ru 등)
+    for (let z = 0.96; z >= 0.6 && over(); z -= 0.04) tg.forEach(c => (c.style.zoom = z.toFixed(2)));
   }
   function fitPanel() {
     const kind = st.panel?.kind; if (kind !== "explain" && kind !== "speak") return;
@@ -1056,7 +1057,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     if (!app.querySelector(".scr.learn")) return removeEventListener("malmun:uilang", onUiLang);
     setRateWord(t("speed")); // 속도 알약 말(rateLabel)도 새 언어로(다국어부 10-14)
     st.cardKeep = st.cur; // 지금 카드 맞춤 단계 고정(⇄ 0px)
-    if (st.panel?.kind === "explain") st.uiFit = true; // 이 창이 닫히거나 다른 줄로 갈 때까지 창 크기 고정
+    if (st.panel?.kind === "explain") { if (!st.uiFit) st.v9H = panel.querySelector(".v9body")?.getBoundingClientRect().height || 0; st.uiFit = true; } // 이 창이 닫히거나 다른 줄로 갈 때까지 창 크기 고정 · v9H = ⇄ 전 본문 칸 높이(fitBody 한도)
     if (st.uiBar) return; const w = uiKoOn() ? "ko" : "L";
     v9set("snd", w); v9set("txt", w);
     const p = st.panel; if (p?.kind !== "explain" || !L[p.i]?.v9) return;

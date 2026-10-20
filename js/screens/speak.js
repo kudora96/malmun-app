@@ -132,6 +132,17 @@ export default async function speak(app, ep, id, opts = {}) {
   function fitHead(keep = false) { const h = $(".whead"); if (!h) return; if (h.clientWidth === fitHead.w) keep = true; /* 폭이 그대로면 단계를 내리지 않음(다시 그릴 때·⇄ 때 제목이 나타났다 숨었다 0 · 다국어부 th 375) */ fitHead.w = h.clientWidth; if (!keep) h.classList.remove("h1", "h2", "h3", "h4"); const up = () => { for (const c of ["h1", "h2", "h3", "h4"]) { if (h.classList.contains(c)) continue; if (h.scrollWidth <= h.clientWidth + 1) break; h.classList.add(c); } }; up();
     { const sw = []; for (const e of h.querySelectorAll("[data-k]")) { if (e.children.length) continue; const a = tAlt(e.dataset.k); if (a && a !== e.textContent) { sw.push([e, e.textContent]); e.textContent = a; } } if (sw.length) { up(); sw.forEach(([e, v]) => (e.textContent = v)); } } } // ⇄ 반대쪽 말로도 재서 더 높은 단계(⇄ 때 제목이 숨었다 나타나 53px 밀리던 것 · 다국어부 10-19 si)
   new ResizeObserver(() => fitHead()).observe($(".whead"));
+  // 아래 단추 줄(견본·🎤·내 목소리·비교) 높이 = 두 말(한국어 ⇄ 학습자 말) 중 높은 쪽으로 고정 — 한쪽만 두 줄로 접혀 ⇄ 때 줄이 18px 뛰던 것(다국어부 10-20 km) · fitHead 와 같은 방법(글을 잠깐 바꿔 재고 되돌림)
+  function lockBtns() {
+    const row = $(".sbtns"); if (!row || !row.offsetParent) return;
+    const kids = [...row.children]; kids.forEach(k => k.style.removeProperty("min-height"));
+    const labs = [[$(".sbtns [data-act=model]"), "▶ ", "model"], [$(".sbtns .mic .lab"), "", "speak_now"], [$(".sbtns [data-act=mine]"), "▶ ", "my_voice"], [$(".sbtns [data-act=both]"), "", "compare"]]
+      .filter(([e, pre, k]) => e && e.textContent === pre + t(k) && tAlt(k)); // 쉬는 모양 글일 때만(녹음 중 「멈춤」 등은 그대로)
+    const hi = () => Math.max(...kids.map(k => k.getBoundingClientRect().height));
+    let h = hi(); labs.forEach(([e, pre, k]) => (e.textContent = pre + tAlt(k))); h = Math.max(h, hi()); labs.forEach(([e, pre, k]) => (e.textContent = pre + t(k)));
+    kids.forEach(k => (k.style.minHeight = h.toFixed(1) + "px"));
+  }
+  let row0W = -1; new ResizeObserver(() => { const w = $(".sbtns")?.clientWidth; if (w && row0W !== w) { row0W = w; lockBtns(); } }).observe($(".sbtns")); // 폭이 바뀔 때만 다시 잼
   // [तुलना] = 비교 화면(파형 두 줄 + 음절 칸 · js/compare.js) — 다시 누르면 원래 말하기 화면 · 토막을 바꾸거나 🎤 를 누르면 닫음
   let cmp = null;
   const closeCmp = () => { cmp?.close(); cmp = null; $(".cmp").hidden = true; app.querySelector(".scr").classList.remove("cmpon"); $("[data-act=both]").setAttribute("aria-pressed", "false"); };
@@ -483,7 +494,7 @@ export default async function speak(app, ep, id, opts = {}) {
   sfx.preload([lineSrc, ...parts.map(p => p.src)]);
   const release = hold();
   // 언어를 바꾸면(본부 10-13 안 A · retext 가 보내는 malmun:uilang) 결과 줄·토막 단추를 지금 상태 그대로 새 언어로 — 녹음·채점은 안 건드림 · 「확인 중…」 동안은 retext 가 바꾼 글 그대로
-  const onLang = () => { if (!st.alive) return; setRateWord(t("speed")); $(".helpbox").innerHTML = helpHTML(); fitHelp(); fitHead(true); /* ⇄ 때는 줄이기만(풀지 않음) — 단추 글이 보였다 숨었다 하지 않게(다국어부 10-15 ur 1280) */ /* 속도 알약 말도 새 언어로(다시 그릴 때 옛 말로 쓰지 않게 · 다국어부 10-14) */ if (st.checking) return; paint(); if (st.retryDev) $(".msg").textContent = t("sr_retry_dev"); };
+  const onLang = () => { if (!st.alive) return; setRateWord(t("speed")); $(".helpbox").innerHTML = helpHTML(); fitHelp(); fitHead(true); lockBtns(); /* ⇄ 때는 줄이기만(풀지 않음) — 단추 글이 보였다 숨었다 하지 않게(다국어부 10-15 ur 1280) */ /* 속도 알약 말도 새 언어로(다시 그릴 때 옛 말로 쓰지 않게 · 다국어부 10-14) */ if (st.checking) return; paint(); if (st.retryDev) $(".msg").textContent = t("sr_retry_dev"); };
   addEventListener("malmun:uilang", onLang);
   const onFitW = () => st.alive && fitHead(true); addEventListener("malmun:langfit", onFitW); const onBig = () => st.alive && requestAnimationFrame(() => fitHead()); addEventListener("malmun:big", onBig); // 크게 보기 들고 날 때(머리 줄 폭·⛶ 칩) 다시 맞춤 // langfit 이 단추 폭을 「두 말 중 긴 쪽」으로 고정할 때 → 처음부터 긴 말 기준 단계(첫 ⇄ 도 0px · 다국어부 10-15)
   return () => { removeEventListener("malmun:uilang", onLang); removeEventListener("malmun:langfit", onFitW); removeEventListener("malmun:big", onBig); st.alive = false; newAtt(); clearInterval(litT); closeCmp(); stopRec(true); stopSounds(); st.stream?.getTracks().forEach(x => x.stop()); release(); quietWake(false); document.removeEventListener("keydown", onEsc, true); delete app.__sp; };
