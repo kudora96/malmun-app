@@ -1516,6 +1516,11 @@ html.bigview,html.bigview body{overflow:hidden}
 .welcome{position:relative}.welcome .langtip{position:absolute;right:16px;z-index:20;max-width:240px;background:var(--card);border:2px solid var(--hi);border-radius:14px;padding:8px 12px;font-size:14px;line-height:1.4;box-shadow:0 4px 12px rgba(0,0,0,.15);color:var(--ink);cursor:pointer;display:grid;gap:2px}
 .welcome .langtip b{font-size:12px;color:var(--hi)}.welcome .langtip::before{content:"";position:absolute;top:-9px;right:22px;width:14px;height:14px;background:var(--card);border-left:2px solid var(--hi);border-top:2px solid var(--hi);transform:rotate(45deg)}
 .welcome .tiphi{box-shadow:0 0 0 3px var(--hi)}
+/* 🎮 줄 게임(게임부 10-20) — 단추 · 다 깬 줄 작은 ✓(자리 0px) · 배우기 화면 위 겹침 */
+.line .acts button.gamebtn{position:relative;padding:5px 9px}
+.line .acts button.gamebtn.gdone::after{content:"✓";position:absolute;right:-4px;top:-6px;width:14px;height:14px;border-radius:50%;background:#20c47a;color:#fff;font:800 9px/14px system-ui;text-align:center;pointer-events:none}
+.gamewrap{position:fixed;inset:0;z-index:9000;background:#9fd8ff;padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}
+.gamewrap iframe{display:block;width:100%;height:100%;border:0}
 /* 전체 화면 영상에도 ⇄(다국어부 10-20 · 대표님 「모든 창에 ⇄ 기본」) — 전체 화면일 때만 오른쪽 위 · 평소 화면 틀 0px(숨김) */
 #vwrap>.vuiko{display:none}
 #vwrap:fullscreen>.vuiko{display:block;position:absolute;right:16px;top:16px;z-index:3}
