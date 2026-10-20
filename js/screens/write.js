@@ -23,6 +23,7 @@ import * as sfx from "../sfx.js?v=1020.8";
 import { scoreFx, stopFx } from "../scorefx.js?v=1020.8";
 import { units as jamoUnits, baseOf, shapeFix } from "../jamobox.js?v=1020.8"; // 자모 자리 나누기(획순 · 자판 덧칠 · 손글씨 덩어리 — 본부 10-07) // 손글씨 점수 효과 = 말하기와 같은 규칙(본부 10-07)
 import { createStrokes } from "../strokes.js?v=1020.8"; // 획 자료·획순 칠(글자부)
+import { whyRow } from "../whyask.js?v=1020.8"; // 「왜 틀렸어요?」(개발2팀 · 기본 꺼짐 ?why=1)
 import { fitToGuide } from "../strokefit.js?v=1020.8"; // 자석 따라오는 획 길 = 회색 가운데(글자부 10-12)
 
 const KEYS = [..."ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎㄲㄸㅃㅆㅉ"], VOW = [..."ㅏㅑㅓㅕㅗㅛㅜㅠㅡㅣ"];
@@ -1117,6 +1118,11 @@ export default async function write(app, ep, id, opts = {}) {
     if (st.autoGen !== gen) return; // 새 고리가 이어받음 — 그 고리 표시를 건드리지 않음
     st.auto = false; if (st.alive) markAuto();
   }
+  // 「왜 틀렸어요?」(본부·개발2팀 10-20) — 자판에서 틀린 자모를 치면 자모 칸 옆 빈자리에 덮개로 단추 하나(틀 0px · 다음에 맞게 치면 화면을 다시 그려 사라짐) · 꺼져 있으면(기본) 아무것도 안 그림
+  function whyPut(target, heard, meaning) { const row = work.querySelector(".info .slotrow"); row?.querySelector(":scope > .whyrow")?.remove(); const h = whyRow(target, heard, "write", meaning); if (!row || !h) return;
+    row.insertAdjacentHTML("beforeend", h); const w = row.querySelector(":scope > .whyrow"), sl = row.querySelector(".slots"), wb = row.querySelector(".wbtns"), R = row.getBoundingClientRect(), x0 = sl ? sl.getBoundingClientRect().right - R.left + 8 : 0, x1 = wb && wb.offsetWidth ? wb.getBoundingClientRect().left - R.left - 8 : R.width;
+    w.classList.add("wwhy"); w.style.left = Math.round(x0) + "px"; w.style.maxWidth = Math.max(40, Math.round(x1 - x0)) + "px"; const b = w.querySelector(".whyb"), H0 = (sl || row).offsetHeight; if (!b) return; b.setAttribute("aria-label", b.textContent.trim()); const over = () => b.scrollWidth > b.clientWidth + 1 || b.offsetHeight > H0 + 2;
+    for (let f = 12; f >= 9.5 && over(); f -= 0.5) b.style.fontSize = f + "px"; if (over()) { w.classList.add("two"); for (let f = 12; f >= 9 && over(); f -= 0.5) b.style.fontSize = f + "px"; } if (over()) { w.classList.remove("two"); b.style.removeProperty("font-size"); w.classList.add("ic"); } } /* 글 맞춤: 한 줄 → 두 줄(자모 칸 높이 안) → 그래도 안 되면 💡 만(이름 = aria) */
   async function press(j) { // W2
     if (st.resumeAuto) { st.resumeAuto = false; markAuto(); } const key0 = j; // 실제로 누른 자판(겹모음을 나눠 쳐 완성하면 j 는 겹모음으로 바뀜)
     if (st.auto) return stopAuto(); // 자동 완성 중 자판 = 멈춤
@@ -1136,6 +1142,7 @@ export default async function write(app, ep, id, opts = {}) {
       st.part = "";
       const s = work.querySelector(".slot.current"); s?.classList.remove("shake"); void s?.offsetWidth; s?.classList.add("shake");
       const k = work.querySelector(`[data-j="${j}"]`); k?.classList.add("wrong"); setTimeout(() => k?.classList.remove("wrong"), 500);
+      whyPut(c.ch, compose([...st.typed, j].flatMap(jamoParts), vowelLen(c.ch)), words()[st.w].mean ? meanOf(words()[st.w].mean) : ""); /* 「왜 틀렸어요?」(개발2팀 whyask · ?why=1 일 때만) */
       st.busy = true; await run(["bad", voiceSrc]); st.busy = false;
       return;
     }
