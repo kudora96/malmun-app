@@ -7,14 +7,24 @@
 <meta name="theme-color" content="#1d3530" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#eef2ec" media="(prefers-color-scheme: light)">
 <title>Malmun · 말문</title>
+<script>/* 「처음처럼」(본부 10-20 대표님 「학습자가 처음 들어갔을 때 기준으로 보여 줘」) — ?fresh=1 = 이 기기 저장(언어·⇄·녹음·시험 스위치 등) 모두 지우고 첫 실행 화면으로 · 주소에서 fresh 는 지움 */
+(function () { var q = new URLSearchParams(location.search); if (q.get("fresh") !== "1") return;
+  try { localStorage.clear(); sessionStorage.clear(); } catch (e) {} try { window.stop(); } catch (e) {}
+  q.delete("fresh"); var go = function () { location.replace(location.pathname + (q.toString() ? "?" + q : "")); };
+  var w = [];
+  try { ["malmun", "malmun_diag"].forEach(function (n) { w.push(new Promise(function (r) { var d = indexedDB.deleteDatabase(n); d.onsuccess = d.onerror = d.onblocked = r; })); }); } catch (e) {}
+  try { if (window.caches) w.push(caches.keys().then(function (ks) { return Promise.all(ks.map(function (k) { return caches.delete(k); })); })); } catch (e) {}
+  try { if (navigator.serviceWorker) w.push(navigator.serviceWorker.getRegistrations().then(function (rs) { return Promise.all(rs.map(function (r) { return r.unregister(); })); })); } catch (e) {}
+  Promise.all(w).then(go, go); setTimeout(go, 3000);
+})();</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Noto+Sans+KR:wght@400;500;700&family=Gowun+Batang:wght@700&family=Nanum+Myeongjo:wght@800&family=Noto+Sans+Devanagari:wght@400;500;600&family=Noto+Sans+Bengali:wght@400;500&display=swap">
-<link rel="stylesheet" href="css/app.css?v=1016.74">
+<link rel="stylesheet" href="css/app.css?v=1016.75">
 </head>
 <body>
 <main id="app" aria-live="polite"></main>
 <div id="sheet-root"></div>
-<script type="module" src="js/main.js?v=1016.74"></script>
+<script type="module" src="js/main.js?v=1016.75"></script>
 </body>
 </html>
