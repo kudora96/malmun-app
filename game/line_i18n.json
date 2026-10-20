@@ -2110,5 +2110,29 @@
   "id": " dtk",
   "tl": " segundo",
   "vi": " giây"
+ },
+ "ui.tapSound": {
+  "bn": "🔊 শব্দ চালু করতে চাপুন",
+  "en": "🔊 Tap to turn on sound",
+  "es": "🔊 Toca para activar el sonido",
+  "fr": "🔊 Touchez pour activer le son",
+  "hi": "🔊 आवाज़ चालू करने के लिए दबाएँ",
+  "id": "🔊 Ketuk untuk menyalakan suara",
+  "ja": "🔊 タップして音をオン",
+  "km": "🔊 ចុចដើម្បីបើកសំឡេង",
+  "ky": "🔊 Үндү күйгүзүү үчүн басыңыз",
+  "lo": "🔊 ກົດເພື່ອເປີດສຽງ",
+  "mn": "🔊 Дуу асаахын тулд дарна уу",
+  "my": "🔊 အသံဖွင့်ရန် နှိပ်ပါ",
+  "ne": "🔊 आवाज खोल्न थिच्नुहोस्",
+  "pt": "🔊 Toque para ativar o som",
+  "ru": "🔊 Нажмите, чтобы включить звук",
+  "si": "🔊 ශබ්දය සක්‍රිය කිරීමට ඔබන්න",
+  "th": "🔊 แตะเพื่อเปิดเสียง",
+  "tl": "🔊 Pindutin para buksan ang tunog",
+  "ur": "🔊 آواز چلانے کے لیے دبائیں",
+  "uz": "🔊 Ovozni yoqish uchun bosing",
+  "vi": "🔊 Chạm để bật âm thanh",
+  "zh": "🔊 点击开启声音"
  }
 }

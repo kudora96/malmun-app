@@ -560,7 +560,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     const vl = gm.v9?.lines?.find(x => x.n === i + 1) || null, uw = l.units?.words || [];
     const data = { type: "malmun-line", ep, n: l.id, lang, view: uiKoOn() ? "ko" : lang, snd: new URL(`${MEDIA}/game/`, location.href).href,
       line: { ko: l.ko, l1: l.tr || "", audio: l.lineAudio ? [abs(paths.audio(ep, l.lineAudio))] : [] }, words: gameWords(vl, uw, lang, ep).map(w => ({ ...w, audio: w.audio.map(abs) })) };
-    const wrap = document.createElement("div"); wrap.className = "gamewrap"; wrap.innerHTML = `<iframe title="🎮" src="game/line.html?v=1020.2${/[?&]mute=1/.test(location.search) ? "&mute=1" : ""}" allow="autoplay"></iframe>`;
+    const wrap = document.createElement("div"); wrap.className = "gamewrap"; wrap.innerHTML = `<iframe title="🎮" src="game/line.html?v=1020.4${/[?&]mute=1/.test(location.search) ? "&mute=1" : ""}" allow="autoplay"></iframe>`;
     document.body.appendChild(wrap); gm.el = wrap; navPush();
     const fr = wrap.querySelector("iframe");
     gm.onMsg = e => { if (!gm.el || e.source !== fr.contentWindow) return; const m = e.data || {};
