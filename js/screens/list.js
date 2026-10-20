@@ -13,22 +13,25 @@ const mmss = s => `${Math.floor(s / 60)}:${String(Math.round(s % 60)).padStart(2
 const koRuns = s => esc(s).replace(/[ᄀ-ᇿ㄰-㆏가-힣]+/g, m => `<span class="ko" lang="ko">${m}</span>`); // 학습자 말 제목 속 배우는 한글 조각(ㄱ→ㄲ · ㅏㅗ)은 한국어로 표시
 const ttl = (id, ko, tt) => { const tr = tt[id]; if (!tr) return `<span class="ko" lang="ko">${esc(ko)}</span>`; const k = uiKoOn(); return `<span class="ept" data-ko="${esc(ko)}" data-tr="${esc(tr)}"><span class="cur" lang="${k ? "ko" : lang}">${k ? esc(ko) : koRuns(tr)}</span><span class="gh" aria-hidden="true" lang="ko">${esc(ko)}</span><span class="gh" aria-hidden="true" lang="${lang}">${koRuns(tr)}</span></span>`; };
 const reTitles = () => { const k = uiKoOn(); for (const e of document.querySelectorAll(".list .ept")) { const c = e.querySelector(".cur"); c.innerHTML = k ? esc(e.dataset.ko) : koRuns(e.dataset.tr); c.lang = k ? "ko" : lang; } };
-// 단원 이름(머리 줄 큰 글 · 본부 10-20 「모든 창 ⇄」) — 한국어 = 손글씨 그대로 · 학습자 말 = 앱 글꼴로 바꾸고 한국어 때 칸 높이(최대 2줄) 안에 들 때까지 글자만 줄임 → ⇄ 때 칸 0px
+// 단원 이름(머리 줄 큰 글 · 본부 10-20 「모든 창 ⇄」) — 한국어 = 손글씨 그대로 · 학습자 말 = 앱 글꼴로 바꾸고 한국어 때 칸 높이(최대 3줄 · 최소 12px) 안에 들 때까지 글자만 줄임 → ⇄ 때 칸 0px
 //  .ut = .bar .t 와 같은 모양이지만 이름이 달라 langfit(.bar .t 잠금)·retext 가 손대지 않음(이 함수 혼자 맞춤)
 function fitUnit() {
   const u = document.querySelector(".list .bar .ut"); if (!u) return;
   const k = uiKoOn() || !u.dataset.tr;
-  u.style.height = ""; u.style.fontSize = ""; u.classList.add("ko"); u.lang = "ko"; u.textContent = u.dataset.ko;
+  u.style.height = ""; u.style.fontSize = ""; u.style.overflowWrap = ""; u.classList.add("ko"); u.lang = "ko"; u.textContent = u.dataset.ko;
+  if (!fitUnit.fontAsked) { fitUnit.fontAsked = true; document.fonts?.load(`700 28px ${getComputedStyle(u).fontFamily}`, u.dataset.ko).then(() => fitUnit()); } // 학습자 말로 처음 열면 손글씨 글꼴을 아직 안 받아 기준 높이를 다른 글꼴로 잼(tl 320 18.6px) → 받은 뒤 다시
   const H = u.offsetHeight; // 한국어 손글씨 칸 높이 = 기준
   if (k) return void (u.style.height = H + "px");
   u.classList.remove("ko"); u.lang = lang; u.innerHTML = `<span>${koRuns(u.dataset.tr)}</span>`; u.style.height = H + "px";
   const lh = () => parseFloat(getComputedStyle(u).lineHeight) || 1;
-  for (let f = 26; f >= 11; f--) { u.style.fontSize = f + "px"; if (u.scrollHeight <= H + 1 && u.scrollHeight / lh() < 2.5 && u.scrollWidth <= u.clientWidth + 1) break; }
+  for (let f = 26; f >= 12; f--) { u.style.fontSize = f + "px"; if (u.scrollHeight <= H + 1 && u.scrollHeight / lh() < 3.5 && u.scrollWidth <= u.clientWidth + 1) break; } // 최대 3줄 · 최소 12px(본부 10-20 · 320 에서 2줄이면 11px 로 너무 작음)
+  u.style.overflowWrap = u.scrollWidth > u.clientWidth + 1 ? "anywhere" : ""; // 12px 에서도 한 낱말이 칸보다 길면 마지막에만 낱말 안에서 끊음(잘림 대신)
 }
 if (!window.__eptWired) { window.__eptWired = true; addEventListener("malmun:uilang", () => { reTitles(); fitUnit(); }); let rz = 0; addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(fitUnit, 150); }); }
 
 export default async function list(app, unit = "L01-00") {
-  const [cat, tt] = await Promise.all([catalog(), epTitles()]);
+  const hand = getComputedStyle(document.documentElement).getPropertyValue("--f-hand").trim(); // 단원 이름 칸 높이 = 손글씨 기준 → 그리기 전에 글꼴부터(학습자 말 화면엔 손글씨가 안 쓰여 늦게 와서 첫 높이가 바뀌던 것 · tl 320)
+  const [cat, tt] = await Promise.all([catalog(), epTitles(), hand && document.fonts ? Promise.race([document.fonts.load(`700 28px ${hand}`, "한글과 발음"), new Promise(r => setTimeout(r, 800))]).catch(() => {}) : 0]);
   const eps = cat.episodes.filter(e => e.id.startsWith(unit));
   const first = eps.find(e => e.ready);
   const p = first ? progress.get(first.id) : {};

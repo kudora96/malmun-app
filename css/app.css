@@ -1561,4 +1561,4 @@ html.bigview,html.bigview body{overflow:hidden}
 /* 편·단원 제목 학습자 말 ⇄ 한국어(다국어부 10-20) — 세 겹(.cur·한국어·학습자 말)을 한 칸에 겹쳐 칸 = 큰 쪽 → ⇄ 때 0px */
 .ept{display:grid;min-width:0}.ept>*{grid-area:1/1;min-width:0;overflow-wrap:break-word}.ept>.gh{visibility:hidden}
 .hero .ttl:has(>.ept){display:flex;gap:.3em}.hero .ttl>.ept{flex:1}
-.bar .ut{font-size:28px;font-weight:700;line-height:1.05;overflow:hidden;overflow-wrap:break-word}.bar .ut.ko{font-family:var(--f-hand)}.bar .ut:not(.ko){line-height:1.15;overflow-wrap:normal;display:grid;align-content:center} /* 단원 이름 = .bar .t 모양 · 손글씨는 한국어일 때만 · 학습자 말 글자 크기는 list.js fitUnit */
+.bar .ut{font-size:28px;font-weight:700;line-height:1.05;overflow:hidden;overflow-wrap:break-word}.bar .ut.ko{font-family:var(--f-hand)}.bar .ut:not(.ko){line-height:1.15;overflow-wrap:normal;hyphens:auto;display:grid;align-content:center} /* 단원 이름 = .bar .t 모양 · 손글씨는 한국어일 때만 · 학습자 말 글자 크기는 list.js fitUnit */
