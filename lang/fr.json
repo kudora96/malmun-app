@@ -310,5 +310,7 @@
  "ink_orange": "Orangé",
  "ink_pink": "Rose",
  "ink_sky": "Bleu ciel",
- "ink_gray": "Gris"
+ "ink_gray": "Gris",
+ "line_game": "Jeu",
+ "hold_name": "Un oubli? Restez appuyé sur un bouton pour voir son nom"
 }
