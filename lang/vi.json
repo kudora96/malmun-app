@@ -311,6 +311,8 @@
  "ink_pink": "Hồng",
  "ink_sky": "Xanh da trời",
  "ink_gray": "Xám",
+ "line_game": "Trò chơi",
+ "hold_name": "Quên? Nhấn giữ nút để xem tên",
  "birth_q": "Chọn năm sinh của bạn",
  "birth_sub": "Chúng tôi điều chỉnh tính năng theo độ tuổi. Thông tin này không rời khỏi thiết bị này.",
  "birth_year": "Năm sinh",
@@ -320,6 +322,15 @@
  "birth_ok": "Xác nhận",
  "age_teen_note": "Bạn có thể luyện nói. Bản ghi âm được chuyển thành chữ rồi xóa ngay. Tính năng AI mở từ {n} tuổi.",
  "age_kid_note": "Bạn dùng được tất cả video, giải thích và âm chữ. Bản ghi âm khi nói chỉ được dùng trên thiết bị này. Tính năng AI mở từ {n} tuổi.",
- "line_game": "Trò chơi",
- "hold_name": "Quên? Nhấn giữ nút để xem tên"
+ "rp_menu": "Báo lỗi",
+ "rp_q": "Có gì không đúng?",
+ "rp_k_tr": "Bản dịch lạ",
+ "rp_k_snd": "Âm thanh lạ",
+ "rp_k_glyph": "Chữ hoặc nét sai",
+ "rp_k_ai": "Câu trả lời của AI lạ",
+ "rp_k_etc": "Khác",
+ "rp_ph": "(Không bắt buộc) Viết ngắn gọn · 100 ký tự",
+ "rp_send": "Gửi",
+ "rp_thx": "Cảm ơn bạn! Chúng tôi sẽ kiểm tra và sửa.",
+ "rp_limit": "Hôm nay không nhận thêm báo lỗi. Ngày mai bạn hãy báo lại nhé."
 }

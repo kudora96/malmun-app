@@ -311,6 +311,8 @@
  "ink_pink": "Rosas",
  "ink_sky": "Asul-langit",
  "ink_gray": "Kulay-abo",
+ "line_game": "Laro",
+ "hold_name": "Nakalimutan? Pindutin nang matagal ang pindutan para makita ang pangalan",
  "birth_q": "Piliin ang taon ng inyong kapanganakan",
  "birth_sub": "Iniaangkop namin ang mga gamit sa inyong edad. Hindi ito ipinapadala palabas ng aparatong ito.",
  "birth_year": "Taon ng kapanganakan",
@@ -320,6 +322,15 @@
  "birth_ok": "Sige",
  "age_teen_note": "Puwede kayong magsanay magsalita. Ginagawang teksto ang rekording at binubura agad. Bubukas ang mga gamit ng AI mula edad {n}.",
  "age_kid_note": "Magagamit ninyo ang lahat ng video, paliwanag, at tunog ng titik. Sa aparatong ito lang ginagamit ang rekording ng pagsasalita. Bubukas ang mga gamit ng AI mula edad {n}.",
- "line_game": "Laro",
- "hold_name": "Nakalimutan? Pindutin nang matagal ang pindutan para makita ang pangalan"
+ "rp_menu": "Iulat ang mali",
+ "rp_q": "Ano ang mukhang mali?",
+ "rp_k_tr": "Kakaiba ang salin",
+ "rp_k_snd": "Kakaiba ang tunog",
+ "rp_k_glyph": "Mali ang titik o guhit",
+ "rp_k_ai": "Kakaiba ang sagot ng AI",
+ "rp_k_etc": "Iba pa",
+ "rp_ph": "(Opsyonal) Isulat nang maikli · 100 titik",
+ "rp_send": "Ipadala",
+ "rp_thx": "Salamat po! Titingnan at aayusin namin.",
+ "rp_limit": "Hindi na puwedeng mag-ulat ngayong araw. Pakisabi po ulit bukas."
 }
