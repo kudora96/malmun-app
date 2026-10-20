@@ -3,7 +3,7 @@
 //  어디서: 배우기 줄 카드 · 위 창(설명·말하기·쓰기) · 「왜 틀렸어요?」 답 창(종류 = AI 답 미리 고름) — 화면마다 setReportCtx(fn) 로 「무엇을 신고하나」를 알려 줌
 //  길게 누르기를 안 받는 곳(다른 부서·다른 손짓과 겹침 막기): 단추·링크·입력 칸·그림 판(canvas)·자판(data-j)·손글씨 칸·재생 막대·비교 파형·영상
 //  보내기 = 기기 안 줄(malmun.rpq · 최대 50)에 넣고 Worker /report 로 → 서버가 없거나(503) 망이 끊기면 줄에 두었다가 다음 실행·다음 신고 때 다시
-//  기기당 하루 10건(malmun.rpday) · 나이: reportTap(종류) · reportText(글) — agepolicy 표 그대로
+//  기기당 하루 10건(malmun.rpday) · 나이: reportTap(종류) · reportText(글·기기 번호) — agepolicy 표 그대로 · 종류만인 나이 = 그날만 쓰는 무작위 번호
 import { t } from "./i18n.js?v=1020.7";
 import { esc } from "./text.js?v=1020.7";
 import { spkHtml } from "./ui.js?v=1020.7";
@@ -23,12 +23,15 @@ export function setReportCtx(fn) { ctxFn = fn; return () => { if (ctxFn === fn) 
 const queue = () => { try { const q = JSON.parse(ls("malmun.rpq") || "[]"); return Array.isArray(q) ? q : []; } catch { return []; } };
 const saveQ = q => ls("malmun.rpq", JSON.stringify(q.slice(-QMAX)));
 const dayN = () => { try { const d = JSON.parse(ls("malmun.rpday") || "{}"); return d.d === today() ? +d.n || 0 : 0; } catch { return 0; } };
+// 기기 번호: 글을 쓸 수 있는 나이(reportText)만 기기 번호 · 그 밖(종류만)은 그날만 쓰는 무작위 번호(하루 상한용 · 날마다 바뀌어 기기와 이어지지 않음 · 처리방침 1장)
+const anonId = () => { try { const a = JSON.parse(ls("malmun.rpanon") || "{}"); if (a.d === today() && /^[A-Za-z0-9-]{8,64}$/.test(a.id || "")) return a.id; } catch {} const id = "a-" + (crypto.randomUUID?.() || Date.now().toString(36) + Math.random().toString(36).slice(2, 12)); ls("malmun.rpanon", JSON.stringify({ d: today(), id })); return id; };
+const repId = () => (allowed("reportText") ? deviceId() : anonId());
 let flushing = false;
 export async function flushReports() {
   if (flushing || !sttURL()) return; flushing = true;
   try {
     for (const it of queue()) {
-      let st = 0; try { const r = await fetch(sttURL() + "/report", { method: "POST", headers: { "Content-Type": "application/json", "X-Dev": deviceId() }, body: JSON.stringify(it), cache: "no-store", credentials: "omit" }); st = r.status; } catch { st = 0; }
+      let st = 0; try { const r = await fetch(sttURL() + "/report", { method: "POST", headers: { "Content-Type": "application/json", "X-Dev": repId() }, body: JSON.stringify(it), cache: "no-store", credentials: "omit" }); st = r.status; } catch { st = 0; }
       if (st === 0 || st === 503 || st >= 500) break; // 서버 없음·망 끊김 = 다음에
       saveQ(queue().filter(x => x.at !== it.at)); // 200(저장)·400·429(못 받는 것) = 줄에서 뺌
     }
