@@ -307,5 +307,7 @@
  "ink_orange": "주황",
  "ink_pink": "분홍",
  "ink_sky": "하늘색",
- "ink_gray": "회색"
+ "ink_gray": "회색",
+  "line_game": "게임",
+  "hold_name": "잊으면 단추를 길게 누르면 이름이 보여요"
 }

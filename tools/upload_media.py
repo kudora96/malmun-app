@@ -8,7 +8,7 @@
 이미 같은 크기로 올라가 있으면 건너뛴다. 8개씩 동시에 올린다.
 실행: python tools/upload_media.py L01-00-01 [--chars] [--jamo] [--letters] [--charsf] [--sfx] [--game] [--v9=L01-00-01]   (먼저 npx wrangler login)
 """
-import json, os, subprocess, sys, urllib.request
+import json, os, subprocess, sys, urllib.parse, urllib.request
 from concurrent.futures import ThreadPoolExecutor
 
 MALMUN = os.environ.get("MALMUN_ROOT", r"D:\gdrive\malmun")
@@ -20,7 +20,7 @@ PUBLIC = "https://pub-5e6f50ff2dda412eaa13ca4d4302d599.r2.dev"
 
 def already(key, path):
     try:
-        req = urllib.request.Request(f"{PUBLIC}/{key}", method="HEAD")
+        req = urllib.request.Request(f"{PUBLIC}/{urllib.parse.quote(key)}", method="HEAD", headers={"User-Agent": "Mozilla/5.0 malmun-upload"})  # 한글 경로 → 인코딩(안 하면 늘 다시 올림)
         with urllib.request.urlopen(req, timeout=15) as r:
             return int(r.headers.get("Content-Length", -1)) == os.path.getsize(path)
     except Exception:

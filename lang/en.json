@@ -309,5 +309,7 @@
  "ink_orange": "Orange",
  "ink_pink": "Pink",
  "ink_sky": "Sky blue",
- "ink_gray": "Gray"
+ "ink_gray": "Gray",
+  "line_game": "Game",
+  "hold_name": "Forgot one? Press and hold a button to see its name"
 }
