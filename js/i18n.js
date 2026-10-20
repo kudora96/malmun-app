@@ -1,5 +1,5 @@
-import { VERSION } from "./version.js?v=1016.76";
-import { LANG_INFO } from "./langs.js?v=1016.76";
+import { VERSION } from "./version.js?v=1016.77";
+import { LANG_INFO } from "./langs.js?v=1016.77";
 // 학습자 언어 — 고르게 하지 않는다(CLAUDE.md).
 // ① 저장된 선택 ② 폰 언어가 22개 중 하나 ③ 폰 시간대로 나라 짐작 ④ 영어
 export const LANGS = [
