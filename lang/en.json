@@ -309,5 +309,14 @@
  "ink_orange": "Orange",
  "ink_pink": "Pink",
  "ink_sky": "Sky blue",
- "ink_gray": "Gray"
+ "ink_gray": "Gray",
+ "birth_q": "Choose the year you were born",
+ "birth_sub": "We match features to your age. It never leaves this device.",
+ "birth_year": "Year of birth",
+ "birth_country": "Country you live in",
+ "birth_why": "Why do we ask?",
+ "birth_why_a": "Some features (speaking checks and AI) depend on your age and country.",
+ "birth_ok": "OK",
+ "age_teen_note": "You can practice speaking. Recordings are turned into text and deleted right away. AI features open at age {n}.",
+ "age_kid_note": "You can use all videos, explanations and letter sounds. Speaking recordings stay on this device only. AI features open at age {n}."
 }
