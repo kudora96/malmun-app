@@ -38,6 +38,7 @@
   "my": "새설명_소리_my/말해보세요_머리_my.mp3",
   "en": "새설명_소리_en/말해보세요_머리_en.mp3",
   "es": "새설명_소리_es/말해보세요_머리_es.mp3",
+  "pt": "새설명_소리_pt/말해보세요_머리_pt.mp3",
   "bn": "새설명_소리_bn/말해보세요_머리_bn.mp3"
  },
  "lines": [
@@ -604,8 +605,8 @@
      "say": null
     },
     "pt": {
-     "ex": null,
-     "say": null
+     "ex": "새설명_소리_pt/L01-00-01_01_pt_설명.mp3",
+     "say": "새설명_소리_pt/L01-00-01_01_pt_말해보세요.mp3"
     },
     "id": {
      "ex": null,
@@ -661,7 +662,7 @@
      "fr": "Entrez, je vous en prie.",
      "fr_s": null,
      "pt": "Entrem, por favor.",
-     "pt_s": null,
+     "pt_s": 0.07,
      "id": "Silakan masuk.",
      "id_s": null,
      "tl": "Tuloy po kayo.",
@@ -707,7 +708,7 @@
      "fr": "Bienvenue au palais \"경복궁\".",
      "fr_s": null,
      "pt": "Bem-vindos ao palácio \"경복궁\".",
-     "pt_s": null,
+     "pt_s": 1.81,
      "id": "Selamat datang di istana \"경복궁\".",
      "id_s": null,
      "tl": "Maligayang pagdating sa palasyong \"경복궁\".",
@@ -753,7 +754,7 @@
      "fr": "\"어서 오세요\" est une salutation pour accueillir quelqu'un qui arrive.",
      "fr_s": null,
      "pt": "\"어서 오세요\" é um cumprimento para receber quem chega.",
-     "pt_s": null,
+     "pt_s": 4.31,
      "id": "\"어서 오세요\" adalah salam untuk menyambut orang yang datang.",
      "id_s": null,
      "tl": "Ang \"어서 오세요\" ay pagbating ginagamit sa pagsalubong sa taong dumarating.",
@@ -799,7 +800,7 @@
      "fr": "Placé après un lieu, \"에\" indique où l'on vient, où l'on va ou où l'on se trouve.",
      "fr_s": null,
      "pt": "Quando se coloca \"에\" depois de um lugar, ele indica para onde se vem, para onde se vai ou onde se está.",
-     "pt_s": null,
+     "pt_s": 8.87,
      "id": "Jika \"에\" ditempelkan di belakang nama tempat, itu menunjukkan ke mana seseorang datang, ke mana ia pergi, atau di mana ia berada.",
      "id_s": null,
      "tl": "Kapag inilagay ang \"에\" pagkatapos ng lugar, ipinapakita nito kung saan dumarating, saan pumupunta, o saan naroon.",
@@ -845,7 +846,7 @@
      "fr": "Le sens est proche de \"au\" en français, mais en coréen, cette particule ne se place pas avant le mot, mais après.",
      "fr_s": null,
      "pt": "O coreano coloca esta partícula depois da palavra.",
-     "pt_s": null,
+     "pt_s": 16.77,
      "id": "Bahasa Korea menempelkan penanda ini di belakang kata.",
      "id_s": null,
      "tl": "Pareho ang kahulugan nito at ng \"sa\" sa Filipino, pero sa wikang Koreano, hindi ito inilalagay bago ang salita kundi pagkatapos nito.",
@@ -1346,8 +1347,8 @@
      "say": null
     },
     "pt": {
-     "ex": null,
-     "say": null
+     "ex": "새설명_소리_pt/L01-00-01_02_pt_설명.mp3",
+     "say": "새설명_소리_pt/L01-00-01_02_pt_말해보세요.mp3"
     },
     "id": {
      "ex": null,
@@ -1403,7 +1404,7 @@
      "fr": "Madame!",
      "fr_s": null,
      "pt": "Professora!",
-     "pt_s": null,
+     "pt_s": 0.07,
      "id": "Bu Guru!",
      "id_s": null,
      "tl": "Guro!",
@@ -1449,7 +1450,7 @@
      "fr": "J'ai créé une lettre!",
      "fr_s": null,
      "pt": "Eu fiz uma letra!",
-     "pt_s": null,
+     "pt_s": 1.25,
      "id": "Saya sudah membuat huruf!",
      "id_s": null,
      "tl": "Gumawa po ako ng titik!",
@@ -1495,7 +1496,7 @@
      "fr": "La terminaison \"었어요\" indique une action déjà terminée.",
      "fr_s": null,
      "pt": "A terminação \"었어요\" indica uma ação que já terminou.",
-     "pt_s": null,
+     "pt_s": 3.09,
      "id": "Akhiran \"었어요\" menunjukkan hal yang sudah selesai.",
      "id_s": null,
      "tl": "Ipinapakita ng hulaping \"었어요\" ang kilos na tapos na.",
@@ -1541,7 +1542,7 @@
      "fr": "\"만들어요\" est une action que l'on fait maintenant.",
      "fr_s": null,
      "pt": "\"만들어요\" é algo que se faz agora.",
-     "pt_s": null,
+     "pt_s": 7.51,
      "id": "\"만들어요\" adalah hal yang dilakukan sekarang.",
      "id_s": null,
      "tl": "Ang \"만들어요\" ay kilos na ginagawa ngayon.",
@@ -1587,7 +1588,7 @@
      "fr": "\"만들었어요\" est une action déjà faite.",
      "fr_s": null,
      "pt": "\"만들었어요\" é algo que já foi feito.",
-     "pt_s": null,
+     "pt_s": 10.87,
      "id": "\"만들었어요\" adalah hal yang sudah dilakukan.",
      "id_s": null,
      "tl": "Ang \"만들었어요\" ay kilos na nagawa na.",
@@ -1633,7 +1634,7 @@
      "fr": "Selon le mot qui précède, elle devient aussi \"았어요\" ou \"했어요\".",
      "fr_s": null,
      "pt": "Dependendo da palavra anterior, ela também muda para \"았어요\" ou \"했어요\".",
-     "pt_s": null,
+     "pt_s": 15.29,
      "id": "Tergantung kata di depannya, akhiran ini juga bisa berubah menjadi \"았어요\" atau \"했어요\".",
      "id_s": null,
      "tl": "Depende sa naunang bahagi, nagiging \"았어요\" o \"했어요\" rin ito.",
@@ -2159,8 +2160,8 @@
      "say": null
     },
     "pt": {
-     "ex": null,
-     "say": null
+     "ex": "새설명_소리_pt/L01-00-01_03_pt_설명.mp3",
+     "say": "새설명_소리_pt/L01-00-01_03_pt_말해보세요.mp3"
     },
     "id": {
      "ex": null,
@@ -2216,7 +2217,7 @@
      "fr": "Une lettre?",
      "fr_s": null,
      "pt": "Uma letra?",
-     "pt_s": null,
+     "pt_s": 0.11,
      "id": "Huruf?",
      "id_s": null,
      "tl": "Titik?",
@@ -2262,7 +2263,7 @@
      "fr": "Ça, c'est un dessin.",
      "fr_s": null,
      "pt": "Isso é um desenho.",
-     "pt_s": null,
+     "pt_s": 1.41,
      "id": "Ini gambar.",
      "id_s": null,
      "tl": "Larawan ito.",
@@ -2308,7 +2309,7 @@
      "fr": "Si l'on ajoute \"이에요\" après un mot, on obtient une phrase qui dit ce qu'est cette chose.",
      "fr_s": null,
      "pt": "Quando se coloca \"이에요\" depois de uma palavra, forma-se uma frase que diz o que aquela coisa é.",
-     "pt_s": null,
+     "pt_s": 3.03,
      "id": "Jika \"이에요\" ditempelkan di belakang kata, terbentuk kalimat yang menyatakan apa sesuatu itu.",
      "id_s": null,
      "tl": "Kapag inilagay ang \"이에요\" pagkatapos ng salita, nagiging pangungusap ito na nagsasabi kung ano ang bagay na iyon.",
@@ -2354,7 +2355,7 @@
      "fr": "Si le mot a une consonne finale, on ajoute \"이에요\", sinon on ajoute \"예요\".",
      "fr_s": null,
      "pt": "Se a palavra tem consoante final, coloca-se \"이에요\", e se não tem, coloca-se \"예요\".",
-     "pt_s": null,
+     "pt_s": 9.99,
      "id": "Jika ada konsonan akhir, yaitu konsonan di ujung kata, tempelkan \"이에요\", jika tidak, tempelkan \"예요\".",
      "id_s": null,
      "tl": "Kung may katinig sa dulo ang salita, \"이에요\" ang ilalagay, at kung wala, \"예요\" ang ilalagay.",
@@ -2400,7 +2401,7 @@
      "fr": "Par exemple, \"그림이에요\" et \"글자예요\".",
      "fr_s": null,
      "pt": "Por exemplo, \"그림이에요\" e \"글자예요\".",
-     "pt_s": null,
+     "pt_s": 16.91,
      "id": "Contohnya \"그림이에요\" dan \"글자예요\".",
      "id_s": null,
      "tl": "Halimbawa, \"그림이에요\" at \"글자예요\".",
@@ -2900,8 +2901,8 @@
      "say": null
     },
     "pt": {
-     "ex": null,
-     "say": null
+     "ex": "새설명_소리_pt/L01-00-01_04_pt_설명.mp3",
+     "say": "새설명_소리_pt/L01-00-01_04_pt_말해보세요.mp3"
     },
     "id": {
      "ex": null,
@@ -2957,7 +2958,7 @@
      "fr": "Ce n'est pas une lettre?",
      "fr_s": null,
      "pt": "Não é uma letra?",
-     "pt_s": null,
+     "pt_s": 0.15,
      "id": "Bukan huruf?",
      "id_s": null,
      "tl": "Hindi po ba ito titik?",
@@ -3003,7 +3004,7 @@
      "fr": "Pourquoi?",
      "fr_s": null,
      "pt": "Por quê?",
-     "pt_s": null,
+     "pt_s": 1.57,
      "id": "Kenapa, Bu?",
      "id_s": null,
      "tl": "Bakit po?",
@@ -3049,7 +3050,7 @@
      "fr": "\"아니에요\" est le contraire du \"이에요\" entendu plus tôt.",
      "fr_s": null,
      "pt": "\"아니에요\" é o contrário do \"이에요\" que ouvimos antes.",
-     "pt_s": null,
+     "pt_s": 2.05,
      "id": "\"아니에요\" adalah kebalikan dari \"이에요\" yang sudah Anda dengar tadi.",
      "id_s": null,
      "tl": "Ang \"아니에요\" ay kabaligtaran ng \"이에요\" na narinig natin kanina.",
@@ -3095,7 +3096,7 @@
      "fr": "Placé après un mot, il signifie que ce n'est pas cela.",
      "fr_s": null,
      "pt": "Colocado depois de uma palavra, significa que não é aquilo.",
-     "pt_s": null,
+     "pt_s": 7.31,
      "id": "Jika diletakkan di belakang kata, artinya bukan hal itu.",
      "id_s": null,
      "tl": "Kapag inilagay ito pagkatapos ng salita, ang ibig sabihin ay hindi iyon ang bagay na tinutukoy.",
@@ -3141,7 +3142,7 @@
      "fr": "Si l'intonation monte à la fin, cela devient une question.",
      "fr_s": null,
      "pt": "Se você falar subindo o tom no final, vira uma pergunta.",
-     "pt_s": null,
+     "pt_s": 11.71,
      "id": "Jika ujungnya diucapkan dengan nada naik, kalimat ini menjadi pertanyaan.",
      "id_s": null,
      "tl": "Kapag itinaas ang tono sa dulo, nagiging tanong ito.",
@@ -3697,8 +3698,8 @@
      "say": null
     },
     "pt": {
-     "ex": null,
-     "say": null
+     "ex": "새설명_소리_pt/L01-00-01_05_pt_설명.mp3",
+     "say": "새설명_소리_pt/L01-00-01_05_pt_말해보세요.mp3"
     },
     "id": {
      "ex": null,
@@ -3754,7 +3755,7 @@
      "fr": "Les lettres sont une convention.",
      "fr_s": null,
      "pt": "As letras são um combinado.",
-     "pt_s": null,
+     "pt_s": 0.11,
      "id": "Huruf itu kesepakatan.",
      "id_s": null,
      "tl": "Ang titik ay isang kasunduan.",
@@ -3800,7 +3801,7 @@
      "fr": "Ce ne sont des lettres que si tout le monde peut les lire ensemble.",
      "fr_s": null,
      "pt": "Só são letras se todo mundo puder ler junto.",
-     "pt_s": null,
+     "pt_s": 2.31,
      "id": "Kalau semua orang bisa membacanya bersama, barulah itu huruf.",
      "id_s": null,
      "tl": "Maituturing lang itong titik kung mababasa ito ng lahat nang magkakasama.",
@@ -3846,7 +3847,7 @@
      "fr": "Le \"는\" après un mot indique que l'on va maintenant parler de cela.",
      "fr_s": null,
      "pt": "O \"는\" depois de uma palavra indica que agora se vai falar sobre aquilo.",
-     "pt_s": null,
+     "pt_s": 5.85,
      "id": "Penanda \"는\" di belakang kata menunjukkan bahwa kita akan membicarakan hal itu sekarang.",
      "id_s": null,
      "tl": "Ang \"는\" pagkatapos ng salita ay panandang nagsasabing iyon ang pag-uusapan ngayon.",
@@ -3892,7 +3893,7 @@
      "fr": "S'il y a une consonne finale, on ajoute \"은\", sinon on ajoute \"는\".",
      "fr_s": null,
      "pt": "Se há consoante final, coloca-se \"은\", e se não há, coloca-se \"는\".",
-     "pt_s": null,
+     "pt_s": 11.51,
      "id": "Jika ada konsonan akhir, tempelkan \"은\", jika tidak, tempelkan \"는\".",
      "id_s": null,
      "tl": "Kung may katinig sa dulo ang salita, \"은\" ang ilalagay, at kung wala, \"는\" ang ilalagay.",
@@ -4421,8 +4422,8 @@
      "say": null
     },
     "pt": {
-     "ex": null,
-     "say": null
+     "ex": "새설명_소리_pt/L01-00-01_06_pt_설명.mp3",
+     "say": "새설명_소리_pt/L01-00-01_06_pt_말해보세요.mp3"
     },
     "id": {
      "ex": null,
@@ -4478,7 +4479,7 @@
      "fr": "Ah, si c'est seulement moi qui la connais, ce n'est pas une lettre.",
      "fr_s": null,
      "pt": "Ah, então se só eu sei, não é uma letra.",
-     "pt_s": null,
+     "pt_s": 0.13,
      "id": "Oh, ternyata kalau hanya saya sendiri yang tahu, itu bukan huruf, ya.",
      "id_s": null,
      "tl": "Ah, kapag ako lang mag-isa ang nakakaalam, hindi pala ito titik.",
@@ -4524,7 +4525,7 @@
      "fr": "La terminaison \"구나\" s'emploie pour dire, comme à soi-même, une chose que l'on vient de découvrir.",
      "fr_s": null,
      "pt": "A terminação \"구나\" é usada para dizer, como quem fala consigo mesmo, algo que se acabou de perceber.",
-     "pt_s": null,
+     "pt_s": 4.27,
      "id": "Akhiran \"구나\" dipakai untuk mengucapkan hal yang baru saja disadari, seperti berbicara kepada diri sendiri.",
      "id_s": null,
      "tl": "Ginagamit ang hulaping \"구나\" kapag sinasabi ang bagay na ngayon lang nalaman, na parang kinakausap ang sarili.",
@@ -4570,7 +4571,7 @@
      "fr": "\"구나\" s'emploie quand on se parle à soi-même ou quand on parle avec des proches.",
      "fr_s": null,
      "pt": "\"구나\" é usado quando se fala consigo mesmo ou com pessoas próximas.",
-     "pt_s": null,
+     "pt_s": 5.17,
      "id": "\"구나\" dipakai saat berbicara sendiri atau dengan orang yang akrab.",
      "id_s": null,
      "tl": "Ginagamit ang \"구나\" kapag kinakausap ang sarili o ang malalapit na kaibigan at kapamilya.",
@@ -4616,7 +4617,7 @@
      "fr": "Pour parler poliment, on le remplace par \"군요\", et non par \"구나요\".",
      "fr_s": null,
      "pt": "Para falar de forma educada, troca-se por \"군요\", e não por \"구나요\".",
-     "pt_s": null,
+     "pt_s": 17.25,
      "id": "Untuk berbicara dengan sopan, \"구나\" diubah menjadi \"군요\", bukan \"구나요\".",
      "id_s": null,
      "tl": "Kapag nagsasalita nang magalang, pinapalitan ito ng \"군요\", hindi ng \"구나요\".",
@@ -5148,8 +5149,8 @@
      "say": null
     },
     "pt": {
-     "ex": null,
-     "say": null
+     "ex": "새설명_소리_pt/L01-00-01_07_pt_설명.mp3",
+     "say": "새설명_소리_pt/L01-00-01_07_pt_말해보세요.mp3"
     },
     "id": {
      "ex": null,
@@ -5205,7 +5206,7 @@
      "fr": "Alors, qui a fixé cette convention?",
      "fr_s": null,
      "pt": "Então quem decidiu esse combinado?",
-     "pt_s": null,
+     "pt_s": 0.09,
      "id": "Kalau begitu, siapa yang menentukan kesepakatan itu, Bu?",
      "id_s": null,
      "tl": "Kung gayon, sino po ang nagtakda ng kasunduang iyon?",
@@ -5251,7 +5252,7 @@
      "fr": "\"누가\" est la forme abrégée que l'on obtient en ajoutant \"가\" à \"누구\".",
      "fr_s": null,
      "pt": "\"누가\" é a forma abreviada que surge quando \"가\" se junta a \"누구\".",
-     "pt_s": null,
+     "pt_s": 2.47,
      "id": "\"누가\" adalah bentuk singkat dari \"누구\" yang ditempeli \"가\".",
      "id_s": null,
      "tl": "Ang \"누가\" ay pinaikling anyo na nabuo nang ilagay ang \"가\" sa \"누구\".",
@@ -5297,7 +5298,7 @@
      "fr": "On l'emploie pour demander qui a fait quelque chose.",
      "fr_s": null,
      "pt": "É usada para perguntar quem fez algo.",
-     "pt_s": null,
+     "pt_s": 9.03,
      "id": "Kata ini dipakai untuk menanyakan siapa orang yang melakukan sesuatu.",
      "id_s": null,
      "tl": "Ginagamit ito sa pagtatanong kung sino ang gumawa ng isang bagay.",
@@ -5343,7 +5344,7 @@
      "fr": "Le \"했어요\" de \"정했어요\" est la même terminaison que le \"었어요\" entendu plus tôt.",
      "fr_s": null,
      "pt": "O \"했어요\" de \"정했어요\" é a mesma terminação que o \"었어요\" que ouvimos antes.",
-     "pt_s": null,
+     "pt_s": 12.25,
      "id": "\"했어요\" dalam \"정했어요\" adalah akhiran yang sama dengan \"었어요\" yang sudah Anda dengar tadi.",
      "id_s": null,
      "tl": "Ang \"했어요\" sa \"정했어요\" ay kaparehong hulapi ng \"었어요\" na narinig natin kanina.",
@@ -5389,7 +5390,7 @@
      "fr": "Elle indique une action déjà terminée.",
      "fr_s": null,
      "pt": "Ela indica uma ação que já terminou.",
-     "pt_s": null,
+     "pt_s": 19.45,
      "id": "Akhiran ini menunjukkan hal yang sudah selesai.",
      "id_s": null,
      "tl": "Ipinapakita nito ang kilos na tapos na.",
@@ -6307,8 +6308,8 @@
      "say": null
     },
     "pt": {
-     "ex": null,
-     "say": null
+     "ex": "새설명_소리_pt/L01-00-01_08_pt_설명.mp3",
+     "say": "새설명_소리_pt/L01-00-01_08_pt_말해보세요.mp3"
     },
     "id": {
      "ex": null,
@@ -6364,7 +6365,7 @@
      "fr": "Le roi \"세종대왕\".",
      "fr_s": null,
      "pt": "Foi o rei \"세종대왕\".",
-     "pt_s": null,
+     "pt_s": 0.15,
      "id": "Raja \"세종대왕\".",
      "id_s": null,
      "tl": "Si Haring \"세종대왕\".",
@@ -6410,7 +6411,7 @@
      "fr": "Il y a cinq cents ans, le roi a créé lui-même les lettres.",
      "fr_s": null,
      "pt": "Há quinhentos anos, o próprio rei fez as letras.",
-     "pt_s": null,
+     "pt_s": 2.13,
      "id": "Lima ratus tahun yang lalu, raja sendiri yang membuatnya.",
      "id_s": null,
      "tl": "Limandaang taon na ang nakalipas, ang hari mismo ang gumawa ng mga titik.",
@@ -6456,7 +6457,7 @@
      "fr": "À l'époque, les gens du peuple ne savaient pas lire.",
      "fr_s": null,
      "pt": "Naquela época, o povo não conhecia as letras.",
-     "pt_s": null,
+     "pt_s": 5.83,
      "id": "Soalnya, waktu itu rakyat tidak mengenal huruf.",
      "id_s": null,
      "tl": "Noong panahong iyon kasi, hindi marunong bumasa at sumulat ang taumbayan.",
@@ -6502,7 +6503,7 @@
      "fr": "C'était trop difficile.",
      "fr_s": null,
      "pt": "Era difícil demais.",
-     "pt_s": null,
+     "pt_s": 9.21,
      "id": "Hurufnya terlalu sulit.",
      "id_s": null,
      "tl": "Napakahirap ng mga titik noon.",
@@ -6548,7 +6549,7 @@
      "fr": "Le \"를\" de \"글자를\" se place après le mot qui reçoit l'action, c'est-à-dire ce que l'on ne connaît pas ou ce que l'on crée.",
      "fr_s": null,
      "pt": "O \"를\" de \"글자를\" vem depois da palavra que é o objeto, ou seja, aquilo que não se conhece ou aquilo que se faz.",
-     "pt_s": null,
+     "pt_s": 11.39,
      "id": "Penanda \"를\" dalam \"글자를\" ditempelkan di belakang kata yang menjadi sasaran, yaitu apa yang tidak diketahui atau apa yang dibuat.",
      "id_s": null,
      "tl": "Ang \"를\" sa \"글자를\" ay inilalagay pagkatapos ng layon, ang salitang tumutukoy sa kung ano ang hindi alam o kung ano ang ginagawa.",
@@ -6594,7 +6595,7 @@
      "fr": "S'il y a une consonne finale, on ajoute \"을\", sinon on ajoute \"를\".",
      "fr_s": null,
      "pt": "Se há consoante final, coloca-se \"을\", e se não há, coloca-se \"를\".",
-     "pt_s": null,
+     "pt_s": 21.11,
      "id": "Jika ada konsonan akhir, tempelkan \"을\", jika tidak, tempelkan \"를\".",
      "id_s": null,
      "tl": "Kung may katinig sa dulo ang salita, \"을\" ang ilalagay, at kung wala, \"를\" ang ilalagay.",
@@ -6640,7 +6641,7 @@
      "fr": "Le coréen place cette particule après le mot.",
      "fr_s": null,
      "pt": "O coreano coloca esta partícula depois da palavra.",
-     "pt_s": null,
+     "pt_s": 26.61,
      "id": "Bahasa Korea menempelkan penanda ini di belakang kata.",
      "id_s": null,
      "tl": "Sa wikang Koreano, inilalagay ang panandang ito pagkatapos ng salita.",
@@ -7167,8 +7168,8 @@
      "say": null
     },
     "pt": {
-     "ex": null,
-     "say": null
+     "ex": "새설명_소리_pt/L01-00-01_09_pt_설명.mp3",
+     "say": "새설명_소리_pt/L01-00-01_09_pt_말해보세요.mp3"
     },
     "id": {
      "ex": null,
@@ -7224,7 +7225,7 @@
      "fr": "Waouh!",
      "fr_s": null,
      "pt": "Nossa!",
-     "pt_s": null,
+     "pt_s": 0.19,
      "id": "Wah!",
      "id_s": null,
      "tl": "Wow!",
@@ -7270,7 +7271,7 @@
      "fr": "Alors tout le monde a dû être ravi!",
      "fr_s": null,
      "pt": "Então todo mundo deve ter adorado!",
-     "pt_s": null,
+     "pt_s": 1.17,
      "id": "Kalau begitu, semua orang pasti senang, ya!",
      "id_s": null,
      "tl": "Kung ganoon po, tiyak na natuwa ang lahat!",
@@ -7316,7 +7317,7 @@
      "fr": "\"좋아했겠네요\" s'emploie pour deviner quelque chose que l'on n'a pas vu soi-même.",
      "fr_s": null,
      "pt": "\"좋아했겠네요\" é usado para supor algo que não se viu diretamente.",
-     "pt_s": null,
+     "pt_s": 3.77,
      "id": "\"좋아했겠네요\" dipakai untuk menebak hal yang tidak dilihat sendiri.",
      "id_s": null,
      "tl": "Ginagamit ang \"좋아했겠네요\" kapag hinuhulaan ang isang bagay na hindi mismo nakita.",
@@ -7362,7 +7363,7 @@
      "fr": "Pour l'instant, apprenez-le tel quel.",
      "fr_s": null,
      "pt": "Por enquanto, aprenda a expressão inteira de uma vez.",
-     "pt_s": null,
+     "pt_s": 9.77,
      "id": "Untuk sekarang, cukup hafalkan ungkapan ini secara utuh.",
      "id_s": null,
      "tl": "Sa ngayon, kabisaduhin po muna ninyo ito nang buo.",
@@ -7784,8 +7785,8 @@
      "say": null
     },
     "pt": {
-     "ex": null,
-     "say": null
+     "ex": "새설명_소리_pt/L01-00-01_10_pt_설명.mp3",
+     "say": "새설명_소리_pt/L01-00-01_10_pt_말해보세요.mp3"
     },
     "id": {
      "ex": null,
@@ -7841,7 +7842,7 @@
      "fr": "Eh non.",
      "fr_s": null,
      "pt": "Não.",
-     "pt_s": null,
+     "pt_s": 0.17,
      "id": "Tidak.",
      "id_s": null,
      "tl": "Hindi.",
@@ -7887,7 +7888,7 @@
      "fr": "Les ministres s'y sont opposés.",
      "fr_s": null,
      "pt": "Os ministros foram contra.",
-     "pt_s": null,
+     "pt_s": 0.85,
      "id": "Para pejabat istana justru menentangnya.",
      "id_s": null,
      "tl": "Tumutol ang mga opisyal ng palasyo.",
@@ -7933,7 +7934,7 @@
      "fr": "Le \"이\" de \"신하들이\" se place après le mot qui est le sujet de la phrase.",
      "fr_s": null,
      "pt": "O \"이\" de \"신하들이\" vem depois da palavra que é o sujeito da frase.",
-     "pt_s": null,
+     "pt_s": 3.11,
      "id": "Penanda \"이\" dalam \"신하들이\" ditempelkan di belakang kata yang menjadi subjek kalimat.",
      "id_s": null,
      "tl": "Ang \"이\" sa \"신하들이\" ay inilalagay pagkatapos ng salitang simuno ng pangungusap.",
@@ -7979,7 +7980,7 @@
      "fr": "Il se met aussi après ce qui n'est pas une personne, et devant \"아니다\", on utilise la même forme \"가\", comme dans \"글자가 아니구나\", entendu plus tôt.",
      "fr_s": null,
      "pt": "Também se coloca com coisas que não são pessoas, e antes de \"아니다\" se usa a mesma forma \"가\", como em \"글자가 아니구나\", que ouvimos antes.",
-     "pt_s": null,
+     "pt_s": 9.15,
      "id": "Penanda ini juga dipakai untuk hal yang bukan orang, dan di depan \"아니다\" pun dipakai bentuk yang sama, yaitu \"가\", seperti pada \"글자가 아니구나\" yang sudah Anda dengar tadi.",
      "id_s": null,
      "tl": "Inilalagay rin ito sa hindi tao, at gaya ng \"글자가 아니구나\" na narinig natin kanina, ginagamit din ang kaparehong anyo na \"가\" bago ang \"아니다\".",
@@ -8025,7 +8026,7 @@
      "fr": "S'il y a une consonne finale, on ajoute \"이\", sinon on ajoute \"가\".",
      "fr_s": null,
      "pt": "Se há consoante final, coloca-se \"이\", e se não há, coloca-se \"가\".",
-     "pt_s": null,
+     "pt_s": 21.33,
      "id": "Jika ada konsonan akhir, tempelkan \"이\", jika tidak, tempelkan \"가\".",
      "id_s": null,
      "tl": "Kung may katinig sa dulo ang salita, \"이\" ang ilalagay, at kung wala, \"가\" ang ilalagay.",
@@ -8524,8 +8525,8 @@
      "say": null
     },
     "pt": {
-     "ex": null,
-     "say": null
+     "ex": "새설명_소리_pt/L01-00-01_11_pt_설명.mp3",
+     "say": "새설명_소리_pt/L01-00-01_11_pt_말해보세요.mp3"
     },
     "id": {
      "ex": null,
@@ -8581,7 +8582,7 @@
      "fr": "Les ministres?",
      "fr_s": null,
      "pt": "Os ministros?",
-     "pt_s": null,
+     "pt_s": 0.13,
      "id": "Para pejabat istana?",
      "id_s": null,
      "tl": "Ang mga opisyal po?",
@@ -8627,7 +8628,7 @@
      "fr": "Pourquoi?",
      "fr_s": null,
      "pt": "Por quê?",
-     "pt_s": null,
+     "pt_s": 1.35,
      "id": "Kenapa, Bu?",
      "id_s": null,
      "tl": "Bakit po?",
@@ -8673,7 +8674,7 @@
      "fr": "Il suffit d'ajouter \"요\" à un seul mot pour parler poliment.",
      "fr_s": null,
      "pt": "Basta acrescentar \"요\" a uma única palavra para que ela fique educada.",
-     "pt_s": null,
+     "pt_s": 2.45,
      "id": "Cukup dengan menempelkan \"요\" pada satu kata, ucapan itu menjadi sopan.",
      "id_s": null,
      "tl": "Kahit \"요\" lang ang ilagay sa iisang salita, nagiging magalang na ang pananalita.",
@@ -8719,7 +8720,7 @@
      "fr": "S'il y a une consonne finale, on dit aussi \"이요\".",
      "fr_s": null,
      "pt": "Se há consoante final, também se diz \"이요\".",
-     "pt_s": null,
+     "pt_s": 7.35,
      "id": "Jika ada konsonan akhir, bisa juga diucapkan \"이요\".",
      "id_s": null,
      "tl": "Kung may katinig sa dulo ang salita, sinasabi rin ang \"이요\".",
@@ -8765,7 +8766,7 @@
      "fr": "C'est le cas de \"글자요\" et de \"세종대왕이요\", entendus plus tôt.",
      "fr_s": null,
      "pt": "É o caso de \"글자요\" e \"세종대왕이요\", que ouvimos antes.",
-     "pt_s": null,
+     "pt_s": 10.93,
      "id": "\"글자요\" dan \"세종대왕이요\" yang sudah Anda dengar tadi adalah contohnya.",
      "id_s": null,
      "tl": "Ganito ang \"글자요\" at \"세종대왕이요\" na narinig natin kanina.",
@@ -8811,7 +8812,7 @@
      "fr": "Si l'intonation monte à la fin, c'est une question pour vérifier, et si elle descend, c'est une réponse courte.",
      "fr_s": null,
      "pt": "Subindo o tom no final, é uma pergunta para confirmar, e descendo, é uma resposta curta.",
-     "pt_s": null,
+     "pt_s": 16.53,
      "id": "Jika ujungnya dinaikkan, itu pertanyaan balik, dan jika diturunkan, itu jawaban singkat.",
      "id_s": null,
      "tl": "Kapag itinaas ang tono sa dulo, muling pagtatanong ito, at kapag ibinaba, maikling sagot ito.",
@@ -9377,9 +9378,16 @@
      "ex": "그때는 글자를 아는 사람만 힘이 있었거든요. 낱말 뒤의 \"만\" (man) 은 오직 그것뿐이라는 뜻이에요. 뜻은 크메르어의 \"តែ\"와 같지만, 크메르어는 \"តែ\"를 낱말 앞에 두고 한국어는 낱말 뒤에 붙여요. 말끝 \"거든요\" (geo-deun-yo) 는 까닭을 덧붙여 알려 줄 때 써요.",
      "say": "이제 말해 보세요. \"왕만 힘이 있었어요\" (wang-man him-i iss-eoss-eo-yo, មានតែស្តេចទេដែលមានអំណាច)",
      "slot": "뜻은 크메르어의 \"តែ\"와 같지만, 크메르어는 \"តែ\"를 낱말 앞에 두고 한국어는 낱말 뒤에 붙여요.",
+     "audio_ex": "새설명_소리_kr/L01-00-01_12_kr_설명.km.mp3",
      "sent": {
       "2": "뜻은 크메르어의 \"តែ\"와 같지만, 크메르어는 \"តែ\"를 낱말 앞에 두고 한국어는 낱말 뒤에 붙여요."
-     }
+     },
+     "sent_s": [
+      null,
+      null,
+      null,
+      null
+     ]
     },
     "lo": {
      "ex": "그때는 글자를 아는 사람만 힘이 있었거든요. 낱말 뒤의 \"만\" (man) 은 오직 그것뿐이라는 뜻이에요. 라오어의 \"ເທົ່ານັ້ນ\"처럼 낱말 뒤에 와요. 말끝 \"거든요\" (geo-deun-yo) 는 까닭을 덧붙여 알려 줄 때 써요.",
@@ -9549,8 +9557,8 @@
      "say": null
     },
     "pt": {
-     "ex": null,
-     "say": null
+     "ex": "새설명_소리_pt/L01-00-01_12_pt_설명.mp3",
+     "say": "새설명_소리_pt/L01-00-01_12_pt_말해보세요.mp3"
     },
     "id": {
      "ex": null,
@@ -9606,7 +9614,7 @@
      "fr": "C'est qu'à l'époque, seuls ceux qui savaient lire avaient du pouvoir.",
      "fr_s": null,
      "pt": "É que, naquela época, só quem conhecia as letras tinha poder.",
-     "pt_s": null,
+     "pt_s": 0.11,
      "id": "Soalnya, waktu itu hanya orang yang mengenal huruf yang punya kekuasaan.",
      "id_s": null,
      "tl": "Kasi noong panahong iyon, ang mga marunong lang bumasa at sumulat ang may kapangyarihan.",
@@ -9652,7 +9660,7 @@
      "fr": "Le \"만\" après un mot signifie que c'est seulement cela et rien d'autre.",
      "fr_s": null,
      "pt": "O \"만\" depois de uma palavra significa somente aquilo e nada mais.",
-     "pt_s": null,
+     "pt_s": 5.25,
      "id": "Penanda \"만\" di belakang kata berarti hanya itu saja.",
      "id_s": null,
      "tl": "Ang \"만\" pagkatapos ng salita ay nangangahulugang iyon lang at wala nang iba.",
@@ -9698,7 +9706,7 @@
      "fr": "Le sens est le même que \"seuls\" en français, mais en coréen, cette particule ne se place pas avant le mot, mais après.",
      "fr_s": null,
      "pt": "O significado é o mesmo de \"só\" em português, mas o português coloca \"só\" antes da palavra, e o coreano coloca esta partícula depois da palavra.",
-     "pt_s": null,
+     "pt_s": 11.11,
      "id": "Artinya sama dengan \"hanya\" dalam bahasa Indonesia, tetapi bahasa Korea menempelkan penanda ini di belakang kata, bukan di depan.",
      "id_s": null,
      "tl": "Inilalagay rin ang panandang ito pagkatapos ng salita.",
@@ -9744,7 +9752,7 @@
      "fr": "La terminaison \"거든요\" s'emploie pour ajouter une raison.",
      "fr_s": null,
      "pt": "A terminação \"거든요\" é usada para acrescentar o motivo de algo.",
-     "pt_s": null,
+     "pt_s": 22.63,
      "id": "Akhiran \"거든요\" dipakai untuk menambahkan alasan.",
      "id_s": null,
      "tl": "Ginagamit ang hulaping \"거든요\" kapag nagdaragdag ng dahilan.",
@@ -10228,9 +10236,18 @@
      "ex": "그럼 우리는요? 우리도 읽을 수 있어요? 낱말 뒤의 \"도\" (do) 는 그것도 역시 그렇다는 뜻이에요. 뜻은 크메르어의 \"ក៏\"와 같지만, 크메르어는 \"ក៏\"를 움직임 말 앞에 두고 한국어는 낱말 뒤에 붙여요. \"읽을 수 있어요\" (ilg-eul su iss-eo-yo, អាចអានបាន) 는 읽는 것이 가능하다는 뜻이에요. 지금은 \"읽을 수 있어요\" (ilg-eul su iss-eo-yo) 를 통째로 익혀 두세요.",
      "say": "이제 말해 보세요. \"저도 읽을 수 있어요\" (jeo-do ilg-eul su iss-eo-yo, ខ្ញុំក៏អាចអានបានដែរ)",
      "slot": "뜻은 크메르어의 \"ក៏\"와 같지만, 크메르어는 \"ក៏\"를 움직임 말 앞에 두고 한국어는 낱말 뒤에 붙여요.",
+     "audio_ex": "새설명_소리_kr/L01-00-01_13_kr_설명.km.mp3",
      "sent": {
       "3": "뜻은 크메르어의 \"ក៏\"와 같지만, 크메르어는 \"ក៏\"를 움직임 말 앞에 두고 한국어는 낱말 뒤에 붙여요."
-     }
+     },
+     "sent_s": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ]
     },
     "lo": {
      "ex": "그럼 우리는요? 우리도 읽을 수 있어요? 낱말 뒤의 \"도\" (do) 는 그것도 역시 그렇다는 뜻이에요. 이 표시도 낱말 뒤에 붙여요. \"읽을 수 있어요\" (ilg-eul su iss-eo-yo, ອ່ານໄດ້) 는 읽는 것이 가능하다는 뜻이에요. 지금은 \"읽을 수 있어요\" (ilg-eul su iss-eo-yo) 를 통째로 익혀 두세요.",
@@ -10361,8 +10378,8 @@
      "say": null
     },
     "pt": {
-     "ex": null,
-     "say": null
+     "ex": "새설명_소리_pt/L01-00-01_13_pt_설명.mp3",
+     "say": "새설명_소리_pt/L01-00-01_13_pt_말해보세요.mp3"
     },
     "id": {
      "ex": null,
@@ -10418,7 +10435,7 @@
      "fr": "Et nous, alors?",
      "fr_s": null,
      "pt": "Então, e nós?",
-     "pt_s": null,
+     "pt_s": 0.11,
      "id": "Lalu, bagaimana dengan kami?",
      "id_s": null,
      "tl": "Paano naman po kami?",
@@ -10464,7 +10481,7 @@
      "fr": "Nous aussi, nous pouvons lire?",
      "fr_s": null,
      "pt": "Nós também podemos ler?",
-     "pt_s": null,
+     "pt_s": 1.81,
      "id": "Apakah kami juga bisa membacanya, Bu?",
      "id_s": null,
      "tl": "Makakabasa rin po ba kami?",
@@ -10510,7 +10527,7 @@
      "fr": "Le \"도\" après un mot signifie que c'est aussi le cas pour cela.",
      "fr_s": null,
      "pt": "O \"도\" depois de uma palavra significa que aquilo também é assim.",
-     "pt_s": null,
+     "pt_s": 3.79,
      "id": "Penanda \"도\" di belakang kata berarti hal itu juga sama.",
      "id_s": null,
      "tl": "Ang \"도\" pagkatapos ng salita ay nangangahulugang ganoon din iyon.",
@@ -10556,7 +10573,7 @@
      "fr": "Cette particule se place aussi après le mot.",
      "fr_s": null,
      "pt": "Esta partícula também vem depois da palavra.",
-     "pt_s": null,
+     "pt_s": 9.31,
      "id": "Seperti \"juga\" dalam bahasa Indonesia, penanda ini terletak di belakang kata.",
      "id_s": null,
      "tl": "Inilalagay rin ang panandang ito pagkatapos ng salita.",
@@ -10602,7 +10619,7 @@
      "fr": "\"읽을 수 있어요\" signifie qu'il est possible de lire.",
      "fr_s": null,
      "pt": "\"읽을 수 있어요\" significa que é possível ler.",
-     "pt_s": null,
+     "pt_s": 12.47,
      "id": "\"읽을 수 있어요\" berarti bisa membaca.",
      "id_s": null,
      "tl": "Ang \"읽을 수 있어요\" ay nangangahulugang kayang bumasa.",
@@ -10648,7 +10665,7 @@
      "fr": "Pour l'instant, apprenez \"읽을 수 있어요\" tel quel.",
      "fr_s": null,
      "pt": "Por enquanto, aprenda \"읽을 수 있어요\" inteiro, de uma vez.",
-     "pt_s": null,
+     "pt_s": 17.27,
      "id": "Untuk sekarang, cukup hafalkan \"읽을 수 있어요\" secara utuh.",
      "id_s": null,
      "tl": "Sa ngayon, kabisaduhin po muna ninyo nang buo ang \"읽을 수 있어요\".",
@@ -11229,9 +11246,19 @@
      "ex": "자, 여기 보세요. 이게 그 글자예요. \"아\" (a, អក្សរកូរ៉េ) 예요. 움직임을 나타내는 말에 \"세요\" (se-yo) 를 붙이면 공손하게 권하는 말이 돼요. \"보세요\" (bo-se-yo, សូមមើល) 처럼요. 받침이 있으면 보통 \"읽으세요\" (ilg-eu-se-yo, សូមអាន) 처럼 \"으세요\" (eu-se-yo) 를 붙이지만, 리을 받침은 리을이 빠지고 \"세요\" (se-yo) 만 붙여서 \"만드세요\" (man-deu-se-yo, សូមបង្កើត) 처럼 말해요. 뜻은 크메르어의 \"សូម\"과 같지만, 크메르어는 \"សូម\"을 움직임 말 앞에 두고 한국어는 많은 움직임 말 뒤에 붙여서 공손하게 권해요.",
      "say": "이제 말해 보세요. \"여기 보세요\" (yeo-gi bo-se-yo, សូមមើលត្រង់នេះ)",
      "slot": "뜻은 크메르어의 \"សូម\"과 같지만, 크메르어는 \"សូម\"을 움직임 말 앞에 두고 한국어는 많은 움직임 말 뒤에 붙여서 공손하게 권해요.",
+     "audio_ex": "새설명_소리_kr/L01-00-01_14_kr_설명.km.mp3",
      "sent": {
       "6": "뜻은 크메르어의 \"សូម\"과 같지만, 크메르어는 \"សូម\"을 움직임 말 앞에 두고 한국어는 많은 움직임 말 뒤에 붙여서 공손하게 권해요."
-     }
+     },
+     "sent_s": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ]
     },
     "lo": {
      "ex": "자, 여기 보세요. 이게 그 글자예요. \"아\" (a, ຕົວໜັງສືເກົາຫຼີ) 예요. 움직임을 나타내는 말에 \"세요\" (se-yo) 를 붙이면 공손하게 권하는 말이 돼요. \"보세요\" (bo-se-yo, ເຊີນເບິ່ງ) 처럼요. 받침이 있으면 보통 \"읽으세요\" (ilg-eu-se-yo, ເຊີນອ່ານ) 처럼 \"으세요\" (eu-se-yo) 를 붙이지만, 리을 받침은 리을이 빠지고 \"세요\" (se-yo) 만 붙여서 \"만드세요\" (man-deu-se-yo, ເຊີນສ້າງ) 처럼 말해요. 뜻은 라오어의 \"ເຊີນ\"과 비슷하지만, 라오어는 \"ເຊີນ\"을 움직임 말 앞에 두고 한국어는 많은 움직임 말 뒤에 붙여서 공손하게 권해요.",
@@ -11371,8 +11398,8 @@
      "say": null
     },
     "pt": {
-     "ex": null,
-     "say": null
+     "ex": "새설명_소리_pt/L01-00-01_14_pt_설명.mp3",
+     "say": "새설명_소리_pt/L01-00-01_14_pt_말해보세요.mp3"
     },
     "id": {
      "ex": null,
@@ -11428,7 +11455,7 @@
      "fr": "Allez, regardez ici.",
      "fr_s": null,
      "pt": "Vamos lá, olhe aqui.",
-     "pt_s": null,
+     "pt_s": 0.11,
      "id": "Nah, silakan lihat ke sini.",
      "id_s": null,
      "tl": "O, tingnan ninyo rito.",
@@ -11474,7 +11501,7 @@
      "fr": "Voici la lettre en question.",
      "fr_s": null,
      "pt": "Esta é aquela letra.",
-     "pt_s": null,
+     "pt_s": 1.95,
      "id": "Ini dia huruf itu.",
      "id_s": null,
      "tl": "Ito ang titik na iyon.",
@@ -11520,7 +11547,7 @@
      "fr": "C'est \"아\".",
      "fr_s": null,
      "pt": "É \"아\".",
-     "pt_s": null,
+     "pt_s": 3.81,
      "id": "Ini \"아\".",
      "id_s": null,
      "tl": "Ito ay \"아\".",
@@ -11566,7 +11593,7 @@
      "fr": "Si l'on ajoute \"세요\" à un verbe, on obtient une invitation polie.",
      "fr_s": null,
      "pt": "Quando se acrescenta \"세요\" a um verbo, forma-se um convite educado.",
-     "pt_s": null,
+     "pt_s": 5.29,
      "id": "Jika \"세요\" ditempelkan pada kata kerja, ucapan itu menjadi ajakan yang sopan.",
      "id_s": null,
      "tl": "Kapag inilagay ang \"세요\" sa pandiwa, nagiging magalang na mungkahi ito.",
@@ -11612,7 +11639,7 @@
      "fr": "Par exemple, \"보세요\".",
      "fr_s": null,
      "pt": "Por exemplo, \"보세요\".",
-     "pt_s": null,
+     "pt_s": 9.99,
      "id": "Contohnya \"보세요\".",
      "id_s": null,
      "tl": "Gaya ng \"보세요\".",
@@ -11658,7 +11685,7 @@
      "fr": "S'il y a une consonne finale, on ajoute en général \"으세요\", comme dans \"읽으세요\", mais avec la consonne finale \"리을\", celle-ci tombe et on ajoute seulement \"세요\", comme dans \"만드세요\".",
      "fr_s": null,
      "pt": "Se há consoante final, normalmente se coloca \"으세요\", como em \"읽으세요\", mas quando a consoante final é \"리을\", ela cai e se coloca só \"세요\", como em \"만드세요\".",
-     "pt_s": null,
+     "pt_s": 12.39,
      "id": "Jika ada konsonan akhir, biasanya ditempelkan \"으세요\" seperti \"읽으세요\", tetapi jika konsonan akhirnya \"리을\", \"리을\" itu hilang dan hanya \"세요\" yang ditempelkan, sehingga menjadi \"만드세요\".",
      "id_s": null,
      "tl": "Kung may katinig sa dulo, karaniwang \"으세요\" ang inilalagay, gaya ng \"읽으세요\", pero kapag \"리을\" ang katinig sa dulo, nawawala ang \"리을\" at \"세요\" lang ang inilalagay, kaya nagiging \"만드세요\".",
@@ -11704,7 +11731,7 @@
      "fr": "Comme la terminaison de \"regardez\" en français, on l'ajoute ainsi à beaucoup de verbes pour inviter poliment à faire quelque chose.",
      "fr_s": null,
      "pt": "Esta terminação se junta assim a muitos verbos para convidar com educação.",
-     "pt_s": null,
+     "pt_s": 25.53,
      "id": "Artinya sama dengan \"silakan\" dalam bahasa Indonesia, tetapi bahasa Korea menempelkannya di belakang kata kerja, bukan di depan.",
      "id_s": null,
      "tl": "Sa ganitong paraan, inilalagay ito sa maraming pandiwa para magalang na magmungkahi.",
@@ -12552,8 +12579,8 @@
      "say": null
     },
     "pt": {
-     "ex": null,
-     "say": null
+     "ex": "새설명_소리_pt/L01-00-01_15_pt_설명.mp3",
+     "say": "새설명_소리_pt/L01-00-01_15_pt_말해보세요.mp3"
     },
     "id": {
      "ex": null,
@@ -12609,7 +12636,7 @@
      "fr": "Alors c'est ça que voulait faire le roi \"세종대왕\".",
      "fr_s": null,
      "pt": "Então era isso que o rei \"세종대왕\" queria fazer.",
-     "pt_s": null,
+     "pt_s": 0.09,
      "id": "Ternyata itu yang ingin dilakukan Raja \"세종대왕\".",
      "id_s": null,
      "tl": "Iyon pala ang gustong gawin ni Haring \"세종대왕\".",
@@ -12655,7 +12682,7 @@
      "fr": "Des lettres que tout le monde peut lire facilement.",
      "fr_s": null,
      "pt": "Letras que qualquer um pudesse ler com facilidade.",
-     "pt_s": null,
+     "pt_s": 4.55,
      "id": "Huruf yang mudah dibaca oleh siapa saja.",
      "id_s": null,
      "tl": "Mga titik na madaling mabasa ng kahit sino po.",
@@ -12701,7 +12728,7 @@
      "fr": "Et ce tout le monde, aujourd'hui, c'est nous.",
      "fr_s": null,
      "pt": "E esse qualquer um, hoje, somos nós.",
-     "pt_s": null,
+     "pt_s": 8.45,
      "id": "Dan siapa saja itu adalah kita sekarang.",
      "id_s": null,
      "tl": "At ang kahit sinong iyon ay tayo po ngayon.",
@@ -12747,7 +12774,7 @@
      "fr": "Si l'on ajoute \"고 싶어요\" à un verbe, cela signifie que l'on veut faire cette action.",
      "fr_s": null,
      "pt": "Quando se acrescenta \"고 싶어요\" a um verbo, significa que se quer fazer aquilo.",
-     "pt_s": null,
+     "pt_s": 12.23,
      "id": "Jika \"고 싶어요\" ditempelkan pada kata kerja, artinya ingin melakukan hal itu.",
      "id_s": null,
      "tl": "Kapag inilagay ang \"고 싶어요\" sa pandiwa, ang ibig sabihin ay gustong gawin ang kilos na iyon.",
@@ -12793,7 +12820,7 @@
      "fr": "Le \"구나\" de \"거구나\" est la terminaison entendue plus tôt, celle que l'on emploie quand on vient de découvrir quelque chose.",
      "fr_s": null,
      "pt": "O \"구나\" de \"거구나\" é a terminação que ouvimos antes, usada quando se acaba de perceber algo.",
-     "pt_s": null,
+     "pt_s": 19.53,
      "id": "\"구나\" dalam \"거구나\" adalah akhiran yang sudah Anda dengar tadi, yang dipakai saat baru saja menyadari sesuatu.",
      "id_s": null,
      "tl": "Ang \"구나\" sa \"거구나\" ay ang hulaping narinig natin kanina, na ginagamit kapag may bagong nalaman.",
