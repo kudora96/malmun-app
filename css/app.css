@@ -1306,10 +1306,10 @@ html:lang(ur) .write .hand.hic .hbtns :is(.ml,.ms){font-size:9px;line-height:1.2
 .write .whead .wclose{margin-left:0}
 /* 먹 색 팔레트(대표님 10-16) — 손글씨 칸 바로 위 오른쪽 한 줄(점수 줄 왼쪽 44% 는 점수·시간) · 동그라미 크기 = 칸 폭에 맞춰 저절로(최대 20px) · 고른 색 테두리 */
 .write .hand{position:relative}
-.write .hand .hpal{position:absolute;display:flex;justify-content:flex-start;gap:clamp(2px,1.2vw,5px);height:21px;align-items:center;z-index:1}
+.write .hand .hpal{position:absolute;display:flex;justify-content:flex-start;gap:clamp(2px,1vw,4px);height:21px;align-items:center;z-index:1}
 html:lang(ur) .write .hand .hpal{height:25px}
 .write .hand.stack .hpal{justify-content:flex-start}
-.write .hand .hpal button{flex:0 1 18px;min-width:0;aspect-ratio:1;max-height:18px;padding:0;border:0;border-radius:50%;background:var(--c);box-shadow:0 0 0 1.5px var(--card),0 0 0 2.5px var(--line);cursor:pointer}
+.write .hand .hpal button{flex:0 1 14px;min-width:0;aspect-ratio:1;max-height:14px;padding:0;border:0;border-radius:50%;background:var(--c);box-shadow:0 0 0 1.5px var(--card),0 0 0 2.5px var(--line);cursor:pointer}
 .write .hand .hpal button[aria-checked=true]{box-shadow:0 0 0 2px var(--card),0 0 0 4px var(--hi)}
 .write .hbox .fx{right:auto;left:64px;z-index:3;padding:0 6px;border-radius:999px;background:var(--card)} /* 꽝·통과 글 = 점수 바로 옆(잠깐 팔레트 위에 겹침 · 바탕을 깔아 읽히게) */
 .write .hbox .hscore{max-width:60px!important}
@@ -1326,27 +1326,38 @@ html:lang(ur) .write .hand .hpal{height:25px}
 /* 간직하기(🎉 100점 · 10-15) — 판정 상자 맨 위 작은 단추 줄 · A4 미리보기 덮개 · 인쇄 때는 그 한 장만 */
 .write .hjudge p.keeprow{display:flex;gap:6px;flex-wrap:nowrap;margin-bottom:4px}
 .write .hjudge p.keeprow button{min-height:24px;padding:1px 8px;border:1px solid var(--hi);border-radius:999px;background:var(--card);color:var(--hi);font-size:12px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
-.write .hjudge p.keeprow button[aria-pressed=true]{background:var(--hi);color:var(--on-hi)}
+.write .hjudge p.keeprow button{flex:1 1 auto;width:100%;justify-content:center;background:var(--hi);color:var(--on-hi);text-overflow:clip;overflow:visible;display:flex;align-items:center;gap:4px;line-height:1.25} /* 💾 단추 하나 = 상자 폭 가득 · 글 자동 맞춤(잘림 없음) */
+.write .hjudge p.keeprow button.wrap2{white-space:normal;text-align:center}
+.write .hjudge p.keeprow button .kl{min-width:0}
+.write .hjudge p.keeprow button.ic .kl{display:none}.write .hjudge p.keeprow button.ic{min-height:26px;height:26px;padding-block:0;line-height:1;font-family:"Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif;font-size:15px}
+.write .keeptip{position:absolute;z-index:6;padding:6px 10px;border-radius:10px;background:var(--ink);color:var(--card);font-size:13px;font-weight:700;line-height:1.35;box-shadow:0 4px 14px rgba(0,0,0,.25);pointer-events:auto;animation:keepTipIn .25s ease-out}
+.write .keeptip::after{content:"";position:absolute;top:100%;left:var(--ax,50%);margin-left:-6px;border:6px solid transparent;border-top-color:var(--ink)}
+@keyframes keepTipIn{from{opacity:0;transform:translateY(4px)}}
 .keepov{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;background:rgba(20,24,22,.55);padding:12px}
 .keepov .kp{display:grid;gap:8px;width:min(560px,100%);max-height:100%;overflow:auto;padding:12px;border-radius:14px;background:var(--bg,#fff);box-shadow:0 10px 30px rgba(0,0,0,.3)}
-.keepov .kh{display:flex;align-items:center;gap:8px}.keepov .kh b{font-size:16px;margin-inline-end:auto}
+.keepov .kh{display:flex;align-items:center;justify-content:flex-end;gap:8px}.keepov .kh b{font-size:16px;margin-inline-end:auto}
 .keepov .seg{display:inline-flex;gap:4px}.keepov button{min-height:32px;padding:4px 10px;border:1px solid var(--line,#ccc);border-radius:10px;background:var(--card,#fff);font-weight:700;color:var(--ink,#222)}
 .keepov button[aria-pressed=true]{background:var(--hi,#a8691b);color:var(--on-hi,#fff);border-color:var(--hi,#a8691b)}.keepov button:disabled{opacity:.45}
 .keepov .kchips{display:flex;gap:6px;flex-wrap:wrap}.keepov .kchips button{font-size:20px;min-width:44px}.keepov .kchips button.need{opacity:.5;border-style:dashed}
 .keepov .kpick{display:flex;gap:6px;overflow-x:auto}.keepov .kpick[hidden]{display:none}.keepov .kpick button{padding:2px}.keepov .kpick canvas{width:56px;height:56px;display:block}
 .keepov .kcv{display:flex;justify-content:center}.keepov .kcv canvas{width:min(100%,360px);height:auto;aspect-ratio:1240/1754;box-shadow:0 2px 10px rgba(0,0,0,.18);border-radius:2px;background:#fffdf7}
 .keepov .kname{display:flex;align-items:center;gap:8px;font-weight:700}.keepov .kname input{flex:1;min-height:34px;padding:4px 8px;border:1px solid var(--line,#ccc);border-radius:8px;font:inherit}
-.keepov .kbtns{display:flex;gap:6px;flex-wrap:wrap}.keepov .ktip{margin:0;font-size:12px;color:var(--mute,#666)}
+.keepov .kbtns{display:flex;gap:10px;justify-content:center;position:relative}.keepov .kbtns > button{min-width:56px;min-height:46px;font-size:22px;padding:4px 12px}
+.keepov .ktip2{position:absolute;bottom:calc(100% + 10px);left:50%;transform:translateX(-50%);display:flex;gap:12px;padding:6px 12px;border-radius:10px;background:var(--ink,#222);color:var(--card,#fff);font-size:13px;font-weight:700;white-space:nowrap;max-width:calc(100vw - 40px);flex-wrap:nowrap;justify-content:center;box-shadow:0 4px 14px rgba(0,0,0,.25);animation:keepTipIn .25s ease-out}
+.keepov .ktip2::after{content:"";position:absolute;top:100%;left:50%;margin-left:-6px;border:6px solid transparent;border-top-color:var(--ink,#222)}
+.keepov .kbtns > button{display:inline-flex;align-items:center;justify-content:center;gap:3px}.keepov .kbtns .ico{width:24px;height:24px}.keepov .kbtns b{font-size:12px;font-weight:800}
+.keepov .ktip2 span{display:inline-flex;align-items:center;gap:4px}.keepov .ktip2 .ico{width:16px;height:16px}
+.keepov .kname > span{font-size:18px;color:var(--mute,#666)}.keepov .ktip{margin:0;font-size:12px;color:var(--mute,#666)}
 .keepprint{display:none}
-@media print{body > *:not(.keepprint){display:none!important}.keepprint{display:block!important;margin:0}.keepprint img{width:100%;height:auto;display:block}@page{size:A4 portrait;margin:0}}
+@media print{html,body{margin:0!important;padding:0!important;height:auto!important;min-height:0!important;overflow:hidden!important}body > *:not(.keepprint){display:none!important}.keepprint{display:block!important;margin:0;width:210mm;height:296mm;overflow:hidden;break-after:avoid;page-break-after:avoid}.keepprint img{width:100%;height:100%;object-fit:contain;display:block}@page{size:A4 portrait;margin:0}} /* 한 장만(대표님 10-20 2장 중 1장 빈 종이 · 297mm 꽉 차면 반올림으로 넘침 → 296mm) */
 /* ⛶ 크게 보기(앱개발부 틀 .learn.big · 대표님 10-16) — .learn.big 안에서만 걸림(끄면 지금 화면과 같음)
    가로(.bigl) = 왼쪽 손글씨 칸 높이 가득 · 오른쪽 위 = 뜻·도구·자동 단추 · 가운데 = 판정 상자(남는 높이 전부 · 글 크게) · 아래 = 손글씨 단추 다섯(엄지 크기) */
 .learn.big .panel .write .work.handmode.bigl{display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-rows:26px auto minmax(0,1fr);column-gap:14px;row-gap:6px;padding:4px 12px 8px;min-height:0;flex:1}
 .learn.big .panel .write .work.handmode.bigl>.stage{grid-column:2;grid-row:1 / span 2;height:auto!important;min-height:0;padding:0}
 .learn.big .panel .write .work.handmode.bigl>.wbtns{grid-column:2;grid-row:2}
 .learn.big .panel .write .work.handmode.bigl>.hand{display:contents}
-.learn.big .panel .write .work.handmode.bigl .hpal{position:static!important;grid-column:1;grid-row:1;width:auto!important;justify-self:end;align-self:center;gap:6px}
-.learn.big .panel .write .work.handmode.bigl .hpal button{flex:none;width:18px;height:18px}
+.learn.big .panel .write .work.handmode.bigl .hpal{position:static!important;grid-column:1;grid-row:1;width:auto!important;justify-self:end;align-self:center;gap:5px}
+.learn.big .panel .write .work.handmode.bigl .hpal button{flex:none;width:14px;height:14px} /* 동그라미 20% 작게(대표님 10-20) */
 .learn.big .panel .write .work.handmode.bigl .hbox{grid-column:1;grid-row:2 / span 2;align-self:start;margin-top:0}
 .learn.big .panel .write .work.handmode.bigl .hbtns{grid-column:2;grid-row:3;display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr));grid-template-rows:minmax(0,1fr) auto;gap:6px;height:auto!important;width:auto!important;min-height:0}
 .learn.big .panel .write .work.handmode.bigl .hbtns .hjudge{grid-column:1 / -1;min-height:0;font-size:16px;line-height:1.45}
@@ -1546,8 +1557,26 @@ html.bigview,html.bigview body{overflow:hidden}
 #vwrap:fullscreen>.vuiko .chip.uiko{min-height:36px;padding:4px 12px;font-size:14px;border-radius:8px;border:1px solid rgba(255,255,255,.6);color:#fff;background:rgba(0,0,0,.5)} /* 검은 영상 위 = 자막 단추(CC)와 같은 색 */
 #vwrap:fullscreen>.vuiko .chip.uiko .a,#vwrap:fullscreen>.vuiko .chip.uiko .b{opacity:.6;color:#fff}
 #vwrap:fullscreen>.vuiko .chip.uiko[aria-pressed=false] .a,#vwrap:fullscreen>.vuiko .chip.uiko[aria-pressed=true] .b{opacity:1;color:#ffd27a}
+
+/* 줄 카드 단추 = 그림만 다섯(쓰기부 · 대표님 10-20 B) — 같은 크기 한 줄 · ▶ 만 주황 · 높이 고정(언어·⇄ 상관없이 카드 높이 0px) */
+.line.cur .acts.ib5{display:grid;grid-template-columns:repeat(5,44px);gap:6px;flex-wrap:nowrap;justify-content:start} /* 단추 폭 고정 44px(짧은 줄 카드도 같은 크기 · 카드가 단추 줄만큼은 넓어짐) */
+.line .acts.ib5 button.ib{display:flex;align-items:center;justify-content:center;height:34px;min-width:0;padding:0!important;border-radius:12px;font-size:0}
+.line .acts.ib5 button.ib.menu{background:var(--card);border:1px solid var(--line);box-shadow:0 2px 0 var(--line);color:var(--ink)}
+.line .acts.ib5 button.ib.menu[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.line .acts.ib5 button.ib .ico{width:20px;height:20px}
+.line.fitc .acts.ib5 button.ib{height:32px}
+.line .acts.ib5 button.gamebtn{position:relative}
+.actstip{position:fixed;z-index:80;max-width:calc(100vw - 24px);padding:7px 12px;border-radius:12px;background:#18302a;color:#fff;font-size:14px;line-height:1.35;box-shadow:0 6px 18px rgba(0,0,0,.3);pointer-events:none;animation:keepTipIn .2s ease-out}
+.actstip b{font-weight:800}.actstip i{font-style:normal;opacity:.7;font-size:12px;margin-inline-start:8px}.actstip small{display:block;font-size:12px;opacity:.8;font-weight:600}.actstip small.hold{opacity:.65;font-weight:500;margin-top:2px}
+.actstip::after{content:"";position:absolute;top:100%;left:var(--ax,50%);margin-left:-7px;border:7px solid transparent;border-top-color:#18302a}
+.chip.bgmb[data-act=bgmtog]{width:36px;min-width:36px;padding:0;border-radius:999px}.chip.bgmb[data-act=bgmtog] .bi{display:flex}.chip.bgmb[data-act=bgmtog] svg{width:18px;height:18px}
+.chip.bgmb[data-act=bgmtog][data-on=false]{opacity:.75;text-decoration:none}.chip.bgmb[data-act=bgmtog][data-on=true]{background:var(--hi-soft,#f5e6cf);border-color:var(--hi);color:var(--hi)} /* 🔇 꺼짐 = 흐리게 · 🔊 켜짐 = 주황 */
 /* 머리 줄 붙박이(대표님 10-20 「ㅇ」 · 모든 창 ⇄) — 편 목록·진단을 내려도 머리 줄(⇄ 포함)이 위에 · 칸 크기·자리 0px(위치만 sticky · 바탕색만 덧칠) */
 .list > .bar,.diag > .bar{position:sticky;top:0;z-index:5;background:var(--bg);box-shadow:0 1px 0 var(--line)} /* 아래 선 = 그림자(높이 0px) */
+/* 편·단원 제목 학습자 말 ⇄ 한국어(다국어부 10-20) — 세 겹(.cur·한국어·학습자 말)을 한 칸에 겹쳐 칸 = 큰 쪽 → ⇄ 때 0px */
+.ept{display:grid;min-width:0}.ept>*{grid-area:1/1;min-width:0;overflow-wrap:break-word}.ept>.gh{visibility:hidden}
+.hero .ttl:has(>.ept){display:flex;gap:.3em}.hero .ttl>.ept{flex:1}
+.bar .ut{font-size:28px;font-weight:700;line-height:1.05;overflow:hidden;overflow-wrap:break-word}.bar .ut.ko{font-family:var(--f-hand)}.bar .ut:not(.ko){line-height:1.15;overflow-wrap:normal;hyphens:auto;display:grid;align-content:center} /* 단원 이름 = .bar .t 모양 · 손글씨는 한국어일 때만 · 학습자 말 글자 크기는 list.js fitUnit */
 /* 「잘못된 것 신고」(report.js · 대표님 10-20) — 길게 누르기 → 겹쳐 뜨는 풍선(틀 0px) · 음악 상자·답 창(.sheet)보다 위 */
 .rpmenu,.rptip{position:fixed;z-index:10050;box-sizing:border-box;background:var(--card);border:2px solid var(--hi);border-radius:14px;box-shadow:0 4px 14px rgba(0,0,0,.22);color:var(--ink);text-align:start}
 .rpmenu{padding:4px}

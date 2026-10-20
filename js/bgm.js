@@ -5,8 +5,8 @@
 //  · 켜기/끄기 = ♪ 단추(ui.js bgmBtn · 모든 창 · 처음 켬 · 기억 malmun.bgm) · 🎵 음악 상자(ui.js openMusicBox)에서 곡 골라 듣기
 //  · 파일 = 소리부 05_audio/_bgm(직접 합성 · 저작권 없음) — 곡마다 [loopStart, loopEnd] 한 번 → 끝나면 다른 곡(같은 곡 연속 없음 · 앱을 다시 열어도 지난 곡 다음)
 //  · 점검(?mute=1 · __sfxVolume 아주 작게)에선 안 틂
-import { audioCtx } from "./wake.js?v=1020.5";
-import { paths } from "./paths.js?v=1020.5";
+import { audioCtx } from "./wake.js?v=1020.7";
+import { paths } from "./paths.js?v=1020.7";
 
 const KEY = "malmun.bgm", LAST = "malmun.bgmLast", VOL = "malmun.bgmVol";
 // 곡 목록(늘리기 = 한 줄) — 소리부 「철학판」 36곡(본부 10-16 대표님 ㅇ · 05_audio/_bgm/med · bgm_catalog.json style "med") = 12곡 × 결 3(잔잔 = 공부 화면 · 밝은 = 첫 화면·목록 · 힘찬 = 음악 상자에서만)
@@ -50,13 +50,13 @@ export const TRACKS = [
   { file: "bgm_monggeumpo_med_power.mp3", id: "monggeumpo", song: "몽금포타령", en: "Monggeumpo Taryeong", ver: "power", loopStart: 1.0, loopEnd: 111.182 },
 ];
 const FIRST = "bgm_arirang_med_bright.mp3"; // 앱을 처음 열 때 첫 곡(본부 판단 · 대표님이 바꾸면 따름)
-const SCENE_GAIN = { "": 1, list: 1, diag: 0 }, STUDY = 0.32, DUCK = 0.3; // 공부 화면 ≈ −10dB · 앱 소리 날 때 그 위에서 ≈ −10dB 더
+const SCENE_GAIN = { "": 1, list: 1, diag: 0 }, STUDY = 0.32, DUCK = 0; // 공부 화면 ≈ −10dB · 앱 소리 날 때 그 위에서 ≈ −10dB 더
 const UP = 0.8, DOWN = 0.2; // 음량 바꾸는 시간(초) — 내릴 땐 빨리
 
 // 음량(대표님 10-16 · 🎵 음악 상자 막대 · 0~1 · 기억 · 앱 전체 — 공부 화면·덕킹·녹음 0 은 이 값 위에서 그대로)
 export const bgmVol = () => { try { const v = parseFloat(localStorage.getItem(VOL)); return v >= 0 && v <= 2 ? v : 1; } catch { return 1; } }; // 0~2배 · 1 = 기본(대표님 10-16 「지금 크기 = 막대 가운데」)
 export function setBgmVol(v) { try { localStorage.setItem(VOL, String(Math.max(0, Math.min(2, v)))); } catch {} sync(); }
-export const bgmOn = () => { try { return localStorage.getItem(KEY) !== "0"; } catch { return true; } };
+export const bgmOn = () => { try { return localStorage.getItem(KEY) === "1"; } catch { return false; } }; // 처음 = 꺼짐(대표님 10-20)
 const muted = () => /[?&]mute=1\b/.test(location.search) || (window.__sfxVolume ?? 1) < 0.01;
 
 let scene = null, holds = 0, src = null, gain = null, waitTap = false, cur = -1, next = -1, mic = false, sounds = 0, target = 0, endAt = 0;
@@ -69,7 +69,7 @@ const poolVer = () => (scene === "" || scene === "list" ? "bright" : "calm");
 const pick = () => { let last = cur, first = false; if (last < 0) try { const v = localStorage.getItem(LAST); first = v == null; last = +(v ?? -1); } catch {} const f0 = TRACKS.findIndex(x => x.file === FIRST); if (first && f0 >= 0 && TRACKS[f0].ver === poolVer()) return f0; const ids = TRACKS.map((_, i) => i), pool = ids.filter(i => TRACKS[i].ver === poolVer()), c = (pool.length ? pool : ids).filter(i => i !== last); return c.length ? c[Math.floor(Math.random() * c.length)] : (pool[0] ?? 0); };
 
 // 배경음악 끔(대표님 10-19 「계속 들어보니 방해가 되는게 맞아 · 음악 메뉴는 전체적으로 지우자 · 백업으로」) — MUSIC_ON = true 로 바꾸면 ♪·음악 상자·배경음악이 그대로 돌아옴(곡 파일·목록은 그대로 둠)
-export const MUSIC_ON = false;
+export const MUSIC_ON = true; // 대표님 10-20 「🔇/🔊 켜기·끄기 · 처음 꺼짐」
 const playOk = () => MUSIC_ON && bgmOn() && !muted() && document.visibilityState === "visible";
 // 지금 있어야 할 음량(0~1) — 화면 · 앱 소리 · 마이크 · 막음(hold)
 const level = () => { for (const m of media) if (!m.isConnected || m.paused || m.ended) media.delete(m); /* 화면에서 사라진 영상·소리(멈춤 신호 없이 빠짐)는 뺌 — 안 빼면 덕킹이 안 풀림(ur 320 점검) */ if (mic || holds) return 0; const g = scene in SCENE_GAIN ? SCENE_GAIN[scene] : STUDY; return g * bgmVol() * (sounds > 0 || media.size ? DUCK : 1) * Math.min(1, window.__sfxVolume ?? 1); };
@@ -119,7 +119,7 @@ function sync() {
 export function bgmScene(name) { const v0 = poolVer(); scene = name; if (poolVer() !== v0 && next >= 0) { next = pick(); load(next); } sync(); } // 결이 바뀌면 다음 곡도 그 결로
 // 음악이 절대 섞이면 안 되는 동안(그 자리에서 0) — 끝나면 release()
 export function hold() { holds++; sync(); let done = false; return () => { if (done) return; done = true; holds = Math.max(0, holds - 1); sync(); }; }
-export function setBgm(on) { try { localStorage.setItem(KEY, on ? "1" : "0"); } catch {} document.querySelectorAll("[data-act=bgm]").forEach(b => (b.dataset.on = String(bgmOn()))); sync(); paintBox(); }
+export function setBgm(on) { try { localStorage.setItem(KEY, on ? "1" : "0"); } catch {} document.querySelectorAll("[data-act=bgm], [data-act=bgmtog]").forEach(b => (b.dataset.on = String(bgmOn()))); sync(); paintBox(); }
 // 🎵 음악 상자에서 이 곡 듣기(꺼져 있으면 켬) · 지금 나는 곡이면 그대로
 export function playTrack(i) { if (!bgmOn()) { try { localStorage.setItem(KEY, "1"); } catch {} document.querySelectorAll("[data-act=bgm]").forEach(b => (b.dataset.on = "true")); } if (src && cur === i) return; stop(true); next = -1; start(i); }
 export const bgmNow = () => (src ? cur : -1);

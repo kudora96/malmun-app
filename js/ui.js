@@ -1,10 +1,10 @@
-import { MUSIC_ON, bgmOn, setBgm, TRACKS, playTrack, bgmNow, onBgmChange, bgmVol, setBgmVol, playNext } from "./bgm.js?v=1020.5";
-import { paths } from "./paths.js?v=1020.5";
-import { t, tL, tAlt, lang, langName, LANGS, READY, setLang, KO_UI, uiKoOn, setUiKo, langShort, preloadKoUi } from "./i18n.js?v=1020.5";
-import { snapshot, retext } from "./retext.js?v=1020.5";
-import "./langfit.js?v=1020.5"; // ⇄ 때 단추 크기·자리 고정(다국어부 10-15)
-import { VERSION } from "./version.js?v=1020.5";
-import { esc } from "./text.js?v=1020.5";
+import { MUSIC_ON, bgmOn, setBgm, TRACKS, playTrack, bgmNow, onBgmChange, bgmVol, setBgmVol, playNext } from "./bgm.js?v=1020.7";
+import { paths } from "./paths.js?v=1020.7";
+import { t, tL, tAlt, lang, langName, LANGS, READY, setLang, KO_UI, uiKoOn, setUiKo, langShort, preloadKoUi } from "./i18n.js?v=1020.7";
+import { snapshot, retext } from "./retext.js?v=1020.7";
+import "./langfit.js?v=1020.7"; // ⇄ 때 단추 크기·자리 고정(다국어부 10-15)
+import { VERSION } from "./version.js?v=1020.7";
+import { esc } from "./text.js?v=1020.7";
 
 const svg = (d, fill) => `<svg class="ico" viewBox="0 0 24 24" ${fill ? 'fill="currentColor"' : 'fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"'} aria-hidden="true">${d}</svg>`;
 export const I = {
@@ -25,7 +25,10 @@ export const langChip = () => `<button class="chip" data-act="lang" aria-label="
 export const uiKoBtn = () => bgmBtn() + uikoChip();
 export const uikoChip = () => (KO_UI.includes(lang) ? `<button class="chip uiko" data-act="uiko" aria-pressed="${uiKoOn()}" aria-label="${esc(langName(lang))} ⇄ 한국어"><span class="a" lang="${lang}">${esc(langShort(lang))}</span>⇄<span class="b" lang="ko">한</span></button>` : "");
 // ♪ 「음악」 = 🎵 음악 상자 열기(대표님 10-16 · 모든 창 = uiKoBtn() 앞 · ⇄ 없는 언어에도 · 크기 고정 · 끔 = 흐리게 빗금(data-on) · 누르기는 아래 문서 한 곳)
-export const bgmBtn = () => !MUSIC_ON ? `<span class="bgmb-anchor" hidden></span>` : `<button class="chip bgmb" data-act="bgm" data-on="${bgmOn()}" aria-haspopup="dialog" aria-label="${esc(t("music_box"))}" title="${esc(t("music_box"))}"><span aria-hidden="true">♪</span><span class="lt" data-k="bgm_short">${esc(t("bgm_short"))}</span></button>`;
+const BGM_I = { on: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>', off: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M17 9.5l5 5M22 9.5l-5 5"/></svg>' };
+// 배경음악 켜기·끄기(대표님 10-20) = ⇄ 바로 왼쪽 동그란 단추 · 🔇 꺼짐(처음) ⇄ 🔊 켜짐 · 누르면 바로 켜기·끄기(음악 상자는 따로) · 크기 고정(글 없음 · 이름 = aria·title)
+export const bgmBtn = () => !MUSIC_ON ? `<span class="bgmb-anchor" hidden></span>` : `<button class="chip bgmb" data-act="bgmtog" data-on="${bgmOn()}" aria-pressed="${bgmOn()}" aria-label="${esc(t("bgm_short"))}" title="${esc(t("bgm_short"))}"><span class="bi" aria-hidden="true">${BGM_I[bgmOn() ? "on" : "off"]}</span></button>`;
+const paintBgm = () => document.querySelectorAll("[data-act=bgmtog]").forEach(b => { const on = bgmOn(); b.dataset.on = String(on); b.setAttribute("aria-pressed", String(on)); const i = b.querySelector(".bi"); if (i) i.innerHTML = BGM_I[on ? "on" : "off"]; });
 export async function toggleUiKo(after) { await switchUiKo(!uiKoOn()); after?.(); }
 export async function switchUiKo(ko) {
   if (!KO_UI.includes(lang) || ko === uiKoOn()) return;
@@ -43,6 +46,7 @@ if (!window.__uikoWired) { // 문서 한 곳에서 받기(화면이 따로 손�
   window.__uikoWired = true;
   // 잡기 단계(capture)에서 받고 멈춤 — 화면의 「바깥 누르면 닫힘」(? 방법·말풍선·마이크 목록) 손잡이까지 가지 않게 → ⇄ = 그 상태 그대로 글만(본부 10-15 투덜이 원칙)
   document.addEventListener("click", e => { const b = e.target.closest?.("[data-act=uiko]"); if (!b) return; e.preventDefault(); e.stopPropagation(); switchUiKo(!uiKoOn()); }, true);
+  document.addEventListener("click", e => { if (!MUSIC_ON || !e.target.closest?.("[data-act=bgmtog]")) return; e.preventDefault(); e.stopPropagation(); setBgm(!bgmOn()); paintBgm(); }, true); /* ⇄ 처럼 잡기 단계 = 바깥 누르면 닫힘에 안 감 */
   document.addEventListener("click", e => { if (MUSIC_ON && e.target.closest?.("[data-act=bgm], [data-act=musicbox]")) openMusicBox(); });
   preloadKoUi();
 }

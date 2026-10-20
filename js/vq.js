@@ -2,12 +2,12 @@
 //  기본 720p · 느린 망(effectiveType slow-2g·2g·3g · 데이터 절약 saveData · downlink < 1.5Mbps)이면 처음부터 480p
 //  재생 중 버퍼링이 잦으면(1분 안 3번 · 또는 한 번 4초 넘게 멈춤) 480p 로 바꾸고 같은 자리·같은 재생 상태로 이어 감 · 그 기기는 하루 동안 480p 로 시작
 //  1080p 는 앱에서 안 씀(원본 보관) · R2 = video/720/{ep}.mp4 · video/480/{ep}.mp4(영상1팀 06_release\video\720·480) · 없으면 다음 것(480 → 옛 video/{ep}.mp4)
-import { paths } from "./paths.js?v=1020.5";
+import { paths } from "./paths.js?v=1020.7";
 
 const K = "malmun.vq480";
 const get = () => { try { return +localStorage.getItem(K) || 0; } catch { return 0; } };
 const slowNet = () => { const c = navigator.connection; if (!c) return false; return !!c.saveData || /(^|-)(2g|3g)$/.test(c.effectiveType || "") || (c.downlink > 0 && c.downlink < 1.5); };
-export const startQ = () => (window.__vq || (slowNet() || Date.now() - get() < 864e5 ? "480" : "720")); // __vq = 점검 스위치(480·720)
+export const startQ = () => (slowNet() || Date.now() - get() < 864e5 ? "480" : "720");
 const chain = (ep, q) => (q === "480" ? ["480"] : ["720", "480"]).map(x => paths.video(ep, x)).concat(paths.video(ep));
 
 // <video> 에 붙임 — 처음 주소 고르기 · 못 받으면 다음 주소 · 잦은 버퍼링이면 480 으로

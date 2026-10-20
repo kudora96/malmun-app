@@ -1,5 +1,5 @@
-import { VERSION } from "./version.js?v=1020.5";
-import { LANG_INFO } from "./langs.js?v=1020.5";
+import { VERSION } from "./version.js?v=1020.7";
+import { LANG_INFO } from "./langs.js?v=1020.7";
 // 학습자 언어 — 고르게 하지 않는다(CLAUDE.md).
 // ① 저장된 선택 ② 폰 언어가 22개 중 하나 ③ 폰 시간대로 나라 짐작 ④ 영어
 export const LANGS = [
@@ -101,6 +101,9 @@ export const t = (k, vars) => {
 };
 // ⇄ 반대쪽 글(지금 모국어면 한국어판 · 한국어면 모국어) — 단추 폭을 두 말 중 긴 쪽으로 고정할 때(js/langfit.js · 다국어부 10-15)
 export const tAlt = k => { const ko = koGot[lang]; if (!ko) return null; return uiKoOn() ? (strings[k] ?? fallback[k] ?? null) : (ko[k] ?? strings[k] ?? fallback[k] ?? null); };
+// 편·단원 제목(다국어부 10-20 · 검사1팀 ⚠ 「곧 나옴」 제목이 한국어만) — lang/titles/{xx}.json {편 id: 제목} · 언어부 09_lang/ui/out/titles → tools/sync_lang.py · 없으면 {}(한국어 제목 그대로)
+const titleWait = {};
+export const epTitles = (c = lang) => (titleWait[c] ||= fetch(`lang/titles/${c}.json?v=${VERSION}`).then(r => (r.ok ? r.json() : {})).catch(() => ({})));
 export const koReady = c => !!koGot[c || lang];
 // 모국어 글(한국어 토글과 상관없이) — 한국어로 바꾼 직후 「돌아오는 길」 안내처럼 학습자가 꼭 읽어야 하는 글(본부 10-14 ④)
 export const tL = (k, vars) => { let s = strings[k] ?? fallback[k] ?? k; if (vars) for (const [a, b] of Object.entries(vars)) s = s.replace(`{${a}}`, b); return s; };

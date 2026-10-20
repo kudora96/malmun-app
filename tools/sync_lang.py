@@ -3,6 +3,7 @@
 #     앱 글이 언어부 원본과 다른 열쇠가 있으면 그 언어는 덮지 않고 표로 보여 줌(앱에서 고친 글 보호 · --accept 열쇠,열쇠 = 그 열쇠만 허락 · --force = 다 덮음)
 #   python tools/sync_lang.py --table                       → js/langs.js(언어 표)만 프로필에서 다시 씀
 #   python tools/sync_lang.py --ready xx[,yy]               → 공개 단계로(본부 신호 때만)
+#   python tools/sync_lang.py --titles                      → 편·단원 제목만(09_lang/ui/out/titles/titles_{xx}.json → lang/titles/{xx}.json · 다국어부 10-20) · 언어 넣기 때도 함께
 # 하는 일: lang_{xx}.json(.ko.json) → lang/ · {편}.{xx}.json → data/{편}/ · 프로필 → js/langs.js(방향·글꼴·줄 높이·단계)
 #   설명(v9 v2)은 tools/sync_v9.py · 편 목록 langs 는 tools/sync_content.py 가 함(여기서 부름)
 # 언어를 더할 때 js 는 고치지 않는다 — 언어마다 다른 값은 js/langs.js 한 곳(i18n.js 가 읽음)
@@ -99,6 +100,21 @@ def app_edits(a, b):
     return [(k, y[k], x.get(k)) for k in y if not k.startswith("_") and y[k] != x.get(k)]
 
 
+def sync_titles(codes=None, dry=False):
+    """편·단원 제목 — 있는 언어만(en 포함) · [(언어, 개수)]"""
+    d, out = os.path.join(LANG, "ui", "out", "titles"), []
+    if not os.path.isdir(d): return out
+    for f in sorted(os.listdir(d)):
+        m = re.fullmatch(r"titles_([a-z]{2})\.json", f)
+        if not m or (codes and m.group(1) not in codes and m.group(1) != "en"): continue
+        j = json.load(open(os.path.join(d, f), encoding="utf-8"))
+        if not dry:
+            os.makedirs(os.path.join(APP, "lang", "titles"), exist_ok=True)
+            open(os.path.join(APP, "lang", "titles", f"{m.group(1)}.json"), "w", encoding="utf-8", newline="\n").write(json.dumps(j, ensure_ascii=False, indent=1) + "\n")
+        out.append((m.group(1), len(j)))
+    return out
+
+
 def copy(a, b, dry):
     if dry: return
     os.makedirs(os.path.dirname(b), exist_ok=True)
@@ -115,6 +131,8 @@ def main(argv):
     info = read_table()
     if argv[:1] == ["--table"]:
         write_table(table_from_profiles(info)); print("js/langs.js ✓"); return
+    if argv[:1] == ["--titles"]:
+        print("제목:", " ".join(f"{c} {n}" for c, n in sync_titles(dry=dry)) or "없음"); return
     if argv[:1] == ["--ready"]:
         for c in argv[1].split(","): info.setdefault(c, {})["stage"] = "ready"
         write_table(info); print("ready:", argv[1]); return
@@ -140,6 +158,12 @@ def main(argv):
         if stage0 == "none": info[c].pop("stage", None)  # --stage none = 글만 넣고 선택 목록엔 「곧」(본부 신호 전 · 10-19)
         else: info[c].setdefault("stage", stage0)
         out.append(f"{c} ✓ 글 {n - len(miss)}/{n}" + (f"(en 으로 {len(miss)})" if miss else "") + f" · {info[c]['dir']}" + (f" · {info[c]['font']}" if info[c].get("font") else "") + f" · {info[c].get('stage', '곧(단계 없음)')}")
+    # en = 화면 글(lang/en.json)은 개발1팀 정본이라 안 덮지만 편 자료(줄 번역·인물·제목)는 언어부 것 → 늘 함께(10-20 본부 🔴 en 줄 번역 빈칸 · 전엔 en 을 통째로 건너뜀)
+    en_src = os.path.join(LANG, "en", f"{ep}.en.json")
+    if os.path.exists(en_src):
+        copy(en_src, os.path.join(APP, "data", ep, f"{ep}.en.json"), dry); out.append(f"en 편 자료 ✓ {ep}.en.json")
+    tl = sync_titles(codes, dry)
+    if tl: out.append("제목: " + " ".join(f"{c} {n}" for c, n in tl))
     if not dry:
         write_table(info)
         for tool in ("sync_v9.py", "sync_content.py"):
