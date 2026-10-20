@@ -34,8 +34,9 @@ const ISO = "AD AE AF AG AI AL AM AO AR AS AT AU AW AX AZ BA BB BD BE BF BG BH B
 export function guessCountry() { let tz = ""; try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ""; } catch {} return TZC[tz] || ""; }
 const uiLang = () => (uiKoOn() ? "ko" : lang === "tl" ? "fil" : lang);
 function names() {
-  let dn = null; try { dn = new Intl.DisplayNames([uiLang(), "en"], { type: "region" }); } catch {}
-  const coll = (() => { try { return new Intl.Collator(uiLang()); } catch { return new Intl.Collator(); } })();
+  // 그 말 나라 이름 자료가 없는 기기(브라우저) = 한국어 이름(영어 섞임 0 · 대표님 10-19 「한국어 ⇄ 학습자 언어만」)
+  let dn = null, l = uiLang(); try { if (!Intl.DisplayNames.supportedLocalesOf([l]).length) l = "ko"; dn = new Intl.DisplayNames([l], { type: "region", fallback: "code" }); } catch {}
+  const coll = (() => { try { return new Intl.Collator(l); } catch { return new Intl.Collator(); } })();
   return ISO.map(c => [c, (dn && dn.of(c)) || c]).sort((a, b) => coll.compare(a[1], b[1]));
 }
 
@@ -69,8 +70,8 @@ export function askBirth(wrap, cta, go) {
     // 18세 미만 = 같은 풍선 자리에 안내 한 줄 + [시작하기]
     tip.innerHTML = `<b class="who">${spkHtml("선생님")}</b><p class="q2">${esc(t(key, { n: minAge("aiExplain") }))}</p><div class="bt"><button type="button" class="ok go" data-k="start">${esc(t("start"))}</button></div>`;
     tip.querySelector(".go").onclick = () => { close(); go(); };
-    requestAnimationFrame(place); tip.querySelector(".go").focus?.();
+    requestAnimationFrame(place);
   };
-  requestAnimationFrame(place); by.focus?.({ preventScroll: true });
+  requestAnimationFrame(place);
   return close;
 }
