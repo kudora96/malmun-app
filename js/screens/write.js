@@ -13,18 +13,19 @@
 //  W5 소리는 언제나 하나만 · 새 일을 하면 앞 소리는 멈춘다
 //  W6 영상 창 안(embedded): 창 안에서 스크롤 없이 다 보이게 — 긴 문장은 토막으로(◀ 1/3 ▶) ·
 //     토막을 다 쓰면 자동으로 다음 토막 · 줄을 다 쓰면 대사를 듣고 자동으로 다음 줄 쓰기 · 아래 ▶ = 이 부분 듣기
-import { t, tL, lang, uiKoOn, KO_UI, preloadKoUi } from "../i18n.js?v=1021.8";
-import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO, koq } from "../text.js?v=1021.8";
-import { episode, chars, charsF } from "../data.js?v=1021.8";
-import { paths } from "../paths.js?v=1021.8";
-import { I, spkHtml, uiKoBtn, uikoChip } from "../ui.js?v=1021.8";
-import { audioCtx, hold } from "../wake.js?v=1021.8";
-import * as sfx from "../sfx.js?v=1021.8";
-import { scoreFx, stopFx } from "../scorefx.js?v=1021.8";
-import { units as jamoUnits, baseOf, shapeFix } from "../jamobox.js?v=1021.8"; // 자모 자리 나누기(획순 · 자판 덧칠 · 손글씨 덩어리 — 본부 10-07) // 손글씨 점수 효과 = 말하기와 같은 규칙(본부 10-07)
-import { createStrokes } from "../strokes.js?v=1021.8"; // 획 자료·획순 칠(글자부)
-import { whyRow } from "../whyask.js?v=1021.8"; // 「왜 틀렸어요?」(개발2팀 · 기본 꺼짐 ?why=1)
-import { fitToGuide } from "../strokefit.js?v=1021.8"; // 자석 따라오는 획 길 = 회색 가운데(글자부 10-12)
+import { t, tL, lang, uiKoOn, KO_UI, preloadKoUi } from "../i18n.js?v=1021.5";
+import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO, koq } from "../text.js?v=1021.5";
+import { episode, chars, charsF } from "../data.js?v=1021.5";
+import { paths } from "../paths.js?v=1021.5";
+import { I, spkHtml, uiKoBtn, uikoChip } from "../ui.js?v=1021.5";
+import { audioCtx, hold } from "../wake.js?v=1021.5";
+import * as sfx from "../sfx.js?v=1021.5";
+import { scoreFx, stopFx } from "../scorefx.js?v=1021.5";
+import { units as jamoUnits, baseOf, shapeFix } from "../jamobox.js?v=1021.5"; // 자모 자리 나누기(획순 · 자판 덧칠 · 손글씨 덩어리 — 본부 10-07) // 손글씨 점수 효과 = 말하기와 같은 규칙(본부 10-07)
+import { createStrokes } from "../strokes.js?v=1021.5"; // 획 자료·획순 칠(글자부)
+import { whyRow } from "../whyask.js?v=1021.5"; // 「왜 틀렸어요?」(개발2팀 · 기본 꺼짐 ?why=1)
+let FBV = null; import(`../fbvoice.js?v=${document.documentElement.dataset.v || ""}`).then(m => { FBV = m; }).catch(() => {}); // 안내 소리(개발2팀 · 없으면 소리 없이 지금 그대로)
+import { fitToGuide } from "../strokefit.js?v=1021.5"; // 자석 따라오는 획 길 = 회색 가운데(글자부 10-12)
 
 const KEYS = [..."ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎㄲㄸㅃㅆㅉ"], VOW = [..."ㅏㅑㅓㅕㅗㅛㅜㅠㅡㅣ"];
 const VOW2 = [..."ㅐㅒㅔㅖㅘㅙㅚㅝㅞㅟㅢ"]; // 겹모음 줄(본부 10-06) — 칸 하나 · ㅓ+ㅣ 처럼 나눠 쳐도 받음
@@ -556,7 +557,7 @@ export default async function write(app, ep, id, opts = {}) {
       if ((o.sm ?? 1) < (o.sd ?? 1) && (o.sm ?? 1) < 0.9) return items.push({ cat: "line", k: "wx_shake", v: jn(o.j), j: o.j, s: o.i, shake: o.shake }); /* 떨림이 더 크면 「떨렸어요」 + 떨린 곳 빨강 */
       items.push({ cat: "line", k: "wx_line", v: { ...jn(o.j), w: a.t < 0.3 ? "wx_w_start" : a.t > 0.7 ? "wx_w_end" : "wx_w_mid", d: Math.abs(a.dy) >= Math.abs(a.dx) ? (a.dy < 0 ? "wx_d_up" : "wx_d_down") : a.dx < 0 ? "wx_d_left" : "wx_d_right", a: o.M >= 0.06 ? "wx_a_lot" : "wx_a_bit" }, j: o.j, s: o.i, mk: [a.nx, a.ny, a.x, a.y] }); });
     // ③ 빠르기 — 견본(보통)의 2배 넘게 느림 · 0.4배보다 빠름 · 0.4초 넘게 멈춤
-    (ex.sp?.per || []).forEach(o => { if (spBad.has(o.j)) return; const v = { ...jn(o.j), s: o.dur.toFixed(1), m: o.norm.toFixed(1), p: o.pause.toFixed(1) };
+    (ex.sp?.per || []).forEach(o => { if (spBad.has(o.j)) return; const sec = x => String(Math.min(60, Math.round(x))), v = { ...jn(o.j), s: sec(o.dur), m: String(Math.max(1, Math.round(o.norm))), p: String(Math.max(1, Math.round(o.pause))) }; /* 초 = 정수(본부 10-21 · 글·소리 1:1 · 숫자 소리 0~60) */
       const k = o.ratio > 2 ? "wx_slow" : o.ratio < 0.4 ? "wx_fast" : o.pause > 0.4 ? "wx_pause" : ""; if (!k) return; spBad.add(o.j); items.push({ cat: "speed", k, v, j: o.j, s: o.i }); });
     // 잘 쓴 획(✓) — 맞춘 자료 획 중 세 기준 모두 문제없는 것
     const good = [...new Set(mt.filter(j => j >= 0))].filter(j => !seen.has(j) && !lineBad.has(j) && !spBad.has(j)).sort((a, b) => a - b);
@@ -691,7 +692,7 @@ export default async function write(app, ep, id, opts = {}) {
       if (H.ordPlaying || H.ordAt) { H.stopOrder(); paintGuide(); } // 획순 보는 중·멈춘 채 쓰기 시작 = 획순 그만(회색으로)
       if (H.passed) { H.passed = false; H.strokes = []; H.said = null; H.roles = null; H.orderTold = false; H.mag = 0; markHand(); if (magnetOn()) { paintGuide(); H.magMarks?.(); } } // 통과 뒤 다시 그리면 = 다시 쓰기(더 높은 점수 · 자석은 처음 획부터)
       clearTimeout(H.clr); clearFix(); judgeFull(false); { const sc = work.querySelector(".hscore"); if (sc) sc.hidden = true; } // 새로 쓰기 시작 = 점수 지움
-      const tk = toolKey(); H.cur = Object.assign([pt(e, null)], { tool: tk, w: TOOLS[tk].w, ink: inkHex(), ts: [e.timeStamp || performance.now()] }); /* 획마다 그때 고른 먹 색(대표님 10-16 · 바꾸면 다음 획부터) */ H.strokes.push(H.cur); /* ts = 점마다 시각(빠르기 채점 · 10-15) */ paintInk(); drawStart(tk); H.lastMv = [e.clientX, e.clientY, e.timeStamp || performance.now()]; if (!magnetOn()) startTimer(H); });
+      fbStop(); const tk = toolKey(); H.cur = Object.assign([pt(e, null)], { tool: tk, w: TOOLS[tk].w, ink: inkHex(), ts: [e.timeStamp || performance.now()] }); /* 획마다 그때 고른 먹 색(대표님 10-16 · 바꾸면 다음 획부터) */ H.strokes.push(H.cur); /* ts = 점마다 시각(빠르기 채점 · 10-15) */ paintInk(); drawStart(tk); H.lastMv = [e.clientX, e.clientY, e.timeStamp || performance.now()]; if (!magnetOn()) startTimer(H); });
     iv.addEventListener("pointermove", e => { if (!H.cur) return; e.preventDefault(); { const now = e.timeStamp || performance.now(), L = H.lastMv; if (L) { const r = iv.getBoundingClientRect(), dt = Math.max(1, now - L[2]); drawMove(Math.hypot(e.clientX - L[0], e.clientY - L[1]) / Math.max(1, r.width) / (dt / 1000)); } H.lastMv = [e.clientX, e.clientY, now]; } const evs = e.getCoalescedEvents?.() || []; for (const ev of evs.length ? evs : [e]) { H.cur.push(pt(ev, H.cur)); H.cur.ts?.push(ev.timeStamp || performance.now()); despike(H.cur); } if (magnetOn()) magFollow(H.cur[H.cur.length - 1]); paintInk(); });
     // 실시간 자석(본부 10-11 「포토샵 마그네틱 올가미처럼」) — 지금 차례 획 위에서 손가락과 가장 가까운 점이 앞으로만 따라옴 · 칸 12% 넘게 떨어지면 따라오기 멈춤
     const magFollow = p => { const T = H.magList?.[H.mag]; if (!T) return; let F = H.follow; if (!F) { const Q = fitPath(c.ch, H.magList, H.mag, H.cur.tool); if (!Q.length) return; F = H.follow = { Q, prog: -1, lost: false, tool: H.cur.tool, w: H.cur.w }; }
@@ -892,15 +893,26 @@ export default async function write(app, ep, id, opts = {}) {
     if (!it.length) L.push(r.dir ? { raw: r.dir } : { k: "h_again" }); if (timeUp) L.push({ k: "wx_time" });
     return { L, it: L.filter(o => o.j != null || o.s != null), tt };
   }
+  // 안내 소리(대표님 10-21 「쓰기도 다 말을 넣어 주자 · 설명처럼」 · 설계 _hq/design_write_feedback_voice.md) — 개발2팀 fbvoice 를 같이 씀(조각 소리 · 불 · ⇄ 이어 읽기 · 겹침 막기)
+  //  쓰기부 몫 = 읽을 차례(열쇠 + 칸 값 → 소리 칸) · 판정 상자에 묶기 · 🎉 덮개가 걷힌 뒤 · 새로 긋기·지우기·다음·글자 바뀜에 멈춤
+  const fbSlot = (name, val) => typeof val === "number" ? { n: val } : typeof val === "string" && /^(wx_|h_dir_)/.test(val) ? { sub: [{ key: val, vars: {}, slots: {} }] } : typeof val === "string" && /^\d+$/.test(val) ? { n: +val } : typeof val === "string" && /^[ㄱ-ㆎ\s]+$/.test(val) ? { jamo: val } : typeof val === "string" && /[가-힣]/.test(val) ? { ko: val } : {};
+  function fbJudge(jx) { const out = []; if (jx.sc != null) out.push({ num: jx.sc });
+    for (const o of jx.L) { if (!o.k || o.raw != null) continue; const vars = {}, slots = {}; for (const [a, b] of Object.entries(o.v || {})) { vars[a] = typeof b === "string" && /^(wx_|h_dir_)/.test(b) ? tx(b) : String(b); slots[a] = fbSlot(a, b); } out.push({ key: o.k, vars, slots }); }
+    return out; }
+  function fbSay(bx, plan, fresh) { if (!FBV || !bx) return; if (st.fb?.el !== bx) { st.fb?.off(); st.fb = FBV.fbBind(bx, { canPlay: () => st.alive && !document.querySelector(".fxfull") && !st.auto && !(st.hand?.cur) }); st.fb.el = bx; }
+    clearTimeout(st.fbWait); const go = () => { if (!st.alive || st.fb?.el !== bx || !bx.isConnected) return; if (fresh && document.querySelector(".fxfull")) { st.fbWait = setTimeout(go, 250); return; } st.fb.set(plan, fresh); }; go(); } /* 🎉 덮개·팡파레가 끝난 뒤 자동 읽기 */
+  const fbStop = () => { clearTimeout(st.fbWait); st.fb?.stop(); };
   // 채점 전 안내(투덜이 10-15 「빈 흰 칸이라 허전」) — 「이 — 2획 · ① ㅇ ② ㅣ」 + 쓰는 법(회색 따라 / 👣 주황 점 / 🧲 자석) + ⏱ 시간 · 처음 6글자는 셋 다, 그 뒤엔 획 줄 + 쓰는 법만 · 상자 크기 그대로
   const koEsc = x => esc(x).replace(/[가-힣ㄱ-ㅣ]+/g, m => `<span class="ko" lang="ko">${m}</span>`); // 판정 글 속 배우는 한국어(글자·자모) = lang=ko(학습자 언어 글과 구분)
   function showGuide(H = st.hand) {
     const bx = work.querySelector(".hjudge"); if (!bx || !H || H.jx || H.hintOn || st.hand !== H) return; const list = SK.STK ? strokesOf(H.ch) : []; if (!list.length) return;
     let seen = 0; try { seen = +localStorage.getItem("malmun.wguide") || 0; if (!H.guideCounted) { H.guideCounted = true; localStorage.setItem("malmun.wguide", String(seen + 1)); } } catch {}
-    const nums = "①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳", L = [tx("wx_g_strokes", { c: H.ch, n: list.length, l: list.map((S, i) => `${nums[i] || i + 1} ${S.jamo || ""}`).join(" ") }), tx(magnetOn() ? "wx_g_magnet" : followOn() ? "wx_g_follow" : "wx_g_how")];
-    if (list.some(S => /[ㅈㅊㅉ]/.test(S.jamo || ""))) L.push(tx("wx_g_jcursive")); /* 글자부 10-15 ㅈ·ㅊ 자료 = 고딕 3·4획 → 손으로는 ス처럼 이어 써도 됨 */
-    if (seen < 6 && !magnetOn()) L.push(tx("wx_g_time", { s: Math.round(4 + 2.5 * list.length) })); /* 시간 = startTimer 와 같은 셈 */
+    const nums = "①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳", gl = list.map((S, i) => `${nums[i] || i + 1} ${S.jamo || ""}`).join(" "), how = magnetOn() ? "wx_g_magnet" : followOn() ? "wx_g_follow" : "wx_g_how", L = [tx("wx_g_strokes", { c: H.ch, n: list.length, l: gl }), tx(how)];
+    const P = [{ key: "wx_g_strokes", vars: { c: H.ch, n: String(list.length), l: gl }, slots: { c: { ko: H.ch }, n: { n: list.length }, l: { jamo: list.map(S => S.jamo || "").join("") } } }, { key: how, vars: {}, slots: {} }]; /* 소리 차례(글과 1:1) */
+    if (list.some(S => /[ㅈㅊㅉ]/.test(S.jamo || ""))) { L.push(tx("wx_g_jcursive")); P.push({ key: "wx_g_jcursive", vars: {}, slots: {} }); } /* 글자부 10-15 ㅈ·ㅊ 자료 = 고딕 3·4획 → 손으로는 ス처럼 이어 써도 됨 */
+    if (seen < 6 && !magnetOn()) { const s0 = Math.round(4 + 2.5 * list.length); L.push(tx("wx_g_time", { s: s0 })); P.push({ key: "wx_g_time", vars: { s: String(s0) }, slots: { s: { n: s0 } } }); } /* 시간 = startTimer 와 같은 셈 */
     judgeFull(false); H.guideOn = true; bx.className = "hjudge guide"; bx.innerHTML = L.map((x, i) => `<p${i ? "" : ' class="g1"'}>${koEsc(x)}</p>`).join(""); fitJudge();
+    fbSay(bx, P, !H.guideSaid && st.w === 0 && st.c === 0); H.guideSaid = true; /* 채점 전 안내 = 그 줄 첫 글자만 자동(본부 10-21) · 나머지는 상자 눌러 듣기 */
   }
   function showJudge(jx) {
     const bx = work.querySelector(".hjudge"); if (!bx) return; judgeFull(false); st.hand && (st.hand.jx = jx, st.hand.guideOn = false); if (!jx) { bx.innerHTML = ""; bx.className = "hjudge"; return showGuide(); }
@@ -908,6 +920,7 @@ export default async function write(app, ep, id, opts = {}) {
     const vv = v => v && Object.fromEntries(Object.entries(v).map(([a, b]) => [a, typeof b === "string" && /^(wx_|h_dir_)/.test(b) ? tx(b) : b])); /* 낱말 열쇠(방향·자리·크기) = 그릴 때 그 언어로(⇄) */
     const keepRow = jx.keep ? `<p class="keeprow"><button data-act="keepsheet" aria-label="${esc(tx("wx_keep_star"))}">💾 <span class="kl">${esc(tx("wx_keep_star"))}</span></button></p>` : ""; /* 100점 = 단추 하나 「💾 이 글씨 간직」 → 이 글씨를 대표로 고르고 바로 A4 저장 창(대표님 10-20 「저장 기능이 안 보여」 · 단추 둘 → 하나) */
     bx.innerHTML = keepRow + jx.L.map(o => `<p${o.ok ? ' class="ok"' : ""}><i>${o.ok ? (o.k === "wx_ok" ? "✓" : "") : N[n++] || ""}</i>${o.cat ? `<b class="tg tg-${o.cat}">${esc(tx("wx_s_" + o.cat))}</b>` : ""}${koEsc(o.raw ?? tx(o.k, vv(o.v)))}</p>`).join(""); fitJudge(); if (jx.keep) keepTip();
+    fbSay(bx, fbJudge(jx), jx.fresh); jx.fresh = false; /* 판정 소리로 읽기(대표님 10-21 · 개발2팀 fbvoice) — 점수 → 칭찬 → 줄 ❶❷❸ · ⇄ 다시 그리면 같은 줄부터 그 말로 */
   }
   // 💾 단추 글 = 단추 폭 안에 들 때까지 글자만 줄임(8px 까지 · 그래도 길면 두 줄) · 단추 크기·상자 틀 그대로(21개 언어 가장 긴 글 · 대표님 10-20 잘림)
   function fitKeep() { const b = work.querySelector(".hjudge .keeprow button"), m = b?.querySelector(".kl"); if (!m) return; m.style.removeProperty("font-size"); b.classList.remove("wrap2", "ic"); const over = () => { const br = b.getBoundingClientRect(), rg = document.createRange(); rg.selectNodeContents(b); const r = rg.getBoundingClientRect(); return b.scrollWidth > b.clientWidth + 1 || r.right > br.right - 4 || r.left < br.left + 4 || r.bottom > br.bottom + 1; };
@@ -979,7 +992,7 @@ export default async function write(app, ep, id, opts = {}) {
     const pass = r.pass ?? r.pct >= 80, star = pass && (r.total ?? r.pct) >= 95, full = pass && (r.total ?? r.pct) >= 100 && r.speedP != null, /* ★ = 점수 95↑ · 🎉 = 점수 100(대표님 10-16 · 빠르기는 조건 아님 · 손으로 쓴 획만) */ sc = work.querySelector(".hscore");
     if (sc) { sc.innerHTML = badgeHtml(r, star); sc.className = "hscore " + (pass ? "ok" : "bad"); sc.hidden = false; fitScore(sc); } /* 세 칸 「모양 · 선 · 빠르기」(투덜이 10-15 안 A) */
     scoreFx(work.querySelector(".hbox .fx"), star ? Math.max(95, r.pct) : pass ? Math.min(94, r.pct) : r.pct, { full }); /* ★ = 셋 다 95↑ · 🎉 = 셋 다 100 */
-    let jx = null; try { jx = judgeLines(r, force && H.timeUp); } catch (e) { console.warn("judge", e); } if (jx && full) { const kid = keepSave(c.ch, H.strokes, r); jx.keep = { ch: c.ch, id: kid }; } showJudge(jx); /* 판정 상자(투덜이 10-15) · 🎉 100점 = 간직 후보로 모음 + ⭐·📄 단추 */
+    let jx = null; try { jx = judgeLines(r, force && H.timeUp); } catch (e) { console.warn("judge", e); } if (jx && full) { const kid = keepSave(c.ch, H.strokes, r); jx.keep = { ch: c.ch, id: kid }; } if (jx) { jx.sc = r.total ?? r.pct; jx.fresh = true; } showJudge(jx); /* 판정 상자(투덜이 10-15) · 🎉 100점 = 간직 후보로 모음 + ⭐·📄 단추 */
     if (pass) { // 통과 — 초록 + 그 글자 소리 · 최고 점수 기억 · 「다음 ▶」/다시 쓰기
       bestPut(st.w, st.c, r.pct); paintSent(); work.querySelector("[data-act=hnext]")?.classList.add("nudge"); /* 통과 = 저절로 안 넘어감(대표님 10-16 설명 볼 틈) · 「다음 ▶」 반짝 */
       note.textContent = ""; H.passed = true; H.paintInk(); markHand();
@@ -1201,7 +1214,7 @@ export default async function write(app, ep, id, opts = {}) {
     if (mb) { if (st.mode !== mb.dataset.mode) { if (st.auto || st.resumeAuto) stopAuto(); st.hand?.stopOrder?.(); hush(); stopLoop(); st.busy = false; st.done = false; st.queue = []; st.mode = mb.dataset.mode; /* 모드 바꾸기 = 돌던 것(자동·획순·소리) 먼저 멈춤 — 본부 10-08 투덜이: 자판 자동 켠 채 손글씨로 바꾸면 저 혼자 계속 씀 */ try { localStorage.setItem("malmun.wmode", st.mode); } catch {} app.querySelectorAll("[data-mode]").forEach(x => x.setAttribute("aria-pressed", String(x.dataset.mode === st.mode))); st.typed = []; st.k = 0; st.part = ""; st.segEnd = false; render(); } return; }
     const b = e.target.closest("[data-act]");
     if (!b) return;
-    const a = b.dataset.act;
+    const a = b.dataset.act; if (/^(hclear|hnext|horder|hundo|hdone|autoone|autoall|autoline|hear|hearch|next|prev|keepsheet)$/.test(a || "")) fbStop(); /* 안내 소리 = 다른 일 시작하면 멈춤 */
     if (a === "close") { hush(); stopLoop(); return opts.onClose?.(); } // ✕ 닫기(본부 10-07 — 말하기·설명 창과 같게 · 폰 뒤로도 같은 동작)
     if (a === "keepstar") { const k = st.hand?.jx?.keep; if (k) { keepStar(k.ch, k.id); b.setAttribute("aria-pressed", "true"); } return; } if (a === "keepsheet") { const k = st.hand?.jx?.keep; if (k) keepStar(k.ch, k.id); keepTipOff(); stopFx(); return keepOpen(); } /* 🎉 덮개·팡파레가 미리보기 위에 겹치지 않게 바로 치움(검사부 10-15) */ // 간직하기(🎉 100점만)
     if (a === "inkpick") return inkMenu(!app.querySelector(".inkmenu")); if (a === "inkset") { try { localStorage.setItem("malmun.hink", b.dataset.ink); } catch {} app.querySelectorAll(".hpal [data-ink]").forEach(x => x.setAttribute("aria-checked", String(x.dataset.ink === inkKey()))); return; } /* 팔레트 = 다음 획부터 그 색 */ // 먹 색 고르기 → 바로 닫힘 · 그은 획도 그 색
@@ -1257,5 +1270,5 @@ export default async function write(app, ep, id, opts = {}) {
   const onFontsDone = () => { if (st.alive) { fitWord(); placeBtns(); fitWord(); fitHbtn(); } }; document.fonts?.ready?.then(() => setTimeout(onFontsDone, 0)); /* 뜻 줄(fitSub2)도 다시 맞춤 */ document.fonts?.addEventListener?.("loadingdone", onFontsDone); // 글꼴이 늦게 오면(나스탈리크·데바나가리) 단추 글 다시 맞춤(10-16)
   const onVis = () => { if (document.visibilityState === "hidden" && st.alive) { if (st.auto || st.resumeAuto) stopAuto(); stopLoop(); hush(); st.busy = false; const H = st.hand; if (H) { clearTimeout(H.adv); H.passSnd = false; } } /* 다른 탭·앱으로 가면 자동·반복·소리·다음 글자 예약 멈춤(본부 10-15) */ if (document.visibilityState === "visible") { try { const c = audioCtx(); if (c.state !== "running") c.resume().catch(() => {}); } catch {} } }; document.addEventListener("visibilitychange", onVis); // 앱으로 돌아오면 소리 장치 깨움(폰에서 다른 앱 갔다 오면 잠들어 쓰는 소리가 안 나던 것 · 본부 10-14)
   const onWinUp = () => { if (st.hand?.cur) st.hand.up?.(); }; window.addEventListener("pointerup", onWinUp, true); window.addEventListener("pointercancel", onWinUp, true); // 손글씨 획 = 창 어디에서 놓아도 끝남(투덜이 10-14)
-  return () => { window.removeEventListener("malmun:big", onBig); window.removeEventListener("resize", onBig); document.fonts?.removeEventListener?.("loadingdone", onFontsDone); document.querySelector(".keepov")?.remove(); document.removeEventListener("pointerdown", onInkOut, true); document.removeEventListener("visibilitychange", onVis); window.removeEventListener("malmun:uilang", onUiLang); window.removeEventListener("pointerup", onWinUp, true); window.removeEventListener("pointercancel", onWinUp, true); release(); st.alive = false; { const H0 = st.hand; if (H0) { clearInterval(H0.tInt); H0.tStart = null; H0.tDue = false; clearTimeout(H0.timer); clearTimeout(H0.clr); clearTimeout(H0.adv); clearTimeout(H0.fixT); clearInterval(H0.paceT); } } drawEnd(); /* 닫을 때 시간 막대·채점 예약·넘김 예약·쓰는 소리 모두 멈춤(검사부 10-14 「있」 ㅇ 만 쓰고 닫았다 다시 열면 15초 안에 꽝) */ st.autoGen = (st.autoGen || 0) + 1; st.auto = false; st.resumeAuto = false; st.allNext = false; st.hand?.stopOrder?.(); hush(); st.hand?.ro?.disconnect(); clearTimeout(st.hand?.timer); delete app.__wr; };
+  return () => { clearTimeout(st.fbWait); st.fb?.off(); st.fb = null; window.removeEventListener("malmun:big", onBig); window.removeEventListener("resize", onBig); document.fonts?.removeEventListener?.("loadingdone", onFontsDone); document.querySelector(".keepov")?.remove(); document.removeEventListener("pointerdown", onInkOut, true); document.removeEventListener("visibilitychange", onVis); window.removeEventListener("malmun:uilang", onUiLang); window.removeEventListener("pointerup", onWinUp, true); window.removeEventListener("pointercancel", onWinUp, true); release(); st.alive = false; { const H0 = st.hand; if (H0) { clearInterval(H0.tInt); H0.tStart = null; H0.tDue = false; clearTimeout(H0.timer); clearTimeout(H0.clr); clearTimeout(H0.adv); clearTimeout(H0.fixT); clearInterval(H0.paceT); } } drawEnd(); /* 닫을 때 시간 막대·채점 예약·넘김 예약·쓰는 소리 모두 멈춤(검사부 10-14 「있」 ㅇ 만 쓰고 닫았다 다시 열면 15초 안에 꽝) */ st.autoGen = (st.autoGen || 0) + 1; st.auto = false; st.resumeAuto = false; st.allNext = false; st.hand?.stopOrder?.(); hush(); st.hand?.ro?.disconnect(); clearTimeout(st.hand?.timer); delete app.__wr; };
 }

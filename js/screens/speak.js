@@ -71,7 +71,6 @@ import { similarity, align } from "../score.js?v=1021.4";
 import { scoreFx } from "../scorefx.js?v=1021.4"; // 점수별 효과(본부 10-05)
 import { whyRow } from "../whyask.js?v=1021.4";
 import { fbBind, fbPlan, fbAuto, setFbAuto } from "../fbvoice.js?v=1021.4"; // 결과 안내 소리로 읽기·불·⇄(대표님 10-21) // 「왜 틀렸어요?」(본부 10-19 · 기본 꺼짐 ?why=1)
-import { whyRow } from "../whyask.js?v=1021.8"; // 「왜 틀렸어요?」(본부 10-19 · 기본 꺼짐 ?why=1)
 export { similarity };
 
 // ── 내 목소리 저장(S6) ──
