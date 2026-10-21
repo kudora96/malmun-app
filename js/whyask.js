@@ -2,11 +2,11 @@
 //  겉 틀: 기본 꺼짐 — 켜기 = 주소에 ?why=1 (기억 malmun.why · ?why=0 이면 끔) · 꺼져 있으면 단추·상자 자체를 그리지 않음(지금 화면과 0px 같음)
 //  쓰기 화면(쓰기부)도 이 파일을 씀: whyRow(target, heard, mode, meaning) 를 틀림 표시 옆에 넣고 · 같은 data-act=why 클릭은 아래 문서 하나가 받음
 //  키는 앱에 없음(Worker 비밀값) · 보내는 것 = 정답 문장 · 학습자가 말한/쓴 글 · 모드 · 학습자 언어 · 뜻(있으면) · 기기 번호
-import { t, lang } from "./i18n.js?v=1021.5";
-import { sttURL, sttReady, deviceId } from "./sttserver.js?v=1021.5";
-import { allowed } from "./agepolicy.js?v=1021.5"; // AI = 나이(대표님 10-19)
-import { uikoChip } from "./ui.js?v=1021.5"; // 답 창에서도 ⇄(음악 상자와 같은 자리 · 대표님 「⇄ 는 어디서든 즉시」)
-import { esc } from "./text.js?v=1021.5";
+import { t, lang } from "./i18n.js?v=1021.6";
+import { sttURL, sttReady, deviceId } from "./sttserver.js?v=1021.6";
+import { allowed } from "./agepolicy.js?v=1021.6"; // AI = 나이(대표님 10-19)
+import { uikoChip } from "./ui.js?v=1021.6"; // 답 창에서도 ⇄(음악 상자와 같은 자리 · 대표님 「⇄ 는 어디서든 즉시」)
+import { esc } from "./text.js?v=1021.6";
 
 const KEY = "malmun.why";
 try { const m = /[?&]why=([01])\b/.exec(location.search); if (m) m[1] === "1" ? localStorage.setItem(KEY, "1") : localStorage.removeItem(KEY); } catch {}
