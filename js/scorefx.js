@@ -3,9 +3,9 @@
 //  · 80 아래(말은 들림) = miss(꽝 살짝 흔들림 0.4초) · 말소리 없음 = 효과 없음
 //  🎉 100점 = 화면 위 덮개(position:fixed · 누르기 통과 · 화면 크기 0px): 팡파레(합성 · 파일 없음) + 별 여러 개 날아오름 + 들쭉날쭉 떨어지는 색종이(방사형 햇살 장식 금지) + 「100점!」 큰 글씨
 // 점수 줄 위 작은 자리에 겹쳐 떴다가 사라진다(position:absolute — 카드·창 크기·스크롤 안 바뀜) · 움직임 줄이기 설정이면 움직임 없이 표시만
-import * as sfx from "./sfx.js?v=1021.10";
-import { t } from "./i18n.js?v=1021.10";
-import { paths } from "./paths.js?v=1021.10";
+import * as sfx from "./sfx.js?v=1021.11";
+import { t } from "./i18n.js?v=1021.11";
+import { paths } from "./paths.js?v=1021.11";
 
 export const tierOf = sc => (sc == null ? null : sc >= 95 ? "perfect" : sc >= 80 ? "pass" : "miss");
 // 소리 = media/sfx/score_*.mp3(투덜이가 귀로 고른 4개 · 본부 10-05 · 원본 02_assets/sfx) · 파일이 없으면 조용히 건너뜀
