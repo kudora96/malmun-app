@@ -42,6 +42,7 @@ import { episode } from "../data.js?v=1021.4";
 import { paths, MEDIA } from "../paths.js?v=1021.4";
 import { attachVq } from "../vq.js?v=1021.4";
 import { setReportCtx } from "../report.js?v=1021.4";
+import { fbBind, fbPlan } from "../fbvoice.js?v=1021.4"; // 결과 안내 소리로 읽기(대표님 10-21)
 import { Sequence } from "../audio.js?v=1021.4";
 import { I, progress, SPEAKER, spkHtml, uiKoBtn, uikoChip, switchUiKo } from "../ui.js?v=1021.4";
 import writeView from "./write.js?v=1021.4";
@@ -689,7 +690,8 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   let sp = null; // { i, ctl, blob, audio, saved }
   // 시도 번호 + 받아쓰기 끊기(검사부 10-11) — 「확인 중…」 동안 카드를 닫거나 새로 녹음하면 옛 결과는 버림 · srOnBlob 도 멈춤
   let spAtt = 0, spAbort = null; const spCancel = () => { spAtt++; const a = spAbort; spAbort = null; try { a?.abort(); } catch {} };
-  function spStop() { spCancel(); quietWake(false); sp?.ctl?.stop(true); sp?.audio?.pause(); sp?.slow?.pause(); sp = null; closeMic(); } // 카드를 닫을 때 마이크도 닫음(그때처럼 · 카드가 열려 있는 동안은 쥐고 있음)
+  let fbx = null; // 설명 창 「말해 보세요」 결과 읽기(fbvoice.js)
+  function spStop() { fbx?.b.off(); fbx = null; spCancel(); quietWake(false); sp?.ctl?.stop(true); sp?.audio?.pause(); sp?.slow?.pause(); sp = null; closeMic(); } // 카드를 닫을 때 마이크도 닫음(그때처럼 · 카드가 열려 있는 동안은 쥐고 있음)
   // 소리는 언제나 하나(본부 10-10 막 누르기 — 느린 견본·내 목소리가 나오는 중에 칸 글을 누르면 설명 읽기가 겹치던 것) — 견본(느린)·내 목소리·효과음 멈춤
   const sayPlaying = () => !!(sp?.slow?.playing || (sp?.audio && !sp.audio.paused));
   const hushSay = () => { sp?.slow?.pause(); sp?.audio?.pause(); sfxL.stopAll(); };
@@ -767,11 +769,16 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     // 점수가 안 나오면 절대 통과·저장 아님(본부 10-04 — 엉뚱한 말도 그냥 넘어가던 것) · 왜 안 나왔는지 짧게
     // 점수는 언제나 % — 못 알아들었으면 「0% · 까닭」 · 80% 넘으면 [저장]
     box.querySelector("[data-x=keep]").hidden = !(sc != null && sc >= PASS);
-    setTx(msg, () => { let m = switchedSR ? `0% · ${t("sr_only_switched")}` : sc == null ? (canScore() ? `0% · ${t(r.why === "nospeech" ? "why_nospeech" : srWhy(r.srErr))}` : t(noScoreKey())) : scoreLine(sc, r.why, t, (h => h && { ...h, say: L[i].say.ko, rom: Object.fromEntries([...(L[i].v9?.pieces || []).map(p => [p.ko, p.rom]), ...Object.entries(L[i].v9?.gloss || {}).map(([k, g]) => [k, g.rom])].filter(([k, r]) => k && r)) })(endHint(L[i].say.ko, r.heard))); // 두 단계 통과 ☆/★ + 끝난 까닭
+    const hintX = (h => h && { ...h, say: L[i].say.ko, rom: Object.fromEntries([...(L[i].v9?.pieces || []).map(p => [p.ko, p.rom]), ...Object.entries(L[i].v9?.gloss || {}).map(([k, g]) => [k, g.rom])].filter(([k, r]) => k && r)) })(endHint(L[i].say.ko, r.heard));
+    setTx(msg, () => { let m = switchedSR ? `0% · ${t("sr_only_switched")}` : sc == null ? (canScore() ? `0% · ${t(r.why === "nospeech" ? "why_nospeech" : srWhy(r.srErr))}` : t(noScoreKey())) : scoreLine(sc, r.why, t, hintX); // 두 단계 통과 ☆/★ + 끝난 까닭
       if (rhy && sc != null) m += " · " + rhyText(rhy, t);
       if (rhy?.late && sc != null) m += " · " + t("why_late");
       if (!r.blob && sc != null) m += " · " + t("sr_only_note");
       return m; }); // 언어를 바꾸면 이 글을 새 언어로 다시 씀(retext · 안 A)
+    // 결과 안내 = 소리로 읽기 + 불(fbvoice.js) — 새 결과면 한 번 저절로 · ⇄ 는 onUiLang 이 같은 문장부터 그 말로
+    if (!fbx || fbx.el !== msg) { fbx?.b.off(); fbx = { el: msg, b: fbBind(msg, { canPlay: () => !!sp && !sp.ctl && st.panel?.kind === "explain" }) }; }
+    fbx.mk = () => (sc != null && !switchedSR ? fbPlan({ sc, why: r.why, hint: hintX, rhy, late: rhy?.late, rhyAny: true }) : []);
+    fbx.b.set(fbx.mk(), true);
     box.classList.toggle("pass", sc != null && sc >= PASS);
     scoreFx(box.querySelector(".fx"), sc ?? (canScore() && !switchedSR ? 0 : null), { busy: () => !!sp?.ctl, full: isFull(sc, rhy) }); // 점수가 뜨는 순간 효과 한 번 · 아무 말도 없었어도 꽝(투덜이 10-08)
     const bh = bestFull(L[i].say.ko, r.heard); // 들린 말(덧붙은 말은 흐린 회색) — 점수를 낸 그 인식 결과 · 틀린 음절 빨간 밑줄 · 빠진 자리 _
@@ -1056,6 +1063,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     if (!app.querySelector(".scr.learn")) return removeEventListener("malmun:uilang", onUiLang);
     setRateWord(t("speed")); // 속도 알약 말(rateLabel)도 새 언어로(다국어부 10-14)
     st.cardKeep = st.cur; // 지금 카드 맞춤 단계 고정(⇄ 0px)
+    if (fbx?.el.isConnected) fbx.b.set(fbx.mk(), false); // 결과 안내 읽기 중이면 같은 문장부터 새 말로
     if (st.panel?.kind === "explain") st.uiFit = true; // 이 창이 닫히거나 다른 줄로 갈 때까지 창 크기 고정
     if (st.uiBar) return; const w = uiKoOn() ? "ko" : "L";
     v9set("snd", w); v9set("txt", w);

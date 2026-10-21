@@ -310,8 +310,8 @@
  "ink_pink": "Pink",
  "ink_sky": "Sky blue",
  "ink_gray": "Gray",
-  "line_game": "Game",
-  "hold_name": "Forgot one? Press and hold a button to see its name",
+ "line_game": "Game",
+ "hold_name": "Forgot one? Press and hold a button to see its name",
  "birth_q": "Choose the year you were born",
  "birth_sub": "We match features to your age. It never leaves this device.",
  "birth_year": "Year of birth",
@@ -331,5 +331,6 @@
  "rp_ph": "(Optional) Tell us briefly · 100 characters",
  "rp_send": "Send",
  "rp_thx": "Thank you! We'll check and fix it.",
- "rp_limit": "No more reports today. Please tell us again tomorrow."
+ "rp_limit": "No more reports today. Please tell us again tomorrow.",
+ "fb_auto": "Read my results aloud"
 }

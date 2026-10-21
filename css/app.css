@@ -1593,6 +1593,12 @@ html.bigview,html.bigview body{overflow:hidden}
 .rptip .bt .go{background:var(--ink);color:var(--bg);border-color:var(--ink);font-weight:700}
 .rptip .bt .go:disabled{opacity:.35;cursor:not-allowed}
 .rphi{box-shadow:0 0 0 3px var(--hi)!important}
+/* 결과 안내 소리로 읽기(fbvoice.js · 대표님 10-21) — 읽는 문장에 불(설명 창 칠과 같은 색 · 글자·자리 0px) · 누르면 읽기 ⇄ 멈춤 */
+.fbcan{cursor:pointer}
+.fbs{border-radius:3px;transition:background-color .2s;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.fbs.fbon{background:var(--sent)}
+.helpbox .fbauto{min-height:32px;padding:4px 12px;border-radius:999px;border:1px solid var(--line);background:var(--bg2);color:var(--ink);font-size:inherit}
+.helpbox .fbauto[aria-pressed=true]{background:var(--hi);border-color:var(--hi);color:#fff}
 .write .info .slotrow{position:relative}.write .info .slotrow > .whyrow.wwhy{position:absolute;top:50%;transform:translateY(-50%);margin:0;z-index:2}.write .info .slotrow > .whyrow.wwhy .whyb{font-size:12px;padding:2px 8px;white-space:nowrap;overflow:hidden;text-overflow:clip;box-shadow:0 1px 4px rgba(0,0,0,.15)} /* 「왜 틀렸어요?」 = 자모 칸 옆 덮개(쓰기부 10-20 · 틀 0px) */
 .write .info .slotrow > .whyrow.wwhy.ic .whyb [data-k]{display:none}
 .write .info .slotrow > .whyrow.wwhy.two .whyb{white-space:normal;line-height:1.1;text-align:start;padding:2px 8px;border-radius:12px}

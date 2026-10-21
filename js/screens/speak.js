@@ -69,7 +69,8 @@ export const maxMsFor = say => Math.max(8000, (3 + 0.8 * [...String(say || "")].
 // ── 닮음 = 음절 정렬(js/score.js · 「들린 말」 빨간 표시와 같은 함수 — 본부 10-04) ──
 import { similarity, align } from "../score.js?v=1021.4";
 import { scoreFx } from "../scorefx.js?v=1021.4"; // 점수별 효과(본부 10-05)
-import { whyRow } from "../whyask.js?v=1021.4"; // 「왜 틀렸어요?」(본부 10-19 · 기본 꺼짐 ?why=1)
+import { whyRow } from "../whyask.js?v=1021.4";
+import { fbBind, fbPlan, fbAuto, setFbAuto } from "../fbvoice.js?v=1021.4"; // 결과 안내 소리로 읽기·불·⇄(대표님 10-21) // 「왜 틀렸어요?」(본부 10-19 · 기본 꺼짐 ?why=1)
 export { similarity };
 
 // ── 내 목소리 저장(S6) ──
@@ -86,7 +87,7 @@ export const recPut = async (key, val) => { try { const d = await db(); await ne
 
 // 단추 글 = 기호(◀ ▶ ? ✕) + 글 — 좁으면 글만 숨김(머리 줄 한 줄 유지)
 // 사용법 풍선 글(help_sp_*) — {b} = 「ने⇄한」 단추 이름(한국어 칸 · ⇄ 때 이 함수로 다시 씀)
-const helpHTML = () => [1, 2, 3, 4, 5, 6, 7, 8, 9].map(k => "help_sp_" + k).concat(ageHelpKey() ? [ageHelpKey()] : []).filter(k => t(k) !== k).map(k => `<p dir="auto">${esc(t(k)).replace("{b}", `<span lang="ko">${esc(langShort(lang))}⇄한</span>`)}</p>`).join("") + `<p class="x">${esc(t("help_close"))}</p>`;
+const helpHTML = () => [1, 2, 3, 4, 5, 6, 7, 8, 9].map(k => "help_sp_" + k).concat(ageHelpKey() ? [ageHelpKey()] : []).filter(k => t(k) !== k).map(k => `<p dir="auto">${esc(t(k)).replace("{b}", `<span lang="ko">${esc(langShort(lang))}⇄한</span>`)}</p>`).join("") + `<p><button class="fbauto" data-act="fbauto" aria-pressed="${fbAuto()}"><span aria-hidden="true">🔊</span> <span data-k="fb_auto">${esc(t("fb_auto"))}</span></button></p>` + `<p class="x">${esc(t("help_close"))}</p>`; // 결과 안내 저절로 읽기 켬/끔(대표님 10-21 · 틀 0px = 「?」 안)
 const lbl = k => { const s = t(k), m = String(s).match(/^([^\p{L}\p{M}\p{N}]*)(.*?)([^\p{L}\p{M}\p{N}]*)$/u); return m ? `${m[1] ? `<i class="ic">${esc(m[1].trim())}</i>` : ""}<span class="lt" data-k="${k}" data-kcore>${esc(m[2])}</span>${m[3] ? `<i class="ic">${esc(m[3].trim())}</i>` : ""}` : esc(s); };
 export default async function speak(app, ep, id, opts = {}) {
   const d = await episode(ep, lang);
@@ -124,6 +125,7 @@ export default async function speak(app, ep, id, opts = {}) {
     </div>
   </section>`;
   const $ = s => app.querySelector(s);
+  const fb = fbBind(app.querySelector(".msg"), { canPlay: () => st.alive && !st.rec && !st.checking }); // 결과 안내 읽기(fbvoice.js)
   const cur = () => parts[st.i];
   // 도움말 풍선 = 칸 안에 다 보이게(본부 10-07 · 스크롤 0) — 넘치면 글을 조금씩 작게(최소 0.6배)
   const fitHelp = () => { const hb = $(".helpbox"); if (!hb || hb.hidden) return; const ps = [...hb.children].filter(x => !x.classList.contains("x")); /* 「닫으려면…」 안내는 줄이지 않음(12px · 검사부 1015.5 ur·th 320) */ ps.forEach(x => x.style.removeProperty("zoom")); hb.style.overflowY = "hidden"; const zMin = Math.min(1, 12 / (parseFloat(getComputedStyle(ps[0] || hb).fontSize) || 13)); /* 글 크기 12px 아래로 안 감(ur 처럼 바탕 글이 작은 말 · 검사부 1015.4) */ for (let z = 0.96; z >= zMin && hb.scrollHeight > hb.clientHeight; z -= 0.04) ps.forEach(x => (x.style.zoom = z.toFixed(2))); if (hb.scrollHeight > hb.clientHeight + 1) hb.style.overflowY = "auto"; }; // 글은 12px 아래로 안 줄임(검사부 10-15 ur 320 · 0.6배는 못 읽음) — 그래도 넘치면 풍선 안에서 굴려 읽음
@@ -190,6 +192,8 @@ export default async function speak(app, ep, id, opts = {}) {
     { const hl = $(".heardline"), sv = hl.closest(".speak"); hl.classList.remove("wtight"); if (sv && hl.querySelector(".whyrow") && sv.scrollHeight > sv.clientHeight + 1) hl.classList.add("wtight"); } // 아주 작은 화면(320×568)에서 넘치면 「들은 말:」 이름표 빼고 단추 글 작게
     $(".mic").classList.toggle("on", !!st.rec); $(".mic").disabled = !!st.checking; $(".mic").setAttribute("aria-disabled", String(!!st.checking)); // 확인 중 = 🎤 막음(검사부 10-11)
     if (st.checking && !st.rec) $(".msg").textContent = t("checking");
+    { const show = !st.rec && !st.checking && !st.kept && !st.note && sc != null, k = show ? `${sc}|${st.whyEnd}|${st.heardHTML}|${st.rhy?.L}|${st.late}|${st.i}` : ""; // 결과 안내 = 소리로 읽기(새 결과면 한 번 저절로 · ⇄ 면 같은 문장부터 그 말로)
+      fb.set(show ? fbPlan({ sc, why: st.whyEnd, hint: st.hint, rhy: st.rhy, late: st.late }) : [], show && k !== st.fbKey); st.fbKey = k; }
     $(".mic .lab").textContent = st.rec ? (st.ready ? t("btn_stop") : "… " + t("mic_opening")) : "🎤 " + t("speak_now"); // 준비 중 → 마이크에 실제 소리가 들어오면 녹음 중 · 카드처럼 「🎤 बोल्नुहोस्」
     $("[data-act=model]").setAttribute("aria-pressed", String(st.model));
     { const r = getRate("m"), mb = $("[data-act=mrate]"); mb.textContent = rateLabel(r); mb.setAttribute("aria-pressed", String(r !== 1)); }
@@ -437,6 +441,7 @@ export default async function speak(app, ep, id, opts = {}) {
   app.__sp = { closeList: () => closeMics(true), toggle: () => (st.model ? (stopSounds(), paint()) : playModel()), busy: () => !!st.rec || st.model || sfx.playing(), _finish: finish, _state: st, _cur: () => cur(), _paint: () => paint() };
 
   app.querySelector(".scr").onclick = async e => {
+    { const fa = e.target.closest("[data-act=fbauto]"); if (fa) { setFbAuto(!fbAuto()); fa.setAttribute("aria-pressed", String(fbAuto())); if (!fbAuto()) fb.stop(); return; } } // 「?」 안 켬/끔 — 풍선은 그대로
     if (!$(".helpbox").hidden) { $(".helpbox").hidden = true; if (e.target.closest("[data-act=help], .helpbox")) return; } // 풍선은 아무 데나 누르면 닫힘
     if (!$(".miclist").hidden && !e.target.closest(".miclist, [data-act=pick]")) { closeMics(); return; } // 마이크 목록 바깥 누르기 = 닫기
     const sg = e.target.closest("[data-seg]");
@@ -497,5 +502,5 @@ export default async function speak(app, ep, id, opts = {}) {
   const onLang = () => { if (!st.alive) return; setRateWord(t("speed")); $(".helpbox").innerHTML = helpHTML(); fitHelp(); fitHead(true); lockBtns(); /* ⇄ 때는 줄이기만(풀지 않음) — 단추 글이 보였다 숨었다 하지 않게(다국어부 10-15 ur 1280) */ /* 속도 알약 말도 새 언어로(다시 그릴 때 옛 말로 쓰지 않게 · 다국어부 10-14) */ if (st.checking) return; paint(); if (st.retryDev) $(".msg").textContent = t("sr_retry_dev"); };
   addEventListener("malmun:uilang", onLang);
   const onFitW = () => st.alive && fitHead(true); addEventListener("malmun:langfit", onFitW); const onBig = () => st.alive && requestAnimationFrame(() => fitHead()); addEventListener("malmun:big", onBig); // 크게 보기 들고 날 때(머리 줄 폭·⛶ 칩) 다시 맞춤 // langfit 이 단추 폭을 「두 말 중 긴 쪽」으로 고정할 때 → 처음부터 긴 말 기준 단계(첫 ⇄ 도 0px · 다국어부 10-15)
-  return () => { removeEventListener("malmun:uilang", onLang); removeEventListener("malmun:langfit", onFitW); removeEventListener("malmun:big", onBig); st.alive = false; newAtt(); clearInterval(litT); closeCmp(); stopRec(true); stopSounds(); st.stream?.getTracks().forEach(x => x.stop()); release(); quietWake(false); document.removeEventListener("keydown", onEsc, true); delete app.__sp; };
+  return () => { fb.off(); removeEventListener("malmun:uilang", onLang); removeEventListener("malmun:langfit", onFitW); removeEventListener("malmun:big", onBig); st.alive = false; newAtt(); clearInterval(litT); closeCmp(); stopRec(true); stopSounds(); st.stream?.getTracks().forEach(x => x.stop()); release(); quietWake(false); document.removeEventListener("keydown", onEsc, true); delete app.__sp; };
 }

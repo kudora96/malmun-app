@@ -31,7 +31,8 @@ export const preload = urls => Promise.all([...new Set(urls.filter(Boolean))].ma
 
 // 틀기 — 다 나오면 true · 파일이 없으면 false · 중간에 멈춰도 true(없음이 아니므로)
 // opt: { offset 초, dur 초, fade 초(앞뒤 살짝 줄이기 — 원음 잘라 틀 때) }
-export async function play(url, { offset = 0, dur, fade = 0 } = {}) {
+export let lastTag = null; // 방금 시작한 소리의 꼬리표(fbvoice.js — 남의 소리가 시작됐는지 알려고)
+export async function play(url, { offset = 0, dur, fade = 0, tag = null } = {}) {
   const my = gen, buf = await load(url);
   if (!buf) return false;
   if (my !== gen) return true; // 받는 사이 멈춤 = 멈춘 것(없음 아님)
@@ -46,14 +47,14 @@ export async function play(url, { offset = 0, dur, fade = 0 } = {}) {
     g.gain.setValueAtTime(vol, t0 + len - fade); g.gain.linearRampToValueAtTime(0, t0 + len);
   } else g.gain.setValueAtTime(vol, t0);
   return new Promise(res => {
-    const h = { src, stopped: false };
+    const h = { src, stopped: false, tag };
     live.add(h);
     src.onended = () => {
       live.delete(h); dispatchEvent(new CustomEvent("malmun:snd", { detail: -1 })); // 배경음악 덕킹 끝(bgm.js)
       note(h.stopped ? "멈춤" : "끝", url, { pos: offset + (ctx.currentTime - t0) });
       res(true);
     };
-    note("시작", url); dispatchEvent(new CustomEvent("malmun:snd", { detail: 1 })); // 배경음악 덕킹(bgm.js)
+    note("시작", url); lastTag = tag; dispatchEvent(new CustomEvent("malmun:snd", { detail: 1 })); // 배경음악 덕킹(bgm.js)
     src.start(t0, offset, len);
   });
 }
@@ -62,3 +63,5 @@ export function stopAll() {
   for (const h of live) { h.stopped = true; try { h.src.stop(); } catch {} }
 }
 export const playing = () => live.size > 0;
+export const stopGen = () => gen; // stopAll 번호표(누가 다 멈췄는지 알려고 · fbvoice.js)
+export function stopTag(tag) { for (const h of live) if (h.tag === tag) { h.stopped = true; try { h.src.stop(); } catch {} } } // 그 꼬리표 소리만 멈춤(남의 소리는 그대로)
