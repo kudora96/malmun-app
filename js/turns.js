@@ -7,6 +7,9 @@ import { MEDIA } from "./paths.js?v=1021.4";
 import { startQ } from "./vq.js?v=1021.4";
 import { listen, analyze, judge } from "./vowel.js?v=1021.4";
 
+// 공개판 스위치(본부 10-21): 2편 진짜 반응 영상이 나올 때까지 주소 ?follow=1 일 때만(이 기기 기억 · ?follow=0 끔)
+try { const f = new URLSearchParams(location.search).get("follow"); if (f === "1") localStorage.setItem("malmun.follow", "1"); else if (f === "0") localStorage.removeItem("malmun.follow"); } catch {}
+export const followOn = () => { try { return localStorage.getItem("malmun.follow") === "1"; } catch { return false; } };
 const pref = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } };
 const reactUrl = (ep, file, q) => `${MEDIA}/video/${q}/react/${ep}/${file}?v=1`;
 const W = ms => new Promise(r => setTimeout(r, ms));
@@ -14,6 +17,7 @@ const getJSON = u => fetch(u, { cache: "no-store" }).then(r => (r.ok ? r.json() 
 
 // opts: { wrap(#vwrap), canRun() 차례를 해도 되나(영상 모드·이어 보기 중), onSub({id,ko,tr}|{listen:true,level}|null) 자막 칸, lang }
 export async function setupTurns(ep, v, opts) {
+  if (!followOn()) return null;
   const [T, I] = await Promise.all([getJSON(`data/${ep}/${ep}.turns.json`), getJSON(`data/${ep}/${ep}.reactions.json`)]);
   if (!T?.turns?.length || !T.reactions) return null;
   const q = startQ(), urls = new Map(); // id → objectURL(미리 받은 것)
