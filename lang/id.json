@@ -332,5 +332,7 @@
  "rp_ph": "(Opsional) Tulis singkat · 100 karakter",
  "rp_send": "Kirim",
  "rp_thx": "Terima kasih! Kami akan memeriksa dan memperbaikinya.",
- "rp_limit": "Hari ini tidak bisa melapor lagi. Silakan beri tahu kami besok."
+ "rp_limit": "Hari ini tidak bisa melapor lagi. Silakan beri tahu kami besok.",
+ "fb_auto": "Bacakan hasil dengan suara",
+ "turn_listen": "Giliran Anda — guru sedang mendengarkan"
 }

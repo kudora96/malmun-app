@@ -332,5 +332,7 @@
  "rp_ph": "(Facultatif) Décrivez en bref · 100 caractères",
  "rp_send": "Envoyer",
  "rp_thx": "Merci! Nous allons vérifier et corriger.",
- "rp_limit": "Plus de signalement possible aujourd'hui. Revenez nous le dire demain."
+ "rp_limit": "Plus de signalement possible aujourd'hui. Revenez nous le dire demain.",
+ "fb_auto": "Lire les résultats à voix haute",
+ "turn_listen": "À vous — la professeure vous écoute"
 }

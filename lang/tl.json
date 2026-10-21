@@ -332,5 +332,7 @@
  "rp_ph": "(Opsyonal) Isulat nang maikli · 100 titik",
  "rp_send": "Ipadala",
  "rp_thx": "Salamat po! Titingnan at aayusin namin.",
- "rp_limit": "Hindi na puwedeng mag-ulat ngayong araw. Pakisabi po ulit bukas."
+ "rp_limit": "Hindi na puwedeng mag-ulat ngayong araw. Pakisabi po ulit bukas.",
+ "fb_auto": "Basahin nang malakas ang resulta",
+ "turn_listen": "Kayo na — nakikinig ang guro"
 }

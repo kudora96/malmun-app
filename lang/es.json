@@ -332,5 +332,7 @@
  "rp_ph": "(Opcional) Escríbalo brevemente · 100 caracteres",
  "rp_send": "Enviar",
  "rp_thx": "¡Gracias! Lo revisaremos y corregiremos.",
- "rp_limit": "Hoy no se pueden enviar más avisos. Vuelva a avisarnos mañana."
+ "rp_limit": "Hoy no se pueden enviar más avisos. Vuelva a avisarnos mañana.",
+ "fb_auto": "Leer los resultados en voz alta",
+ "turn_listen": "Su turno — la profesora le escucha"
 }
