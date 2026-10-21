@@ -108,13 +108,17 @@ async function urlsOf(s) {
 //  bind(el) → { set(plan, fresh), stop() } · set = 글을 새로 쓴 뒤마다 부름(fresh = 새 결과 → 자동 재생)
 export function fbBind(el, { canPlay = () => true } = {}) {
   let plan = [], gen = 0, cur = -1, mine = false;
+  // 문장마다 불 칸 = 글자 마디만 <span class="fbs"> 로 감쌈(안의 <p>·<b>·단추 구조는 그대로 · 마디 경계를 넘으면 마디마다 조각 span · 같은 data-fb · 쓰기부 10-21)
   const mark = () => {
-    const txt = el.textContent, spans = []; let at = 0;
-    plan.forEach((s, i) => { const x = textOf(s), k = x ? txt.indexOf(x, at) : -1; if (k >= 0) { spans.push([k, k + x.length, i]); at = k + x.length; } });
-    if (!spans.length) return;
-    const esc = s => s.replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c]);
-    let h = "", p = 0; for (const [a, b, i] of spans) { h += esc(txt.slice(p, a)) + `<span class="fbs" data-fb="${i}">${esc(txt.slice(a, b))}</span>`; p = b; }
-    el.innerHTML = h + esc(txt.slice(p));
+    el.querySelectorAll("span.fbs").forEach(sp => sp.replaceWith(...sp.childNodes)); el.normalize();
+    const nodes = [], w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT); let n, off = 0;
+    while ((n = w.nextNode())) { if (n.parentElement?.closest("button")) { off += n.nodeValue.length; continue; } nodes.push([n, off]); off += n.nodeValue.length; }
+    const txt = el.textContent, ranges = []; let at = 0;
+    plan.forEach((s, i) => { const x = textOf(s), k = x ? txt.indexOf(x, at) : -1; if (k >= 0) { ranges.push([k, k + x.length, i]); at = k + x.length; } });
+    for (const [a, b, i] of ranges.reverse()) for (const [nd, o] of [...nodes].reverse()) { // 뒤에서부터 → 앞 마디 위치가 안 바뀜
+      const s0 = Math.max(a, o), e0 = Math.min(b, o + nd.nodeValue.length); if (s0 >= e0 || !nd.isConnected) continue;
+      const r = document.createRange(); r.setStart(nd, s0 - o); r.setEnd(nd, e0 - o); const sp = document.createElement("span"); sp.className = "fbs"; sp.dataset.fb = i; r.surroundContents(sp);
+    }
   };
   const lit = i => { cur = i; el.querySelectorAll(".fbs").forEach(s => s.classList.toggle("fbon", +s.dataset.fb === i)); el.classList.toggle("fbplay", i >= 0); };
   const stop = () => { if (cur < 0 && !mine) return; gen++; sfx.stopTag("fb"); mine = false; lit(-1); };
@@ -137,7 +141,7 @@ export function fbBind(el, { canPlay = () => true } = {}) {
   const onSnd = e => { if (e.detail === 1 && sfx.lastTag !== "fb" && cur >= 0) stop(); };
   const onMedia = e => { if (cur >= 0 && e.target instanceof HTMLMediaElement) stop(); };
   addEventListener("malmun:snd", onSnd); document.addEventListener("play", onMedia, true);
-  const onTap = () => { if (!plan.length) return; if (cur >= 0) stop(); else play(0); };
+  const onTap = e => { if (!plan.length || e.target.closest?.("button, a, input, [data-act], [data-x]")) return; if (cur >= 0) stop(); else play(0); }; // 안의 단추(⋯·💾·왜 틀렸어요)는 그 단추 일만
   el.addEventListener("click", onTap);
   let autoT = 0;
   return {
