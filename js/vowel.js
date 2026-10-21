@@ -75,32 +75,37 @@ function split(x, s) {
   return [part(s.i, mid), part(mid + 1, s.j)];
 }
 // 판정 하나: 기대 모음 → 반응 id
+//  (10-21 소리부 follow_calib 536개 · 21개 말 원어 목소리 여·남·아이로 다시 맞춤) 목소리마다 F1·F2 가 달라 「가장 가까운 모음」 대신 갈림 선:
+//   아 ↔ 어 = F2(아 ≥ 1130Hz) · 오 ↔ 어 = F1(어 > 570Hz) · 이 쪽 = F1 < 430 & F2 > 1800 · 둥근 소리(오·우) = F1 < 600 & F2 < 1000 · 오 ↔ 우 = F1 < 365 · F2 가 3번째 봉우리로 잡힌 것(F1 > 550 인데 F2 > 2200)은 F2 를 안 믿음
+export const LOUD_MIN = -30; // 목소리 덩어리 크기(dBFS) 이보다 작으면 「조금 더 크게」(L)
 export function judgeSeg(s, expect) {
   if (!s) return "N";
   if (s.dur < 0.2) return "S";
-  if (!Number.isFinite(s.f1) || !Number.isFinite(s.f2)) return "G"; // 포먼트를 못 잼 = 틀렸다고 하지 않음
-  const near = nearest(s.f1, s.f2), dE = dist(s.f1, s.f2, expect);
-  if (near === expect || dE < 0.45) {
-    if (expect === "오" && Number.isFinite(s.f1Tail) && nearest(s.f1Tail, s.f2Tail, ["오", "우"]) === "우" && s.f1Tail < s.f1 * 0.85) return "O2"; // 끝이 「우」로 미끄러짐
-    return "G";
-  }
+  if (Number.isFinite(s.db) && s.db < LOUD_MIN) return "L";
+  const f1 = s.f1, f2r = s.f2;
+  if (!Number.isFinite(f1)) return "G"; // 못 잼 = 틀렸다고 하지 않음
+  const f2 = Number.isFinite(f2r) && !(f1 > 550 && f2r > 2200) ? f2r : NaN;
+  const front = f1 < 430 && f2 > 1800, round = f1 < 600 && f2 < 1000;
   if (expect === "아") {
-    if (near === "오" || near === "우") return s.f1 > 700 ? "A2" : "W1a";
-    if (near === "어" || s.f1 < REF.아[0] * 0.75) return "A1";
-    return "W1a";
+    if (front) return "W1a";
+    if (round) return "A2";
+    if (Number.isFinite(f2)) return f2 < 1130 ? "A1" : "G";
+    return f1 < 700 ? "A1" : "G";
   }
   if (expect === "오") {
-    if (near === "아") return "W1o";
-    if (near === "우") return s.f1 < REF.오[0] * 0.8 ? "O3" : "G"; // 오·우 는 F1 만 조금 다름 → 확실히 닫혔을 때만 고침(처음엔 너그럽게 · 실제 녹음으로 맞춤)
-    if (near === "어" || s.f2 > REF.오[1] * 1.25) return "O1";
-    return "W1o";
+    if (front) return "W1o";
+    if (f1 > 900 && (!Number.isFinite(f2) || f2 > 1150)) return "W1o"; // 「아」 쪽
+    if (f1 > 570) return "O1";
+    if (f1 < 365) return "O3";
+    if (Number.isFinite(s.f1Tail) && s.f1Tail < 400 && s.f1Tail < f1 * 0.85) return "O2"; // 끝이 「우」로
+    return "G";
   }
-  return "W1" + (expect === "아" ? "a" : "o");
+  return "G";
 }
 // 차례 판정: expect = ["아"] 또는 ["아","오"](이어서 · 덩어리 차례대로) → { id, segs, why }
 export function judge(an, expect) {
   const { segs, noiseDb, peakDb } = an;
-  if (!segs.length) return { id: peakDb > noiseDb + 6 ? "L" : "N", segs };
+  if (!segs.length) return { id: peakDb > noiseDb + 6 && peakDb > -60 ? "L" : "N", segs };
   let pick = [...segs].sort((a, b) => b.dur - a.dur).slice(0, expect.length).sort((a, b) => a.t0 - b.t0); // 가장 긴 덩어리들을 말한 차례대로(짧은 숨·끊김 조각은 빼고)
   if (expect.length === 2 && pick.length === 1 && an.x) pick = split(an.x, pick[0]); // 「아오」를 쉬지 않고 이어 말함 = 가운데에서 둘로
   for (let k = 0; k < expect.length; k++) { const id = judgeSeg(pick[k], expect[k]); if (id !== "G") return { id, segs, at: k }; }
