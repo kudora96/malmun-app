@@ -1,19 +1,19 @@
 // 진단 화면 #/diag(본부 10-07 「PC 에선 되는데 폰에선 안 됨」) — 투덜이가 폰에서 열어 사진 한 장 · 「복사」로 글째 보냄
 //  기기 · 받아쓰기(인식만 / 녹음+인식 동시) · 마이크(허락 · 실제 적용된 설정 · 장치) · 녹음 형식(지원 · 3초 녹음을 풀 수 있나)
 //  소리(AudioContext 상태 · 「가」 소리 · 효과음 · 음성 창고 읽기) · 최근 오류 20개 — 앱 동작은 안 바꿈(시험은 이 화면 안에서만)
-import { VERSION } from "../version.js?v=1021.8";
-import { esc } from "../text.js?v=1021.8";
-import { uiKoBtn } from "../ui.js?v=1021.8";
-import { t, tAlt, preloadKoUi } from "../i18n.js?v=1021.8";
-import { paths } from "../paths.js?v=1021.8";
-import { charsF } from "../data.js?v=1021.8";
-import { audioCtx } from "../wake.js?v=1021.8";
-import * as sfx from "../sfx.js?v=1021.8";
-import { srOnlyMode, setSrOnly, devSR, setDevSR, seqMode, srFailCount, serverMode } from "../recorder.js?v=1021.8";
-import * as AP from "../agepolicy.js?v=1021.8"; // 나이·나라 · 켜진/막힌 기능(대표님 10-19 시험 스위치 ?age=15&country=NP)
-import { sttReady, sttURL, serverSTT } from "../sttserver.js?v=1021.8";
-import { diagCount, clearDiag } from "../diag.js?v=1021.8";
-import { errLog, clearErr } from "../errlog.js?v=1021.8";
+import { VERSION } from "../version.js?v=1021.9";
+import { esc } from "../text.js?v=1021.9";
+import { uiKoBtn } from "../ui.js?v=1021.9";
+import { t, tAlt, preloadKoUi } from "../i18n.js?v=1021.9";
+import { paths } from "../paths.js?v=1021.9";
+import { charsF } from "../data.js?v=1021.9";
+import { audioCtx } from "../wake.js?v=1021.9";
+import * as sfx from "../sfx.js?v=1021.9";
+import { srOnlyMode, setSrOnly, devSR, setDevSR, seqMode, srFailCount, serverMode } from "../recorder.js?v=1021.9";
+import * as AP from "../agepolicy.js?v=1021.9"; // 나이·나라 · 켜진/막힌 기능(대표님 10-19 시험 스위치 ?age=15&country=NP)
+import { sttReady, sttURL, serverSTT } from "../sttserver.js?v=1021.9";
+import { diagCount, clearDiag } from "../diag.js?v=1021.9";
+import { errLog, clearErr } from "../errlog.js?v=1021.9";
 
 // 같은 오류(종류·글·주소·자리)는 한 줄로 묶음 — 화면·복사 글 같이(본부 10-12 · 띄엄띄엄 쌓인 version.json 실패 20개)
 const errGroups = () => { const g = new Map(); for (const e of errLog()) { const k = [e.kind, e.msg, e.url || "", e.src || "", e.line || ""].join("|"), o = g.get(k); if (o) { o.n += e.n || 1; o.at = e.at; } else g.set(k, { ...e, n: e.n || 1 }); } return [...g.values()].reverse(); };
