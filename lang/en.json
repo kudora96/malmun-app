@@ -332,5 +332,6 @@
  "rp_send": "Send",
  "rp_thx": "Thank you! We'll check and fix it.",
  "rp_limit": "No more reports today. Please tell us again tomorrow.",
- "fb_auto": "Read my results aloud"
+ "fb_auto": "Read my results aloud",
+ "turn_listen": "Your turn — the teacher is listening"
 }

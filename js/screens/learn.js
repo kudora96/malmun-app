@@ -42,7 +42,8 @@ import { episode } from "../data.js?v=1021.4";
 import { paths, MEDIA } from "../paths.js?v=1021.4";
 import { attachVq } from "../vq.js?v=1021.4";
 import { setReportCtx } from "../report.js?v=1021.4";
-import { fbBind, fbPlan } from "../fbvoice.js?v=1021.4"; // 결과 안내 소리로 읽기(대표님 10-21)
+import { fbBind, fbPlan } from "../fbvoice.js?v=1021.4";
+import { setupTurns } from "../turns.js?v=1021.4"; // 「따라 해 보세요」 양방향(대표님 10-21) // 결과 안내 소리로 읽기(대표님 10-21)
 import { Sequence } from "../audio.js?v=1021.4";
 import { I, progress, SPEAKER, spkHtml, uiKoBtn, uikoChip, switchUiKo } from "../ui.js?v=1021.4";
 import writeView from "./write.js?v=1021.4";
@@ -125,6 +126,18 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     if (el.closest(".vsub")) return { screen: "learn", ep, line: id(st.cur), el: el.closest(".vsub") };
     return null;
   });
+  // 「따라 해 보세요」 양방향(turns.js · 자료가 있는 편만) — 차례 동안 영상 밑 큰 자막 칸 = 🎤 듣기 · 선생님 반응 자막(학습자 말 ⇄ 한국어)
+  let turns = null;
+  let turnLastSub = null;
+  function turnSub(x) {
+    const inn = app.querySelector(".vsub .in"); if (!inn) return;
+    turnLastSub = x && !x.listen ? x : turnLastSub && x?.listen ? null : x;
+    if (!x) return vsubFill(st.cur);
+    if (x.listen) { if (!inn.querySelector(".tlisten")) inn.innerHTML = `<span class="tlisten">🎤 <span data-k="turn_listen">${esc(t("turn_listen"))}</span></span><i class="tlvl"><b></b></i>`; inn.querySelector(".tlvl b").style.width = Math.round(x.level * 100) + "%"; return; }
+    inn.innerHTML = `<span class="who">${spkHtml("선생님")}</span><b class="ko" lang="ko">${esc(x.ko || "")}</b>${x[lang] && lang !== "ko" ? `<span class="tr">${esc(x[lang])}</span>` : ""}`;
+  }
+  setupTurns(ep, v, { wrap: app.querySelector("#vwrap"), canRun: () => st.mode === "video" && !st.panel && !st.once, onSub: turnSub }).then(x => { turns = x; });
+  app.addEventListener("pointerdown", e => { if (turns?.busy() && e.target.closest(".ctrl, .lines, .seek, #vwrap, .vtitle")) turns.skip(); }, true); // 차례 중 누르면 이번 차례 그만(누른 단추 일은 그대로)
   const items = [...app.querySelectorAll(".line")];
   // 두 말 위아래 = ⇄ 상태(대표님 10-19·10-20 「한↔네팔어 바뀌면 위아래도 바뀌어야」) — 학습자 말 화면이면 학습자 말이 위 · 한국어 화면이면 한국어가 위
   //  편 제목 · 영상 아래 큰 자막 · 줄 카드(지금 줄·대화 풍선) — 위 자리 = 큰 글·진한 색(큰 자막은 두 줄 같은 크기) · ⇄ 없는 언어(영어 등)는 지금 그대로
@@ -1059,7 +1072,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   v.addEventListener("click", togglePlay);
   // 「ने⇄한」 = 언어 하나(안 A) — 어느 화면·창의 단추든(ui.js 문서 한 곳이 받음 · 다국어부 10-14) 앱 글이 바뀌면 설명 소리·본문도 그 언어로(듣는 중이면 같은 문장부터) · 설명 막대 안 고르기(uiLang)는 제 손잡이가 이미 맞춤
   const onUiLang = () => {
-    applyFirst(); st.cardKeep = -1; requestAnimationFrame(() => { fitTitle(app.querySelector(".vtitle")); vsubFill(st.cur); fitCard(st.cur); }); // 위아래 바뀜 → 다시 맞춤
+    applyFirst(); st.cardKeep = -1; requestAnimationFrame(() => { fitTitle(app.querySelector(".vtitle")); vsubFill(st.cur); if (turns?.busy() && turnLastSub) turnSub(turnLastSub); fitCard(st.cur); }); // 따라 하기 반응 자막 중이면 그 자막 그대로(⇄ 순서만) // 위아래 바뀜 → 다시 맞춤
     if (!app.querySelector(".scr.learn")) return removeEventListener("malmun:uilang", onUiLang);
     setRateWord(t("speed")); // 속도 알약 말(rateLabel)도 새 언어로(다국어부 10-14)
     st.cardKeep = st.cur; // 지금 카드 맞춤 단계 고정(⇄ 0px)
@@ -1119,5 +1132,5 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   if (reopen) openPanel(reopen.kind, reopen.i, { restore: reopen }); // ने⇄한 토글 전 창·자리
   else if (opts.explain) openPanel("explain", st.cur, { autoplay: true }); /* #/explain/{편}/{줄} = 그 줄 v9 설명 창(첫 터치 전엔 소리가 막힐 수 있음 — ▶ 로 시작) */
   const release = hold(); // 소리 장치 깨워 두기(첫소리 먹힘 방지)
-  return () => { tipOff(); clearTimeout(tip.wait); tip.step = -1; document.removeEventListener("pointerdown", tipTap, true); window.removeEventListener("malmun:uilang", onUiTip); if (gm.el) closeGame(true); removeEventListener("resize", onTurn); mqLand.removeEventListener?.("change", onLand); document.removeEventListener("keydown", onBigKey, true); document.documentElement.classList.remove("bigview"); clearTimeout(tipT); document.removeEventListener("fullscreenchange", onFsChange); clearInterval(edgeT); clearInterval(litT); clearInterval(seekTimer); clearInterval(hlTimer); document.removeEventListener("pointerdown", onDocDown, true); removeEventListener("popstate", onPop); removeEventListener("malmun:uilang", onUiLang); removeEventListener("malmun:langfit", onLfit); document.removeEventListener("visibilitychange", onHide); clearTimeout(st.animEnd); release(); st.panel?.cleanup?.(); ex.stop(); removeEventListener("resize", pad); removeEventListener("resize", onFit); clearInterval(timer); clearTimeout(st.gap); document.removeEventListener("keydown", onKey); seq.stop(); vqOff(); rpOff(); v.pause(); v.removeAttribute("src"); v.load(); };
+  return () => { tipOff(); clearTimeout(tip.wait); tip.step = -1; document.removeEventListener("pointerdown", tipTap, true); window.removeEventListener("malmun:uilang", onUiTip); if (gm.el) closeGame(true); removeEventListener("resize", onTurn); mqLand.removeEventListener?.("change", onLand); document.removeEventListener("keydown", onBigKey, true); document.documentElement.classList.remove("bigview"); clearTimeout(tipT); document.removeEventListener("fullscreenchange", onFsChange); clearInterval(edgeT); clearInterval(litT); clearInterval(seekTimer); clearInterval(hlTimer); document.removeEventListener("pointerdown", onDocDown, true); removeEventListener("popstate", onPop); removeEventListener("malmun:uilang", onUiLang); removeEventListener("malmun:langfit", onLfit); document.removeEventListener("visibilitychange", onHide); clearTimeout(st.animEnd); release(); st.panel?.cleanup?.(); ex.stop(); removeEventListener("resize", pad); removeEventListener("resize", onFit); clearInterval(timer); clearTimeout(st.gap); document.removeEventListener("keydown", onKey); seq.stop(); vqOff(); rpOff(); turns?.off(); v.pause(); v.removeAttribute("src"); v.load(); };
 }
