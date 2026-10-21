@@ -150,7 +150,11 @@ export function fbBind(el, { canPlay = () => true } = {}) {
       if (!plan.length) { clearTimeout(autoT); stop(); return; }
       mark();
       if (was >= 0) { sfx.stopTag("fb"); const i = Math.min(was, plan.length - 1); lit(i); play(i); return; } // ⇄ = 같은 문장부터 그 말로(글은 이미 새 말)
-      if (fresh && plan.length && fbAuto()) { clearTimeout(autoT); autoT = setTimeout(() => canPlay() && play(0), 400); }
+      if (fresh && plan.length && fbAuto()) { // 새 결과 = 점수 효과음(scorefx · sfx)이 다 끝난 뒤 0.3초 쉬고 한 번(검사1팀 10-21 「100%」 1.5초 겹침) · 최대 6초 기다림
+        clearTimeout(autoT); const t0 = performance.now();
+        const go = () => { if (!canPlay()) return; if (sfx.playing() && performance.now() - t0 < 6000) { autoT = setTimeout(go, 100); return; } autoT = setTimeout(() => canPlay() && !sfx.playing() && play(0), 300); };
+        autoT = setTimeout(go, 400);
+      }
     },
     stop() { clearTimeout(autoT); stop(); },
     playing: () => cur >= 0,
