@@ -152,7 +152,8 @@ export function fbBind(el, { canPlay = () => true } = {}) {
       if (was >= 0) { sfx.stopTag("fb"); const i = Math.min(was, plan.length - 1); lit(i); play(i); return; } // ⇄ = 같은 문장부터 그 말로(글은 이미 새 말)
       if (fresh && plan.length && fbAuto()) { // 새 결과 = 점수 효과음(scorefx · sfx)이 다 끝난 뒤 0.3초 쉬고 한 번(검사1팀 10-21 「100%」 1.5초 겹침) · 최대 6초 기다림
         clearTimeout(autoT); const t0 = performance.now();
-        const go = () => { if (!canPlay()) return; if (sfx.playing() && performance.now() - t0 < 6000) { autoT = setTimeout(go, 100); return; } autoT = setTimeout(() => canPlay() && !sfx.playing() && play(0), 300); };
+        let quiet = 0; // 다른 소리 없이 이어진 시간 — 0.3초 연속 조용해야 시작(한 번 보고 0.3초 뒤 시작하면 그 사이 효과음이 시작될 수 있음 · 검사1팀 1021.12 🎤 끼어든 뒤)
+        const go = () => { if (!canPlay()) return; quiet = sfx.playing() ? 0 : quiet + 100; if (quiet >= 300 || performance.now() - t0 > 6000) return play(0); autoT = setTimeout(go, 100); };
         autoT = setTimeout(go, 400);
       }
     },
