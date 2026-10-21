@@ -1,0 +1,127 @@
+{
+  "_note": "새 1편 v11(대표님 OK 10-22) · 초 = 편 안 초(자막 L01-00-01_subs.json 의 그 줄 말 시작 ~ 끝+0.3) · 카드 그림 = R2 video/overlay/L01-00-01/ · 글 번역 = 09_lang/out/L01-00-01/overlays_i18n.json · 폭 600px 아래·12px 아래는 카드 글을 영상 밑 자막 칸에 같은 차례로(개발2팀 규칙)",
+  "video": "L01-00-01 (v11 · 90.07초)",
+  "cards": [
+    {
+      "id": "K5",
+      "file": "L01-00-01_card_steps.png",
+      "start": 29.01,
+      "end": 38.2,
+      "pos": "right",
+      "w": 0.4,
+      "texts": [
+        {
+          "key": "k5_step1",
+          "ko": "한글 기초",
+          "x": 0.24,
+          "y": 0.49,
+          "w": 0.4,
+          "align": "center",
+          "size": 0.05
+        },
+        {
+          "key": "k5_step2",
+          "ko": "생활 한국어",
+          "x": 0.24,
+          "y": 0.37,
+          "w": 0.4,
+          "align": "center",
+          "size": 0.05
+        },
+        {
+          "key": "k5_step3",
+          "ko": "한국어 시험 준비",
+          "x": 0.26,
+          "y": 0.22,
+          "w": 0.44,
+          "align": "center",
+          "size": 0.05
+        }
+      ]
+    },
+    {
+      "id": "K7",
+      "file": "L01-00-01_card_lsw.png",
+      "start": 43.18,
+      "end": 48.9,
+      "pos": "right",
+      "w": 0.4,
+      "texts": []
+    },
+    {
+      "id": "K9",
+      "file": "L01-00-01_card_research.png",
+      "start": 56.98,
+      "end": 62.2,
+      "pos": "right",
+      "w": 0.4,
+      "texts": [
+        {
+          "key": "k9_ref1_src",
+          "ko": "MacLeod 외, 2010",
+          "x": 0.54,
+          "y": 0.455,
+          "w": 0.7,
+          "align": "left",
+          "size": 0.026
+        },
+        {
+          "key": "k9_ref1",
+          "ko": "소리 내어 읽은 낱말을 더 잘 기억해요.",
+          "x": 0.54,
+          "y": 0.497,
+          "w": 0.7,
+          "align": "left",
+          "size": 0.034
+        },
+        {
+          "key": "k9_ref2_src",
+          "ko": "Swain, 1985",
+          "translate": false,
+          "x": 0.54,
+          "y": 0.635,
+          "w": 0.7,
+          "align": "left",
+          "size": 0.026
+        },
+        {
+          "key": "k9_ref2",
+          "ko": "직접 말하고 써야 실력이 늘어요.",
+          "x": 0.54,
+          "y": 0.677,
+          "w": 0.7,
+          "align": "left",
+          "size": 0.034
+        },
+        {
+          "key": "k9_ref3_src",
+          "ko": "Icht & Mama, 2022",
+          "translate": false,
+          "x": 0.54,
+          "y": 0.814,
+          "w": 0.7,
+          "align": "left",
+          "size": 0.026
+        },
+        {
+          "key": "k9_ref3",
+          "ko": "외국어 낱말을 소리 내어 읽으면 덜 잊어요.",
+          "x": 0.54,
+          "y": 0.856,
+          "w": 0.7,
+          "align": "left",
+          "size": 0.034
+        }
+      ]
+    },
+    {
+      "id": "K10",
+      "file": "L01-00-01_card_game.png",
+      "start": 62.57,
+      "end": 65.8,
+      "pos": "right",
+      "w": 0.4,
+      "texts": []
+    }
+  ]
+}
