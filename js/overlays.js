@@ -18,12 +18,13 @@ export async function setupOverlays(ep, v, { wrap, onText }) {
   const textOf = x => (x.translate === false || uiKoOn() || lang === "ko" ? x.ko : I?.[x.key]?.[lang] || x.ko); // 학습자 말 ⇄ 한국어 · 번역 없는 칸(저자·연도)은 그대로
   let cur = null, el = null, fallback = false;
   const lines = c => c.texts.map(x => textOf(x));
+  const compact = c => { const out = []; c.texts.forEach((x, i) => { if (/_src$/.test(x.key) && c.texts[i + 1]) return; const p = c.texts[i - 1]; out.push(p && /_src$/.test(p.key) ? `${textOf(p)} — ${textOf(x)}` : textOf(x)); }); return out; }; // 「저자·연도 — 뜻」
   function layout() {
     if (!el || !cur) return;
     const W = wrap.clientWidth, H = wrap.clientHeight, side = Math.round(cur.w * W);
     el.style.width = el.style.height = side + "px"; el.style.right = Math.round(W * 0.03) + "px"; el.style.top = Math.max(0, Math.round((H - side) / 2)) + "px";
     el.querySelectorAll(".ovt").forEach(s => s.remove());
-    const canSub = onText?.canShow?.(cur.texts.length) ?? true; // 자막 칸이 없는 화면(가로 폰) = 영상 아래쪽 작은 글 상자(.ovcap)
+    const canSub = onText?.canShow?.(cur.texts.length) ?? true;
     const minPx = MIN_PX;
     fallback = W < MIN_W;
     if (!fallback) for (const x of cur.texts) {
@@ -39,9 +40,10 @@ export async function setupOverlays(ep, v, { wrap, onText }) {
       s.style.transform = "translateY(-50%)";
     }
     if (fallback) el.querySelectorAll(".ovt").forEach(s => s.remove());
-    wrap.querySelector(".ovcap")?.remove();
-    if (fallback && cur.texts.length && !canSub) { const cap = document.createElement("div"); cap.className = "ovcap"; cap.setAttribute("aria-hidden", "true"); cap.innerHTML = lines(cur).map(x => `<span dir="auto"></span>`).join(""); [...cap.children].forEach((sp, i) => (sp.textContent = lines(cur)[i])); wrap.append(cap); onText?.(null); }
-    else onText?.(fallback && cur.texts.length ? lines(cur) : null);
+    // 글은 언제나 영상 밖(검사1팀 10-22 「선생님 얼굴·입 절대 안 가림」): 자막 칸에 줄마다 → 칸이 낮으면 「저자·연도 — 뜻」 한 줄씩 → 자막 칸이 없는 가로 폰은 그림만(글은 선생님 말·자막)
+    let out = null;
+    if (fallback && cur.texts.length) { const full = lines(cur), comp = compact(cur); out = canSub ? full : onText?.canShow?.(comp.length) ? comp : null; }
+    onText?.(out);
   }
   function show(c) {
     hide(); cur = c;
@@ -49,7 +51,7 @@ export async function setupOverlays(ep, v, { wrap, onText }) {
     el.style.backgroundImage = `url("${c.img.src}")`; wrap.append(el); layout();
     requestAnimationFrame(() => el?.classList.add("on")); // 천천히 떠오름(css)
   }
-  function hide() { wrap.querySelector(".ovcap")?.remove(); if (el) { const e = el; e.classList.remove("on"); setTimeout(() => e.remove(), 400); } el = null; if (cur) { cur = null; onText?.(null); } }
+  function hide() { if (el) { const e = el; e.classList.remove("on"); setTimeout(() => e.remove(), 400); } el = null; if (cur) { cur = null; onText?.(null); } }
   const tick = () => {
     const tm = v.currentTime, c = okVideo() ? O.cards.find(x => tm >= x.start && tm < x.end) : null;
     if (c !== cur) (c ? show(c) : hide());
