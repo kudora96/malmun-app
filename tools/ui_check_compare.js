@@ -1,24 +1,28 @@
 // 말하기 「तुलना」 비교 화면 점검(본부 10-06) — #/learn/{편} 을 연 채로 실행 · 소리는 아주 작게
-// 13번 2/4 토막(「우리도 읽을 수 있어요」)에 「저도 읽을 수 있어요」 소리를 내 녹음으로 넣고(녹음 경로는 안 씀) 비교 화면을 연다
+// 1번 줄 둘째 칸(편 자료 · 옛 세종 13번 2/4 「우리도 읽을 수 있어요」)에 본보기 소리를 내 녹음으로 넣고 들은 말 = 앞 음절 빠짐 + 둘째 음절 「저」(녹음 경로는 안 씀) 비교 화면을 연다 · 개발2팀 10-22
 // 확인: 파형 두 줄 · 본보기 음절 = align.json · 내 음절 수 같음 · 색(빠짐·틀림·맞음) · 위 칸 안(스크롤 0 · 단추 줄 보임) · 다시 누르면 원래 화면 · 토막 바꾸면 닫힘
 (async () => {
   const W = ms => new Promise(s => setTimeout(s, ms)), res = [], ok = (c, m, x = "") => res.push(`${c ? "✓" : "✗"} ${m}${x ? " · " + x : ""}`);
   window.__sfxVolume = 0.0001;
   try {
-    document.querySelectorAll(".line")[12].querySelector("[data-act=speak]").click(); await W(1500);
+    document.querySelectorAll(".line")[0].querySelector("[data-act=speak]").click(); await W(1500);
     const p = document.querySelector(".panel"); p.querySelectorAll(".segnav button")[1].click(); await W(500);
     const S = p.__sp._state, v = document.documentElement.dataset.v, { heardHTML } = await import(`/js/heard.js?v=${v}`);
     const want = p.querySelector(".task .say").textContent.replace(/[?]/g, "");
-    S.blob = await (await fetch("/media/v9/L01-00-01/" + encodeURIComponent("새설명_소리_kr") + "/" + encodeURIComponent("L01-00-01_13_말해보세요_문장.mp3"))).blob();
-    S.heardHTML = `<span class="lab">x:</span> <span class="ko">${heardHTML(want, "저도 읽을 수 있어요").html}</span>`;
+    const al = await (await fetch(`/data/L01-00-01/L01-00-01.align.json?${Date.now()}`)).json(), pl = x => String(x || "").replace(/[\s.?!,]/g, "");
+    const [AK, AI] = Object.entries(al.items).find(([, x]) => pl(x.text) === pl(want)) || [], A = AI?.syl || [], AU = String(AI?.file || "").replace(/^.*?media/, "/media").split(String.fromCharCode(92)).join("/");
+    const HS = [...want].filter(ch => /[가-힣]/.test(ch)), BAD = ["저", "미", "나", "보", "타"].find(ch => !want.includes(ch)), H2 = want.replace(HS[0], "").replace(HS[1], BAD); // 틀린 글자 = 과제에 없는 글자(옛 「리」 → 「저」) // 「우리도…」 → 「저도…」 꼴
+    res.push(`· 과제 「${want}」 · align ${AK || "없음"} · 들은 말 「${H2}」`);
+    S.blob = await (await fetch(AU)).blob();
+    S.heardHTML = `<span class="lab">x:</span> <span class="ko">${heardHTML(want, H2).html}</span>`;
     const b = p.querySelector("[data-act=both]"); b.disabled = false; b.click(); await W(2200);
-    const c = window.__cmp, al = await (await fetch(`/data/L01-00-01/L01-00-01.align.json?${Date.now()}`)).json(), A = al.items["L01-00-01_13_p02"].syl;
+    const c = window.__cmp;
     ok(document.querySelectorAll(".cmp canvas").length === 2 && c, "파형 두 줄(본보기 · 내 목소리)");
     ok(c.msyl.length === A.length && c.msyl.every((x, k) => x.ch === A[k].ch && Math.abs(x.s - A[k].s) < 1e-6), "본보기 음절 = align.json", c.msyl.map(x => x.ch).join(""));
     ok(c.ysyl.length === c.msyl.length && c.ysyl.every((x, k) => !k || x.s >= c.ysyl[k - 1].s), "내 목소리 음절 = 같은 수 · 차례대로(DTW)", c.ysyl.map(x => x.s.toFixed(2)).join(" "));
-    ok(c.marks.join(",") === "miss,bad,ok,ok,ok,ok,ok,ok,ok", "색 = 점수 정렬(우 빠짐 · 리 틀림 · 나머지 맞음)", c.marks.join(","));
+    ok(c.marks.join(",") === ["miss", "bad", ...Array(Math.max(0, A.length - 2)).fill("ok")].join(","), `색 = 점수 정렬(${HS[0]} 빠짐 · ${HS[1]} 틀림 · 나머지 맞음)`, c.marks.join(","));
     const got = p.querySelector(".crow.y .csyl .cel[data-k='1']");
-    ok(got?.querySelector(".got")?.textContent === "저" && got?.querySelector(".want")?.textContent === "리" && p.querySelector(".crow.y .csyl .cel[data-k='0']").classList.contains("miss"), "들은 글자 표시: 리 칸 = 빨강 「저」 + 위 흐린 「리」 · 우 = 빠짐", got?.textContent);
+    ok(got?.querySelector(".got")?.textContent === BAD && got?.querySelector(".want")?.textContent === HS[1] && p.querySelector(".crow.y .csyl .cel[data-k='0']").classList.contains("miss"), `들은 글자 표시: ${HS[1]} 칸 = 빨강 「${BAD}」 + 위 흐린 「${HS[1]}」 · ${HS[0]} = 빠짐`, got?.textContent);
     const hd = p.querySelector(".whead"), ys = [...hd.children].filter(x => x.offsetParent).map(x => Math.round(x.getBoundingClientRect().top + x.getBoundingClientRect().height / 2));
     ok(Math.max(...ys) - Math.min(...ys) <= 6 && hd.scrollWidth <= hd.clientWidth + 1, "말하기 머리 줄 한 줄(✕ 가 둘째 줄로 안 떨어짐)", hd.className + " · 높이 " + hd.offsetHeight);
     const sb = p.querySelector(".sbtns").getBoundingClientRect(), pr = p.getBoundingClientRect();
@@ -58,14 +62,14 @@
     ok(p.querySelector(".cmp").hidden, "토막 바꾸면 비교 화면 닫힘");
     // 덧붙은 소리 = 회색 작은 칸
     p.querySelectorAll(".segnav button")[1].click(); await W(400);
-    S.blob = await (await fetch("/media/audio/L01-00-01/units/L01-00-01_13_p02.mp3")).blob();
-    S.heardHTML = `<span class="lab">x:</span> <span class="ko">${heardHTML(want, "그럼 우리도 읽을 수 있어요").html}</span>`;
+    S.blob = await (await fetch(AU)).blob();
+    S.heardHTML = `<span class="lab">x:</span> <span class="ko">${heardHTML(want, "그럼 " + want).html}</span>`;
     b.disabled = false; b.click(); await W(1500);
     ok(window.__cmp.extra.map(x => x.ch).join("") === "그럼" && p.querySelectorAll(".crow.y .csyl .add").length === 2 && window.__cmp.marks.every(x => x === "ok"), "덧붙은 소리 = 회색 작은 칸(「그」「럼」) · 나머지 맞음", window.__cmp.extra.map(x => x.ch).join(""));
     b.click(); await W(200);
     // 그림·재생 한 기준(본부 10-06) — 앞 1초 잡음(부스럭) + 말 → 내 목소리 줄 x=0 = lead · 음절 칸 누르면 그 칸 밑 파형 구간이 그대로 나옴
     { const { wavOf } = await import(`/js/recstore.js?v=${v}`), ctx = new OfflineAudioContext(1, 44100, 44100);
-      const m = await ctx.decodeAudioData(await (await fetch("/media/audio/L01-00-01/units/L01-00-01_13_p02.mp3")).arrayBuffer()), d = m.getChannelData(0), sr = m.sampleRate;
+      const m = await ctx.decodeAudioData(await (await fetch(AU)).arrayBuffer()), d = m.getChannelData(0), sr = m.sampleRate;
       const pre = Math.round(sr * 1), nb = ctx.createBuffer(1, pre + d.length, sr), x = nb.getChannelData(0);
       for (let i = 0; i < pre; i++) x[i] = (Math.random() * 2 - 1) * 0.004; x.set(d, pre);
       S.blob = wavOf(nb, 0, nb.duration, 1); S.heardHTML = `<span class="lab">x:</span> <span class="ko">${heardHTML(want, want).html}</span>`;

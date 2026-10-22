@@ -15,7 +15,7 @@
   const bad = [];
   try {
     for (const lg of ["ne", "en", "ur", "th", "vi"]) { localStorage.setItem("malmun.lang", lg); await i18n.setLang(lg); await i18n.setUiKo(false);
-      for (const mode of ["hand", "kb"]) { localStorage.setItem("malmun.wmode", mode); document.querySelectorAll(".panel [data-act=close]").forEach(b => b.click()); await W(300); document.querySelectorAll(".line")[14].querySelector("[data-act=write]").click(); await W(1600);
+      for (const mode of ["hand", "kb"]) { localStorage.setItem("malmun.wmode", mode); document.querySelectorAll(".panel [data-act=close]").forEach(b => b.click()); await W(300); (document.querySelectorAll(".line")[14] || [...document.querySelectorAll(".line")].sort((a, b) => (b.querySelector(".kotext")?.textContent.length || 0) - (a.querySelector(".kotext")?.textContent.length || 0))[0]).querySelector("[data-act=write]").click(); await W(1600);
         for (const ko of i18n.KO_UI.includes(lg) ? [false, true] : [false]) { if (ko) { await i18n.setUiKo(true); window.dispatchEvent(new CustomEvent("malmun:uilang")); await W(500); }
           const hit = [...document.querySelectorAll(SEL)].filter(e => !e.closest(".hjudge, .hjfull, .helpbox, .inkmenu") && cut(e)).map(e => `${(e.closest("[data-act],[data-mode],[data-tool],[data-hmode],[data-hfollow]")?.dataset.act || e.closest("[data-mode]")?.dataset.mode || e.closest("[data-tool]")?.dataset.tool || e.className || e.tagName).toString().slice(0, 14)}${e.matches("button") ? "" : "." + (e.className || e.tagName).toString().slice(0, 8)}「${(e.innerText || "").replace(/\s+/g, " ").trim().slice(0, 12)}」${e.scrollWidth - e.clientWidth}px`);
           if (hit.length) bad.push(`${lg}${ko ? "⇄한" : ""} ${mode}: ${[...new Set(hit)].slice(0, 5).join(", ")}`);

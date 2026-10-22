@@ -16,7 +16,7 @@
     return out;
   };
   const watch = async (name, act) => { const seen = new Set(); act(); for (let k = 0; k < 40; k++) { scan().forEach(x => seen.add(x)); await W(50); } res.push(!seen.size); if (seen.size) bad.push(`${name}: ${[...seen].slice(0, 4).join(" · ")}`); };
-  for (const n of [1, 8, 15]) {
+  const NL = document.querySelectorAll(".line").length; for (const n of [...new Set([1, Math.min(8, NL), Math.min(15, NL)])]) { // 옛 세종 1·8·15번 · 줄이 적은 편은 마지막 줄(개발2팀 10-22)
     await watch(`${n}번 설명 열기`, () => line(n).querySelector("[data-act=explain]").click());
     await watch(`${n}번 로마자 바꿈`, () => p().querySelector("[data-x=v9rom]")?.click());
     await watch(`${n}번 로마자 다시`, () => p().querySelector("[data-x=v9rom]")?.click());
