@@ -22,7 +22,7 @@ export async function setupOverlays(ep, v, { wrap }) {
   const pick = f => (ccOn() && f.tr ? f.tr : f.ko); // 지금 띄울 그림
   const imgOf = c => pick(c.fr[0]);
   const frameAt = (c, tm) => { let k = 0; c.fr.forEach((f, i) => { if (tm >= (f.start ?? c.start)) k = i; }); return k; };
-  let cur = null, el = null;
+  let cur = null, el = null; const SWAP = 0.25; // 장 바꿈 전환(초)
   function layout() {
     if (!el || !cur) return;
     // 크기 = 영상 폭 × w · 그림 모양대로(정사각 카드 · 세로로 긴 앱 화면) · 세로로 넘치면 영상 높이 92% 에 맞춤
@@ -35,9 +35,12 @@ export async function setupOverlays(ep, v, { wrap }) {
     else { el.style.left = "auto"; el.style.right = (topY + sideH > H - 52 ? 54 : Math.round(W * 0.03)) + "px"; } // 아래 끝이 ⛶ 단추 자리까지 오면 그 왼쪽으로(세로로 긴 앱 화면)
   }
   function show(c) {
-    hide(); cur = c;
+    // 전환 = json 카드 "fade"(초 · 영상2팀 K7a·b·c = 0.25) · 없으면 시간이 겹치는 이어진 카드(장 바꿈)만 0.25초 · 처음 떠오름 0.7초(css)는 그대로(본부 10-22)
+    const chain = !!(el && cur && cur.end > c.start && c.end > cur.start), FD = c.fade ?? (chain ? SWAP : null), fast = FD != null && chain;
+    hide(fast ? FD : 0); cur = c;
     el = document.createElement("div"); el.className = "ovc"; el.dataset.id = c.id; el.setAttribute("aria-hidden", "true");
-    c.fr.forEach(f => { const d = document.createElement("div"); d.className = "ovf"; d.style.backgroundImage = `url("${pick(f).src}")`; el.append(d); });
+    if (fast) Object.assign(el.style, { transition: `opacity ${FD}s ease`, transform: "none" }); // 장 바꿈 = 제자리에서 빠르게
+    c.fr.forEach(f => { const d = document.createElement("div"); d.className = "ovf"; d.style.backgroundImage = `url("${pick(f).src}")`; d.style.transition = `opacity ${c.fade ?? SWAP}s ease`; el.append(d); }); // 카드 안 여러 장(frames) 바뀜도 0.25초(또는 fade)
     el.dataset.f = -1; setFrame(frameAt(c, v.currentTime)); wrap.append(el);
     const im0 = imgOf(c); if (!im0.naturalWidth) im0.addEventListener("load", () => cur === c && layout(), { once: true }); // 모양(가로·세로)은 그림을 받은 뒤 다시 잼
     layout();
@@ -45,7 +48,7 @@ export async function setupOverlays(ep, v, { wrap }) {
   }
   function paint() { if (!el || !cur) return; [...el.querySelectorAll(".ovf")].forEach((d, i) => { d.style.backgroundImage = `url("${pick(cur.fr[i]).src}")`; }); layout(); } // CC 켬·끔 = 그 자리에서 그림만 바꿈(자리·크기 그대로)
   function setFrame(k) { if (!el || +el.dataset.f === k) return; el.dataset.f = k; [...el.querySelectorAll(".ovf")].forEach((d, i) => d.classList.toggle("on", i === k)); } // 장 바꿈 = 겹쳐 서서히(css)
-  function hide() { if (el) { const e = el; e.classList.remove("on"); setTimeout(() => e.remove(), 400); } el = null; cur = null; }
+  function hide(fd) { if (el) { const e = el; if (fd) e.style.transition = `opacity ${fd}s ease`; e.classList.remove("on"); setTimeout(() => e.remove(), fd ? fd * 1000 + 20 : 400); } el = null; cur = null; } // fd = 빠른 장 바꿈(초)
   const tick = () => {
     const tm = v.currentTime, c = okVideo() ? O.cards.filter(x => tm >= x.start && tm < x.end).sort((a, b) => b.start - a.start)[0] || null : null; // 겹치면 늦게 시작한 카드(K7a→b→c = 차례로 바뀜)
     if (c !== cur) (c ? show(c) : hide()); else if (c && c.fr.length > 1) setFrame(frameAt(c, tm));
