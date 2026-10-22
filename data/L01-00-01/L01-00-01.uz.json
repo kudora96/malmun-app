@@ -3,7 +3,12 @@
  "lang": "uz",
  "what": "대사 자막층 uz — 새 1편 「처음 만나요」 v11(대본 03_episodes/L01/L01-00/L01-00-01_first-meet/L01-00-01_script.md) · 언어부 10-22 · 제미나이 검토 + AI 판단으로 확정(대표님 10-22 · 원어민 검수 없음 · 남는 건 앱 신고 단추)",
  "title_t": "Birinchi uchrashuv",
- "characters": [],
+ "characters": [
+  {
+   "id": "seonsaengnim",
+   "bio": "Koreys tili oʻqituvchisi"
+  }
+ ],
  "subtitles": [
   {
    "id": 1,
