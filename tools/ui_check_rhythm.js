@@ -6,9 +6,10 @@
 (async () => {
   const v = document.documentElement.dataset.v, { prepare, rhythmScore, withRhythm, loadAlign } = await import(`/js/rhythm.js?v=${v}`);
   const res = [], ok = (c, m, x = "") => res.push(`${c ? "✓" : "✗"} ${m}${x ? " · " + x : ""}`);
-  const al = await loadAlign("L01-00-01"), key = "L01-00-01_13_p02", it = al.items[key], text = it.text;
+  // 소리 계산 회귀 시험 = 점검 전용 고정 자료(tools/fx/sejong · 옛 세종 1편 정렬·소리 · 개발2팀 10-22) — 편이 바뀌어도 같은 소리·같은 기대값 · ⓗ(모든 토막)만 지금 편(alC)
+  const al = await (await fetch(`/tools/fx/sejong/align.json?${Date.now()}`)).json(), alC = await loadAlign("L01-00-01"), key = "L01-00-01_13_p02", it = al.items[key], text = it.text;
   const ctx = new OfflineAudioContext(1, 44100, 44100), dec = async u => ctx.decodeAudioData(await (await fetch(u)).arrayBuffer());
-  const mbuf = await dec("/media/audio/L01-00-01/units/L01-00-01_13_p02.mp3"), sr = mbuf.sampleRate;
+  const mbuf = await dec("/tools/fx/sejong/L01-00-01_13_p02.mp3"), sr = mbuf.sampleRate;
   const R = (ybuf, mb = mbuf, k2 = key, heard) => { const pr = prepare({ al, key: k2, text: al.items[k2].text, mbuf: mb, ybuf }); return { ...rhythmScore({ msyl: pr.msyl, ysyl: pr.ysyl, mbuf: mb, ybuf, ends: pr.ends, heard, groups: pr.groups }), pr }; };
   const speed = async r => { const oc = new OfflineAudioContext(1, Math.ceil((mbuf.length / r)) + 10, sr), s = oc.createBufferSource(); s.buffer = mbuf; s.playbackRate.value = r; s.connect(oc.destination); s.start(); return oc.startRendering(); };
   const a = R(mbuf); ok(a.R >= 0.97, "ⓐ 본보기 = 내 목소리 → R ≥ 0.97", `R ${a.R.toFixed(3)}`);
@@ -22,7 +23,7 @@
   // ⓕ 끝을 끄는 본보기(15번 2/8 「하고 싶었던 거구나」 · 13번 2/4) — 내 것 = 본보기에서 마지막 음절 여운만 자름(음절 길이 45%에서 30ms 줄여 끝냄)
   for (const k2 of ["L01-00-01_15_p02", key]) {
     const it2 = al.items[k2]; if (!it2) { res.push(`· ${k2} 정렬 없음(건너뜀)`); continue; }
-    const mb = k2 === key ? mbuf : await dec(`/media/audio/L01-00-01/units/${k2}.mp3`), L = it2.syl[it2.syl.length - 1], cut = Math.round((L.s + 0.45 * (L.e - L.s)) * mb.sampleRate), f = Math.round(0.03 * mb.sampleRate);
+    const mb = k2 === key ? mbuf : await dec(`/tools/fx/sejong/${k2}.mp3`), L = it2.syl[it2.syl.length - 1], cut = Math.round((L.s + 0.45 * (L.e - L.s)) * mb.sampleRate), f = Math.round(0.03 * mb.sampleRate);
     const nb = ctx.createBuffer(1, cut + Math.round(0.3 * mb.sampleRate), mb.sampleRate), x = nb.getChannelData(0), d = mb.getChannelData(0); for (let i = 0; i < cut; i++) x[i] = d[i] * Math.min(1, (cut - i) / f);
     const a0 = R(mb, mb, k2), b0 = R(nb, mb, k2);
     if (k2 !== key) { // ⓖ 「나」 2.5배 끌기 — 모음 가운데 조각을 되풀이해 늘임
@@ -39,10 +40,11 @@
   { const h = R(mbuf, mbuf, key, "우리도 읽을 수 이이있어요"), h2 = R(mbuf, mbuf, key, "우리도 읽을 수 있어요"); ok(h.worst?.kind === "stutter" && h.worst?.ch === "있" && withRhythm(100, h.R) < 100 && withRhythm(100, h2.R) === 100, "ⓖ 「이이있어요」 → 「있」 더듬음 · 100 아님(같은 녹음 · 들은 말 바르면 100)", `R ${h.R.toFixed(3)} → ${withRhythm(100, h.R)}점 · ${h.worst?.kind} 「${h.worst?.ch}」 · 바른 말 ${withRhythm(100, h2.R)}`); }
   { // ⓗ 모든 토막: 본보기를 내 목소리로 → 100점(10-07 — 「거구나」 뒤 본보기 쉼을 더듬음으로 잡던 것)
     const bad = []; let n = 0;
-    for (const [k2, it2] of Object.entries(al.items)) { if (!it2.syl || it2.syl.length < 2 || !it2.file) continue;
+    const RC = (yb, mb, k2, heard) => { const pr = prepare({ al: alC, key: k2, text: alC.items[k2].text, mbuf: mb, ybuf: yb }); return { ...rhythmScore({ msyl: pr.msyl, ysyl: pr.ysyl, mbuf: mb, ybuf: yb, ends: pr.ends, heard, groups: pr.groups }), pr }; }; // 지금 편 정렬
+    for (const [k2, it2] of Object.entries(alC.items)) { if (!it2.syl || it2.syl.length < 2 || !it2.file) continue;
       let mb; try { mb = await dec(it2.file.replace(/^.*?media/, "/media").split(String.fromCharCode(92)).join("/")); } catch { continue; }
-      const r2 = R(mb, mb, k2, it2.text); n++; if (withRhythm(100, r2.R) < 100) bad.push(`${k2} R ${r2.R.toFixed(3)} ${r2.worst?.kind} 「${r2.worst?.ch}」`); }
-    ok(n > 50 && !bad.length, `ⓗ 모든 토막 본보기 = 내 목소리 → 100점(${n}토막)`, bad.slice(0, 5).join(" · ") || "모두 100"); }
+      const r2 = RC(mb, mb, k2, it2.text); n++; if (withRhythm(100, r2.R) < 100) bad.push(`${k2} R ${r2.R.toFixed(3)} ${r2.worst?.kind} 「${r2.worst?.ch}」`); }
+    ok(n >= Math.min(20, Object.keys(alC.items).length) && !bad.length, `ⓗ 지금 편 모든 토막 본보기 = 내 목소리 → 100점(${n}토막)`, bad.slice(0, 5).join(" · ") || "모두 100"); }
   { // ⓙ 긴 줄 = 낱말 단위 리듬(본부 10-07 · 투덜이 허락) — 15번 줄 전체
     const k3 = "L01-00-01_15_line", it3 = al.items[k3], mb3 = await dec(it3.file.replace(/^.*?media/, "/media").split(String.fromCharCode(92)).join("/")), sr3 = mb3.sampleRate;
     const self = R(mb3, mb3, k3); ok(withRhythm(100, self.R) === 100, "ⓙ 긴 줄 본보기 = 내 목소리 → 100(낱말 단위)", `R ${self.R.toFixed(3)}`);

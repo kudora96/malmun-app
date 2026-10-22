@@ -52,6 +52,11 @@
   // 저장 지우고 시작
   await new Promise(r => { const q = indexedDB.deleteDatabase("malmun"); q.onsuccess = q.onerror = q.onblocked = r; });
 
+  // 편 자료에서 읽음(옛 세종 15줄·5토막을 박아 두지 않음 · 개발2팀 10-22): NS = 1번 줄 칸 수(토막 + 줄 전체 + 말해 보기) · 과제 글 = 화면 .say · 줄 수 = 화면 .line
+  const navT = () => $(".panel .segnav").innerText.replace(/\s/g, ""), navAt = () => +((navT().match(/(\d+)\/\d+/) || [])[1] || 0), plain = x => String(x || "").replace(/[.?!,。]/g, "").trim();
+  const hs = x => [...x].filter(c => /[가-힣]/.test(c)), cutSyl = (x, k) => { let c = 0, o = ""; for (const ch of x) { if (/[가-힣]/.test(ch)) { if (c >= k) break; c++; } o += ch; } return plain(o); }; // 앞에서 음절 k 개만
+  const NL = document.querySelectorAll(".line").length, LX = Math.min(12, NL); // 설명 카드 🔁 시험 줄(옛 12번 · 줄이 적은 편은 마지막 줄)
+  let NS = 0, T1 = "", T2 = "";
   ok(!!line(1).querySelector("[data-act=speak]"), "줄 단추에 [말하기] 있음(쓰기 옆)", line(1).querySelector(".acts").innerText.replace(/\n/g, " · "));
   try { localStorage.removeItem("malmun.sp.help"); } catch {}
   await open(1);
@@ -62,48 +67,49 @@
   ok(hb2 && hb.hidden && !$(".panel .whead [data-act=save]") && !$(".panel .whead [data-act=pick]") && /\S\s*\S/.test($(".panel [data-act=help]").textContent.trim()), "[? 사용법] → 풍선 열림 · 다시 → 닫힘 · 위 줄에 옛 ⬇·🎤 단추 없음", $(".panel .whead").innerText.replace(/\s+/g, " "));
   const sp = $(".panel .speak"), p = $(".panel").getBoundingClientRect(), btn = $(".panel .sbtns").getBoundingClientRect();
   ok($("#vwrap").offsetHeight === 0 && sp && sp.scrollHeight - sp.clientHeight <= 1 && btn.bottom <= p.bottom + 1, "말하기가 영상 창 자리에 · 창 안 스크롤 없음");
-  ok($(".panel .say").textContent === "어서 오세요." && /1\/5/.test($(".panel .segnav").innerText.replace(/\s/g, "")), "과제 = 첫 토막 「어서 오세요.」 · 1/5(토막 3 + 줄 전체 + 말해 보기)", $(".panel .say").textContent + " " + $(".panel .segnav").innerText.replace(/\s/g, ""));
+  NS = +((navT().match(/\/(\d+)/) || [])[1] || 0); T1 = $(".panel .say").textContent;
+  ok(T1.length > 1 && navAt() === 1 && NS >= 2, `과제 = 1번 줄 첫 칸 · 1/${NS}(토막 + 줄 전체 + 말해 보기)`, T1 + " " + navT());
   ok($(".panel [data-act=mine]").disabled && $(".panel [data-act=both]").disabled, "녹음 전에는 [내 목소리]·[비교] 꺼져 있음");
-  let at = log.length; $(".panel [data-act=model]").click(); await W(1800);
-  ok(log.slice(at).some(e => e.ev === "시작" && /_01_p01\.mp3$/.test(e.name)) && log.slice(at).some(e => e.ev === "끝"), "[본보기] → 그 토막 소리 끝까지", log.slice(at).map(e => e.ev + "(" + e.name.split("/").pop() + ")").join(" → "));
+  let at = log.length; $(".panel [data-act=model]").click(); await W(1800); for (let k = 0; k < 140 && !log.slice(at).some(e => e.ev === "끝"); k++) await W(100); // 긴 줄(새 1편 1번 = 줄 전체 7초)은 끝날 때까지
+  ok(log.slice(at).some(e => e.ev === "시작" && /_01_\w+\.mp3$/.test(e.name)) && log.slice(at).some(e => e.ev === "끝"), "[본보기] → 그 토막 소리 끝까지", log.slice(at).map(e => e.ev + "(" + e.name.split("/").pop() + ")").join(" → "));
   at = log.length; $(".ctrl [data-act=play]").click(); await W(500); ok(log.slice(at).some(e => e.ev === "시작"), "아래 ▶ = 본보기"); $(".ctrl [data-act=play]").click(); await W(400);
   // 틀리게 말함
-  await say("안녕하세요"); ok(micAsked === 1 && $(".panel .mic").classList.contains("on"), "[말하기] → 마이크 허락 1번 · 녹음 중 표시");
+  await say("감사합니다"); ok(micAsked === 1 && $(".panel .mic").classList.contains("on"), "[말하기] → 마이크 허락 1번 · 녹음 중 표시");
   await waitIdle();
   ok(!$(".panel .mic").classList.contains("on"), "말이 끝나고 조용하면 저절로 멈춤");
-  ok(/40%/.test($(".panel .msg").textContent) && !$(".panel .meter").classList.contains("pass") && /1\/5/.test($(".panel .segnav").innerText.replace(/\s/g, "")), "다르게 말함(안녕하세요 / 어서 오세요) → 40%(「세요」 두 음절만) · 통과 아님 · 그 자리에 있음(막지 않음)", $(".panel .msg").textContent);
+  ok(+(($(".panel .msg").textContent.match(/^(\d+)%/) || [])[1] ?? 100) < 80 && !$(".panel .meter").classList.contains("pass") && navAt() === 1, "다르게 말함(「감사합니다」) → 80% 아래 · 통과 아님 · 그 자리에 있음(막지 않음)", $(".panel .msg").textContent);
   ok(!$(".panel [data-act=mine]").disabled && $(".panel [data-act=keep]").hidden, "못 넘어도 방금 녹음은 [내 목소리]로 들림 · [저장] 없음(투덜이 10-04)");
   const andr = /Android/i.test(navigator.userAgent), want = andr; // 안드로이드 = 폰 자체 처리 켬(본부 10-07) · 그 밖 = 날소리
   ok(window.__lastC && window.__lastC.echoCancellation === want && window.__lastC.noiseSuppression === want && window.__lastC.autoGainControl === want, "마이크는 날소리로(에코 제거·잡음 억제·자동 크기 끔 — 말이 뚝뚝 끊기던 것)", JSON.stringify(window.__lastC));
   ok(window.__srCont === true, "음성 인식이 말을 끝까지 들음(짧은 말을 중간에 끊지 않음)");
   ok(window.__srTrack === "audio", "음성 인식이 녹음하는 그 마이크를 들음(크롬 기본 마이크가 아니라)", String(window.__srTrack));
   // 점수에 맞는 한마디 — 반쯤 맞음(50%)과 많이 틀림(40 미만)은 말이 다르다
-  await say("안녕하세요"); await waitIdle(); const m3 = $(".panel .msg").textContent;
+  await say(cutSyl(T1, Math.ceil(hs(T1).length / 2))); await waitIdle(); const m3 = $(".panel .msg").textContent; // 앞 절반만 = 반쯤 맞음
   await say("감사합니다"); await waitIdle(); const m1 = $(".panel .msg").textContent;
   ok(/^\d+% · /.test(m3) && /^\d+% · /.test(m1) && m3.replace(/^\d+%/, "") !== m1.replace(/^\d+%/, ""), "점수마다 한마디가 다름(아직 조금 부족해요 / 천천히 다시)", m3 + " ｜ " + m1);
   // 맞게 말함 → 100% ✓ + [저장] 단추(자동 저장 아님) → 누르면 저장 · 저절로 넘어가지 않음
-  await say("어서 오세요"); await waitIdle();
+  await say(plain(T1)); await waitIdle();
   ok(/100% ✓/.test($(".panel .msg").textContent) && !$(".panel [data-act=keep]").hidden && !/✓/.test($(".panel .segnav").innerText), "맞게 말함 → 100% ✓ · [저장] 나옴 · 아직 저장 안 됨", $(".panel .msg").textContent);
   await W(1800);
-  ok(/1\/5/.test($(".panel .segnav").innerText.replace(/\s/g, "")), "통과해도 저절로 다음 토막으로 안 넘어감(저장할 틈)", $(".panel .segnav").innerText.replace(/\s/g, ""));
+  ok(navAt() === 1, "통과해도 저절로 다음 토막으로 안 넘어감(저장할 틈)", $(".panel .segnav").innerText.replace(/\s/g, ""));
   $(".panel [data-act=keep]").click(); await W(400);
-  ok(/1\/5✓/.test($(".panel .segnav").innerText.replace(/\s/g, "")) && $(".panel [data-act=keep]").hidden && !$(".panel [data-act=savedplay]").hidden, "[저장] 누름 → ✓ · 「저장됨 ▶」 나옴", $(".panel .msg").textContent);
+  ok(/(^|\D)1\/\d+✓/.test(navT()) && $(".panel [data-act=keep]").hidden && !$(".panel [data-act=savedplay]").hidden, "[저장] 누름 → ✓ · 「저장됨 ▶」 나옴", $(".panel .msg").textContent);
   $(".panel [data-seg='1']").click(); await W(300);
-  ok(/2\/5/.test($(".panel .segnav").innerText.replace(/\s/g, "")) && $(".panel .say").textContent.startsWith("경복궁에"), "▶ 로 다음 토막", $(".panel .say").textContent);
+  T2 = $(".panel .say").textContent; ok(navAt() === 2 && T2 && T2 !== T1, "▶ 로 다음 칸(과제 글 바뀜)", T2);
 
   if (/Android/i.test(navigator.userAgent)) ok(micAsked >= 1, "안드로이드 = 녹음마다 마이크를 닫고 다시 엶(본부 10-08 · 허락은 브라우저가 한 번만 물음)", String(micAsked));
   else ok(micAsked === 1, "마이크 허락은 처음 한 번만(창이 열려 있는 동안 마이크를 쥐고 있음 — 10-01 판처럼)", String(micAsked));
   // 저장 확인: 앞 토막으로 돌아가면 ✓ + 내 목소리 켜짐
   $(".panel [data-seg='-1']").click(); await W(300);
-  ok(/1\/5✓/.test($(".panel .segnav").innerText.replace(/\s/g, "")) && !$(".panel [data-act=savedplay]").hidden && $(".panel [data-act=mine]").disabled, "앞 토막으로 → ✓ · 「저장됨 ▶」 · (방금 녹음 없음이라 [내 목소리] 꺼짐)", $(".panel .segnav").innerText.replace(/\s/g, ""));
+  ok(/(^|\D)1\/\d+✓/.test(navT()) && !$(".panel [data-act=savedplay]").hidden && $(".panel [data-act=mine]").disabled, "앞 토막으로 → ✓ · 「저장됨 ▶」 · (방금 녹음 없음이라 [내 목소리] 꺼짐)", $(".panel .segnav").innerText.replace(/\s/g, ""));
   let dl2 = null; const oc2 = HTMLAnchorElement.prototype.click; HTMLAnchorElement.prototype.click = function () { if (this.download) dl2 = this.download; else oc2.call(this); };
   $(".panel [data-act=savedl]").click(); await W(1200); HTMLAnchorElement.prototype.click = oc2;
-  ok(dl2 === "malmun_L01-00-01_01_p01_100.wav", "말하기 창: 저장한 녹음 [⬇ 내려받기] 이름에 점수", String(dl2));
+  ok(/^malmun_L01-00-01_01_\w+_100\.wav$/.test(dl2 || ""), "말하기 창: 저장한 녹음 [⬇ 내려받기] 이름에 점수", String(dl2));
   const ml0 = (window.__mineLog ||= []).length; $(".panel [data-act=savedplay]").click(); for (let k = 0; k < 20 && window.__mineLog.length === ml0; k++) await W(100);
   ok(window.__mineLog.length > ml0, "「저장됨 ▶」 → 저장한 녹음을 말 시작 자리부터(풀어서 직결 재생)", JSON.stringify(window.__mineLog[window.__mineLog.length - 1]));
   ok(!/%/.test($(".panel .msg").textContent), "열 때(돌아왔을 때) 예전 점수는 안 보임 — ✓ 만", $(".panel .msg").textContent);
   // 녹음 중 다시 누르면 멈춤
-  await say("어서 오세요", 5000); await W(600); $(".panel [data-act=rec]").click(); await W(1200);
+  await say(plain(T1), 5000); await W(600); $(".panel [data-act=rec]").click(); await W(1200);
   ok(!$(".panel .mic").classList.contains("on"), "녹음 중 [말하기] 다시 → 멈춤"); await W(1800);
   // 닫았다 다시 열어도 저장이 남음
   line(1).querySelector("[data-act=speak]").click(); await W(500);
@@ -111,12 +117,12 @@
   await open(1);
   ok(/✓/.test($(".panel .segnav").innerText), "다시 열어도 ✓ 와 저장된 녹음이 남아 있음", $(".panel .segnav").innerText.replace(/\s/g, ""));
   // 줄 전체까지 통과 → 다음 줄 말하기
-  for (const [k, heard] of ["어서 오세요", "경복궁에 온 걸", "환영해요", "어서 오세요 경복궁에 온 걸 환영해요", "한국에 온 걸 환영해요"].entries()) {
-    while (+((($(".panel .segnav").innerText.replace(/\s/g, "").match(/(\d+)\/5/)) || [])[1]) !== k + 1) { $(".panel [data-seg='1']").click(); await W(200); }
-    await say(heard); await waitIdle(); $(".panel [data-act=keep]").click(); await W(300);
+  for (let k = 0; k < NS; k++) {
+    for (let g = 0; g < 12 && navAt() !== k + 1; g++) { $(".panel [data-seg='1']").click(); await W(200); }
+    await say(plain($(".panel .say").textContent)); await waitIdle(); $(".panel [data-act=keep]").click(); await W(300);
   }
   await W(600);
-  ok(/^1 \//.test($(".panel .whead .sub")?.textContent || "") && /5\/5✓/.test($(".panel .segnav").innerText.replace(/\s/g, "")) && /100% ✓ · .+/.test($(".panel .msg").textContent), "줄 전체까지 통과·저장 → 그 줄에 그대로(다음 줄로 넘어가지 않음)", $(".panel .whead .sub")?.textContent + " · " + $(".panel .msg").textContent);
+  ok(/^1 \//.test($(".panel .whead .sub")?.textContent || "") && new RegExp(`${NS}/${NS}✓`).test(navT()) && /100% ✓ · .+/.test($(".panel .msg").textContent), "줄 전체까지 통과·저장 → 그 줄에 그대로(다음 줄로 넘어가지 않음)", $(".panel .whead .sub")?.textContent + " · " + $(".panel .msg").textContent);
   // 점수가 안 나오면 절대 통과·저장 아님(본부 10-04) — 말하기 창
   await open(9);
   const settle = async () => { for (let k = 0; k < 40 && TX("checking").test($(".panel .msg")?.textContent || ""); k++) await W(150); };
@@ -142,8 +148,12 @@
   ok(!$(".panel .sayb .micname").hidden && /✓/.test($(".panel .sayb .micname").textContent), "카드: 🎤 아래 지금 마이크 이름 한 줄(눌러서 바꾸기)", $(".panel .sayb .micname").textContent);
   line(10).querySelector("[data-act=explain]").click(); await W(500);
   // 통과 = 95% 이상 · 들린 말 한 줄(틀린 음절 빨간 밑줄 · 빠진 자리 _) — 1번 줄 「한국에 온 걸 환영해요」(본부 10-04)
-  line(1).querySelector("[data-act=explain]").click(); await W(1300); document.querySelector("video").pause();
+  const AL = await (await fetch(`data/L01-00-01/L01-00-01.align.json?${Date.now()}`)).json().catch(() => ({ items: {} }));
+  const HK = +(Object.entries(AL.items || {}).find(([k, x]) => /_say$/.test(k) && plain(x.text) === "한국에 온 걸 환영해요")?.[0].match(/_(\d+)_say$/)?.[1] || 0); // 그 문장 카드가 있는 줄
   const hl = () => $(".panel .sayb .heardline");
+  if (!HK) res.push("· 이 편엔 「한국에 온 걸 환영해요」 말해 보기가 없음 — 점수 표 건너뜀");
+  else {
+  line(HK).querySelector("[data-act=explain]").click(); await W(1300); document.querySelector("video").pause();
   // 음절 정렬 점수(본부 10-04 기대값 · 정정: 혼자 맞은 음절도 맞음) · 점수와 빨간 표시는 같은 정렬
   for (const [h, want] of [["한국에 온 걸 환영해요", 100], ["미국에 온 걸 환영해요", 89], ["한국에 온 걸 환영해", 89], ["한국에 온 걸 환영합니다", 70], ["너 죽는다 환영 한", 22], ["안녕하세요", 11], ["한국에 걸 환영해요", 89]]) {
     window.__heard = h; cm = await crec();
@@ -166,18 +176,19 @@
   window.__heard = "한국에 온 걸 환영해요"; cm = await crec(); $(".panel .sayb [data-x=keep]").click(); await W(500);
   let dlc = null; const occ = HTMLAnchorElement.prototype.click; HTMLAnchorElement.prototype.click = function () { if (this.download) dlc = this.download; else occ.call(this); };
   $(".panel .sayb [data-x=savedl]").click(); await W(1200); HTMLAnchorElement.prototype.click = occ;
-  ok(dlc === "malmun_L01-00-01_01_say_100.wav" && /⬇ .+/.test($(".panel .sayb [data-x=savedl]").textContent), "카드: 저장한 녹음 [⬇ 내려받기] → 원본 그대로 파일(이름에 점수)", String(dlc));
+  ok(dlc === `malmun_L01-00-01_${String(HK).padStart(2, "0")}_say_100.wav` && /⬇ .+/.test($(".panel .sayb [data-x=savedl]").textContent), "카드: 저장한 녹음 [⬇ 내려받기] → 원본 그대로 파일(이름에 점수)", String(dlc));
   let asked2 = 0; const oconf = window.confirm; window.confirm = () => (asked2++, false);
   $(".panel .sayb [data-x=savedel]").click(); await W(200);
   const stay = !$(".panel .sayb [data-x=savedplay]").hidden;
   window.confirm = () => (asked2++, true); $(".panel .sayb [data-x=savedel]").click(); await W(400); window.confirm = oconf;
-  const left = await new Promise(res => { const q = indexedDB.open("malmun", 1); q.onsuccess = () => { const g = q.result.transaction("rec").objectStore("rec").get("L01-00-01/L01-00-01_01_say"); g.onsuccess = () => { q.result.close(); res(g.result); }; }; });
+  const left = await new Promise(res => { const q = indexedDB.open("malmun", 1); q.onsuccess = () => { const g = q.result.transaction("rec").objectStore("rec").get(`L01-00-01/L01-00-01_${String(HK).padStart(2, "0")}_say`); g.onsuccess = () => { q.result.close(); res(g.result); }; }; });
   ok(asked2 === 2 && stay && $(".panel .sayb [data-x=savedplay]").hidden && $(".panel .sayb [data-x=savedel]").hidden && !left, "카드: [🗑 지우기] → 한 번 묻고(아니오면 그대로) · 예면 그 녹음만 지움", `물음 ${asked2} · 남은 것 ${left ? "있음" : "없음"}`);
-  line(1).querySelector("[data-act=explain]").click(); await W(500);
+  line(HK).querySelector("[data-act=explain]").click(); await W(500);
+  }
   // 🔁 켠 채로 카드 소리 — 본보기·내 목소리는 한 번만 · 설명 ▶ 는 반복 · 🎤 = 반복·재생 모두 멈춤(본부 10-04 「끝없이 되풀이」)
   const pl = []; const op3 = HTMLMediaElement.prototype.play; HTMLMediaElement.prototype.play = function () { pl.push({ el: this, src: decodeURIComponent(this.src) }); return op3.call(this); };
   const toEnd = async el => { for (let k = 0; k < 30 && !isFinite(el.duration); k++) await W(100); if (isFinite(el.duration)) el.currentTime = Math.max(0, el.duration - 0.05); };
-  line(12).querySelector("[data-act=explain]").click(); await W(1300); document.querySelector("video").pause();
+  line(LX).querySelector("[data-act=explain]").click(); await W(1300); document.querySelector("video").pause();
   if (!document.querySelector(".panel").classList.contains("paused")) { $(".ctrl [data-act=play]").click(); await W(300); } // 열 때 저절로 읽는 설명은 멈추고 시작
   if ($(".ctrl [data-act=rep]").getAttribute("aria-pressed") !== "true") { $(".ctrl [data-act=rep]").click(); await W(200); }
   const repOn = $(".ctrl [data-act=rep]").getAttribute("aria-pressed") === "true";
@@ -195,7 +206,7 @@
   const ml1 = (window.__mineLog ||= []).length; $(".panel .sayb [data-x=mine]").click(); await W(4500); // 끝날 때까지(녹음 길이) 기다려도 다시 안 나와야 함
   ok(window.__mineLog.length - ml1 === 1, "🔁 켠 채 [내 목소리] → 한 번만", `내 목소리 ${window.__mineLog.length - ml1}번`);
   $(".ctrl [data-act=rep]").click(); await W(200); HTMLMediaElement.prototype.play = op3;
-  line(12).querySelector("[data-act=explain]").click(); await W(500);
+  line(LX).querySelector("[data-act=explain]").click(); await W(500);
   // 블루투스만 있는 기기 → 그 블루투스로라도 녹음(다른 게 없을 때만)
   const ed = navigator.mediaDevices.enumerateDevices; navigator.mediaDevices.enumerateDevices = async () => [{ kind: "audioinput", deviceId: "bt", label: "시험 블루투스 Hands-Free" }];
   try { localStorage.removeItem("malmun.mic"); } catch {} asked.length = 0;
@@ -253,11 +264,11 @@
   window.__micDeny = false; try { localStorage.removeItem("malmun.mic"); } catch {}
   // 말하기 창 = 카드와 같은 기준(본부 10-04) — 1번 줄 5토막 각각 맞음/틀림/빠짐
   window.SpeechRecognition = fakeSR; window.webkitSpeechRecognition = fakeSR; // 앞의 「인식 없는 기기」 시험에서 지운 것 되살림
-  await open(1); while (!/(^|\D)1\/5/.test($(".panel .segnav").innerText.replace(/\s/g, ""))) { $(".panel [data-seg='-1']").click(); await W(150); }
+  await open(1); while (!navAt() === 1) { $(".panel [data-seg='-1']").click(); await W(150); }
   const settle2 = async () => { for (let k = 0; k < 40 && TX("checking").test($(".panel .msg")?.textContent || ""); k++) await W(150); };
   const syl = x => [...x].filter(c => /[가-힣]/.test(c));
   let bad5 = [];
-  for (let k = 0; k < 5; k++) {
+  for (let k = 0; k < NS; k++) {
     if (k) { $(".panel [data-seg='1']").click(); await W(250); }
     const txt = $(".panel .say").textContent, S = syl(txt);
     const forms = [["맞음", txt, m => /^100% ✓/.test(m) && !$(".panel [data-act=keep]").hidden],
@@ -265,10 +276,10 @@
       ["빠짐", txt.replace(S[1] || S[0], ""), m => !/^100/.test(m) && ((+(m.match(/^(\d+)%/) || [])[1] >= 80) === !$(".panel [data-act=keep]").hidden) && !!$(".panel .heardline mark.miss")]];
     for (const [nm, h, chk] of forms) { await say(h); await waitIdle(); await settle2(); const m = $(".panel .msg").textContent; if (!chk(m)) bad5.push(`${k + 1}토막 ${nm}: ${m} | ${$(".panel .heardline").textContent}`); }
   }
-  ok(!bad5.length, "말하기 창 1번 줄 5토막 × 맞음(100% ✓★·[저장])/틀림(빨간 밑줄)/빠짐(_) — [저장]은 80%↑ 일 때만", bad5.join(" ; ") || "15/15");
+  ok(!bad5.length, `말하기 창 1번 줄 ${NS}칸 × 맞음(100% ✓★·[저장])/틀림(빨간 밑줄)/빠짐(_) — [저장]은 80%↑ 일 때만`, bad5.join(" ; ") || `${NS * 3}/${NS * 3}`);
   window.__srNone = true; await say("아무 말"); await waitIdle(); await settle2(); window.__srNone = false;
   ok(/^0% · /.test($(".panel .msg").textContent) && $(".panel [data-act=keep]").hidden && ![...document.querySelectorAll(".panel button")].some(b => !b.hidden && /^⬇$/.test(b.textContent.trim())), "0% 녹음 뒤 저장할 길 없음([저장] 없음 · 옛 ⬇ 없음)", $(".panel .msg").textContent);
-  ok(![...document.querySelectorAll(".panel button")].filter(b => !b.hidden && b.offsetParent && !b.matches(".bgmb")).some(b => !/[\p{L}]/u.test(b.textContent)), "말하기 창: 아이콘만 단추 없음", [...document.querySelectorAll(".panel button")].filter(b => !b.hidden && b.offsetParent).map(b => b.textContent.trim()).join(" | "));
+  ok(![...document.querySelectorAll(".panel button")].filter(b => !b.hidden && b.offsetParent && !b.matches(".bgmb")).some(b => !/[\p{L}\p{N}]/u.test(b.textContent)), "말하기 창: 아이콘만 단추 없음(글자·숫자 있음 · 저장된 녹음 「★ 100% ▶」 = 점수 글)", [...document.querySelectorAll(".panel button")].filter(b => !b.hidden && b.offsetParent).map(b => b.textContent.trim()).join(" | "));
   const spx = $(".panel .speak"); ok(spx.scrollHeight - spx.clientHeight <= 1, "말하기 창: 들린 말·저장 줄이 떠도 창 안 스크롤 없음", spx.scrollHeight + "/" + spx.clientHeight);
   // 시간 규칙(본부 10-04): 쉼 2초 · 🎤 뒤 6초 · 최대 길이 · 인식 다시 켜기 · 두 단계 통과
   const { scoreLine, maxMsFor } = await import("./js/screens/speak.js?v=" + document.documentElement.dataset.v);
@@ -325,11 +336,11 @@
   $(".panel .v9bar [data-x=close]").click(); await W(600);
   ok($(".panel").offsetHeight === 0 && $("#vwrap").offsetHeight > 0, "설명 카드 [✕ 닫기] → 영상으로");
   // 말하기 창 [🗑 지우기] — 1번 줄 1토막(저장돼 있음)
-  await open(1); while (!/(^|\D)1\/5/.test($(".panel .segnav").innerText.replace(/\s/g, ""))) { $(".panel [data-seg='-1']").click(); await W(150); }
+  await open(1); while (!navAt() === 1) { $(".panel [data-seg='-1']").click(); await W(150); }
   const oc3 = window.confirm; window.confirm = () => true;
-  const hadTick = /1\/5✓/.test($(".panel .segnav").innerText.replace(/\s/g, ""));
+  const hadTick = /(^|\D)1\/\d+✓/.test(navT());
   $(".panel [data-act=savedel]").click(); await W(400);
-  ok(hadTick && !/1\/5✓/.test($(".panel .segnav").innerText.replace(/\s/g, "")) && $(".panel [data-act=savedplay]").hidden, "말하기 창: [🗑 지우기] → 그 토막 ✓·저장됨 사라짐", $(".panel .segnav").innerText.replace(/\s/g, ""));
+  ok(hadTick && !/(^|\D)1\/\d+✓/.test(navT()) && $(".panel [data-act=savedplay]").hidden, "말하기 창: [🗑 지우기] → 그 토막 ✓·저장됨 사라짐", $(".panel .segnav").innerText.replace(/\s/g, ""));
   // 편 목록 「이 편 녹음 모두 지우기」 — 녹음이 있을 때만 보임 · 한 번 묻고 · 진단 녹음도
   location.hash = "#/list"; await W(1200);
   const da = $(".delall button"), shown = da && !da.hidden;
@@ -344,18 +355,18 @@
   mo.observe(document.body, { subtree: true, attributes: true, attributeFilter: ["class"] });
   const of = window.fetch; window.fetch = (u, ...a) => { if (/score_/.test(String(u))) fxGet.push(String(u).match(/score_\w+/)[0]); return of(u, ...a); };
   const fxLog0 = (window.__sfxLog || []).length, fxPlayed = () => (window.__sfxLog || []).slice(fxLog0).filter(e => e.ev === "시작" && /score_/.test(e.name)).map(e => e.name.match(/score_\w+/)[0]);
-  await open(1); while (!/(^|\D)1\/5/.test($(".panel .segnav").innerText.replace(/\s/g, ""))) { $(".panel [data-seg='-1']").click(); await W(150); }
+  await open(1); while (!navAt() === 1) { $(".panel [data-seg='-1']").click(); await W(150); }
   const fxRun = async h => { fxSeen.length = 0; fxSize.length = 0; if (h == null) window.__srNone = true; await say(h ?? "아무 말"); await waitIdle(); await settle2(); window.__srNone = false; const after = fxBox($(".panel .speak .fx")); await W(1900); return [fxSeen.join(","), fxSize.every(x => x === after) && fxBox($(".panel .speak .fx")) === after ? "" : `크기 ${fxSize}→${after}`].join(""); };
-  const fxA = await fxRun("어서 오세요"), fxB = await fxRun("어서 오세"), fxC = await fxRun("너 죽는다"), fxD = await fxRun(null);
+  const fxA = await fxRun(plain(T1)), fxB = await fxRun(cutSyl(T1, Math.round(hs(T1).length * 0.87))), fxC = await fxRun("너 죽는다"), fxD = await fxRun(null);
   ok(fxA === "perfect" && fxB === "pass" && fxC === "miss" && fxD === "miss", "말하기 창 효과: 100% = perfect · 80% = pass · 0%(말은 들림) = miss · 못 알아들음도 꽝 = miss(투덜이 10-08) · 창 크기·스크롤 그대로", `${fxA}|${fxB}|${fxC}|${fxD || "없음"}`);
   const fxPl = fxPlayed();
   ok(["score_perfect", "score_pass", "score_miss"].every(n => fxPl.includes(n)) && fxPl.length === 4, "효과음 score_perfect/pass/miss 가 점수 뜰 때 한 번씩(못 알아들음도 꽝 소리 — 투덜이 10-08)", `남 ${fxPl}`);
-  line(1).querySelector("[data-act=explain]").click(); await W(800);
+  line(1).querySelector("[data-act=explain]").click(); await W(800); const CS = plain($(".panel .sayb .saybig")?.textContent || ""); // 1번 줄 말해 보기 문장(편 자료)
   const crun = async h => { fxSeen.length = 0; fxSize.length = 0; if (h == null) window.__srNone = true; else window.__heard = h; await crec(); window.__srNone = false; const after = fxBox($(".panel .sayb .fx")); await W(1900); return fxSeen.join(",") + (fxSize.every(x => x === after) && fxBox($(".panel .sayb .fx")) === after ? "" : ` 크기 ${fxSize}→${after}`); };
-  const cA = await crun("한국에 온 걸 환영해요"), cB = await crun("너 죽는다"), cC = await crun(null);
+  const cA = await crun(CS), cB = await crun("너 죽는다"), cC = await crun(null);
   ok(cA === "perfect" && cB === "miss" && cC === "miss", "카드 효과: 100% = perfect · 엉뚱한 말 = miss · 못 알아들음도 꽝 = miss(투덜이 10-08) · 카드 크기 그대로(효과가 떠 있을 때 = 사라진 뒤)", `${cA}|${cB}|${cC || "없음"}`);
   // 🎤 누르면 울리던 효과음도 바로 멈춤(녹음에 안 섞임)
-  window.__heard = "한국에 온 걸 환영해요"; await crec(); await W(250); const fxN0 = window.__sfxLog.length;
+  window.__heard = CS; await crec(); await W(250); const fxN0 = window.__sfxLog.length;
   $(".panel .sayb [data-x=rec]").click(); await W(300); const fxCut = window.__sfxLog.slice(fxN0).some(e => e.ev === "멈춤" && /score_perfect/.test(e.name));
   speakFor(700); for (let k = 0; k < 60 && $(".panel .sayb [data-x=rec]").classList.contains("on"); k++) await W(150); await W(2300);
   ok(fxCut, "카드: 효과음(2초 perfect) 중 🎤 → 효과음 바로 멈춤");

@@ -25,7 +25,7 @@
   try { const Wt = ms => new Promise(r => setTimeout(r, ms)), $q = s => document.querySelector(s), outs = [];
     for (const [hm, mode] of [["magnet", "pass"], ["free", "pass"], ["free", "fail"]]) {
       localStorage.setItem("malmun.wmode", "hand"); localStorage.setItem("malmun.hmode", hm); localStorage.setItem("malmun.htool", "pen");
-      document.querySelectorAll(".panel [data-act=close]").forEach(b => b.click()); await Wt(400); document.querySelectorAll(".line")[14].querySelector("[data-act=write]").click(); await Wt(1800);
+      document.querySelectorAll(".panel [data-act=close]").forEach(b => b.click()); await Wt(400); (document.querySelectorAll(".line")[14] || [...document.querySelectorAll(".line")].find(l => /나/.test(l.querySelector(".kotext")?.textContent || "")) || document.querySelector(".line")).querySelector("[data-act=write]").click(); await Wt(1800); /* 옛 세종 15번 줄 · 없으면(새 편) 「나」가 든 첫 줄 · 개발2팀 10-22 */
       for (let k = 0; k < 6 && ![...document.querySelectorAll(".panel .sent .c")].some(b => b.textContent === "나"); k++) { $q(".panel .segnav [data-seg='1']")?.click(); await Wt(700); }
       [...document.querySelectorAll(".panel .sent .c")].find(b => b.textContent === "나")?.click(); await Wt(1600); const wr = $q(".panel .write").parentElement.__wr; wr.hand().stopOrder(); await Wt(400); const H = wr.hand(); for (let k = 0; k < 30 && hm === "magnet" && !H.magList; k++) await Wt(100);
       const pos = () => [...document.querySelectorAll(".panel .hbox, .panel .hbtns > button, .panel .hjudge, .panel .hslot, .panel .stage, .panel .sent")].map(e => { const b = e.getBoundingClientRect(); return [b.left, b.top, b.width, b.height].map(Math.round); });

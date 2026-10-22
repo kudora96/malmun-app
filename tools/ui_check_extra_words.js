@@ -25,8 +25,12 @@
     // ② 리듬·빠르기 — 내 녹음 = 한 줄 전체 mp3(덧붙은 말 포함) · 본보기 = 그 줄 토막
     delete window.__noRhythm;
     const ep = "L01-00-01", al = await R.loadAlign(ep), url = k => al.items[k].file.replace(/^.*?media/, "/media").split(String.fromCharCode(92)).join("/");
-    const sylOf = x => H.sylsAt(x).out;
-    for (const [tk, lk] of [["L01-00-01_01_p03", "L01-00-01_01_line"], ["L01-00-01_01_p01", "L01-00-01_01_line"], ["L01-00-01_01_p02", "L01-00-01_01_line"], ["L01-00-01_08_p03", "L01-00-01_08_line"]]) {
+    const sylOf = x => H.sylsAt(x).out, pl = s => String(s || "").replace(/[^\p{L}\p{N}]/gu, "");
+    // 짝(토막 ⊂ 그 줄) = 옛 세종 키가 있으면 그대로 · 없으면(새 편) 말해 보기 문장이 그 줄 안에 든 것(개발2팀 10-22)
+    const OLDP = [["L01-00-01_01_p03", "L01-00-01_01_line"], ["L01-00-01_01_p01", "L01-00-01_01_line"], ["L01-00-01_01_p02", "L01-00-01_01_line"], ["L01-00-01_08_p03", "L01-00-01_08_line"]].filter(([a, b]) => al.items[a] && al.items[b]);
+    const PAIRS = OLDP.length ? OLDP : Object.keys(al.items).filter(k => /_say$/.test(k)).map(k => [k, k.replace(/_say$/, "_line")]).filter(([a, b]) => al.items[b] && pl(al.items[b].text).includes(pl(al.items[a].text)) && pl(al.items[b].text).length > pl(al.items[a].text).length).slice(0, 4);
+    if (!PAIRS.length) ok(false, "② 짝(토막 ⊂ 그 줄)이 편 자료에 없음");
+    for (const [tk, lk] of PAIRS) {
       const ti = al.items[tk], li = al.items[lk], tgt = ti.text, full = li.text, spn = H.spanOf(tgt, full);
       const [ub, lb] = await Promise.all([fetch(url(tk)).then(r => r.blob()), fetch(url(lk)).then(r => r.blob())]);
       const o = { ep, key: tk, url: url(tk), text: tgt };
@@ -39,7 +43,7 @@
       ok(spn.score === 100 && rA && rN && rW && S(rN) >= Math.min(100, S(rA)) - 2 && S(rW) >= Math.min(100, S(rA)) - 2 && near(rN.win, 0.3) && near(rW.win, 0.15) && !lateS(rN) && !lateS(rW),
         `리듬·빠르기 = 토막 구간만: 「${tgt}」 ⊂ 「${full}」 → 덧붙은 말로 안 깎임 · 늦음 아님 · 구간 맞음`,
         `토막만 녹음 ${S(rA)} · 줄 통째(옛 방식) ${S(rOld)} · 줄 통째(새 · DTW) ${S(rN)} 구간 ${rN?.win ? rN.win.s.toFixed(2) + "~" + rN.win.e.toFixed(2) : "-"} · 서버 낱말 시각 ${S(rW)} ${rW?.win ? rW.win.s.toFixed(2) + "~" + rW.win.e.toFixed(2) : "-"} · 참 ${truth.s.toFixed(2)}~${truth.e.toFixed(2)} · 늦음 ${lateS(rN)}/${lateS(rW)} (yEnd ${rN?.yEnd?.toFixed(2)} · 칠 끝 ${pc ? (pc.end / 1000).toFixed(2) : "-"})`);
-      if (tk === "L01-00-01_01_p03") window.__xwWin = { blob: lb, win: rN?.win, text: spn.text, full };
+      if (tk === PAIRS[0][0]) window.__xwWin = { blob: lb, win: rN?.win, text: spn.text, full, tgt, ln: +tk.match(/_(\d+)_/)[1] };
     }
     window.__noRhythm = true; // 아래 = 가짜 마이크(삑) — 글자 점수·화면만
     // ③ 말하기 창 — 가짜 마이크·받아쓰기(녹음+받아쓰기 같이 · 안드로이드 아님)
@@ -53,22 +57,24 @@
     const p = $(".panel"), sp = p.__sp, msg = () => $(".panel .msg").textContent;
     const once = async h => { window.__heard = h; $(".panel [data-act=rec]").click(); talk(); await W(500); for (let k = 0; k < 120 && $(".panel [data-act=rec]").classList.contains("on"); k++) await W(100); for (let k = 0; k < 60 && !/\d+%/.test(msg()); k++) await W(100); await W(300); return msg(); };
     const say0 = sp._cur().say;
-    let m = await once("어서 오세요 경복궁에 온 걸 환영해요");
+    const S0 = say0.replace(/[.?!,]/g, "").trim(), HS0 = [...S0].filter(c => /[가-힣]/.test(c)), PART = (() => { let c = 0, o = ""; for (const ch of S0) { if (/[가-힣]/.test(ch)) { if (c >= Math.max(1, Math.round(HS0.length * 0.4))) break; c++; } o += ch; } return o.trim(); })(); // 앞 40% 음절만
+    let m = await once(`${S0} 감사합니다`);
     const hl = $(".panel .heardline");
     ok(/^100%/.test(m) && !m.includes(slow) && hl.querySelectorAll(".xtra").length === 1 && !hl.querySelector("mark.bad"), `말하기 창: 「${say0}」 + 뒤에 덧붙임 = 100% · 「천천히」 없음 · 들린 말에 회색 덧붙은 말`, `${m} · 「${hl.textContent}」`);
-    m = await once("한국에 오신 걸 환영합니다 어서 오세요 경복궁에 온 걸 환영해요");
+    m = await once(`한국에 오신 걸 환영합니다 ${S0} 감사합니다`);
     ok(/^100%/.test(m) && !m.includes(slow), "말하기 창: 앞뒤 덧붙임(한 줄 통째) = 100% · 「천천히」 없음", m);
-    m = await once("한국에 오신 걸 환영합니다 어서");
-    ok(/^40%/.test(m), "말하기 창: 앞에 말 + 본보기 일부만 = 일부 점수(40%) 그대로", m);
+    m = await once(`한국에 오신 걸 환영합니다 ${PART}`);
+    ok(parseInt(m) === H.scoreOf(say0, [PART]) && parseInt(m) < 80, `말하기 창: 앞에 말 + 본보기 일부만(「${PART}」) = 일부 점수 그대로(앞 말 없을 때와 같음)`, `${m} · 일부만 ${H.scoreOf(say0, [PART])}%`);
     m = await once("고맙습니다 감사합니다 안녕히 계세요");
-    ok(/^\d+%/.test(m) && parseInt(m) <= 40 && parseInt(m) === H.scoreOf(say0, ["계세요"]), "말하기 창: 엉뚱한 말 = 낮음(본보기와 같은 조각 「세요」만큼 — 그 조각만 말한 것과 같은 점수 · 부풀지 않음)", m);
+    ok(/^\d+%/.test(m) && parseInt(m) <= 40 && parseInt(m) === H.scoreOf(say0, ["고맙습니다 감사합니다 안녕히 계세요"]), "말하기 창: 엉뚱한 말 = 낮음(40% 이하 · 덧붙은 말 규칙으로 부풀지 않음 · 글자 점수와 같음)", m);
     // ⑤ 비교 화면 — 토막 구간(win) + 토막 글만 · 덧붙은 말 칸 없음 · 모두 맞음
     const xw = window.__xwWin;
-    if (xw?.win) { const S = sp._state; S.i = 2; sp._paint(); await W(300);
+    if (xw?.win) { $(".panel [data-act=close]")?.click(); await W(400); document.querySelectorAll(".line")[xw.ln - 1].querySelector("[data-act=speak]").click(); await W(1500); document.querySelector("video")?.pause();
+      const p = $(".panel"), sp = p.__sp, S = sp._state; for (let k = 0; k < 12 && pl(sp._cur().say) !== pl(xw.tgt); k++) { S.i = k; sp._paint(); } await W(300); // 그 토막(편 자료)
       S.blob = xw.blob; S.win = { blob: xw.blob, ...xw.win, text: xw.text }; S.score = 100; S.heardHTML = `<span class="lab">x:</span> <span class="ko" lang="ko">${H.heardHTML(sp._cur().say, xw.full).html}</span>`; sp._paint(); await W(200);
       const b = p.querySelector("[data-act=both]"); b.disabled = false; if (b.getAttribute("aria-pressed") === "true") { b.click(); await W(200); } b.click(); await W(2500);
       const C = window.__cmp, h = p.querySelector(".cmp");
-      ok(sp._cur().say.includes("환영해요") && C && C.marks.every(x => x === "ok") && !C.extra.length && !C.cut && C.ysyl.every(x => x.s >= C.yLead - 0.05 && x.e <= C.yStop + 0.35) && h.scrollHeight <= h.clientHeight + 1,
+      ok(pl(sp._cur().say) === pl(xw.tgt) && C && C.marks.every(x => x === "ok") && !C.extra.length && !C.cut && C.ysyl.every(x => x.s >= C.yLead - 0.05 && x.e <= C.yStop + 0.35) && h.scrollHeight <= h.clientHeight + 1,
         "비교 화면: 덧붙은 말이 있으면 토막 구간만(음절 칸 모두 맞음 · 덧붙은 회색 칸 없음 · 끊김 표시 없음 · 넘침 0)", `「${sp._cur().say}」 · 칸 ${C?.marks.join("")} · 덧붙음 ${C?.extra.length} · 내 줄 ${C?.yLead.toFixed(2)}~${C?.yStop.toFixed(2)}초 · 리듬 R ${C?.rh?.R?.toFixed(2)}`);
       b.click(); await W(300); }
     else ok(false, "비교 화면: ② 에서 토막 구간을 못 얻음");
@@ -99,9 +105,10 @@
     MediaRecorder.prototype.start = function (...a) { const r = mrs0.apply(this, a); const b = window.__feed; if (b && feedG) { const src = ac.createBufferSource(); src.buffer = b; src.connect(feedG); src.start(); this.addEventListener("stop", () => { try { src.stop(); } catch {} }, { once: true }); } return r; };
     window.__xwKeepMrs = mrs0;
     const why = T("why_late"), pct = s => +((s.match(/^(\d+)%/) || [])[1] ?? -1);
-    // 말하기 창 — 8번 줄 「줄 전체」(41음절 · 9.4초)
-    const lineBuf = await dec(url("L01-00-01_08_line"));
-    document.querySelectorAll(".line")[7].querySelector("[data-act=speak]").click(); await W(1500); document.querySelector("video")?.pause();
+    // 말하기 창 — 음절 가장 많은 줄 「줄 전체」(옛 세종 8번 · 41음절 · 9.4초 · 편 자료에서 고름)
+    const K8 = al.items["L01-00-01_08_line"] && OLDP.length ? "L01-00-01_08_line" : Object.keys(al.items).filter(k => /_line$/.test(k)).sort((a, b) => al.items[b].syl.length - al.items[a].syl.length)[0], L8 = +K8.match(/_(\d+)_/)[1] - 1;
+    const lineBuf = await dec(url(K8));
+    document.querySelectorAll(".line")[L8].querySelector("[data-act=speak]").click(); await W(1500); document.querySelector("video")?.pause();
     { const p2 = $(".panel"), sp2 = p2.__sp, S2 = sp2._state; for (let k = 0; k < 12 && !sp2._cur().whole; k++) { S2.i = k; sp2._paint(); } await W(300);
       const msg = () => $(".panel .msg").textContent; window.__heard = sp2._cur().say;
       const spkL = async feed => { window.__feed = feed; $(".panel [data-act=rec]").click(); await W(800); const t0 = performance.now(); while (performance.now() - t0 < 45000 && $(".panel [data-act=rec]").classList.contains("on")) await W(150); for (let k = 0; k < 150 && !/^\d+%/.test(msg()); k++) await W(100); await W(800); return msg(); };
@@ -131,7 +138,7 @@
       Object.defineProperty(navigator, "userAgent", { configurable: true, get: () => "Mozilla/5.0 (Linux; Android 14; SM-S921N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0 Mobile Safari/537.36" });
       delete window.__noSeq; window.__sttURL = URL0; try { for (const k of ["malmun.srdev", "malmun.srdev.t", "malmun.sttnote"]) localStorage.removeItem(k); for (const k of ["malmun.srmode", "malmun.srfail", "malmun.srsrv", "malmun.srmiss"]) sessionStorage.removeItem(k); } catch {}
       try {
-        document.querySelectorAll(".line")[7].querySelector("[data-act=speak]").click(); await W(1500); document.querySelector("video")?.pause();
+        document.querySelectorAll(".line")[L8].querySelector("[data-act=speak]").click(); await W(1500); document.querySelector("video")?.pause();
         const p3 = $(".panel"), sp3 = p3.__sp, S3 = sp3._state; for (let k = 0; k < 12 && !sp3._cur().whole; k++) { S3.i = k; sp3._paint(); } await W(300);
         const msg = () => $(".panel .msg").textContent; window.__heard = sp3._cur().say; window.__feed = lineBuf;
         $(".panel [data-act=rec]").click(); await W(800); let t0 = performance.now(); while (performance.now() - t0 < 30000 && $(".panel [data-act=rec]").classList.contains("on")) await W(150);

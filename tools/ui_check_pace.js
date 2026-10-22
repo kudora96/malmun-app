@@ -33,10 +33,10 @@
       if (rate === 1) { const D = (syl[syl.length - 1].e - s0) * 1.15, m = syl.length; // 옛 칠 = 글자마다 고른 길이
         const r0 = R(stretch(mb, [[s0, s0], ...syl.slice(1).map((x, k) => [x.s, s0 + (D * (k + 1)) / m]), [syl[m - 1].e, s0 + D]]), mb, k2); if (withRhythm(100, r0.R) < 100) old.push(`${k2} ${withRhythm(100, r0.R)}`); }
     }
-    ok(n > 50 && !bad.length, `칠대로 따라 읽기(본보기 속도 ${rate}× · 배수 ${(1.15 / rate).toFixed(2)}) → 모든 토막 100점(${n}토막)`, bad.join(" · ") || `가장 낮은 R ${minR.toFixed(3)} · R 0.9 아래(100점이지만) ${low.length}토막${low.length ? ": " + low.join(" · ") : ""}`);
+    ok(n >= Math.min(20, items.length) && !bad.length, `칠대로 따라 읽기(본보기 속도 ${rate}× · 배수 ${(1.15 / rate).toFixed(2)}) → 모든 토막 100점(${n}토막)`, bad.join(" · ") || `가장 낮은 R ${minR.toFixed(3)} · R 0.9 아래(100점이지만) ${low.length}토막${low.length ? ": " + low.join(" · ") : ""}`);
     if (rate === 1) res.push(`· 대조: 옛 칠(글자마다 고른 길이)대로 → 100 아닌 토막 ${old.length}/${n}${old.length ? " · " + old.slice(0, 6).join(" · ") : ""}`);
   }
-  { const it = al.items["L01-00-01_15_p02"] ? ["L01-00-01_15_p02", al.items["L01-00-01_15_p02"]] : items[0], pc = await paceOf({ ep, key: it[0], text: it[1].text, rate: 1 });
+  { const it = al.items["L01-00-01_15_p02"] ? /* 옛 세종 15번 2/8 · 없으면(새 편) 첫 항목 */ ["L01-00-01_15_p02", al.items["L01-00-01_15_p02"]] : items[0], pc = await paceOf({ ep, key: it[0], text: it[1].text, rate: 1 });
     ok(pc && pc.at.every((t, i) => !i || t >= pc.at[i - 1]) && pc.end > pc.at[pc.at.length - 1], "칠 시각 차례대로 · 안내선 = 끝", `${it[1].text} · ${pc?.at.map(t => (t / 1000).toFixed(2)).join(" ")} → ${(pc?.end / 1000).toFixed(2)}초`); }
   const bad = res.filter(x => x.startsWith("✗")).length, out = `${bad ? "✗" : "✓"} 칠 ${res.filter(x => x.startsWith("✓")).length}/${res.filter(x => /^[✓✗]/.test(x)).length}\n` + res.join("\n");
   console.log(out); return out;

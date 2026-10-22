@@ -5,9 +5,9 @@
 // 통과: 시작점 = 말 시작 −0.1초 ±0.05 (= 말 시작 0.05~0.15초 앞)
 (async () => {
   const v = document.documentElement.dataset.v, { leadOf, voicedEnd } = await import(`/js/playmine.js?v=${v}`);
-  const al = await (await fetch(`/data/L01-00-01/L01-00-01.align.json?${Date.now()}`)).json();
+  const al = await (await fetch(`/tools/fx/sejong/align.json?${Date.now()}`)).json(); // 점검 전용 고정 자료(옛 세종 1편 정렬·소리 · 개발2팀 10-22) — 편이 바뀌어도 같은 소리·같은 기대값
   const SR = 44100, ctx = new OfflineAudioContext(1, SR, SR), res = [];
-  const load = async k => { const it = al.items[k]; const ab = await (await fetch(it.file.replace(/^.*?media/, "/media").replace(/\\/g, "/"))).arrayBuffer(); return { it, d: (await ctx.decodeAudioData(ab)).getChannelData(0) }; };
+  const load = async k => { const it = al.items[k]; const ab = await (await fetch("/" + it.file)).arrayBuffer(); return { it, d: (await ctx.decodeAudioData(ab)).getChannelData(0) }; };
   const buf = arr => ({ sampleRate: SR, duration: arr.length / SR, getChannelData: () => arr });
   const rmsOf = (d, a, b) => { let s = 0; for (let i = a; i < b; i++) s += d[i] * d[i]; return Math.sqrt(s / Math.max(1, b - a)); };
   const peakOf = d => { let p = 0; for (const x of d) p = Math.max(p, Math.abs(x)); return p; };

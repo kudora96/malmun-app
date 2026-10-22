@@ -9,7 +9,7 @@
     const blob = await r8.blob(), L = document.querySelectorAll(".line"), li = L.length - 1;
     if (!document.querySelector(".panel")?.__sp) { L[li].querySelector("[data-act=speak]").click(); await W(1500); }
     const p = document.querySelector(".panel"), sp = p.__sp; for (let k = 0; k < 10 && !sp._cur().whole; k++) { p.querySelector("[data-act=next], .segnav [data-seg='1']")?.click(); await W(300); }
-    const S = sp._state; S.blob = blob; S.whyEnd = "cut"; S.heardHTML = `<span class="ko">그게 세종대왕이 하고 싶었던 거구나</span>`; sp._paint(); await W(200);
+    const S = sp._state; S.blob = blob; S.whyEnd = "cut"; S.heardHTML = `<span class="ko">${(() => { const t = sp._cur().say.replace(/[.?!,]/g, ""), n = [...t].filter(c => /[가-힣]/.test(c)).length, k = Math.round(n * 0.6); let c = 0, o = ""; for (const ch of t) { if (/[가-힣]/.test(ch)) { if (c >= k) break; c++; } o += ch; } return o.trim(); })()}</span>`; /* 들은 말 = 그 줄 앞 60%(끊김 · 옛 세종 「그게 세종대왕이 하고 싶었던 거구나」 · 개발2팀 10-22) */ sp._paint(); await W(200);
     const b = p.querySelector("[data-act=both]"); if (b.getAttribute("aria-pressed") === "true") { b.click(); await W(200); } b.click(); await W(2500);
     const C = window.__cmp, h = p.querySelector(".cmp"), stop = h.querySelector(".crow.y .cstop"), sx = stop?.getBoundingClientRect().left ?? -1;
     const ghosts = [...h.querySelectorAll(".crow.y .cel.ghost, .crow.y .wcel")].filter(e => e.getBoundingClientRect().width > 0).filter(e => e.classList.contains("ghost") || [...e.querySelectorAll(".wch")].every(c => c.classList.contains("miss")));
