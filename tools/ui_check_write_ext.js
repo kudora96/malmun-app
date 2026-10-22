@@ -101,10 +101,10 @@
       localStorage.setItem("malmun.wmode", mode); await open(1); const sc0 = $(".panel .scr.write");
       if (mode === "hand") { const F = await wr().fitPath(wr().hand().ch, 0, "pen"); const iv2 = $(".panel .hink"); const e2 = (t, [x, y]) => { const r = iv2.getBoundingClientRect(); iv2.dispatchEvent(new PointerEvent(t, { bubbles: true, cancelable: true, pointerId: 90, pointerType: "touch", isPrimary: true, clientX: r.left + x * r.width, clientY: r.top + y * r.height })); }; const P = F.map(q => [q.x, q.y]); e2("pointerdown", P[0]); P.forEach(q => e2("pointermove", q)); e2("pointerup", P[P.length - 1]); await W(200); }
       const pos0 = JSON.stringify([wr().st().s, wr().st().w, wr().st().c, wr().st().k]), nStr0 = wr().hand()?.strokes.length ?? -1;
-      await i18n.setUiKo(true); window.dispatchEvent(new CustomEvent("malmun:uilang")); await W(400);
+      await (async on => { const sc = document.querySelector(".panel .scr.write"); if (sc && (sc.dataset.uiko === "1") !== on) sc.querySelector("[data-act=uiko]")?.click(); })(true); await W(400);
       const ko = appText(), hasDeva = /[ऀ-ॿ]/.test(ko);
       const same = $(".panel .scr.write") === sc0 && JSON.stringify([wr().st().s, wr().st().w, wr().st().c, wr().st().k]) === pos0 && (wr().hand()?.strokes.length ?? -1) === nStr0;
-      await i18n.setUiKo(false); window.dispatchEvent(new CustomEvent("malmun:uilang")); await W(400);
+      await (async on => { const sc = document.querySelector(".panel .scr.write"); if (sc && (sc.dataset.uiko === "1") !== on) sc.querySelector("[data-act=uiko]")?.click(); })(false); await W(400);
       const ne = appText(), hasKo = /[가-힣]/.test(ne.replace(/\d+ \/ \d+ · [^\n]*/g, "")); // 머리 줄 화자 이름(배우는 한국어) 빼고
       ok(!hasDeva && !hasKo && same, `ⓑ [${mode}] 앱 글 한국어⇄네팔어 = 쓰기 창 글이 그 언어로만 · 자리·획 그대로 · 다시 안 그림`, `한국어일 때 네팔어 ${hasDeva} 「${(ko.match(/[ऀ-ॿ][^\n]{0,12}/) || [""])[0]}」 · 네팔어일 때 한국어 ${hasKo} 「${(ne.replace(/\d+ \/ \d+ · [^\n]*/g, "").match(/[가-힣][^\n]{0,12}/) || [""])[0]}」 · 그대로 ${same}`);
     }

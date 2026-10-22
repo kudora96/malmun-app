@@ -18,7 +18,7 @@
   const nP = bx().querySelectorAll("p").length, nTg = bx().querySelectorAll(".tg").length, nS = new Set([...bx().querySelectorAll(".fbs")].map(s => s.dataset.fb)).size;
   ok(nP >= 1 && nS >= Math.min(nP, 1) && lit(), "ⓑ 채점 뒤 = 줄마다 칠 · <p> 줄·꼬리표 그대로 · 자동 읽기", `줄 ${nP} · 꼬리표 ${nTg} · 칠 ${nS} · 불 ${lit()}`);
   const pos = () => [...document.querySelectorAll(".panel .scr.write button, .panel .hbox, .panel .hjudge")].map(e => JSON.stringify(e.getBoundingClientRect())).join("|");
-  const p0 = pos(); await ui.switchUiKo(true); await W(600); const p1 = pos(), n1 = bx().querySelectorAll("p").length, s1 = bx().querySelectorAll(".fbs").length, l1 = lit(); await ui.switchUiKo(false); await W(500);
+  const p0 = pos(); $(".panel .scr.write [data-act=uiko]").click(); await W(600); const p1 = pos(), n1 = bx().querySelectorAll("p").length, s1 = bx().querySelectorAll(".fbs").length, l1 = lit(); $(".panel .scr.write [data-act=uiko]").click(); await W(500);
   ok(p0 === p1 && n1 === nP && s1 > 0 && l1, "ⓒ ⇄ = 틀 0px · 줄·칠 그대로 · 이어 읽음(불)", `틀 ${p0 === p1} · 줄 ${n1} · 칠 ${s1} · 불 ${l1}`);
   const mb = bx().querySelector("button"); if (mb) { const a0 = lit(); mb.click(); await W(150); ok(lit() === a0 || !!$(".keepov") || !!$(".panel .hjfull"), "ⓔ 상자 안 단추 누름 = 읽기 안 바뀜"); document.querySelector(".keepov [data-kact=close]")?.click(); document.querySelector(".panel .hjfull")?.click(); await W(200); }
   if (!lit()) { bx().click(); await W(300); } const before = lit(); await draw([{ x: 0.2, y: 0.2 }, { x: 0.3, y: 0.3 }]); await W(200);
