@@ -81,25 +81,23 @@
   $(".panel [data-act=line]").click(); await W(200); ok($(".panel [data-act=line]").getAttribute("aria-pressed") === "false", "다시 누르면 멈춤");
   $(".ctrl [data-act=play]").click(); await W(200); ok($(".panel [data-act=line]").getAttribute("aria-pressed") === "true", "아래 ▶ = 이 줄 듣기"); $(".ctrl [data-act=play]").click(); await W(200);
   { const lb = $(".panel [data-act=line]"), cs = lb && getComputedStyle(lb); ok(lb?.tagName === "BUTTON" && parseFloat(cs.borderTopWidth) > 0 && !!lb.getAttribute("aria-label"), "🔊 = 단추 모양(테두리 · 이름 있음 · 투덜이 10-13)", `${lb?.tagName} · 테두리 ${cs?.borderTopWidth} · 「${lb?.getAttribute("aria-label")}」`); }
-  // [이 글자 듣기](투덜이 10-13 재정정) — 누를 때마다 지금 글자(아래 칸) 소리 한 번 · 켜고 끄기 아님 · 소리 중 또 누르면 처음부터 한 번(겹침 없음)
-  { await idle(4000); const hc = $(".panel [data-act=hearch]"), ch0 = $(".panel .box .target")?.textContent || "", want = "u" + (ch0.codePointAt(0) || 0).toString(16).toUpperCase() + ".mp3";
-    let at0 = log.length; hc.click(); await idle(4000); let ev = log.slice(at0).filter(e => e.ev === "시작");
-    const one = ev.length === 1 && ev[0].name.endsWith(want) && hc.getAttribute("aria-pressed") !== "true";
-    at0 = log.length; hc.click(); await W(120); hc.click(); await idle(4000); ev = log.slice(at0); const starts = ev.filter(e => e.ev === "시작");
-    const iv = []; for (const e of ev) { if (e.ev === "시작") iv.push({ a: e.t, b: Infinity }); else if (e.ev === "끝" || e.ev === "멈춤") { const o = iv.find(x => x.b === Infinity); if (o) o.b = e.t; } } let worst = 1; for (let i = 1; i < iv.length; i++) if (iv[i].a < iv[i - 1].b - 40) worst = 2; /* 멈춤 기록은 onended 라 몇 ms 늦게 남음 → 시각으로 견줌(40ms 여유) */
-    ok(one && starts.length === 2 && starts.every(e => e.name.endsWith(want)) && worst <= 1, "[이 글자 듣기] = 지금 글자 소리 한 번 · 두 번 빨리 누르면 처음부터 다시(겹침 0 · 토글 아님)", `「${ch0}」 ${want} · 한 번 ${one} · 두 번 ${starts.map(e => e.name.split("/").pop()).join(",")} · 겹침 ${worst}`); }
-  // 자동 완성 — 지금 토막의 남은 글자를 한 자모씩 · 글자마다 모양이 맞나 · 토막이 끝나면 멈춤 · 다시 누르면 멈춤
+  // 듣기+자동 쓰기 단추 셋(대표님 10-22) — [글자] = 지금 글자를 써 보이고 그 글자 소리 · [낱말] = 그 낱말 끝까지 · [문장] = 줄 끝까지 · 누른 것만 눌림 · 다시 누르면 멈춤 · 단추 글 고정
+  const wst = () => $(".panel .write")?.parentElement?.__wr?.st?.(), labs0 = [...$(".panel .wbtns").querySelectorAll("button")].map(b => b.textContent).join("|");
+  { await idle(4000); const hc = $(".panel [data-act=hearch]"), ch0 = $(".panel .box .target")?.textContent || "", want = "u" + (ch0.codePointAt(0) || 0).toString(16).toUpperCase() + ".mp3", c0 = [wst().w, wst().c];
+    const at0 = log.length; hc.click(); await W(300); const pressed = hc.getAttribute("aria-pressed") === "true"; for (let k = 0; k < 60 && wst().auto; k++) await W(200); await idle(4000);
+    const said = log.slice(at0).some(e => e.ev === "시작" && e.name.endsWith(want)), moved = wst().w !== c0[0] || wst().c !== c0[1] || wst().segEnd;
+    ok(pressed && said && !wst().auto && hc.getAttribute("aria-pressed") === "false" && moved, "[글자] = 지금 글자를 다 쳐 보이고 그 글자 소리 · 그 글자만 하고 멈춤(대표님 10-22)", `「${ch0}」 눌림 ${pressed} · 소리 ${said} · 멈춤 ${!wst().auto} · 다음 글자 ${moved}`); }
+  let segBefore = $(".panel .segnav").innerText.replace(/\s/g, ""), sBefore = wst()?.s;
   const watchShapes = () => { const seen = []; const mo = new MutationObserver(() => { const b = $(".panel .box.ok"); if (b) { const k = b.querySelector(".target").textContent + "=" + b.querySelector(".typed").textContent; if (seen[seen.length - 1] !== k) seen.push(k); } }); mo.observe($(".panel .write"), { subtree: true, childList: true, attributes: true }); return { seen, stop: () => mo.disconnect() }; };
-  let segBefore = $(".panel .segnav").innerText.replace(/\s/g, ""), sBefore = $(".panel .write")?.parentElement?.__wr?.st?.().s;
-  let w8 = watchShapes(); const atAuto = log.length, subBefore = $(".panel .whead .sub")?.textContent; $(".panel [data-act=auto]").click(); await W(300);
-  ok($(".panel [data-act=auto]").getAttribute("aria-pressed") === "true", "자동 완성 누름 → 「멈춤」 단추로 바뀜");
-  for (let k = 0; k < 600 && !($(".panel .write")?.parentElement?.__wr?.st?.().segEnd); k++) await W(200); await idle(8000); w8.stop(); // 자동 = 지금 토막 끝까지(본부 10-12 「그 단락」 = 토막)
+  let w8 = watchShapes(); const atAuto = log.length, subBefore = $(".panel .whead .sub")?.textContent, w0 = wst().w; $(".panel [data-act=auto]").click(); await W(300);
+  ok($(".panel [data-act=auto]").getAttribute("aria-pressed") === "true", "[낱말] 누름 → 그 단추만 눌림");
+  for (let k = 0; k < 300 && wst()?.auto; k++) await W(200); await idle(8000); w8.stop();
   const badShape = w8.seen.filter(k => { const [a, b] = k.split("="); return a !== b; });
-  const wst = () => $(".panel .write")?.parentElement?.__wr?.st?.();
-  ok(w8.seen.length >= 1 && !badShape.length && wst()?.segEnd && wst()?.s === sBefore && $(".panel .whead .sub")?.textContent === subBefore && $(".panel [data-act=auto]").getAttribute("aria-pressed") === "false",
-    "자동 완성 → 남은 글자를 한 자모씩 다 쳐서 지금 토막 끝까지 · 저절로 멈춤 · 다음 토막·다음 줄로 안 감(본부 10-12)", `${w8.seen.join(" ")}${badShape.length ? " · 틀린 모양 " + badShape.join(" ") : ""} · 토막 ${segBefore} → ${$(".panel .segnav").innerText.replace(/\s/g, "")} · 줄 ${subBefore} → ${$(".panel .whead .sub")?.textContent}`);
-  { $(".panel [data-act=auto]").click(); await W(400); const S = wst(); ok(S?.auto && S.s === sBefore && S.w === 0 && !S.segEnd, "토막 끝에서 자동 완성 다시 = 같은 토막 처음부터", `토막 ${S?.s} · 낱말 ${S?.w} · 자동 ${S?.auto}`); $(".panel [data-act=auto]").click(); await W(300); }
-  const autoAll = log.slice(atAuto).filter(e => e.ev === "시작").map(e => e.name), isLine = n => /_sub_|_line\.mp3|(^|\/)audio\/|(^|\/)units\//.test(n), lineAt = autoAll.findIndex(isLine), autoSounds = lineAt < 0 ? autoAll : autoAll.slice(0, lineAt); // 줄 끝 대사 한 번(본부 10-12)은 따로
+  ok(w8.seen.length >= 1 && !badShape.length && (wst().w !== w0 || wst().segEnd) && wst()?.s === sBefore && $(".panel .whead .sub")?.textContent === subBefore && $(".panel [data-act=auto]").getAttribute("aria-pressed") === "false",
+    "[낱말] → 그 낱말 글자를 한 자모씩 다 쳐서 낱말 끝에서 멈춤 · 다른 토막·다른 줄로 안 감", `${w8.seen.join(" ")}${badShape.length ? " · 틀린 모양 " + badShape.join(" ") : ""} · 토막 ${segBefore} → ${$(".panel .segnav").innerText.replace(/\s/g, "")}`);
+  { $(".panel [data-act=autoall]").click(); await W(400); const S = wst(); const on = S?.auto && S.autoMode === "all" && $(".panel [data-act=autoall]").getAttribute("aria-pressed") === "true"; $(".panel [data-act=autoall]").click(); await W(400);
+    ok(on && !wst().auto && [...$(".panel .wbtns").querySelectorAll("button")].map(b => b.textContent).join("|") === labs0, "[문장] = 줄 자동 시작 · 다시 누르면 멈춤 · 단추 글 고정(글자·낱말·문장)", `시작 ${on} · 멈춤 ${!wst().auto} · 글 ${labs0}`); }
+  const autoAll = log.slice(atAuto).filter(e => e.ev === "시작").map(e => e.name), isLine = n => /_sub_|(^|\/)audio\/|(^|\/)units\//.test(n), lineAt = autoAll.findIndex(isLine), autoSounds = lineAt < 0 ? autoAll : autoAll.slice(0, lineAt); // 줄 끝 대사 한 번(본부 10-12)은 따로
   ok(lineAt === -1 || autoAll.filter(isLine).length <= 1, "자동 완성 → 토막 끝 소리는 한 번만(본부 10-12)", autoAll.slice(lineAt).join(","));
   ok(autoSounds.length > 0 && autoSounds.every(n => /^j\//.test(n) || /\/j_/.test(n) || /chars_f\/u[0-9A-F]{4}\.mp3$/.test(n)) && autoSounds.some(n => /chars_f\/u/.test(n)), "자동 완성 → 자음·모음 소리 + 글자 완성 때 글자 소리(쓰는 동안 단어·문장 소리 없음 · 투덜이 10-08)", `다른 소리: ${autoSounds.filter(n => !(/^j\//.test(n) || /\/j_/.test(n) || /chars_f\/u[0-9A-F]{4}\.mp3$/.test(n))).join(",") || "없음"} · ${autoSounds.length}개`);
   $(".panel [data-act=auto]").click(); await W(1500); $(".panel [data-act=auto]").click(); await W(200);

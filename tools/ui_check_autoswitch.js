@@ -32,15 +32,15 @@
     for (MODE of ["kb", "hand"]) { const watchM = watchPos, tag = MODE === "kb" ? "[자판]" : "[손글씨]";
     // ⓐ [자동 완성] → 지금 토막 끝 → 5초 그대로(본부 10-12 「그 단락」 = 토막)
     await openWrite(short); const sub0 = sub(), s0 = S().s;
-    btn("line").click(); let g = 0; while (!S().segEnd && g++ < 1500) await W(200);
-    const atEnd = S().segEnd && S().s === s0; let g2 = 0; await W(300); while (S().sent && g2++ < 200) await W(100); const heardLine = g2 > 0; const w5 = await watchM(5000); // 대사가 끝난 뒤 5초(본부 10-12 — W6 자동 넘김이 대사 뒤에 오므로)
+    const w00 = S().w; btn("line").click(); await W(300); let g = 0; while (S().auto && g++ < 1500) await W(200); /* [낱말](대표님 10-22) = 그 낱말 끝에서 멈춤 */
+    const atEnd = (S().w !== w00 || S().segEnd) && S().s === s0; let g2 = 0; await W(300); while (S().sent && g2++ < 200) await W(100); const heardLine = g2 > 0; const w5 = await watchM(5000); // 대사가 끝난 뒤 5초(본부 10-12 — W6 자동 넘김이 대사 뒤에 오므로)
     ok(atEnd && sub() === sub0 && !S().auto && !S().allNext && !shown().length && heardLine && w5.flashes === 0 && w5.dings === 0 && w5.worst === 0 && sounds() === 0,
-      tag + " ⓐ [자동 완성] = 지금 토막 끝에서 멈춤 · 토막 소리 한 번 · 5초 동안 다음 토막·줄로 안 감 · 자동 꺼짐", `${sub0} → ${sub()} · 토막끝 ${atEnd} · 자동 ${S().auto} · 단추 ${shown().join(",") || "없음"} · 대사 ${heardLine} · 걸음 ${w5.flashes} · 딩동 ${w5.dings}`);
+      tag + " ⓐ [낱말] = 그 낱말 끝에서 멈춤 · 낱말 소리 한 번 · 5초 동안 저절로 안 감 · 자동 꺼짐", `${sub0} → ${sub()} · 토막끝 ${atEnd} · 자동 ${S().auto} · 단추 ${shown().join(",") || "없음"} · 대사 ${heardLine} · 걸음 ${w5.flashes} · 딩동 ${w5.dings}`);
     // 다시 누르면 같은 토막 처음부터
-    btn("line").click(); await W(700); ok(S().auto && S().autoMode === "line" && S().s === s0 && S().w === 0 && !S().segEnd && sub() === sub0, tag + " ⓐ 토막 끝에서 다시 [자동 완성] = 같은 토막 처음부터", `${pos()} · ${sub()}`);
+    btn("line").click(); await W(700); ok(S().auto && S().autoMode === "word" && S().s === s0 && sub() === sub0, tag + " ⓐ 다시 [낱말] = 그 자리부터 다음 낱말 자동", `${pos()} · ${sub()}`);
     btn("line").click(); await W(400); await closeP();
     // ⓒ 여러 토막 줄(2번 줄 「선생님! / 저 글자 만들었어요!」) × 토막 1/2·2/2 × 시작 자리(첫 글자 · 가운데 글자 자모 하나 · 마지막 글자 자모 하나) → 그 토막 끝에서 멈춤 · 5초 그대로(투덜이 10-12)
-    if (MODE === "kb") for (const seg of [0, 1]) for (const at of ["first", "mid", "last"]) {
+    if (false && MODE === "kb") for (const seg of [0, 1]) for (const at of ["first", "mid", "last"]) { // (토막 자동은 대표님 10-22 글자·낱말·문장 단추로 바뀌어 없어짐 — 낱말 멈춤은 ⓐ·write 점검에서)
       await openWrite(1); if (seg) { $(".panel .segnav [data-seg=\"1\"]")?.click(); await W(700); }
       const subC = sub(), sC = S().s;
       if (at !== "first") { // 미리 한 번 돌려 그 토막 글자 자리 목록을 알고 → 다시 처음부터 돌리다 목표 글자 자모 하나 친 순간 멈춤
@@ -66,9 +66,10 @@
         ok(!S().auto && !shown().length && pos() === still && w2.flashes === 0 && w2.dings === 0 && after.worst < 300 && sounds() === 0, `${m} = 그 자리에서 멈춤 · 소리 0 · 더 안 침`, `${pp0} → ${still} → ${pos()} · 걸음 ${w2.flashes} · 딩동 ${w2.dings}`);
       } else {
         const rate0 = before.flashes, rate1 = after.flashes;
-        ok(S().auto && S().autoMode === b && shown().join() === b && after.worst < 300 && rate1 <= Math.max(rate0 * 1.5, rate0 + 2) && after.dings <= Math.max(before.dings * 1.5, before.dings + 2) && p1 >= p0 && sub() === subA,
+        const wordDone = b === "line" && !S().auto && p1 >= p0 && !shown().length; /* [낱말](대표님 10-22) = 짧아서 지켜보는 사이 그 낱말을 다 쓰고 멈출 수 있음 = 맞음 */
+        ok(wordDone || S().auto && S().autoMode === (b === "line" ? "word" : b) && shown().join() === b && after.worst < 300 && rate1 <= Math.max(rate0 * 1.5, rate0 + 2) && after.dings <= Math.max(before.dings * 1.5, before.dings + 2) && p1 >= p0 && sub() === subA,
           `${m} = 먼저 것 멈춤 · 누른 쪽이 그 자리에서 이어받음 · 소리 겹침 없음 · 한 고리`, `${pp0} → ${pos()} · 걸음 ${rate0}→${rate1} · 딩동 ${before.dings}→${after.dings} · 겹침 ${after.worst}ms · 단추 ${shown().join(",")}`);
-        btn(b).click(); await W(500); ok(!S().auto && sounds() === 0, `${m} → 다시 그 단추 = 멈춤`, `자동 ${S().auto}`);
+        if (!S().auto) { ok(true, `${m} → (낱말을 다 써서 이미 멈춤)`); } else { btn(b).click(); await W(500); ok(!S().auto && sounds() === 0, `${m} → 다시 그 단추 = 멈춤`, `자동 ${S().auto}`); }
       }
       await closeP();
     }

@@ -1635,3 +1635,7 @@ html.bigview,html.bigview body{overflow:hidden}
 #vwrap:fullscreen>.vuiko .vsubt[aria-pressed=true]{background:rgba(0,0,0,.5);border-color:#ffd27a;color:#ffd27a}
 #vwrap:fullscreen .cap .tr{font-size:clamp(20px,3.4vw,40px);font-weight:700;line-height:1.35;opacity:1} /* 자막 한 줄(학습자 말) = 옛 한국어 줄 크기 */
 @media (orientation:landscape) and (max-height:520px){#vwrap:fullscreen .cap .tr{font-size:clamp(13px,5.2vh,40px);line-height:1.3}} /* 가로 폰 = 옛 한국어 줄 크기 */
+/* 듣기+자동 단추 셋(쓰기부 · 대표님 10-22) · 토막 끝 ▶ 점등 */
+.write .segnav [data-seg="1"].glow{animation:segGlow 1.2s ease-in-out 3;background:color-mix(in srgb,var(--hi) 22%,var(--card));box-shadow:0 0 0 3px color-mix(in srgb,var(--hi) 50%,transparent),0 0 12px 2px color-mix(in srgb,var(--hi) 60%,transparent);border-radius:10px}
+@keyframes segGlow{0%,100%{box-shadow:0 0 0 2px color-mix(in srgb,var(--hi) 40%,transparent)}50%{box-shadow:0 0 0 5px color-mix(in srgb,var(--hi) 15%,transparent),0 0 16px 4px color-mix(in srgb,var(--hi) 70%,transparent)}}
+@media (prefers-reduced-motion:reduce){.write .segnav [data-seg="1"].glow{animation:none}}
