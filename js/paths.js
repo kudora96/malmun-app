@@ -18,7 +18,7 @@ export const paths = {
   char: file => `${MEDIA}/letters/c/${file}?v=3`,
   jamo: name => `${MEDIA}/letters/j/${name}.mp3?v=3`,
   // 새 설명(v9) 시안 소리 — tools/sync_v9.py 가 로컬 media/v9 에만 복사(아직 R2 에 없음 · 「올려」 전)
-  v9: (ep, rel) => `${MEDIA}/v9/${ep}/${rel.split("/").map(encodeURIComponent).join("/")}?v=8`,
+  v9: (ep, rel) => `${MEDIA}/v9/${ep}/${rel.split("/").map(encodeURIComponent).join("/")}?v=9`,
   sfx: name => `${MEDIA}/sfx/${name}.mp3?v=2`,
   bgm: file => `${MEDIA}/bgm/${file}?v=1`, // 배경음악(소리부 10-15 · 05_audio/_bgm) // 점수 효과음(본부 10-05 · 다시 맞추면 v 올림)
   charF: file => `${MEDIA}/chars_f/${file}?v=8`, // v8 = 소리부 10-12 글자 14개 새 판(받아쓰기·모음 짝 검사 걸린 것) · v7 = 소리부 10-11 자모 40 음량·7개 다시 · 글자 242 음량 · 공용 아나운서 글자·자모 소리(본부 05_audio/_chars_f) · v4 = 말 시작 0.03초 전부터(본부 10-06 · 투덜이 「딱 좋아」)
