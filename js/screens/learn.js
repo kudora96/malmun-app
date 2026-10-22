@@ -10,10 +10,10 @@
 //  R7 영상은 늘 맨 위 · 지금 줄은 영상 바로 아래(앞 줄은 영상 뒤로) — 손으로 목록을 움직이면 4초 동안은 따라가지 않음
 //  R8 듣기 모드(대사→설명 · 설명만)도 R1~R6 그대로(영상 대신 소리 조각) · 모드를 바꾸면 멈춤(▶ 로 시작)
 //  R9 다시 들어오면 마지막 줄이 선택된 채 멈춰 있음
-import { noScoreKey } from "../agepolicy.js?v=1022.7"; // 점수 없음 안내 = 나이 때문인지(대표님 10-19)
-import { warmSTT } from "../sttserver.js?v=1022.7";
-import * as sfxL from "../sfx.js?v=1022.7"; // 카드 말하기 최대 길이 = 본보기 길이로(10-07)
-import { t, tAlt, lang, langName, KO_UI, uiKoOn, preloadKoUi } from "../i18n.js?v=1022.7";
+import { noScoreKey } from "../agepolicy.js?v=1022.8"; // 점수 없음 안내 = 나이 때문인지(대표님 10-19)
+import { warmSTT } from "../sttserver.js?v=1022.8";
+import * as sfxL from "../sfx.js?v=1022.8"; // 카드 말하기 최대 길이 = 본보기 길이로(10-07)
+import { t, tAlt, lang, langName, KO_UI, uiKoOn, preloadKoUi } from "../i18n.js?v=1022.8";
 // 줄 카드 단추 = 그림만 다섯(대표님 10-20 B 선 아이콘 · 같은 크기 한 줄 · 카드 높이 0px) — ▶ 이 줄 듣기 · 📖 설명 · ✎ 쓰기 · 🎤 말하기 · 🎮 게임 · 이름 = 처음 한 번 차례 풍선말 + 길게 누르기
 const SV = d => `<svg class="ico" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
 const ACTS = [["once", "listen_line", '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M8 5.5v13l11-6.5z"/></svg>'], ["explain", "explain", SV('<path d="M4 5a2 2 0 0 1 2-2h5v17H6a2 2 0 0 0-2 2z"/><path d="M20 5a2 2 0 0 0-2-2h-5v17h5a2 2 0 0 1 2 2z"/>')], ["write", "write", SV('<path d="M16 3l5 5L8 21H3v-5z"/>')], ["speak", "speak", SV('<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>')], ["game", "line_game", SV('<rect x="2" y="7" width="20" height="11" rx="5"/><path d="M7 10v5M4.5 12.5h5"/><circle cx="16" cy="11.5" r="1" fill="currentColor"/><circle cx="18.5" cy="14" r="1" fill="currentColor"/>')]];
@@ -35,30 +35,30 @@ function gameWords(vl, uw, lg, ep) {   // 뜻 조각(v9 pieces)과 소리 낱말
   }
   return out;
 }
-import { setTx } from "../retext.js?v=1022.7";
-import { langfitRun } from "../langfit.js?v=1022.7";
-import { esc, renderText, glossCards, sayParts } from "../text.js?v=1022.7";
-import { episode } from "../data.js?v=1022.7";
-import { paths, MEDIA } from "../paths.js?v=1022.7";
-import { attachVq } from "../vq.js?v=1022.7";
-import { setReportCtx } from "../report.js?v=1022.7";
-import { fbBind, fbPlan } from "../fbvoice.js?v=1022.7";
-import { setupTurns } from "../turns.js?v=1022.7"; // 「따라 해 보세요」 양방향(대표님 10-21) // 결과 안내 소리로 읽기(대표님 10-21)
-import { setupOverlays } from "../overlays.js?v=1022.7"; // 영상 위 그림 카드(대표님 10-22 새 1편) // 「따라 해 보세요」 양방향(대표님 10-21) // 결과 안내 소리로 읽기(대표님 10-21)
-import { Sequence } from "../audio.js?v=1022.7";
-import { I, progress, SPEAKER, spkHtml, uiKoBtn, uikoChip, switchUiKo } from "../ui.js?v=1022.7";
-import writeView from "./write.js?v=1022.7";
-import { diagEnv, keepDiag } from "../diag.js?v=1022.7";
-import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1022.7";
-import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace, lateFactor, sylAt, paintAt, karaokeRun, isFull } from "../rhythm.js?v=1022.7";
-import { playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1022.7";
-import { heardHTML, endHint, scoreOf, bestFull, spanOf, sylsAt } from "../heard.js?v=1022.7"; // 덧붙은 말 빼고 견주기(본부 10-11)
-import { recDel, downloadRec, askPersist } from "../recstore.js?v=1022.7";
-import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1022.7";
-import { scoreFx, stopFx } from "../scorefx.js?v=1022.7"; // 점수별 효과(본부 10-05)
-import { record, recordSROnly, srOnlyMode, setSrOnly, isAndroid, srMiss, micWhy, srWhy, canScore, closeMic, logRec, micOpen, seqMode, srOnBlob, devSR, setDevSR, srJudge, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1022.7";
-import { hold, quietWake } from "../wake.js?v=1022.7";
-import { hold as bgmHold } from "../bgm.js?v=1022.7"; // 🎮 게임 중 배경음악 멈춤
+import { setTx } from "../retext.js?v=1022.8";
+import { langfitRun } from "../langfit.js?v=1022.8";
+import { esc, renderText, glossCards, sayParts } from "../text.js?v=1022.8";
+import { episode } from "../data.js?v=1022.8";
+import { paths, MEDIA } from "../paths.js?v=1022.8";
+import { attachVq } from "../vq.js?v=1022.8";
+import { setReportCtx } from "../report.js?v=1022.8";
+import { fbBind, fbPlan } from "../fbvoice.js?v=1022.8";
+import { setupTurns } from "../turns.js?v=1022.8"; // 「따라 해 보세요」 양방향(대표님 10-21) // 결과 안내 소리로 읽기(대표님 10-21)
+import { setupOverlays } from "../overlays.js?v=1022.8"; // 영상 위 그림 카드(대표님 10-22 새 1편) // 「따라 해 보세요」 양방향(대표님 10-21) // 결과 안내 소리로 읽기(대표님 10-21)
+import { Sequence } from "../audio.js?v=1022.8";
+import { I, progress, SPEAKER, spkHtml, uiKoBtn, uikoChip, switchUiKo } from "../ui.js?v=1022.8";
+import writeView from "./write.js?v=1022.8";
+import { diagEnv, keepDiag } from "../diag.js?v=1022.8";
+import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1022.8";
+import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace, lateFactor, sylAt, paintAt, karaokeRun, isFull } from "../rhythm.js?v=1022.8";
+import { playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1022.8";
+import { heardHTML, endHint, scoreOf, bestFull, spanOf, sylsAt } from "../heard.js?v=1022.8"; // 덧붙은 말 빼고 견주기(본부 10-11)
+import { recDel, downloadRec, askPersist } from "../recstore.js?v=1022.8";
+import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1022.8";
+import { scoreFx, stopFx } from "../scorefx.js?v=1022.8"; // 점수별 효과(본부 10-05)
+import { record, recordSROnly, srOnlyMode, setSrOnly, isAndroid, srMiss, micWhy, srWhy, canScore, closeMic, logRec, micOpen, seqMode, srOnBlob, devSR, setDevSR, srJudge, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1022.8";
+import { hold, quietWake } from "../wake.js?v=1022.8";
+import { hold as bgmHold } from "../bgm.js?v=1022.8"; // 🎮 게임 중 배경음악 멈춤
 
 const RATES = [1, 0.75, 0.5];
 const pref = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } };
