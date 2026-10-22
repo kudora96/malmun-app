@@ -4,11 +4,11 @@
 //  목소리 = ⇄ 상태(학습자 말 = 그 말 · 한국어 = ko) · ⇄ 누르면 같은 문장부터 그 말로 이어 읽음
 //  자동 재생 = 결과가 새로 나오면 한 번(기억 malmun.fbauto = "0" 이면 끔 · 「?」 사용법에서) · 결과 글 누르기 = 읽기 ⇄ 멈춤
 //  겹침 없음: 다른 소리(sfx)가 시작되거나 <audio>/<video> 가 재생되면 즉시 멈춤 · 소리 파일이 없으면 조용히 다음 조각
-import * as sfx from "./sfx.js?v=1022.4";
-import { paths, MEDIA } from "./paths.js?v=1022.4";
-import { t, lang, uiKoOn } from "./i18n.js?v=1022.4";
-import { R_FULL } from "./rhythm.js?v=1022.4";
-import { charsF } from "./data.js?v=1022.4";
+import * as sfx from "./sfx.js?v=1022.5";
+import { paths, MEDIA } from "./paths.js?v=1022.5";
+import { t, lang, uiKoOn } from "./i18n.js?v=1022.5";
+import { R_FULL } from "./rhythm.js?v=1022.5";
+import { charsF } from "./data.js?v=1022.5";
 
 const PASS = 80, PERFECT = 95;
 const V = 1; // 소리 판(소리부가 다시 만들면 올림)

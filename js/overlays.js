@@ -3,8 +3,8 @@
 //  카드 = 정한 초에 영상 오른쪽 빈 곳에 천천히 떠오름 · 끝나면 사라짐 · 화면 틀 0px(#vwrap 안 겹침)
 //  작은 화면(영상 폭 600px 아래) · 글이 12px 아래로 작아지는 말 = 카드 글을 빼고 영상 밑 자막 칸에 같은 차례로(onText)
 //  안전: json "video" 길이(초)와 지금 영상 길이가 1초 넘게 다르면 띄우지 않음(옛 영상 위에 새 카드가 뜨지 않게)
-import { MEDIA } from "./paths.js?v=1022.4";
-import { t, lang, uiKoOn } from "./i18n.js?v=1022.4";
+import { MEDIA } from "./paths.js?v=1022.5";
+import { t, lang, uiKoOn } from "./i18n.js?v=1022.5";
 
 const getJSON = u => fetch(u, { cache: "no-store" }).then(r => (r.ok ? r.json() : null)).catch(() => null);
 const MIN_PX = 12, MIN_W = 600;
