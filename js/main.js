@@ -1,14 +1,14 @@
-import "./agepolicy.js?v=1023.4"; // 기능별 나이(대표님 10-19) — 받아쓰기 막기는 다른 것보다 먼저
-import { detectLang, setLang, LANGS, t } from "./i18n.js?v=1023.4";
-import { VERSION } from "./version.js?v=1023.4";
-import { bgmScene } from "./bgm.js?v=1023.4";
-import welcome from "./screens/welcome.js?v=1023.4";
-import list from "./screens/list.js?v=1023.4";
-import learn from "./screens/learn.js?v=1023.4";
-import write from "./screens/write.js?v=1023.4";
-import speak from "./screens/speak.js?v=1023.4";
-import diag from "./screens/diag.js?v=1023.4";
-import "./errlog.js?v=1023.4"; // 오류 기록(진단 화면용 · 기록만)
+import "./agepolicy.js?v=1023.5"; // 기능별 나이(대표님 10-19) — 받아쓰기 막기는 다른 것보다 먼저
+import { detectLang, setLang, LANGS, t } from "./i18n.js?v=1023.5";
+import { VERSION } from "./version.js?v=1023.5";
+import { bgmScene } from "./bgm.js?v=1023.5";
+import welcome from "./screens/welcome.js?v=1023.5";
+import list from "./screens/list.js?v=1023.5";
+import learn from "./screens/learn.js?v=1023.5";
+import write from "./screens/write.js?v=1023.5";
+import speak from "./screens/speak.js?v=1023.5";
+import diag from "./screens/diag.js?v=1023.5";
+import "./errlog.js?v=1023.5"; // 오류 기록(진단 화면용 · 기록만)
 
 const app = document.getElementById("app");
 const explain = (app, ep, id) => learn(app, ep, id, { explain: true }); /* #/explain/{편}/{줄} = 학습 화면 + 그 줄 새(v9) 설명 창(10-12 · 옛 explain.js 화면 대신 · 책 QR 주소 그대로) */
