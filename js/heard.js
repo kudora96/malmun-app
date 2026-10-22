@@ -1,7 +1,7 @@
 // 「들린 말」 한 줄 — 점수를 낸 그 인식 결과를 본보기와 음절 단위로 견줘 틀린 곳을 보여 준다(본부 10-04 · 투덜이 승인)
 // 견주기 = 음절 편집 거리 정렬(띄어쓰기·문장부호 무시) · 틀린·더 들어간 음절 = 빨간 밑줄 · 빠진 자리 = 빨간 「_」 · 색만으로 구별하지 않게 밑줄도
-import { esc } from "./text.js?v=1022.27";
-import { similarity, align } from "./score.js?v=1022.27";
+import { esc } from "./text.js?v=1022.28";
+import { similarity, align } from "./score.js?v=1022.28";
 
 const keep = ch => /[\p{L}\p{N}]/u.test(ch);
 // 덧붙은 말 빼고 견주기(본부 10-11) — 본보기 앞뒤에 다른 말을 더 해도(대사 한 줄 통째로 등) 본보기와 가장 잘 맞는 이어진 토막만 점수
