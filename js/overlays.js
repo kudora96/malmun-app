@@ -20,10 +20,12 @@ export async function setupOverlays(ep, v, { wrap }) {
     if (!el || !cur) return;
     // 크기 = 영상 폭 × w · 그림 모양대로(정사각 카드 · 세로로 긴 앱 화면) · 세로로 넘치면 영상 높이 92% 에 맞춤
     const W = wrap.clientWidth, H = wrap.clientHeight, im = cur.img, r = im.naturalWidth ? im.naturalHeight / im.naturalWidth : 1;
-    let bw0 = cur.w * W, bh0 = bw0 * r; if (bh0 > H * 0.92) { bh0 = H * 0.92; bw0 = bh0 / r; }
+    // v13b 꼴: h(영상 높이 몫) + x_center(가운데 x · 영상 폭 몫) → 높이로 맞추고 폭은 그림 모양대로(선생님 얼굴 x 0.34~0.64 피함 · 영상2팀)
+    let bw0, bh0; if (cur.h) { bh0 = cur.h * H; bw0 = bh0 / r; } else { bw0 = cur.w * W; bh0 = bw0 * r; if (bh0 > H * 0.92) { bh0 = H * 0.92; bw0 = bh0 / r; } }
     const side = Math.round(bw0), sideH = Math.round(bh0);
     el.style.width = side + "px"; el.style.height = sideH + "px"; const topY = Math.max(0, Math.round((H - sideH) / 2)); el.style.top = topY + "px";
-    el.style.right = (topY + sideH > H - 52 ? 54 : Math.round(W * 0.03)) + "px"; // 아래 끝이 ⛶ 단추 자리까지 오면 그 왼쪽으로(세로로 긴 앱 화면)
+    if (cur.x_center != null) { el.style.right = "auto"; el.style.left = Math.round(cur.x_center * W - side / 2) + "px"; }
+    else { el.style.left = "auto"; el.style.right = (topY + sideH > H - 52 ? 54 : Math.round(W * 0.03)) + "px"; } // 아래 끝이 ⛶ 단추 자리까지 오면 그 왼쪽으로(세로로 긴 앱 화면)
   }
   function show(c) {
     hide(); cur = c;
@@ -37,7 +39,7 @@ export async function setupOverlays(ep, v, { wrap }) {
   function setFrame(k) { if (!el || +el.dataset.f === k) return; el.dataset.f = k; [...el.querySelectorAll(".ovf")].forEach((d, i) => d.classList.toggle("on", i === k)); } // 장 바꿈 = 겹쳐 서서히(css)
   function hide() { if (el) { const e = el; e.classList.remove("on"); setTimeout(() => e.remove(), 400); } el = null; cur = null; }
   const tick = () => {
-    const tm = v.currentTime, c = okVideo() ? O.cards.find(x => tm >= x.start && tm < x.end) : null;
+    const tm = v.currentTime, c = okVideo() ? O.cards.filter(x => tm >= x.start && tm < x.end).sort((a, b) => b.start - a.start)[0] || null : null; // 겹치면 늦게 시작한 카드(K7a→b→c = 차례로 바뀜)
     if (c !== cur) (c ? show(c) : hide()); else if (c && c.fr.length > 1) setFrame(frameAt(c, tm));
   };
   let alive = true;
