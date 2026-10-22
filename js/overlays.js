@@ -1,60 +1,44 @@
-// 영상 위 그림 카드(철학 v1 · 대표님 10-22 새 1편 v11) — 카드 그림 = 영상부 PNG(1:1 · 둥근 모서리 밖 투명) · 설명 글만 앱이 코드로 겹침(학습자 말 ⇄ 한국어)
-//  자료: data/{편}/{편}.overlays.json(영상2팀 · cards[{id,file,start,end,pos,w,texts[{key,ko,x,y,w,align,size,translate}]}]) + {편}.overlays_i18n.json(언어부 {key:{ko,en,ne…}})
-//  카드 = 정한 초에 영상 오른쪽 빈 곳에 천천히 떠오름 · 끝나면 사라짐 · 화면 틀 0px(#vwrap 안 겹침)
-//  작은 화면(영상 폭 600px 아래) · 글이 12px 아래로 작아지는 말 = 카드 글을 빼고 영상 밑 자막 칸에 같은 차례로(onText)
-//  안전: json "video" 길이(초)와 지금 영상 길이가 1초 넘게 다르면 띄우지 않음(옛 영상 위에 새 카드가 뜨지 않게)
+// 영상 위 그림 카드(철학 v1 · 새 1편) — 카드 = 영상부 PNG(바탕 투명) 한 장 또는 여러 장(frames · 말에 맞춰 차례로) · 영상 위에 그림만
+//  자료: data/{편}/{편}.overlays.json(영상2팀 · cards[{id,file|frames[{file,start}],start,end,pos,w}]) · texts 칸이 있어도 쓰지 않음
+//  대표님 10-22 「영상 밑에 또 자막 · 틀 바꾸지 말자」 = 영상 밖(자막 칸·줄 카드·글 상자)에는 카드 때문에 아무것도 안 나옴 · 공개판과 화면 모양·글 100% 같음
+//  카드 = 정한 초에 영상 오른쪽에 천천히 떠오름 · 끝나면 사라짐 · 그림 모양대로 크기(세로로 긴 앱 화면은 영상 높이 92%)
+//  안전: json "video" 길이(초)와 지금 영상 길이가 1초 넘게 다르면 띄우지 않음
 import { MEDIA } from "./paths.js?v=1022.5";
-import { t, lang, uiKoOn } from "./i18n.js?v=1022.5";
 
 const getJSON = u => fetch(u, { cache: "no-store" }).then(r => (r.ok ? r.json() : null)).catch(() => null);
-const MIN_PX = 12, MIN_W = 600;
 
-export async function setupOverlays(ep, v, { wrap, onText }) {
-  const [O, I] = await Promise.all([getJSON(`data/${ep}/${ep}.overlays.json`), getJSON(`data/${ep}/${ep}.overlays_i18n.json`)]);
+export async function setupOverlays(ep, v, { wrap }) {
+  const O = await getJSON(`data/${ep}/${ep}.overlays.json`); // 카드 글(texts)은 쓰지 않음 — 그림 속 글로 끝
   if (!O?.cards?.length) return null;
   const want = +(String(O.video || "").match(/([\d.]+)\s*초/)?.[1] || 0);
   const okVideo = () => !want || (Number.isFinite(v.duration) && Math.abs(v.duration - want) < 1);
-  for (const c of O.cards) { const im = new Image(); im.src = `${MEDIA}/video/overlay/${ep}/${c.file}`; c.img = im; } // 미리 받기
-  const textOf = x => (x.translate === false || uiKoOn() || lang === "ko" ? x.ko : I?.[x.key]?.[lang] || x.ko); // 학습자 말 ⇄ 한국어 · 번역 없는 칸(저자·연도)은 그대로
-  let cur = null, el = null, fallback = false;
-  const lines = c => c.texts.map(x => textOf(x));
-  const compact = c => { const out = []; c.texts.forEach((x, i) => { if (/_src$/.test(x.key) && c.texts[i + 1]) return; const p = c.texts[i - 1]; out.push(p && /_src$/.test(p.key) ? `${textOf(p)} — ${textOf(x)}` : textOf(x)); }); return out; }; // 「저자·연도 — 뜻」
+  // 한 카드 = 그림 한 장(file) 또는 여러 장(frames:[{file,start}] · 말에 맞춰 차례로 바뀜 · 대표님 10-22 K7 듣기→말하기→쓰기) · 미리 받기
+  for (const c of O.cards) { c.fr = (c.frames?.length ? c.frames : [{ file: c.file, start: c.start }]).map(f => { const im = new Image(); im.src = `${MEDIA}/video/overlay/${ep}/${f.file}`; return { ...f, img: im }; }); c.img = c.fr[0].img; }
+  const frameAt = (c, tm) => { let k = 0; c.fr.forEach((f, i) => { if (tm >= (f.start ?? c.start)) k = i; }); return k; };
+  let cur = null, el = null;
   function layout() {
     if (!el || !cur) return;
-    const W = wrap.clientWidth, H = wrap.clientHeight, side = Math.round(cur.w * W);
-    el.style.width = el.style.height = side + "px"; el.style.right = Math.round(W * 0.03) + "px"; el.style.top = Math.max(0, Math.round((H - side) / 2)) + "px";
-    el.querySelectorAll(".ovt").forEach(s => s.remove());
-    const canSub = onText?.canShow?.(cur.texts.length) ?? true;
-    const minPx = MIN_PX;
-    fallback = W < MIN_W;
-    if (!fallback) for (const x of cur.texts) {
-      const s = document.createElement("span"); s.className = "ovt"; s.textContent = textOf(x); s.dir = "auto";
-      if (x.color) s.style.color = x.color;
-      const bw = x.w * side; let fs = x.size * side;
-      Object.assign(s.style, { left: (x.x * side - bw / 2) + "px", width: bw + "px", top: (x.y * side) + "px", textAlign: x.align || "center", fontSize: fs + "px" });
-      el.append(s);
-      // 두 줄까지 접어 넣고 그래도 넘치면 글을 줄임 · 12px 아래가 되면 이 카드 글은 자막 칸으로
-      const fit = () => { const lh = parseFloat(getComputedStyle(s).lineHeight) || fs * 1.25; return s.scrollWidth <= bw + 0.5 && s.getBoundingClientRect().height <= lh + 1; }; // 한 줄(카드 칸 사이가 좁아 두 줄이면 겹침 · 812×375 K9)
-      while (!fit() && fs > minPx - 0.01) { fs -= 0.5; s.style.fontSize = fs + "px"; }
-      if (!fit() || fs < MIN_PX) { fallback = true; break; }
-      s.style.transform = "translateY(-50%)";
-    }
-    if (fallback) el.querySelectorAll(".ovt").forEach(s => s.remove());
-    // 글은 언제나 영상 밖(검사1팀 10-22 「선생님 얼굴·입 절대 안 가림」): 자막 칸에 줄마다 → 칸이 낮으면 「저자·연도 — 뜻」 한 줄씩 → 자막 칸이 없는 가로 폰은 그림만(글은 선생님 말·자막)
-    let out = null;
-    if (fallback && cur.texts.length) { const full = lines(cur), comp = compact(cur); out = canSub ? full : onText?.canShow?.(comp.length) ? comp : null; }
-    onText?.(out);
+    // 크기 = 영상 폭 × w · 그림 모양대로(정사각 카드 · 세로로 긴 앱 화면) · 세로로 넘치면 영상 높이 92% 에 맞춤
+    const W = wrap.clientWidth, H = wrap.clientHeight, im = cur.img, r = im.naturalWidth ? im.naturalHeight / im.naturalWidth : 1;
+    let bw0 = cur.w * W, bh0 = bw0 * r; if (bh0 > H * 0.92) { bh0 = H * 0.92; bw0 = bh0 / r; }
+    const side = Math.round(bw0), sideH = Math.round(bh0);
+    el.style.width = side + "px"; el.style.height = sideH + "px"; const topY = Math.max(0, Math.round((H - sideH) / 2)); el.style.top = topY + "px";
+    el.style.right = (topY + sideH > H - 52 ? 54 : Math.round(W * 0.03)) + "px"; // 아래 끝이 ⛶ 단추 자리까지 오면 그 왼쪽으로(세로로 긴 앱 화면)
   }
   function show(c) {
     hide(); cur = c;
     el = document.createElement("div"); el.className = "ovc"; el.dataset.id = c.id; el.setAttribute("aria-hidden", "true");
-    el.style.backgroundImage = `url("${c.img.src}")`; wrap.append(el); layout();
+    c.fr.forEach((f, i) => { const d = document.createElement("div"); d.className = "ovf"; d.style.backgroundImage = `url("${f.img.src}")`; el.append(d); });
+    el.dataset.f = -1; setFrame(frameAt(c, v.currentTime)); wrap.append(el);
+    if (!c.img.naturalWidth) c.img.addEventListener("load", () => cur === c && layout(), { once: true }); // 모양(가로·세로)은 그림을 받은 뒤 다시 잼
+    layout();
     requestAnimationFrame(() => el?.classList.add("on")); // 천천히 떠오름(css)
   }
-  function hide() { if (el) { const e = el; e.classList.remove("on"); setTimeout(() => e.remove(), 400); } el = null; if (cur) { cur = null; onText?.(null); } }
+  function setFrame(k) { if (!el || +el.dataset.f === k) return; el.dataset.f = k; [...el.querySelectorAll(".ovf")].forEach((d, i) => d.classList.toggle("on", i === k)); } // 장 바꿈 = 겹쳐 서서히(css)
+  function hide() { if (el) { const e = el; e.classList.remove("on"); setTimeout(() => e.remove(), 400); } el = null; cur = null; }
   const tick = () => {
     const tm = v.currentTime, c = okVideo() ? O.cards.find(x => tm >= x.start && tm < x.end) : null;
-    if (c !== cur) (c ? show(c) : hide());
+    if (c !== cur) (c ? show(c) : hide()); else if (c && c.fr.length > 1) setFrame(frameAt(c, tm));
   };
   let alive = true;
   v.addEventListener("timeupdate", tick); v.addEventListener("seeked", tick);
@@ -62,7 +46,6 @@ export async function setupOverlays(ep, v, { wrap, onText }) {
   const onUi = () => layout(), onRs = () => layout();
   addEventListener("malmun:uilang", onUi); addEventListener("resize", onRs); document.addEventListener("fullscreenchange", onRs);
   return {
-    lines: () => (cur && fallback ? lines(cur) : null),
     off() { alive = false; hide(); v.removeEventListener("timeupdate", tick); v.removeEventListener("seeked", tick); removeEventListener("malmun:uilang", onUi); removeEventListener("resize", onRs); document.removeEventListener("fullscreenchange", onRs); },
   };
 }

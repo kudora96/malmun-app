@@ -129,9 +129,8 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   });
   // 「따라 해 보세요」 양방향(turns.js · 자료가 있는 편만) — 차례 동안 영상 밑 큰 자막 칸 = 🎤 듣기 · 선생님 반응 자막(학습자 말 ⇄ 한국어)
   // 영상 위 그림 카드(overlays.js) — 작은 화면·작은 글 = 카드 글을 영상 밑 큰 자막 칸 끝에
-  let ovLines = null, ovl = null;
-  const ovText = ls => { ovLines = ls; if (!turns?.busy()) vsubFill(st.cur); }; ovText.canShow = n => { const b = app.querySelector(".vsub"); return !b.hidden && b.clientHeight >= n * 22 + 8; }; // 자막 칸이 줄 수만큼 넉넉할 때만(아니면 영상 아래쪽 글 상자 · 가로 폰·PC 근거 카드 6줄)
-  setupOverlays(ep, v, { wrap: app.querySelector("#vwrap"), onText: ovText }).then(x => { ovl = x; });
+  let ovl = null;
+  setupOverlays(ep, v, { wrap: app.querySelector("#vwrap") }).then(x => { ovl = x; });
   let turns = null;
   let turnLastSub = null;
   function turnSub(x) {
@@ -238,7 +237,6 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     box.hidden = false; box.style.height = free + "px";
     const l = L[i], rom = romOn() ? (l.v9?.pieces || []).map(p => p.rom).filter(Boolean).join(" ") : "";
     inn.innerHTML = `<span class="who">${spkHtml(l.speaker)}</span><b class="ko" lang="ko">${esc(l.ko)}</b>${rom ? `<span class="rom">${esc(rom)}</span>` : ""}${l.tr ? `<span class="tr">${esc(l.tr)}</span>` : ""}`;
-    if (ovLines) inn.innerHTML = `<span class="ovl" dir="auto">${ovLines.map(x => `<span>${esc(x)}</span>`).join("")}</span>`; // 카드가 떠 있는 동안 + 작은 화면 = 이 칸 = 카드 글(같은 차례 · 지금 줄 자막은 아래 줄 카드에 그대로)
     const fits = z => { inn.style.zoom = String(z); return box.scrollHeight <= box.clientHeight && inn.getBoundingClientRect().height <= box.clientHeight; };
     let lo = 0.6, hi = 1.8;
     if (fits(hi)) lo = hi; else for (let k = 0; k < 8; k++) { const m = (lo + hi) / 2; if (fits(m)) lo = m; else hi = m; }
