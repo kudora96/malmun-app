@@ -2,8 +2,11 @@
 //  자료: data/{편}/{편}.overlays.json(영상2팀 · cards[{id,file|frames[{file,start}],start,end,pos,w}]) · texts 칸이 있어도 쓰지 않음
 //  대표님 10-22 「영상 밑에 또 자막 · 틀 바꾸지 말자」 = 영상 밖(자막 칸·줄 카드·글 상자)에는 카드 때문에 아무것도 안 나옴 · 공개판과 화면 모양·글 100% 같음
 //  카드 = 정한 초에 영상 오른쪽에 천천히 떠오름 · 끝나면 사라짐 · 그림 모양대로 크기(세로로 긴 앱 화면은 영상 높이 92%)
+//  학습자 말 그림(대표님 10-22 「ㅇ」): CC 를 따라감 — CC 끔 = 한국어 카드(file) · CC 켬 = 학습자 말 그림(file_i18n{lang} · 없으면 file) · ⇄ 는 카드에 영향 없음
+//   json 꼴(영상2팀): 카드마다 "file_i18n":{"ne":"…_ne.png"} · frames 를 쓰면 장마다 같은 칸 · 자리·크기·초는 한국어 판과 같음
 //  안전: json "video" 길이(초)와 지금 영상 길이가 1초 넘게 다르면 띄우지 않음
-import { MEDIA } from "./paths.js?v=1022.9";
+import { MEDIA } from "./paths.js?v=1022.10";
+import { lang } from "./i18n.js?v=1022.10";
 
 const getJSON = u => fetch(u, { cache: "no-store" }).then(r => (r.ok ? r.json() : null)).catch(() => null);
 
@@ -13,13 +16,17 @@ export async function setupOverlays(ep, v, { wrap }) {
   const want = +(String(O.video || "").match(/([\d.]+)\s*초/)?.[1] || 0);
   const okVideo = () => !want || (Number.isFinite(v.duration) && Math.abs(v.duration - want) < 1);
   // 한 카드 = 그림 한 장(file) 또는 여러 장(frames:[{file,start}] · 말에 맞춰 차례로 바뀜 · 대표님 10-22 K7 듣기→말하기→쓰기) · 미리 받기
-  for (const c of O.cards) { c.fr = (c.frames?.length ? c.frames : [{ file: c.file, start: c.start }]).map(f => { const im = new Image(); im.src = `${MEDIA}/video/overlay/${ep}/${f.file}`; return { ...f, img: im }; }); c.img = c.fr[0].img; }
+  const url = f => `${MEDIA}/video/overlay/${ep}/${f}`, img = u => { const im = new Image(); im.src = u; return im; };
+  const learn = wrap.closest(".learn"), ccOn = () => !!learn && !learn.classList.contains("nosub"); // CC 칩 상태(learn.js 가 .nosub 로 표시)
+  for (const c of O.cards) c.fr = (c.frames?.length ? c.frames : [{ file: c.file, file_i18n: c.file_i18n, start: c.start }]).map(f => { const t = lang !== "ko" && f.file_i18n?.[lang]; const x = { ...f, ko: img(url(f.file)), tr: t ? img(url(t)) : null }; x.tr?.addEventListener("error", () => { x.tr = null; if (cur === c) paint(); }, { once: true }); return x; }); // 학습자 말 그림이 없거나 못 받으면 한국어 그림
+  const pick = f => (ccOn() && f.tr ? f.tr : f.ko); // 지금 띄울 그림
+  const imgOf = c => pick(c.fr[0]);
   const frameAt = (c, tm) => { let k = 0; c.fr.forEach((f, i) => { if (tm >= (f.start ?? c.start)) k = i; }); return k; };
   let cur = null, el = null;
   function layout() {
     if (!el || !cur) return;
     // 크기 = 영상 폭 × w · 그림 모양대로(정사각 카드 · 세로로 긴 앱 화면) · 세로로 넘치면 영상 높이 92% 에 맞춤
-    const W = wrap.clientWidth, H = wrap.clientHeight, im = cur.img, r = im.naturalWidth ? im.naturalHeight / im.naturalWidth : 1;
+    const W = wrap.clientWidth, H = wrap.clientHeight, im = imgOf(cur), r = im.naturalWidth ? im.naturalHeight / im.naturalWidth : 1;
     // v13b 꼴: h(영상 높이 몫) + x_center(가운데 x · 영상 폭 몫) → 높이로 맞추고 폭은 그림 모양대로(선생님 얼굴 x 0.34~0.64 피함 · 영상2팀)
     let bw0, bh0; if (cur.h) { bh0 = cur.h * H; bw0 = bh0 / r; } else { bw0 = cur.w * W; bh0 = bw0 * r; if (bh0 > H * 0.92) { bh0 = H * 0.92; bw0 = bh0 / r; } }
     const side = Math.round(bw0), sideH = Math.round(bh0);
@@ -30,12 +37,13 @@ export async function setupOverlays(ep, v, { wrap }) {
   function show(c) {
     hide(); cur = c;
     el = document.createElement("div"); el.className = "ovc"; el.dataset.id = c.id; el.setAttribute("aria-hidden", "true");
-    c.fr.forEach((f, i) => { const d = document.createElement("div"); d.className = "ovf"; d.style.backgroundImage = `url("${f.img.src}")`; el.append(d); });
+    c.fr.forEach(f => { const d = document.createElement("div"); d.className = "ovf"; d.style.backgroundImage = `url("${pick(f).src}")`; el.append(d); });
     el.dataset.f = -1; setFrame(frameAt(c, v.currentTime)); wrap.append(el);
-    if (!c.img.naturalWidth) c.img.addEventListener("load", () => cur === c && layout(), { once: true }); // 모양(가로·세로)은 그림을 받은 뒤 다시 잼
+    const im0 = imgOf(c); if (!im0.naturalWidth) im0.addEventListener("load", () => cur === c && layout(), { once: true }); // 모양(가로·세로)은 그림을 받은 뒤 다시 잼
     layout();
     requestAnimationFrame(() => el?.classList.add("on")); // 천천히 떠오름(css)
   }
+  function paint() { if (!el || !cur) return; [...el.querySelectorAll(".ovf")].forEach((d, i) => { d.style.backgroundImage = `url("${pick(cur.fr[i]).src}")`; }); layout(); } // CC 켬·끔 = 그 자리에서 그림만 바꿈(자리·크기 그대로)
   function setFrame(k) { if (!el || +el.dataset.f === k) return; el.dataset.f = k; [...el.querySelectorAll(".ovf")].forEach((d, i) => d.classList.toggle("on", i === k)); } // 장 바꿈 = 겹쳐 서서히(css)
   function hide() { if (el) { const e = el; e.classList.remove("on"); setTimeout(() => e.remove(), 400); } el = null; cur = null; }
   const tick = () => {
@@ -46,8 +54,9 @@ export async function setupOverlays(ep, v, { wrap }) {
   v.addEventListener("timeupdate", tick); v.addEventListener("seeked", tick);
   if (v.requestVideoFrameCallback) { const fr = () => { if (!alive) return; tick(); v.requestVideoFrameCallback(fr); }; v.requestVideoFrameCallback(fr); }
   const onUi = () => layout(), onRs = () => layout();
+  const mo = learn && new MutationObserver(() => paint()); mo?.observe(learn, { attributes: true, attributeFilter: ["class"] }); // CC 켬·끔 = 그 자리에서 그림만 바꿈
   addEventListener("malmun:uilang", onUi); addEventListener("resize", onRs); document.addEventListener("fullscreenchange", onRs);
   return {
-    off() { alive = false; hide(); v.removeEventListener("timeupdate", tick); v.removeEventListener("seeked", tick); removeEventListener("malmun:uilang", onUi); removeEventListener("resize", onRs); document.removeEventListener("fullscreenchange", onRs); },
+    off() { alive = false; mo?.disconnect(); hide(); v.removeEventListener("timeupdate", tick); v.removeEventListener("seeked", tick); removeEventListener("malmun:uilang", onUi); removeEventListener("resize", onRs); document.removeEventListener("fullscreenchange", onRs); },
   };
 }
