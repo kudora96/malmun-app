@@ -2,10 +2,10 @@
 //  태어난 해 = 빈칸에서 시작(기본값 없음 · 1920~올해) · 나라 = 폰 시간대로 미리 짐작(기기 언어는 안 씀 · 9-1) · 둘 다 있어야 [확인] · 「? 왜 묻나요」 = 한 줄 펼침
 //  저장 = 기기 안 malmun.birth · malmun.country 만(서버로 안 보냄) → agepolicy 가 판정 · 18세 미만이면 다음 풍선말에 안내 한 줄(5B 보기·듣기 / 5C 10대) → [시작하기]
 //  나라 이름 = Intl.DisplayNames(지금 화면 말 · ⇄ 한국어면 한국어) — 번역 열쇠 없이 21개 언어 · ⇄ 때 그 자리에서 다시 씀
-import { t, lang, uiKoOn } from "./i18n.js?v=1022.13";
-import { esc } from "./text.js?v=1022.13";
-import { spkHtml } from "./ui.js?v=1022.13";
-import { age, allowed, minAge, applyGate } from "./agepolicy.js?v=1022.13";
+import { t, lang, uiKoOn } from "./i18n.js?v=1022.14";
+import { esc } from "./text.js?v=1022.14";
+import { spkHtml } from "./ui.js?v=1022.14";
+import { age, allowed, minAge, applyGate } from "./agepolicy.js?v=1022.14";
 
 const KB = "malmun.birth", KC = "malmun.country";
 const get = k => { try { return localStorage.getItem(k); } catch { return null; } };
