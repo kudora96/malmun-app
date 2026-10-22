@@ -1,8 +1,8 @@
-import { t } from "../i18n.js?v=1023.3";
-import { esc } from "../text.js?v=1023.3";
-import { langChip, openLangSheet, uiKoBtn, spkHtml } from "../ui.js?v=1023.3";
-import { rerender } from "../main.js?v=1023.3";
-import { needBirth, askBirth } from "../birth.js?v=1023.3";
+import { t } from "../i18n.js?v=1023.4";
+import { esc } from "../text.js?v=1023.4";
+import { langChip, openLangSheet, uiKoBtn, spkHtml } from "../ui.js?v=1023.4";
+import { rerender } from "../main.js?v=1023.4";
+import { needBirth, askBirth } from "../birth.js?v=1023.4";
 
 const KEY = "malmun.started";
 const started = () => { try { return localStorage.getItem(KEY) === "1"; } catch { return false; } };
