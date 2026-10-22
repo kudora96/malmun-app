@@ -908,9 +908,9 @@ export default async function write(app, ep, id, opts = {}) {
     const bx = work.querySelector(".hjudge"); if (!bx || !H || H.jx || H.hintOn || st.hand !== H) return; const list = SK.STK ? strokesOf(H.ch) : []; if (!list.length) return;
     let seen = 0; try { seen = +localStorage.getItem("malmun.wguide") || 0; if (!H.guideCounted) { H.guideCounted = true; localStorage.setItem("malmun.wguide", String(seen + 1)); } } catch {}
     const nums = "①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳", gl = list.map((S, i) => `${nums[i] || i + 1} ${S.jamo || ""}`).join(" "), how = magnetOn() ? "wx_g_magnet" : followOn() ? "wx_g_follow" : "wx_g_how", L = [tx("wx_g_strokes", { c: H.ch, n: list.length, l: gl }), tx(how)];
-    const P = [{ key: "wx_g_strokes", vars: { c: H.ch, n: String(list.length), l: gl }, slots: { c: { ko: H.ch }, n: { n: list.length }, l: { jamo: list.map(S => S.jamo || "").join("") } } }, { key: how, vars: {}, slots: {} }]; /* 소리 차례(글과 1:1) */
+    const P = [{ key: how, vars: {}, slots: {} }]; /* 소리 = 문장만(대표님 10-22 「획 목록·시간까지 읽어 어색」) · 획 목록 줄·⏱ 시간 줄은 글로만 */
     if (list.some(S => /[ㅈㅊㅉ]/.test(S.jamo || ""))) { L.push(tx("wx_g_jcursive")); P.push({ key: "wx_g_jcursive", vars: {}, slots: {} }); } /* 글자부 10-15 ㅈ·ㅊ 자료 = 고딕 3·4획 → 손으로는 ス처럼 이어 써도 됨 */
-    if (seen < 6 && !magnetOn()) { const s0 = Math.round(4 + 2.5 * list.length); L.push(tx("wx_g_time", { s: s0 })); P.push({ key: "wx_g_time", vars: { s: String(s0) }, slots: { s: { n: s0 } } }); } /* 시간 = startTimer 와 같은 셈 */
+    if (seen < 6 && !magnetOn()) { const s0 = Math.round(4 + 2.5 * list.length); L.push(tx("wx_g_time", { s: s0 })); } /* 시간 = startTimer 와 같은 셈 */
     judgeFull(false); H.guideOn = true; bx.className = "hjudge guide"; bx.innerHTML = L.map((x, i) => `<p${i ? "" : ' class="g1"'}>${koEsc(x)}</p>`).join(""); fitJudge();
     fbSay(bx, P, !H.guideSaid && st.w === 0 && st.c === 0); H.guideSaid = true; /* 채점 전 안내 = 그 줄 첫 글자만 자동(본부 10-21) · 나머지는 상자 눌러 듣기 */
   }
