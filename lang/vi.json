@@ -334,5 +334,8 @@
  "rp_thx": "Cảm ơn bạn! Chúng tôi sẽ kiểm tra và sửa.",
  "rp_limit": "Hôm nay không nhận thêm báo lỗi. Ngày mai bạn hãy báo lại nhé.",
  "fb_auto": "Đọc to kết quả",
- "turn_listen": "Đến lượt bạn — cô giáo đang nghe"
+ "turn_listen": "Đến lượt bạn — cô giáo đang nghe",
+ "w_char": "Chữ",
+ "w_word": "Từ",
+ "w_sent": "Câu"
 }

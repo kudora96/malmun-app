@@ -334,5 +334,8 @@
  "rp_thx": "Rahmat! Tekshirib, tuzatamiz.",
  "rp_limit": "Bugun boshqa xabar qabul qilinmaydi. Ertaga yana xabar bering.",
  "fb_auto": "Natijani ovoz chiqarib oʻqish",
- "turn_listen": "Navbat sizda — oʻqituvchi tinglayapti"
+ "turn_listen": "Navbat sizda — oʻqituvchi tinglayapti",
+ "w_char": "Harf",
+ "w_word": "Soʻz",
+ "w_sent": "Jumla"
 }
