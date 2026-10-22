@@ -159,6 +159,13 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     els.forEach((e, k) => { const m = Math.max(a[k], b[k]); if (Math.abs(a[k] - b[k]) > 0.5) e.style.minHeight = m.toFixed(1) + "px"; }); // 두 상태가 다르면 큰 쪽으로(어느 상태에서 열어도)
     sc.classList.add("lockh");
   }
+  // 지금 줄 카드(큰 글 · 맞춘 크기)도 두 상태를 재서 큰 쪽을 min-height 로(개발2팀 10-23 · 화면 열 때 lockBoth 는 그 카드가 지금 줄이 아닐 때 잼 → 우르두 3번 줄 ⇄ 때 31px 줄던 것)
+  function lockCard(el) {
+    if (!KO_UI.includes(lang)) return;
+    const sc = app.querySelector(".scr.learn"), H = document.documentElement, on0 = sc.classList.contains("lfirst"), u0 = H.classList.contains("uiko");
+    el.style.removeProperty("min-height"); const a = el.getBoundingClientRect().height; swapTo(!on0); H.classList.toggle("uiko", !u0); const b = el.getBoundingClientRect().height; swapTo(on0); H.classList.toggle("uiko", u0);
+    if (Math.abs(a - b) > 0.5) el.style.minHeight = Math.max(a, b).toFixed(1) + "px";
+  }
   function swapTo(on) {
     app.querySelector(".scr.learn")?.classList.toggle("lfirst", on);
     for (const li of items) { const ko = li.querySelector(".kotext"), tr = li.querySelector(":scope > .tr"); if (!ko || !tr) continue; if (on && ko.nextElementSibling === tr) ko.before(tr); else if (!on && tr.nextElementSibling === ko) ko.after(tr); }
@@ -214,13 +221,13 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     if (st.cardKeep === i) return; // ⇄ 뒤 같은 카드 = 맞춘 단계 그대로(⇄ 0px · 다국어부 10-19 ru 375 카드 단추 줄 14~21px) · 다른 줄·창 크기가 바뀌면 다시 맞춤
     st.cardKeep = -1;
     items.forEach(li => { li.classList.remove("fitc", "tr2", "tr1", "ac1"); li.style.removeProperty("--kf"); li.style.removeProperty("--tf"); });
-    const el = items[i]; if (!el) return; const mh0 = el.style.minHeight; el.style.removeProperty("min-height"); queueMicrotask(() => { if (mh0) el.style.minHeight = mh0; }); // 맞출 땐 글 높이로만(⇄ 고정 높이는 맞춘 뒤 다시) // 네 창(영상·설명·쓰기·말하기) 모두 같은 카드 자리·같은 글 크기(본부 10-06 「한 틀」)
+    const el = items[i]; if (!el) return; const mh0 = el.style.minHeight; el.style.removeProperty("min-height"); // 맞출 땐 글 높이로만(⇄ 고정 높이는 맞춘 뒤 다시 — 아래 lockCard) // 네 창(영상·설명·쓰기·말하기) 모두 같은 카드 자리·같은 글 크기(본부 10-06 「한 틀」)
     const avail = ctrlBar.getBoundingClientRect().top - stick.getBoundingClientRect().bottom - 14;
-    const kt = el.querySelector(".kotext"), tt = el.querySelector(":scope > .tr"), ko = (lFirst() && tt) || kt, tr = lFirst() && tt ? kt : tt; if (!ko) return; // 뜻 줄 없는 줄·언어 바꾼 뒤에도(쓰기부 10-20 getComputedStyle null) // 위 자리 = --kf · 아래 = --tf(⇄ 위아래)
+    const kt = el.querySelector(".kotext"), tt = el.querySelector(":scope > .tr"), ko = (lFirst() && tt) || kt, tr = lFirst() && tt ? kt : tt; if (!ko) { if (mh0) el.style.minHeight = mh0; return; } // 뜻 줄 없는 줄·언어 바꾼 뒤에도(쓰기부 10-20 getComputedStyle null) // 위 자리 = --kf · 아래 = --tf(⇄ 위아래)
     let kf = parseFloat(getComputedStyle(ko).fontSize), tf = tr ? parseFloat(getComputedStyle(tr).fontSize) : 0;
     el.classList.add("fitc");
     for (let k = 0; k < 16 && el.offsetHeight > avail && kf > 11; k++) { kf -= 1; tf = Math.max(10, tf - 0.7); el.style.setProperty("--kf", kf + "px"); el.style.setProperty("--tf", tf + "px"); }
-    for (const c of ["tr2", "tr1"]) { if (!tr || el.offsetHeight <= avail) break; el.classList.remove("tr2", "tr1"); el.classList.add(c); } if (el.offsetHeight > avail) el.classList.add("ac1"); /* 줄 카드 단추 = 늘 그림만 · 이름은 aria-label(10-20) */ /* 그래도 넘치면 [▶ 이 줄 듣기] = ▶ 만(글은 화면 읽기용으로 남김) · 단추 안쪽 여백 줄임(다국어부 10-12 ur 320 — 단추가 셋째 줄로) */ // 가장 작은 글로도 넘치면 학습자 말 뜻을 2줄 → 1줄(설명 창에 다 보임 · 검사부 10-12 vi·th·ur 320 — 단추가 아래 막대 뒤로)
+    for (const c of ["tr2", "tr1"]) { if (!tr || el.offsetHeight <= avail) break; el.classList.remove("tr2", "tr1"); el.classList.add(c); } if (el.offsetHeight > avail) el.classList.add("ac1"); lockCard(el); /* 줄 카드 단추 = 늘 그림만 · 이름은 aria-label(10-20) */ /* 그래도 넘치면 [▶ 이 줄 듣기] = ▶ 만(글은 화면 읽기용으로 남김) · 단추 안쪽 여백 줄임(다국어부 10-12 ur 320 — 단추가 셋째 줄로) */ // 가장 작은 글로도 넘치면 학습자 말 뜻을 2줄 → 1줄(설명 창에 다 보임 · 검사부 10-12 vi·th·ur 320 — 단추가 아래 막대 뒤로)
   }
   // 영상 창 = 제목 줄 바로 밑에 영상(위 정렬) · 남는 자리(폰)에 지금 대사를 영화 자막처럼 크게(투덜이 10-06 ㅇ) — 화자(작게) · 한국어(굵게) · 로마자(켜짐이면 작게) · 학습자 언어
   //   글 크기 = 그 자리를 채우는 가장 큰 크기(넘치면 줄임 · 스크롤 0) · 대사가 바뀔 때와 창 크기가 바뀔 때만 다시 맞춤 · 자리가 70px 안 되면(넓고 낮은 창) 자막 줄 없음
