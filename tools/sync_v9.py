@@ -66,6 +66,10 @@ def sync(ep, dry=False):
             for j, sj in enumerate(sent):
                 if sj.get(code) is not None and sj.get(f"{code}_s") is None: sj[f"{code}_s"] = ss[j]; filled += 1
     if filled: print("문장 시각 채움:", filled)
+    # 한국어 문장 시각(ko_s)·학습자별 한국어 설명(ko_by.{xx}.sent_s)이 비면 앱 칠이 마지막 문장에 붙음(10-22 새 1편) → 경고
+    nk = [l["n"] for l in d["lines"] if any(s.get("ko") and s.get("ko_s") is None for s in (l.get("sent") or []))]
+    nb = [(l["n"], c) for l in d["lines"] for c, kb in (l.get("ko_by") or {}).items() if kb.get("audio_ex") and (not kb.get("sent_s") or None in kb["sent_s"])]
+    if nk or nb: print("⚠ 문장 시각 빔 — ko_s 줄", nk, "· ko_by sent_s", nb, "(소리부 sent_s 또는 MMS 정렬로 채울 것)")
     # 말하기 본보기 = 문장만 읽은 소리(본부 10-03 · app.json 에 칸이 없어 이름 규칙으로) → audio.ko.sentence
     for l in d["lines"]:
         rel = f"새설명_소리_kr/{ep}_{l['n']:02d}_말해보세요_문장.mp3"
