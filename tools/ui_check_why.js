@@ -9,7 +9,7 @@
   try {
   const vd = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, "volume");
   Object.defineProperty(HTMLMediaElement.prototype, "volume", { configurable: true, get() { return vd.get.call(this); }, set(v) { vd.set.call(this, Math.min(v, 0.0001)); } });
-  const LONG = "सही वाक्य: 어서 오세요.\n" + "तपाईंले 「오세요」 को सट्टा अर्कै शब्द भन्नुभयो, त्यसैले अर्थ फरक भयो। ".repeat(3) + "\nयाद राख्नुहोस्: 「요」 राख्दा नम्र हुन्छ।";
+  const LONG = "सही वाक्य: …\n" + "तपाईंले 「오세요」 को सट्टा अर्कै शब्द भन्नुभयो, त्यसैले अर्थ फरक भयो। ".repeat(3) + "\nयाद राख्नुहोस्: 「요」 राख्दा नम्र हुन्छ।";
   const sent = (window.__whySent = []); let fail = false; const of = (window.__whyOf ||= window.fetch);
   window.fetch = async (u, o) => { u = String(u);
     if (u.endsWith("/stt")) return new Response(JSON.stringify({ error: "x" }), { status: 503 });
@@ -53,6 +53,8 @@
   // 저장 지우고 시작
   await new Promise(r => { const q = indexedDB.deleteDatabase("malmun"); q.onsuccess = q.onerror = q.onblocked = r; });
 
+  // 정답 = 편 자료의 1번 줄(박아 두지 않음 · 옛 세종 「어서 오세요」 → 새 1편 「안녕하세요…」 · 개발2팀 10-22) · 틀린 말 = 첫 낱말 + 엉뚱한 말
+  const T = line(1).querySelector(".kotext").textContent.trim(), N = s => String(s || "").replace(/[\s.,!?。、…「」"']/g, ""), W1 = T.split(/\s+/)[0], WRONG = W1 + " 와요", WRONG2 = W1 + " 가요"; // 첫 낱말만 맞고 나머지는 틀림(긴 줄도 점수가 기준 아래)
   ok(!!line(1).querySelector("[data-act=speak]"), "줄 단추에 [말하기] 있음(쓰기 옆)", line(1).querySelector(".acts").innerText.replace(/\n/g, " · "));
   try { localStorage.removeItem("malmun.sp.help"); } catch {}
   const box = () => $(".sheet.whys .whybox"), btn = () => $(".panel .whyb"), shut = async () => { $(".sheet.whys [data-close].mclose")?.click(); await W(200); };
@@ -61,19 +63,19 @@
   const sp = () => $(".panel .speak"), over = () => (sp() ? sp().scrollHeight - sp().clientHeight : 0);
   // W1 꺼짐
   try { localStorage.removeItem("malmun.why"); localStorage.setItem("malmun.sp.help", "1"); } catch {}
-  await open(1); await say("어서 와요"); await waitIdle();
+  await open(1); await say(WRONG); await waitIdle();
   ok(!btn(), "W1 꺼짐(기본) = 단추·자리 없음(지금 화면 그대로)", `넘침 ${over()}`);
   $(".panel [data-act=close], .panel .closex")?.click(); await W(600);
   // W2 켬
   try { localStorage.setItem("malmun.why", "1"); } catch {}
-  await open(1); await say("어서 와요"); await waitIdle();
+  await open(1); await say(WRONG); await waitIdle();
   const b = btn(); ok(!!b && inside(b) && b.scrollWidth <= b.clientWidth + 2 && over() <= 1, "W2 켬 + 틀림 = 「왜 틀렸어요?」 단추(창 안 · 글 안 잘림 · 말하기 창 넘침 0)", `${b ? b.innerText.replace(/\s+/g, " ") : "없음"} · 넘침 ${over()}`);
   // W3 누름 = 아래에서 올라오는 작은 창
   const o0 = over(); b?.click(); await W(150); const waiting = !!box()?.querySelector(".wait"); await W(900);
   const bx = box(), sh = $(".sheet.whys");
   ok(waiting && bx && /सही/.test(bx.innerText) && inView(sh) && bx.scrollWidth <= bx.clientWidth + 1 && over() === o0, "W3 누름 = 기다림 글 → 아래 작은 창에 답(화면 안 · 가로 잘림 0 · 말하기 창 그대로)", `창 ${Math.round(sh?.getBoundingClientRect().height || 0)}px`);
   { const h = () => $(".sheet.whys h2 [data-k=why_ask]")?.textContent, u = $(".sheet.whys [data-act=uiko]"), a0 = h(); if (u) { u.click(); await W(700); const a1 = h(); u.click(); await W(700); ok(a1 && a1 !== a0 && h() === a0 && !!box(), "W7 답 창 ⇄ = 제목 글 바로 바뀜 · 다시 ⇄ 돌아옴 · 답 그대로", `${a0} → ${a1}`); } }
-  const s0 = sent[0] || {}; ok(sent.length === 1 && /^어서 오세요\.?$/.test(s0.target) && s0.heard && s0.mode === "speak" && s0.lang === document.documentElement.lang, "W3 보낸 것 = 정답·들은 말·speak·학습자 언어(한 번만)", JSON.stringify(s0).slice(0, 120));
+  const s0 = sent[0] || {}; ok(sent.length === 1 && N(s0.target) && N(T).includes(N(s0.target)) && s0.heard && s0.mode === "speak" && s0.lang === document.documentElement.lang, "W3 보낸 것 = 정답·들은 말·speak·학습자 언어(한 번만)", JSON.stringify(s0).slice(0, 120));
   // W4 닫고 다시
   await shut(); const gone = !box(); btn().click(); await W(500);
   ok(gone && !!box() && /सही/.test(box().innerText) && sent.length === 1, "W4 ✕ 로 닫힘 · 다시 누르면 같은 답(다시 안 부름)"); await shut();
@@ -81,10 +83,10 @@
   const r0 = btn().getBoundingClientRect(), u = [...document.querySelectorAll(".panel [data-act=uiko]")].find(e => e.offsetParent);
   if (u) { u.click(); await W(900); const r1 = btn().getBoundingClientRect(); ok(Math.abs(r0.width - r1.width) <= 1 && Math.abs(r0.left - r1.left) <= 1, "W6 ⇄ = 단추 0px", `${Math.round(r0.width)}→${Math.round(r1.width)}`); u.click(); await W(900); }
   // W5 실패
-  fail = true; await say("어서 가요"); await waitIdle(); btn()?.click(); await W(1200);
+  fail = true; await say(WRONG2); await waitIdle(); btn()?.click(); await W(1200);
   ok(box()?.classList.contains("err") && box().innerText.trim().length > 4, "W5 서버 실패 = 「지금은 설명할 수 없어요」", box()?.innerText.slice(0, 40)); await shut();
   // 맞게 말함 = 단추 없음
-  fail = false; await say("어서 오세요."); await waitIdle();
+  fail = false; await say(T); await waitIdle();
   ok(!btn(), "맞게 말하면 단추 없음");
   try { localStorage.removeItem("malmun.why"); } catch {}
   $(".panel [data-act=close], .panel .closex")?.click(); await W(400);
