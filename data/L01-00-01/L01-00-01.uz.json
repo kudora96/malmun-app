@@ -12,47 +12,55 @@
  "subtitles": [
   {
    "id": 1,
-   "t": "Assalomu alaykum, hammaga. Men koreys tili oʻqituvchisiman. Familiyam \"한\", ismim \"국어\". Tanishganimdan xursandman."
+   "t": "Assalomu alaykum, hammaga. Men koreys tili oʻqituvchisiman."
   },
   {
    "id": 2,
-   "t": "Bu yer \"인천공항\". Koreyaga xush kelibsiz."
+   "t": "Familiyam \"한\", ismim \"국어\". Tanishganimdan xursandman."
   },
   {
    "id": 3,
-   "t": "Bundan buyon siz va men, ikkovimiz birga oʻqiymiz."
+   "t": "Bu yer \"인천공항\". Koreyaga xush kelibsiz."
   },
   {
    "id": 4,
-   "t": "\"한글\" undosh va unlilarining eng oddiy asoslaridan boshlab, kundalik koreys tili hamda koreys tili imtihoniga tayyorgarlikkacha barchasini birgalikda oʻrganamiz."
+   "t": "Bundan buyon siz va men, ikkovimiz birga oʻqiymiz."
   },
   {
    "id": 5,
-   "t": "Sizni ham hayajon qamrab olyaptimi?"
+   "t": "\"한글\" undosh va unlilarining eng oddiy asoslaridan boshlab, kundalik koreys tili hamda koreys tili imtihoniga tayyorgarlikkacha barchasini birgalikda oʻrganamiz."
   },
   {
    "id": 6,
-   "t": "Goʻdak gapirishni oʻrgangandek, koreyscha tinglang, soʻng oʻzingiz gapiring va yozing."
+   "t": "Sizni ham hayajon qamrab olyaptimi?"
   },
   {
    "id": 7,
-   "t": "Shunchaki tomosha qilsangiz, faqat kuzatuvchi boʻlib qolasiz. Oʻzingiz mashq qilsangizgina mahoratingiz oshadi."
+   "t": "Goʻdak gapirishni oʻrgangandek, koreyscha tinglang, soʻng oʻzingiz gapiring va yozing."
   },
   {
    "id": 8,
-   "t": "Ovoz chiqarib aytilgan soʻzlar yaxshiroq va uzoqroq eslab qolinishi haqida tadqiqot bor."
+   "t": "Shunchaki tomosha qilsangiz, faqat kuzatuvchi boʻlib qolasiz. Oʻzingiz mashq qilsangizgina mahoratingiz oshadi."
   },
   {
    "id": 9,
-   "t": "Oʻyin oʻynab ham oʻrgansa boʻladi."
+   "t": "Ovoz chiqarib aytilgan soʻzlar yaxshiroq va uzoqroq eslab qolinishi haqida tadqiqot bor."
   },
   {
    "id": 10,
-   "t": "Bu ilovada boshidan oxirigacha siz va men bir-birimiz bilan gaplashib oʻrganamiz."
+   "t": "Oʻyin oʻynab ham oʻrgansa boʻladi."
   },
   {
    "id": 11,
-   "t": "\"한글\" qanday koʻrinishini keyingi safar oʻrganamiz. Bugun tanishganimdan xursand boʻldim. Keyingi safar koʻrishguncha."
+   "t": "Bu ilovada boshidan oxirigacha siz va men bir-birimiz bilan gaplashib oʻrganamiz."
+  },
+  {
+   "id": 12,
+   "t": "\"한글\" qanday koʻrinishini keyingi safar oʻrganamiz."
+  },
+  {
+   "id": 13,
+   "t": "Bugun tanishganimdan xursand boʻldim. Keyingi safar koʻrishguncha."
   }
  ]
 }

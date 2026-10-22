@@ -12,47 +12,55 @@
  "subtitles": [
   {
    "id": 1,
-   "t": "Hola a todos. Soy profesora de coreano. Mi apellido es \"한\" y mi nombre es \"국어\". Encantada de conocerlos."
+   "t": "Hola a todos. Soy profesora de coreano."
   },
   {
    "id": 2,
-   "t": "Este es el \"인천공항\". Bienvenidos a Corea."
+   "t": "Mi apellido es \"한\" y mi nombre es \"국어\". Encantada de conocerlos."
   },
   {
    "id": 3,
-   "t": "A partir de ahora, usted y yo estudiaremos juntos, solo los dos."
+   "t": "Este es el \"인천공항\". Bienvenidos a Corea."
   },
   {
    "id": 4,
-   "t": "Empezaremos desde lo más básico de las consonantes y vocales del \"한글\", luego el coreano cotidiano, y hasta la preparación del examen de coreano, y lo haremos todo juntos."
+   "t": "A partir de ahora, usted y yo estudiaremos juntos, solo los dos."
   },
   {
    "id": 5,
-   "t": "¿No le hace ilusión?"
+   "t": "Empezaremos desde lo más básico de las consonantes y vocales del \"한글\", luego el coreano cotidiano, y hasta la preparación del examen de coreano, y lo haremos todo juntos."
   },
   {
    "id": 6,
-   "t": "Como un bebé que aprende a hablar, escuche en coreano y luego hable y escriba usted mismo."
+   "t": "¿No le hace ilusión?"
   },
   {
    "id": 7,
-   "t": "Si solo mira, solo aprenderá a ser espectador. Su nivel mejorará si lo practica usted mismo."
+   "t": "Como un bebé que aprende a hablar, escuche en coreano y luego hable y escriba usted mismo."
   },
   {
    "id": 8,
-   "t": "Hay estudios que dicen que las palabras dichas en voz alta se recuerdan mejor y por más tiempo."
+   "t": "Si solo mira, solo aprenderá a ser espectador. Su nivel mejorará si lo practica usted mismo."
   },
   {
    "id": 9,
-   "t": "También puede aprender jugando."
+   "t": "Hay estudios que dicen que las palabras dichas en voz alta se recuerdan mejor y por más tiempo."
   },
   {
    "id": 10,
-   "t": "En esta aplicación, de principio a fin, ustedes y yo aprendemos hablando unos con otros."
+   "t": "También puede aprender jugando."
   },
   {
    "id": 11,
-   "t": "La próxima vez aprenderemos cómo es el \"한글\". Hoy fue un placer conocerlos. Nos vemos la próxima vez."
+   "t": "En esta aplicación, de principio a fin, ustedes y yo aprendemos hablando unos con otros."
+  },
+  {
+   "id": 12,
+   "t": "La próxima vez aprenderemos cómo es el \"한글\"."
+  },
+  {
+   "id": 13,
+   "t": "Hoy fue un placer conocerlos. Nos vemos la próxima vez."
   }
  ]
 }

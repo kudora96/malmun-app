@@ -12,47 +12,55 @@
  "subtitles": [
   {
    "id": 1,
-   "t": "Olá, pessoal. Eu sou professora de coreano. Meu sobrenome é \"한\" e meu nome é \"국어\". Prazer em conhecer vocês."
+   "t": "Olá, pessoal. Eu sou professora de coreano."
   },
   {
    "id": 2,
-   "t": "Aqui é o \"인천공항\". Bem-vindos à Coreia."
+   "t": "Meu sobrenome é \"한\" e meu nome é \"국어\". Prazer em conhecer vocês."
   },
   {
    "id": 3,
-   "t": "A partir de agora, você e eu vamos estudar juntos, só nós dois."
+   "t": "Aqui é o \"인천공항\". Bem-vindos à Coreia."
   },
   {
    "id": 4,
-   "t": "Vamos começar do mais básico das consoantes e vogais do \"한글\", depois o coreano do dia a dia, até a preparação para o exame de coreano, e vamos fazer tudo juntos."
+   "t": "A partir de agora, você e eu vamos estudar juntos, só nós dois."
   },
   {
    "id": 5,
-   "t": "Não está animado?"
+   "t": "Vamos começar do mais básico das consoantes e vogais do \"한글\", depois o coreano do dia a dia, até a preparação para o exame de coreano, e vamos fazer tudo juntos."
   },
   {
    "id": 6,
-   "t": "Assim como um bebê aprende a falar, ouça em coreano, fale e escreva você mesmo."
+   "t": "Não está animado?"
   },
   {
    "id": 7,
-   "t": "Se só assistir, você só melhora em assistir. É fazendo você mesmo que você melhora."
+   "t": "Assim como um bebê aprende a falar, ouça em coreano, fale e escreva você mesmo."
   },
   {
    "id": 8,
-   "t": "Há pesquisas que mostram que palavras ditas em voz alta são lembradas melhor e por mais tempo."
+   "t": "Se só assistir, você só melhora em assistir. É fazendo você mesmo que você melhora."
   },
   {
    "id": 9,
-   "t": "Também dá para aprender jogando."
+   "t": "Há pesquisas que mostram que palavras ditas em voz alta são lembradas melhor e por mais tempo."
   },
   {
    "id": 10,
-   "t": "Neste aplicativo, do começo ao fim, vocês e eu aprendemos conversando uns com os outros."
+   "t": "Também dá para aprender jogando."
   },
   {
    "id": 11,
-   "t": "Na próxima vez, vamos aprender como é o \"한글\". Foi um prazer conhecer vocês hoje. Até a próxima."
+   "t": "Neste aplicativo, do começo ao fim, vocês e eu aprendemos conversando uns com os outros."
+  },
+  {
+   "id": 12,
+   "t": "Na próxima vez, vamos aprender como é o \"한글\"."
+  },
+  {
+   "id": 13,
+   "t": "Foi um prazer conhecer vocês hoje. Até a próxima."
   }
  ]
 }

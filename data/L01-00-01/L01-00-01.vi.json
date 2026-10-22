@@ -12,47 +12,55 @@
  "subtitles": [
   {
    "id": 1,
-   "t": "Xin chào các bạn. Cô là giáo viên tiếng Hàn. Cô họ \"한\", tên là \"국어\". Rất vui được gặp các bạn."
+   "t": "Xin chào các bạn. Cô là giáo viên tiếng Hàn."
   },
   {
    "id": 2,
-   "t": "Đây là \"인천공항\". Chào mừng các bạn đến Hàn Quốc."
+   "t": "Cô họ \"한\", tên là \"국어\". Rất vui được gặp các bạn."
   },
   {
    "id": 3,
-   "t": "Từ nay, cô và bạn sẽ cùng nhau học một kèm một nhé."
+   "t": "Đây là \"인천공항\". Chào mừng các bạn đến Hàn Quốc."
   },
   {
    "id": 4,
-   "t": "Bắt đầu từ phụ âm và nguyên âm \"한글\" cơ bản nhất, rồi tiếng Hàn đời sống, đến cả luyện thi tiếng Hàn, chúng ta sẽ cùng làm hết."
+   "t": "Từ nay, cô và bạn sẽ cùng nhau học một kèm một nhé."
   },
   {
    "id": 5,
-   "t": "Các bạn có thấy háo hức không?"
+   "t": "Bắt đầu từ phụ âm và nguyên âm \"한글\" cơ bản nhất, rồi tiếng Hàn đời sống, đến cả luyện thi tiếng Hàn, chúng ta sẽ cùng làm hết."
   },
   {
    "id": 6,
-   "t": "Giống như em bé học nói, hãy nghe bằng tiếng Hàn, rồi tự nói và tự viết."
+   "t": "Các bạn có thấy háo hức không?"
   },
   {
    "id": 7,
-   "t": "Chỉ xem thôi thì chẳng tiến bộ được đâu. Phải tự làm thì trình độ mới nâng cao."
+   "t": "Giống như em bé học nói, hãy nghe bằng tiếng Hàn, rồi tự nói và tự viết."
   },
   {
    "id": 8,
-   "t": "Có nghiên cứu cho thấy từ được nói thành tiếng sẽ nhớ tốt hơn và lâu hơn."
+   "t": "Chỉ xem thôi thì chẳng tiến bộ được đâu. Phải tự làm thì trình độ mới nâng cao."
   },
   {
    "id": 9,
-   "t": "Các bạn cũng có thể vừa chơi trò chơi vừa học."
+   "t": "Có nghiên cứu cho thấy từ được nói thành tiếng sẽ nhớ tốt hơn và lâu hơn."
   },
   {
    "id": 10,
-   "t": "Trong ứng dụng này, từ đầu đến cuối, cô và các bạn học bằng cách nói chuyện với nhau."
+   "t": "Các bạn cũng có thể vừa chơi trò chơi vừa học."
   },
   {
    "id": 11,
-   "t": "Lần sau chúng ta sẽ học chữ \"한글\" trông như thế nào. Hôm nay rất vui được gặp các bạn. Hẹn gặp lại lần sau."
+   "t": "Trong ứng dụng này, từ đầu đến cuối, cô và các bạn học bằng cách nói chuyện với nhau."
+  },
+  {
+   "id": 12,
+   "t": "Lần sau chúng ta sẽ học chữ \"한글\" trông như thế nào."
+  },
+  {
+   "id": 13,
+   "t": "Hôm nay rất vui được gặp các bạn. Hẹn gặp lại lần sau."
   }
  ]
 }

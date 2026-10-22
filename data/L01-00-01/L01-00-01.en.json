@@ -12,47 +12,55 @@
  "subtitles": [
   {
    "id": 1,
-   "t": "Hello, everyone. I am a Korean teacher. My family name is \"한\", and my given name is \"국어\". Nice to meet you."
+   "t": "Hello, everyone. I am a Korean teacher."
   },
   {
    "id": 2,
-   "t": "This is \"인천공항\". Welcome to Korea."
+   "t": "My family name is \"한\", and my given name is \"국어\". Nice to meet you."
   },
   {
    "id": 3,
-   "t": "From now on, you and I will study together, one on one."
+   "t": "This is \"인천공항\". Welcome to Korea."
   },
   {
    "id": 4,
-   "t": "We will start from the very basics of \"한글\" consonants and vowels, then everyday Korean, all the way to Korean test prep, and do it all together."
+   "t": "From now on, you and I will study together, one on one."
   },
   {
    "id": 5,
-   "t": "Aren't you excited?"
+   "t": "We will start from the very basics of \"한글\" consonants and vowels, then everyday Korean, all the way to Korean test prep, and do it all together."
   },
   {
    "id": 6,
-   "t": "Just like a baby learns to talk, listen in Korean, then speak and write it yourself."
+   "t": "Aren't you excited?"
   },
   {
    "id": 7,
-   "t": "If you only watch, you only get better at watching. You get better by doing it yourself."
+   "t": "Just like a baby learns to talk, listen in Korean, then speak and write it yourself."
   },
   {
    "id": 8,
-   "t": "Research shows that words you say out loud are remembered better and longer."
+   "t": "If you only watch, you only get better at watching. You get better by doing it yourself."
   },
   {
    "id": 9,
-   "t": "You can also learn while playing games."
+   "t": "Research shows that words you say out loud are remembered better and longer."
   },
   {
    "id": 10,
-   "t": "In this app, from start to finish, you and I learn by talking to each other."
+   "t": "You can also learn while playing games."
   },
   {
    "id": 11,
-   "t": "Next time, we will learn what \"한글\" looks like. It was nice to meet you today. See you next time."
+   "t": "In this app, from start to finish, you and I learn by talking to each other."
+  },
+  {
+   "id": 12,
+   "t": "Next time, we will learn what \"한글\" looks like."
+  },
+  {
+   "id": 13,
+   "t": "It was nice to meet you today. See you next time."
   }
  ]
 }

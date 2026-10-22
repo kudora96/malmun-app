@@ -12,47 +12,55 @@
  "subtitles": [
   {
    "id": 1,
-   "t": "Bonjour à tous. Je suis professeure de coréen. Mon nom de famille est \"한\" et mon prénom est \"국어\". Ravie de vous rencontrer."
+   "t": "Bonjour à tous. Je suis professeure de coréen."
   },
   {
    "id": 2,
-   "t": "Ici, c'est \"인천공항\". Bienvenue en Corée."
+   "t": "Mon nom de famille est \"한\" et mon prénom est \"국어\". Ravie de vous rencontrer."
   },
   {
    "id": 3,
-   "t": "À partir de maintenant, vous et moi, nous allons étudier ensemble, en tête-à-tête."
+   "t": "Ici, c'est \"인천공항\". Bienvenue en Corée."
   },
   {
    "id": 4,
-   "t": "Des toutes premières bases des consonnes et des voyelles du \"한글\" jusqu'au coréen du quotidien et à la préparation à l'examen de coréen, nous ferons tout ensemble."
+   "t": "À partir de maintenant, vous et moi, nous allons étudier ensemble, en tête-à-tête."
   },
   {
    "id": 5,
-   "t": "Vous n'êtes pas impatients?"
+   "t": "Des toutes premières bases des consonnes et des voyelles du \"한글\" jusqu'au coréen du quotidien et à la préparation à l'examen de coréen, nous ferons tout ensemble."
   },
   {
    "id": 6,
-   "t": "Comme un bébé qui apprend à parler, écoutez en coréen, puis parlez et écrivez vous-même."
+   "t": "Vous n'êtes pas impatients?"
   },
   {
    "id": 7,
-   "t": "Si vous vous contentez de regarder, vous resterez spectateur. C'est en pratiquant vous-même que vous progresserez."
+   "t": "Comme un bébé qui apprend à parler, écoutez en coréen, puis parlez et écrivez vous-même."
   },
   {
    "id": 8,
-   "t": "Des recherches montrent que les mots dits à voix haute se retiennent mieux et plus longtemps."
+   "t": "Si vous vous contentez de regarder, vous resterez spectateur. C'est en pratiquant vous-même que vous progresserez."
   },
   {
    "id": 9,
-   "t": "Vous pouvez aussi apprendre en jouant."
+   "t": "Des recherches montrent que les mots dits à voix haute se retiennent mieux et plus longtemps."
   },
   {
    "id": 10,
-   "t": "Dans cette application, du début à la fin, vous et moi apprenons en nous parlant."
+   "t": "Vous pouvez aussi apprendre en jouant."
   },
   {
    "id": 11,
-   "t": "La prochaine fois, nous verrons à quoi ressemble le \"한글\". Ravie de vous avoir rencontrés aujourd'hui. À la prochaine."
+   "t": "Dans cette application, du début à la fin, vous et moi apprenons en nous parlant."
+  },
+  {
+   "id": 12,
+   "t": "La prochaine fois, nous verrons à quoi ressemble le \"한글\"."
+  },
+  {
+   "id": 13,
+   "t": "Ravie de vous avoir rencontrés aujourd'hui. À la prochaine."
   }
  ]
 }

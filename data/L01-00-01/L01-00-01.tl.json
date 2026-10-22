@@ -12,47 +12,55 @@
  "subtitles": [
   {
    "id": 1,
-   "t": "Magandang araw sa inyong lahat. Ako ay guro ng wikang Koreano. Ang apelyido ko ay \"한\" at ang pangalan ko ay \"국어\". Ikinagagalak kong makilala kayo."
+   "t": "Magandang araw sa inyong lahat. Ako ay guro ng wikang Koreano."
   },
   {
    "id": 2,
-   "t": "Ito ang \"인천공항\". Maligayang pagdating sa Korea."
+   "t": "Ang apelyido ko ay \"한\" at ang pangalan ko ay \"국어\". Ikinagagalak kong makilala kayo."
   },
   {
    "id": 3,
-   "t": "Mula ngayon, tayong dalawa ang magkasamang mag-aaral."
+   "t": "Ito ang \"인천공항\". Maligayang pagdating sa Korea."
   },
   {
    "id": 4,
-   "t": "Magsisimula tayo sa pinakapangunahing katinig at patinig ng \"한글\", saka Koreano sa araw-araw, hanggang sa paghahanda sa pagsusulit sa Koreano, at lahat iyan ay gagawin natin nang magkasama."
+   "t": "Mula ngayon, tayong dalawa ang magkasamang mag-aaral."
   },
   {
    "id": 5,
-   "t": "Hindi ba kayo nasasabik?"
+   "t": "Magsisimula tayo sa pinakapangunahing katinig at patinig ng \"한글\", saka Koreano sa araw-araw, hanggang sa paghahanda sa pagsusulit sa Koreano, at lahat iyan ay gagawin natin nang magkasama."
   },
   {
    "id": 6,
-   "t": "Gaya ng sanggol na natututong magsalita, makinig sa Koreano, at subukang magsalita at magsulat mismo."
+   "t": "Hindi ba kayo nasasabik?"
   },
   {
    "id": 7,
-   "t": "Kung manonood lang kayo, panonood lang ang matututuhan ninyo. Kailangang kayo mismo ang sumubok para gumaling."
+   "t": "Gaya ng sanggol na natututong magsalita, makinig sa Koreano, at subukang magsalita at magsulat mismo."
   },
   {
    "id": 8,
-   "t": "May pananaliksik na nagsasabing mas mahusay at mas matagal na natatandaan ang salitang binigkas nang malakas."
+   "t": "Kung manonood lang kayo, panonood lang ang matututuhan ninyo. Kailangang kayo mismo ang sumubok para gumaling."
   },
   {
    "id": 9,
-   "t": "Puwede rin kayong matuto habang naglalaro."
+   "t": "May pananaliksik na nagsasabing mas mahusay at mas matagal na natatandaan ang salitang binigkas nang malakas."
   },
   {
    "id": 10,
-   "t": "Sa app na ito, mula simula hanggang dulo, ako at kayo ay matututo habang nag-uusap."
+   "t": "Puwede rin kayong matuto habang naglalaro."
   },
   {
    "id": 11,
-   "t": "Sa susunod, pag-aaralan natin kung ano ang hitsura ng \"한글\". Masaya akong makilala kayo ngayon. Hanggang sa susunod."
+   "t": "Sa app na ito, mula simula hanggang dulo, ako at kayo ay matututo habang nag-uusap."
+  },
+  {
+   "id": 12,
+   "t": "Sa susunod, pag-aaralan natin kung ano ang hitsura ng \"한글\"."
+  },
+  {
+   "id": 13,
+   "t": "Masaya akong makilala kayo ngayon. Hanggang sa susunod."
   }
  ]
 }
