@@ -232,7 +232,6 @@ a{color:inherit;text-decoration:none}
 .exv .exprog i{display:block;height:100%;width:0;background:var(--hi)}
 .learn .panel .vplay{position:absolute;left:50%;top:50%;width:58px;height:58px;margin:-29px 0 0 -29px;border-radius:50%;display:grid;place-items:center;color:#fff;background:rgba(0,0,0,.45);opacity:0;transition:opacity .2s;pointer-events:none}
 .learn .panel.explain.paused .vplay{opacity:.85}
-.learn .panel.explain .vplay{display:none} /* 설명 글 위 ▶ 동그라미 겹침(검사1팀 10-22) — 멈춤·재생은 아래 막대 ▶ 가 보여 줌 */
 
 /* 쓰기(말문 방식) — 영상 창 안 · 스크롤 없이 창 안에 다(W6) */
 .write.embedded{min-height:0;height:100%;overflow:hidden;display:flex;flex-direction:column}
