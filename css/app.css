@@ -784,7 +784,7 @@ a{color:inherit;text-decoration:none}
 .speak .whead.h2 .spk{display:none}
 .speak .whead.h3{gap:4px;padding-inline:10px}.speak .whead.h3 .chip.uiko{padding:3px 4px;gap:1px}
 .speak .whead.h4 > b{display:none}
-.speak .whead.h5{gap:2px;padding-inline:4px}.speak .whead.h5 .bigb{min-width:30px;padding:0 6px} /* 그래도 넘치면 틈·여백만 줄임(ur 320 ✕ 화면 밖 28px · 개발3팀 10-23) */
+.speak .whead.h5{gap:2px;padding-inline:4px}.speak .whead.h5 .bigb{min-width:30px;width:30px;padding:0} /* 그래도 넘치면 틈·여백만 줄임(ur 320 ✕ 화면 밖 28px · 개발3팀 10-23) */
 .speak .whead.h6 .micpick,.speak .whead.h6 .segnav button{min-width:26px;padding:0 4px} /* 마지막 단계 = ◀▶·?·✕ 최소 폭만(320 + 넓은 ⇄ 칩 · 개발3팀 10-23) */
 .speak .whead > *{flex:none}
 /* 비교 화면 내 목소리 = 들은 글자(본부 10-06) — 바뀐 칸: 위 작게 흐린 본보기 · 아래 크게 빨강 들은 글자 · 덧붙은 소리: 회색 작은 칸 */
@@ -1453,6 +1453,7 @@ html:lang(ur) .write .hand .hpal{height:25px}
 .scr.learn .chip.bgmb,.scr.speak .chip.bgmb,.scr.write .chip.bgmb{display:none!important} /* 🔇 = 첫 화면·목록에만(대표님 10-23 · 창 머리 줄 비좁음) · 소리 상태는 앱 전체 그대로 · ⛶ 자리 잡기용으로 마디는 남김 */
 .v9bar .glab,.v9bar .seg.snd{display:none!important} /* 설명 창 「듣기」 이름표·[▶ 학습자 말][▶ 한국어] 뺌(대표님 10-23 · ⇄ 있음) — 읽기 시작·멈춤 = 아래 큰 ▶·글 누르기 */
 .learn .bigb>span:first-child{font-family:system-ui,sans-serif;line-height:1} /* ⛶ = 언어 글꼴·줄 높이 안 받음(:lang(ur) 나스탈리크 줄 높이로 글 상자 38px > 단추 30px · 개발3팀 10-23) */
+.learn .bigb .off,.learn .bigb .on{display:none!important}.learn .bigb{width:34px;padding:0} /* ⛶ = 모든 창 그림만 작은 단추 34px 고정(대표님 10-23 「비대함」 · 설명 창 91px → 34) · 이름은 aria-label·title · 남는 폭 = ⇄·글 */
 .learn .bigb[hidden]{display:none}.learn .bigb .on{display:none}.learn .bigb[aria-pressed=true] .on{display:inline}.learn .bigb[aria-pressed=true] .off{display:none}
 html.bigview,html.bigview body{overflow:hidden}
 .learn.big .lines,.learn.big .ctrl,.learn.big .seek,.learn.big .vtitle{display:none!important}
