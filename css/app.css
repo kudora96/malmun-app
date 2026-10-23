@@ -1641,3 +1641,5 @@ html.bigview,html.bigview body{overflow:hidden}
 @media (prefers-reduced-motion:reduce){.write .segnav [data-seg="1"].glow{animation:none}}
 .line.cur:has(>.acts.ib5){max-width:min(100%,max(88%,calc(5 * 44px + 4 * 6px + 26px)))} /* 지금 줄 카드 = 단추 다섯 줄만큼은 넓게(320 에서 88% = 247px < 단추 줄 270px → 단추가 카드 밖 10px · 개발2팀 10-23) */
 .speak .task{align-content:safe center} /* 넘치면 위(머리 줄 쪽)가 아니라 아래로 → scrollHeight 로 잡혀 fitTask 가 줄임(320×568 긴 줄 과제 글이 머리 줄과 겹치던 것 · 개발2팀 10-23) */
+.learn .vtitle .tt>.sub,.learn.lfirst .vtitle .tt>.sub{overflow-x:clip;overflow-y:visible} /* 가로만 자름(…) · 세로는 안 자름 — 미얀마·우르두 글자 위아래가 줄 높이(18px)보다 커서 잘리던 것(다국어부 10-23 my 4px·ur 11px) · 줄 높이·자리 그대로 */
+html:has(.scr.learn),html:has(.scr.learn) body{overflow-anchor:none} /* 배우기 화면 스크롤은 앱이 맞춤(keepVisible) — ⇄ 때 높이 고정을 재며 카드 위아래를 잠깐 바꾸는 사이 브라우저 scroll anchoring 이 화면을 20~67px 옮기던 것(다국어부 10-23 · 개발2팀) */

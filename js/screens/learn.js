@@ -227,7 +227,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     let kf = parseFloat(getComputedStyle(ko).fontSize), tf = tr ? parseFloat(getComputedStyle(tr).fontSize) : 0;
     el.classList.add("fitc");
     for (let k = 0; k < 16 && el.offsetHeight > avail && kf > 11; k++) { kf -= 1; tf = Math.max(10, tf - 0.7); el.style.setProperty("--kf", kf + "px"); el.style.setProperty("--tf", tf + "px"); }
-    for (const c of ["tr2", "tr1"]) { if (!tr || el.offsetHeight <= avail) break; el.classList.remove("tr2", "tr1"); el.classList.add(c); } if (el.offsetHeight > avail) el.classList.add("ac1"); lockCard(el); /* 줄 카드 단추 = 늘 그림만 · 이름은 aria-label(10-20) */ /* 그래도 넘치면 [▶ 이 줄 듣기] = ▶ 만(글은 화면 읽기용으로 남김) · 단추 안쪽 여백 줄임(다국어부 10-12 ur 320 — 단추가 셋째 줄로) */ // 가장 작은 글로도 넘치면 학습자 말 뜻을 2줄 → 1줄(설명 창에 다 보임 · 검사부 10-12 vi·th·ur 320 — 단추가 아래 막대 뒤로)
+    for (const c of ["tr2", "tr1"]) { if (!tr || el.offsetHeight <= avail) break; el.classList.remove("tr2", "tr1"); el.classList.add(c); } if (el.offsetHeight > avail) el.classList.add("ac1"); lockCard(el); if (st.lockedCur && st.lockedCur !== el && st.lockedCur.isConnected) lockCard(st.lockedCur); st.lockedCur = el; // 지금 줄에서 벗어난 카드도 작은 글 상태로 다시 잼(ru 0번 ⇄ 때 102→122 · 화면 20px 튐 · 개발2팀 10-23) /* 줄 카드 단추 = 늘 그림만 · 이름은 aria-label(10-20) */ /* 그래도 넘치면 [▶ 이 줄 듣기] = ▶ 만(글은 화면 읽기용으로 남김) · 단추 안쪽 여백 줄임(다국어부 10-12 ur 320 — 단추가 셋째 줄로) */ // 가장 작은 글로도 넘치면 학습자 말 뜻을 2줄 → 1줄(설명 창에 다 보임 · 검사부 10-12 vi·th·ur 320 — 단추가 아래 막대 뒤로)
   }
   // 영상 창 = 제목 줄 바로 밑에 영상(위 정렬) · 남는 자리(폰)에 지금 대사를 영화 자막처럼 크게(투덜이 10-06 ㅇ) — 화자(작게) · 한국어(굵게) · 로마자(켜짐이면 작게) · 학습자 언어
   //   글 크기 = 그 자리를 채우는 가장 큰 크기(넘치면 줄임 · 스크롤 0) · 대사가 바뀔 때와 창 크기가 바뀔 때만 다시 맞춤 · 자리가 70px 안 되면(넓고 낮은 창) 자막 줄 없음
@@ -535,7 +535,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     const fx = L[i].v9.formula_by?.[code] || L[i].v9.formula;
     if (p0) p0.innerHTML = v9Sent(i, code); if (p1) p1.innerHTML = sayHTML(i, code);
     const pl = panel.querySelector(".v9body .pairln"); if (pl) pl.outerHTML = pairHTML(i, code, +pl.dataset.k || 0); if (f) f.textContent = fx || "";
-    hidePop();
+    hidePop(); fitPanel(); // 글이 바뀐 그 자리에서 바로 맞춤(120ms 뒤 맞춤 전에 15px 넘쳐 스크롤바 깜빡이던 것 · ne 320 소리 언어 바꿈 · 개발2팀 10-23)
   }
   function explainHTML(i) {
     if (L[i].v9) return v9HTML(i);
