@@ -201,9 +201,10 @@
   .musBtn.off { background: #9fb1c6; } .musBtn.corner2 { top: 52px; right: 12px; } #pMus.off { opacity: .7; }
   .lineX { position: fixed; top: calc(12px + env(safe-area-inset-top, 0px)); left: 12px; z-index: 7; width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--line); background: #fff; color: var(--ink); font: 800 16px/1 system-ui; padding: 0; box-shadow: 0 3px 0 rgba(22,40,74,.18); cursor: pointer; }   /* 68판: 한 줄 판 — 시작·설명 화면에서 언제든 앱으로 */
   .lineX:active { transform: translateY(2px); box-shadow: 0 1px 0 rgba(22,40,74,.18); }
-  body.lineMode .sndBtn { left: 56px; white-space: normal; line-height: 1.15; text-align: left; overflow-wrap: anywhere; }
+  body.lineMode .sndBtn { left: 56px; box-sizing: border-box; white-space: normal; line-height: 1.15; text-align: left; overflow-wrap: anywhere; }
   .sndBtn { position: absolute; top: 12px; left: 12px; z-index: 3; font: 800 14px var(--fx); color: #fff; background: var(--chip); border: 2px solid #fff; border-radius: 99px; padding: 5px 12px 4px; box-shadow: 0 3px 0 rgba(22,40,74,.25); cursor: pointer; animation: hop .6s ease-in-out infinite alternate; }   /* 31f: 첫 누름 전엔 소리가 막힘을 알림 */
-  #start { padding-top: 50px; }   /* 28판: 로고가 ⇄ 단추 밑으로 들어가지 않게 */
+  #start { padding-top: 50px; justify-content: flex-start; }   /* 70판: 가로·확대(키 작은 화면)에서 가운데 맞춤이 위를 잘라 먹던 것 → 위에서부터 · 남는 키는 아래 위 똑같이 */
+  #start > .logoWrap { margin-top: auto; } #start > #meta { margin-bottom: auto; }   /* 28판: 로고가 ⇄ 단추 밑으로 들어가지 않게 */
   .ctrlSeg { display: inline-flex; align-items: center; gap: 4px; background: rgba(255,255,255,.85); border: 2px solid #fff; border-radius: 99px; padding: 3px; box-shadow: 0 3px 0 rgba(22,40,74,.12); flex: none; }   /* 26c: 조종 고르기(끌기 / 조이스틱) */
   .ctrlSeg .cl { font: 700 13px var(--fx); color: var(--ink2); padding: 0 6px 0 8px; }
   .ctrlSeg button { font: 800 14px var(--fx); color: var(--ink2); background: transparent; border: 0; border-radius: 99px; padding: 5px 14px 3px; cursor: pointer; }
@@ -250,7 +251,7 @@
     <button class="sndBtn" id="sndBtn"></button>
     <button class="musBtn corner2" id="musStart" aria-label="music"></button>
     <div class="tg bot l"><i></i></div><div class="tg bot r"><i></i></div>
-    <div><h1 id="logo">자모 <b>슈팅</b></h1><div><span class="tagl" id="tagl"></span></div></div>
+    <div class="logoWrap"><h1 id="logo">자모 <b>슈팅</b></h1><div><span class="tagl" id="tagl"></span></div></div>
     <div class="hero">
       <img class="k" src="img/kong.png" alt="콩"><img class="d" src="img/dubu.png" alt="두부">
 
@@ -361,7 +362,7 @@
     <button class="btn ghost" id="clrFrom1" hidden></button>
   </div>
 
-  <div class="tag">v68</div>
+  <div class="tag">v70</div>
 </div>
 
 <script>
@@ -3634,8 +3635,16 @@ $("endExit").onclick = () => { clearTimeout(autoT); clearInterval(autoTick); exi
 $("selBack").onclick = () => { $("sel").hidden = true; paintMeta(); $("start").hidden = false; Snd.ambient(true); };
 function sndOn() { if (!inited) { inited = true; Snd.init(); } const p = Snd.resume(); Snd.ambient(true); Promise.resolve(p).then(() => { const d = Snd.dbg(); console.info("[snd]", d.st, d.amb); $("sndBtn").hidden = d.st === "running"; if (d.st !== "running") $("sndBtn").textContent = ({ ko: "🔇 소리가 막혔어요 · 다시 누르기", en: "🔇 Sound blocked · tap again", ne: "🔇 आवाज बन्द · फेरि थिच्नुहोस्" })[LANG] || "🔇 Sound blocked · tap again"; }); }   /* 31f */
 const SND_TXT = { ko: "🔊 눌러서 소리 켜기", en: "🔊 Tap for sound", ne: "🔊 आवाज खोल्न थिच्नुहोस्" };
-function paintSndBtn() { const b = $("sndBtn"); if (b && !b.hidden && !inited) b.textContent = LT("ui.tapSound") || SND_TXT[LANG] || (LINE ? SND_TXT.ko : SND_TXT.en);
-  if (LINE) { const lr = $("langStart").getBoundingClientRect(); if (lr.width) b.style.maxWidth = Math.max(90, lr.left - 56 - 8) + "px"; } }   /* 68판: ✕·⇄ 사이에 맞춤(좁은 폰 · 긴 언어는 두 줄) */   /* 68판: 한 줄 판 = 22개 언어 표 · 영어 섞임 0 */
+function paintSndBtn() { const b = $("sndBtn"); if (b && !b.hidden && !inited) b.textContent = LT("ui.tapSound") || SND_TXT[LANG] || (LINE ? SND_TXT.ko : SND_TXT.en);   /* 68판: 한 줄 판 = 22개 언어 표 · 영어 섞임 0 */
+  if (LINE) fitStartTop(); }
+function fitStartTop() {   /* 68~70판: 한 줄 판 입구 — 🔊 는 ✕·⇄ 사이(긴 언어는 두 줄 · 2줄 넘으면 글자 줄임) · 아주 좁으면(폰 확대 200%) ✕ 밑 줄 · 제목은 🔊·♪ 밑에서 시작 */
+  const b = $("sndBtn"), st = $("start"); if (!b || st.hidden) return;
+  const narrow = innerWidth < 300, lr = $("langStart").getBoundingClientRect(), mr = $("musStart").getBoundingClientRect();
+  b.style.top = narrow ? "52px" : ""; b.style.left = narrow ? "12px" : "";
+  const room = narrow ? (mr.width ? mr.left - 12 - 6 : innerWidth - 24) : (lr.width ? lr.left - 56 - 6 : 0); if (room) b.style.maxWidth = Math.max(50, room) + "px";
+  b.style.fontSize = ""; b.style.paddingLeft = b.style.paddingRight = ""; for (let fs = 14; fs >= (narrow ? 9 : 11) && b.offsetHeight > 46; fs--) { b.style.fontSize = fs + "px"; b.style.paddingLeft = b.style.paddingRight = "9px"; }
+  const bot = b.hidden ? 0 : b.offsetTop + b.offsetHeight, mbot = narrow && !$("musStart").hidden ? $("musStart").offsetTop + $("musStart").offsetHeight : 0;
+  const pt = Math.max(50, bot + 10, mbot + 8) + "px"; if (st.style.paddingTop !== pt) st.style.paddingTop = pt; }
 $("sndBtn").addEventListener("click", e => { e.stopPropagation(); sndOn(); });
 document.addEventListener("pointerdown", () => { if (!$("start").hidden && !S) sndOn(); });   /* 31d·31f: 처음 화면 아무 데나 첫 누름 = 음악 */
 document.addEventListener("click", () => { if (!$("start").hidden && !S) sndOn(); });   /* 31f: 일부 브라우저는 click 만 「사용자 누름」으로 침 */   /* 31d: 첫 누름 그 자리에서 바로 */   // 처음 화면: 한 번 누르면 신비한 음악
@@ -3748,7 +3757,7 @@ if (LINE) {   /* 65판: 한 줄 판 시작 화면 · 자료 받기 */
 $("pSel").onclick = () => { $("pause").hidden = true; Snd.stop(); S = null; openSel(); };
 $("pExit").onclick = () => LINE ? lineDone("close") : exitGame();
 $("pauseBtn").addEventListener("pointerdown", e => e.stopPropagation());
-if (LINE) { addEventListener("resize", () => paintSndBtn()); document.body.classList.add("lineMode"); const lx = $("lineX"); lx.hidden = false; lx.addEventListener("pointerdown", e => e.stopPropagation()); lx.onclick = e => { e.stopPropagation(); lineDone("close"); };
+if (LINE) { addEventListener("resize", fitStartTop); try { const ro = new ResizeObserver(() => fitStartTop()); ro.observe($("langStart")); document.fonts && document.fonts.ready.then(fitStartTop); } catch (e) {} document.body.classList.add("lineMode"); const lx = $("lineX"); lx.hidden = false; lx.addEventListener("pointerdown", e => e.stopPropagation()); lx.onclick = e => { e.stopPropagation(); lineDone("close"); };
   const lxl = () => { lx.setAttribute("aria-label", LT("ui.exit") || "✕"); }; lxl(); setTimeout(lxl, 1500); }   /* 68판: ✕ = 앱으로(같은 줄) */
 const SHIELD_CALLS = 6;   /* 소리부 game_callouts/{lang}/shield_1~6.mp3 */
 function useChance() {   // 29판: 비상 방패 — 적탄 모두 사라짐 · 둥근 하얀 물결 · 5초 무적(벌집·유리는 안 깨짐)
