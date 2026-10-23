@@ -2,11 +2,12 @@
 //  글은 지금 그대로(speak.js scoreLine · rhyText · why_late) — 여기서는 같은 재료(점수·까닭·틀린 곳·리듬·늦음)로 「읽을 차례」를 만들고, 화면 글의 그 문장에 <span> 만 씌움(글자·자리 0px)
 //  소리: 틀 조각 = media/fb/{목소리}/{id}.mp3(소리부 · data/fb_manifest.json) · 점수 = fb/{목소리}/n/{N}.mp3 · 한국어 낱말·들린 말·음절 = 공용 글자 소리(chars_f) 한 글자씩(또박또박 · 대표님 10-21)
 //  목소리 = ⇄ 상태(학습자 말 = 그 말 · 한국어 = ko) · ⇄ 누르면 같은 문장부터 그 말로 이어 읽음
+//  ⇄ 창마다 독립(대표님 10-22 · 설계 _hq/design_uiko_scope.md): 말·목소리 = fbBind(el) 의 el 이 든 창 상태(uiKoIn(el)) · 끼운 조각 글(lv)도 그 상태로 다시 만듦
 //  자동 재생 = 결과가 새로 나오면 한 번(기억 malmun.fbauto = "0" 이면 끔 · 「?」 사용법에서) · 결과 글 누르기 = 읽기 ⇄ 멈춤
 //  겹침 없음: 다른 소리(sfx)가 시작되거나 <audio>/<video> 가 재생되면 즉시 멈춤 · 소리 파일이 없으면 조용히 다음 조각
 import * as sfx from "./sfx.js?v=1022.29";
 import { paths, MEDIA } from "./paths.js?v=1022.29";
-import { t, lang, uiKoOn } from "./i18n.js?v=1022.29";
+import { t, tFor, lang, uiKoOn, uiKoIn } from "./i18n.js?v=1022.29";
 import { R_FULL } from "./rhythm.js?v=1022.29";
 import { charsF } from "./data.js?v=1022.29";
 
@@ -32,7 +33,7 @@ const short = (w, n = 8) => { const a = [...String(w)]; let k = 0, i = 0; for (;
 export function fbPlan({ sc, why, hint, rhy, late, rhyAny = false }) { // rhyAny = 설명 창(리듬 줄을 점수와 상관없이 붙임 — learn.js 와 같게)
   if (sc == null) return [];
   const q = w => `${koq(w)}${romOn() && hint?.rom?.[w] ? `(${hint.rom[w]})` : ""}`;
-  const S = (key, vars = {}, slots = {}) => ({ key, vars, slots });
+  const S = (key, vars = {}, slots = {}, lv) => ({ key, vars, slots, ...(lv && { lv }) }); // lv = 창 말로 다시 만들 조각 글(칸 → ko => 글)
   const out = [{ num: sc }];
   const fast = sc < PASS && (why === "time" || (why === "pause" && hint?.kind === "tail"));
   if (fast) {
@@ -50,7 +51,8 @@ export function fbPlan({ sc, why, hint, rhy, late, rhyAny = false }) { // rhyAny
       else {
         const parts = hint.words.map(x => (x.h ? S("why_heard_as", { w: q(x.w), h: koq(short(x.h, 6)) }, { w: { ko: x.w }, h: { ko: short(x.h, 6) } }) : S("why_missing", { w: q(x.w) }, { w: { ko: x.w } })));
         const redo = S("why_redo", { ws: list }, { ws: wsKo }), rest = hint.restOk ? [S("why_rest_ok")] : [];
-        out.push(S("why_frame", { parts: parts.map(p => t(p.key, p.vars)).join(" · "), redo: t(redo.key, redo.vars), rest: rest.length ? " " + t("why_rest_ok") : "" }, { parts: { sub: parts }, redo: { sub: [redo] }, rest: { sub: rest } }));
+        out.push(S("why_frame", { parts: parts.map(p => t(p.key, p.vars)).join(" · "), redo: t(redo.key, redo.vars), rest: rest.length ? " " + t("why_rest_ok") : "" }, { parts: { sub: parts }, redo: { sub: [redo] }, rest: { sub: rest } },
+          { parts: ko => parts.map(p => textOf(p, ko)).join(" · "), redo: ko => textOf(redo, ko), rest: ko => (rest.length ? " " + tFor(ko, "why_rest_ok") : "") }));
       }
     }
   }
@@ -62,7 +64,7 @@ export function fbPlan({ sc, why, hint, rhy, late, rhyAny = false }) { // rhyAny
   if (late) out.push(S("why_late"));
   return out;
 }
-const textOf = s => (s.num != null ? `${s.num}%` : t(s.key, s.vars));
+const textOf = (s, ko = uiKoOn()) => (s.num != null ? `${s.num}%` : tFor(ko, s.key, s.lv ? { ...s.vars, ...Object.fromEntries(Object.entries(s.lv).map(([k, f]) => [k, f(ko)])) } : s.vars));
 
 // 다른 화면(쓰기부 등)이 쓰는 입구 — [{ k: 열쇠, v: { 칸: 값 } }, …] → 읽을 차례(fbBind().set 에 그대로)
 //  값: 숫자 = 맨 숫자 소리(num/) · { pct: n } = 「n%」 · 자모 글자(ㄱ~ㅣ) = 자모 소리 · 한글 = 글자 소리 한 자씩 · "wx_…"·"h_dir_…" 같은 열쇠 이름 = 그 열쇠 글 조각
@@ -71,22 +73,22 @@ const KEYLIKE = /^(wx_|h_dir_|why_|score_|rhy_|sentence_)/;
 export function fbFrom(list) {
   const one = x => {
     if (x.k == null && x.pct != null) return { num: x.pct };
-    const vars = {}, slots = {};
+    const vars = {}, slots = {}, lv = {};
     for (const [name, val] of Object.entries(x.v || {})) {
       if (typeof val === "number") { vars[name] = String(val); slots[name] = { n: val }; }
       else if (val && typeof val === "object" && val.pct != null) { vars[name] = `${val.pct}%`; slots[name] = { num: val.pct }; }
-      else if (typeof val === "string" && KEYLIKE.test(val)) { vars[name] = t(val); slots[name] = { sub: [{ key: val, vars: {}, slots: {} }] }; }
+      else if (typeof val === "string" && KEYLIKE.test(val)) { vars[name] = t(val); slots[name] = { sub: [{ key: val, vars: {}, slots: {} }] }; lv[name] = ko => tFor(ko, val); }
       else if (typeof val === "string" && /^[ㄱ-ㆎ·\s]+$/.test(val)) { vars[name] = val; slots[name] = { jamo: val }; }
       else { vars[name] = String(val ?? ""); slots[name] = /[가-힣]/.test(String(val)) ? { ko: String(val) } : {}; }
     }
-    return { key: x.k, vars, slots };
+    return { key: x.k, vars, slots, ...(Object.keys(lv).length && { lv }) };
   };
   return (list || []).map(one);
 }
 
 // ── 소리 줄 세우기 ─────────────────────────────────────────────────────────────
-async function urlsOf(s) {
-  const m = await manifest(), mode = uiKoOn() ? "K" : "L", voice = mode === "K" ? "ko" : lang;
+async function urlsOf(s, ko = uiKoOn()) {
+  const m = await manifest(), mode = ko ? "K" : "L", voice = mode === "K" ? "ko" : lang;
   if (s.num != null) return [numUrl(voice, Math.max(0, Math.min(100, Math.round(s.num))))];
   const segs = m?.langs?.[lang]?.[mode]?.[s.key]; if (!segs) return [];
   const out = [];
@@ -98,7 +100,7 @@ async function urlsOf(s) {
       else if (v.n != null) out.push(plainUrl(voice, Math.max(0, Math.min(100, Math.round(v.n)))));
       else if (v.jamo) { for (const j of String(v.jamo)) if (/[ㄱ-ㆎ]/.test(j)) out.push(await jamoUrl(j)); }
       else if (v.ko) { for (const ch of String(v.ko).replace(/…$/, "")) { if (/[가-힣]/.test(ch)) out.push(charUrl(ch)); else if (/\s/.test(ch)) out.push(null); } } // 낱말 사이 = 짧은 쉼
-      else if (v.sub) { for (const x of v.sub) out.push(...(await urlsOf(x))); }
+      else if (v.sub) { for (const x of v.sub) out.push(...(await urlsOf(x, ko))); }
     }
   }
   return out;
@@ -107,14 +109,14 @@ async function urlsOf(s) {
 // ── 화면 글에 문장 표시(span) · 읽기 · 불 ─────────────────────────────────────────
 //  bind(el) → { set(plan, fresh), stop() } · set = 글을 새로 쓴 뒤마다 부름(fresh = 새 결과 → 자동 재생)
 export function fbBind(el, { canPlay = () => true } = {}) {
-  let plan = [], gen = 0, cur = -1, mine = false;
+  let plan = [], gen = 0, cur = -1, mine = false; const ko = () => uiKoIn(el); // 이 상자가 든 창의 ⇄ 상태(창 밖이면 앱 전체)
   // 문장마다 불 칸 = 글자 마디만 <span class="fbs"> 로 감쌈(안의 <p>·<b>·단추 구조는 그대로 · 마디 경계를 넘으면 마디마다 조각 span · 같은 data-fb · 쓰기부 10-21)
   const mark = () => {
     el.querySelectorAll("span.fbs").forEach(sp => sp.replaceWith(...sp.childNodes)); el.normalize();
     const nodes = [], w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT); let n, off = 0;
     while ((n = w.nextNode())) { if (n.parentElement?.closest("button")) { off += n.nodeValue.length; continue; } nodes.push([n, off]); off += n.nodeValue.length; }
     const txt = el.textContent, ranges = []; let at = 0;
-    plan.forEach((s, i) => { const x = textOf(s), k = x ? txt.indexOf(x, at) : -1; if (k >= 0) { ranges.push([k, k + x.length, i]); at = k + x.length; } });
+    const K = ko(); plan.forEach((s, i) => { const x = textOf(s, K), k = x ? txt.indexOf(x, at) : -1; if (k >= 0) { ranges.push([k, k + x.length, i]); at = k + x.length; } });
     for (const [a, b, i] of ranges.reverse()) for (const [nd, o] of [...nodes].reverse()) { // 뒤에서부터 → 앞 마디 위치가 안 바뀜
       const s0 = Math.max(a, o), e0 = Math.min(b, o + nd.nodeValue.length); if (s0 >= e0 || !nd.isConnected) continue;
       const r = document.createRange(); r.setStart(nd, s0 - o); r.setEnd(nd, e0 - o); const sp = document.createElement("span"); sp.className = "fbs"; sp.dataset.fb = i; r.surroundContents(sp);
@@ -126,7 +128,7 @@ export function fbBind(el, { canPlay = () => true } = {}) {
     const my = ++gen;
     for (let i = from; i < plan.length; i++) {
       if (my !== gen) return; lit(i);
-      for (const u of await urlsOf(plan[i])) {
+      for (const u of await urlsOf(plan[i], ko())) {
         if (my !== gen) return; // 새 읽기가 시작됨 = 옛 줄은 조용히 끝(새 줄을 멈추지 않게)
         if (!canPlay()) return stop();
         if (!u) { await new Promise(r => setTimeout(r, 120)); continue; }

@@ -334,5 +334,8 @@
  "rp_thx": "Terima kasih! Kami akan memeriksa dan memperbaikinya.",
  "rp_limit": "Hari ini tidak bisa melapor lagi. Silakan beri tahu kami besok.",
  "fb_auto": "Bacakan hasil dengan suara",
- "turn_listen": "Giliran Anda — guru sedang mendengarkan"
+ "turn_listen": "Giliran Anda — guru sedang mendengarkan",
+ "w_char": "Huruf",
+ "w_word": "Kata",
+ "w_sent": "Kalimat"
 }

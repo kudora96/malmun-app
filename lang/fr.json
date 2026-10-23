@@ -334,5 +334,8 @@
  "rp_thx": "Merci! Nous allons vérifier et corriger.",
  "rp_limit": "Plus de signalement possible aujourd'hui. Revenez nous le dire demain.",
  "fb_auto": "Lire les résultats à voix haute",
- "turn_listen": "À vous — la professeure vous écoute"
+ "turn_listen": "À vous — la professeure vous écoute",
+ "w_char": "Lettre",
+ "w_word": "Mot",
+ "w_sent": "Phrase"
 }

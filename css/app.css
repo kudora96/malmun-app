@@ -1432,6 +1432,7 @@ html:lang(ur) .write .hand .hpal{height:25px}
 .toast.uikotip{max-width:min(92vw,360px);text-align:center}
 /* 오른쪽→왼쪽 언어(ur)에서 앱 글을 한국어로 바꾸면 — 화면 짜임(오른쪽→왼쪽)은 그대로 두고, 글 덩이마다 제 방향(한국어 문장 「.」 이 앞으로 튀지 않게 · 본부 10-14) */
 :root.uiko[dir=rtl] :is(p,h1,h2,h3,li,small,label,.sub,.say,.tr,.toast,.modetip,.fstip,button > span:only-child){unicode-bidi:plaintext}
+:root[dir=rtl] [data-uiko="1"] :is(p,h1,h2,h3,li,small,label,.sub,.say,.tr,.toast,.modetip,.fstip,button > span:only-child){unicode-bidi:plaintext}:root.uiko[dir=rtl] [data-uiko="0"] :is(p,h1,h2,h3,li,small,label,.sub,.say,.tr,.toast,.modetip,.fstip,button > span:only-child){unicode-bidi:normal} /* 창 범위 ⇄(10-23) — 창이 한국어면 바깥이 모국어여도 문단마다 제 방향 · 창이 모국어면 바깥 한국어 규칙을 끔 */
 /* 말해 보세요 속도 알약(.mrate) — 나스탈리크 꼬리가 알약 위아래에서 깎이지 않게(알약 크기는 그대로 · 10-14 ur 375·1280) */
 :lang(ur) :is(.v9body,.speak) .sbtns .mrate{overflow:visible}
 /* 「모국어⇄한」 단추 — 켜진 쪽을 굵게 바꾸면 단추 폭이 1~3px 바뀌어 옆 글이 밀림(본부 10-15 「⇄ 때 크기·자리 0px」) → 두 쪽 다 늘 굵게 · 켜진 쪽은 색·진하기로만 */
