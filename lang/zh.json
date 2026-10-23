@@ -337,5 +337,8 @@
  "turn_listen": "轮到你了——老师在听",
  "w_char": "字",
  "w_word": "词",
- "w_sent": "句子"
+ "w_sent": "句子",
+ "ln_start": "开始",
+ "ln_end": "结束",
+ "from_start": "从头开始"
 }

@@ -337,5 +337,8 @@
  "turn_listen": "Navbat sizda — oʻqituvchi tinglayapti",
  "w_char": "Harf",
  "w_word": "Soʻz",
- "w_sent": "Jumla"
+ "w_sent": "Jumla",
+ "ln_start": "Boshlanish",
+ "ln_end": "Oxiri",
+ "from_start": "Boshidan"
 }

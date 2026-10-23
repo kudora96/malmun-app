@@ -337,5 +337,8 @@
  "turn_listen": "あなたの番です — 先生が聞いています",
  "w_char": "文字",
  "w_word": "単語",
- "w_sent": "文"
+ "w_sent": "文",
+ "ln_start": "はじめ",
+ "ln_end": "おわり",
+ "from_start": "最初から"
 }

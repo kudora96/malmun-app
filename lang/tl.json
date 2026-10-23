@@ -337,5 +337,8 @@
  "turn_listen": "Kayo na — nakikinig ang guro",
  "w_char": "Titik",
  "w_word": "Salita",
- "w_sent": "Pangungusap"
+ "w_sent": "Pangungusap",
+ "ln_start": "Simula",
+ "ln_end": "Wakas",
+ "from_start": "Mula sa simula"
 }

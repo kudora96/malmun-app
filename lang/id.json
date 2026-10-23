@@ -337,5 +337,8 @@
  "turn_listen": "Giliran Anda — guru sedang mendengarkan",
  "w_char": "Huruf",
  "w_word": "Kata",
- "w_sent": "Kalimat"
+ "w_sent": "Kalimat",
+ "ln_start": "Mulai",
+ "ln_end": "Selesai",
+ "from_start": "Dari awal"
 }
