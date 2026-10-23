@@ -46,17 +46,17 @@ export function switchUiScope(root, ko = root?.dataset.uiko !== "1") {
 }
 // ⇄ 미끄럼 칸(대표님 10-23 시안 ③) — 켜진 말(.a/.b) 뒤 주황 칸 = 칩의 ::before(--pl·--pw) · 누르면 0.2초 미끄러짐 · 칩 크기·자리 0px(겹 그림만) · 못 잰 칩은 css 가 켜진 글자 둘레만 채움
 function placePill(c) {
-  const ko = c.getAttribute("aria-pressed") === "true", on = c.querySelector(ko ? ".b" : ".a"); if (!on || !c.offsetWidth) return;
-  const cr = c.getBoundingClientRect(), k = c.offsetWidth / cr.width || 1, x = v => (v - cr.left) * k - c.clientLeft; // 화면 px → 칩 안 px(설명 막대처럼 통째로 줄인 곳도)
-  const o = on.getBoundingClientRect(), arE = c.querySelector(".ar"), arT = arE || [...c.childNodes].find(n => n.nodeType === 3 && n.nodeValue.trim());
-  const arRect = () => { if (!arT) return null; const rg = document.createRange(); rg.selectNodeContents(arT); const r = rg.getBoundingClientRect(); return r.width ? [x(r.left), x(r.right)] : null; }; // ⇄ 글자 자리 — 칸이 여기를 넘으면 안 됨(겹침 0 · 본부 10-23)
-  if (arE && !c.dataset.tight) { const a0 = arRect(), gap = e => { const r = e.getBoundingClientRect(); return Math.max(a0[0] - x(r.right), x(r.left) - a0[1]); }, gp = a0 ? Math.min(gap(c.querySelector(".a")), gap(c.querySelector(".b"))) : 9; c.dataset.tight = gp < 2 ? "2" : gp < 4 ? "1" : "0"; } // 글자와 ⇄ 사이가 좁을수록 ⇄ 글자만 작게(css transform · 칩 크기 0px · 오른→왼 말도) — 1px = 72% · 3px = 86%
+  const ko = c.getAttribute("aria-pressed") === "true", on = c.querySelector(ko ? ".b" : ".a"), arE = c.querySelector(".ar"); if (!on || !arE || !c.offsetWidth) return;
+  // 칩 자기 좌표(offset* = 칩 안쪽 px · 설명 창처럼 통째로 키우거나 줄인 zoom 에서도 ::before 와 같은 단위 · 가로 설명 창 10-23 칸이 1.33배로 밀리던 것)
+  const bx = e => [e.offsetLeft, e.offsetLeft + e.offsetWidth], ob = bx(on);
+  const arRect = () => { const [l0, r0] = bx(arE), m = /matrix\(([-\d.e]+)/.exec(getComputedStyle(arE).transform), sc = m ? Math.abs(parseFloat(m[1])) : 1, cx = (l0 + r0) / 2, hw = ((r0 - l0) * sc) / 2; return [cx - hw, cx + hw]; }; // ⇄ 글자 자리(작게 보이기 transform 반영)
+  if (!c.dataset.tight) { const a0 = arRect(), gap = e => { const [l0, r0] = bx(e); return Math.max(a0[0] - r0, l0 - a0[1]); }, gp = Math.min(gap(c.querySelector(".a")), gap(c.querySelector(".b"))); c.dataset.tight = gp < 2 ? "2" : gp < 4 ? "1" : "0"; } // 글자와 ⇄ 사이가 좁을수록 ⇄ 글자만 작게(칩 크기 0px) — 1px = 72% · 3px = 86%
   const ar = arRect();
-  const rs = ar && x(o.left) + x(o.right) > ar[0] + ar[1]; // 켜진 말이 ⇄ 오른쪽(왼→오 「한」 · 오른→왼 ur 의 모국어)
-  if (ar && c.dataset.tight !== "2" && (rs ? x(o.left) < ar[1] + 1.5 : x(o.right) > ar[0] - 1.5)) { c.dataset.tight = "2"; return placePill(c); } // 글자 상자가 ⇄ 에 닿음(ur 나스탈리크) = ⇄ 한 단계 더 작게
-  let l = x(o.left) - 5, rgt = x(o.right) + 5;
-  if (ar) { if (rs) l = Math.max(l, ar[1] + 1.5); else rgt = Math.min(rgt, ar[0] - 1.5); } /* 1.5px 틈(반올림 0.3px 겹침 막기 · ur) */
-  l = Math.max(2, Math.min(l, x(o.left))); rgt = Math.min(c.clientWidth - 2, Math.max(rgt, x(o.right)));
+  const rs = ob[0] + ob[1] > ar[0] + ar[1]; // 켜진 말이 ⇄ 오른쪽(왼→오 「한」 · 오른→왼 ur 의 모국어)
+  if (c.dataset.tight !== "2" && (rs ? ob[0] < ar[1] + 1.5 : ob[1] > ar[0] - 1.5)) { c.dataset.tight = "2"; return placePill(c); } // 글자 상자가 ⇄ 에 닿음(ur 나스탈리크) = ⇄ 한 단계 더 작게
+  let l = ob[0] - 5, rgt = ob[1] + 5;
+  if (rs) l = Math.max(l, ar[1] + 1.5); else rgt = Math.min(rgt, ar[0] - 1.5); // ⇄ 와 1.5px 틈
+  l = Math.max(2, Math.min(l, ob[0])); rgt = Math.min(c.clientWidth - 2, Math.max(rgt, ob[1]));
   // 칸 모양이 칩 둥근 테두리 안에 쏙(대표님 10-23 「둥그런 거 삐져나옴」) — 칩 안쪽 둥근 네모를 2.5px 줄인 곳 안에 칸(둥근 네모)의 테두리 점이 모두 들도록 칸 높이를 줄임 · 세로 가운데
   const W = c.clientWidth, H = c.clientHeight, g = 2.5, R = Math.max(0, Math.min(parseFloat(getComputedStyle(c).borderTopLeftRadius) - c.clientTop, W / 2, H / 2) - g), pw = rgt - l;
   const inside = (x0, y0) => { const cx = Math.min(Math.max(x0, g + R), W - g - R), cy = Math.min(Math.max(y0, g + R), H - g - R); return x0 >= g - 0.01 && x0 <= W - g + 0.01 && y0 >= g - 0.01 && y0 <= H - g + 0.01 && Math.hypot(x0 - cx, y0 - cy) <= R + 0.01; };
