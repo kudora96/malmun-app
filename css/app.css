@@ -785,6 +785,7 @@ a{color:inherit;text-decoration:none}
 .speak .whead.h3{gap:4px;padding-inline:10px}.speak .whead.h3 .chip.uiko{padding:3px 4px;gap:1px}
 .speak .whead.h4 > b{display:none}
 .speak .whead.h5{gap:2px;padding-inline:4px}.speak .whead.h5 .bigb{min-width:30px;padding:0 6px} /* 그래도 넘치면 틈·여백만 줄임(ur 320 ✕ 화면 밖 28px · 개발3팀 10-23) */
+.speak .whead.h6 .micpick,.speak .whead.h6 .segnav button{min-width:26px;padding:0 4px} /* 마지막 단계 = ◀▶·?·✕ 최소 폭만(320 + 넓은 ⇄ 칩 · 개발3팀 10-23) */
 .speak .whead > *{flex:none}
 /* 비교 화면 내 목소리 = 들은 글자(본부 10-06) — 바뀐 칸: 위 작게 흐린 본보기 · 아래 크게 빨강 들은 글자 · 덧붙은 소리: 회색 작은 칸 */
 .speak .cmp .crow.y .csyl{height:46px}
