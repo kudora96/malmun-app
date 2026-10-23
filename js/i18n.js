@@ -75,7 +75,7 @@ async function loadKoUi() {
 }
 export async function setUiKo(on) { try { localStorage.setItem(UIKO, on ? "1" : "0"); } catch {} await loadKoUi(); }
 // 지금 쓸 수 있는 화면 글 열쇠 전부(앱개발부 retext — 바꾸기 전·뒤 t(k) 견줘 그 자리에서 글 바꾸기)
-export const uiKeys = () => Object.keys({ ...fallback, ...strings, ...koUi });
+export const uiKeys = () => Object.keys({ ...fallback, ...strings, ...koUi, ...(koGot[lang] || {}) }); // 창 범위 ⇄ 는 바깥이 모국어여도 한국어판 열쇠가 필요
 export let lang = "en";
 
 export async function setLang(code, remember = false) {
@@ -93,14 +93,22 @@ export async function setLang(code, remember = false) {
   window.dispatchEvent(new CustomEvent("malmun:langset")); // 언어를 바꿈(지구 단추) — langfit 이 단추 폭을 다시 잼
 }
 
-export const t = (k, vars) => {
-  if (vars && typeof vars.n === "number") { try { const c = new Intl.PluralRules(koUi[k] != null ? "ko" : lang).select(vars.n), kk = `${k}_${c}`; if (koUi[kk] ?? strings[kk] ?? fallback[kk]) k = kk; } catch {} } /* 복수형 — {n} 이 있으면 열쇠_one/_few/_many/_other 가 있을 때 그것(언어부 A5) */
-  let s = koUi[k] ?? strings[k] ?? fallback[k] ?? k;
+// 창 범위 ⇄(대표님 10-22 「⇄ 창마다 독립」 · _hq/design_uiko_scope.md) — 상태(ko)를 인자로 받는 t · 창 뿌리 data-uiko="1|0" 이 있으면 그 창 상태
+//  t(k) = tFor(uiKoOn(), k) · tIn(el, k) = 그 요소가 든 창 상태로 · 창 밖 = 앱 전체 상태
+const koSet = ko => (ko && KO_UI.includes(lang) ? koGot[lang] || {} : {});
+export const tFor = (ko, k, vars) => {
+  const ku = koSet(ko);
+  if (vars && typeof vars.n === "number") { try { const c = new Intl.PluralRules(ku[k] != null ? "ko" : lang).select(vars.n), kk = `${k}_${c}`; if (ku[kk] ?? strings[kk] ?? fallback[kk]) k = kk; } catch {} } /* 복수형 — {n} 이 있으면 열쇠_one/_few/_many/_other 먼저(Intl.PluralRules · ru·uz 등 · 다국어부 10-12 ③) · 한국어판은 복수형 없음 */
+  let s = ku[k] ?? strings[k] ?? fallback[k] ?? k;
   if (vars) for (const [a, b] of Object.entries(vars)) s = s.replace(`{${a}}`, b);
   return s;
 };
-// ⇄ 반대쪽 글(지금 모국어면 한국어판 · 한국어면 모국어) — 단추 폭을 두 말 중 긴 쪽으로 고정할 때(js/langfit.js · 다국어부 10-15)
-export const tAlt = k => { const ko = koGot[lang]; if (!ko) return null; return uiKoOn() ? (strings[k] ?? fallback[k] ?? null) : (ko[k] ?? strings[k] ?? fallback[k] ?? null); };
+export const t = (k, vars) => tFor(uiKoOn(), k, vars);
+export const uiKoIn = el => { const r = el?.closest?.("[data-uiko]"); return r ? r.dataset.uiko === "1" && KO_UI.includes(lang) : uiKoOn(); };
+export const tIn = (el, k, vars) => tFor(uiKoIn(el), k, vars);
+export const tAltFor = (on, k) => { const ko = koGot[lang]; if (!ko) return null; return on ? (strings[k] ?? fallback[k] ?? null) : (ko[k] ?? strings[k] ?? fallback[k] ?? null); };
+export const tAlt = k => tAltFor(uiKoOn(), k);
+export const tAltIn = (el, k) => tAltFor(uiKoIn(el), k); // 창 안 단추 폭 = 그 창 상태의 반대 말로 잼(langfit)
 // 편·단원 제목(다국어부 10-20 · 검사1팀 ⚠ 「곧 나옴」 제목이 한국어만) — lang/titles/{xx}.json {편 id: 제목} · 언어부 09_lang/ui/out/titles → tools/sync_lang.py · 없으면 {}(한국어 제목 그대로)
 const titleWait = {};
 export const epTitles = (c = lang) => (titleWait[c] ||= fetch(`lang/titles/${c}.json?v=${VERSION}`).then(r => (r.ok ? r.json() : {})).catch(() => ({})));

@@ -1432,6 +1432,7 @@ html:lang(ur) .write .hand .hpal{height:25px}
 .toast.uikotip{max-width:min(92vw,360px);text-align:center}
 /* 오른쪽→왼쪽 언어(ur)에서 앱 글을 한국어로 바꾸면 — 화면 짜임(오른쪽→왼쪽)은 그대로 두고, 글 덩이마다 제 방향(한국어 문장 「.」 이 앞으로 튀지 않게 · 본부 10-14) */
 :root.uiko[dir=rtl] :is(p,h1,h2,h3,li,small,label,.sub,.say,.tr,.toast,.modetip,.fstip,button > span:only-child){unicode-bidi:plaintext}
+:root[dir=rtl] [data-uiko="1"] :is(p,h1,h2,h3,li,small,label,.sub,.say,.tr,.toast,.modetip,.fstip,button > span:only-child){unicode-bidi:plaintext}:root.uiko[dir=rtl] [data-uiko="0"] :is(p,h1,h2,h3,li,small,label,.sub,.say,.tr,.toast,.modetip,.fstip,button > span:only-child){unicode-bidi:normal} /* 창 범위 ⇄(10-23) — 창이 한국어면 바깥이 모국어여도 문단마다 제 방향 · 창이 모국어면 바깥 한국어 규칙을 끔 */
 /* 말해 보세요 속도 알약(.mrate) — 나스탈리크 꼬리가 알약 위아래에서 깎이지 않게(알약 크기는 그대로 · 10-14 ur 375·1280) */
 :lang(ur) :is(.v9body,.speak) .sbtns .mrate{overflow:visible}
 /* 「모국어⇄한」 단추 — 켜진 쪽을 굵게 바꾸면 단추 폭이 1~3px 바뀌어 옆 글이 밀림(본부 10-15 「⇄ 때 크기·자리 0px」) → 두 쪽 다 늘 굵게 · 켜진 쪽은 색·진하기로만 */
@@ -1641,3 +1642,14 @@ html.bigview,html.bigview body{overflow:hidden}
 @media (prefers-reduced-motion:reduce){.write .segnav [data-seg="1"].glow{animation:none}}
 .line.cur:has(>.acts.ib5){max-width:min(100%,max(88%,calc(5 * 44px + 4 * 6px + 26px)))} /* 지금 줄 카드 = 단추 다섯 줄만큼은 넓게(320 에서 88% = 247px < 단추 줄 270px → 단추가 카드 밖 10px · 개발2팀 10-23) */
 .speak .task{align-content:safe center} /* 넘치면 위(머리 줄 쪽)가 아니라 아래로 → scrollHeight 로 잡혀 fitTask 가 줄임(320×568 긴 줄 과제 글이 머리 줄과 겹치던 것 · 개발2팀 10-23) */
+
+/* ⇄ 단추 = 미끄럼 칸(대표님 10-23 시안 ③ · 다국어부) — 켜진 말 뒤 주황 칸(::before · 자리는 ui.js placePill) · 칩 크기·자리 0px · 어두운 화면 = 노란 칸 + 짙은 글자(--on-hi) */
+.chip.uiko{position:relative;isolation:isolate;border-color:var(--hi)}
+.chip.uiko .a,.chip.uiko .b{opacity:1;color:var(--hi);position:relative;z-index:1;transition:color .2s}
+.chip.uiko::before{content:"";position:absolute;z-index:0;top:2px;bottom:2px;left:var(--pl,0);width:var(--pw,0);border-radius:999px;background:var(--hi);opacity:0}
+.chip.uiko[style*="--pw"]::before{opacity:1}.chip.uiko.pl::before{transition:left .2s ease,width .2s ease}
+.chip.uiko[aria-pressed=false] .a,.chip.uiko[aria-pressed=true] .b{color:var(--on-hi,#fff)}
+.chip.uiko:not([style*="--pw"])[aria-pressed=false] .a,.chip.uiko:not([style*="--pw"])[aria-pressed=true] .b{background:var(--hi);border-radius:999px;box-shadow:0 0 0 3px var(--hi)} /* 아직 못 잼(숨은 칩) = 켜진 글자 둘레만 */
+@media (prefers-reduced-motion:reduce){.chip.uiko.pl::before,.chip.uiko .a,.chip.uiko .b{transition:none}}
+#vwrap:fullscreen>.vuiko .chip.uiko .a,#vwrap:fullscreen>.vuiko .chip.uiko .b{opacity:1;color:#fff}#vwrap:fullscreen>.vuiko .chip.uiko::before{background:#ffd27a}
+#vwrap:fullscreen>.vuiko .chip.uiko[aria-pressed=false] .a,#vwrap:fullscreen>.vuiko .chip.uiko[aria-pressed=true] .b{color:#1d3530}
