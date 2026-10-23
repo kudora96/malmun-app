@@ -93,8 +93,8 @@
   ok($(".panel [data-act=auto]").getAttribute("aria-pressed") === "true", "[낱말] 누름 → 그 단추만 눌림");
   for (let k = 0; k < 300 && wst()?.auto; k++) await W(200); await idle(8000); w8.stop();
   const badShape = w8.seen.filter(k => { const [a, b] = k.split("="); return a !== b; });
-  ok(w8.seen.length >= 1 && !badShape.length && (wst().w !== w0 || wst().segEnd) && wst()?.s === sBefore && $(".panel .whead .sub")?.textContent === subBefore && $(".panel [data-act=auto]").getAttribute("aria-pressed") === "false",
-    "[낱말] → 그 낱말 글자를 한 자모씩 다 쳐서 낱말 끝에서 멈춤 · 다른 토막·다른 줄로 안 감", `${w8.seen.join(" ")}${badShape.length ? " · 틀린 모양 " + badShape.join(" ") : ""} · 토막 ${segBefore} → ${$(".panel .segnav").innerText.replace(/\s/g, "")}`);
+  ok(w8.seen.length >= 1 && !badShape.length && wst().w === w0 && wst().c === $(".panel .write").parentElement.__wr.segs()[sBefore][w0].chars.length - 1 && wst()?.s === sBefore && $(".panel .whead .sub")?.textContent === subBefore && $(".panel [data-act=auto]").getAttribute("aria-pressed") === "false",
+    "[낱말] → 그 낱말 글자를 한 자모씩 다 쳐서 그 낱말 마지막 글자에 머묾 · 다음 낱말·토막·줄로 안 감(대표님 10-23)", `${w8.seen.join(" ")}${badShape.length ? " · 틀린 모양 " + badShape.join(" ") : ""} · 토막 ${segBefore} → ${$(".panel .segnav").innerText.replace(/\s/g, "")}`);
   { $(".panel [data-act=autoall]").click(); await W(400); const S = wst(); const on = S?.auto && S.autoMode === "all" && $(".panel [data-act=autoall]").getAttribute("aria-pressed") === "true"; $(".panel [data-act=autoall]").click(); await W(400);
     ok(on && !wst().auto && [...$(".panel .wbtns").querySelectorAll("button")].map(b => b.textContent).join("|") === labs0, "[문장] = 줄 자동 시작 · 다시 누르면 멈춤 · 단추 글 고정(글자·낱말·문장)", `시작 ${on} · 멈춤 ${!wst().auto} · 글 ${labs0}`); }
   const autoAll = log.slice(atAuto).filter(e => e.ev === "시작").map(e => e.name), isLine = n => /_sub_|(^|\/)audio\/|(^|\/)units\//.test(n), lineAt = autoAll.findIndex(isLine), autoSounds = lineAt < 0 ? autoAll : autoAll.slice(0, lineAt); // 줄 끝 대사 한 번(본부 10-12)은 따로
