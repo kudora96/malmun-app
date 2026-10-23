@@ -23,7 +23,7 @@ export const langChip = () => `<button class="chip" data-act="lang" aria-label="
 //  어느 화면에서 눌러도 앱 전체가 같이(기억 malmun.uiko) · 다시 그리지 않고 그 자리에서 글만(retext) · 처음엔 모국어
 //  화면은 uiKoBtn() 만 머리 줄 오른쪽 묶음 맨 앞에 두면 됨 — 누르기는 아래 문서 한 곳(switchUiKo)이 받음(배우기 화면은 자기 손잡이가 먼저 받고 멈춤)
 export const uiKoBtn = () => bgmBtn() + uikoChip();
-export const uikoChip = (ko = uiKoOn()) => (KO_UI.includes(lang) ? `<button class="chip uiko" data-act="uiko" aria-pressed="${ko}" aria-label="${esc(langName(lang))} ⇄ 한국어"><span class="a" lang="${lang}">${esc(langShort(lang))}</span>⇄<span class="b" lang="ko">한</span></button>` : "");
+export const uikoChip = (ko = uiKoOn()) => (KO_UI.includes(lang) ? `<button class="chip uiko" data-act="uiko" aria-pressed="${ko}" aria-label="${esc(langName(lang))} ⇄ 한국어"><span class="a" lang="${lang}">${esc(langShort(lang))}</span><span class="ar" aria-hidden="true">⇄</span><span class="b" lang="ko">한</span></button>` : "");
 // ♪ 「음악」 = 🎵 음악 상자 열기(대표님 10-16 · 모든 창 = uiKoBtn() 앞 · ⇄ 없는 언어에도 · 크기 고정 · 끔 = 흐리게 빗금(data-on) · 누르기는 아래 문서 한 곳)
 const BGM_I = { on: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>', off: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M17 9.5l5 5M22 9.5l-5 5"/></svg>' };
 // 배경음악 켜기·끄기(대표님 10-20) = ⇄ 바로 왼쪽 동그란 단추 · 🔇 꺼짐(처음) ⇄ 🔊 켜짐 · 누르면 바로 켜기·끄기(음악 상자는 따로) · 크기 고정(글 없음 · 이름 = aria·title)
@@ -46,9 +46,16 @@ export function switchUiScope(root, ko = root?.dataset.uiko !== "1") {
 }
 // ⇄ 미끄럼 칸(대표님 10-23 시안 ③) — 켜진 말(.a/.b) 뒤 주황 칸 = 칩의 ::before(--pl·--pw) · 누르면 0.2초 미끄러짐 · 칩 크기·자리 0px(겹 그림만) · 못 잰 칩은 css 가 켜진 글자 둘레만 채움
 function placePill(c) {
-  const on = c.querySelector(c.getAttribute("aria-pressed") === "true" ? ".b" : ".a"); if (!on || !c.offsetWidth) return;
-  const l = Math.max(2, on.offsetLeft - 5), w = Math.min(on.offsetWidth + 10, c.clientWidth - 2 - l);
-  c.style.setProperty("--pl", l + "px"); c.style.setProperty("--pw", w + "px");
+  const ko = c.getAttribute("aria-pressed") === "true", on = c.querySelector(ko ? ".b" : ".a"); if (!on || !c.offsetWidth) return;
+  const cr = c.getBoundingClientRect(), k = c.offsetWidth / cr.width || 1, x = v => (v - cr.left) * k - c.clientLeft; // 화면 px → 칩 안 px(설명 막대처럼 통째로 줄인 곳도)
+  const o = on.getBoundingClientRect(), arE = c.querySelector(".ar"), arT = arE || [...c.childNodes].find(n => n.nodeType === 3 && n.nodeValue.trim());
+  const arRect = () => { if (!arT) return null; const rg = document.createRange(); rg.selectNodeContents(arT); const r = rg.getBoundingClientRect(); return r.width ? [x(r.left), x(r.right)] : null; }; // ⇄ 글자 자리 — 칸이 여기를 넘으면 안 됨(겹침 0 · 본부 10-23)
+  if (arE && !c.dataset.tight) { const a0 = arRect(), ga = x(c.querySelector(".a").getBoundingClientRect().right), gb = x(c.querySelector(".b").getBoundingClientRect().left); const gp = a0 ? Math.min(a0[0] - ga, gb - a0[1]) : 9; c.dataset.tight = gp < 2 ? "2" : gp < 4 ? "1" : "0"; } // 글자와 ⇄ 사이가 좁을수록 ⇄ 글자만 작게(css transform · 칩 크기 0px) — 1px(말하기 창) = 72% · 3px(목록·배우기·설명·쓰기) = 86%
+  const ar = arRect();
+  let l = x(o.left) - 5, rgt = x(o.right) + 5;
+  if (ar) { if (ko) l = Math.max(l, ar[1] + 1); else rgt = Math.min(rgt, ar[0] - 1); }
+  l = Math.max(2, Math.min(l, x(o.left))); rgt = Math.min(c.clientWidth - 2, Math.max(rgt, x(o.right)));
+  c.style.setProperty("--pl", l.toFixed(1) + "px"); c.style.setProperty("--pw", (rgt - l).toFixed(1) + "px");
   if (!c.classList.contains("pl")) requestAnimationFrame(() => c.classList.add("pl")); // 처음 자리는 움직임 없이 · 그 뒤부터 미끄러짐
 }
 const pillAll = () => document.querySelectorAll(".chip.uiko").forEach(placePill);

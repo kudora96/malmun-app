@@ -1650,6 +1650,7 @@ html.bigview,html.bigview body{overflow:hidden}
 .chip.uiko[style*="--pw"]::before{opacity:1}.chip.uiko.pl::before{transition:left .2s ease,width .2s ease}
 .chip.uiko[aria-pressed=false] .a,.chip.uiko[aria-pressed=true] .b{color:var(--on-hi,#fff)}
 .chip.uiko:not([style*="--pw"])[aria-pressed=false] .a,.chip.uiko:not([style*="--pw"])[aria-pressed=true] .b{background:var(--hi);border-radius:999px;box-shadow:0 0 0 3px var(--hi)} /* 아직 못 잼(숨은 칩) = 켜진 글자 둘레만 */
+.chip.uiko .ar{display:inline-block;position:relative;z-index:1}.chip.uiko[data-tight="1"] .ar{transform:scale(.86)}.chip.uiko[data-tight="2"] .ar{transform:scale(.72)} /* 좁은 칩 = ⇄ 글자만 작게 보임(자리·칩 크기 그대로) → 칸과 ⇄ 사이 틈 */
 @media (prefers-reduced-motion:reduce){.chip.uiko.pl::before,.chip.uiko .a,.chip.uiko .b{transition:none}}
 #vwrap:fullscreen>.vuiko .chip.uiko .a,#vwrap:fullscreen>.vuiko .chip.uiko .b{opacity:1;color:#fff}#vwrap:fullscreen>.vuiko .chip.uiko::before{background:#ffd27a}
 #vwrap:fullscreen>.vuiko .chip.uiko[aria-pressed=false] .a,#vwrap:fullscreen>.vuiko .chip.uiko[aria-pressed=true] .b{color:#1d3530}
