@@ -97,13 +97,13 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     <div class="seek" data-off><span class="t0">0:00</span><div class="trk" aria-label="${esc(t("seek_bar"))}"><div class="rail"><i></i></div></div><span class="t1">0:00</span><button class="vsubt" data-act="subs" aria-pressed="${subsOn()}" aria-label="${esc(t("subs_aria"))}" title="${esc(t("subs_aria"))}"><span class="cc" aria-hidden="true">CC</span></button>
       <div class="fstip" role="status" hidden><span class="who">${spkHtml("선생님")}</span><p data-k="subs_tip">${esc(t("subs_tip"))}</p><button class="x" data-act="tipx" aria-label="${esc(t("close_word"))}">✕</button></div></div>
     </div>
-    <ol class="lines"><li class="lend" data-end="start" role="button" tabindex="0"><b lang="ko">▶ 시작</b><span>${esc(t("ln_start"))} · 0:00 – ${(x => `${Math.floor(x / 60)}:${String(Math.floor(x % 60)).padStart(2, "0")}`)(L[0]?.start || 0)}</span></li>${L.map((l, i) => `<li class="line sp-${SPEAKER[l.speaker] || "x"} ${l.speaker === "선생님" ? "" : "right"}" data-i="${i}" data-peek="👁 ${esc(t("subs_peek"))}">
+    <ol class="lines"><li class="lend" data-end="start" role="button" tabindex="0"><b lang="ko">▶ 시작</b><span><span data-k="ln_start">${esc(t("ln_start"))}</span> · 0:00 – ${(x => `${Math.floor(x / 60)}:${String(Math.floor(x % 60)).padStart(2, "0")}`)(L[0]?.start || 0)}</span></li>${L.map((l, i) => `<li class="line sp-${SPEAKER[l.speaker] || "x"} ${l.speaker === "선생님" ? "" : "right"}" data-i="${i}" data-peek="👁 ${esc(t("subs_peek"))}">
       <span class="who">${spkHtml(l.speaker)}</span>
       <p class="kotext ko" lang="ko">${esc(l.ko)}</p>
       ${l.tr ? `<p class="tr">${esc(l.tr)}</p>` : ""}
       <div class="expl"></div>
       <div class="acts ib5">${ACTS.map(([a, k, ic], q) => `<button class="ib${q ? " menu" : ""}${a === "game" ? " gamebtn" + (gameDone(ep, l.id) ? " gdone" : "") : ""}" data-act="${a}" data-tipk="${k}" aria-label="${esc(t(k))}">${ic}</button>`).join("")}</div>
-    </li>`).join("")}<li class="lend" data-end="end" role="button" tabindex="0"><b lang="ko">끝</b><span>${esc(t("ln_end"))} · ${(x => `${Math.floor(x / 60)}:${String(Math.floor(x % 60)).padStart(2, "0")}`)(L[L.length - 1]?.end || 0)} –</span></li></ol>
+    </li>`).join("")}<li class="lend" data-end="end" role="button" tabindex="0"><b lang="ko">끝</b><span><span data-k="ln_end">${esc(t("ln_end"))}</span> · ${(x => `${Math.floor(x / 60)}:${String(Math.floor(x % 60)).padStart(2, "0")}`)(L[L.length - 1]?.end || 0)} –</span></li></ol>
     <div class="ctrl">
       <a class="iconbtn" href="#/list" aria-label="${esc(t("back"))}">${I.back}</a>
       <button class="iconbtn" data-act="rep" aria-pressed="false" aria-label="${esc(t("repeat"))}">${I.rep}</button>
@@ -1151,9 +1151,17 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     if (fs && fs === w) w.querySelector(".vuiko")?.prepend(ccBtn); else if (ccBtn.parentElement !== ccHome?.parentElement) ccHome?.before(ccBtn); capFill(st.cur);
     const on = !!fs && fs === w; w.classList.toggle("isfs", on); // 크게 보기(대표님 10-23) = 재생 막대(평소 그것)를 영상 안 아래로 · 단추 줄 · 나오면 제자리
     if (on) w.querySelector(".fsui").prepend(seekEl0); else if (seekEl0.parentElement !== seekPar) (seekHome && seekHome.parentElement === seekPar ? seekHome.before(seekEl0) : seekPar.append(seekEl0));
-    fsShow(); };
+    fsShow(); capAvoid(); };
   // 크게 보기 단추 줄 보임/숨김 — 재생 중 3초 가만두면 숨음 · 화면 누르면 다시(숨어 있을 때 누름은 보이기만 · 재생 안 바꿈)
   function fsW() { return app.querySelector("#vwrap"); }
+  // 크게 보기 자막 = 떠 있는 손바닥 카드 안쪽 끝까지만 넓게(검사1팀 10-23 가로 긴 자막 3줄이 K5 를 덮음) · 줄은 늘어도 맨 아래라 카드 밑과 안 겹침
+  function capAvoid() { const w = fsW(), cap = app.querySelector(".cap"); if (!w || !cap) return; if (!w.classList.contains("isfs")) { cap.style.removeProperty("max-width"); cap.style.removeProperty("left"); return; }
+    const wr = w.getBoundingClientRect(), W = wr.width; let lo = 16, hi = W - 16; // 카드 반대쪽 빈 자리 가운데로 · 폭 = 빈 자리
+    for (const c of w.querySelectorAll(".ovc.on")) { const r = c.getBoundingClientRect(), m = (r.left + r.right) / 2 - wr.left; if (m > W / 2) hi = Math.min(hi, r.left - wr.left - 10); else lo = Math.max(lo, r.right - wr.left + 10); }
+    if (hi - lo < W * 0.3) { lo = 16; hi = W - 16; } // 양쪽 다 막히면 그대로(가운데)
+    cap.style.left = Math.round((lo + hi) / 2) + "px"; cap.style.maxWidth = Math.round(hi - lo) + "px"; }
+  new MutationObserver(() => capAvoid()).observe(app.querySelector("#vwrap"), { childList: true, subtree: true, attributes: true, attributeFilter: ["class"] });
+  addEventListener("malmun:ovc", () => capAvoid());
   function fsBarH() { const w = fsW(); if (!w) return; const u = w.querySelector(".fsui"); w.style.setProperty("--barh", w.classList.contains("isfs") && !w.classList.contains("fshide") ? u.offsetHeight + "px" : "0px"); }
   function fsShow() { const w = fsW(); if (!w) return; w.classList.remove("fshide"); fsBarH(); fsArm(); }
   function fsArm() { clearTimeout(st.fsT); const w = fsW(); if (!w?.classList.contains("isfs")) return; st.fsT = setTimeout(() => { if (playing() && w.classList.contains("isfs")) { w.classList.add("fshide"); fsBarH(); } }, 3000); }
