@@ -1643,3 +1643,22 @@ html.bigview,html.bigview body{overflow:hidden}
 .speak .task{align-content:safe center} /* 넘치면 위(머리 줄 쪽)가 아니라 아래로 → scrollHeight 로 잡혀 fitTask 가 줄임(320×568 긴 줄 과제 글이 머리 줄과 겹치던 것 · 개발2팀 10-23) */
 .learn .vtitle .tt>.sub,.learn.lfirst .vtitle .tt>.sub{overflow-x:clip;overflow-y:visible} /* 가로만 자름(…) · 세로는 안 자름 — 미얀마·우르두 글자 위아래가 줄 높이(18px)보다 커서 잘리던 것(다국어부 10-23 my 4px·ur 11px) · 줄 높이·자리 그대로 */
 html:has(.scr.learn),html:has(.scr.learn) body{overflow-anchor:none} /* 배우기 화면 스크롤은 앱이 맞춤(keepVisible) — ⇄ 때 높이 고정을 재며 카드 위아래를 잠깐 바꾸는 사이 브라우저 scroll anchoring 이 화면을 20~67px 옮기던 것(다국어부 10-23 · 개발2팀) */
+/* 크게 보기 막대·단추(대표님 10-23 「ㅇ」 · learn.js .isfs) — 재생 막대 = 평소 그 막대를 영상 안 아래로 · ⏮ 처음부터 · ◀◀ ▶▶ 앞·뒤 줄 · ▶ · 재생 중 3초 가만두면 숨음(.fshide) · 자막 = 막대 위 ↔ 맨 아래 */
+.fsui{display:none}
+#vwrap.isfs>.fsui{display:grid;gap:6px;position:absolute;left:0;right:0;bottom:0;z-index:3;padding:10px 14px 12px;background:linear-gradient(transparent,rgba(0,0,0,.72));transition:opacity .25s}
+#vwrap.isfs>.fsui .seek{background:none;padding:0 4px;height:28px;font-size:13px}
+#vwrap.isfs>.fsui .fsbtns{display:flex;justify-content:center;align-items:center;gap:14px;padding-right:56px;padding-left:56px}
+#vwrap.isfs>.fsui .fsbtns button{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;background:rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.55);color:#fff}
+#vwrap.isfs>.fsui .fsbtns button svg{width:22px;height:22px}
+#vwrap.isfs>.fsui .fsbtns .fsplay{width:58px;height:58px;background:var(--hi);border-color:var(--hi);color:var(--on-hi)}
+#vwrap.isfs>.vfs{right:14px;bottom:14px;z-index:4;width:44px;height:44px}
+#vwrap.isfs .cap{bottom:calc(var(--barh,0px) + 12px)!important;transition:bottom .25s}
+#vwrap.isfs.fshide>.fsui,#vwrap.isfs.fshide>.vuiko,#vwrap.isfs.fshide>.vfs{opacity:0;pointer-events:none}
+#vwrap.isfs>.vuiko{transition:opacity .25s}
+@media (orientation:landscape) and (max-height:520px){#vwrap.isfs>.fsui{gap:2px;padding:4px 14px 8px}#vwrap.isfs>.fsui .fsbtns button{width:38px;height:38px}#vwrap.isfs>.fsui .fsbtns .fsplay{width:46px;height:46px}#vwrap.isfs>.vfs{width:38px;height:38px;bottom:10px}}
+/* 목록 맨 앞 「시작」 · 맨 뒤 「끝」 줄(영상만 · 줄 카드 꼴 · 단추 없음) */
+.lend{align-self:flex-start;max-width:88%;display:grid;gap:2px;padding:9px 13px;border-radius:16px 16px 16px 4px;background:var(--bubble);opacity:.6;cursor:pointer;transition:opacity .2s}
+.lend b{font-size:15px;font-weight:700}
+.lend span{font-size:13px;color:var(--mute);font-variant-numeric:tabular-nums}
+.lend.cur{opacity:1;box-shadow:0 0 0 2px var(--hi);background:var(--bubble-cur)}
+@media (max-width:380px){#vwrap.isfs>.fsui .fsbtns{gap:8px;padding-left:0;padding-right:52px}#vwrap.isfs>.fsui .fsbtns button{width:40px;height:40px}#vwrap.isfs>.fsui .fsbtns .fsplay{width:50px;height:50px}} /* 좁은 폰(320) = 단추 줄이 ⛶ 와 안 겹치게 */

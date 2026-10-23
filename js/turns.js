@@ -26,7 +26,7 @@ export async function setupTurns(ep, v, opts) {
   (async () => { for (const [id, f] of Object.entries(files)) { if (!alive) return; try { const r = await fetch(reactUrl(ep, f, q)); if (r.ok) urls.set(id, URL.createObjectURL(await r.blob())); } catch {} } })(); // 편 열 때 미리 받기(작은 파일)
   const ready = () => Object.keys(files).every(id => urls.has(id));
   // 겹친 영상 2개(본 영상과 같은 자리·크기 · 평소 숨김)
-  const mk = () => { const e = document.createElement("video"); e.className = "brv"; e.playsInline = true; e.preload = "auto"; e.hidden = true; opts.wrap.append(e); return e; };
+  const mk = () => { const e = document.createElement("video"); e.className = "brv"; e.playsInline = true; e.setAttribute("controlslist", "nodownload noremoteplayback noplaybackrate"); e.disablePictureInPicture = true; e.disableRemotePlayback = true; e.preload = "auto"; e.hidden = true; opts.wrap.append(e); return e; };
   const AV = [mk(), mk()]; let front = -1;
   const show = (k) => { AV[k].hidden = false; if (front >= 0 && front !== k) AV[front].hidden = true; front = k; };
   const hideAll = () => { for (const e of AV) { e.pause(); e.hidden = true; } front = -1; };

@@ -334,5 +334,8 @@
  "turn_listen": "따라 해 보세요 — 선생님이 듣고 있어요",
   "w_char": "글자",
   "w_word": "낱말",
-  "w_sent": "문장"
+  "w_sent": "문장",
+  "ln_start": "시작",
+  "ln_end": "끝",
+  "from_start": "처음부터"
 }
