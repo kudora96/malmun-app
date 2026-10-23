@@ -53,7 +53,7 @@ function placePill(c) {
   if (arE && !c.dataset.tight) { const a0 = arRect(), ga = x(c.querySelector(".a").getBoundingClientRect().right), gb = x(c.querySelector(".b").getBoundingClientRect().left); const gp = a0 ? Math.min(a0[0] - ga, gb - a0[1]) : 9; c.dataset.tight = gp < 2 ? "2" : gp < 4 ? "1" : "0"; } // 글자와 ⇄ 사이가 좁을수록 ⇄ 글자만 작게(css transform · 칩 크기 0px) — 1px(말하기 창) = 72% · 3px(목록·배우기·설명·쓰기) = 86%
   const ar = arRect();
   let l = x(o.left) - 5, rgt = x(o.right) + 5;
-  if (ar) { if (ko) l = Math.max(l, ar[1] + 1.5); else rgt = Math.min(rgt, ar[0] - 1.5); // 1.5px 틈(반올림 0.3px 겹침 막기 · ur) }
+  if (ar) { if (ko) l = Math.max(l, ar[1] + 1.5); else rgt = Math.min(rgt, ar[0] - 1.5); } /* 1.5px 틈(반올림 0.3px 겹침 막기 · ur) */
   l = Math.max(2, Math.min(l, x(o.left))); rgt = Math.min(c.clientWidth - 2, Math.max(rgt, x(o.right)));
   c.style.setProperty("--pl", l.toFixed(1) + "px"); c.style.setProperty("--pw", (rgt - l).toFixed(1) + "px");
   if (!c.classList.contains("pl")) requestAnimationFrame(() => c.classList.add("pl")); // 처음 자리는 움직임 없이 · 그 뒤부터 미끄러짐
