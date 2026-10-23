@@ -856,8 +856,8 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
       if (going && cur.p === 1) { const from = items.findIndex(x => x.p === 1); ex.play(items, Math.max(0, from)); return sync(); }
       ex.play(items); return sync();
     }
-    if (k === "gw") { const h = popFor(x); togglePlay(); return h ? v9Pop(x, h) : hidePop(); } // 조각 칩 = 설명 소리 멈춤⇄이어서만(대표님 10-22 · 개발2팀) + 뜻이 있으면 작은 말풍선(소리와 상관없음)
-    if (k === "sn") { hidePop(); return togglePlay(); } // 설명 문장 = 설명 소리 멈춤⇄이어서만(대표님 10-22 「읽어 줄 때 끄고 싶다」 · 옛: 그 문장부터 재생)
+    if (k === "gw") { const sn = x.closest(".sn"), h = popFor(x); if (sn) playFromSent(sn); return h ? v9Pop(x, h) : hidePop(); } // 따옴표 낱말 = 그 문장부터 재생 + 뜻이 있으면 작은 말풍선(본부 10-05)
+    if (k === "sn") { hidePop(); if (x.classList.contains("cur") && x.closest(".v9body")) return togglePlay(); return playFromSent(x); } // 문장 = 그 문장부터 재생 · 지금 읽는 문장을 누르면 멈춤⇄다시(본부 10-08)
     if (k === "v9rom") { const on = x.getAttribute("aria-pressed") !== "true"; x.setAttribute("aria-pressed", String(on)); pref("malmun.rom", on ? "1" : "0"); panel.querySelector(".exv").classList.toggle("norom", !on); app.classList.toggle("norom", !on); hidePop(); fitPanel(); return; } // 로마자 켜기/끄기(기억) · 그 순간 글 크기 다시 맞춤(넘친 첫 그림이 보이지 않게)
     if (k === "rec") return spRec(i, x);
     if (k === "close") return closePanel(); // ✕ 닫기 — 녹음 중이면 버리고 영상으로
@@ -913,12 +913,10 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   }
   // (설명 진행 막대·끌어 옮기기는 없앰 — 본부 10-05 · 이동은 문장 누르기 · 맨 위 줄 「n/N」)
   // 위 창 누르기 = 멈춤/재생(설명) · 한글 대조·학습자 말 단추는 그대로
-  // 말해 보기 칸 🎤 말하세요·▶ 견본·▶ 내 목소리 = 누르는 순간 설명 소리 멈춤(대표님 10-22 · 손가락이 닿을 때 바로 · 그 단추 일은 click 에서)
-  panel.addEventListener("pointerdown", e => { if (st.panel?.kind !== "explain" || !e.target.closest(".sayb [data-x=rec], .sayb [data-x=model], .sayb [data-x=mine]")) return; if (ex.playing || ex.q.length) { clearTimeout(st.gap); st.gap = 0; st.exLoop = null; ex.stop(); sync(); } });
   panel.addEventListener("click", e => {
     if (st.panel?.kind !== "explain" || e.target.closest("[data-act=uiko]")) return; // ⇄한 은 ui.js 문서 한 곳이 받음(멈춤⇄다시로 새지 않게)
     const x = e.target.closest("[data-x]");
-    if (e.target.closest(".sayb")) { if (x) v9Click(x); return; } // 아래 말해 보기 칸 = 그 칸 단추 일만 · 설명 쪽으로 안 넘어감(대표님 10-22 · 옛: 단추 밖 = 설명 멈춤⇄다시)
+    if (e.target.closest(".sayb")) { if (x) v9Click(x); else if (!sp?.ctl) togglePlay(); return; } // 말하기 칸 단추 밖 = 멈춤⇄다시(본부 10-08 투덜이 · 녹음 중은 빼고)
     if (x && st.panel.i != null && L[st.panel.i].v9) return v9Click(x);
     if (x) {
       const on = x.getAttribute("aria-pressed") !== "true"; x.setAttribute("aria-pressed", String(on));
