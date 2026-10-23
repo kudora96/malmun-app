@@ -919,9 +919,13 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   }
   // (설명 진행 막대·끌어 옮기기는 없앰 — 본부 10-05 · 이동은 문장 누르기 · 맨 위 줄 「n/N」)
   // 위 창 누르기 = 멈춤/재생(설명) · 한글 대조·학습자 말 단추는 그대로
+  // 손가락 터치 = 크롬이 누른 곳을 가까운 따옴표 낱말(.gw)로 끌어당겨 옆 문장이 눌리던 것(검사1팀 10-23 ne 5·9번) → 손가락이 닿은 진짜 자리의 문장으로
+  let pdn = null; panel.addEventListener("pointerdown", e => { pdn = e.pointerType === "touch" ? { x: e.clientX, y: e.clientY, t: performance.now() } : null; }, true);
+  const realTap = x => { if (!pdn || performance.now() - pdn.t > 1500 || !x?.closest(".v9body") || !/^(gw|sn)$/.test(x.dataset.x)) return x;
+    const r = document.elementFromPoint(pdn.x, pdn.y)?.closest(".v9body [data-x]"); return r && /^(gw|sn)$/.test(r.dataset.x) && r.closest(".sn") !== x.closest(".sn") ? r : x; };
   panel.addEventListener("click", e => {
     if (st.panel?.kind !== "explain" || e.target.closest("[data-act=uiko]")) return; // ⇄한 은 ui.js 문서 한 곳이 받음(멈춤⇄다시로 새지 않게)
-    const x = e.target.closest("[data-x]");
+    const x = realTap(e.target.closest("[data-x]"));
     if (e.target.closest(".sayb")) { if (x) v9Click(x); else if (!sp?.ctl) togglePlay(); return; } // 말하기 칸 단추 밖 = 멈춤⇄다시(본부 10-08 투덜이 · 녹음 중은 빼고)
     if (x && st.panel.i != null && L[st.panel.i].v9) return v9Click(x);
     if (x) {
