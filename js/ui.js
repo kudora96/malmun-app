@@ -64,7 +64,9 @@ function placePill(c) {
   let ph = H - 2 * g; while (ph > 8 && !fits((H - ph) / 2, ph)) ph -= 0.5;
   c.style.setProperty("--pl", l.toFixed(1) + "px"); c.style.setProperty("--pw", pw.toFixed(1) + "px"); c.style.setProperty("--pt", ((H - ph) / 2).toFixed(1) + "px"); c.style.setProperty("--ph", ph.toFixed(1) + "px");
   if (!c.classList.contains("pl")) requestAnimationFrame(() => c.classList.add("pl")); // 처음 자리는 움직임 없이 · 그 뒤부터 미끄러짐
+  if (!c.__pillRO && window.ResizeObserver) { c.__pillRO = true; pillRO.observe(c); } // 칩 크기가 바뀌면 다시 잼(설명 창이 맞는 배율을 찾느라 칩 높이를 여러 번 바꿈 · 가로 설명 창 10-23)
 }
+const pillRO = window.ResizeObserver ? new ResizeObserver(es => es.forEach(e => placePill(e.target))) : null;
 const pillAll = () => document.querySelectorAll(".chip.uiko").forEach(placePill);
 if (!window.__pillWired) {
   window.__pillWired = true;
