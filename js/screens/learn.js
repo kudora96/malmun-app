@@ -1145,9 +1145,17 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     if (fs && fs === w) w.querySelector(".vuiko")?.prepend(ccBtn); else if (ccBtn.parentElement !== ccHome?.parentElement) ccHome?.before(ccBtn); capFill(st.cur);
     const on = !!fs && fs === w; w.classList.toggle("isfs", on); // 크게 보기(대표님 10-23) = 재생 막대(평소 그것)를 영상 안 아래로 · 단추 줄 · 나오면 제자리
     if (on) w.querySelector(".fsui").prepend(seekEl0); else if (seekEl0.parentElement !== seekPar) (seekHome && seekHome.parentElement === seekPar ? seekHome.before(seekEl0) : seekPar.append(seekEl0));
-    fsShow(); };
+    fsShow(); capAvoid(); };
   // 크게 보기 단추 줄 보임/숨김 — 재생 중 3초 가만두면 숨음 · 화면 누르면 다시(숨어 있을 때 누름은 보이기만 · 재생 안 바꿈)
   function fsW() { return app.querySelector("#vwrap"); }
+  // 크게 보기 자막 = 떠 있는 손바닥 카드 안쪽 끝까지만 넓게(검사1팀 10-23 가로 긴 자막 3줄이 K5 를 덮음) · 줄은 늘어도 맨 아래라 카드 밑과 안 겹침
+  function capAvoid() { const w = fsW(), cap = app.querySelector(".cap"); if (!w || !cap) return; if (!w.classList.contains("isfs")) { cap.style.removeProperty("max-width"); cap.style.removeProperty("left"); return; }
+    const wr = w.getBoundingClientRect(), W = wr.width; let lo = 16, hi = W - 16; // 카드 반대쪽 빈 자리 가운데로 · 폭 = 빈 자리
+    for (const c of w.querySelectorAll(".ovc.on")) { const r = c.getBoundingClientRect(), m = (r.left + r.right) / 2 - wr.left; if (m > W / 2) hi = Math.min(hi, r.left - wr.left - 10); else lo = Math.max(lo, r.right - wr.left + 10); }
+    if (hi - lo < W * 0.3) { lo = 16; hi = W - 16; } // 양쪽 다 막히면 그대로(가운데)
+    cap.style.left = Math.round((lo + hi) / 2) + "px"; cap.style.maxWidth = Math.round(hi - lo) + "px"; }
+  new MutationObserver(() => capAvoid()).observe(app.querySelector("#vwrap"), { childList: true, subtree: true, attributes: true, attributeFilter: ["class"] });
+  addEventListener("malmun:ovc", () => capAvoid());
   function fsBarH() { const w = fsW(); if (!w) return; const u = w.querySelector(".fsui"); w.style.setProperty("--barh", w.classList.contains("isfs") && !w.classList.contains("fshide") ? u.offsetHeight + "px" : "0px"); }
   function fsShow() { const w = fsW(); if (!w) return; w.classList.remove("fshide"); fsBarH(); fsArm(); }
   function fsArm() { clearTimeout(st.fsT); const w = fsW(); if (!w?.classList.contains("isfs")) return; st.fsT = setTimeout(() => { if (playing() && w.classList.contains("isfs")) { w.classList.add("fshide"); fsBarH(); } }, 3000); }
