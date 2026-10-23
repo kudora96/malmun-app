@@ -3,9 +3,9 @@
 //  → 판정 → 가장 가까운 쉼 지점/끝 프레임에서 반응 영상(소리 켬) → 맞음(G) = 본 영상 resume 부터 · 틀림 = 고침 영상 → T1 → 다시 듣기(2번까지) · 세 번째도 = E1~E3 번갈아 → resume(자동)
 //  자료: data/{편}/{편}.turns.json(영상2팀) + data/{편}/{편}.reactions.json(언어부 자막 {ID:{ko,en,ne…}}) · 영상 = video/{720|480}/react/{편}/{file}
 //  없으면(자료·영상·마이크 거절·못 받음) = 아무것도 안 함 → 영상 속 4.5초 무음이 따라 할 시간(앱 밖과 같음)
-import { MEDIA } from "./paths.js?v=1023.11";
-import { startQ } from "./vq.js?v=1023.11";
-import { listen, analyze, judge } from "./vowel.js?v=1023.11";
+import { MEDIA } from "./paths.js?v=1023.12";
+import { startQ } from "./vq.js?v=1023.12";
+import { listen, analyze, judge } from "./vowel.js?v=1023.12";
 
 // 공개판 스위치(본부 10-21): 2편 진짜 반응 영상이 나올 때까지 주소 ?follow=1 일 때만(이 기기 기억 · ?follow=0 끔)
 try { const f = new URLSearchParams(location.search).get("follow"); if (f === "1") localStorage.setItem("malmun.follow", "1"); else if (f === "0") localStorage.removeItem("malmun.follow"); } catch {}
