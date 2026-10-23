@@ -784,6 +784,7 @@ a{color:inherit;text-decoration:none}
 .speak .whead.h2 .spk{display:none}
 .speak .whead.h3{gap:4px;padding-inline:10px}.speak .whead.h3 .chip.uiko{padding:3px 4px;gap:1px}
 .speak .whead.h4 > b{display:none}
+.speak .whead.h5{gap:2px;padding-inline:4px}.speak .whead.h5 .bigb{min-width:30px;padding:0 6px} /* 그래도 넘치면 틈·여백만 줄임(ur 320 ✕ 화면 밖 28px · 개발3팀 10-23) */
 .speak .whead > *{flex:none}
 /* 비교 화면 내 목소리 = 들은 글자(본부 10-06) — 바뀐 칸: 위 작게 흐린 본보기 · 아래 크게 빨강 들은 글자 · 덧붙은 소리: 회색 작은 칸 */
 .speak .cmp .crow.y .csyl{height:46px}
@@ -1448,6 +1449,7 @@ html:lang(ur) .write .hand .hpal{height:25px}
 .learn .bigb .off,.learn .bigb .on{font-size:12px;font-family:inherit}
 @media (max-width:519px){.learn .bigb .off,.learn .bigb .on{display:none!important}}
 .speak .whead.h1 .bigb .off,.speak .whead.h1 .bigb .on,.v9bar.nocw .bigb .off,.v9bar.nocw .bigb .on{display:none!important}
+.learn .bigb>span:first-child{font-family:system-ui,sans-serif;line-height:1} /* ⛶ = 언어 글꼴·줄 높이 안 받음(:lang(ur) 나스탈리크 줄 높이로 글 상자 38px > 단추 30px · 개발3팀 10-23) */
 .learn .bigb[hidden]{display:none}.learn .bigb .on{display:none}.learn .bigb[aria-pressed=true] .on{display:inline}.learn .bigb[aria-pressed=true] .off{display:none}
 html.bigview,html.bigview body{overflow:hidden}
 .learn.big .lines,.learn.big .ctrl,.learn.big .seek,.learn.big .vtitle{display:none!important}
