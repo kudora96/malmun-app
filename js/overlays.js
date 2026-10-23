@@ -36,9 +36,7 @@ export async function setupOverlays(ep, v, { wrap }) {
     // 손바닥 판(영상2팀 10-22 · 대표님 OK): anchor "bottom-center" = 카드 아래 가운데를 (x, y_bottom)(영상 비율)에 · 크기 h(높이 몫)·w(폭 몫) · keyframes[{t,x,y_bottom,h,w}] 가 있으면 그 사이를 시각대로 부드럽게 옮김(선생님 손 따라)
     if (cur.anchor === "bottom-center" || cur.y_bottom != null) { const P = posAt(cur, v.currentTime);
       const bw = P.w ? P.w * W : (P.h * H) / r, bh = P.h ? P.h * H : bw * r;
-      const L0 = Math.round(P.x * W - bw / 2); let T0 = Math.round(P.y_bottom * H - bh);
-      const vf = wrap.querySelector(".vfs"); if (vf && vf.offsetParent) { const wr = wrap.getBoundingClientRect(), vr = vf.getBoundingClientRect(), vl = vr.left - wr.left, vt = vr.top - wr.top; if (L0 + bw > vl - 2 && L0 < vl + vr.width + 2 && T0 + bh > vt - 2 && T0 < vt + vr.height) T0 = Math.max(0, Math.round(vt - bh - 4)); } // ⛶ 단추와 겹치면 카드만 그만큼 위로(검사1팀 10-23 K7·K9·K10 · 단추 자리 그대로)
-      Object.assign(el.style, { width: Math.round(bw) + "px", height: Math.round(bh) + "px", left: L0 + "px", top: T0 + "px", right: "auto" }); window.dispatchEvent(new Event("malmun:ovc")); return; }
+      Object.assign(el.style, { width: Math.round(bw) + "px", height: Math.round(bh) + "px", left: Math.round(P.x * W - bw / 2) + "px", top: Math.round(P.y_bottom * H - bh) + "px", right: "auto" }); window.dispatchEvent(new Event("malmun:ovc")); return; } // 카드 자리 = 대표님 OK 그대로(본부 10-23) · 신호 = 크게 보기 자막 비켜 가기
     let bw0, bh0; if (cur.h) { bh0 = cur.h * H; bw0 = bh0 / r; } else { bw0 = cur.w * W; bh0 = bw0 * r; if (bh0 > H * 0.92) { bh0 = H * 0.92; bw0 = bh0 / r; } }
     const side = Math.round(bw0), sideH = Math.round(bh0);
     el.style.width = side + "px"; el.style.height = sideH + "px"; const topY = Math.max(0, Math.round((H - sideH) / 2)); el.style.top = topY + "px";
