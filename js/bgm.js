@@ -5,8 +5,8 @@
 //  · 켜기/끄기 = ♪ 단추(ui.js bgmBtn · 모든 창 · 처음 켬 · 기억 malmun.bgm) · 🎵 음악 상자(ui.js openMusicBox)에서 곡 골라 듣기
 //  · 파일 = 소리부 05_audio/_bgm(직접 합성 · 저작권 없음) — 곡마다 [loopStart, loopEnd] 한 번 → 끝나면 다른 곡(같은 곡 연속 없음 · 앱을 다시 열어도 지난 곡 다음)
 //  · 점검(?mute=1 · __sfxVolume 아주 작게)에선 안 틂
-import { audioCtx } from "./wake.js?v=1023.10";
-import { paths } from "./paths.js?v=1023.10";
+import { audioCtx } from "./wake.js?v=1023.11";
+import { paths } from "./paths.js?v=1023.11";
 
 const KEY = "malmun.bgm", LAST = "malmun.bgmLast", VOL = "malmun.bgmVol";
 // 곡 목록(늘리기 = 한 줄) — 소리부 「철학판」 36곡(본부 10-16 대표님 ㅇ · 05_audio/_bgm/med · bgm_catalog.json style "med") = 12곡 × 결 3(잔잔 = 공부 화면 · 밝은 = 첫 화면·목록 · 힘찬 = 음악 상자에서만)
