@@ -97,13 +97,13 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     <div class="seek" data-off><span class="t0">0:00</span><div class="trk" aria-label="${esc(t("seek_bar"))}"><div class="rail"><i></i></div></div><span class="t1">0:00</span><button class="vsubt" data-act="subs" aria-pressed="${subsOn()}" aria-label="${esc(t("subs_aria"))}" title="${esc(t("subs_aria"))}"><span class="cc" aria-hidden="true">CC</span></button>
       <div class="fstip" role="status" hidden><span class="who">${spkHtml("선생님")}</span><p data-k="subs_tip">${esc(t("subs_tip"))}</p><button class="x" data-act="tipx" aria-label="${esc(t("close_word"))}">✕</button></div></div>
     </div>
-    <ol class="lines"><li class="lend" data-end="start" role="button" tabindex="0"><b lang="ko">▶ 시작</b><span>${esc(t("ln_start"))} · 0:00 – ${(x => `${Math.floor(x / 60)}:${String(Math.floor(x % 60)).padStart(2, "0")}`)(L[0]?.start || 0)}</span></li>${L.map((l, i) => `<li class="line sp-${SPEAKER[l.speaker] || "x"} ${l.speaker === "선생님" ? "" : "right"}" data-i="${i}" data-peek="👁 ${esc(t("subs_peek"))}">
+    <ol class="lines"><li class="lend" data-end="start" role="button" tabindex="0"><b lang="ko">▶ 시작</b><span><span data-k="ln_start">${esc(t("ln_start"))}</span> · 0:00 – ${(x => `${Math.floor(x / 60)}:${String(Math.floor(x % 60)).padStart(2, "0")}`)(L[0]?.start || 0)}</span></li>${L.map((l, i) => `<li class="line sp-${SPEAKER[l.speaker] || "x"} ${l.speaker === "선생님" ? "" : "right"}" data-i="${i}" data-peek="👁 ${esc(t("subs_peek"))}">
       <span class="who">${spkHtml(l.speaker)}</span>
       <p class="kotext ko" lang="ko">${esc(l.ko)}</p>
       ${l.tr ? `<p class="tr">${esc(l.tr)}</p>` : ""}
       <div class="expl"></div>
       <div class="acts ib5">${ACTS.map(([a, k, ic], q) => `<button class="ib${q ? " menu" : ""}${a === "game" ? " gamebtn" + (gameDone(ep, l.id) ? " gdone" : "") : ""}" data-act="${a}" data-tipk="${k}" aria-label="${esc(t(k))}">${ic}</button>`).join("")}</div>
-    </li>`).join("")}<li class="lend" data-end="end" role="button" tabindex="0"><b lang="ko">끝</b><span>${esc(t("ln_end"))} · ${(x => `${Math.floor(x / 60)}:${String(Math.floor(x % 60)).padStart(2, "0")}`)(L[L.length - 1]?.end || 0)} –</span></li></ol>
+    </li>`).join("")}<li class="lend" data-end="end" role="button" tabindex="0"><b lang="ko">끝</b><span><span data-k="ln_end">${esc(t("ln_end"))}</span> · ${(x => `${Math.floor(x / 60)}:${String(Math.floor(x % 60)).padStart(2, "0")}`)(L[L.length - 1]?.end || 0)} –</span></li></ol>
     <div class="ctrl">
       <a class="iconbtn" href="#/list" aria-label="${esc(t("back"))}">${I.back}</a>
       <button class="iconbtn" data-act="rep" aria-pressed="false" aria-label="${esc(t("repeat"))}">${I.rep}</button>
