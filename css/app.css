@@ -1478,7 +1478,7 @@ html.bigview,html.bigview body{overflow:hidden}
   .learn.big .panel.speak .meter .sbar{height:12px}
   .learn.big .panel.speak .speak>.sbtns{grid-column:2;grid-row:2 / span 2;grid-template-columns:1fr;align-content:end;margin-top:0}
   .learn.big .panel.speak .speak>.miclist,.learn.big .panel.speak .speak>.helpbox{grid-column:1 / -1;grid-row:2 / span 2}
-  .learn.big .panel.speak .speak>.helpbox{top:0} /* 칸이 이미 머리 줄 아래 = 위 40px 비움 없앰(견본 단추가 풍선 위로 삐져나오던 것 · 검사1팀 가로 812 · 개발3팀 10-23) */
+  .learn.big .panel.speak .speak>.helpbox{top:0;padding-top:48px} /* 위 40px 띠도 풍선 바탕으로 덮음 · 글 자리·두 칸 모양은 전과 같음(견본 단추가 풍선 위로 삐져나오던 것 · 검사1팀 가로 812 · 개발3팀 10-23) */
   .learn.big .panel.speak .speak>.sbtns{align-content:safe end} /* 단추 기둥이 높이보다 길면 위(머리 줄)로 말고 아래로 넘침(확대 200 ◀▶✕ 겹침 · 개발3팀 10-23) */
 }
 @media (orientation:landscape) and (max-height:400px){.learn.big .panel.speak .speak>.sbtns{gap:4px;padding-bottom:2px}.learn.big .panel.speak .sbtns .mic{min-height:48px}} /* 아주 낮은 가로(높이 360) = 단추 사이 틈만 줄여 기둥이 화면 안에 */
