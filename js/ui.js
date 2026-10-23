@@ -57,7 +57,12 @@ function placePill(c) {
   let l = x(o.left) - 5, rgt = x(o.right) + 5;
   if (ar) { if (rs) l = Math.max(l, ar[1] + 1.5); else rgt = Math.min(rgt, ar[0] - 1.5); } /* 1.5px 틈(반올림 0.3px 겹침 막기 · ur) */
   l = Math.max(2, Math.min(l, x(o.left))); rgt = Math.min(c.clientWidth - 2, Math.max(rgt, x(o.right)));
-  c.style.setProperty("--pl", l.toFixed(1) + "px"); c.style.setProperty("--pw", (rgt - l).toFixed(1) + "px");
+  // 칸 모양이 칩 둥근 테두리 안에 쏙(대표님 10-23 「둥그런 거 삐져나옴」) — 칩 안쪽 둥근 네모를 2.5px 줄인 곳 안에 칸(둥근 네모)의 테두리 점이 모두 들도록 칸 높이를 줄임 · 세로 가운데
+  const W = c.clientWidth, H = c.clientHeight, g = 2.5, R = Math.max(0, Math.min(parseFloat(getComputedStyle(c).borderTopLeftRadius) - c.clientTop, W / 2, H / 2) - g), pw = rgt - l;
+  const inside = (x0, y0) => { const cx = Math.min(Math.max(x0, g + R), W - g - R), cy = Math.min(Math.max(y0, g + R), H - g - R); return x0 >= g - 0.01 && x0 <= W - g + 0.01 && y0 >= g - 0.01 && y0 <= H - g + 0.01 && Math.hypot(x0 - cx, y0 - cy) <= R + 0.01; };
+  const fits = (t, ph) => { const r = Math.min(pw, ph) / 2; for (let i = 0; i < 4; i++) { const ox = i % 2 ? l + pw - r : l + r, oy = i < 2 ? t + r : t + ph - r; for (let a = 0; a <= 8; a++) { const th = (Math.PI / 2) * (a / 8) + [Math.PI, 1.5 * Math.PI, 0.5 * Math.PI, 0][i]; if (!inside(ox + r * Math.cos(th), oy + r * Math.sin(th))) return false; } } return true; };
+  let ph = H - 2 * g; while (ph > 8 && !fits((H - ph) / 2, ph)) ph -= 0.5;
+  c.style.setProperty("--pl", l.toFixed(1) + "px"); c.style.setProperty("--pw", pw.toFixed(1) + "px"); c.style.setProperty("--pt", ((H - ph) / 2).toFixed(1) + "px"); c.style.setProperty("--ph", ph.toFixed(1) + "px");
   if (!c.classList.contains("pl")) requestAnimationFrame(() => c.classList.add("pl")); // 처음 자리는 움직임 없이 · 그 뒤부터 미끄러짐
 }
 const pillAll = () => document.querySelectorAll(".chip.uiko").forEach(placePill);
