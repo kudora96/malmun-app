@@ -1653,3 +1653,5 @@ html.bigview,html.bigview body{overflow:hidden}
 @media (prefers-reduced-motion:reduce){.chip.uiko.pl::before,.chip.uiko .a,.chip.uiko .b{transition:none}}
 #vwrap:fullscreen>.vuiko .chip.uiko .a,#vwrap:fullscreen>.vuiko .chip.uiko .b{opacity:1;color:#fff}#vwrap:fullscreen>.vuiko .chip.uiko::before{background:#ffd27a}
 #vwrap:fullscreen>.vuiko .chip.uiko[aria-pressed=false] .a,#vwrap:fullscreen>.vuiko .chip.uiko[aria-pressed=true] .b{color:#1d3530}
+.learn .vtitle .tt>.sub,.learn.lfirst .vtitle .tt>.sub{overflow-x:clip;overflow-y:visible} /* 가로만 자름(…) · 세로는 안 자름 — 미얀마·우르두 글자 위아래가 줄 높이(18px)보다 커서 잘리던 것(다국어부 10-23 my 4px·ur 11px) · 줄 높이·자리 그대로 */
+html:has(.scr.learn),html:has(.scr.learn) body{overflow-anchor:none} /* 배우기 화면 스크롤은 앱이 맞춤(keepVisible) — ⇄ 때 높이 고정을 재며 카드 위아래를 잠깐 바꾸는 사이 브라우저 scroll anchoring 이 화면을 20~67px 옮기던 것(다국어부 10-23 · 개발2팀) */
