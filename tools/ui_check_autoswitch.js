@@ -33,8 +33,8 @@
     // ⓐ [자동 완성] → 지금 토막 끝 → 5초 그대로(본부 10-12 「그 단락」 = 토막)
     await openWrite(short); const sub0 = sub(), s0 = S().s;
     const w00 = S().w; btn("line").click(); await W(300); let g = 0; while (S().auto && g++ < 1500) await W(200); /* [낱말](대표님 10-22) = 그 낱말 끝에서 멈춤 */
-    const atEnd = (S().w !== w00 || S().segEnd) && S().s === s0; let g2 = 0; await W(300); while (S().sent && g2++ < 200) await W(100); const heardLine = g2 > 0; const w5 = await watchM(5000); // 대사가 끝난 뒤 5초(본부 10-12 — W6 자동 넘김이 대사 뒤에 오므로)
-    ok(atEnd && sub() === sub0 && !S().auto && !S().allNext && !shown().length && heardLine && w5.flashes === 0 && w5.dings === 0 && w5.worst === 0 && sounds() === 0,
+    const atEnd = S().w === w00 && S().s === s0 && S().c === $(".panel .write").parentElement.__wr.segs()[s0][w00].chars.length - 1; /* 그 낱말 마지막 글자에 머묾(대표님 10-23) */ let g2 = 0; await W(300); while (S().sent && g2++ < 200) await W(100); const heardLine = g2 > 0; const w5 = await watchM(5000); // 대사가 끝난 뒤 5초(본부 10-12 — W6 자동 넘김이 대사 뒤에 오므로)
+    ok(atEnd && sub() === sub0 && !S().auto && !S().allNext && !shown().length && w5.flashes === 0 /* 낱말 소리는 짧아 기다리는 사이 끝날 수 있음 = 대사 확인 뺌 */ && w5.dings === 0 && w5.worst === 0 && sounds() === 0,
       tag + " ⓐ [낱말] = 그 낱말 끝에서 멈춤 · 낱말 소리 한 번 · 5초 동안 저절로 안 감 · 자동 꺼짐", `${sub0} → ${sub()} · 토막끝 ${atEnd} · 자동 ${S().auto} · 단추 ${shown().join(",") || "없음"} · 대사 ${heardLine} · 걸음 ${w5.flashes} · 딩동 ${w5.dings}`);
     // 다시 누르면 같은 토막 처음부터
     btn("line").click(); await W(700); ok(S().auto && S().autoMode === "word" && S().s === s0 && sub() === sub0, tag + " ⓐ 다시 [낱말] = 그 자리부터 다음 낱말 자동", `${pos()} · ${sub()}`);
