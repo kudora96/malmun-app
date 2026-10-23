@@ -1656,4 +1656,3 @@ html.bigview,html.bigview body{overflow:hidden}
 #vwrap:fullscreen>.vuiko .chip.uiko[aria-pressed=false] .a,#vwrap:fullscreen>.vuiko .chip.uiko[aria-pressed=true] .b{color:#1d3530}
 /* 설명·말하기·쓰기 창 ⇄ 칩 = 목록 화면 칩과 같은 크기(대표님 10-23 「공간 충분한데 왜 좁게」 · 이 경우만 크기 0px 예외) — 자리는 ⛶ 여백 9→6px · 320 은 개발3팀 fitHead h5·h6(다른 단추 여백) 와 함께 */
 .v9bar .chip.uiko.uiko,.whead .chip.uiko.uiko{padding:4px 9px;gap:3px;font-size:12px}
-.learn .v9bar .bigb,.learn .whead .bigb{padding:0 6px;min-width:30px}
