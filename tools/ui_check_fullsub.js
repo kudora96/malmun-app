@@ -17,7 +17,7 @@
     const b = $(".seek [data-act=subs]"), cs = b && getComputedStyle(b);
     const looks = !!cs && (parseFloat(cs.borderTopWidth) > 0 || !/rgba\(0, 0, 0, 0\)|transparent/.test(cs.backgroundColor)) && R(b).height >= 18;
     ok(!!b && b.tagName === "BUTTON" && looks && b.getAttribute("aria-pressed") === "true", "ⓐ 자막 단추 = 단추 모양 · aria-pressed=true(기본 켬)", b ? `${box(R(b))} 테두리 ${cs.borderTopWidth} 바탕 ${cs.backgroundColor}` : "없음");
-    ok(!!b && !$("#vwrap").contains(b) && !$("#vwrap").contains($(".fstip")) && $("#vwrap").contains($(".cap")) && [...$("#vwrap").querySelectorAll("button")].every(x => x.dataset.act === "fs" || x.closest(".vuiko")), "ⓐ 영상 안 단추 = ⛶ 만 · 자막 단추·말풍선은 영상 밖 · 전체 화면 자막은 영상 안");
+    ok(!!b && !$("#vwrap").contains(b) && !$("#vwrap").contains($(".fstip")) && $("#vwrap").contains($(".cap")) && [...$("#vwrap").querySelectorAll("button")].every(x => x.dataset.act === "fs" || x.closest(".vuiko, .fsui")), "ⓐ 영상 안 단추 = ⛶ 만 · 자막 단추·말풍선은 영상 밖 · 전체 화면 자막은 영상 안");
     { const sk = R($(".seek")), sb = R(b), vw = R($("#vwrap"));
       ok(sb.top >= sk.top - 0.5 && sb.bottom <= sk.bottom + 0.5 && sb.right <= sk.right + 0.5 && sk.height <= 26.5 && !hit(sb, vw), "ⓐ 자막 단추 = 재생 막대 안(막대 높이 그대로) · 영상과 안 겹침", `단추 ${box(sb)} 막대 ${box(sk)}`); }
     // ⓑ 끄기 · 켜기

@@ -336,5 +336,8 @@
  "turn_listen": "Your turn — the teacher is listening",
   "w_char": "Letter",
   "w_word": "Word",
-  "w_sent": "Sentence"
+  "w_sent": "Sentence",
+  "ln_start": "Start",
+  "ln_end": "End",
+  "from_start": "From the start"
 }

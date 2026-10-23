@@ -85,10 +85,11 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     <div class="stick">
     <div class="vstage">
     <div class="vmain"><div class="vtitle"><div class="tt"><b class="ko" lang="ko">${esc(d.title || "")}</b>${d.title_t ? `<span class="sub">${esc(d.title_t)}</span>` : ""}</div>${uiKoBtn()}<span class="n"></span></div>
-    <div class="varea"><div class="video" id="vwrap"><video playsinline preload="metadata" poster="${paths.poster(ep)}"></video>
+    <div class="varea"><div class="video" id="vwrap"><video playsinline preload="metadata" controlslist="nodownload noremoteplayback noplaybackrate" disablepictureinpicture disableremoteplayback poster="${paths.poster(ep)}"></video>
       <span class="vplay" aria-hidden="true">${I.play}</span>
       <div class="cap" aria-live="polite"></div>
       <button class="vfs" data-act="fs" aria-label="${esc(t("fullscreen"))}">${FS}</button><span class="vuiko">${uikoChip()}</span>
+      <div class="fsui"><div class="fsbtns"><button data-act="fstop" aria-label="${esc(t("from_start"))}" title="${esc(t("from_start"))}">${I.prev}</button><button data-act="fsprev" aria-label="${esc(t("previous"))}"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="currentColor"><path d="M11.5 6v12L3 12z"/><path d="M21 6v12l-8.5-6z"/></svg></button><button class="fsplay" data-act="fsplay" aria-label="${esc(t("play"))}">${I.play}</button><button data-act="fsnext" aria-label="${esc(t("next"))}"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="currentColor"><path d="M12.5 6v12L21 12z"/><path d="M3 6v12l8.5-6z"/></svg></button></div></div>
       </div></div><div class="vsub" hidden aria-hidden="true"><div class="in"></div></div></div>
     <div class="panel" hidden></div>
     </div>
@@ -96,13 +97,13 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     <div class="seek" data-off><span class="t0">0:00</span><div class="trk" aria-label="${esc(t("seek_bar"))}"><div class="rail"><i></i></div></div><span class="t1">0:00</span><button class="vsubt" data-act="subs" aria-pressed="${subsOn()}" aria-label="${esc(t("subs_aria"))}" title="${esc(t("subs_aria"))}"><span class="cc" aria-hidden="true">CC</span></button>
       <div class="fstip" role="status" hidden><span class="who">${spkHtml("선생님")}</span><p data-k="subs_tip">${esc(t("subs_tip"))}</p><button class="x" data-act="tipx" aria-label="${esc(t("close_word"))}">✕</button></div></div>
     </div>
-    <ol class="lines">${L.map((l, i) => `<li class="line sp-${SPEAKER[l.speaker] || "x"} ${l.speaker === "선생님" ? "" : "right"}" data-i="${i}" data-peek="👁 ${esc(t("subs_peek"))}">
+    <ol class="lines"><li class="lend" data-end="start" role="button" tabindex="0"><b lang="ko">▶ 시작</b><span>${esc(t("ln_start"))} · 0:00 – ${(x => `${Math.floor(x / 60)}:${String(Math.floor(x % 60)).padStart(2, "0")}`)(L[0]?.start || 0)}</span></li>${L.map((l, i) => `<li class="line sp-${SPEAKER[l.speaker] || "x"} ${l.speaker === "선생님" ? "" : "right"}" data-i="${i}" data-peek="👁 ${esc(t("subs_peek"))}">
       <span class="who">${spkHtml(l.speaker)}</span>
       <p class="kotext ko" lang="ko">${esc(l.ko)}</p>
       ${l.tr ? `<p class="tr">${esc(l.tr)}</p>` : ""}
       <div class="expl"></div>
       <div class="acts ib5">${ACTS.map(([a, k, ic], q) => `<button class="ib${q ? " menu" : ""}${a === "game" ? " gamebtn" + (gameDone(ep, l.id) ? " gdone" : "") : ""}" data-act="${a}" data-tipk="${k}" aria-label="${esc(t(k))}">${ic}</button>`).join("")}</div>
-    </li>`).join("")}</ol>
+    </li>`).join("")}<li class="lend" data-end="end" role="button" tabindex="0"><b lang="ko">끝</b><span>${esc(t("ln_end"))} · ${(x => `${Math.floor(x / 60)}:${String(Math.floor(x % 60)).padStart(2, "0")}`)(L[L.length - 1]?.end || 0)} –</span></li></ol>
     <div class="ctrl">
       <a class="iconbtn" href="#/list" aria-label="${esc(t("back"))}">${I.back}</a>
       <button class="iconbtn" data-act="rep" aria-pressed="false" aria-label="${esc(t("repeat"))}">${I.rep}</button>
@@ -181,6 +182,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   // ── 선택 · 따라가기 ──
   function select(i, { scroll = true, force = false } = {}) {
     i = Math.max(0, Math.min(L.length - 1, i));
+    if (st.endSel) { st.endSel = null; app.querySelectorAll(".lend.cur").forEach(x => x.classList.remove("cur")); items[i]?.classList.add("cur"); } // 시작·끝 줄 칠 풀림
     if (i !== st.cur) {
       items.forEach(li => li.classList.remove("peek")); /* 자막 끔 때 잠깐 본 카드 = 다음 줄로 가면 다시 흐림 */
       items[st.cur]?.classList.remove("cur");
@@ -303,7 +305,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   const playing = () => (st.panel?.kind === "explain" ? ex.playing || !!st.gap : st.mode === "video" ? !v.paused || !!st.gap : seq.playing);
   const clearExpl = () => items.forEach(li => { const e = li.querySelector(".expl"); if (e.classList.contains("on") || e.firstChild) { e.classList.remove("on"); e.textContent = ""; } });
   const sync = () => {
-    playBtn.innerHTML = playing() ? I.pause : I.play;
+    playBtn.innerHTML = playing() ? I.pause : I.play; const fp = app.querySelector("[data-act=fsplay]"); if (fp) fp.innerHTML = playBtn.innerHTML; fsArm();
     app.querySelector("#vwrap").classList.toggle("paused", !playing());
     app.querySelector(".panel").classList.toggle("paused", !playing());
     items.forEach((li, k) => li.classList.toggle("onceplay", st.once && k === st.cur && playing()));
@@ -321,6 +323,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   function tick() {
     if (st.mode !== "video" || v.paused) return;
     const now = v.currentTime, l = L[st.cur];
+    if (!st.once && !st.rep && L.length) { const e = now < L[0].start - LEAD * v.playbackRate ? "start" : now > L[L.length - 1].end + 0.3 ? "end" : null; if (e !== st.endSel) setEnd(e, { scroll: true }); if (e) return; } // 시작·끝 구간 = 그 줄 칠(대표님 10-23)
     if ((st.once || st.rep) && now >= l.end) {
       v.pause();
       if (st.rep) {
@@ -928,6 +931,14 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   });
 
   // ── 동작 ──
+  // 시작·끝 줄(영상만) — 고르면 그 구간부터 영상 · 줄 카드 칠은 그 줄 · 다른 줄 고르면 풀림
+  function setEnd(e, { scroll = false } = {}) {
+    st.endSel = e || null; app.querySelectorAll(".lend").forEach(x => x.classList.toggle("cur", x.dataset.end === st.endSel));
+    if (e) { items.forEach(li => li.classList.remove("cur")); if (scroll) underVideo(app.querySelector(`.lend[data-end=${e}]`)); }
+    else items[st.cur]?.classList.add("cur");
+  }
+  function playEnd(e) { stopAll(); st.once = false; setEnd(e, { scroll: true }); if (st.mode !== "video") return sync(); v.currentTime = e === "start" ? 0 : Math.min(v.duration || 1e9, L[L.length - 1].end); v.play().catch(() => {}); sync(); }
+  app.querySelectorAll(".lend").forEach(x => { x.onclick = () => playEnd(x.dataset.end); x.onkeydown = ev => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); playEnd(x.dataset.end); } }; });
   function goPaused(i) { stopAll(); st.once = false; select(i, { force: true }); v.currentTime = L[i].start; sync(); } // R1
   function playLine(i) { // R3 · R6
     stopAll(); select(i, { force: true });
@@ -957,6 +968,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
       return sync();
     }
     const l = L[st.cur];
+    if (st.mode === "video" && st.endSel) { if (st.endSel === "start" ? v.currentTime >= L[0].start : v.ended || v.currentTime >= (v.duration || 0) - 0.1) v.currentTime = st.endSel === "start" ? 0 : L[L.length - 1].end; v.play().catch(() => {}); return sync(); } // 시작·끝 줄 = 그 구간부터
     if (st.mode === "video") {
       const now = v.currentTime;
       if (st.rep || st.once) { if (now < l.start - 0.1 || now >= l.end - 0.05) v.currentTime = l.start; }
@@ -1128,8 +1140,24 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   }
   // 크게 보기 안에도 CC(대표님 10-22) = 재생 막대의 그 CC 단추를 ⇄ 옆으로 옮겨 씀(새 단추 아님) · 나오면 제자리로
   const ccBtn = app.querySelector("[data-act=subs]"), ccHome = ccBtn.nextElementSibling;
+  const seekEl0 = app.querySelector(".seek"), seekHome = seekEl0.nextElementSibling, seekPar = seekEl0.parentElement;
   const onFsChange = () => { const fs = document.fullscreenElement, w = app.querySelector("#vwrap"); if (fs) hideTip();
-    if (fs && fs === w) w.querySelector(".vuiko")?.prepend(ccBtn); else if (ccBtn.parentElement !== ccHome?.parentElement) ccHome?.before(ccBtn); capFill(st.cur); };
+    if (fs && fs === w) w.querySelector(".vuiko")?.prepend(ccBtn); else if (ccBtn.parentElement !== ccHome?.parentElement) ccHome?.before(ccBtn); capFill(st.cur);
+    const on = !!fs && fs === w; w.classList.toggle("isfs", on); // 크게 보기(대표님 10-23) = 재생 막대(평소 그것)를 영상 안 아래로 · 단추 줄 · 나오면 제자리
+    if (on) w.querySelector(".fsui").prepend(seekEl0); else if (seekEl0.parentElement !== seekPar) (seekHome && seekHome.parentElement === seekPar ? seekHome.before(seekEl0) : seekPar.append(seekEl0));
+    fsShow(); };
+  // 크게 보기 단추 줄 보임/숨김 — 재생 중 3초 가만두면 숨음 · 화면 누르면 다시(숨어 있을 때 누름은 보이기만 · 재생 안 바꿈)
+  function fsW() { return app.querySelector("#vwrap"); }
+  function fsBarH() { const w = fsW(); if (!w) return; const u = w.querySelector(".fsui"); w.style.setProperty("--barh", w.classList.contains("isfs") && !w.classList.contains("fshide") ? u.offsetHeight + "px" : "0px"); }
+  function fsShow() { const w = fsW(); if (!w) return; w.classList.remove("fshide"); fsBarH(); fsArm(); }
+  function fsArm() { clearTimeout(st.fsT); const w = fsW(); if (!w?.classList.contains("isfs")) return; st.fsT = setTimeout(() => { if (playing() && w.classList.contains("isfs")) { w.classList.add("fshide"); fsBarH(); } }, 3000); }
+  app.querySelector("#vwrap").addEventListener("pointerdown", e => { const w = fsW(); if (!w.classList.contains("isfs")) return; if (w.classList.contains("fshide")) { fsShow(); w.__swallow = true; } else fsArm(); }, true);
+  app.querySelector("#vwrap").addEventListener("click", e => { const w = fsW(); if (w.__swallow) { w.__swallow = false; e.stopPropagation(); e.preventDefault(); } }, true);
+  app.querySelector("#vwrap").addEventListener("contextmenu", e => e.preventDefault()); // 영상 길게 누르기·오른쪽 클릭 = 저장 메뉴 안 뜸(대표님 10-23)
+  app.querySelector("[data-act=fstop]").onclick = () => playEnd("start"); // ⏮ 처음부터 = 0초부터(시작 줄)
+  app.querySelector("[data-act=fsprev]").onclick = () => playBtn.closest(".ctrl").querySelector("[data-act=prev]").click(); // ◀◀ ▶▶ = 앞·뒤 줄(아래 단추와 같은 일)
+  app.querySelector("[data-act=fsnext]").onclick = () => playBtn.closest(".ctrl").querySelector("[data-act=next]").click();
+  app.querySelector("[data-act=fsplay]").onclick = () => togglePlay();
   document.addEventListener("fullscreenchange", onFsChange);
   const onKey = e => { if (e.code !== "Space" || /^(INPUT|BUTTON|TEXTAREA|A)$/.test(e.target.tagName)) return; e.preventDefault(); togglePlay(); };
   document.addEventListener("keydown", onKey);
