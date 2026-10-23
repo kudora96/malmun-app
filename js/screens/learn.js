@@ -220,14 +220,14 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   function fitCard(i) {
     if (st.cardKeep === i) return; // ⇄ 뒤 같은 카드 = 맞춘 단계 그대로(⇄ 0px · 다국어부 10-19 ru 375 카드 단추 줄 14~21px) · 다른 줄·창 크기가 바뀌면 다시 맞춤
     st.cardKeep = -1;
-    items.forEach(li => { li.classList.remove("fitc", "tr2", "tr1", "ac1"); li.style.removeProperty("--kf"); li.style.removeProperty("--tf"); });
+    items.forEach(li => { li.classList.remove("fitc", "tr2", "tr1", "ac1", "cscroll"); li.style.removeProperty("--kf"); li.style.removeProperty("--tf"); li.style.removeProperty("--cmax"); });
     const el = items[i]; if (!el) return; const mh0 = el.style.minHeight; el.style.removeProperty("min-height"); // 맞출 땐 글 높이로만(⇄ 고정 높이는 맞춘 뒤 다시 — 아래 lockCard) // 네 창(영상·설명·쓰기·말하기) 모두 같은 카드 자리·같은 글 크기(본부 10-06 「한 틀」)
     const avail = ctrlBar.getBoundingClientRect().top - stick.getBoundingClientRect().bottom - 14;
     const kt = el.querySelector(".kotext"), tt = el.querySelector(":scope > .tr"), ko = (lFirst() && tt) || kt, tr = lFirst() && tt ? kt : tt; if (!ko) { if (mh0) el.style.minHeight = mh0; return; } // 뜻 줄 없는 줄·언어 바꾼 뒤에도(쓰기부 10-20 getComputedStyle null) // 위 자리 = --kf · 아래 = --tf(⇄ 위아래)
     let kf = parseFloat(getComputedStyle(ko).fontSize), tf = tr ? parseFloat(getComputedStyle(tr).fontSize) : 0;
     el.classList.add("fitc");
     for (let k = 0; k < 16 && el.offsetHeight > avail && kf > 11; k++) { kf -= 1; tf = Math.max(10, tf - 0.7); el.style.setProperty("--kf", kf + "px"); el.style.setProperty("--tf", tf + "px"); }
-    for (const c of ["tr2", "tr1"]) { if (!tr || el.offsetHeight <= avail) break; el.classList.remove("tr2", "tr1"); el.classList.add(c); } if (el.offsetHeight > avail) el.classList.add("ac1"); lockCard(el); if (st.lockedCur && st.lockedCur !== el && st.lockedCur.isConnected) lockCard(st.lockedCur); st.lockedCur = el; // 지금 줄에서 벗어난 카드도 작은 글 상태로 다시 잼(ru 0번 ⇄ 때 102→122 · 화면 20px 튐 · 개발2팀 10-23) /* 줄 카드 단추 = 늘 그림만 · 이름은 aria-label(10-20) */ /* 그래도 넘치면 [▶ 이 줄 듣기] = ▶ 만(글은 화면 읽기용으로 남김) · 단추 안쪽 여백 줄임(다국어부 10-12 ur 320 — 단추가 셋째 줄로) */ // 가장 작은 글로도 넘치면 학습자 말 뜻을 2줄 → 1줄(설명 창에 다 보임 · 검사부 10-12 vi·th·ur 320 — 단추가 아래 막대 뒤로)
+    for (const c of ["tr2", "tr1"]) { if (!tr || el.offsetHeight <= avail) break; el.classList.remove("tr2", "tr1"); el.classList.add(c); } if (el.offsetHeight > avail) el.classList.add("ac1"); lockCard(el); { const h = Math.max(el.offsetHeight, parseFloat(el.style.minHeight) || 0); if (h > avail + 0.5 && avail > 60) { el.classList.add("cscroll"); el.style.setProperty("--cmax", Math.floor(avail) + "px"); } } /* 글 자르기 없이(대표님 10-23 ㄴ) 자리보다 긴 카드 = 카드 높이 = 자리 · 안에서 굴려 끝까지 · 단추 줄은 아래 붙음(개발3팀) */ if (st.lockedCur && st.lockedCur !== el && st.lockedCur.isConnected) lockCard(st.lockedCur); st.lockedCur = el; // 지금 줄에서 벗어난 카드도 작은 글 상태로 다시 잼(ru 0번 ⇄ 때 102→122 · 화면 20px 튐 · 개발2팀 10-23) /* 줄 카드 단추 = 늘 그림만 · 이름은 aria-label(10-20) */ /* 그래도 넘치면 [▶ 이 줄 듣기] = ▶ 만(글은 화면 읽기용으로 남김) · 단추 안쪽 여백 줄임(다국어부 10-12 ur 320 — 단추가 셋째 줄로) */ // 가장 작은 글로도 넘치면 학습자 말 뜻을 2줄 → 1줄(설명 창에 다 보임 · 검사부 10-12 vi·th·ur 320 — 단추가 아래 막대 뒤로)
   }
   // 영상 창 = 제목 줄 바로 밑에 영상(위 정렬) · 남는 자리(폰)에 지금 대사를 영화 자막처럼 크게(투덜이 10-06 ㅇ) — 화자(작게) · 한국어(굵게) · 로마자(켜짐이면 작게) · 학습자 언어
   //   글 크기 = 그 자리를 채우는 가장 큰 크기(넘치면 줄임 · 스크롤 0) · 대사가 바뀔 때와 창 크기가 바뀔 때만 다시 맞춤 · 자리가 70px 안 되면(넓고 낮은 창) 자막 줄 없음
