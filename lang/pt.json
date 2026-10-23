@@ -337,5 +337,8 @@
  "turn_listen": "Sua vez — a professora está ouvindo",
  "w_char": "Letra",
  "w_word": "Palavra",
- "w_sent": "Frase"
+ "w_sent": "Frase",
+ "ln_start": "Início",
+ "ln_end": "Fim",
+ "from_start": "Do início"
 }

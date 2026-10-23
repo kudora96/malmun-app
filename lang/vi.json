@@ -337,5 +337,8 @@
  "turn_listen": "Đến lượt bạn — cô giáo đang nghe",
  "w_char": "Chữ",
  "w_word": "Từ",
- "w_sent": "Câu"
+ "w_sent": "Câu",
+ "ln_start": "Bắt đầu",
+ "ln_end": "Kết thúc",
+ "from_start": "Từ đầu"
 }

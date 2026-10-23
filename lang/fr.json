@@ -337,5 +337,8 @@
  "turn_listen": "À vous — la professeure vous écoute",
  "w_char": "Lettre",
  "w_word": "Mot",
- "w_sent": "Phrase"
+ "w_sent": "Phrase",
+ "ln_start": "Début",
+ "ln_end": "Fin",
+ "from_start": "Depuis le début"
 }
