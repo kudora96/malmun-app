@@ -5,8 +5,8 @@
 //  학습자 말 그림(대표님 10-22 「ㅇ」): CC 를 따라감 — CC 끔 = 한국어 카드(file) · CC 켬 = 학습자 말 그림(file_i18n{lang} · 없으면 file) · ⇄ 는 카드에 영향 없음
 //   json 꼴(영상2팀): 카드마다 "file_i18n":{"ne":"…_ne.png"} · frames 를 쓰면 장마다 같은 칸 · 자리·크기·초는 한국어 판과 같음
 //  안전: json "video" 길이(초)와 지금 영상 길이가 1초 넘게 다르면 띄우지 않음
-import { MEDIA } from "./paths.js?v=1023.5";
-import { lang } from "./i18n.js?v=1023.5";
+import { MEDIA } from "./paths.js?v=1023.6";
+import { lang } from "./i18n.js?v=1023.6";
 
 const getJSON = u => fetch(u, { cache: "no-store" }).then(r => (r.ok ? r.json() : null)).catch(() => null);
 
