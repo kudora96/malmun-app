@@ -1640,3 +1640,14 @@ html.bigview,html.bigview body{overflow:hidden}
 .write .segnav [data-seg="1"].glow{animation:segGlow 1.2s ease-in-out 3;background:color-mix(in srgb,var(--hi) 22%,var(--card));box-shadow:0 0 0 3px color-mix(in srgb,var(--hi) 50%,transparent),0 0 12px 2px color-mix(in srgb,var(--hi) 60%,transparent);border-radius:10px}
 @keyframes segGlow{0%,100%{box-shadow:0 0 0 2px color-mix(in srgb,var(--hi) 40%,transparent)}50%{box-shadow:0 0 0 5px color-mix(in srgb,var(--hi) 15%,transparent),0 0 16px 4px color-mix(in srgb,var(--hi) 70%,transparent)}}
 @media (prefers-reduced-motion:reduce){.write .segnav [data-seg="1"].glow{animation:none}}
+
+/* ⇄ 단추 = 미끄럼 칸(대표님 10-23 시안 ③ · 다국어부) — 켜진 말 뒤 주황 칸(::before · 자리는 ui.js placePill) · 칩 크기·자리 0px · 어두운 화면 = 노란 칸 + 짙은 글자(--on-hi) */
+.chip.uiko{position:relative;isolation:isolate;border-color:var(--hi)}
+.chip.uiko .a,.chip.uiko .b{opacity:1;color:var(--hi);position:relative;z-index:1;transition:color .2s}
+.chip.uiko::before{content:"";position:absolute;z-index:0;top:2px;bottom:2px;left:var(--pl,0);width:var(--pw,0);border-radius:999px;background:var(--hi);opacity:0}
+.chip.uiko[style*="--pw"]::before{opacity:1}.chip.uiko.pl::before{transition:left .2s ease,width .2s ease}
+.chip.uiko[aria-pressed=false] .a,.chip.uiko[aria-pressed=true] .b{color:var(--on-hi,#fff)}
+.chip.uiko:not([style*="--pw"])[aria-pressed=false] .a,.chip.uiko:not([style*="--pw"])[aria-pressed=true] .b{background:var(--hi);border-radius:999px;box-shadow:0 0 0 3px var(--hi)} /* 아직 못 잼(숨은 칩) = 켜진 글자 둘레만 */
+@media (prefers-reduced-motion:reduce){.chip.uiko.pl::before,.chip.uiko .a,.chip.uiko .b{transition:none}}
+#vwrap:fullscreen>.vuiko .chip.uiko .a,#vwrap:fullscreen>.vuiko .chip.uiko .b{opacity:1;color:#fff}#vwrap:fullscreen>.vuiko .chip.uiko::before{background:#ffd27a}
+#vwrap:fullscreen>.vuiko .chip.uiko[aria-pressed=false] .a,#vwrap:fullscreen>.vuiko .chip.uiko[aria-pressed=true] .b{color:#1d3530}

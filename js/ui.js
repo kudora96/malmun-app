@@ -44,6 +44,21 @@ export function switchUiScope(root, ko = root?.dataset.uiko !== "1") {
   const before = snapshot(root.dataset.uiko === "1"); root.dataset.uiko = ko ? "1" : "0"; root.classList.toggle("uiko", ko); retext(before, root, ko, root);
   root.querySelectorAll("[data-act=uiko]").forEach(b => b.setAttribute("aria-pressed", String(ko)));
 }
+// ⇄ 미끄럼 칸(대표님 10-23 시안 ③) — 켜진 말(.a/.b) 뒤 주황 칸 = 칩의 ::before(--pl·--pw) · 누르면 0.2초 미끄러짐 · 칩 크기·자리 0px(겹 그림만) · 못 잰 칩은 css 가 켜진 글자 둘레만 채움
+function placePill(c) {
+  const on = c.querySelector(c.getAttribute("aria-pressed") === "true" ? ".b" : ".a"); if (!on || !c.offsetWidth) return;
+  const l = Math.max(2, on.offsetLeft - 5), w = Math.min(on.offsetWidth + 10, c.clientWidth - 2 - l);
+  c.style.setProperty("--pl", l + "px"); c.style.setProperty("--pw", w + "px");
+  if (!c.classList.contains("pl")) requestAnimationFrame(() => c.classList.add("pl")); // 처음 자리는 움직임 없이 · 그 뒤부터 미끄러짐
+}
+const pillAll = () => document.querySelectorAll(".chip.uiko").forEach(placePill);
+if (!window.__pillWired) {
+  window.__pillWired = true;
+  new MutationObserver(recs => { for (const r of recs) { if (r.type === "attributes") { if (r.target.matches?.(".chip.uiko")) placePill(r.target); continue; } for (const n of r.addedNodes) if (n.nodeType === 1) (n.matches(".chip.uiko") ? [n] : n.querySelectorAll(".chip.uiko")).forEach(placePill); } })
+    .observe(document.body, { subtree: true, childList: true, attributes: true, attributeFilter: ["aria-pressed"] });
+  for (const ev of ["resize", "malmun:langfit", "malmun:uilang"]) addEventListener(ev, () => requestAnimationFrame(pillAll));
+  document.fonts?.ready.then(pillAll); document.addEventListener("fullscreenchange", () => requestAnimationFrame(pillAll));
+}
 // 한국어로 바꾼 뒤 길을 잃지 않게(본부 10-14 ④) — 처음 두 번만, 모국어로 「ไทย⇄한 을 누르면 돌아와요」
 function backTip() {
   const K = "malmun.uikotip"; let n = 0; try { n = +localStorage.getItem(K) || 0; if (n >= 2) return; localStorage.setItem(K, String(n + 1)); } catch {}
