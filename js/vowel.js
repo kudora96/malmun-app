@@ -2,8 +2,8 @@
 //  받아쓰기는 홑모음을 빼먹음 → 목소리 구간(음높이 75~500Hz · 소음보다 12dB 위) + 길이 + F1/F2(LPC 스펙트럼 봉우리) 로 판정
 //  기준 F1/F2 = 검사2팀 vowel_check.py REF(소리부 본보기) · 로그 거리 · 처음엔 너그럽게(실제 학습자 녹음으로 문턱 다시 맞춤)
 //  결과 = 반응 영상 id(영상2팀 v5 표): G 맞음 · N 안 잡힘 · L 작음 · S 짧음 · A1 「아」 입 작음 · A2 「아」 입술 둥긂 · O1 「오」 입술 안 둥긂 · O2 「오」 끝이 「우」로 · O3 「오」 닫힘 · W1a/W1o 다른 소리
-import { audioCtx } from "./wake.js?v=1023.16";
-import { getMic } from "./recorder.js?v=1023.16";
+import { audioCtx } from "./wake.js?v=1023.17";
+import { getMic } from "./recorder.js?v=1023.17";
 
 export const REF = { 아: [1154, 1557], 어: [607, 997], 오: [448, 901], 우: [381, 981], 으: [400, 1600], 이: [350, 2700], 애: [720, 2150], 에: [520, 2350] };
 const SR = 11025, WIN = 0.03, HOP = 0.01, MIN_SEG = 0.06;

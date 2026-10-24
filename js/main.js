@@ -1,14 +1,15 @@
-import "./agepolicy.js?v=1023.16"; // 기능별 나이(대표님 10-19) — 받아쓰기 막기는 다른 것보다 먼저
-import { detectLang, setLang, LANGS, t } from "./i18n.js?v=1023.16";
-import { VERSION } from "./version.js?v=1023.16";
-import { bgmScene } from "./bgm.js?v=1023.16";
-import welcome from "./screens/welcome.js?v=1023.16";
-import list from "./screens/list.js?v=1023.16";
-import learn from "./screens/learn.js?v=1023.16";
-import write from "./screens/write.js?v=1023.16";
-import speak from "./screens/speak.js?v=1023.16";
-import diag from "./screens/diag.js?v=1023.16";
-import "./errlog.js?v=1023.16"; // 오류 기록(진단 화면용 · 기록만)
+import "./agepolicy.js?v=1023.17"; // 기능별 나이(대표님 10-19) — 받아쓰기 막기는 다른 것보다 먼저
+import { detectLang, setLang, LANGS, t } from "./i18n.js?v=1023.17";
+import { VERSION } from "./version.js?v=1023.17";
+import { bgmScene } from "./bgm.js?v=1023.17";
+import welcome from "./screens/welcome.js?v=1023.17";
+import list from "./screens/list.js?v=1023.17";
+import learn from "./screens/learn.js?v=1023.17";
+import write from "./screens/write.js?v=1023.17";
+import speak from "./screens/speak.js?v=1023.17";
+import diag from "./screens/diag.js?v=1023.17";
+import "./errlog.js?v=1023.17"; // 오류 기록(진단 화면용 · 기록만)
+import { devgoPrep, devgoRun } from "./devgo.js?v=1023.17"; // 대표님 확인용 바로가기 ?go=(로컬판에서만 · 본부 10-23)
 
 const app = document.getElementById("app");
 const explain = (app, ep, id) => learn(app, ep, id, { explain: true }); /* #/explain/{편}/{줄} = 학습 화면 + 그 줄 새(v9) 설명 창(10-12 · 옛 explain.js 화면 대신 · 책 QR 주소 그대로) */
@@ -72,6 +73,7 @@ console.info("말문 판", VERSION);
   // ?lang=ne 처럼 주소로 학습자 언어를 정할 수 있다(미리보기 · 기억됨) — 아니면 자동(CLAUDE.md 언어 자동)
   const q = new URLSearchParams(location.search).get("lang");
   if (q && LANGS.some(l => l[0] === q)) await setLang(q, true); else await setLang(detectLang().lang);
+  await devgoPrep();
   window.addEventListener("hashchange", route);
-  route();
+  route().then(devgoRun);
 })();
