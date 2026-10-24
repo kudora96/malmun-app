@@ -694,7 +694,8 @@ a{color:inherit;text-decoration:none}
 .line.fitc{padding-top:6px;padding-bottom:6px}
 .line.fitc .acts{margin-top:4px;gap:4px}
 .line.fitc .acts button{padding-top:4px;padding-bottom:4px;font-size:11.5px}
-.line.fitc.tr2 .tr,.line.fitc.tr1 .tr{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}.line.fitc.tr1 .tr{-webkit-line-clamp:1}
+/* 줄 카드 번역 줄 자르기(tr2·tr1 line-clamp) 없앰 — 학습자가 읽을 뜻은 숨기지 않음 · 넘치면 카드가 글만큼 커짐(본부 10-23 · 개발3팀) */
+.line.cscroll{box-sizing:border-box;height:var(--cmax);min-height:0!important;display:flex;flex-direction:column;overflow:hidden}.line.cscroll>*{flex:none}.line.cscroll>.tr,.learn.lfirst .line.cscroll>.kotext{flex:0 1 auto;min-height:1.5em;overflow-y:auto;overscroll-behavior:contain}.learn.lfirst .line.cscroll>.tr{flex:none;overflow:visible} /* 자리보다 긴 카드 = 카드 높이 = 자리 · 아래쪽 글 칸만 줄고 그 안에서 굴려 끝까지(글 자르기 없음 · 단추 줄과 안 겹침 · 대표님 10-23 「스크롤로」 · 개발3팀) */
 .line.fitc.ac1 .acts button{padding-left:8px;padding-right:8px}.line.fitc.ac1 .acts [data-act=once] span{display:none}.line.fitc.ac1 .acts [data-act=once]{min-width:0!important;max-width:none!important} /* ▶ 만 = 언어 폭 고정도 풀어 작은 단추로(검사부 10-16 ne 375 — 빈 넓은 단추 · 글 71px 잘림) · 이름은 aria-label */
 .write .kb .kr,.write .kb .kr button,.write.embedded .kb .kr button{min-height:30px}
 .learn .panel.write{height:min(500px,calc(100dvh - 98px - clamp(120px,26dvh,210px)))} /* 자막 카드 자리 26% — 660×560 에서도 자판 다섯 줄 · 카드는 fitCard 가 글 줄여 맞춤 */
@@ -784,6 +785,8 @@ a{color:inherit;text-decoration:none}
 .speak .whead.h2 .spk{display:none}
 .speak .whead.h3{gap:4px;padding-inline:10px}.speak .whead.h3 .chip.uiko{padding:3px 4px;gap:1px}
 .speak .whead.h4 > b{display:none}
+.speak .whead.h5{gap:2px;padding-inline:4px}.speak .whead.h5 .bigb{min-width:30px;width:30px;padding:0} /* 그래도 넘치면 틈·여백만 줄임(ur 320 ✕ 화면 밖 28px · 개발3팀 10-23) */
+.speak .whead.h6 .micpick,.speak .whead.h6 .segnav button{min-width:26px;padding:0 4px} /* 마지막 단계 = ◀▶·?·✕ 최소 폭만(320 + 넓은 ⇄ 칩 · 개발3팀 10-23) */
 .speak .whead > *{flex:none}
 /* 비교 화면 내 목소리 = 들은 글자(본부 10-06) — 바뀐 칸: 위 작게 흐린 본보기 · 아래 크게 빨강 들은 글자 · 덧붙은 소리: 회색 작은 칸 */
 .speak .cmp .crow.y .csyl{height:46px}
@@ -1448,6 +1451,10 @@ html:lang(ur) .write .hand .hpal{height:25px}
 .learn .bigb .off,.learn .bigb .on{font-size:12px;font-family:inherit}
 @media (max-width:519px){.learn .bigb .off,.learn .bigb .on{display:none!important}}
 .speak .whead.h1 .bigb .off,.speak .whead.h1 .bigb .on,.v9bar.nocw .bigb .off,.v9bar.nocw .bigb .on{display:none!important}
+.scr.learn .chip.bgmb,.scr.speak .chip.bgmb,.scr.write .chip.bgmb{display:none!important} /* 🔇 = 첫 화면·목록에만(대표님 10-23 · 창 머리 줄 비좁음) · 소리 상태는 앱 전체 그대로 · ⛶ 자리 잡기용으로 마디는 남김 */
+.v9bar .glab,.v9bar .seg.snd{display:none!important} /* 설명 창 「듣기」 이름표·[▶ 학습자 말][▶ 한국어] 뺌(대표님 10-23 · ⇄ 있음) — 읽기 시작·멈춤 = 아래 큰 ▶·글 누르기 */
+.learn .bigb>span:first-child{font-family:system-ui,sans-serif;line-height:1} /* ⛶ = 언어 글꼴·줄 높이 안 받음(:lang(ur) 나스탈리크 줄 높이로 글 상자 38px > 단추 30px · 개발3팀 10-23) */
+.learn .bigb .off,.learn .bigb .on{display:none!important}.learn .bigb{width:34px;padding:0} /* ⛶ = 모든 창 그림만 작은 단추 34px 고정(대표님 10-23 「비대함」 · 설명 창 91px → 34) · 이름은 aria-label·title · 남는 폭 = ⇄·글 */
 .learn .bigb[hidden]{display:none}.learn .bigb .on{display:none}.learn .bigb[aria-pressed=true] .on{display:inline}.learn .bigb[aria-pressed=true] .off{display:none}
 html.bigview,html.bigview body{overflow:hidden}
 .learn.big .lines,.learn.big .ctrl,.learn.big .seek,.learn.big .vtitle{display:none!important}
@@ -1475,7 +1482,10 @@ html.bigview,html.bigview body{overflow:hidden}
   .learn.big .panel.speak .meter .sbar{height:12px}
   .learn.big .panel.speak .speak>.sbtns{grid-column:2;grid-row:2 / span 2;grid-template-columns:1fr;align-content:end;margin-top:0}
   .learn.big .panel.speak .speak>.miclist,.learn.big .panel.speak .speak>.helpbox{grid-column:1 / -1;grid-row:2 / span 2}
+  .learn.big .panel.speak .speak>.helpbox{top:0;padding-top:48px} /* 위 40px 띠도 풍선 바탕으로 덮음 · 글 자리·두 칸 모양은 전과 같음(견본 단추가 풍선 위로 삐져나오던 것 · 검사1팀 가로 812 · 개발3팀 10-23) */
+  .learn.big .panel.speak .speak>.sbtns{align-content:safe end} /* 단추 기둥이 높이보다 길면 위(머리 줄)로 말고 아래로 넘침(확대 200 ◀▶✕ 겹침 · 개발3팀 10-23) */
 }
+@media (orientation:landscape) and (max-height:400px){.learn.big .panel.speak .speak>.sbtns{gap:4px;padding-bottom:2px}.learn.big .panel.speak .sbtns .mic{min-height:48px}} /* 아주 낮은 가로(높이 360) = 단추 사이 틈만 줄여 기둥이 화면 안에 */
 
 /* 폰 가로(높이 ≤ 500 · 크게 보기 아닐 때) = 왼쪽 기둥(제목·영상 높이 가득·재생 막대·아래 단추 줄) · 오른쪽 줄 목록(대표님 10-16 · 세로 화면은 그대로) */
 @media (orientation:landscape) and (max-height:500px){
@@ -1560,7 +1570,7 @@ html.bigview,html.bigview body{overflow:hidden}
 #vwrap:fullscreen>.vuiko .chip.uiko[aria-pressed=false] .a,#vwrap:fullscreen>.vuiko .chip.uiko[aria-pressed=true] .b{opacity:1;color:#ffd27a}
 
 /* 줄 카드 단추 = 그림만 다섯(쓰기부 · 대표님 10-20 B) — 같은 크기 한 줄 · ▶ 만 주황 · 높이 고정(언어·⇄ 상관없이 카드 높이 0px) */
-.line.cur .acts.ib5{display:grid;grid-template-columns:repeat(5,44px);gap:6px;flex-wrap:nowrap;justify-content:start} /* 단추 폭 고정 44px(짧은 줄 카드도 같은 크기 · 카드가 단추 줄만큼은 넓어짐) */
+.line.cur .acts.ib5{display:grid;grid-template-columns:repeat(5,minmax(34px,44px));gap:6px;flex-wrap:nowrap;justify-content:start} /* 단추 폭 고정 44px(짧은 줄 카드도 같은 크기 · 카드가 단추 줄만큼은 넓어짐) */ /* 카드가 더 좁을 때만 34px 까지 줄어듦(가로 확대 200 줄 목록 243px · 🎮 가 화면 밖 · 개발3팀 10-23) */
 .line .acts.ib5 button.ib{display:flex;align-items:center;justify-content:center;height:34px;min-width:0;padding:0!important;border-radius:12px;font-size:0}
 .line .acts.ib5 button.ib.menu{background:var(--card);border:1px solid var(--line);box-shadow:0 2px 0 var(--line);color:var(--ink)}
 .line .acts.ib5 button.ib.menu[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
