@@ -13,22 +13,22 @@
 //     못 넘어도 막지 않는다([다음 ▶]) · 음성 인식이 안 되는 곳은 점수 없이 듣고 비교만(녹음은 저장)
 //  S6 녹음은 이 기기 안에만(IndexedDB) — 서버로 보내지 않는다
 //  S7 영상 창 안(embedded): 스크롤 없이 · 줄 이동·닫기는 학습 화면이 한다 · 줄 전체까지 통과하면 다음 줄 말하기로
-import { noScoreKey, ageHelpKey } from "../agepolicy.js?v=1023.17"; // 점수 없음 안내 = 나이 때문인지(대표님 10-19)
-import { warmSTT } from "../sttserver.js?v=1023.17";
-import { t, lang, langShort, tAlt } from "../i18n.js?v=1023.17";
-import { esc, sayParts, koq } from "../text.js?v=1023.17";
-import { spkHtml, uiKoBtn } from "../ui.js?v=1023.17";
-import { episode } from "../data.js?v=1023.17";
-import { paths } from "../paths.js?v=1023.17";
-import { audioCtx, hold, quietWake } from "../wake.js?v=1023.17";
-import * as sfx from "../sfx.js?v=1023.17";
-import { diagEnv, keepDiag } from "../diag.js?v=1023.17";
-import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1023.17";
-import { bestHeard, heardHTML, endHint, scoreOf, bestFull, spanOf, sylsAt } from "../heard.js?v=1023.17"; // 덧붙은 말 빼고 견주기(본부 10-11)
-import { openCompare, playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1023.17";
-import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace, lateFactor, sylAt, karaokeRun, isFull } from "../rhythm.js?v=1023.17";
-import { recDel, downloadRec, askPersist } from "../recstore.js?v=1023.17";
-import { logRec, dB, srWhy, srWatch, niceLabel, ALIAS, srOnlyMode, setSrOnly, isAndroid, recordSROnly, srMiss, micSet, seqMode, srOnBlob, devSR, setDevSR, srJudge } from "../recorder.js?v=1023.17";
+import { noScoreKey, ageHelpKey } from "../agepolicy.js?v=1022.29"; // 점수 없음 안내 = 나이 때문인지(대표님 10-19)
+import { warmSTT } from "../sttserver.js?v=1022.29";
+import { t as tG, lang, langShort, tIn, tAltIn, uiKoIn } from "../i18n.js?v=1022.29";
+import { esc, sayParts, koq } from "../text.js?v=1022.29";
+import { spkHtml, bgmBtn, uikoChip } from "../ui.js?v=1022.29";
+import { episode } from "../data.js?v=1022.29";
+import { paths } from "../paths.js?v=1022.29";
+import { audioCtx, hold, quietWake } from "../wake.js?v=1022.29";
+import * as sfx from "../sfx.js?v=1022.29";
+import { diagEnv, keepDiag } from "../diag.js?v=1022.29";
+import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1022.29";
+import { bestHeard, heardHTML, endHint, scoreOf, bestFull, spanOf, sylsAt } from "../heard.js?v=1022.29"; // 덧붙은 말 빼고 견주기(본부 10-11)
+import { openCompare, playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1022.29";
+import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace, lateFactor, sylAt, karaokeRun, isFull } from "../rhythm.js?v=1022.29";
+import { recDel, downloadRec, askPersist } from "../recstore.js?v=1022.29";
+import { logRec, dB, srWhy, srWatch, niceLabel, ALIAS, srOnlyMode, setSrOnly, isAndroid, recordSROnly, srMiss, micSet, seqMode, srOnBlob, devSR, setDevSR, srJudge } from "../recorder.js?v=1022.29";
 
 // 통과 두 단계(본부 10-04 · 투덜이 「원어민은 되지만 외국인은 100% 어렵다」): 80↑ = ☆ 통과(✓ · [저장]) · 95↑ = ★ 완벽
 export const PASS = 80, PERFECT = 95;
@@ -87,9 +87,11 @@ export const recPut = async (key, val) => { try { const d = await db(); await ne
 
 // 단추 글 = 기호(◀ ▶ ? ✕) + 글 — 좁으면 글만 숨김(머리 줄 한 줄 유지)
 // 사용법 풍선 글(help_sp_*) — {b} = 「ने⇄한」 단추 이름(한국어 칸 · ⇄ 때 이 함수로 다시 씀)
-const helpHTML = () => [1, 2, 3, 4, 5, 6, 7, 8, 9].map(k => "help_sp_" + k).concat(ageHelpKey() ? [ageHelpKey()] : []).filter(k => t(k) !== k).map(k => `<p dir="auto">${esc(t(k)).replace("{b}", `<span lang="ko">${esc(langShort(lang))}⇄한</span>`)}</p>`).join("") + `<p><button class="fbauto" data-act="fbauto" aria-pressed="${fbAuto()}"><span aria-hidden="true">🔊</span> <span data-k="fb_auto">${esc(t("fb_auto"))}</span></button></p>` + `<p class="x">${esc(t("help_close"))}</p>`; // 결과 안내 저절로 읽기 켬/끔(대표님 10-21 · 틀 0px = 「?」 안)
-const lbl = k => { const s = t(k), m = String(s).match(/^([^\p{L}\p{M}\p{N}]*)(.*?)([^\p{L}\p{M}\p{N}]*)$/u); return m ? `${m[1] ? `<i class="ic">${esc(m[1].trim())}</i>` : ""}<span class="lt" data-k="${k}" data-kcore>${esc(m[2])}</span>${m[3] ? `<i class="ic">${esc(m[3].trim())}</i>` : ""}` : esc(s); };
+let curT = tG; // 지금 말하기 창의 글 함수(창 범위 · speak() 가 맞춤)
+const helpHTML = () => [1, 2, 3, 4, 5, 6, 7, 8, 9].map(k => "help_sp_" + k).concat(ageHelpKey() ? [ageHelpKey()] : []).filter(k => curT(k) !== k).map(k => `<p dir="auto">${esc(curT(k)).replace("{b}", `<span lang="ko">${esc(langShort(lang))}⇄한</span>`)}</p>`).join("") + `<p><button class="fbauto" data-act="fbauto" aria-pressed="${fbAuto()}"><span aria-hidden="true">🔊</span> <span data-k="fb_auto">${esc(curT("fb_auto"))}</span></button></p>` + `<p class="x">${esc(curT("help_close"))}</p>`; // 결과 안내 저절로 읽기 켬/끔(대표님 10-21 · 틀 0px = 「?」 안)
+const lbl = k => { const s = curT(k), m = String(s).match(/^([^\p{L}\p{M}\p{N}]*)(.*?)([^\p{L}\p{M}\p{N}]*)$/u); return m ? `${m[1] ? `<i class="ic">${esc(m[1].trim())}</i>` : ""}<span class="lt" data-k="${k}" data-kcore>${esc(m[2])}</span>${m[3] ? `<i class="ic">${esc(m[3].trim())}</i>` : ""}` : esc(s); };
 export default async function speak(app, ep, id, opts = {}) {
+  const t = (k, v) => tIn(app, k, v), tAlt = k => tAltIn(app, k); curT = t; // 창 범위 글(창 밖 = 앱 전체와 같음)
   const d = await episode(ep, lang);
   if (seqMode()) warmSTT(); // 서버 받아쓰기 데우기(본부 10-12 · 안드로이드·아이폰)
   const li = Math.max(0, d.lines.findIndex(l => String(l.id) === String(id)));
@@ -111,7 +113,7 @@ export default async function speak(app, ep, id, opts = {}) {
 
   app.innerHTML = `<section class="scr speak ${opts.embedded ? "embedded" : ""}">
     <div class="whead"><b data-k="speak">${esc(t("speak"))}</b><span class="sub">${li + 1} / ${d.lines.length}<span class="spk"> · ${spkHtml(line.speaker)}</span></span>
-      ${uiKoBtn()}<button class="micpick" data-act="help" aria-label="${esc(t("help"))}">${lbl("help_btn")}</button><span class="segnav"></span><button class="micpick closex" data-act="close" aria-label="${esc(t("close_btn"))}">${lbl("close_btn")}</button></div>
+      ${bgmBtn()}${uikoChip(uiKoIn(app))}<button class="micpick" data-act="help" aria-label="${esc(t("help"))}">${lbl("help_btn")}</button><span class="segnav"></span><button class="micpick closex" data-act="close" aria-label="${esc(t("close_btn"))}">${lbl("close_btn")}</button></div>
     <div class="miclist" hidden></div>
     <div class="helpbox" hidden>${helpHTML()}</div>
     <div class="task"><div class="say ko" lang="ko"></div><div class="tr"></div></div>
@@ -503,7 +505,7 @@ export default async function speak(app, ep, id, opts = {}) {
   sfx.preload([lineSrc, ...parts.map(p => p.src)]);
   const release = hold();
   // 언어를 바꾸면(본부 10-13 안 A · retext 가 보내는 malmun:uilang) 결과 줄·토막 단추를 지금 상태 그대로 새 언어로 — 녹음·채점은 안 건드림 · 「확인 중…」 동안은 retext 가 바꾼 글 그대로
-  const onLang = () => { if (!st.alive) return; setRateWord(t("speed")); $(".helpbox").innerHTML = helpHTML(); fitHelp(); fitHead(true); lockBtns(); /* ⇄ 때는 줄이기만(풀지 않음) — 단추 글이 보였다 숨었다 하지 않게(다국어부 10-15 ur 1280) */ /* 속도 알약 말도 새 언어로(다시 그릴 때 옛 말로 쓰지 않게 · 다국어부 10-14) */ if (st.checking) return; paint(); if (st.retryDev) $(".msg").textContent = t("sr_retry_dev"); };
+  const onLang = e => { if (!st.alive) return; const r = e?.detail?.root; if (app.dataset.uiko != null ? r !== app : r) return; /* 창 범위면 이 창 ⇄ 만 · 앱 전체 ⇄ = 창 그대로(본부 10-23) */ setRateWord(t("speed")); $(".helpbox").innerHTML = helpHTML(); fitHelp(); fitHead(true); lockBtns(); /* ⇄ 때는 줄이기만(풀지 않음) — 단추 글이 보였다 숨었다 하지 않게(다국어부 10-15 ur 1280) */ /* 속도 알약 말도 새 언어로(다시 그릴 때 옛 말로 쓰지 않게 · 다국어부 10-14) */ if (st.checking) return; paint(); if (st.retryDev) $(".msg").textContent = t("sr_retry_dev"); };
   addEventListener("malmun:uilang", onLang);
   const onFitW = () => st.alive && fitHead(true); addEventListener("malmun:langfit", onFitW); const onBig = () => st.alive && requestAnimationFrame(() => fitHead()); addEventListener("malmun:big", onBig); // 크게 보기 들고 날 때(머리 줄 폭·⛶ 칩) 다시 맞춤 // langfit 이 단추 폭을 「두 말 중 긴 쪽」으로 고정할 때 → 처음부터 긴 말 기준 단계(첫 ⇄ 도 0px · 다국어부 10-15)
   return () => { fb.off(); removeEventListener("malmun:uilang", onLang); removeEventListener("malmun:langfit", onFitW); removeEventListener("malmun:big", onBig); st.alive = false; newAtt(); clearInterval(litT); closeCmp(); stopRec(true); stopSounds(); st.stream?.getTracks().forEach(x => x.stop()); release(); quietWake(false); document.removeEventListener("keydown", onEsc, true); delete app.__sp; };

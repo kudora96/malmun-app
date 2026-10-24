@@ -13,17 +13,17 @@
 //  W5 소리는 언제나 하나만 · 새 일을 하면 앞 소리는 멈춘다
 //  W6 영상 창 안(embedded): 창 안에서 스크롤 없이 다 보이게 — 긴 문장은 토막으로(◀ 1/3 ▶) ·
 //     토막을 다 쓰면 자동으로 다음 토막 · 줄을 다 쓰면 대사를 듣고 자동으로 다음 줄 쓰기 · 아래 ▶ = 이 부분 듣기
-import { t, tL, lang, uiKoOn, KO_UI, preloadKoUi } from "../i18n.js?v=1023.17";
-import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO, koq } from "../text.js?v=1023.17";
-import { episode, chars, charsF } from "../data.js?v=1023.17";
-import { paths } from "../paths.js?v=1023.17";
-import { I, spkHtml, uiKoBtn, uikoChip } from "../ui.js?v=1023.17";
-import { audioCtx, hold } from "../wake.js?v=1023.17";
-import * as sfx from "../sfx.js?v=1023.17";
-import { scoreFx, stopFx } from "../scorefx.js?v=1023.17";
-import { units as jamoUnits, baseOf, shapeFix } from "../jamobox.js?v=1023.17"; // 자모 자리 나누기(획순 · 자판 덧칠 · 손글씨 덩어리 — 본부 10-07) // 손글씨 점수 효과 = 말하기와 같은 규칙(본부 10-07)
-import { createStrokes } from "../strokes.js?v=1023.17"; // 획 자료·획순 칠(글자부)
-import { whyRow } from "../whyask.js?v=1023.17"; // 「왜 틀렸어요?」(개발2팀 · 기본 꺼짐 ?why=1)
+import { t as tG, tL, lang, uiKoOn as uiKoG, KO_UI, preloadKoUi, tIn, uiKoIn } from "../i18n.js?v=1022.29";
+import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO, koq } from "../text.js?v=1022.29";
+import { episode, chars, charsF } from "../data.js?v=1022.29";
+import { paths } from "../paths.js?v=1022.29";
+import { I, spkHtml, uiKoBtn, uikoChip, openUiScope, SPEAKER } from "../ui.js?v=1022.29";
+import { audioCtx, hold } from "../wake.js?v=1022.29";
+import * as sfx from "../sfx.js?v=1022.29";
+import { scoreFx, stopFx } from "../scorefx.js?v=1022.29";
+import { units as jamoUnits, baseOf, shapeFix } from "../jamobox.js?v=1022.29"; // 자모 자리 나누기(획순 · 자판 덧칠 · 손글씨 덩어리 — 본부 10-07) // 손글씨 점수 효과 = 말하기와 같은 규칙(본부 10-07)
+import { createStrokes } from "../strokes.js?v=1022.29"; // 획 자료·획순 칠(글자부)
+import { whyRow } from "../whyask.js?v=1022.29"; // 「왜 틀렸어요?」(개발2팀 · 기본 꺼짐 ?why=1)
 let FBV = null; import(`../fbvoice.js?v=${document.documentElement.dataset.v || ""}`).then(m => { FBV = m; }).catch(() => {}); // 안내 소리(개발2팀 · 없으면 소리 없이 지금 그대로)
 import { fitToGuide } from "../strokefit.js?v=1023.17"; // 자석 따라오는 획 길 = 회색 가운데(글자부 10-12)
 
@@ -84,8 +84,10 @@ async function run(steps) {
 }
 
 let autoAllNext = null; // 전체 자동 완성이 다음 줄로 넘어갈 때 { ep, id, t } — 새 쓰기 화면이 이어받아 바로 자동
-const helpHtml = () => [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(k => "help_wr_" + k).filter(k => t(k) !== k).map(k => `<p>${esc(t(k))}</p>`).join("") + `<p class="x">${esc(t("help_close"))}</p>`; // 7 = 🔊 이 줄 듣기(10-13 · 열쇠가 있을 때만)
+const helpHtml = (t = tG) => [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(k => "help_wr_" + k).filter(k => t(k) !== k).map(k => `<p>${esc(t(k))}</p>`).join("") + `<p class="x">${esc(t("help_close"))}</p>`; // 7 = 🔊 이 줄 듣기(10-13 · 열쇠가 있을 때만)
 export default async function write(app, ep, id, opts = {}) {
+  const spkS = ko => { const id = SPEAKER[ko], k = "spk_" + id, g = id ? t(k) : ""; return `<span class="ko" lang="ko">${esc(ko)}</span>${g && g !== k && g !== ko ? `<span class="spkg"> · ${esc(g)}</span>` : ""}`; }; // 화자 이름 = 이 창 상태로(ui.js spkHtml 은 앱 전체 상태)
+  let scrW = null; const t = (k, v) => (scrW ? tIn(scrW, k, v) : tG(k, v)), uiKoOn = () => (scrW ? uiKoIn(scrW) : uiKoG()); // ⇄ 창마다 독립(대표님 10-22 · 다국어부 공용 입구) — 쓰기 창 글은 이 창 상태로
   const [d, idx, cf, KOS] = await Promise.all([episode(ep, lang), chars(), charsF(ep), KO_UI.includes(lang) ? preloadKoUi(lang) : null]); // KOS = 한국어 앱 글(⇄) — 단추 폭을 두 언어 중 긴 쪽으로(10-15)
   // 글자·자모 소리: 공용 아나운서(chars_f) 먼저 · 없으면 지금 글자 소리 · 자모는 옛 jamo 이름
   const charSrc = ch => (cf[ch] ? paths.charF(cf[ch]) : idx[ch] ? paths.char(idx[ch]) : null);
@@ -125,14 +127,15 @@ export default async function write(app, ep, id, opts = {}) {
 
   app.innerHTML = `<section class="scr write ${opts.embedded ? "embedded" : ""}">
     ${opts.embedded
-      ? `<div class="whead"><b>${esc(t("write"))}</b><span class="sub"><span class="ln">${li + 1} / ${d.lines.length}</span><span class="sp"> · ${spkHtml(line.speaker)}</span></span>${modeBtns()}${uiKoBtn()}<button class="whelp" data-act="help" aria-label="${esc(t("help"))}">${esc(t("help_btn"))}</button><button class="whelp wclose" data-act="close" aria-label="${esc(t("close_btn"))}">✕<span class="lt">${esc(String(t("close_btn")).replace(/^✕\s*/, " "))}</span></button><span class="loopnote" aria-live="polite"></span></div>`
+      ? `<div class="whead"><b>${esc(t("write"))}</b><span class="sub"><span class="ln">${li + 1} / ${d.lines.length}</span><span class="sp"> · ${spkS(line.speaker)}</span></span>${modeBtns()}${uiKoBtn()}<button class="whelp" data-act="help" aria-label="${esc(t("help"))}">${esc(t("help_btn"))}</button><button class="whelp wclose" data-act="close" aria-label="${esc(t("close_btn"))}">✕<span class="lt">${esc(String(t("close_btn")).replace(/^✕\s*/, " "))}</span></button><span class="loopnote" aria-live="polite"></span></div>`
       : `<div class="bar"><a class="iconbtn" href="#/learn/${ep}/${line.id}" aria-label="${esc(t("back"))}">${I.back}</a>
-      <div class="grow"><div class="t">${esc(t("write"))}</div><div class="sub"><span class="ln">${li + 1} / ${d.lines.length}</span><span class="sp"> · ${spkHtml(line.speaker)}</span></div></div>${modeBtns()}${uiKoBtn()}<button class="whelp" data-act="help" aria-label="${esc(t("help"))}">${esc(t("help_btn"))}</button></div><div class="loopnote" aria-live="polite"></div>`}
+      <div class="grow"><div class="t">${esc(t("write"))}</div><div class="sub"><span class="ln">${li + 1} / ${d.lines.length}</span><span class="sp"> · ${spkS(line.speaker)}</span></div></div>${modeBtns()}${uiKoBtn()}<button class="whelp" data-act="help" aria-label="${esc(t("help"))}">${esc(t("help_btn"))}</button></div><div class="loopnote" aria-live="polite"></div>`}
     <div class="segrow"><div class="sent" lang="ko"></div><div class="segnav"></div><div class="wtip" hidden></div></div>
     <div class="work"></div>
-    <div class="helpbox" hidden>${helpHtml()}</div>
+    <div class="helpbox" hidden>${helpHtml(t)}</div>
     <div class="wbtns"><button data-act="hearch"></button><button data-act="auto"></button><button data-act="autoall"></button></div>
   </section>`;
+  scrW = openUiScope(app.querySelector(".scr.write")); /* 창 범위 시작 = 바깥 상태(본부 10-23) · 창 안 ⇄ = 이 창만 */
 
   const $ = s => app.querySelector(s);
   const note = $(".loopnote"), work = $(".work"), sentEl = $(".sent"), segnav = $(".segnav");
@@ -864,23 +867,25 @@ export default async function write(app, ep, id, opts = {}) {
     const ov = document.createElement("div"); ov.className = "keepov"; ov.setAttribute("role", "dialog");
     const date = new Date().toISOString().slice(0, 10), nm = (() => { try { return localStorage.getItem("malmun.keepname") || ""; } catch { return ""; } })();
     const sv = d0 => `<svg class="ico" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d0}</svg>`;
-    const ic = [["print", sv('<path d="M6 9V3h12v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M7 14h10v7H7z"/>'), "keep_print"], ["pdf", sv('<path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M12 12v6M9 15l3 3 3-3"/>') + "<b>PDF</b>", "keep_pdf"], ["png", sv('<rect x="3" y="3" width="18" height="14" rx="2"/><circle cx="8.5" cy="8" r="1.5"/><path d="M21 13l-5-5-9 9"/><path d="M12 19v3M9.5 20.5 12 22l2.5-1.5"/>'), "keep_png"]], lab = k => tx(k).replace(/^[🖨⬇]️?\s*/u, "");
-    ov.innerHTML = `<div class="kp"><div class="kh">${uikoChip()}<button class="kx" data-kact="close">✕</button></div>
+    const ic = [["print", sv('<path d="M6 9V3h12v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M7 14h10v7H7z"/>'), "keep_print"], ["pdf", sv('<path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M12 12v6M9 15l3 3 3-3"/>') + "<b>PDF</b>", "keep_pdf"], ["png", sv('<rect x="3" y="3" width="18" height="14" rx="2"/><circle cx="8.5" cy="8" r="1.5"/><path d="M21 13l-5-5-9 9"/><path d="M12 19v3M9.5 20.5 12 22l2.5-1.5"/>'), "keep_png"]], lab = k => tv(k).replace(/^[🖨⬇]️?\s*/u, "");
+    ov.innerHTML = `<div class="kp"><div class="kh">${uikoChip(uiKoIn(scrW))}<button class="kx" data-kact="close">✕</button></div>
       <div class="kcv"><canvas></canvas></div>
       <label class="kname"><span aria-hidden="true">✎</span><input type="text" maxlength="24" value="${esc(nm)}"></label>
       <div class="kbtns">${ic.map(([a, g]) => `<button data-kact="${a}">${g}</button>`).join("")}</div></div>`;
+    ov.dataset.uiko = scrW?.dataset.uiko ?? (uiKoG() ? "1" : "0"); ov.classList.toggle("uiko", ov.dataset.uiko === "1"); /* 저장 창 = 제 범위(쓰기 창 상태로 시작 · 이 창 ⇄ = 이 창만) */
+    const tv = (k, v) => { const s0 = tIn(ov, k, v); if (s0 !== k) return s0; return (WX[uiKoIn(ov) ? "ko" : lang] || WX.en)[k] ?? WX.en[k] ?? k; };
     document.body.append(ov); const cv = ov.querySelector("canvas");
-    const retx = () => { ov.setAttribute("aria-label", tx("keep_title")); ov.querySelector(".kx").setAttribute("aria-label", t("close_btn")); const ni = ov.querySelector(".kname input"); ni.setAttribute("placeholder", tx("keep_name")); ni.setAttribute("aria-label", tx("keep_name")); /* 이름 = 칸 안 흐린 글만(⇄ 0px) */
-      ic.forEach(([a, , k]) => { const b = ov.querySelector(`[data-kact=${a}]`); b.setAttribute("aria-label", lab(k)); b.title = lab(k); }); ov.querySelectorAll("[data-act=uiko]").forEach(b => b.setAttribute("aria-pressed", String(uiKoOn()))); };
-    const draw = () => { const name = ov.querySelector(".kname input").value.trim(); drawSheet(cv, { items: [{ ch: only, e: e0 }], ep: `말문 · ${d.title || ""}`, title: tx("keep_mine"), word: "", mean: w.mean ? meanOf(w.mean) : "", nameLab: tx("keep_name"), name, dateLab: "", date, need: tx("keep_need"), sc: "" }); };
-    const onLang = () => { if (!ov.isConnected) return window.removeEventListener("malmun:uilang", onLang); retx(); draw(); }; window.addEventListener("malmun:uilang", onLang); /* ⇄ = 글만 바뀜(창 틀 그대로) */
+    const retx = () => { ov.setAttribute("aria-label", tv("keep_title")); ov.querySelector(".kx").setAttribute("aria-label", tv("close_btn")); const ni = ov.querySelector(".kname input"); ni.setAttribute("placeholder", tv("keep_name")); ni.setAttribute("aria-label", tv("keep_name")); /* 이름 = 칸 안 흐린 글만(⇄ 0px) */
+      ic.forEach(([a, , k]) => { const b = ov.querySelector(`[data-kact=${a}]`); b.setAttribute("aria-label", lab(k)); b.title = lab(k); }); ov.querySelectorAll("[data-act=uiko]").forEach(b => b.setAttribute("aria-pressed", String(uiKoIn(ov)))); };
+    const draw = () => { const name = ov.querySelector(".kname input").value.trim(); drawSheet(cv, { items: [{ ch: only, e: e0 }], ep: `말문 · ${d.title || ""}`, title: tv("keep_mine"), word: "", mean: w.mean ? meanOf(w.mean) : "", nameLab: tv("keep_name"), name, dateLab: "", date, need: tv("keep_need"), sc: "" }); };
+    const onLang = () => { if (!ov.isConnected) return window.removeEventListener("malmun:uilang", onLang); retv(); draw(); }; window.addEventListener("malmun:uilang", onLang); /* ⇄ = 글만 바뀜(창 틀 그대로) */
     const tipOff = () => ov.querySelector(".ktip2")?.remove();
     ov.addEventListener("click", ev => { const t0 = ev.target.closest("button, .keepov"); if (ev.target === ov) return ov.remove(); if (!t0 || t0 === ov) return; tipOff();
       const a2 = t0.dataset.kact; if (a2 === "close") return ov.remove();
       if (a2 === "png") { const aEl = document.createElement("a"); aEl.href = cv.toDataURL("image/png"); aEl.download = `malmun_${only}_${date}.png`; document.body.append(aEl); aEl.click(); aEl.remove(); return; }
       if (a2 === "print" || a2 === "pdf") { document.querySelector(".keepprint")?.remove(); const ps = document.createElement("div"); ps.className = "keepprint"; ps.innerHTML = `<img alt="" src="${cv.toDataURL("image/png")}">`; document.body.append(ps); const done = () => { ps.remove(); window.removeEventListener("afterprint", done); }; window.addEventListener("afterprint", done); setTimeout(() => window.print(), 50); return; } });
     ov.querySelector(".kname input").addEventListener("input", e => { try { localStorage.setItem("malmun.keepname", e.target.value.trim()); } catch {} draw(); });
-    retx(); document.fonts?.ready.then(draw); draw();
+    retv(); document.fonts?.ready.then(draw); draw();
     let seen = false; try { seen = localStorage.getItem("malmun.keeptip2") === "1"; localStorage.setItem("malmun.keeptip2", "1"); } catch {} /* 아이콘 뜻 = 처음 한 번 풍선말 · 누르면 사라짐 */
     if (!seen) { const tp = document.createElement("div"); tp.className = "ktip2"; tp.setAttribute("role", "status"); tp.innerHTML = ic.map(([, g, k]) => `<span>${g.replace("<b>PDF</b>", "")} ${esc(lab(k))}</span>`).join(""); ov.querySelector(".kbtns").append(tp); setTimeout(tipOff, 6000); }
   }
@@ -1257,12 +1262,12 @@ export default async function write(app, ep, id, opts = {}) {
   function retext() {
     if (!st.alive) return; barLock = performance.now() + 800; const L = k => t(k), span = (el, k) => { if (!el) return; el.setAttribute("aria-label", L(k)); }; /* 보이는 글 = dualizeAll(두 겹 중 고른 언어) */
     const h = app.querySelector(".whead"), bar = app.querySelector(".bar");
-    if (h) { const b = h.querySelector(":scope > b"); if (b) b.textContent = L("write"); const sb = h.querySelector(".sub"); if (sb) sb.innerHTML = `<span class="ln">${li + 1} / ${d.lines.length}</span><span class="sp"> · ${spkHtml(line.speaker)}</span>`; }
-    if (bar) { const tt = bar.querySelector(".t"), sb = bar.querySelector(".sub"), bk = bar.querySelector(".iconbtn"); if (tt) tt.textContent = L("write"); if (sb) sb.innerHTML = `<span class="ln">${li + 1} / ${d.lines.length}</span><span class="sp"> · ${spkHtml(line.speaker)}</span>`; bk?.setAttribute("aria-label", L("back")); }
+    if (h) { const b = h.querySelector(":scope > b"); if (b) b.textContent = L("write"); const sb = h.querySelector(".sub"); if (sb) sb.innerHTML = `<span class="ln">${li + 1} / ${d.lines.length}</span><span class="sp"> · ${spkS(line.speaker)}</span>`; }
+    if (bar) { const tt = bar.querySelector(".t"), sb = bar.querySelector(".sub"), bk = bar.querySelector(".iconbtn"); if (tt) tt.textContent = L("write"); if (sb) sb.innerHTML = `<span class="ln">${li + 1} / ${d.lines.length}</span><span class="sp"> · ${spkS(line.speaker)}</span>`; bk?.setAttribute("aria-label", L("back")); }
     app.querySelectorAll("[data-mode]").forEach(x => span(x, x.dataset.mode === "kb" ? "w_kb" : "w_hand"));
     app.querySelectorAll("[data-act=help]").forEach(x => x.setAttribute("aria-label", L("help")));
     app.querySelectorAll("[data-act=close]").forEach(x => x.setAttribute("aria-label", L("close_btn")));
-    const hb = $(".helpbox"); if (hb) hb.innerHTML = helpHtml();
+    const hb = $(".helpbox"); if (hb) hb.innerHTML = helpHtml(t);
     dualizeAll(); markAuto();
     paintSent(); /* 위 글자 줄 · ◀ ▶ 이름 · 🔊 이름 */ const tip = $(".wtip"); if (tip && !tip.hidden) tip.textContent = L("w_line_tip");
     work.querySelectorAll("[data-tool]").forEach(x => span(x, "h_" + x.dataset.tool)); span(work.querySelector("[data-hmode]"), "h_magnet"); work.querySelector("[data-hfollow]")?.setAttribute("aria-label", tx("h_follow"));
@@ -1274,7 +1279,7 @@ export default async function write(app, ep, id, opts = {}) {
     if (sc) { sc.querySelectorAll("i[data-k] u").forEach(u => (u.textContent = tx(u.parentElement.dataset.k))); fitScore(sc); } /* 배지 이름도 그 언어로(⇄) */
     fitHeadW(); placeBtns(); fitWord();
   }
-  const onUiLang = () => { retext(); autoLabels(); }; window.addEventListener("malmun:uilang", onUiLang); /* 🔊 전체 = 학습자 말 ⇄ 한국어 */
+  const onUiLang = e => { if (e?.detail?.root !== scrW) return; retext(); autoLabels(); }; window.addEventListener("malmun:uilang", onUiLang); /* 이 창 ⇄ 일 때만(앱 전체 ⇄ = 창 그대로 · 본부 10-23) */ /* 🔊 전체 = 학습자 말 ⇄ 한국어 */
   const onBig = () => { if (!st.alive) return; requestAnimationFrame(() => { if (!st.alive) return; st.hand?.fit?.(); fitHandBox(); fitHeadW(); placeBtns(); fitWord(); fitJudge(); }); }; window.addEventListener("malmun:big", onBig); window.addEventListener("resize", onBig); // ⛶ 크게 보기 켜고 끌 때·폰 돌릴 때 칸 다시 맞춤
   const onFontsDone = () => { if (st.alive) { fitWord(); placeBtns(); fitWord(); fitHbtn(); } }; document.fonts?.ready?.then(() => setTimeout(onFontsDone, 0)); /* 뜻 줄(fitSub2)도 다시 맞춤 */ document.fonts?.addEventListener?.("loadingdone", onFontsDone); // 글꼴이 늦게 오면(나스탈리크·데바나가리) 단추 글 다시 맞춤(10-16)
   const onVis = () => { if (document.visibilityState === "hidden" && st.alive) { if (st.auto || st.resumeAuto) stopAuto(); stopLoop(); hush(); st.busy = false; const H = st.hand; if (H) { clearTimeout(H.adv); H.passSnd = false; } } /* 다른 탭·앱으로 가면 자동·반복·소리·다음 글자 예약 멈춤(본부 10-15) */ if (document.visibilityState === "visible") { try { const c = audioCtx(); if (c.state !== "running") c.resume().catch(() => {}); } catch {} } }; document.addEventListener("visibilitychange", onVis); // 앱으로 돌아오면 소리 장치 깨움(폰에서 다른 앱 갔다 오면 잠들어 쓰는 소리가 안 나던 것 · 본부 10-14)
