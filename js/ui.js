@@ -23,7 +23,7 @@ export const langChip = () => `<button class="chip" data-act="lang" aria-label="
 //  어느 화면에서 눌러도 앱 전체가 같이(기억 malmun.uiko) · 다시 그리지 않고 그 자리에서 글만(retext) · 처음엔 모국어
 //  화면은 uiKoBtn() 만 머리 줄 오른쪽 묶음 맨 앞에 두면 됨 — 누르기는 아래 문서 한 곳(switchUiKo)이 받음(배우기 화면은 자기 손잡이가 먼저 받고 멈춤)
 export const uiKoBtn = () => bgmBtn() + uikoChip();
-export const uikoChip = (ko = uiKoOn()) => (KO_UI.includes(lang) ? `<button class="chip uiko" data-act="uiko" aria-pressed="${ko}" aria-label="${esc(langName(lang))} ⇄ 한국어"><span class="a" lang="${lang}">${esc(langShort(lang))}</span>⇄<span class="b" lang="ko">한</span></button>` : "");
+export const uikoChip = (ko = uiKoOn()) => (KO_UI.includes(lang) ? `<button class="chip uiko" data-act="uiko" aria-pressed="${ko}" aria-label="${esc(langName(lang))} ⇄ 한국어"><span class="a" lang="${lang}">${esc(langShort(lang))}</span><span class="ar" aria-hidden="true">⇄</span><span class="b" lang="ko">한</span></button>` : "");
 // ♪ 「음악」 = 🎵 음악 상자 열기(대표님 10-16 · 모든 창 = uiKoBtn() 앞 · ⇄ 없는 언어에도 · 크기 고정 · 끔 = 흐리게 빗금(data-on) · 누르기는 아래 문서 한 곳)
 const BGM_I = { on: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>', off: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M17 9.5l5 5M22 9.5l-5 5"/></svg>' };
 // 배경음악 켜기·끄기(대표님 10-20) = ⇄ 바로 왼쪽 동그란 단추 · 🔇 꺼짐(처음) ⇄ 🔊 켜짐 · 누르면 바로 켜기·끄기(음악 상자는 따로) · 크기 고정(글 없음 · 이름 = aria·title)
@@ -46,11 +46,27 @@ export function switchUiScope(root, ko = root?.dataset.uiko !== "1") {
 }
 // ⇄ 미끄럼 칸(대표님 10-23 시안 ③) — 켜진 말(.a/.b) 뒤 주황 칸 = 칩의 ::before(--pl·--pw) · 누르면 0.2초 미끄러짐 · 칩 크기·자리 0px(겹 그림만) · 못 잰 칩은 css 가 켜진 글자 둘레만 채움
 function placePill(c) {
-  const on = c.querySelector(c.getAttribute("aria-pressed") === "true" ? ".b" : ".a"); if (!on || !c.offsetWidth) return;
-  const l = Math.max(2, on.offsetLeft - 5), w = Math.min(on.offsetWidth + 10, c.clientWidth - 2 - l);
-  c.style.setProperty("--pl", l + "px"); c.style.setProperty("--pw", w + "px");
+  const ko = c.getAttribute("aria-pressed") === "true", on = c.querySelector(ko ? ".b" : ".a"), arE = c.querySelector(".ar"); if (!on || !arE || !c.offsetWidth) return;
+  // 칩 자기 좌표(offset* = 칩 안쪽 px · 설명 창처럼 통째로 키우거나 줄인 zoom 에서도 ::before 와 같은 단위 · 가로 설명 창 10-23 칸이 1.33배로 밀리던 것)
+  const bx = e => [e.offsetLeft, e.offsetLeft + e.offsetWidth], ob = bx(on);
+  const arRect = () => { const [l0, r0] = bx(arE), m = /matrix\(([-\d.e]+)/.exec(getComputedStyle(arE).transform), sc = m ? Math.abs(parseFloat(m[1])) : 1, cx = (l0 + r0) / 2, hw = ((r0 - l0) * sc) / 2; return [cx - hw, cx + hw]; }; // ⇄ 글자 자리(작게 보이기 transform 반영)
+  if (!c.dataset.tight) { const a0 = arRect(), gap = e => { const [l0, r0] = bx(e); return Math.max(a0[0] - r0, l0 - a0[1]); }, gp = Math.min(gap(c.querySelector(".a")), gap(c.querySelector(".b"))); c.dataset.tight = gp < 2 ? "2" : gp < 4 ? "1" : "0"; } // 글자와 ⇄ 사이가 좁을수록 ⇄ 글자만 작게(칩 크기 0px) — 1px = 72% · 3px = 86%
+  const ar = arRect();
+  const rs = ob[0] + ob[1] > ar[0] + ar[1]; // 켜진 말이 ⇄ 오른쪽(왼→오 「한」 · 오른→왼 ur 의 모국어)
+  if (c.dataset.tight !== "2" && (rs ? ob[0] < ar[1] + 1.5 : ob[1] > ar[0] - 1.5)) { c.dataset.tight = "2"; return placePill(c); } // 글자 상자가 ⇄ 에 닿음(ur 나스탈리크) = ⇄ 한 단계 더 작게
+  let l = ob[0] - 5, rgt = ob[1] + 5;
+  if (rs) l = Math.max(l, ar[1] + 1.5); else rgt = Math.min(rgt, ar[0] - 1.5); // ⇄ 와 1.5px 틈
+  l = Math.max(2, Math.min(l, ob[0])); rgt = Math.min(c.clientWidth - 2, Math.max(rgt, ob[1]));
+  // 칸 모양이 칩 둥근 테두리 안에 쏙(대표님 10-23 「둥그런 거 삐져나옴」) — 칩 안쪽 둥근 네모를 2.5px 줄인 곳 안에 칸(둥근 네모)의 테두리 점이 모두 들도록 칸 높이를 줄임 · 세로 가운데
+  const W = c.clientWidth, H = c.clientHeight, g = 2.5, R = Math.max(0, Math.min(parseFloat(getComputedStyle(c).borderTopLeftRadius) - c.clientTop, W / 2, H / 2) - g), pw = rgt - l;
+  const inside = (x0, y0) => { const cx = Math.min(Math.max(x0, g + R), W - g - R), cy = Math.min(Math.max(y0, g + R), H - g - R); return x0 >= g - 0.01 && x0 <= W - g + 0.01 && y0 >= g - 0.01 && y0 <= H - g + 0.01 && Math.hypot(x0 - cx, y0 - cy) <= R + 0.01; };
+  const fits = (t, ph) => { const r = Math.min(pw, ph) / 2; for (let i = 0; i < 4; i++) { const ox = i % 2 ? l + pw - r : l + r, oy = i < 2 ? t + r : t + ph - r; for (let a = 0; a <= 8; a++) { const th = (Math.PI / 2) * (a / 8) + [Math.PI, 1.5 * Math.PI, 0.5 * Math.PI, 0][i]; if (!inside(ox + r * Math.cos(th), oy + r * Math.sin(th))) return false; } } return true; };
+  let ph = H - 2 * g; while (ph > 8 && !fits((H - ph) / 2, ph)) ph -= 0.5;
+  c.style.setProperty("--pl", l.toFixed(1) + "px"); c.style.setProperty("--pw", pw.toFixed(1) + "px"); c.style.setProperty("--pt", ((H - ph) / 2).toFixed(1) + "px"); c.style.setProperty("--ph", ph.toFixed(1) + "px");
   if (!c.classList.contains("pl")) requestAnimationFrame(() => c.classList.add("pl")); // 처음 자리는 움직임 없이 · 그 뒤부터 미끄러짐
+  if (!c.__pillRO && window.ResizeObserver) { c.__pillRO = true; pillRO.observe(c); } // 칩 크기가 바뀌면 다시 잼(설명 창이 맞는 배율을 찾느라 칩 높이를 여러 번 바꿈 · 가로 설명 창 10-23)
 }
+const pillRO = window.ResizeObserver ? new ResizeObserver(es => es.forEach(e => placePill(e.target))) : null;
 const pillAll = () => document.querySelectorAll(".chip.uiko").forEach(placePill);
 if (!window.__pillWired) {
   window.__pillWired = true;
