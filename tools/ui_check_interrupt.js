@@ -46,14 +46,14 @@
     // ── 자동 완성 2종(본부 10-11) — 서로 끼어들면 먼저 것 멈춤 · 모드·토막·✕ = 멈춤 · 마지막 줄 전체 자동 = 저절로 더 안 감 ──
     { localStorage.setItem("malmun.wmode", "kb"); await openP("write"); const all = () => $(".panel [data-act=autoall]"), lab = () => `${autoBtn()?.textContent}|${all()?.textContent}`;
       autoBtn().click(); await W(900); all().click(); await W(300); const s1 = wr()?.st(), l1 = lab(); const mx1 = await peak(800);
-      ok(s1?.auto && s1.autoMode === "all" && /⏹/.test(all().textContent) && !/⏹/.test(autoBtn().textContent) && mx1 <= 1, "자동 완성 중 → 전체 자동 = 먼저 것 멈추고 전체만(단추 ⏹ 하나 · 소리 하나 이하)", `${l1} · 소리 ${mx1}`);
-      autoBtn().click(); await W(300); const s2 = wr()?.st(); ok(s2?.auto && s2.autoMode === "line" && /⏹/.test(autoBtn().textContent) && !/⏹/.test(all().textContent), "전체 자동 중 → 자동 완성 = 바꿔서 한 줄만", lab());
-      $(`.panel [data-mode=hand]`).click(); await W(300); const s3 = wr()?.st(), mx3 = await peak(800), [a, b] = await stillFor(3000); ok(!s3.auto && !/⏹/.test(lab()) && mx3 <= 1 && a === b, "자동 중 모드 바꿈 = 멈춤 · 저 혼자 안 씀", `${lab()} · ${a}→${b}`);
-      $(`.panel [data-mode=kb]`).click(); await W(300); all().click(); await W(700); $(".panel [data-seg='1']")?.click(); await W(300); const s4 = wr()?.st(), [c1, c2] = await stillFor(3000); ok(!s4.auto && c1 === c2 && !/⏹/.test(lab()), "전체 자동 중 토막 옮김 = 멈춤", `${c1}→${c2}`);
+      ok(s1?.auto && s1.autoMode === "all" && all().getAttribute("aria-pressed") === "true" && autoBtn().getAttribute("aria-pressed") !== "true" && mx1 <= 1, "[낱말] 중 → [문장] = 먼저 것 멈추고 문장만(눌림 하나 · 소리 하나 이하 · 대표님 10-22 단추 글 고정)", `${l1} · 소리 ${mx1}`);
+      autoBtn().click(); await W(300); const s2 = wr()?.st(); ok(s2?.auto && s2.autoMode === "word" && autoBtn().getAttribute("aria-pressed") === "true" && all().getAttribute("aria-pressed") !== "true", "[문장] 중 → [낱말] = 바꿔서 낱말만", lab());
+      $(`.panel [data-mode=hand]`).click(); await W(300); const s3 = wr()?.st(), mx3 = await peak(800), [a, b] = await stillFor(3000); ok(!s3.auto && ![autoBtn(), all()].some(b => b?.getAttribute("aria-pressed") === "true") && mx3 <= 1 && a === b, "자동 중 모드 바꿈 = 멈춤 · 저 혼자 안 씀", `${lab()} · ${a}→${b}`);
+      $(`.panel [data-mode=kb]`).click(); await W(300); all().click(); await W(700); $(".panel [data-seg='1']")?.click(); await W(300); const s4 = wr()?.st(), [c1, c2] = await stillFor(3000); ok(!s4.auto && c1 === c2 && ![autoBtn(), all()].some(b => b?.getAttribute("aria-pressed") === "true"), "전체 자동 중 토막 옮김 = 멈춤", `${c1}→${c2}`);
       all().click(); await W(700); await closeP(); const mx5 = await peak(1500); ok(!$(".panel .write") && mx5 === 0, "전체 자동 중 ✕ = 소리 0 · 쓰기 창 없음", `소리 ${mx5}`); }
     { const last = L().length - 1; await openP("write", last); const segs = $(".panel .segnav")?.innerText.match(/\/(\d+)/)?.[1] || 1; for (let s = 1; s < +segs; s++) { $(".panel [data-seg='1']")?.click(); await W(150); }
       $(".panel [data-act=autoall]").click(); let t = 0; while (t < 40000 && !wr()?.st().lineEnd) { await W(200); t += 200; } await W(3500); const sub = $(".panel .whead .sub")?.textContent, S = wr()?.st();
-      ok(S?.lineEnd && !S.auto && !S.allNext && new RegExp(`^${last + 1} /`).test(sub || "") && !/⏹/.test($(".panel [data-act=autoall]").textContent), "마지막 줄 전체 자동 끝 = 그 자리에 멈춤(다음으로 안 감 · 단추 원래대로)", `${sub} · ${t}ms`); await closeP(); }
+      ok(S?.lineEnd && !S.auto && !S.allNext && new RegExp(`^${last + 1} /`).test(sub || "") && $(".panel [data-act=autoall]").getAttribute("aria-pressed") !== "true", "마지막 줄 전체 자동 끝 = 그 자리에 멈춤(다음으로 안 감 · 단추 원래대로)", `${sub} · ${t}ms`); await closeP(); }
     // ── 글자 칸 소리 단추(본부 10-08) — 다시 누름 · 자판 · 자동 ──
     { await openP("write"); const bx = () => $(".panel .stage .box"); const n0 = log.length; bx().click(); await W(150); const heard = log.slice(n0).some(e => e.ev === "시작" && /chars_f/.test(e.name)); bx().click(); const m1 = await peak(900);
       [...document.querySelectorAll(".panel [data-j]")][0].click(); bx().click(); await W(50); [...document.querySelectorAll(".panel [data-j]")][1].click(); const m2 = await peak(900);
@@ -67,10 +67,10 @@
     { await openP("write"); autoBtn().click(); let t = 0; while (t < 6000 && !(wr()?.st().done)) { await W(30); t += 30; } await W(150); const at = pos(); autoBtn().click(); await W(1500); const [x, y] = await stillFor(2000);
       ok(at.split(".").slice(1, 3).join(".") === x.split(".").slice(1, 3).join(".") && x === y && !wr()?.st().auto, "자동 중 글자 완성 소리 때 자동 단추 = 그 글자에서 바로 멈춤(넘어감 0)", `${at}→${x}→${y}`);
       const k1 = [...document.querySelectorAll(".panel [data-j]")][0]; const n0 = log.length; k1?.click(); await W(900); ok(log.slice(n0).some(e => e.ev === "시작"), "그 자리(다 친 글자)에서 자판 = 소리 남(다음 글자로)", pos()); await closeP(); }
-    { await openP("write"); autoBtn().click(); await W(900); $(".panel [data-act=line]")?.click(); await W(300); const off = !wr()?.st().auto, lab = /⏹|■/.test(autoBtn()?.textContent || ""), p0 = pos(); let t = 0; while (t < 12000 && !wr()?.st().auto) { await W(200); t += 200; } const back = !!wr()?.st().auto;
-      ok(off && lab && back, "자동 중 이 부분 듣기 = 자동 잠깐 멈춤(단추는 멈추기) → 듣기 끝나면 그 글자부터 자동 다시", `멈춤 ${off} · 단추 ${lab} · 다시 ${back} (${t}ms) · ${p0}`); if (wr()?.st().auto) autoBtn().click(); await W(300);
+    { await openP("write"); autoBtn().click(); await W(900); $(".panel [data-act=line]")?.click(); await W(300); const off = !wr()?.st().auto, lab = autoBtn()?.getAttribute("aria-pressed") !== "true", p0 = pos(); await W(6000); const back = !!wr()?.st().auto, p1 = pos();
+      ok(off && lab && !back && p0 === p1, "자동 중 이 부분 듣기 = 자동 멈추고 듣기만 · 끝나도 자동 다시 안 함(본부 10-23 「그 단추 일만」)", `멈춤 ${off} · 눌림 풀림 ${lab} · 다시 ${back} · ${p0}→${p1}`); if (wr()?.st().auto) autoBtn().click(); await W(300);
       autoBtn().click(); await W(900); $(".panel [data-act=line]")?.click(); await W(300); autoBtn().click(); await W(300); const mx = await peak(800); await W(4000);
-      ok(!wr()?.st().auto && !wr()?.st().sent && !/⏹|■/.test(autoBtn()?.textContent || "") && mx === 0, "듣기 중 자동 단추 = 자동 끔 · 듣기도 멈춤 · 다시 안 켜짐", `소리 ${mx}`); await closeP(); }
+      ok(!wr()?.st().sent && mx <= 1, "듣기 중 [낱말] = 듣기 멈추고 그 단추 일만(낱말 자동) · 소리 하나 이하(본부 10-23)", `소리 ${mx} · 자동 ${wr()?.st().auto}`); if (wr()?.st().auto) autoBtn().click(); await W(300); await closeP(); }
     // ── 말하기 ──
     { await openP("speak"); const m = $(".panel [data-act=model]"); m.click(); await W(400); await closeP(); const mx = await peak(1200); ok(mx === 0, "말하기 견본 중 → ✕ = 소리 0", `소리 ${mx}`); }
     { localStorage.setItem("malmun.rate.m", "0.75"); await openP("speak"); $(".panel [data-act=model]").click(); await W(400); $(".panel [data-act=model]").click(); await W(400);

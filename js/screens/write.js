@@ -173,7 +173,7 @@ export default async function write(app, ep, id, opts = {}) {
     const again = () => { if (st.resumeAuto && st.alive) { st.resumeAuto = false; autoPart(st.autoMode); } };
     if (st.sent) { st.sent = false; hush(); markSent(); return again(); }
     const wasAuto = st.auto; if (wasAuto) { st.auto = false; st.jumpTo = null; st.hand?.stopOrder?.(); st.busy = false; st.done = false; st.queue = []; }
-    stopLoop(); st.sent = true; markSent(); st.resumeAuto = wasAuto || st.resumeAuto; markAuto();
+    stopLoop(); st.sent = true; markSent(); st.resumeAuto = false; if (wasAuto) st.autoGen = (st.autoGen || 0) + 1; markAuto(); /* 자동 중 이 부분 듣기 = 자동 멈추고 듣기만(본부 10-23 「다른 단추 = 그 단추 일만」 · 끝나도 자동 다시 안 함) */
     const my = (st.sentGen = (st.sentGen || 0) + 1);
     run([partStep()]).then(ok => { if (st.sentGen !== my) return; st.sent = false; markSent(); if (ok) again(); else if (st.resumeAuto) { st.resumeAuto = false; markAuto(); } }); // 다른 걸 눌러 끊기면 자동 다시 안 함
   }
@@ -1247,7 +1247,7 @@ export default async function write(app, ep, id, opts = {}) {
       if (st.allNext) { st.allNext = false; st.sent = false; hush(); markSent(); markAuto(); return; } // 줄 끝 대사 중(다음 줄로 넘어가기 전) = 넘어가지 않고 멈춤(어느 단추든) // 줄 끝 대사 중(다음 줄로 넘어가기 전) = 넘어가지 않음
       else if (st.auto) { stopAuto(); if (mine) return; }
       else if (st.resumeAuto) { st.resumeAuto = false; st.sent = false; hush(); markSent(); markAuto(); if (mine) return; } // 듣기 중(자동이 잠깐 멈춤) 같은 단추 = 자동 끔 · 듣기도 멈춤
-      if (st.s < segs.length) { if (st.busy || st.done) { hush(); st.busy = false; st.done = false; st.queue = []; } autoPart(mode); } // 소리 중이어도 바로(투덜이 10-10 「친 뒤 누르면 바로 중지」)
+      if (st.s < segs.length) { if (st.sent) { st.sent = false; st.sentGen = (st.sentGen || 0) + 1; hush(); markSent(); } /* 듣는 중 자동 단추 = 듣기 멈추고 그 자동만 */ if (st.busy || st.done) { hush(); st.busy = false; st.done = false; st.queue = []; } autoPart(mode); } // 소리 중이어도 바로(투덜이 10-10 「친 뒤 누르면 바로 중지」)
     } else if (a === "retry") { goSeg(0); }
   };
 
