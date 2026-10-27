@@ -2,7 +2,7 @@
 // stage: pilot = 개발 주소에서만 · ready = 공개(본부 신호) · 없음 = ?lang= 시범만 · ko_ui = {xx}.ko.json 있음
 export const LANG_INFO = {
   "bn": {"dir": "ltr", "ko_ui": true, "lh": 1.5, "short": "বাং"},
-  "en": {"dir": "ltr", "short": "EN", "stage": "ready"},
+  "en": {"dir": "ltr", "ko_ui": true, "short": "EN", "stage": "ready"},
   "es": {"dir": "ltr", "ko_ui": true, "short": "Esp"},
   "fr": {"dir": "ltr", "ko_ui": true, "short": "Fr"},
   "hi": {"dir": "ltr", "ko_ui": true, "lh": 1.5, "short": "हिंदी"},
