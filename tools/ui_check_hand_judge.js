@@ -10,7 +10,7 @@
     document.querySelectorAll(".panel [data-act=close]").forEach(b => b.click()); await W(400);
     document.querySelectorAll(".line")[0].querySelector("[data-act=write]").click(); await W(1800);
     const wr = $(".panel .write").parentElement.__wr; wr.hand()?.stopOrder?.(); await W(300);
-    { const g = $(".panel .hjudge"), t0 = g?.querySelector("p")?.textContent || ""; ok(g?.classList.contains("guide") && t0.includes(wr.hand().ch) && t0.includes("①") && (g.scrollHeight <= g.clientHeight + 1 || !!g.querySelector(".jmore")), "채점 전 판정 상자 = 안내(글자 · 획 수 · ① 자모 · 쓰는 법)", g?.innerText.replace(/\s+/g, " ").slice(0, 80)); }
+    { const g = $(".panel .hjudge"), t0 = g?.querySelector("p")?.textContent || ""; ok(g?.classList.contains("guide") && t0.length > 4 && !t0.includes("①") && (g.scrollHeight <= g.clientHeight + 1 || !!g.querySelector(".jmore")), "채점 전 판정 상자 = 안내(쓰는 법 문장 · 획 목록 줄 없음 · 대표님 10-22)", g?.innerText.replace(/\s+/g, " ").slice(0, 80)); }
     const keys = j => j.L.map(o => o.k || "raw"), bad = [];
     for (const ch of ["나", "세", "어", "을", "왕"]) {
       const L = await wr.strokesOf(ch), N = L.length, fp = []; for (let i = 0; i < N; i++) fp.push((await wr.fitPath(ch, i, "pen")).map(q => [q.x, q.y, 1]));
