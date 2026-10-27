@@ -1,6 +1,6 @@
 // 지금 「배울 말」(다국어부 10-27 · 작전표 004 F) — 앱 전체에서 한국어를 코드에 박지 않고 여기서 읽음 · 1단계 = 늘 ko(지금과 똑같이)
 //  LEARN = 배울 말 코드(ko·en·ta …) · 개발 주소에서만 ?learn=xx 로 시험(ready 아닌 말도) · 공개는 ready 인 말만(기억 malmun.learn)
-import { LEARN_INFO } from "./learnlangs.js?v=1023.40";
+import { LEARN_INFO } from "./learnlangs.js?v=1023.41";
 export { LEARN_INFO };
 
 const DEV = /^(localhost|127\.0\.0\.1)$/.test(location.hostname);

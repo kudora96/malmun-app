@@ -3,7 +3,7 @@
 //  카드 = 정한 때에 떠오름(0.3초) → 말하는 낱말 줄이 빛남(글자 크기·자리 0 변화 · 다음 낱말까지 계속) → 카드 끝 0.55초 = 카드마다 다른 사라짐 효과(파편·픽셀·유리 조각·접힘) · 모두 영상 시각(currentTime)으로 계산 = 되감기·일시정지·건너뛰기에 그 자리 그대로
 //  자리 = 큰 화면(scene) · 작은 화면(영상 폭 560px 밑 = phone · 글 하한 10px) · 안전: 영상 길이가 json total 과 1초 넘게 다르면 띄우지 않음
 //  자료가 없으면 null(옛 PNG 카드 overlays.js 로)
-import { lang, uiKoOn } from "./i18n.js?v=1023.40";
+import { lang, uiKoOn } from "./i18n.js?v=1023.41";
 
 const getJSON = u => fetch(u, { cache: "no-store" }).then(r => (r.ok ? r.json() : null)).catch(() => null);
 const ICON = {
