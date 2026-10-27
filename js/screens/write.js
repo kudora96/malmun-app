@@ -13,20 +13,20 @@
 //  W5 소리는 언제나 하나만 · 새 일을 하면 앞 소리는 멈춘다
 //  W6 영상 창 안(embedded): 창 안에서 스크롤 없이 다 보이게 — 긴 문장은 토막으로(◀ 1/3 ▶) ·
 //     토막을 다 쓰면 자동으로 다음 토막 · 줄을 다 쓰면 대사를 듣고 자동으로 다음 줄 쓰기 · 아래 ▶ = 이 부분 듣기
-import { t as tG, tL, lang, uiKoOn as uiKoG, KO_UI, preloadKoUi, tIn, uiKoIn } from "../i18n.js?v=1023.27";
-import { LEARN } from "../tl.js?v=1023.27";
-import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO, koq } from "../text.js?v=1023.27";
-import { episode, chars, charsF } from "../data.js?v=1023.27";
-import { paths } from "../paths.js?v=1023.27";
-import { I, spkHtml, uiKoBtn, uikoChip, openUiScope, SPEAKER } from "../ui.js?v=1023.27";
-import { audioCtx, hold } from "../wake.js?v=1023.27";
-import * as sfx from "../sfx.js?v=1023.27";
-import { scoreFx, stopFx } from "../scorefx.js?v=1023.27";
-import { units as jamoUnits, baseOf, shapeFix } from "../jamobox.js?v=1023.27"; // 자모 자리 나누기(획순 · 자판 덧칠 · 손글씨 덩어리 — 본부 10-07) // 손글씨 점수 효과 = 말하기와 같은 규칙(본부 10-07)
-import { createStrokes } from "../strokes.js?v=1023.27"; // 획 자료·획순 칠(글자부)
-import { whyRow } from "../whyask.js?v=1023.27"; // 「왜 틀렸어요?」(개발2팀 · 기본 꺼짐 ?why=1)
+import { t as tG, tL, lang, uiKoOn as uiKoG, KO_UI, preloadKoUi, tIn, uiKoIn } from "../i18n.js?v=1023.29";
+import { LEARN } from "../tl.js?v=1023.29";
+import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO, koq } from "../text.js?v=1023.29";
+import { episode, chars, charsF } from "../data.js?v=1023.29";
+import { paths } from "../paths.js?v=1023.29";
+import { I, spkHtml, uiKoBtn, uikoChip, openUiScope, SPEAKER } from "../ui.js?v=1023.29";
+import { audioCtx, hold } from "../wake.js?v=1023.29";
+import * as sfx from "../sfx.js?v=1023.29";
+import { scoreFx, stopFx } from "../scorefx.js?v=1023.29";
+import { units as jamoUnits, baseOf, shapeFix } from "../jamobox.js?v=1023.29"; // 자모 자리 나누기(획순 · 자판 덧칠 · 손글씨 덩어리 — 본부 10-07) // 손글씨 점수 효과 = 말하기와 같은 규칙(본부 10-07)
+import { createStrokes } from "../strokes.js?v=1023.29"; // 획 자료·획순 칠(글자부)
+import { whyRow } from "../whyask.js?v=1023.29"; // 「왜 틀렸어요?」(개발2팀 · 기본 꺼짐 ?why=1)
 let FBV = null; import(`../fbvoice.js?v=${document.documentElement.dataset.v || ""}`).then(m => { FBV = m; }).catch(() => {}); // 안내 소리(개발2팀 · 없으면 소리 없이 지금 그대로)
-import { fitToGuide } from "../strokefit.js?v=1023.27"; // 자석 따라오는 획 길 = 회색 가운데(글자부 10-12)
+import { fitToGuide } from "../strokefit.js?v=1023.29"; // 자석 따라오는 획 길 = 회색 가운데(글자부 10-12)
 
 const KEYS = [..."ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎㄲㄸㅃㅆㅉ"], VOW = [..."ㅏㅑㅓㅕㅗㅛㅜㅠㅡㅣ"];
 const VOW2 = [..."ㅐㅒㅔㅖㅘㅙㅚㅝㅞㅟㅢ"]; // 겹모음 줄(본부 10-06) — 칸 하나 · ㅓ+ㅣ 처럼 나눠 쳐도 받음
