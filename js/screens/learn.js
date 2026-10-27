@@ -237,6 +237,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   //   글 크기 = 그 자리를 채우는 가장 큰 크기(넘치면 줄임 · 스크롤 0) · 대사가 바뀔 때와 창 크기가 바뀔 때만 다시 맞춤 · 자리가 70px 안 되면(넓고 낮은 창) 자막 줄 없음
   // 제목 줄이 좁은 폰(320)에서 「…」로 잘리지 않게(다국어부 10-12) — 18 → 16 → 14px → 두 줄
   function fitTitle(ttl) {
+    if (!ttl) return; /* 화면을 떠난 뒤 늦게 불리는 경우(막 누르기에서 null.querySelectorAll) */
     const els = [...ttl.querySelectorAll(".tt b, .tt .sub")], over = () => els.some(e => e.scrollWidth > e.clientWidth + 1);
     for (const c of ["", "t1", "t2", "t3"]) { ttl.classList.remove("t1", "t2", "t3"); if (c) ttl.classList.add(c); if (!over()) break; }
   }

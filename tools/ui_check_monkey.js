@@ -1,6 +1,6 @@
 // 막 누르기 점검(본부 10-08 투덜이 「여러 각도로 별 이상한 짓까지」) — #/learn/L01-00-01 을 연 채로 · 소리 아주 작게 · 마이크·받아쓰기는 가짜
 // 학습 화면에서 보이는 누를 수 있는 것을 무작위로(씨앗 window.__monkeySeed · 길이 window.__monkeyMs 기본 90초 · 50~400ms 간격) — 연타·열자마자 닫기·녹음 중 아무 데나·손글씨 긋기 포함
-// 감시(100ms 마다): 오류 0 · 소리 2개 이상이 0.3초 넘게 0 · 「자동」 단추 글 = 실제 자동 · 20번마다 5.5초 쉬며 저절로 바뀜 0(자동·재생 중 빼고) · 가로 넘침 0
+// 감시(100ms 마다): 오류 0 · 소리 2개 이상이 0.3초 넘게 0 · 「자동」 단추 표시(주황 data-st=run · 예전 판은 ⏹ 글) = 실제 자동 · 20번마다 5.5초 쉬며 저절로 바뀜 0(자동·재생 중 빼고) · 가로 넘침 0
 // 문제 = 직전 누른 20개(요소 경로)를 sessionStorage "__monkey" 에 · window.__monkeyReplay = 그 목록을 주면 같은 순서로 다시 누름
 (async () => {
   const W = ms => new Promise(s => setTimeout(s, ms)), $ = s => document.querySelector(s);
@@ -16,7 +16,7 @@
   const els = new Set(); HTMLMediaElement.prototype.play = function () { els.add(this); try { this.volume = Math.min(this.volume, 0.0001); } catch {} return keep.play.call(this); };
   const log = (window.__sfxLog = []), sfxLive = () => { const n = {}; for (const e of log) n[e.name] = (n[e.name] || 0) + (e.ev === "시작" ? 1 : -1); return Object.values(n).reduce((a, v) => a + Math.max(0, v), 0); };
   const sounds = () => [...els].filter(e => !e.paused && !e.ended && e.currentSrc && !(e.tagName === "VIDEO" && e.muted)).length + sfxLive();
-  const errs = []; const onErr = e => errs.push(String(e.message || e.reason?.message || e.reason)); addEventListener("error", onErr); addEventListener("unhandledrejection", onErr);
+  const errs = []; const onErr = e => errs.push(String(e.message || e.reason?.message || e.reason) + " @" + String((e.error || e.reason)?.stack || e.filename + ":" + e.lineno).split(String.fromCharCode(10)).slice(1, 3).map(x => x.trim().replace(/^at /, "").replace(/https?:\/\/[^/]+\//, "").replace(/\?v=[\d.]+/, "")).join(" ; ")); addEventListener("error", onErr); addEventListener("unhandledrejection", onErr);
   console.error = (...a) => { if (!/Failed to load resource|404/.test(String(a[0]))) errs.push("console " + String(a[0]).slice(0, 120)); return keep.cerr.apply(console, a); };
   // 요소 경로(다시 누르기용)
   const pathOf = el => { const p = []; while (el && el !== document.body) { const par = el.parentElement; if (!par) break; p.unshift(`${el.tagName.toLowerCase()}:${[...par.children].indexOf(el)}`); el = par; } return p.join(">"); };
@@ -39,7 +39,7 @@
   // 감시
   let over2 = 0; const mon = setInterval(() => {
     const n = sounds(); over2 = n >= 2 ? over2 + 100 : 0; if (over2 === 400) { const live = {}; for (const e of log) live[e.name] = (live[e.name] || 0) + (e.ev === "시작" ? 1 : -1); report("소리 2개 이상 0.3초+", n + " · " + [...[...els].filter(e => !e.paused && !e.ended && e.currentSrc && !(e.tagName === "VIDEO" && e.muted)).map(e => e.tagName[0] + ":" + decodeURIComponent(e.currentSrc).split("/").slice(-2).join("/").slice(-40)), ...Object.entries(live).filter(([, v]) => v > 0).map(([k, v]) => "sfx:" + String(k).slice(-40) + "×" + v)].join(" , ")); } /* 무슨 소리였는지 같이 적음(10-11) */
-    const s = wrSt(), bs = [...document.querySelectorAll(".panel [data-act=auto], .panel [data-act=autoall]")], shown = bs.filter(b => /⏹|■/.test(b.textContent)).length; if (s && bs.length && (shown > 1 || (shown === 1) !== !!(s.auto || s.resumeAuto || s.allNext))) report("자동 표시 ≠ 실제", `${bs.map(b => b.textContent).join("|")} / ${s.auto}`);
+    const s = wrSt(), bs = [...document.querySelectorAll(".panel [data-act=auto], .panel [data-act=autoall]")], shown = bs.filter(b => b.dataset.st === "run" || /⏹|■/.test(b.textContent)).length; if (s && bs.length && (shown > 1 || (shown === 1) !== !!(((s.auto || s.resumeAuto) && (s.autoMode === "word" || s.autoMode === "all")) || s.allNext))) report("자동 표시 ≠ 실제", `${bs.map(b => b.textContent).join("|")} / ${s.auto}`);
     if (document.documentElement.scrollWidth > innerWidth + 1) report("가로 넘침", document.documentElement.scrollWidth);
   }, 100);
   try {
@@ -64,6 +64,6 @@
   navigator.mediaDevices.getUserMedia = keep.gum; navigator.mediaDevices.enumerateDevices = keep.en; window.SpeechRecognition = keep.SR; window.webkitSpeechRecognition = keep.wSR; HTMLMediaElement.prototype.play = keep.play; console.error = keep.cerr;
   removeEventListener("error", onErr); removeEventListener("unhandledrejection", onErr); delete window.__noSrSwitch;
   document.querySelectorAll(".panel [data-act=close], .panel [data-x=close]").forEach(b => b.click()); document.querySelector("video")?.pause();
-  const res = [`${probs.length ? "✗" : "✓"} 막 누르기 씨앗 ${seed0} · ${acts.length}번 누름 · ${innerWidth}x${innerHeight}`, ...probs.map(p => `✗ ${p.kind} · ${String(p.x).slice(0, 160)} · 직전 ${p.last.slice(-5).join(" → ")}`)];
+  const res = [`${probs.length ? "✗" : "✓"} 막 누르기 씨앗 ${seed0} · ${acts.length}번 누름 · ${innerWidth}x${innerHeight}`, ...probs.map(p => `✗ ${p.kind} · ${String(p.x).slice(0, 320)} · 직전 ${p.last.slice(-5).join(" → ")}`)];
   const out = res.join("\n"); console.log(out); return out;
 })();
