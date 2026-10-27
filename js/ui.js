@@ -1,10 +1,11 @@
-import { MUSIC_ON, bgmOn, setBgm, TRACKS, playTrack, bgmNow, onBgmChange, bgmVol, setBgmVol, playNext } from "./bgm.js?v=1023.31";
-import { paths } from "./paths.js?v=1023.31";
-import { t, tL, tAlt, lang, langName, LANGS, READY, setLang, KO_UI, uiKoOn, setUiKo, langShort, preloadKoUi } from "./i18n.js?v=1023.31";
-import { snapshot, retext } from "./retext.js?v=1023.31";
-import "./langfit.js?v=1023.31"; // ⇄ 때 단추 크기·자리 고정(다국어부 10-15)
-import { VERSION } from "./version.js?v=1023.31";
-import { esc } from "./text.js?v=1023.31";
+import { MUSIC_ON, bgmOn, setBgm, TRACKS, playTrack, bgmNow, onBgmChange, bgmVol, setBgmVol, playNext } from "./bgm.js?v=1023.29";
+import { LEARN } from "./tl.js?v=1023.29";
+import { paths } from "./paths.js?v=1023.29";
+import { t, tL, tAlt, lang, langName, LANGS, READY, setLang, KO_UI, uiKoOn, setUiKo, langShort, preloadKoUi } from "./i18n.js?v=1023.29";
+import { snapshot, retext } from "./retext.js?v=1023.29";
+import "./langfit.js?v=1023.29"; // ⇄ 때 단추 크기·자리 고정(다국어부 10-15)
+import { VERSION } from "./version.js?v=1023.29";
+import { esc } from "./text.js?v=1023.29";
 
 const svg = (d, fill) => `<svg class="ico" viewBox="0 0 24 24" ${fill ? 'fill="currentColor"' : 'fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"'} aria-hidden="true">${d}</svg>`;
 export const I = {
@@ -166,4 +167,4 @@ export const progress = {
 export const SPEAKER = { "선생님": "teacher", "콩": "kong", "두부": "dubu" };
 // 화자 이름 옆 학습자 말(본부 10-08 투덜이) — 선생님 = 그 나라 말 「선생님」(뜻) · 두부·콩 = 이름 로마자(로마자 끄기와 무관) · 표 = lang/*.json 「spk_<id>」(없으면 en)
 export const spkGloss = ko => { const id = SPEAKER[ko], k = "spk_" + id, g = id ? t(k) : ""; return g && g !== k && g !== ko ? g : ""; };
-export const spkHtml = ko => { const g = spkGloss(ko); return `<span class="ko" lang="ko">${esc(ko)}</span>${g ? `<span class="spkg"> · ${esc(g)}</span>` : ""}`; };
+export const spkHtml = ko => { const g = spkGloss(ko); return `<span class="ko" lang="${LEARN}">${esc(ko)}</span>${g ? `<span class="spkg"> · ${esc(g)}</span>` : ""}`; };

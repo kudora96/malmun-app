@@ -10,10 +10,11 @@
 //  R7 영상은 늘 맨 위 · 지금 줄은 영상 바로 아래(앞 줄은 영상 뒤로) — 손으로 목록을 움직이면 4초 동안은 따라가지 않음
 //  R8 듣기 모드(대사→설명 · 설명만)도 R1~R6 그대로(영상 대신 소리 조각) · 모드를 바꾸면 멈춤(▶ 로 시작)
 //  R9 다시 들어오면 마지막 줄이 선택된 채 멈춰 있음
-import { noScoreKey } from "../agepolicy.js?v=1023.31"; // 점수 없음 안내 = 나이 때문인지(대표님 10-19)
-import { warmSTT } from "../sttserver.js?v=1023.31";
-import * as sfxL from "../sfx.js?v=1023.31"; // 카드 말하기 최대 길이 = 본보기 길이로(10-07)
-import { t, tAlt, lang, langName, KO_UI, uiKoOn, preloadKoUi, tIn, uiKoIn } from "../i18n.js?v=1023.31";
+import { noScoreKey } from "../agepolicy.js?v=1023.29"; // 점수 없음 안내 = 나이 때문인지(대표님 10-19)
+import { LEARN } from "../tl.js?v=1023.29";
+import { warmSTT } from "../sttserver.js?v=1023.29";
+import * as sfxL from "../sfx.js?v=1023.29"; // 카드 말하기 최대 길이 = 본보기 길이로(10-07)
+import { t, tAlt, lang, langName, KO_UI, uiKoOn, preloadKoUi, tIn, uiKoIn } from "../i18n.js?v=1023.29";
 // 줄 카드 단추 = 그림만 다섯(대표님 10-20 B 선 아이콘 · 같은 크기 한 줄 · 카드 높이 0px) — ▶ 이 줄 듣기 · 📖 설명 · ✎ 쓰기 · 🎤 말하기 · 🎮 게임 · 이름 = 처음 한 번 차례 풍선말 + 길게 누르기
 const SV = d => `<svg class="ico" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
 const ACTS = [["once", "listen_line", '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M8 5.5v13l11-6.5z"/></svg>'], ["explain", "explain", SV('<path d="M4 5a2 2 0 0 1 2-2h5v17H6a2 2 0 0 0-2 2z"/><path d="M20 5a2 2 0 0 0-2-2h-5v17h5a2 2 0 0 1 2 2z"/>')], ["write", "write", SV('<path d="M16 3l5 5L8 21H3v-5z"/>')], ["speak", "speak", SV('<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>')], ["game", "line_game", SV('<rect x="2" y="7" width="20" height="11" rx="5"/><path d="M7 10v5M4.5 12.5h5"/><circle cx="16" cy="11.5" r="1" fill="currentColor"/><circle cx="18.5" cy="14" r="1" fill="currentColor"/>')]];
@@ -84,7 +85,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   app.innerHTML = `<section class="scr learn${subsOn() ? "" : " nosub"}">
     <div class="stick">
     <div class="vstage">
-    <div class="vmain"><div class="vtitle"><div class="tt"><b class="ko" lang="ko">${esc(d.title || "")}</b>${d.title_t ? `<span class="sub">${esc(d.title_t)}</span>` : ""}</div>${uiKoBtn()}<span class="n"></span></div>
+    <div class="vmain"><div class="vtitle"><div class="tt"><b class="ko" lang="${LEARN}">${esc(d.title || "")}</b>${d.title_t ? `<span class="sub">${esc(d.title_t)}</span>` : ""}</div>${uiKoBtn()}<span class="n"></span></div>
     <div class="varea"><div class="video" id="vwrap"><video playsinline preload="metadata" controlslist="nodownload noremoteplayback noplaybackrate" disablepictureinpicture disableremoteplayback poster="${paths.poster(ep)}"></video>
       <span class="vplay" aria-hidden="true">${I.play}</span>
       <div class="cap" aria-live="polite"></div>
@@ -99,7 +100,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     </div>
     <ol class="lines"><li class="lend" data-end="start" role="button" tabindex="0"><b lang="ko">▶ 시작</b><span><span data-k="ln_start">${esc(t("ln_start"))}</span> · 0:00 – ${(x => `${Math.floor(x / 60)}:${String(Math.floor(x % 60)).padStart(2, "0")}`)(L[0]?.start || 0)}</span></li>${L.map((l, i) => `<li class="line sp-${SPEAKER[l.speaker] || "x"} ${l.speaker === "선생님" ? "" : "right"}" data-i="${i}" data-peek="👁 ${esc(t("subs_peek"))}">
       <span class="who">${spkHtml(l.speaker)}</span>
-      <p class="kotext ko" lang="ko">${esc(l.ko)}</p>
+      <p class="kotext ko" lang="${LEARN}">${esc(l.ko)}</p>
       ${l.tr ? `<p class="tr">${esc(l.tr)}</p>` : ""}
       <div class="expl"></div>
       <div class="acts ib5">${ACTS.map(([a, k, ic], q) => `<button class="ib${q ? " menu" : ""}${a === "game" ? " gamebtn" + (gameDone(ep, l.id) ? " gdone" : "") : ""}" data-act="${a}" data-tipk="${k}" aria-label="${esc(t(k))}">${ic}</button>`).join("")}</div>
@@ -140,7 +141,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     if (!x) { w.querySelector(".tsub")?.remove(); return; }
     let inn = w.querySelector(".tsub"); if (!inn) { inn = document.createElement("div"); inn.className = "tsub"; inn.setAttribute("aria-live", "polite"); w.append(inn); }
     if (x.listen) { if (!inn.querySelector(".tlisten")) inn.innerHTML = `<span class="tlisten">🎤 <span data-k="turn_listen">${esc(t("turn_listen"))}</span></span><i class="tlvl"><b></b></i>`; inn.querySelector(".tlvl b").style.width = Math.round(x.level * 100) + "%"; return; }
-    inn.innerHTML = `${x[lang] && lang !== "ko" && !uiKoOn() ? `<span class="tr">${esc(x[lang])}</span>` : `<b class="ko" lang="ko">${esc(x.ko || "")}</b>`}`; // 학습자 말 한 줄(⇄ 한국어면 한국어)
+    inn.innerHTML = `${x[lang] && lang !== "ko" && !uiKoOn() ? `<span class="tr">${esc(x[lang])}</span>` : `<b class="ko" lang="${LEARN}">${esc(x.ko || "")}</b>`}`; // 학습자 말 한 줄(⇄ 한국어면 한국어)
   }
   setupTurns(ep, v, { wrap: app.querySelector("#vwrap"), canRun: () => st.mode === "video" && !st.panel && !st.once, onSub: turnSub }).then(x => { turns = x; });
   app.addEventListener("pointerdown", e => { if (turns?.busy() && e.target.closest(".ctrl, .lines, .seek, #vwrap, .vtitle")) turns.skip(); }, true); // 차례 중 누르면 이번 차례 그만(누른 단추 일은 그대로)
@@ -239,7 +240,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     for (const c of ["", "t1", "t2", "t3"]) { ttl.classList.remove("t1", "t2", "t3"); if (c) ttl.classList.add(c); if (!over()) break; }
   }
   // 크게 보기(⛶) 자막 = 한 줄만(대표님 10-22): 학습자 말 · ⇄ 한국어면 한국어(번역 없는 줄 = 한국어) · CC 끔 = 없음(css .nosub)
-  function capFill(i) { const l = L[i], cap = app.querySelector(".cap"); if (!l || !cap) return; cap.innerHTML = uiKoOn() || !l.tr ? `<span class="ko" lang="ko">${esc(l.ko)}</span>` : `<span class="tr" dir="auto">${esc(l.tr)}</span>`; }
+  function capFill(i) { const l = L[i], cap = app.querySelector(".cap"); if (!l || !cap) return; cap.innerHTML = uiKoOn() || !l.tr ? `<span class="ko" lang="${LEARN}">${esc(l.ko)}</span>` : `<span class="tr" dir="auto">${esc(l.tr)}</span>`; }
   function vsubFill(i) {
     const vm = app.querySelector(".vmain"), box = app.querySelector(".vsub"), inn = box.querySelector(".in"), ttl = app.querySelector(".vtitle");
     if (vm.hidden) return;
@@ -248,7 +249,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     if (free < 70) { box.hidden = true; box.style.removeProperty("height"); return; }
     box.hidden = false; box.style.height = free + "px";
     const l = L[i], rom = romOn() ? (l.v9?.pieces || []).map(p => p.rom).filter(Boolean).join(" ") : "";
-    inn.innerHTML = `<span class="who">${spkHtml(l.speaker)}</span><b class="ko" lang="ko">${esc(l.ko)}</b>${rom ? `<span class="rom">${esc(rom)}</span>` : ""}${l.tr ? `<span class="tr">${esc(l.tr)}</span>` : ""}`;
+    inn.innerHTML = `<span class="who">${spkHtml(l.speaker)}</span><b class="ko" lang="${LEARN}">${esc(l.ko)}</b>${rom ? `<span class="rom">${esc(rom)}</span>` : ""}${l.tr ? `<span class="tr">${esc(l.tr)}</span>` : ""}`;
     const fits = z => { inn.style.zoom = String(z); return box.scrollHeight <= box.clientHeight && inn.getBoundingClientRect().height <= box.clientHeight; };
     let lo = 0.6, hi = 1.8;
     if (fits(hi)) lo = hi; else for (let k = 0; k < 8; k++) { const m = (lo + hi) / 2; if (fits(m)) lo = m; else hi = m; }
@@ -406,7 +407,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
       <div class="v9bar">${lab("v9_listen")}<span class="seg snd">${v9L ? (x.audio?.[v9L]?.ex ? playBtn("L") : `<button class="pb nosnd" disabled aria-disabled="true"><span class="ic" aria-hidden="true">🔇</span> ${esc(v9name("L"))}</button>`) : ""}${playBtn("ko")}</span>${x.sent?.length ? `<span class="snum" aria-live="off">1/${x.sent.length}</span>` : ""}${bgmBtn()}${uikoChip(panelKo())}<button class="romb" data-x="v9rom" aria-pressed="${romOn()}"><span data-k="v9_rom">${esc(tq("v9_rom"))}</span></button><button class="pb closex" data-x="close" title="${esc(tq("close_word"))}" aria-label="${esc(tq("close_word"))}"><span class="cx">✕</span><span class="cw"> ${esc(tq("close_word"))}</span></button><div class="v9tip" hidden>${esc(tq("v9_tip"))}</div></div>
       ${v9L ? "" : `<div class="v9soon">${esc(tq("v9_lang_soon"))}</div>`}<div class="v9pop" hidden></div>
       <div class="v9body">
-        ${x.pieces?.length || fx ? `<div class="chips">${(x.pieces || []).map(c => `<span class="chip"><b class="ko" lang="ko">${esc(c.ko)}</b> <i>${c.rom != null ? `<span class="rom">${esc(c.rom)}${c.mean && v9L ? ", " : ""}</span>${v9L ? esc(c.mean || "") : ""}` : v9L ? esc(c.gloss || "") : ""}</i></span>`).join("")}${fx ? `<span class="fx">= <b>${esc(fx)}</b></span>` : ""}</div>` : ""}
+        ${x.pieces?.length || fx ? `<div class="chips">${(x.pieces || []).map(c => `<span class="chip"><b class="ko" lang="${LEARN}">${esc(c.ko)}</b> <i>${c.rom != null ? `<span class="rom">${esc(c.rom)}${c.mean && v9L ? ", " : ""}</span>${v9L ? esc(c.mean || "") : ""}` : v9L ? esc(c.gloss || "") : ""}</i></span>`).join("")}${fx ? `<span class="fx">= <b>${esc(fx)}</b></span>` : ""}</div>` : ""}
         <p data-p="0">${v9Sent(i, code)}</p>${pairHTML(i, code, 0)}
         ${l.say ? `<div class="sayb"><p data-p="1" class="sayp">${sayHTML(i, code)}</p>
           <div class="sbtns" data-keep="${esc(tq("keep_short"))}"><button class="mic" data-x="rec">${micLbl()}</button><button data-x="model">▶ ${esc(tq("model"))}</button><button class="mrate" data-x="mrate" aria-label="${esc(tq("speed"))}" aria-pressed="${getRate("m") !== 1}">${rateLabel(getRate("m"))}</button><button data-x="mine" disabled>▶ ${esc(tq("my_voice"))}</button><button data-x="keep" title="${esc(tq("keep"))}" hidden>${esc(tq("keep_short"))}</button><button data-x="savedplay" title="${esc(tq("saved_title"))}" hidden>${esc(tq("saved_play"))}</button><span class="mini"><button data-x="savedl" class="small" title="${esc(tq("download"))}" hidden>⬇ ${esc(tq("dl_short"))}</button><button data-x="savedel" class="small" title="${esc(tq("del_one"))}" hidden>🗑 ${esc(tq("del_short"))}</button></span></div>
@@ -427,7 +428,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     return v9src(i, k, "say") ? [{ src: v9src(i, k, "say"), p: 1, lang: v9code(k) }] : [];
   }
   // 설명 글 = 문장 짝(sent)을 듣는 언어로 이어 붙임 · 문장마다 span(누르면 다른 언어 짝) · 따옴표 속 한국어 = 누르면 로마자·뜻(gloss) · 괄호 병기 없음(본부 10-05)
-  const qWords = (i, s) => esc(s).replace(/&quot;([^&]*?)&quot;|"([^"]*?)"/g, (m, a, b) => { const w = a ?? b, g = L[i].v9?.gloss?.[w]; return g ? `<b class="gw" data-x="gw" data-g="${esc(w)}" lang="ko">"${esc(w)}"</b>` : `<b>"${esc(w)}"</b>`; });
+  const qWords = (i, s) => esc(s).replace(/&quot;([^&]*?)&quot;|"([^"]*?)"/g, (m, a, b) => { const w = a ?? b, g = L[i].v9?.gloss?.[w]; return g ? `<b class="gw" data-x="gw" data-g="${esc(w)}" lang="${LEARN}">"${esc(w)}"</b>` : `<b>"${esc(w)}"</b>`; });
   function v9Sent(i, code) {
     const x = L[i].v9, sn = x.sent;
     if (!sn?.length) return bold((x.text?.[code] || x.text?.ko || {}).ex || "");
@@ -435,13 +436,13 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     // 낱말마다 감쌈(설명 노래방 칠 · 본부 10-08 — 데바나가리는 낱말 단위라야 글꼴이 안 깨짐) · 따옴표 낱말은 통째로
     const toks = str => code === "th" && globalThis.Intl?.Segmenter ? [...new Intl.Segmenter("th", { granularity: "word" }).segment(String(str))].map(x => x.segment) : String(str).match(/"[^"]*"\S*|\S+|\s+/g) || []; // 타이어는 띄어쓰기가 없어 낱말 나누기(Intl.Segmenter · 언어부 10-11)
     const kw = str => toks(str).map(tk => (/^\s+$/.test(tk) ? tk : `<span class="kw">${qWords(i, tk)}</span>`)).join("");
-    return sn.map((s, k) => `<span class="sn" data-x="sn" data-s="${k}" data-i="${i}" data-c="${code}"${code === "ko" ? ' lang="ko"' : ""}>${kw(s[code] || "")}</span>`).join(" ");
+    return sn.map((s, k) => `<span class="sn" data-x="sn" data-s="${k}" data-i="${i}" data-c="${code}"${code === "ko" ? ` lang="${LEARN}"` : ""}>${kw(s[code] || "")}</span>`).join(" ");
   }
   // 「이제 말해 보세요」 칸(본부 10-05) — 첫 줄 = 안내(듣기 언어) · 한국어 문장 크게 · 로마자(작게 · 로마자 꺼지면 숨김) · 뜻(작게 · 학습자 언어 항상) · 괄호 없음
   function sayHTML(i, code) {
     const x = L[i].v9, a = sayParts(x.text?.[code]?.say), b = sayParts(x.text?.[v9L]?.say) || a;
     if (!a) return bold((x.text?.[code] || x.text?.ko || {}).say || "");
-    return `<span class="sayin"${code === "ko" ? ' lang="ko"' : ""}>${esc(a.intro)}</span><span class="saybig" lang="ko" dir="ltr">${[...String(a.ko)].map(ch => `<span>${esc(ch)}</span>`).join("")}</span>${b?.rom ? `<span class="sayrom rom" dir="ltr">${esc(b.rom)}</span>` : ""}${b?.mean && v9L ? `<span class="saymean">${esc(b.mean)}</span>` : ""}`;
+    return `<span class="sayin"${code === "ko" ? ` lang="${LEARN}"` : ""}>${esc(a.intro)}</span><span class="saybig" lang="${LEARN}" dir="ltr">${[...String(a.ko)].map(ch => `<span>${esc(ch)}</span>`).join("")}</span>${b?.rom ? `<span class="sayrom rom" dir="ltr">${esc(b.rom)}</span>` : ""}${b?.mean && v9L ? `<span class="saymean">${esc(b.mean)}</span>` : ""}`;
   }
   // 지금 문장 번호 = 재생 시각이 들어간 sent 칸
   const sentAt = (i, code, tm) => { const sn = L[i].v9?.sent || []; let k = 0; sn.forEach((s, j) => { if ((s[`${code}_s`] ?? 0) <= tm + 0.05) k = j; }); return k; };
@@ -481,7 +482,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   function pairHTML(i, code, k) {
     const s = L[i].v9?.sent?.[k]; if (!s) return "";
     const o = otherOf(code);
-    return `<p class="pairln" data-k="${k}"${o === "ko" ? ' lang="ko"' : ""}><span class="arr" aria-hidden="true">↳</span> ${bold(s[o] || "")}</p>`;
+    return `<p class="pairln" data-k="${k}"${o === "ko" ? ` lang="${LEARN}"` : ""}><span class="arr" aria-hidden="true">↳</span> ${bold(s[o] || "")}</p>`;
   }
   function setPair(root, i, code, k) {
     const p = root?.querySelector(".pairln"); if (!p || (p.dataset.k === String(k) && p.dataset.c === code)) return;
@@ -526,7 +527,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   const hidePop = () => app.querySelectorAll(".v9pop").forEach(p => { p.hidden = true; p.__for = null; });
   function popFor(el) {
     const sn = el.closest(".sn"), i = sn ? +sn.dataset.i : st.panel.i, x = L[i].v9;
-    if (el.dataset.x === "gw") { const w = el.dataset.g, g = x.gloss?.[w] || {}, rom = romOn() && g.rom, gm = v9L ? g.mean : null; /* 어댑터가 학습자 언어 뜻을 mean 으로(v2 · 언어부 #19) */ if (!gm && !rom) return ""; return `<b lang="ko">${esc(w)}</b>${rom ? ` <span class="rom">${esc(g.rom)}</span>` : ""}${gm ? ` · ${esc(gm)}` : ""}`; } /* 뜻 = 학습자 언어(없으면 로마자만 · 언어부 10-11) */ // 뜻·로마자 없으면 말풍선 없음
+    if (el.dataset.x === "gw") { const w = el.dataset.g, g = x.gloss?.[w] || {}, rom = romOn() && g.rom, gm = v9L ? g.mean : null; /* 어댑터가 학습자 언어 뜻을 mean 으로(v2 · 언어부 #19) */ if (!gm && !rom) return ""; return `<b lang="${LEARN}">${esc(w)}</b>${rom ? ` <span class="rom">${esc(g.rom)}</span>` : ""}${gm ? ` · ${esc(gm)}` : ""}`; } /* 뜻 = 학습자 언어(없으면 로마자만 · 언어부 10-11) */ // 뜻·로마자 없으면 말풍선 없음
     return "";
   }
   const onDocDown = e => { if (!e.target.closest(".v9pop, [data-x=sn], [data-x=gw]")) hidePop(); };
@@ -548,8 +549,8 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
       <div class="exhead"><b>${esc(tq("explain"))}</b><span class="sub">${i + 1} / ${L.length} · ${spkHtml(l.speaker)}</span><span class="grow"></span>
         ${cards.length ? `<button data-x="rom" aria-pressed="${romOn()}">${esc(tq("gloss_toggle"))}</button>` : ""}
         ${hasTr ? `<button data-x="tr" aria-pressed="false">${esc(langName(lang))}</button>` : ""}</div>
-      <div class="quote"><div class="glosses">${cards.length ? cards.map(c => `<span class="g"><span class="rom">${esc(c.rom)}</span><span class="kw ko" lang="ko">${esc(c.ko)}</span><span class="mean">${esc(c.mean)}</span></span>`).join("")
-        : `<span class="kw ko" lang="ko">${esc(l.ko)}</span>`}</div>${l.tr ? `<p class="tr">${esc(l.tr)}</p>` : ""}</div>
+      <div class="quote"><div class="glosses">${cards.length ? cards.map(c => `<span class="g"><span class="rom">${esc(c.rom)}</span><span class="kw ko" lang="${LEARN}">${esc(c.ko)}</span><span class="mean">${esc(c.mean)}</span></span>`).join("")
+        : `<span class="kw ko" lang="${LEARN}">${esc(l.ko)}</span>`}</div>${l.tr ? `<p class="tr">${esc(l.tr)}</p>` : ""}</div>
       <div class="paras">${l.krParas.map((p, k) => `<p data-p="${k}">${renderText(p)}</p>`).join("") || `<p>${esc(tq("no_explain"))}</p>`}
         <div class="learner" hidden><h3>${esc(langName(lang))}</h3>${l.trParas.map(p => `<p>${renderText(p)}</p>`).join("")}</div></div>
       <div class="exprog"><i></i></div>
@@ -815,7 +816,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     box.classList.toggle("pass", sc != null && sc >= PASS);
     scoreFx(box.querySelector(".fx"), sc ?? (canScore() && !switchedSR ? 0 : null), { busy: () => !!sp?.ctl, full: isFull(sc, rhy) }); // 점수가 뜨는 순간 효과 한 번 · 아무 말도 없었어도 꽝(투덜이 10-08)
     const bh = bestFull(L[i].say.ko, r.heard); // 들린 말(덧붙은 말은 흐린 회색) — 점수를 낸 그 인식 결과 · 틀린 음절 빨간 밑줄 · 빠진 자리 _
-    box.querySelector(".heardline").innerHTML = switchedSR ? `<button class="srboth" data-x="srboth">${esc(tq("sr_both_again"))}</button>` : bh ? (({ html, ok }) => `<span class="lab">${esc(tq("heard_label"))}:</span> <span class="ko" lang="ko">${html}</span>${ok ? " ✓" : ""}`)(heardHTML(L[i].say.ko, bh)) : "";
+    box.querySelector(".heardline").innerHTML = switchedSR ? `<button class="srboth" data-x="srboth">${esc(tq("sr_both_again"))}</button>` : bh ? (({ html, ok }) => `<span class="lab">${esc(tq("heard_label"))}:</span> <span class="ko" lang="${LEARN}">${html}</span>${ok ? " ✓" : ""}`)(heardHTML(L[i].say.ko, bh)) : "";
   }
   // 맨 위 한 줄 맞추기 + 처음 한 번 말풍선(▶ = 듣는 언어 · 탭 = 읽는 언어 · 3초 · 다시 안 뜸)
   const v9Over = bar => { if (bar.scrollWidth > bar.clientWidth + 1) return true; const r = bar.getBoundingClientRect(), pr = panel.getBoundingClientRect(); if (r.left < pr.left - 1 || r.right > pr.right + 1) return true; return [...bar.children].some(e => { const c = e.getBoundingClientRect(); return c.width > 0 && (c.left < r.left - 1 || c.right > r.right + 1); }); }; // 가운데 맞춤이면 왼쪽 넘침은 scrollWidth 에 안 잡힘

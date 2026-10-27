@@ -6,7 +6,7 @@ export function renderText(raw) {
   return esc(raw)
     .replace(/\(([^()]*)\)/g, '<span class="gl">($1)</span>')
     .replace(/&quot;([^&]*?)&quot;/g, (m, inner) => /[가-힣]/.test(inner) ? `<span class="ko q">"${inner}"</span>` : m)
-    .replace(KO, m => `<span class="ko" lang="ko">${m}</span>`);
+    .replace(KO, m => `<span class="ko" lang="${LEARN}">${m}</span>`);
 }
 
 // "어서 (eo-seo, छिटो) 오세요 (o-se-yo, आउनुहोस्)." → 낱말 카드
