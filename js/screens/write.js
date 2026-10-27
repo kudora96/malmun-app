@@ -86,7 +86,7 @@ async function run(steps) {
 let autoAllNext = null; // 전체 자동 완성이 다음 줄로 넘어갈 때 { ep, id, t } — 새 쓰기 화면이 이어받아 바로 자동
 const helpHtml = (t = tG) => [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(k => "help_wr_" + k).filter(k => t(k) !== k).map(k => `<p>${esc(t(k))}</p>`).join("") + `<p class="x">${esc(t("help_close"))}</p>`; // 7 = 🔊 이 줄 듣기(10-13 · 열쇠가 있을 때만)
 export default async function write(app, ep, id, opts = {}) {
-  const spkS = ko => { const id = SPEAKER[ko], k = "spk_" + id, g = id ? t(k) : ""; return `<span class="ko" lang="ko">${esc(ko)}</span>${g && g !== k && g !== ko ? `<span class="spkg"> · ${esc(g)}</span>` : ""}`; }; // 화자 이름 = 이 창 상태로(ui.js spkHtml 은 앱 전체 상태)
+  const spkS = ko => { const id = SPEAKER[ko], k = "spk_" + id, g = id ? t(k) : "", gl = id ? tL(k) : ""; if (g && g !== k && g !== ko) return `<span class="ko" lang="ko">${esc(ko)}</span><span class="spkg"> · ${esc(g)}</span>`; /* 한국어 상태 = 한국어 풀이는 이름과 같아 안 보임 → 학습자 말 풀이 자리만 글 없이 잡아 둠(머리 줄 「✕ 글 숨김」 판정이 ⇄ 로 달라져 닫기 단추가 22px 움직이던 것 · 0px) */ return `<span class="ko" lang="ko">${esc(ko)}</span>${gl && gl !== k && gl !== ko ? `<span class="spkg rsv" aria-hidden="true" data-alt=" · ${esc(gl)}"></span>` : ""}`; }; // 화자 이름 = 이 창 상태로(ui.js spkHtml 은 앱 전체 상태)
   let scrW = null; const t = (k, v) => (scrW ? tIn(scrW, k, v) : tG(k, v)), uiKoOn = () => (scrW ? uiKoIn(scrW) : uiKoG()); // ⇄ 창마다 독립(대표님 10-22 · 다국어부 공용 입구) — 쓰기 창 글은 이 창 상태로
   const [d, idx, cf, KOS] = await Promise.all([episode(ep, lang), chars(), charsF(ep), KO_UI.includes(lang) ? preloadKoUi(lang) : null]); // KOS = 한국어 앱 글(⇄) — 단추 폭을 두 언어 중 긴 쪽으로(10-15)
   // 글자·자모 소리: 공용 아나운서(chars_f) 먼저 · 없으면 지금 글자 소리 · 자모는 옛 jamo 이름
