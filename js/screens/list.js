@@ -1,17 +1,18 @@
-import { t, lang, uiKoOn, epTitles } from "../i18n.js?v=1023.26";
-import { esc } from "../text.js?v=1023.26";
-import { catalog } from "../data.js?v=1023.26";
-import { langChip, openLangSheet, progress, uiKoBtn } from "../ui.js?v=1023.26";
-import { rerender } from "../main.js?v=1023.26";
-import { VERSION } from "../version.js?v=1023.26";
-import { recCount, recDelEpisode } from "../recstore.js?v=1023.26";
+import { t, lang, uiKoOn, epTitles } from "../i18n.js?v=1023.27";
+import { LEARN } from "../tl.js?v=1023.27";
+import { esc } from "../text.js?v=1023.27";
+import { catalog } from "../data.js?v=1023.27";
+import { langChip, openLangSheet, progress, uiKoBtn } from "../ui.js?v=1023.27";
+import { rerender } from "../main.js?v=1023.27";
+import { VERSION } from "../version.js?v=1023.27";
+import { recCount, recDelEpisode } from "../recstore.js?v=1023.27";
 
 const mmss = s => `${Math.floor(s / 60)}:${String(Math.round(s % 60)).padStart(2, "0")}`;
 
 // 제목 = 학습자 말 ⇄ 한국어(다국어부 10-20) — 보이는 글(.cur) + 보이지 않는 두 겹(한국어·학습자 말)이 같은 칸에 겹쳐 칸 크기 = 둘 중 큰 쪽 → ⇄ 때 0px
 //  번역이 없으면(언어부 전) 한국어 한 겹 그대로 · ⇄ 는 malmun:uilang 에서 .cur 글만 바꿈
-const koRuns = s => esc(s).replace(/[ᄀ-ᇿ㄰-㆏가-힣]+/g, m => `<span class="ko" lang="ko">${m}</span>`); // 학습자 말 제목 속 배우는 한글 조각(ㄱ→ㄲ · ㅏㅗ)은 한국어로 표시
-const ttl = (id, ko, tt) => { const tr = tt[id]; if (!tr) return `<span class="ko" lang="ko">${esc(ko)}</span>`; const k = uiKoOn(); return `<span class="ept" data-ko="${esc(ko)}" data-tr="${esc(tr)}"><span class="cur" lang="${k ? "ko" : lang}">${k ? esc(ko) : koRuns(tr)}</span><span class="gh" aria-hidden="true" lang="ko">${esc(ko)}</span><span class="gh" aria-hidden="true" lang="${lang}">${koRuns(tr)}</span></span>`; };
+const koRuns = s => esc(s).replace(/[ᄀ-ᇿ㄰-㆏가-힣]+/g, m => `<span class="ko" lang="${LEARN}">${m}</span>`); // 학습자 말 제목 속 배우는 한글 조각(ㄱ→ㄲ · ㅏㅗ)은 한국어로 표시
+const ttl = (id, ko, tt) => { const tr = tt[id]; if (!tr) return `<span class="ko" lang="${LEARN}">${esc(ko)}</span>`; const k = uiKoOn(); return `<span class="ept" data-ko="${esc(ko)}" data-tr="${esc(tr)}"><span class="cur" lang="${k ? "ko" : lang}">${k ? esc(ko) : koRuns(tr)}</span><span class="gh" aria-hidden="true" lang="${LEARN}">${esc(ko)}</span><span class="gh" aria-hidden="true" lang="${lang}">${koRuns(tr)}</span></span>`; };
 const reTitles = () => { const k = uiKoOn(); for (const e of document.querySelectorAll(".list .ept")) { const c = e.querySelector(".cur"); c.innerHTML = k ? esc(e.dataset.ko) : koRuns(e.dataset.tr); c.lang = k ? "ko" : lang; } };
 // 단원 이름(머리 줄 큰 글 · 본부 10-20 「모든 창 ⇄」) — 한국어 = 손글씨 그대로 · 학습자 말 = 앱 글꼴로 바꾸고 한국어 때 칸 높이(최대 3줄 · 최소 12px) 안에 들 때까지 글자만 줄임 → ⇄ 때 칸 0px
 //  .ut = .bar .t 와 같은 모양이지만 이름이 달라 langfit(.bar .t 잠금)·retext 가 손대지 않음(이 함수 혼자 맞춤)
@@ -36,7 +37,7 @@ export default async function list(app, unit = "L01-00") {
   const p = first ? progress.get(first.id) : {};
   const seen = Math.min(p.line || 0, first?.lines || 0);
   app.innerHTML = `<section class="scr list">
-    <div class="bar"><div class="grow"><div class="ut ko" lang="ko" data-ko="${esc(cat.units[unit] || unit)}"${tt[unit] ? ` data-tr="${esc(tt[unit])}"` : ""}>${esc(cat.units[unit] || unit)}</div>
+    <div class="bar"><div class="grow"><div class="ut ko" lang="${LEARN}" data-ko="${esc(cat.units[unit] || unit)}"${tt[unit] ? ` data-tr="${esc(tt[unit])}"` : ""}>${esc(cat.units[unit] || unit)}</div>
       <div class="sub">${esc(unit)} · <span>${esc(t("n_episodes", { n: eps.length }))}</span></div></div><span class="hbt">${uiKoBtn()}${langChip()}</span></div>
     ${first ? `<a class="hero" href="#/learn/${first.id}"><img src="img/${first.id}.jpg" alt="">
       <div><div class="ttl">${esc(first.id.slice(-2))} ${ttl(first.id, first.title, tt)}</div>

@@ -13,19 +13,20 @@
 //  W5 소리는 언제나 하나만 · 새 일을 하면 앞 소리는 멈춘다
 //  W6 영상 창 안(embedded): 창 안에서 스크롤 없이 다 보이게 — 긴 문장은 토막으로(◀ 1/3 ▶) ·
 //     토막을 다 쓰면 자동으로 다음 토막 · 줄을 다 쓰면 대사를 듣고 자동으로 다음 줄 쓰기 · 아래 ▶ = 이 부분 듣기
-import { t as tG, tL, lang, uiKoOn as uiKoG, KO_UI, preloadKoUi, tIn, uiKoIn } from "../i18n.js?v=1023.26";
-import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO, koq } from "../text.js?v=1023.26";
-import { episode, chars, charsF } from "../data.js?v=1023.26";
-import { paths } from "../paths.js?v=1023.26";
-import { I, spkHtml, uiKoBtn, uikoChip, openUiScope, SPEAKER } from "../ui.js?v=1023.26";
-import { audioCtx, hold } from "../wake.js?v=1023.26";
-import * as sfx from "../sfx.js?v=1023.26";
-import { scoreFx, stopFx } from "../scorefx.js?v=1023.26";
-import { units as jamoUnits, baseOf, shapeFix } from "../jamobox.js?v=1023.26"; // 자모 자리 나누기(획순 · 자판 덧칠 · 손글씨 덩어리 — 본부 10-07) // 손글씨 점수 효과 = 말하기와 같은 규칙(본부 10-07)
-import { createStrokes } from "../strokes.js?v=1023.26"; // 획 자료·획순 칠(글자부)
-import { whyRow } from "../whyask.js?v=1023.26"; // 「왜 틀렸어요?」(개발2팀 · 기본 꺼짐 ?why=1)
+import { t as tG, tL, lang, uiKoOn as uiKoG, KO_UI, preloadKoUi, tIn, uiKoIn } from "../i18n.js?v=1023.27";
+import { LEARN } from "../tl.js?v=1023.27";
+import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO, koq } from "../text.js?v=1023.27";
+import { episode, chars, charsF } from "../data.js?v=1023.27";
+import { paths } from "../paths.js?v=1023.27";
+import { I, spkHtml, uiKoBtn, uikoChip, openUiScope, SPEAKER } from "../ui.js?v=1023.27";
+import { audioCtx, hold } from "../wake.js?v=1023.27";
+import * as sfx from "../sfx.js?v=1023.27";
+import { scoreFx, stopFx } from "../scorefx.js?v=1023.27";
+import { units as jamoUnits, baseOf, shapeFix } from "../jamobox.js?v=1023.27"; // 자모 자리 나누기(획순 · 자판 덧칠 · 손글씨 덩어리 — 본부 10-07) // 손글씨 점수 효과 = 말하기와 같은 규칙(본부 10-07)
+import { createStrokes } from "../strokes.js?v=1023.27"; // 획 자료·획순 칠(글자부)
+import { whyRow } from "../whyask.js?v=1023.27"; // 「왜 틀렸어요?」(개발2팀 · 기본 꺼짐 ?why=1)
 let FBV = null; import(`../fbvoice.js?v=${document.documentElement.dataset.v || ""}`).then(m => { FBV = m; }).catch(() => {}); // 안내 소리(개발2팀 · 없으면 소리 없이 지금 그대로)
-import { fitToGuide } from "../strokefit.js?v=1023.26"; // 자석 따라오는 획 길 = 회색 가운데(글자부 10-12)
+import { fitToGuide } from "../strokefit.js?v=1023.27"; // 자석 따라오는 획 길 = 회색 가운데(글자부 10-12)
 
 const KEYS = [..."ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎㄲㄸㅃㅆㅉ"], VOW = [..."ㅏㅑㅓㅕㅗㅛㅜㅠㅡㅣ"];
 const VOW2 = [..."ㅐㅒㅔㅖㅘㅙㅚㅝㅞㅟㅢ"]; // 겹모음 줄(본부 10-06) — 칸 하나 · ㅓ+ㅣ 처럼 나눠 쳐도 받음
@@ -86,7 +87,7 @@ async function run(steps) {
 let autoAllNext = null; // 전체 자동 완성이 다음 줄로 넘어갈 때 { ep, id, t } — 새 쓰기 화면이 이어받아 바로 자동
 const helpHtml = (t = tG) => [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(k => "help_wr_" + k).filter(k => t(k) !== k).map(k => `<p>${esc(t(k))}</p>`).join("") + `<p class="x">${esc(t("help_close"))}</p>`; // 7 = 🔊 이 줄 듣기(10-13 · 열쇠가 있을 때만)
 export default async function write(app, ep, id, opts = {}) {
-  const spkS = ko => { const id = SPEAKER[ko], k = "spk_" + id, g = id ? t(k) : ""; return `<span class="ko" lang="ko">${esc(ko)}</span>${g && g !== k && g !== ko ? `<span class="spkg"> · ${esc(g)}</span>` : ""}`; }; // 화자 이름 = 이 창 상태로(ui.js spkHtml 은 앱 전체 상태)
+  const spkS = ko => { const id = SPEAKER[ko], k = "spk_" + id, g = id ? t(k) : ""; return `<span class="ko" lang="${LEARN}">${esc(ko)}</span>${g && g !== k && g !== ko ? `<span class="spkg"> · ${esc(g)}</span>` : ""}`; }; // 화자 이름 = 이 창 상태로(ui.js spkHtml 은 앱 전체 상태)
   let scrW = null; const t = (k, v) => (scrW ? tIn(scrW, k, v) : tG(k, v)), uiKoOn = () => (scrW ? uiKoIn(scrW) : uiKoG()); // ⇄ 창마다 독립(대표님 10-22 · 다국어부 공용 입구) — 쓰기 창 글은 이 창 상태로
   const [d, idx, cf, KOS] = await Promise.all([episode(ep, lang), chars(), charsF(ep), KO_UI.includes(lang) ? preloadKoUi(lang) : null]); // KOS = 한국어 앱 글(⇄) — 단추 폭을 두 언어 중 긴 쪽으로(10-15)
   // 글자·자모 소리: 공용 아나운서(chars_f) 먼저 · 없으면 지금 글자 소리 · 자모는 옛 jamo 이름
@@ -130,7 +131,7 @@ export default async function write(app, ep, id, opts = {}) {
       ? `<div class="whead"><b>${esc(t("write"))}</b><span class="sub"><span class="ln">${li + 1} / ${d.lines.length}</span><span class="sp"> · ${spkS(line.speaker)}</span></span>${modeBtns()}${uiKoBtn()}<button class="whelp" data-act="help" aria-label="${esc(t("help"))}">${esc(t("help_btn"))}</button><button class="whelp wclose" data-act="close" aria-label="${esc(t("close_btn"))}">✕<span class="lt">${esc(String(t("close_btn")).replace(/^✕\s*/, " "))}</span></button><span class="loopnote" aria-live="polite"></span></div>`
       : `<div class="bar"><a class="iconbtn" href="#/learn/${ep}/${line.id}" aria-label="${esc(t("back"))}">${I.back}</a>
       <div class="grow"><div class="t">${esc(t("write"))}</div><div class="sub"><span class="ln">${li + 1} / ${d.lines.length}</span><span class="sp"> · ${spkS(line.speaker)}</span></div></div>${modeBtns()}${uiKoBtn()}<button class="whelp" data-act="help" aria-label="${esc(t("help"))}">${esc(t("help_btn"))}</button></div><div class="loopnote" aria-live="polite"></div>`}
-    <div class="segrow"><div class="sent" lang="ko"></div><div class="segnav"></div><div class="wtip" hidden></div></div>
+    <div class="segrow"><div class="sent" lang="${LEARN}"></div><div class="segnav"></div><div class="wtip" hidden></div></div>
     <div class="work"></div>
     <div class="helpbox" hidden>${helpHtml(t)}</div>
     <div class="wbtns"><button data-act="hearch"></button><button data-act="auto"></button><button data-act="autoall"></button></div>
@@ -289,13 +290,13 @@ export default async function write(app, ep, id, opts = {}) {
   function render() {
     paintSent();
     if (st.s >= segs.length) {
-      work.innerHTML = `<div class="done-card"><span class="big ko" lang="ko">${esc(line.ko)}</span>${line.tr ? `<span class="tr">${esc(line.tr)}</span>` : ""}
+      work.innerHTML = `<div class="done-card"><span class="big ko" lang="${LEARN}">${esc(line.ko)}</span>${line.tr ? `<span class="tr">${esc(line.tr)}</span>` : ""}
         <span>${esc(t("sentence_done"))}</span><button class="chip" data-act="retry">${esc(t("retry_writing"))}</button></div>`;
       wb.remove(); return;
     }
     const w = words()[st.w], c = w.chars[st.c], jam = c.jamo;
-    work.innerHTML = `<div class="stage"><div class="box" role="button" tabindex="0" aria-label="${esc(t("listen_char") || "▶")}"><canvas class="tcv" aria-hidden="true"></canvas><span class="target ko" lang="ko">${esc(c.ch)}</span><span class="typed ko" lang="ko">${esc(compose([...st.typed, st.part].flatMap(jamoParts), vowelLen(c.ch)))}</span></div>
-      <div class="info">${w.mean || st.mode === "hand" ? `<div class="sub2">${w.chars.length > 1 ? `<span class="wko ko" lang="ko">${w.chars.map((x, i) => i === st.c ? `<b>${esc(x.ch)}</b>` : esc(x.ch)).join("")}</span>` : ""}${w.mean ? `<span class="mean tr">${esc(meanOf(w.mean))}</span>` : ""}${st.mode === "hand" ? `<span class="htools" role="group">${Object.entries(TOOLS).map(([k, v]) => `<button data-tool="${k}" aria-pressed="${toolKey() === k}" aria-label="${esc(t("h_" + k))}">${v.icon}<span class="ml"> ${esc(t("h_" + k))}</span></button>`).join("")}<button class="hmag" data-hmode aria-pressed="${magnetOn()}" aria-label="${esc(t("h_magnet"))}">🧲<span class="ml"> ${esc(t("h_magnet"))}</span></button><button data-hfollow aria-pressed="${followOn()}" aria-label="${esc(tx("h_follow"))}">👣<span class="ml"> ${esc(tx("h_follow"))}</span></button></span>` : ""}</div>` : ""}
+    work.innerHTML = `<div class="stage"><div class="box" role="button" tabindex="0" aria-label="${esc(t("listen_char") || "▶")}"><canvas class="tcv" aria-hidden="true"></canvas><span class="target ko" lang="${LEARN}">${esc(c.ch)}</span><span class="typed ko" lang="${LEARN}">${esc(compose([...st.typed, st.part].flatMap(jamoParts), vowelLen(c.ch)))}</span></div>
+      <div class="info">${w.mean || st.mode === "hand" ? `<div class="sub2">${w.chars.length > 1 ? `<span class="wko ko" lang="${LEARN}">${w.chars.map((x, i) => i === st.c ? `<b>${esc(x.ch)}</b>` : esc(x.ch)).join("")}</span>` : ""}${w.mean ? `<span class="mean tr">${esc(meanOf(w.mean))}</span>` : ""}${st.mode === "hand" ? `<span class="htools" role="group">${Object.entries(TOOLS).map(([k, v]) => `<button data-tool="${k}" aria-pressed="${toolKey() === k}" aria-label="${esc(t("h_" + k))}">${v.icon}<span class="ml"> ${esc(t("h_" + k))}</span></button>`).join("")}<button class="hmag" data-hmode aria-pressed="${magnetOn()}" aria-label="${esc(t("h_magnet"))}">🧲<span class="ml"> ${esc(t("h_magnet"))}</span></button><button data-hfollow aria-pressed="${followOn()}" aria-label="${esc(tx("h_follow"))}">👣<span class="ml"> ${esc(tx("h_follow"))}</span></button></span>` : ""}</div>` : ""}
       <div class="slotrow"><div class="slots">${jam.map((j, i) => `<span class="slot ${i < st.k ? "filled" : i === st.k ? "current" : ""}">${i <= st.k ? esc(j) : ""}</span>`).join("")}${"<span class=\"slot slotpad\" aria-hidden=\"true\"></span>".repeat(Math.max(0, 4 - jam.length))}</div></div></div></div>
       ${st.mode === "hand" ? `<div class="hand"><span class="hpal" role="radiogroup" aria-label="${esc(tx("h_ink"))}">${INKS.map(([k, hex]) => `<button data-act="inkset" data-ink="${k}" role="radio" aria-checked="${k === inkKey()}" aria-label="${esc(tx("ink_" + k))}" style="--c:${hex}"></button>`).join("")}</span><div class="hbox"><canvas class="hguide" aria-hidden="true"></canvas><canvas class="hpace" aria-hidden="true"></canvas><canvas class="hink" aria-label="${esc(t("w_hand"))}"></canvas><canvas class="hfix" aria-hidden="true"></canvas><span class="fx" aria-hidden="true"></span><span class="hslot"><b class="hscore" hidden></b><span class="htime" aria-hidden="true"><i></i><b></b></span></span></div><div class="hbtns"><div class="hjudge" aria-live="polite"></div><button data-act="hdone" aria-label="${esc(t("h_done"))}">✓<span class="ml"> ${esc(t("h_done"))}</span></button><button data-act="hnext" aria-label="${esc(t("next_btn"))}">▶<span class="ml"> ${esc(String(t("next_btn")).replace(/\s*▶\s*$/, ""))}</span></button><button data-act="horder" aria-label="${esc(t("h_order"))}">✎<span class="ml"> ${esc(t("h_order"))}</span></button><button data-act="hundo" aria-label="${esc(t("h_undo"))}">↶<span class="ml"> ${esc(t("h_undo"))}</span><span class="ms">${esc(tx("h_undo_s"))}</span></button><button data-act="hclear" aria-label="${esc(t("h_clear"))}"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M15.4 3.6a2 2 0 0 1 2.8 0l2.2 2.2a2 2 0 0 1 0 2.8L11 18H6.6l-3-3a2 2 0 0 1 0-2.8z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M9.2 9.8l5 5M6.6 18H21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span class="ml"> ${esc(t("h_clear"))}</span></button></div></div>`
         : `<div class="kb" lang="ko">${KB_ROWS.map(r => `<div class="kr">${r.map(j => `<button data-j="${j}">${j}</button>`).join("")}</div>`).join("")}</div>`}`;
@@ -908,7 +909,7 @@ export default async function write(app, ep, id, opts = {}) {
     clearTimeout(st.fbWait); const go = () => { if (!st.alive || st.fb?.el !== bx || !bx.isConnected) return; if (fresh && document.querySelector(".fxfull")) { st.fbWait = setTimeout(go, 250); return; } st.fb.set(plan, fresh); }; go(); } /* 🎉 덮개·팡파레가 끝난 뒤 자동 읽기 */
   const fbStop = () => { clearTimeout(st.fbWait); st.fb?.stop(); };
   // 채점 전 안내(투덜이 10-15 「빈 흰 칸이라 허전」) — 「이 — 2획 · ① ㅇ ② ㅣ」 + 쓰는 법(회색 따라 / 👣 주황 점 / 🧲 자석) + ⏱ 시간 · 처음 6글자는 셋 다, 그 뒤엔 획 줄 + 쓰는 법만 · 상자 크기 그대로
-  const koEsc = x => esc(x).replace(/[가-힣ㄱ-ㅣ]+/g, m => `<span class="ko" lang="ko">${m}</span>`); // 판정 글 속 배우는 한국어(글자·자모) = lang=ko(학습자 언어 글과 구분)
+  const koEsc = x => esc(x).replace(/[가-힣ㄱ-ㅣ]+/g, m => `<span class="ko" lang="${LEARN}">${m}</span>`); // 판정 글 속 배우는 한국어(글자·자모) = lang=ko(학습자 언어 글과 구분)
   function showGuide(H = st.hand) {
     const bx = work.querySelector(".hjudge"); if (!bx || !H || H.jx || H.hintOn || st.hand !== H) return; const list = SK.STK ? strokesOf(H.ch) : []; if (!list.length) return;
     let seen = 0; try { seen = +localStorage.getItem("malmun.wguide") || 0; if (!H.guideCounted) { H.guideCounted = true; localStorage.setItem("malmun.wguide", String(seen + 1)); } } catch {}

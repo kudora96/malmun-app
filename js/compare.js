@@ -5,13 +5,14 @@
 //  · 재생: 본보기 → 0.4초 → 내 목소리 · 재생 위치 세로 막대 + 지금 음절 강조 · 파형·음절 칸을 누르면 그 줄 그 음절부터
 //  녹음·점수 계산·[내 목소리] 재생(playmine.js playMine)은 그대로 — 여기는 그리기·DTW·비교 화면 안 재생만
 //  (본보기는 sfx.play 그대로 · 내 목소리는 playmine 과 같은 방식: decodeAudioData → BufferSource.start(t, offset) → Gain)
-import { prepare, rhythmScore, loadAlign, isSyl, R_FULL, cutWin, snapSyl } from "./rhythm.js?v=1023.26";
-import { esc, koq } from "./text.js?v=1023.26";
-import { align } from "./score.js?v=1023.26";
-import { audioCtx } from "./wake.js?v=1023.26";
-import { leadOf, gainOf, speechDb, FADE, FADE_OUT, voicedEnd } from "./playmine.js?v=1023.26";
-import { speechEnd, wavOf } from "./recstore.js?v=1023.26";
-import * as sfx from "./sfx.js?v=1023.26";
+import { prepare, rhythmScore, loadAlign, isSyl, R_FULL, cutWin, snapSyl } from "./rhythm.js?v=1023.27";
+import { LEARN } from "./tl.js?v=1023.27";
+import { esc, koq } from "./text.js?v=1023.27";
+import { align } from "./score.js?v=1023.27";
+import { audioCtx } from "./wake.js?v=1023.27";
+import { leadOf, gainOf, speechDb, FADE, FADE_OUT, voicedEnd } from "./playmine.js?v=1023.27";
+import { speechEnd, wavOf } from "./recstore.js?v=1023.27";
+import * as sfx from "./sfx.js?v=1023.27";
 
 // host 안에 그린다 → { close() } · o = { ep, key, url(본보기), text(본보기 글), blob(내 녹음), heard(들은 말 글자 · 없으면 색 없음), t(문구), win(덧붙은 말이 있을 때 토막 구간 { s, e } · 10-11) }
 // 속도 단계(본부 10-07 · 투덜이 「견본에도 각각」) — 줄마다 자기 속도 · 누를 때마다 1 → 0.9 → 0.75 → 0.6 → 0.5 → 1 · 0.5 아래는 늘이기가 끊겨 뺌 · 고른 값 기억
@@ -92,7 +93,7 @@ export async function openCompare(host, o) {
   };
   const extras = (syl, lead) => extra.map(x => { const at = x.after >= 0 ? syl[x.after].e : syl[0].s, [a0, a1] = x.after >= 0 ? [at - 0.03, at + 0.05] : [Math.max(lead, at - 0.08), at]; return `<span class="add" style="${pos(a0, a1, lead)}">${esc(x.ch)}</span>`; }).join("");
   const rkey = c => (c === "m" ? "m" : "y");
-  const row = (cls, lab, syl, lead) => `<div class="crow ${cls}"><div class="clab"><button class="cplay" data-play="${cls}">▶ ${esc(lab)}</button><button class="crate" data-rate="${cls}" aria-pressed="${getRate(rkey(cls)) !== 1}" aria-label="${esc(t("speed"))}">${rateTxt(getRate(rkey(cls)))}</button>${cls === "y" && o.scoreTxt ? `<b class="cscore">${esc(o.scoreTxt)}</b>` : ""}</div><div class="cwave"><canvas></canvas><i class="cbar" hidden></i></div><div class="csyl ko" lang="ko">${syl.map((x, k) => cell(x, k, lead, cls === "y")).join("")}${groups ? groups.map((g, wi) => wcell(g, wi, syl, lead, cls === "y")).join("") : ""}${cls === "y" ? extras(syl, lead) : ""}</div></div>`;
+  const row = (cls, lab, syl, lead) => `<div class="crow ${cls}"><div class="clab"><button class="cplay" data-play="${cls}">▶ ${esc(lab)}</button><button class="crate" data-rate="${cls}" aria-pressed="${getRate(rkey(cls)) !== 1}" aria-label="${esc(t("speed"))}">${rateTxt(getRate(rkey(cls)))}</button>${cls === "y" && o.scoreTxt ? `<b class="cscore">${esc(o.scoreTxt)}</b>` : ""}</div><div class="cwave"><canvas></canvas><i class="cbar" hidden></i></div><div class="csyl ko" lang="${LEARN}">${syl.map((x, k) => cell(x, k, lead, cls === "y")).join("")}${groups ? groups.map((g, wi) => wcell(g, wi, syl, lead, cls === "y")).join("") : ""}${cls === "y" ? extras(syl, lead) : ""}</div></div>`;
   const ticks = []; for (let s = 0; s <= span + 1e-6; s += span > 3 ? 1 : 0.5) ticks.push(`<span style="left:${(100 * s) / span}%">${s.toFixed(1)}</span>`);
   host.innerHTML = `<div class="cmpw">${row("m", t("model"), msyl, mLead)}${row("y", t("my_voice"), ysyl, yLead)}<div class="cruler">${ticks.join("")}</div><div class="cfoot"><button class="craw" data-raw title="lead ${yLead.toFixed(2)} · end ${yStop.toFixed(2)} · ${ybuf.duration.toFixed(2)}s">⬇ ${esc(t("raw_dl"))}</button></div></div>`;
   const rows = [...host.querySelectorAll(".crow")];

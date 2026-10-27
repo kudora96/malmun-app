@@ -1,12 +1,13 @@
 // 음성·영상 경로는 여기서만 조립한다(app_build_spec §3-5 — JSON 에는 파일 이름만).
 // 로컬 미리보기 = media/(저장소 밖 연결) · 배포 = R2 버킷 malmun-media(tools/upload_media.py 로 올림)
+import { dataBase } from "./tl.js?v=1023.27";
 const R2 = "https://pub-5e6f50ff2dda412eaa13ca4d4302d599.r2.dev";
 const LOCAL = /^(localhost|127\.0\.0\.1|\[::1\]|10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+|172\.(1[6-9]|2\d|3[01])\.\d+\.\d+)$/.test(location.hostname); // 같은 와이파이 폰(사설 IP 주소)도 로컬 미리보기 = media/(10-22 대표님 폰에서 R2 옛 영상이 나옴)
 export const MEDIA = LOCAL ? "media" : R2;
 
 // ?v 한 칸씩 올림(10-07) — 음성 창고에 CORS 허락을 넣기 전에 폰이 받아 둔 옛 응답(허락 머리 없음 · 7일 저장)을 다시 쓰지 않게
 export const paths = {
-  data: (ep, suffix = "") => `data/${ep}/${ep}${suffix}.json`,
+  data: (ep, suffix = "") => `${dataBase}/${ep}/${ep}${suffix}.json`, // 배울 말마다 자료 길(js/tl.js · ko = 옛 길 data/<편>/ 그대로)
   // ?v= = 판 번호 — 영상을 바꾸면 올려서 폰·브라우저에 남은 옛 영상을 쓰지 않게 한다
   // q = "720"·"480" → video/{q}/{ep}.mp4(10-20 화질 자동 · vq.js) · q 없음 = 옛 한 판(못 받을 때 마지막 대안)
   video: (ep, q) => (q ? `${MEDIA}/video/${q}/${ep}.mp4?v=1` : `${MEDIA}/video/${ep}.mp4?v=3`),
