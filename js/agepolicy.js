@@ -3,7 +3,7 @@
 //  나라 = 스토어 계정 나라 → 없으면(웹) 첫 실행 때 고른 나라 → 그래도 없으면 가장 엄한 쪽(대표님 10-19)
 //  ⚠ 첫 실행 나이 화면이 생기기 전에는 나이를 모르는 학습자를 막지 않음(지금 앱 그대로) — 시험 스위치나 태어난 해가 있을 때만 판정
 //  시험 스위치(대표님이 직접 보기): 주소 ?age=15&country=NP · ?age=off 로 끔 · 기기 기억 · #/diag 에 「지금 나이·나라 · 켜진/막힌 기능」
-import { learnInfo } from "./tl.js?v=1023.36";
+import { learnInfo } from "./tl.js?v=1023.37";
 export const POLICY = {
   version: "2026-10-19",
   cols: ["KR", "US", "GB", "EU", "NP", "IN", "TH", "VN", "PH", "ID", "OTHER"],
