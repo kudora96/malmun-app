@@ -13,16 +13,16 @@
 //  W5 소리는 언제나 하나만 · 새 일을 하면 앞 소리는 멈춘다
 //  W6 영상 창 안(embedded): 창 안에서 스크롤 없이 다 보이게 — 긴 문장은 토막으로(◀ 1/3 ▶) ·
 //     토막을 다 쓰면 자동으로 다음 토막 · 줄을 다 쓰면 대사를 듣고 자동으로 다음 줄 쓰기 · 아래 ▶ = 이 부분 듣기
-import { t as tG, tL, lang, uiKoOn as uiKoG, KO_UI, preloadKoUi, tIn, uiKoIn } from "../i18n.js?v=1023.26";
-import { esc, glossCards, koq } from "../text.js?v=1023.26";
-import { SCRIPT } from "../script_adapter.js?v=1023.26"; // 글자 체계 어댑터(한글 감싸기 · 쓰기부 10-27 작전표 004 G 1단계)
-import { episode, chars, charsF } from "../data.js?v=1023.26";
-import { paths } from "../paths.js?v=1023.26";
-import { I, spkHtml, uiKoBtn, uikoChip, openUiScope, SPEAKER } from "../ui.js?v=1023.26";
-import { audioCtx, hold } from "../wake.js?v=1023.26";
-import * as sfx from "../sfx.js?v=1023.26";
-import { scoreFx, stopFx } from "../scorefx.js?v=1023.26";
-import { whyRow } from "../whyask.js?v=1023.26"; // 「왜 틀렸어요?」(개발2팀 · 기본 꺼짐 ?why=1)
+import { t as tG, tL, lang, uiKoOn as uiKoG, KO_UI, preloadKoUi, tIn, uiKoIn } from "../i18n.js?v=1023.35";
+import { esc, glossCards, koq } from "../text.js?v=1023.35";
+import { SCRIPT } from "../script_adapter.js?v=1023.35"; // 글자 체계 어댑터(한글 감싸기 · 쓰기부 10-27 작전표 004 G 1단계)
+import { episode, chars, charsF } from "../data.js?v=1023.35";
+import { paths } from "../paths.js?v=1023.35";
+import { I, spkHtml, uiKoBtn, uikoChip, openUiScope, SPEAKER } from "../ui.js?v=1023.35";
+import { audioCtx, hold } from "../wake.js?v=1023.35";
+import * as sfx from "../sfx.js?v=1023.35";
+import { scoreFx, stopFx } from "../scorefx.js?v=1023.35";
+import { whyRow } from "../whyask.js?v=1023.35"; // 「왜 틀렸어요?」(개발2팀 · 기본 꺼짐 ?why=1)
 let FBV = null; import(`../fbvoice.js?v=${document.documentElement.dataset.v || ""}`).then(m => { FBV = m; }).catch(() => {}); // 안내 소리(개발2팀 · 없으면 소리 없이 지금 그대로)
 // 한글 함수는 어댑터(SCRIPT)에서 — 이름은 그대로 두어 아래 코드는 한 줄도 안 바뀜(감싸기만 · 동작 0 변경)
 const { jamoOf: toJamoW, jamoParts, compose, vowelLen, soundNames: JAMO_AUDIO } = SCRIPT, { createStrokes, jamoUnits, shapeFix, baseOf, fitToGuide } = SCRIPT.engine; // fitToGuide = 자석 따라오는 획 길 = 회색 가운데(글자부 10-12)

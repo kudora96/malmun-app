@@ -5,11 +5,11 @@
 //  ⇄ 창마다 독립(대표님 10-22 · 설계 _hq/design_uiko_scope.md): 말·목소리 = fbBind(el) 의 el 이 든 창 상태(uiKoIn(el)) · 끼운 조각 글(lv)도 그 상태로 다시 만듦
 //  자동 재생 = 결과가 새로 나오면 한 번(기억 malmun.fbauto = "0" 이면 끔 · 「?」 사용법에서) · 결과 글 누르기 = 읽기 ⇄ 멈춤
 //  겹침 없음: 다른 소리(sfx)가 시작되거나 <audio>/<video> 가 재생되면 즉시 멈춤 · 소리 파일이 없으면 조용히 다음 조각
-import * as sfx from "./sfx.js?v=1023.28";
-import { paths, MEDIA } from "./paths.js?v=1023.28";
-import { t, tFor, lang, uiKoOn, uiKoIn } from "./i18n.js?v=1023.28";
-import { R_FULL } from "./rhythm.js?v=1023.28";
-import { charsF } from "./data.js?v=1023.28";
+import * as sfx from "./sfx.js?v=1023.35";
+import { paths, MEDIA } from "./paths.js?v=1023.35";
+import { t, tFor, lang, uiKoOn, uiKoIn } from "./i18n.js?v=1023.35";
+import { R_FULL } from "./rhythm.js?v=1023.35";
+import { charsF } from "./data.js?v=1023.35";
 
 const PASS = 80, PERFECT = 95;
 const V = 1; // 소리 판(소리부가 다시 만들면 올림)

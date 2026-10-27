@@ -4,11 +4,11 @@
 //  길게 누르기를 안 받는 곳(다른 부서·다른 손짓과 겹침 막기): 단추·링크·입력 칸·그림 판(canvas)·자판(data-j)·손글씨 칸·재생 막대·비교 파형·영상
 //  보내기 = 기기 안 줄(malmun.rpq · 최대 50)에 넣고 Worker /report 로 → 서버가 없거나(503) 망이 끊기면 줄에 두었다가 다음 실행·다음 신고 때 다시
 //  기기당 하루 10건(malmun.rpday) · 나이: reportTap(종류) · reportText(글·기기 번호) — agepolicy 표 그대로 · 종류만인 나이 = 그날만 쓰는 무작위 번호
-import { t } from "./i18n.js?v=1023.28";
-import { esc } from "./text.js?v=1023.28";
-import { spkHtml } from "./ui.js?v=1023.28";
-import { allowed } from "./agepolicy.js?v=1023.28";
-import { sttURL, deviceId } from "./sttserver.js?v=1023.28";
+import { t } from "./i18n.js?v=1023.35";
+import { esc } from "./text.js?v=1023.35";
+import { spkHtml } from "./ui.js?v=1023.35";
+import { allowed } from "./agepolicy.js?v=1023.35";
+import { sttURL, deviceId } from "./sttserver.js?v=1023.35";
 
 export const KINDS = ["tr", "snd", "glyph", "ai", "etc"];
 const NO = "button, a, input, textarea, select, label, canvas, svg, video, [data-j], [data-act], .seek, .hslot, .hand, .cmp, .wv, .rpmenu, .rptip, [contenteditable], .gamewrap, .vplay";
