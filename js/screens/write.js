@@ -13,24 +13,22 @@
 //  W5 소리는 언제나 하나만 · 새 일을 하면 앞 소리는 멈춘다
 //  W6 영상 창 안(embedded): 창 안에서 스크롤 없이 다 보이게 — 긴 문장은 토막으로(◀ 1/3 ▶) ·
 //     토막을 다 쓰면 자동으로 다음 토막 · 줄을 다 쓰면 대사를 듣고 자동으로 다음 줄 쓰기 · 아래 ▶ = 이 부분 듣기
-import { t as tG, tL, lang, uiKoOn as uiKoG, KO_UI, preloadKoUi, tIn, uiKoIn } from "../i18n.js?v=1023.28";
-import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO, koq } from "../text.js?v=1023.28";
-import { episode, chars, charsF } from "../data.js?v=1023.28";
-import { paths } from "../paths.js?v=1023.28";
-import { I, spkHtml, uiKoBtn, uikoChip, openUiScope, SPEAKER } from "../ui.js?v=1023.28";
-import { audioCtx, hold } from "../wake.js?v=1023.28";
-import * as sfx from "../sfx.js?v=1023.28";
-import { scoreFx, stopFx } from "../scorefx.js?v=1023.28";
-import { units as jamoUnits, baseOf, shapeFix } from "../jamobox.js?v=1023.28"; // 자모 자리 나누기(획순 · 자판 덧칠 · 손글씨 덩어리 — 본부 10-07) // 손글씨 점수 효과 = 말하기와 같은 규칙(본부 10-07)
-import { createStrokes } from "../strokes.js?v=1023.28"; // 획 자료·획순 칠(글자부)
-import { whyRow } from "../whyask.js?v=1023.28"; // 「왜 틀렸어요?」(개발2팀 · 기본 꺼짐 ?why=1)
+import { t as tG, tL, lang, uiKoOn as uiKoG, KO_UI, preloadKoUi, tIn, uiKoIn } from "../i18n.js?v=1023.26";
+import { esc, glossCards, koq } from "../text.js?v=1023.26";
+import { SCRIPT } from "../script_adapter.js?v=1023.26"; // 글자 체계 어댑터(한글 감싸기 · 쓰기부 10-27 작전표 004 G 1단계)
+import { episode, chars, charsF } from "../data.js?v=1023.26";
+import { paths } from "../paths.js?v=1023.26";
+import { I, spkHtml, uiKoBtn, uikoChip, openUiScope, SPEAKER } from "../ui.js?v=1023.26";
+import { audioCtx, hold } from "../wake.js?v=1023.26";
+import * as sfx from "../sfx.js?v=1023.26";
+import { scoreFx, stopFx } from "../scorefx.js?v=1023.26";
+import { whyRow } from "../whyask.js?v=1023.26"; // 「왜 틀렸어요?」(개발2팀 · 기본 꺼짐 ?why=1)
 let FBV = null; import(`../fbvoice.js?v=${document.documentElement.dataset.v || ""}`).then(m => { FBV = m; }).catch(() => {}); // 안내 소리(개발2팀 · 없으면 소리 없이 지금 그대로)
-import { fitToGuide } from "../strokefit.js?v=1023.28"; // 자석 따라오는 획 길 = 회색 가운데(글자부 10-12)
+// 한글 함수는 어댑터(SCRIPT)에서 — 이름은 그대로 두어 아래 코드는 한 줄도 안 바뀜(감싸기만 · 동작 0 변경)
+const { jamoOf: toJamoW, jamoParts, compose, vowelLen, soundNames: JAMO_AUDIO } = SCRIPT, { createStrokes, jamoUnits, shapeFix, baseOf, fitToGuide } = SCRIPT.engine; // fitToGuide = 자석 따라오는 획 길 = 회색 가운데(글자부 10-12)
 
-const KEYS = [..."ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎㄲㄸㅃㅆㅉ"], VOW = [..."ㅏㅑㅓㅕㅗㅛㅜㅠㅡㅣ"];
-const VOW2 = [..."ㅐㅒㅔㅖㅘㅙㅚㅝㅞㅟㅢ"]; // 겹모음 줄(본부 10-06) — 칸 하나 · ㅓ+ㅣ 처럼 나눠 쳐도 받음
 // 자판 줄(본부 10-06 투덜이 「단추가 제각각」) — 모든 단추 같은 모양·같은 너비(10칸 줄 기준) · 칸이 모자란 줄은 가운데
-const KB_ROWS = [KEYS.slice(0, 10), KEYS.slice(10), VOW, VOW2.slice(0, 6), VOW2.slice(6)];
+const { keys: KEYS, vowels: VOW, vowels2: VOW2, rows: KB_ROWS } = SCRIPT.keyboard; // 자판 = 어댑터(한글 두벌식 · 겹모음 줄 칸 하나 — 본부 10-06)
 const GAP_NEXT = 600;     // 글자 소리 → 다음 글자 사이
 
 // ── 소리(W5) — 한 번에 하나 · 차례 재생 · 취소 ── 짧은 소리는 전부 미리 풀어 둔 버퍼로(js/sfx.js)
@@ -298,7 +296,7 @@ export default async function write(app, ep, id, opts = {}) {
       <div class="info">${w.mean || st.mode === "hand" ? `<div class="sub2">${w.chars.length > 1 ? `<span class="wko ko" lang="ko">${w.chars.map((x, i) => i === st.c ? `<b>${esc(x.ch)}</b>` : esc(x.ch)).join("")}</span>` : ""}${w.mean ? `<span class="mean tr">${esc(meanOf(w.mean))}</span>` : ""}${st.mode === "hand" ? `<span class="htools" role="group">${Object.entries(TOOLS).map(([k, v]) => `<button data-tool="${k}" aria-pressed="${toolKey() === k}" aria-label="${esc(t("h_" + k))}">${v.icon}<span class="ml"> ${esc(t("h_" + k))}</span></button>`).join("")}<button class="hmag" data-hmode aria-pressed="${magnetOn()}" aria-label="${esc(t("h_magnet"))}">🧲<span class="ml"> ${esc(t("h_magnet"))}</span></button><button data-hfollow aria-pressed="${followOn()}" aria-label="${esc(tx("h_follow"))}">👣<span class="ml"> ${esc(tx("h_follow"))}</span></button></span>` : ""}</div>` : ""}
       <div class="slotrow"><div class="slots">${jam.map((j, i) => `<span class="slot ${i < st.k ? "filled" : i === st.k ? "current" : ""}">${i <= st.k ? esc(j) : ""}</span>`).join("")}${"<span class=\"slot slotpad\" aria-hidden=\"true\"></span>".repeat(Math.max(0, 4 - jam.length))}</div></div></div></div>
       ${st.mode === "hand" ? `<div class="hand"><span class="hpal" role="radiogroup" aria-label="${esc(tx("h_ink"))}">${INKS.map(([k, hex]) => `<button data-act="inkset" data-ink="${k}" role="radio" aria-checked="${k === inkKey()}" aria-label="${esc(tx("ink_" + k))}" style="--c:${hex}"></button>`).join("")}</span><div class="hbox"><canvas class="hguide" aria-hidden="true"></canvas><canvas class="hpace" aria-hidden="true"></canvas><canvas class="hink" aria-label="${esc(t("w_hand"))}"></canvas><canvas class="hfix" aria-hidden="true"></canvas><span class="fx" aria-hidden="true"></span><span class="hslot"><b class="hscore" hidden></b><span class="htime" aria-hidden="true"><i></i><b></b></span></span></div><div class="hbtns"><div class="hjudge" aria-live="polite"></div><button data-act="hdone" aria-label="${esc(t("h_done"))}">✓<span class="ml"> ${esc(t("h_done"))}</span></button><button data-act="hnext" aria-label="${esc(t("next_btn"))}">▶<span class="ml"> ${esc(String(t("next_btn")).replace(/\s*▶\s*$/, ""))}</span></button><button data-act="horder" aria-label="${esc(t("h_order"))}">✎<span class="ml"> ${esc(t("h_order"))}</span></button><button data-act="hundo" aria-label="${esc(t("h_undo"))}">↶<span class="ml"> ${esc(t("h_undo"))}</span><span class="ms">${esc(tx("h_undo_s"))}</span></button><button data-act="hclear" aria-label="${esc(t("h_clear"))}"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M15.4 3.6a2 2 0 0 1 2.8 0l2.2 2.2a2 2 0 0 1 0 2.8L11 18H6.6l-3-3a2 2 0 0 1 0-2.8z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M9.2 9.8l5 5M6.6 18H21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span class="ml"> ${esc(t("h_clear"))}</span></button></div></div>`
-        : `<div class="kb" lang="ko">${KB_ROWS.map(r => `<div class="kr">${r.map(j => `<button data-j="${j}">${j}</button>`).join("")}</div>`).join("")}</div>`}`;
+        : `<div class="kb" lang="${SCRIPT.keyboard.lang}">${KB_ROWS.map(r => `<div class="kr">${r.map(j => `<button data-j="${j}">${j}</button>`).join("")}</div>`).join("")}</div>`}`;
     paintBox(c); if (st.lineEnd) { work.querySelector(".box")?.classList.add("ok"); paintBox(c, true); } // 줄 끝 = 마지막 글자 완성 표시 그대로 // 자판 칸 = 회색 글자 위에 친 자모 자리만 진하게(본부 10-07 · 글자가 따로 그려져 어긋나던 것)
     work.classList.toggle("handmode", st.mode === "hand"); // 손글씨 = 위 작은 글자 상자·자모 칸 숨기고 큰 칸을 키움(본부 10-07)
     if (st.mode === "hand") setupHand(c);
