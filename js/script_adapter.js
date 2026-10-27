@@ -3,10 +3,10 @@
 //  쓰기 화면(write.js)은 한글 함수를 직접 부르지 않고 SCRIPT 로 부름. 한글 어댑터는 지금 함수를 **그대로** 부를 뿐(동작 0 변경 · 기준선 tools/baseline_script.json 으로 점검).
 //  다른 체계(라틴·키릴·데바나가리·아랍·가나·한자·태국계)는 2단계 이후 — 인터페이스는 설계서 §2.
 //  1단계는 늘 한글(배울 말 프로필 LEARN 이 들어오면 `adapterOf(learnInfo.script)` 로 고름 — 그 한 줄만 바뀜).
-import { toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO } from "./text.js?v=1023.39";
-import { units as jamoUnits, baseOf, shapeFix } from "./jamobox.js?v=1023.39"; // 한글 자모 덩어리 나누기(글자부)
-import { createStrokes } from "./strokes.js?v=1023.39"; // 획 자료·획순 칠(글자부)
-import { fitToGuide } from "./strokefit.js?v=1023.39"; // 자석 따라오는 획 길
+import { toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO } from "./text.js?v=1023.40";
+import { units as jamoUnits, baseOf, shapeFix } from "./jamobox.js?v=1023.40"; // 한글 자모 덩어리 나누기(글자부)
+import { createStrokes } from "./strokes.js?v=1023.40"; // 획 자료·획순 칠(글자부)
+import { fitToGuide } from "./strokefit.js?v=1023.40"; // 자석 따라오는 획 길
 
 const KEYS = [..."ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎㄲㄸㅃㅆㅉ"], VOW = [..."ㅏㅑㅓㅕㅗㅛㅜㅠㅡㅣ"];
 const VOW2 = [..."ㅐㅒㅔㅖㅘㅙㅚㅝㅞㅟㅢ"]; // 겹모음 줄(본부 10-06) — 칸 하나 · ㅓ+ㅣ 처럼 나눠 쳐도 받음
