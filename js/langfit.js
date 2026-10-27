@@ -2,8 +2,8 @@
 //  새로 그려진 단추마다: 지금 말 글과 반대쪽 말 글(i18n.tAlt)로 폭·높이를 재서 → 둘 중 큰 쪽으로 고정(min-width·min-height)
 //  고정하면 줄이 넘치는 자리(좁은 폰 머리 줄 등)는 → 폭은 지금 그대로 고정하고, 더 긴 말일 때 글자 크기만 줄임(모드별 배율 · ⇄ 때 바꿈)
 //  쓰기 화면(.write)은 쓰기부가 따로 함 · 배우는 내용(대사·낱말·설명 본문)은 건드리지 않음
-import { tFor, tAltFor, uiKoOn, uiKoIn, koReady, preloadKoUi, lang, uiKeys, KO_UI } from "./i18n.js?v=1023.37";
-import { snapshot } from "./retext.js?v=1023.37";
+import { tFor, tAltFor, uiKoOn, uiKoIn, koReady, preloadKoUi, lang, uiKeys, KO_UI } from "./i18n.js?v=1023.38";
+import { snapshot } from "./retext.js?v=1023.38";
 
 const TARGET = "button, a[href], .chip, [role=button], .modeb, .sheet > p, .sheet h2, .eps .st, .hero .meta, .whead > b, .whead > .sub, .bar .t, .bar .sub, .vtitle .tt > b, .exhead > b, .v9bar > span";
 const SHRINK = ".whead > *, .bar > *, .bar .t, .bar .sub, .vtitle .tt > *, .hbt > *, .eps .st"; // 한 줄을 나눠 쓰는 머리 줄 — 넓히지 않고 글자만 줄임
@@ -84,7 +84,7 @@ function run(root = document.body) {
   queued = false;
   if (!KO_UI.includes(lang)) return; // ⇄ 없는 언어(en 등) = 맞출 반대쪽 말 없음 — 전엔 koReady 가 늘 false 라 run→then→run 끝없는 고리로 화면이 멈췄음(쓰기부 10-15 긴급)
   if (!koReady(lang)) { if (!run.waiting) { run.waiting = true; preloadKoUi().then(() => { run.waiting = false; if (koReady(lang)) run(root); }); } return; }
-  if (snapMode !== lang) { snapCache = {}; snapMode = lang; }
+  if (!snapCache || snapMode !== lang) { snapCache = {}; snapMode = lang; }
   const snapFor = on => (snapCache[on ? "K" : "L"] ||= snapshot(on)); // 상태마다 하나(앱 전체 · 창 범위 ⇄ 둘 다)
   const n0 = fitted.size, list = [...root.querySelectorAll(TARGET)].map(el => prep(el, snapFor)).filter(Boolean);
   if (list.length) { measureAll(list); list.forEach(fit); }
