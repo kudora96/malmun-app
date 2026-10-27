@@ -1,5 +1,6 @@
 {
- "L01-00": "Hangul and Pronunciation",
+ "L01-00": "Korean Alphabet and Pronunciation",
+ "L01-00-01": "First Meeting",
  "L01-00-02": "Sky·Earth·Human → ㅏㅗ",
  "L01-00-03": "Tall·Wide Vowels + Stroke Direction",
  "L01-00-04": "ㅏ/ㅓ + ㅜ/ㅗ (First Pronunciation)",
@@ -149,6 +150,5 @@
  "L09-59-01": "59 Immigration Control Act",
  "L09-59-02": "59 Immigration Control Act",
  "L09-60-01": "60 Worker Insurance",
- "L09-60-02": "60 Worker Insurance",
- "L01-00-01": "First Meeting"
+ "L09-60-02": "60 Worker Insurance"
 }

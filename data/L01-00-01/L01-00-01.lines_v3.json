@@ -1,0 +1,148 @@
+{
+ "video": "ko_ep1_v3 r5/r6 78.667초",
+ "rule": "줄 start = 그 줄 첫 말(유성음·sound_ruler) −0.3초 · end = 그 줄 마지막 말 끝 +0.5초(다음 줄이 먼저 오면 그 시작 −0.04) = srt 와 같은 규칙",
+ "lines": [
+  {
+   "id": 1,
+   "start": 0,
+   "end": 5.218,
+   "cuts": [
+    1,
+    2
+   ],
+   "voiced_start": 0.23,
+   "voiced_end": 4.718
+  },
+  {
+   "id": 2,
+   "start": 5.525,
+   "end": 10.777,
+   "cuts": [
+    3,
+    4
+   ],
+   "voiced_start": 5.825,
+   "voiced_end": 10.277
+  },
+  {
+   "id": 3,
+   "start": 11.118,
+   "end": 16.18,
+   "cuts": [
+    5,
+    6
+   ],
+   "voiced_start": 11.418,
+   "voiced_end": 15.68
+  },
+  {
+   "id": 4,
+   "start": 16.522,
+   "end": 19.482,
+   "cuts": [
+    7
+   ],
+   "voiced_start": 16.822,
+   "voiced_end": 18.982
+  },
+  {
+   "id": 5,
+   "start": 19.858,
+   "end": 30.628,
+   "cuts": [
+    8,
+    9,
+    10
+   ],
+   "voiced_start": 20.158,
+   "voiced_end": 30.128
+  },
+  {
+   "id": 6,
+   "start": 31.577,
+   "end": 33.307,
+   "cuts": [
+    11
+   ],
+   "voiced_start": 31.877,
+   "voiced_end": 32.807
+  },
+  {
+   "id": 7,
+   "start": 33.98,
+   "end": 41.145,
+   "cuts": [
+    12,
+    13
+   ],
+   "voiced_start": 34.28,
+   "voiced_end": 40.645
+  },
+  {
+   "id": 8,
+   "start": 42.023,
+   "end": 47.613,
+   "cuts": [
+    14,
+    15
+   ],
+   "voiced_start": 42.323,
+   "voiced_end": 47.113
+  },
+  {
+   "id": 9,
+   "start": 47.868,
+   "end": 56.083,
+   "cuts": [
+    16,
+    17,
+    18
+   ],
+   "voiced_start": 48.168,
+   "voiced_end": 55.583
+  },
+  {
+   "id": 10,
+   "start": 57.003,
+   "end": 60.767,
+   "cuts": [
+    19,
+    20
+   ],
+   "voiced_start": 57.303,
+   "voiced_end": 60.267
+  },
+  {
+   "id": 11,
+   "start": 61.805,
+   "end": 68.762,
+   "cuts": [
+    21,
+    22
+   ],
+   "voiced_start": 62.105,
+   "voiced_end": 68.262
+  },
+  {
+   "id": 12,
+   "start": 69.083,
+   "end": 73.413,
+   "cuts": [
+    23
+   ],
+   "voiced_start": 69.383,
+   "voiced_end": 72.913
+  },
+  {
+   "id": 13,
+   "start": 73.72,
+   "end": 78.168,
+   "cuts": [
+    24,
+    25
+   ],
+   "voiced_start": 74.02,
+   "voiced_end": 77.668
+  }
+ ]
+}

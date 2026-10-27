@@ -1,5 +1,6 @@
 {
- "L01-00": "Hangul e pronúncia",
+ "L01-00": "Alfabeto coreano e pronúncia",
+ "L01-00-01": "Primeiro encontro",
  "L01-00-02": "Céu·Terra·Pessoa → ㅏㅗ",
  "L01-00-03": "Vogais verticais·horizontais + traços",
  "L01-00-04": "ㅏ/ㅓ + ㅜ/ㅗ (primeira pronúncia)",
@@ -149,6 +150,5 @@
  "L09-59-01": "59 Lei de Controle de Imigração",
  "L09-59-02": "59 Lei de Controle de Imigração",
  "L09-60-01": "60 Seguros do trabalhador",
- "L09-60-02": "60 Seguros do trabalhador",
- "L01-00-01": "Primeiro encontro"
+ "L09-60-02": "60 Seguros do trabalhador"
 }

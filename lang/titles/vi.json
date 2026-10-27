@@ -1,5 +1,6 @@
 {
- "L01-00": "Hangeul và phát âm",
+ "L01-00": "Chữ cái tiếng Hàn và phát âm",
+ "L01-00-01": "Lần đầu gặp mặt",
  "L01-00-02": "Trời·Đất·Người → ㅏㅗ",
  "L01-00-03": "Nguyên âm dọc·ngang + chiều nét",
  "L01-00-04": "ㅏ/ㅓ + ㅜ/ㅗ (bài phát âm đầu tiên)",
@@ -149,6 +150,5 @@
  "L09-59-01": "59 Luật Quản lý Xuất nhập cảnh",
  "L09-59-02": "59 Luật Quản lý Xuất nhập cảnh",
  "L09-60-01": "60 Bảo hiểm cho người lao động",
- "L09-60-02": "60 Bảo hiểm cho người lao động",
- "L01-00-01": "Lần đầu gặp mặt"
+ "L09-60-02": "60 Bảo hiểm cho người lao động"
 }

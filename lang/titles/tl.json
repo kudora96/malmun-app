@@ -1,5 +1,6 @@
 {
- "L01-00": "Hangeul at pagbigkas",
+ "L01-00": "Alpabetong Koreano at pagbigkas",
+ "L01-00-01": "Unang Pagkikita",
  "L01-00-02": "Langit·Lupa·Tao → ㅏㅗ",
  "L01-00-03": "Patayo·pahigang patinig + guhit",
  "L01-00-04": "ㅏ/ㅓ + ㅜ/ㅗ (unang pagbigkas)",
@@ -149,6 +150,5 @@
  "L09-59-01": "59 Batas sa Imigrasyon",
  "L09-59-02": "59 Batas sa Imigrasyon",
  "L09-60-01": "60 Seguro ng manggagawa",
- "L09-60-02": "60 Seguro ng manggagawa",
- "L01-00-01": "Unang Pagkikita"
+ "L09-60-02": "60 Seguro ng manggagawa"
 }

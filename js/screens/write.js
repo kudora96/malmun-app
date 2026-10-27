@@ -13,19 +13,19 @@
 //  W5 소리는 언제나 하나만 · 새 일을 하면 앞 소리는 멈춘다
 //  W6 영상 창 안(embedded): 창 안에서 스크롤 없이 다 보이게 — 긴 문장은 토막으로(◀ 1/3 ▶) ·
 //     토막을 다 쓰면 자동으로 다음 토막 · 줄을 다 쓰면 대사를 듣고 자동으로 다음 줄 쓰기 · 아래 ▶ = 이 부분 듣기
-import { t as tG, tL, lang, uiKoOn as uiKoG, KO_UI, preloadKoUi, tIn, uiKoIn } from "../i18n.js?v=1023.18";
-import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO, koq } from "../text.js?v=1023.18";
-import { episode, chars, charsF } from "../data.js?v=1023.18";
-import { paths } from "../paths.js?v=1023.18";
-import { I, spkHtml, uiKoBtn, uikoChip, openUiScope, SPEAKER } from "../ui.js?v=1023.18";
-import { audioCtx, hold } from "../wake.js?v=1023.18";
-import * as sfx from "../sfx.js?v=1023.18";
-import { scoreFx, stopFx } from "../scorefx.js?v=1023.18";
-import { units as jamoUnits, baseOf, shapeFix } from "../jamobox.js?v=1023.18"; // 자모 자리 나누기(획순 · 자판 덧칠 · 손글씨 덩어리 — 본부 10-07) // 손글씨 점수 효과 = 말하기와 같은 규칙(본부 10-07)
-import { createStrokes } from "../strokes.js?v=1023.18"; // 획 자료·획순 칠(글자부)
-import { whyRow } from "../whyask.js?v=1023.18"; // 「왜 틀렸어요?」(개발2팀 · 기본 꺼짐 ?why=1)
+import { t as tG, tL, lang, uiKoOn as uiKoG, KO_UI, preloadKoUi, tIn, uiKoIn } from "../i18n.js?v=1023.26";
+import { esc, glossCards, toJamoW, jamoParts, compose, vowelLen, JAMO_AUDIO, koq } from "../text.js?v=1023.26";
+import { episode, chars, charsF } from "../data.js?v=1023.26";
+import { paths } from "../paths.js?v=1023.26";
+import { I, spkHtml, uiKoBtn, uikoChip, openUiScope, SPEAKER } from "../ui.js?v=1023.26";
+import { audioCtx, hold } from "../wake.js?v=1023.26";
+import * as sfx from "../sfx.js?v=1023.26";
+import { scoreFx, stopFx } from "../scorefx.js?v=1023.26";
+import { units as jamoUnits, baseOf, shapeFix } from "../jamobox.js?v=1023.26"; // 자모 자리 나누기(획순 · 자판 덧칠 · 손글씨 덩어리 — 본부 10-07) // 손글씨 점수 효과 = 말하기와 같은 규칙(본부 10-07)
+import { createStrokes } from "../strokes.js?v=1023.26"; // 획 자료·획순 칠(글자부)
+import { whyRow } from "../whyask.js?v=1023.26"; // 「왜 틀렸어요?」(개발2팀 · 기본 꺼짐 ?why=1)
 let FBV = null; import(`../fbvoice.js?v=${document.documentElement.dataset.v || ""}`).then(m => { FBV = m; }).catch(() => {}); // 안내 소리(개발2팀 · 없으면 소리 없이 지금 그대로)
-import { fitToGuide } from "../strokefit.js?v=1023.18"; // 자석 따라오는 획 길 = 회색 가운데(글자부 10-12)
+import { fitToGuide } from "../strokefit.js?v=1023.26"; // 자석 따라오는 획 길 = 회색 가운데(글자부 10-12)
 
 const KEYS = [..."ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎㄲㄸㅃㅆㅉ"], VOW = [..."ㅏㅑㅓㅕㅗㅛㅜㅠㅡㅣ"];
 const VOW2 = [..."ㅐㅒㅔㅖㅘㅙㅚㅝㅞㅟㅢ"]; // 겹모음 줄(본부 10-06) — 칸 하나 · ㅓ+ㅣ 처럼 나눠 쳐도 받음
@@ -671,7 +671,7 @@ export default async function write(app, ep, id, opts = {}) {
     const fit = () => { if (!hand.isConnected) return; const cs = getComputedStyle(hand), px = v => parseFloat(cs[v]) || 0, gap = px("columnGap") || 10; // 칸 크기 = 안쪽 여백 빼고(본부 10-07 왼쪽 끝 3px 에 붙던 것)
       const bigOn = !!work.closest(".learn.big"), bigL = bigOn && innerWidth > innerHeight; work.classList.toggle("bigl", bigL); work.classList.toggle("bigp", bigOn && !bigL); // ⛶ 크게 보기(앱개발부 틀 .learn.big · 대표님 10-16) — 가로 = 칸 왼쪽 높이 가득 · 세로 = 칸 폭 가득 + 남는 높이는 판정 상자
       if (bigL) { const wr0 = work.getBoundingClientRect(), pal0 = 26, s0 = Math.max(120, Math.floor(Math.min(work.clientHeight - pal0 - 10, wr0.width * 0.56))), dpr0 = window.devicePixelRatio || 1; hand.classList.remove("stack", "two", "three");
-        box.style.width = box.style.height = s0 + "px"; for (const cv of [gv, iv, box.querySelector(".hfix"), box.querySelector(".hpace")]) if (cv) cv.width = cv.height = Math.round(s0 * dpr0); H.s = s0; bt.style.height = ""; fitHbtn(); fitJudge(); paintGuide(); paintInk(); return; }
+        box.style.width = box.style.height = s0 + "px"; for (const cv of [gv, iv, box.querySelector(".hfix"), box.querySelector(".hpace")]) if (cv && !(cv.classList.contains("hfix") && cv.width === Math.round(s0 * dpr0))) cv.width = cv.height = Math.round(s0 * dpr0); H.s = s0; bt.style.height = ""; fitHbtn(); fitJudge(); paintGuide(); paintInk(); return; }
       const iw = hand.clientWidth - px("paddingLeft") - px("paddingRight"), ih = hand.clientHeight - px("paddingTop") - px("paddingBottom");
       /* 단추 줄 폭 = 칸 폭으로만 정함(투덜이 10-15 「⇄ 언어를 바꿔도 화면이 절대 안 바뀜」 — 단추 글 길이로 폭이 정해져 언어마다 칸이 127px 까지 달라지던 것) · 글은 그 폭 안에서 줄임(fitHbtn) */
       hand.style.setProperty("--hbw1", Math.round(Math.max(104, Math.min(190, iw * 0.3))) + "px"); hand.style.setProperty("--hbw2", Math.round(Math.max(96, Math.min(250, iw * (hand.classList.contains("hic") ? 0.36 : 0.5)))) + "px"); /* 글 단추 = 넓게(글이 읽히게) · 그림+작은 글(hic) = 좁게(칸 크게) */ hand.style.setProperty("--hbw3", Math.round(Math.max(132, Math.min(200, iw * 0.44))) + "px");
@@ -681,7 +681,7 @@ export default async function write(app, ep, id, opts = {}) {
       if (!best) best = ["stack", Math.min(ih - bt.offsetHeight - 8, iw)];
       hand.classList.remove("stack", "two", "three"); if (best[0]) hand.classList.add(best[0]); if (best[0] === "three") hand.classList.add("hic"); /* 세 줄 = 좁은 단추 → 그림 아래 글(10-16 ur 360 글이 단추 밖) */
       const s = Math.max(60, Math.floor(best[1])), dpr = window.devicePixelRatio || 1;
-      box.style.width = box.style.height = s + "px"; for (const cv of [gv, iv, box.querySelector(".hfix"), box.querySelector(".hpace")]) if (cv) cv.width = cv.height = Math.round(s * dpr); H.s = s;
+      box.style.width = box.style.height = s + "px"; for (const cv of [gv, iv, box.querySelector(".hfix"), box.querySelector(".hpace")]) if (cv && !(cv.classList.contains("hfix") && cv.width === Math.round(s * dpr))) cv.width = cv.height = Math.round(s * dpr); /* 틀린 곳 짚기(.hfix · 2초)는 크기가 그대로면 안 지움(칸을 다시 맞출 때 같은 크기로 다시 정해도 캔버스가 비워져 안 보이던 것) */ H.s = s;
       bt.style.height = ""; const jb0 = bt.querySelector(".hjudge"); if (jb0) jb0.style.removeProperty("height"); if (best[0] !== "stack") bt.style.height = Math.max(s, ih, bt.offsetHeight) + "px"; else if (bigOn && jb0) { const left = ih - s - (px("rowGap") || 8) - bt.offsetHeight; if (left > 0) jb0.style.height = Math.round(jb0.offsetHeight + left) + "px"; } /* 세로 크게 = 남는 높이를 판정 상자가(빈자리 0 · 본부 10-16) */ /* 오른쪽 줄 = 손글씨 칸 높이 전부(칸이 폭에 막혀 작으면 남는 높이는 판정 상자가 씀 · 본부 10-15 빈자리 100px) */ fitHbtn(); /* 판정 상자 = 단추 줄 남는 높이 전부(칸 높이와 같게 · 글 길이와 상관없이 고정 · 투덜이 10-15) */ fitJudge(); { const pal = hand.querySelector(".hpal"); if (pal) { const hr = hand.getBoundingClientRect(), br = box.getBoundingClientRect(), L = br.left - hr.left + 66, R = hand.clientWidth - px("paddingRight"); pal.style.left = L + "px"; pal.style.width = Math.max(80, R - L) + "px"; pal.style.top = (br.top - hr.top - 24) + "px"; } } /* 팔레트 = 칸 위 점수 옆부터 오른쪽 끝까지(폰에서도 동그라미가 커지게) */ paintGuide(); paintInk(); };
     fit(); H.ro?.disconnect(); H.ro = new ResizeObserver(() => fit()); H.ro.observe(hand); stkReady.then(() => { if (st.hand === H) paintGuide(); }); // 획 자료가 오면 회색 길로
     document.fonts?.load(`${glyphWeight()} 100px ${glyphFont()}`, c.ch).catch(() => {}).then(() => document.fonts.ready).then(() => { if (st.hand !== H) return; gCache.clear(); uCache.clear(); revPrev.clear(); pathCache.clear(); unitMaskCache.clear(); ownCache.clear(); fit(); }); /* 앞 장면·붓 길·자모 틀도 함께 비움 */ // 글꼴이 늦게 오면 글자 그림 다시

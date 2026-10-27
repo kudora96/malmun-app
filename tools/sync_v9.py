@@ -2,6 +2,8 @@
 # 글 → data/{편}/{편}.v9.json · 소리 → media/v9/{편}/(로컬 복사 · 저장소에 안 들어감)
 # media/audio 는 05_audio 로 이어진 연결 폴더라 거기에 쓰지 않는다(드라이브 쪽 원본을 건드리지 않게).
 import json, os, shutil, sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from datapath import data_dir  # 편 자료 폴더 한 곳(배울 말별)
 
 MALMUN = r"D:\gdrive\malmun"
 APP = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -88,7 +90,7 @@ def sync(ep, dry=False):
             heads[code] = rel
     if heads:
         d["say_head"] = heads
-    dst = os.path.join(APP, "data", ep, f"{ep}.v9.json")
+    dst = os.path.join(data_dir("ko", ep), f"{ep}.v9.json")
     if dry: print(ep, "(dry-run)", src); return d
     with open(dst + ".tmp", "w", encoding="utf-8") as f:  # 반쯤 쓴 파일 막기 — 임시 → 바꿔치기
         json.dump(d, f, ensure_ascii=False, indent=1)
