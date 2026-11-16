@@ -1777,3 +1777,5 @@ html:has(.scr.learn),html:has(.scr.learn) body{overflow-anchor:none} /* 배우�
 .chip.vkstar{flex:none;gap:2px;padding:4px 9px;font-size:12px;font-weight:800;border-color:var(--hi);color:var(--hi);background:var(--card);align-self:center;font-variant-numeric:tabular-nums}
 .chip.vkstar .vs{font-size:12px;line-height:1;font-family:system-ui,sans-serif}
 .v9bar .chip.vkstar{height:30px;min-height:30px;box-sizing:border-box;padding-block:0;justify-content:center}
+/* 대표님 11-16: 학습 제목 줄 — ⭐ N 을 「ने⇄한」과 같은 자리(위 2px 띄움·정렬 같게) */
+.learn .vtitle .chip.vkstar{align-self:auto;margin-top:2px}
