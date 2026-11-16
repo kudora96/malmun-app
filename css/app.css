@@ -1751,7 +1751,7 @@ html:has(.scr.learn),html:has(.scr.learn) body{overflow-anchor:none} /* 배우�
 .vk-menu{margin:6px 0 2px;padding:0 14px}
 .vk-menubtn{display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:0 14px;border-radius:999px;border:1px solid var(--hi);background:var(--card);color:var(--hi);font-size:14px;font-weight:700;box-shadow:0 1px 0 var(--line)}
 .vk-menubtn:active{transform:translateY(1px);box-shadow:none}
-.vk-dim{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center;padding:12px}
+.vk-dim{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center;padding:12px}
 .vk-card,.vk-sheet{width:100%;max-width:420px;max-height:84vh;overflow:auto;box-sizing:border-box;background:var(--card);color:var(--ink);border-radius:18px;padding:14px 14px 12px;box-shadow:0 8px 28px rgba(0,0,0,.3)}
 .vk-row{display:flex;align-items:center;gap:10px}
 .vk-snd{flex:none;width:46px;height:46px;border-radius:50%;border:1px solid var(--hi);background:var(--hi);color:var(--on-hi);font-size:18px;box-shadow:0 1px 0 var(--line)}
@@ -1771,3 +1771,9 @@ html:has(.scr.learn),html:has(.scr.learn) body{overflow-anchor:none} /* 배우�
 .vk-ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
 .vk-li{width:100%;display:flex;flex-direction:column;align-items:flex-start;gap:1px;text-align:start;padding:8px 12px;border-radius:12px;border:1px solid var(--line);background:var(--bubble);color:var(--ink)}
 .vk-empty{margin:12px 4px;color:var(--mute);font-size:14px}
+
+/* ⭐ N 작은 단추(대표님 11-16) — 「ने⇄한」 바로 왼쪽 · 같은 높이 납작한 알약 · 첫 화면 큰 「⭐ 내 단어장」 메뉴는 화면에서 뺌(코드는 그대로) */
+.vk-menu{display:none!important}
+.chip.vkstar{flex:none;gap:2px;padding:4px 9px;font-size:12px;font-weight:800;border-color:var(--hi);color:var(--hi);background:var(--card);align-self:center;font-variant-numeric:tabular-nums}
+.chip.vkstar .vs{font-size:12px;line-height:1;font-family:system-ui,sans-serif}
+.v9bar .chip.vkstar{height:30px;min-height:30px;box-sizing:border-box;padding-block:0;justify-content:center}

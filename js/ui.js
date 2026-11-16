@@ -6,6 +6,7 @@ import { snapshot, retext } from "./retext.js?v=1023.41";
 import "./langfit.js?v=1023.41"; // ⇄ 때 단추 크기·자리 고정(다국어부 10-15)
 import { VERSION } from "./version.js?v=1023.41";
 import { esc } from "./text.js?v=1023.41";
+import { starChip } from "./vocab.js?v=1023.41";
 
 const svg = (d, fill) => `<svg class="ico" viewBox="0 0 24 24" ${fill ? 'fill="currentColor"' : 'fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"'} aria-hidden="true">${d}</svg>`;
 export const I = {
@@ -23,7 +24,7 @@ export const langChip = () => `<button class="chip" data-act="lang" aria-label="
 // 「ने ⇄ 한」 토글(본부 10-08 · 10-14 모든 화면) — 소리 없는 토글이어도 단추 모양 · 켜짐 = 「한」 쪽 강조
 //  어느 화면에서 눌러도 앱 전체가 같이(기억 malmun.uiko) · 다시 그리지 않고 그 자리에서 글만(retext) · 처음엔 모국어
 //  화면은 uiKoBtn() 만 머리 줄 오른쪽 묶음 맨 앞에 두면 됨 — 누르기는 아래 문서 한 곳(switchUiKo)이 받음(배우기 화면은 자기 손잡이가 먼저 받고 멈춤)
-export const uiKoBtn = () => bgmBtn() + uikoChip();
+export const uiKoBtn = (star = false) => bgmBtn() + (star ? starChip() : "") + uikoChip(); // star = ⭐ N(네팔어 단어장 · 대표님 11-16) 학습·쓰기·목록 머리 줄만
 export const uikoChip = (ko = uiKoOn()) => (KO_UI.includes(lang) ? `<button class="chip uiko" data-act="uiko" aria-pressed="${ko}" aria-label="${esc(langName(lang))} ⇄ 한국어"><span class="a" lang="${lang}">${esc(langShort(lang))}</span><span class="ar" aria-hidden="true">⇄</span><span class="b" lang="ko">한</span></button>` : "");
 // ♪ 「음악」 = 🎵 음악 상자 열기(대표님 10-16 · 모든 창 = uiKoBtn() 앞 · ⇄ 없는 언어에도 · 크기 고정 · 끔 = 흐리게 빗금(data-on) · 누르기는 아래 문서 한 곳)
 const BGM_I = { on: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>', off: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M17 9.5l5 5M22 9.5l-5 5"/></svg>' };

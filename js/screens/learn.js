@@ -55,7 +55,7 @@ import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf
 import { playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1023.41";
 import { heardHTML, endHint, scoreOf, bestFull, spanOf, sylsAt } from "../heard.js?v=1023.41"; // 덧붙은 말 빼고 견주기(본부 10-11)
 import { recDel, downloadRec, askPersist } from "../recstore.js?v=1023.41";
-import { vocabOn, openWordCard, wordSpan } from "../vocab.js?v=1023.41"; // ⭐ 내 단어장 시험판(네팔어 · 대표님 11-16)
+import { vocabOn, openWordCard, wordSpan, starChip } from "../vocab.js?v=1023.41"; // ⭐ 내 단어장 시험판(네팔어 · 대표님 11-16)
 import { showStopTip, hideStopTip } from "../stoptip.js?v=1023.41";
 import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1023.41";
 import { scoreFx, stopFx } from "../scorefx.js?v=1023.41"; // 점수별 효과(본부 10-05)
@@ -88,7 +88,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   app.innerHTML = `<section class="scr learn${subsOn() ? "" : " nosub"}">
     <div class="stick">
     <div class="vstage">
-    <div class="vmain"><div class="vtitle"><div class="tt"><b class="ko" lang="${LEARN}">${esc(d.title || "")}</b>${d.title_t ? `<span class="sub">${esc(d.title_t)}</span>` : ""}</div>${uiKoBtn()}<span class="n"></span></div>
+    <div class="vmain"><div class="vtitle"><div class="tt"><b class="ko" lang="${LEARN}">${esc(d.title || "")}</b>${d.title_t ? `<span class="sub">${esc(d.title_t)}</span>` : ""}</div>${uiKoBtn(true)}<span class="n"></span></div>
     <div class="varea"><div class="video" id="vwrap"><video playsinline preload="metadata" controlslist="nodownload noremoteplayback noplaybackrate" disablepictureinpicture disableremoteplayback poster="${paths.poster(ep)}"></video>
       <span class="vplay" aria-hidden="true">${I.play}</span>
       <div class="cap" aria-live="polite"></div>
@@ -408,7 +408,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     const k = sndOf(i), code = v9code(txtOf(i));
     const lab = key => `<span class="glab"><span data-k="${key}">${esc(tq(key))}</span></span>`; // 괄호 속 한국어 덧붙임 뺌 — 화면 글은 한국어 ⇄ 학습자 언어 중 하나만(대표님 10-19 · 검사부 th · 다국어부 10-20)
     return `<div class="exv v9${romOn() ? "" : " norom"}">
-      <div class="v9bar">${lab("v9_listen")}<span class="seg snd">${v9L ? (x.audio?.[v9L]?.ex ? playBtn("L") : `<button class="pb nosnd" disabled aria-disabled="true"><span class="ic" aria-hidden="true">🔇</span> ${esc(v9name("L"))}</button>`) : ""}${playBtn("ko")}</span>${x.sent?.length ? `<span class="snum" aria-live="off">1/${x.sent.length}</span>` : ""}${bgmBtn()}${uikoChip(panelKo())}<button class="romb" data-x="v9rom" aria-pressed="${romOn()}"><span data-k="v9_rom">${esc(tq("v9_rom"))}</span></button><button class="pb closex" data-x="close" title="${esc(tq("close_word"))}" aria-label="${esc(tq("close_word"))}"><span class="cx">✕</span><span class="cw"> ${esc(tq("close_word"))}</span></button><div class="v9tip" hidden>${esc(tq("v9_tip"))}</div></div>
+      <div class="v9bar">${lab("v9_listen")}<span class="seg snd">${v9L ? (x.audio?.[v9L]?.ex ? playBtn("L") : `<button class="pb nosnd" disabled aria-disabled="true"><span class="ic" aria-hidden="true">🔇</span> ${esc(v9name("L"))}</button>`) : ""}${playBtn("ko")}</span>${x.sent?.length ? `<span class="snum" aria-live="off">1/${x.sent.length}</span>` : ""}${bgmBtn()}${starChip()}${uikoChip(panelKo())}<button class="romb" data-x="v9rom" aria-pressed="${romOn()}"><span data-k="v9_rom">${esc(tq("v9_rom"))}</span></button><button class="pb closex" data-x="close" title="${esc(tq("close_word"))}" aria-label="${esc(tq("close_word"))}"><span class="cx">✕</span><span class="cw"> ${esc(tq("close_word"))}</span></button><div class="v9tip" hidden>${esc(tq("v9_tip"))}</div></div>
       ${v9L ? "" : `<div class="v9soon">${esc(tq("v9_lang_soon"))}</div>`}<div class="v9pop" hidden></div>
       <div class="v9body">
         ${x.pieces?.length || fx ? `<div class="chips">${(x.pieces || []).map((c, ci) => `<span class="chip"${vocabOn() ? ` data-x="wd" data-wi="${ci}"` : ""}><b class="ko" lang="${LEARN}">${esc(c.ko)}</b> <i>${c.rom != null ? `<span class="rom">${esc(c.rom)}${c.mean && v9L ? ", " : ""}</span>${v9L ? esc(c.mean || "") : ""}` : v9L ? esc(c.gloss || "") : ""}</i></span>`).join("")}${fx ? `<span class="fx">= <b>${esc(fx)}</b></span>` : ""}</div>` : ""}

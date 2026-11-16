@@ -20,6 +20,7 @@ import { showStopTip, hideStopTip } from "../stoptip.js?v=1023.41";
 import { warmSTT } from "../sttserver.js?v=1023.41";
 import { t as tG, lang, langShort, tIn, tAltIn, uiKoIn } from "../i18n.js?v=1023.41";
 import { esc, sayParts, koq } from "../text.js?v=1023.41";
+import { starChip } from "../vocab.js?v=1023.41";
 import { spkHtml, bgmBtn, uikoChip } from "../ui.js?v=1023.41";
 import { episode } from "../data.js?v=1023.41";
 import { paths } from "../paths.js?v=1023.41";
@@ -116,7 +117,7 @@ export default async function speak(app, ep, id, opts = {}) {
 
   app.innerHTML = `<section class="scr speak ${opts.embedded ? "embedded" : ""}">
     <div class="whead"><b data-k="speak">${esc(t("speak"))}</b><span class="sub">${li + 1} / ${d.lines.length}<span class="spk"> · ${spkHtml(line.speaker)}</span></span>
-      ${bgmBtn()}${uikoChip(uiKoIn(app))}<button class="micpick" data-act="help" aria-label="${esc(t("help"))}">${lbl("help_btn")}</button><span class="segnav"></span><button class="micpick closex" data-act="close" aria-label="${esc(t("close_btn"))}">${lbl("close_btn")}</button></div>
+      ${bgmBtn()}${starChip()}${uikoChip(uiKoIn(app))}<button class="micpick" data-act="help" aria-label="${esc(t("help"))}">${lbl("help_btn")}</button><span class="segnav"></span><button class="micpick closex" data-act="close" aria-label="${esc(t("close_btn"))}">${lbl("close_btn")}</button></div>
     <div class="miclist" hidden></div>
     <div class="helpbox" hidden>${helpHTML()}</div>
     <div class="task"><div class="say ko" lang="${LEARN}"></div><div class="tr"></div></div>

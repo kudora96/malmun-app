@@ -107,3 +107,11 @@ export function openVocabList() {
 
 // 편 목록 위 단추 글 — 개수는 말 바뀔 때마다 다시
 export const vocabMenuHTML = () => (vocabOn() ? `<p class="vk-menu"><button class="vk-menubtn" data-act="vocab" data-n="${vocabCount()}">${esc(tx("menu"))} <span class="vk-n">(${vocabCount()})</span></button></p>` : "");
+
+// 작은 단추 「⭐ N」 — 「ने⇄한」 바로 왼쪽(모든 화면 · 네팔어만) · 누르면 그 자리에 단어장 목록이 겹쳐 뜸(영상·녹음·설명 소리는 안 끊음)
+export const starChip = () => (vocabOn() ? `<button class="chip vkstar" data-vk="star" aria-label="${esc(tx("title"))}" title="${esc(tx("title"))}"><span class="vs" aria-hidden="true">⭐</span><span class="vn">${vocabCount()}</span></button>` : "");
+if (!window.__vkStarWired) {
+  window.__vkStarWired = true;
+  document.addEventListener("click", e => { const b = e.target.closest?.("[data-vk=star]"); if (!b) return; e.preventDefault(); e.stopPropagation(); openVocabList(); }, true); // 앞서 받아 화면 쪽 멈춤⇄다시로 새지 않게
+  addEventListener("malmun:vocab", () => document.querySelectorAll(".vkstar .vn").forEach(n => { n.textContent = String(vocabCount()); }));
+}

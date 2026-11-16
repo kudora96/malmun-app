@@ -39,7 +39,7 @@ export default async function list(app, unit = "L01-00") {
   const seen = Math.min(p.line || 0, first?.lines || 0);
   app.innerHTML = `<section class="scr list">
     <div class="bar"><div class="grow"><div class="ut ko" lang="${LEARN}" data-ko="${esc(cat.units[unit] || unit)}"${tt[unit] ? ` data-tr="${esc(tt[unit])}"` : ""}>${esc(cat.units[unit] || unit)}</div>
-      <div class="sub">${esc(unit)} · <span>${esc(t("n_episodes", { n: eps.length }))}</span></div></div><span class="hbt">${uiKoBtn()}${langChip()}</span></div>
+      <div class="sub">${esc(unit)} · <span>${esc(t("n_episodes", { n: eps.length }))}</span></div></div><span class="hbt">${uiKoBtn(true)}${langChip()}</span></div>
     ${vocabMenuHTML()}
     ${first ? `<a class="hero" href="#/learn/${first.id}"><img src="img/${first.id}.jpg" alt="">
       <div><div class="ttl">${esc(first.id.slice(-2))} ${ttl(first.id, first.title, tt)}</div>
