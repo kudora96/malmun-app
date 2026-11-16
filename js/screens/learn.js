@@ -768,7 +768,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
       onLevel: v => { lvl.firstElementChild.style.width = Math.round(v * 100) + "%"; },
       onStop: () => { hideStopTip(); for (const c of box.querySelector(".saybig")?.children || []) c.classList.remove("pace"); if (sp?.ctl === ctl) { msg.textContent = tq("checking"); lvl.hidden = true; } },
       onSwitch: () => { btn.textContent = "… " + tq("mic_opening"); lvl.hidden = true; msg.textContent = tq("mic_switched"); },
-      onReady: () => { if (sp?.ctl !== ctl) return; btn.textContent = "■ " + tq("btn_stop"); lvl.hidden = false; showStopTip(btn, ctl); msg.textContent = tq("listening");
+      onReady: () => { if (sp?.ctl !== ctl) return; btn.textContent = lang === "ne" ? tq("btn_score") : "■ " + tq("btn_stop"); lvl.hidden = false; /* 대표님 11-16 점수 보기 · 풍선 뺌 */ msg.textContent = tq("listening");
         const nb = box.querySelector(".micname"); if (nb && micLabel()) { nb.textContent = `🎤 ${micLabel()} ✓`; nb.hidden = false; } }, // 지금 쓰는 마이크 — 자동이 틀렸을 때만 눌러 바꿈
     });
     sp = { i, ctl, saved: sp?.saved, blob: sp?.blob };
