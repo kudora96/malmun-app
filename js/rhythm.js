@@ -10,12 +10,12 @@
 //      같은 음절 되풀이(「이…있어요」「거구구나」 — 들은 말에 더 들어간 음절이 옆 음절과 같거나 첫소리+모음이 같음)도 −0.08(「더듬음」)
 //  · 최종 점수 = 글자 점수(score.js) × f(R): R ≥ 0.85 → 1 · 0.5 ≤ R < 0.85 → 0.90 + 0.10 × (R − 0.5)/0.35 · R < 0.5 → 0.88
 //  녹음·재생은 그대로 — 받은 녹음(blob)을 풀어 재기만
-import { audioCtx } from "./wake.js?v=1116.2";
-import { leadOf, voicedEnd, keepFirstOf } from "./playmine.js?v=1116.2";
-import { speechEnd } from "./recstore.js?v=1116.2";
-import * as sfx from "./sfx.js?v=1116.2";
-import { align } from "./score.js?v=1116.2";
-import { koq } from "./text.js?v=1116.2";
+import { audioCtx } from "./wake.js?v=1116.3";
+import { leadOf, voicedEnd, keepFirstOf } from "./playmine.js?v=1116.3";
+import { speechEnd } from "./recstore.js?v=1116.3";
+import * as sfx from "./sfx.js?v=1116.3";
+import { align } from "./score.js?v=1116.3";
+import { koq } from "./text.js?v=1116.3";
 
 export const FR = 0.02; // 특징 칸 20ms
 const alignCache = new Map();
@@ -39,7 +39,16 @@ export async function sylAt(ep, key, text) {
   const al = await loadAlign(ep), syl = al?.items?.[key]?.syl, cs = [...String(text)], n = cs.filter(isSyl).length;
   if (!syl?.length || syl.length !== n) return null; let k = -1; return cs.map(ch => { if (isSyl(ch)) k++; return k < 0 ? syl[0].s : syl[k].s; });
 }
-export const paintAt = (els, at, t) => { for (let i = 0; i < els.length; i++) els[i].classList.toggle("kar", !!at && t != null && t >= at[i] - 0.02); };
+// 노래방처럼 소리보다 먼저(대표님 11-16 13:42 「여러분이 먼저 나와줘야 따라갈 준비를 한다」): 글자 불 = 소리 시작보다 200ms 먼저 · 지금 낱말 불이 켜지면 다음 낱말(띄어쓰기 단위)에 옅은 불(class nx)
+export const LIGHT_LEAD = 0.2; // 초(재생 위치 쪽) · 녹음 중 칠은 ms(LIGHT_LEAD*1000)
+function markNext(els, lit) { // lit[i] = 그 글자에 불 · 켜진 마지막 글자의 낱말 다음 낱말(아직 불 없는 글자)에 nx
+  let last = -1; for (let i = 0; i < els.length; i++) if (lit && lit[i]) last = i;
+  const blank = i => !String(els[i].textContent).trim();
+  let a = -1, b = -1;
+  if (last >= 0) { let j = last; while (j < els.length && !blank(j)) j++; while (j < els.length && blank(j)) j++; if (j < els.length) { a = j; b = j; while (b < els.length && !blank(b)) b++; } }
+  for (let i = 0; i < els.length; i++) els[i].classList.toggle("nx", a >= 0 && i >= a && i < b && !lit[i]);
+}
+export const paintAt = (els, at, t) => { const lit = []; for (let i = 0; i < els.length; i++) { lit[i] = !!at && t != null && t >= at[i] - LIGHT_LEAD; els[i].classList.toggle("kar", lit[i]); } markNext(els, at ? lit : null); };
 // getEls() 글자들 · getT() 재생 위치(초) · isOn() 아직 재생 중 → 끝나면 칠 지움
 export function karaokeRun(getEls, at, getT, isOn) {
   if (!at) return () => {};
@@ -47,7 +56,7 @@ export function karaokeRun(getEls, at, getT, isOn) {
   const stop = () => { clearInterval(id); paintAt(getEls() || [], null, 0); };
   return stop;
 }
-export const paintPace = (els, pace, el) => { for (let i = 0; i < els.length; i++) els[i].classList.toggle("pace", !!pace && el >= pace.at[i]); };
+export const paintPace = (els, pace, el) => { const lit = []; for (let i = 0; i < els.length; i++) { lit[i] = !!pace && el >= pace.at[i] - LIGHT_LEAD * 1000; els[i].classList.toggle("pace", lit[i]); } markNext(els, pace ? lit : null); }; // 200ms 먼저 + 다음 낱말 옅은 불
 
 // 20ms 칸 특징 = MFCC 13개(말소리 맞춤의 표준 — 다른 사람 목소리끼리도 같은 음절을 잘 맞춤) · 말마다 평균 빼고 분산 1(CMVN)
 //  16kHz 근처로 솎음 → 25ms 창(해밍) → FFT 512 → 멜 필터 26개 → 로그 → DCT 13

@@ -1041,6 +1041,8 @@ button.dim{opacity:.45}
 
 /* 재생 노래방 칠(본부 10-08) — 견본 재생 때 글자 · 설명 읽는 문장 안 낱말 — 녹음 중 칠(pace)과 같은 모양 */
 .saybig span.kar,.speak .task .say span.kar,.v9body .sn .kw.kar{background:var(--hi-soft);border-radius:3px;box-shadow:0 2px 0 var(--hi)}
+/* 다음 낱말 미리 보이기(노래방 가사 · 11-16) — 지금 낱말 불(kar·pace)보다 확실히 옅게: 바탕 없이 밑줄 점선 + 글자 조금 진하게 */
+.saybig span.nx,.speak .task .say span.nx{border-radius:3px;box-shadow:0 2px 0 color-mix(in srgb,var(--hi) 45%,transparent);color:var(--hi)}
 
 /* 쓰기 글자 칸 = 그 글자 소리 단추(투덜이 10-08 「누르고 싶은」 — 올라와 있는 단추 · 누르면 내려감 · 올리면 살짝 밝게 · 그림 표시 없음) */
 .write .stage .box{cursor:pointer;background:var(--bubble);border:2px solid color-mix(in srgb,var(--ink) 28%,transparent);box-shadow:0 4px 0 color-mix(in srgb,var(--ink) 28%,transparent);border-radius:12px;position:relative;transition:transform .06s,box-shadow .06s,background-color .12s}
