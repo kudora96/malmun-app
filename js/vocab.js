@@ -1,8 +1,8 @@
 // ⭐ 내 단어장(시험판 · 네팔어 1편 · 본부 11-16 대표님 승인) — 낱말 칸을 톡 누르면 작은 카드 · 단어장은 이 기기(localStorage)에만
-// 소리 = 이미 있는 줄 소리(대사 낭독)에서 그 낱말 구간만 · 새 소리 안 만듦 · 학습자 말이 네팔어가 아니면 아무것도 안 보임
-import { lang, uiKoOn } from "./i18n.js?v=1116.5";
-import { esc } from "./text.js?v=1116.5";
-import { paths } from "./paths.js?v=1116.5";
+// 소리 = 이미 만들어 둔 낱말 소리를 이어 붙여(wordsnd.json) · 없는 편은 줄 소리의 그 낱말 구간 · 학습자 말이 네팔어가 아니면 아무것도 안 보임
+import { lang, uiKoOn } from "./i18n.js?v=1116.9";
+import { esc } from "./text.js?v=1116.9";
+import { paths } from "./paths.js?v=1116.9";
 
 const KEY = "malmun.vocab.ne";
 export const vocabOn = () => lang === "ne";
@@ -40,9 +40,13 @@ export async function wordSpan(ep, line, piece) {
   return { s: 0, e: 0 }; // 구간을 못 찾음 = 그 줄 소리 처음부터(이미 있는 소리만)
 }
 
-// ── 소리 한 개(카드 안) — 시작~끝 구간만 재생
-let au = null, stopT = 0;
-export function stopWordSound() { clearTimeout(stopT); if (au) { try { au.pause(); } catch {} au = null; } }
+// ── 소리 한 개(카드 안) — 낱말마다 이미 만들어 둔 낱말 소리(일레븐랩스 v4 · units/_w##)를 이어 붙여 틂(대표님 11-16 「문장을 자르지 말고 되어 있는 단어를 이어 붙여」)
+//    낱말 소리 목록 = data/<편>/<편>.wordsnd.json (줄 번호 → 낱말 → [소리 id]) · 목록에 없으면(다른 편) 예전처럼 줄 소리의 그 구간
+const sndMem = {};
+const sndOf = ep => (sndMem[ep] ||= fetch(paths.data(ep, ".wordsnd")).then(r => (r.ok ? r.json() : null)).catch(() => null));
+export const unitsFor = async (ep, n, w) => (await sndOf(ep))?.lines?.[String(n)]?.[clean(w)] || null;
+let au = null, stopT = 0, seq = 0;
+export function stopWordSound() { seq++; clearTimeout(stopT); if (au) { try { au.pause(); } catch {} au = null; } }
 function playSpan(it, btn, before) {
   if (!it.af) return;
   before?.(); stopWordSound();
@@ -52,6 +56,26 @@ function playSpan(it, btn, before) {
   a.onended = a.onerror = end;
   a.addEventListener("loadedmetadata", () => { try { a.currentTime = it.s || 0; } catch {} }, { once: true });
   a.play().then(() => { if (it.e > it.s) { clearTimeout(stopT); stopT = setTimeout(end, Math.max(200, (it.e - (it.s || 0)) * 1000 + 80)); } }).catch(end);
+}
+async function playSnd(it, btn, before) { // 낱말 소리마다 [id, 시작, 끝](소리 나는 구간만 · 앞 저음·뒤 여백 뺌)을 차례로
+  const ids = it.ep && it.n != null ? await unitsFor(it.ep, it.n, it.w) : null;
+  if (!ids?.length) return playSpan(it, btn, before);
+  before?.(); stopWordSound(); const my = seq;
+  btn?.classList.add("playing");
+  const fin = () => { if (my === seq) { au = null; clearTimeout(stopT); btn?.classList.remove("playing"); } };
+  const as = ids.map(([id]) => { const a = new Audio(paths.unit(it.ep, id)); a.preload = "auto"; return a; });
+  const back = () => { if (it.af) { seq++; playSpan(it, btn); } else fin(); }; // 낱말 소리를 못 받으면 예전 길(줄 소리의 그 구간)
+  const go = k => {
+    if (my !== seq) return;
+    if (k >= as.length) return fin();
+    const a = (au = as[k]), [, s0, e0] = ids[k];
+    let done = false; const next = () => { if (done || my !== seq) return; done = true; clearTimeout(stopT); try { a.pause(); } catch {} go(k + 1); };
+    a.onended = next;
+    a.onerror = () => (k === 0 ? back() : next());
+    a.addEventListener("loadedmetadata", () => { try { a.currentTime = s0 || 0; } catch {} }, { once: true });
+    a.play().then(() => { if (e0 > s0) { clearTimeout(stopT); stopT = setTimeout(next, Math.max(150, (e0 - (s0 || 0)) * 1000)); } }).catch(() => (k === 0 ? back() : fin()));
+  };
+  go(0);
 }
 
 // ── 카드 — 단어 · 로마자 · 네팔어 뜻(같은 크기) · ▶ · 그 줄 문장(한국어 · 네팔어 같은 크기) · ⭐ 넣기
@@ -74,7 +98,7 @@ export function openWordCard(it, { before, fromList = false } = {}) {
     let b = e.target.closest("[data-v]"); if (b && !el.contains(b)) b = null; // 위쪽 칸의 data-v 를 잡지 않게
     if (!b) { if (!e.target.closest(".vk-card")) closeCard(); return; } // 화면 밖을 누르면 닫힘
     e.stopPropagation();
-    if (b.dataset.v === "snd") return playSpan(it, b, before);
+    if (b.dataset.v === "snd") return playSnd(it, b, before);
     if (b.dataset.v === "add") { put(it); draw(); return; }
     if (b.dataset.v === "done") { // 지움 막기(대표님 11-16): 바로 지우지 않고 5초 「되돌리기」
       const snap = read().find(x => x.w === it.w); drop(it.w);
