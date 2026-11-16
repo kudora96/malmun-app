@@ -1,9 +1,10 @@
 // ⭐ 내 단어장(시험판 · 네팔어 1편 · 본부 11-16 대표님 승인) — 낱말 칸을 톡 누르면 작은 카드 · 단어장은 이 기기(localStorage)에만
 // 소리 = 이미 만들어 둔 낱말 소리를 이어 붙여(wordsnd.json) · 없는 편은 줄 소리의 그 낱말 구간 · 학습자 말이 네팔어가 아니면 아무것도 안 보임
-import { lang, uiKoOn, langShort } from "./i18n.js?v=1116.11";
-import { noteHTML, readNote, stopRead } from "./wordnote.js?v=1116.11"; // 단어 카드 설명(위 = 지금 말 · 아래 ↳ 다른 말) + 읽기 소리
-import { esc } from "./text.js?v=1116.11";
-import { paths } from "./paths.js?v=1116.11";
+import { lang, uiKoOn, langShort } from "./i18n.js?v=1116.12";
+import { noteHTML, readNote, stopRead } from "./wordnote.js?v=1116.12"; // 단어 카드 설명(위 = 지금 말 · 아래 ↳ 다른 말) + 읽기 소리
+import { esc } from "./text.js?v=1116.12";
+import { paths } from "./paths.js?v=1116.12";
+import { VERSION } from "./version.js?v=1116.12";
 
 const KEY = "malmun.vocab.ne";
 export const vocabOn = () => lang === "ne";
@@ -86,7 +87,7 @@ let cardEl = null;
 export function closeCard() { stopWordSound(); cardEl?.remove(); cardEl = null; }
 // 낱말 설명(대표님 11-16 「저는」이면 저는에 대한 설명 · 한국어·네팔어 1:1) — data/<편>/<편>.wordnote.json: 낱말 → {ko_mean, ne_mean, ko_ex, ne_ex} · 없는 낱말만 영상 속 문장
 const noteMem = {};
-export const noteOf = ep => (noteMem[ep] ||= fetch(paths.data(ep, ".wordnote")).then(r => (r.ok ? r.json() : null)).catch(() => null));
+export const noteOf = ep => (noteMem[ep] ||= fetch(paths.data(ep, ".wordnote") + "?v=" + VERSION).then(r => (r.ok ? r.json() : null)).catch(() => null));
 export function openWordCard(it, { before, fromList = false } = {}) {
   closeCard();
   const saved = () => has(it.w), roman = (document.querySelector(".exv.norom") ? "" : it.rom);
