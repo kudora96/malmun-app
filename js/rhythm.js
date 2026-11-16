@@ -193,6 +193,41 @@ export function snapSyl(buf, md, a, b, prior = [], trust = []) {
     return { s: a + p * H, e: a + q * H }; });
 }
 
+// 긴 쉼에서 끊어 맞추기(대표님 11-16 · 비교 화면 표시만 — 점수 칸은 그대로) — [a, b] 안에 0.8초 넘는 무음이 있으면 거기서 끊어 소리 덩어리로 나누고,
+//  음절을 덩어리 길이에 맞게 차례대로 나눠(덩어리마다 ≥1) 덩어리 안에서 snapSyl 로 맞춤 → 무음 구간에는 음절 칸이 안 놓임
+//  긴 쉼이 없거나 못 나누면 snapSyl 그대로(바뀌는 것 없음) · md = 본보기 음절 길이 · prior/trust 는 snapSyl 과 같음
+export function snapSylPaused(buf, md, a, b, prior = [], trust = []) {
+  const whole = () => snapSyl(buf, md, a, b, prior, trust), N = md.length, H = 0.01, PAUSE = 0.8;
+  try {
+    const d = buf.getChannelData(0), sr = buf.sampleRate, w = Math.max(1, Math.round(sr * H)), i0 = Math.max(0, Math.floor(a / H)), n = Math.min(Math.floor(d.length / w), Math.ceil(b / H)) - i0;
+    if (!N || n < 80) return whole();
+    const r = new Float32Array(n); let pk = 1e-9;
+    for (let i = 0; i < n; i++) { let q = 0; const o = (i0 + i) * w; for (let k = o; k < o + w; k++) q += d[k] * d[k]; r[i] = Math.sqrt(q / w); }
+    const sm = r.map((_, i) => (r[Math.max(0, i - 1)] + 2 * r[i] + r[Math.min(n - 1, i + 1)]) / 4); sm.forEach(v => { if (v > pk) pk = v; });
+    const thr = pk * Math.pow(10, -24 / 20), minRun = Math.round(PAUSE / H);
+    // 말소리 덩어리 = 0.8초 넘는 무음으로 갈린 구간(앞뒤 무음은 뺌)
+    const ch = []; let cs = -1, quiet = 0, last = -1;
+    for (let i = 0; i < n; i++) { if (sm[i] > thr) { if (cs < 0) cs = i; else if (quiet >= minRun) { ch.push([cs, last + 1]); cs = i; } last = i; quiet = 0; } else quiet++; }
+    if (cs >= 0) ch.push([cs, last + 1]);
+    const big = ch.filter(c => c[1] - c[0] >= 12); // 0.12초 아래 덩어리 = 잡음 → 버림
+    if (big.length < 2 || big.length > N) return whole();
+    const C = big.length, L = big.map(c => (c[1] - c[0]) * H), T = md.reduce((p, q) => p + q, 0), sc = L.reduce((p, q) => p + q, 0) / T;
+    const cum = [0]; md.forEach(x => cum.push(cum[cum.length - 1] + x));
+    // 음절 나누기(동적 계획) — 덩어리 c 가 음절 [i, j) 를 맡는 비용 = (log(덩어리 길이 ÷ (본보기 길이 합 × 비례)))² · 덩어리마다 음절 ≥1
+    const F = Array.from({ length: C + 1 }, () => new Float64Array(N + 1).fill(Infinity)), P = Array.from({ length: C + 1 }, () => new Int32Array(N + 1)); F[0][0] = 0;
+    for (let c = 1; c <= C; c++) for (let j = c; j <= N - (C - c); j++) for (let i = c - 1; i < j; i++) { if (F[c - 1][i] === Infinity) continue;
+      const x = Math.log((L[c - 1] + 0.05) / ((cum[j] - cum[i]) * sc + 0.05)), v = F[c - 1][i] + x * x; if (v < F[c][j]) { F[c][j] = v; P[c][j] = i; } }
+    if (F[C][N] === Infinity) return whole();
+    const cut = [N]; for (let c = C, j = N; c > 0; c--) { j = P[c][j]; cut.unshift(j); }
+    const out = new Array(N);
+    for (let c = 0; c < C; c++) { const f = cut[c], l = cut[c + 1], s0 = a + big[c][0] * H, e0 = a + big[c][1] * H;
+      const sn = snapSyl(buf, md.slice(f, l), s0, e0, prior.slice(f, l), trust.slice(f, l).map((t, k) => k > 0 && t));
+      if (sn) sn.forEach((x, k) => { out[f + k] = x; });
+      else { let t = s0; const m = md.slice(f, l), tt = m.reduce((p, q) => p + q, 0); m.forEach((x, k) => { const dd = ((e0 - s0) * x) / tt; out[f + k] = { s: t, e: t + dd }; t += dd; }); } }
+    return out;
+  } catch { return whole(); }
+}
+
 // 조용한 틈(20ms 칸 · 그 소리 최대에서 30dB 아래) — [t0, t1] 안에서 이어진 구간들 [{ s, e }]
 function quietRuns(buf, t0, t1) {
   const d = buf.getChannelData(0), sr = buf.sampleRate, w = Math.max(1, Math.round(sr * FR)), a = Math.max(0, Math.round(t0 * sr)), b = Math.min(d.length, Math.round(t1 * sr)), r = [];
