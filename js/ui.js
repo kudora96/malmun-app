@@ -1,12 +1,12 @@
-import { MUSIC_ON, bgmOn, setBgm, TRACKS, playTrack, bgmNow, onBgmChange, bgmVol, setBgmVol, playNext } from "./bgm.js?v=1116.3";
-import { LEARN } from "./tl.js?v=1116.3";
-import { paths } from "./paths.js?v=1116.3";
-import { t, tL, tAlt, lang, langName, LANGS, READY, setLang, KO_UI, uiKoOn, setUiKo, langShort, preloadKoUi } from "./i18n.js?v=1116.3";
-import { snapshot, retext } from "./retext.js?v=1116.3";
-import "./langfit.js?v=1116.3"; // ⇄ 때 단추 크기·자리 고정(다국어부 10-15)
-import { VERSION } from "./version.js?v=1116.3";
-import { esc } from "./text.js?v=1116.3";
-import { starChip } from "./vocab.js?v=1116.3";
+import { MUSIC_ON, bgmOn, setBgm, TRACKS, playTrack, bgmNow, onBgmChange, bgmVol, setBgmVol, playNext } from "./bgm.js?v=1116.5";
+import { LEARN } from "./tl.js?v=1116.5";
+import { paths } from "./paths.js?v=1116.5";
+import { t, tL, tAlt, lang, langName, LANGS, READY, setLang, KO_UI, uiKoOn, setUiKo, langShort, preloadKoUi } from "./i18n.js?v=1116.5";
+import { snapshot, retext } from "./retext.js?v=1116.5";
+import "./langfit.js?v=1116.5"; // ⇄ 때 단추 크기·자리 고정(다국어부 10-15)
+import { VERSION } from "./version.js?v=1116.5";
+import { esc } from "./text.js?v=1116.5";
+import { starChip } from "./vocab.js?v=1116.5";
 
 const svg = (d, fill) => `<svg class="ico" viewBox="0 0 24 24" ${fill ? 'fill="currentColor"' : 'fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"'} aria-hidden="true">${d}</svg>`;
 export const I = {
@@ -74,7 +74,7 @@ if (!window.__pillWired) {
   window.__pillWired = true;
   new MutationObserver(recs => { for (const r of recs) { if (r.type === "attributes") { if (r.target.matches?.(".chip.uiko")) placePill(r.target); continue; } for (const n of r.addedNodes) if (n.nodeType === 1) (n.matches(".chip.uiko") ? [n] : n.querySelectorAll(".chip.uiko")).forEach(placePill); } })
     .observe(document.body, { subtree: true, childList: true, attributes: true, attributeFilter: ["aria-pressed"] });
-  for (const ev of ["resize", "malmun:langfit", "malmun:uilang"]) addEventListener(ev, () => requestAnimationFrame(pillAll));
+  for (const ev of ["resize", "malmun:langfit", "malmun:uilang", "malmun:big"]) addEventListener(ev, () => requestAnimationFrame(pillAll));
   document.fonts?.ready.then(pillAll); document.addEventListener("fullscreenchange", () => requestAnimationFrame(pillAll));
 }
 // 한국어로 바꾼 뒤 길을 잃지 않게(본부 10-14 ④) — 처음 두 번만, 모국어로 「ไทย⇄한 을 누르면 돌아와요」

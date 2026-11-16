@@ -1,16 +1,16 @@
 // ⭐ 내 단어장(시험판 · 네팔어 1편 · 본부 11-16 대표님 승인) — 낱말 칸을 톡 누르면 작은 카드 · 단어장은 이 기기(localStorage)에만
 // 소리 = 이미 있는 줄 소리(대사 낭독)에서 그 낱말 구간만 · 새 소리 안 만듦 · 학습자 말이 네팔어가 아니면 아무것도 안 보임
-import { lang, uiKoOn } from "./i18n.js?v=1116.3";
-import { esc } from "./text.js?v=1116.3";
-import { paths } from "./paths.js?v=1116.3";
+import { lang, uiKoOn } from "./i18n.js?v=1116.5";
+import { esc } from "./text.js?v=1116.5";
+import { paths } from "./paths.js?v=1116.5";
 
 const KEY = "malmun.vocab.ne";
 export const vocabOn = () => lang === "ne";
 
 // 새 글(네팔어 = Claude 도우미 교차 확인 · 한국어 = ⇄ 한 때)
 const TX = {
-  ne: { menu: "⭐ मेरो शब्द-सूची", add: "⭐ सूचीमा थप्नुहोस्", has: "⭐ सूचीमा छ", done: "✓ मैले याद गरिसकें", empty: "अहिले केही छैन। कुनै शब्द थिचेर सूचीमा थप्नुहोस्।", title: "मेरो शब्द-सूची", listen: "सुन्नुहोस्", close: "बन्द" },
-  ko: { menu: "⭐ 내 단어장", add: "⭐ 단어장에 넣기", has: "⭐ 단어장에 있음", done: "✓ 다 외웠어요", empty: "아직 없어요. 낱말을 톡 눌러 넣어 보세요.", title: "내 단어장", listen: "듣기", close: "닫기" },
+  ne: { menu: "⭐ मेरो शब्द-सूची", add: "⭐ सूचीमा थप्नुहोस्", has: "⭐ सूचीमा छ", done: "✓ मैले याद गरिसकें", gone: "सूचीबाट हटाइयो", undo: "↩ फिर्ता गर्नुहोस्", empty: "अहिले केही छैन। कुनै शब्द थिचेर सूचीमा थप्नुहोस्।", title: "मेरो शब्द-सूची", listen: "सुन्नुहोस्", close: "बन्द" },
+  ko: { menu: "⭐ 내 단어장", add: "⭐ 단어장에 넣기", has: "⭐ 단어장에 있음", done: "✓ 다 외웠어요", gone: "목록에서 뺐어요", undo: "↩ 되돌리기", empty: "아직 없어요. 낱말을 톡 눌러 넣어 보세요.", title: "내 단어장", listen: "듣기", close: "닫기" },
 };
 const tx = k => (uiKoOn() ? TX.ko : TX.ne)[k];
 
@@ -57,7 +57,7 @@ function playSpan(it, btn, before) {
 // ── 카드 — 단어 · 로마자 · 네팔어 뜻(같은 크기) · ▶ · 그 줄 문장(한국어 · 네팔어 같은 크기) · ⭐ 넣기
 let cardEl = null;
 export function closeCard() { stopWordSound(); cardEl?.remove(); cardEl = null; }
-export function openWordCard(it, { before } = {}) {
+export function openWordCard(it, { before, fromList = false } = {}) {
   closeCard();
   const saved = () => has(it.w), roman = (document.querySelector(".exv.norom") ? "" : it.rom);
   const el = (cardEl = document.createElement("div"));
@@ -67,7 +67,7 @@ export function openWordCard(it, { before } = {}) {
       <div class="vk-row"><button class="vk-snd" data-v="snd" aria-label="${esc(tx("listen"))}" title="${esc(tx("listen"))}">▶</button>
         <div class="vk-main"><span class="vk-t ko" lang="ko">${esc(it.w)}</span>${roman ? `<span class="vk-rom">${esc(roman)}</span>` : ""}<span class="vk-t vk-mean" lang="ne">${esc(it.mean || "")}</span></div></div>
       ${it.ko ? `<div class="vk-sent"><span class="vk-s ko" lang="ko">${esc(it.ko)}</span>${it.tr ? `<span class="vk-s vk-str" lang="ne">${esc(it.tr)}</span>` : ""}</div>` : ""}
-      <div class="vk-btns"><button class="vk-add" data-v="add" ${saved() ? "disabled" : ""}>${esc(saved() ? tx("has") : tx("add"))}</button>${saved() ? `<button class="vk-done" data-v="done">${esc(tx("done"))}</button>` : ""}</div></div>`;
+      <div class="vk-btns"><button class="vk-add" data-v="add" ${saved() ? "disabled" : ""}>${esc(saved() ? tx("has") : tx("add"))}</button>${saved() && fromList ? `<button class="vk-done" data-v="done">${esc(tx("done"))}</button>` : ""}</div></div>`;
   };
   draw();
   el.addEventListener("click", e => {
@@ -76,7 +76,12 @@ export function openWordCard(it, { before } = {}) {
     e.stopPropagation();
     if (b.dataset.v === "snd") return playSpan(it, b, before);
     if (b.dataset.v === "add") { put(it); draw(); return; }
-    if (b.dataset.v === "done") { drop(it.w); closeCard(); }
+    if (b.dataset.v === "done") { // 지움 막기(대표님 11-16): 바로 지우지 않고 5초 「되돌리기」
+      const snap = read().find(x => x.w === it.w); drop(it.w);
+      el.querySelector(".vk-card").innerHTML = `<p class="vk-gone">${esc(tx("gone"))}</p><div class="vk-btns"><button class="vk-add" data-v="undo">${esc(tx("undo"))}</button></div>`;
+      clearTimeout(el.__ut); el.__ut = setTimeout(() => { if (cardEl === el) closeCard(); }, 5000); el.__snap = snap; return;
+    }
+    if (b.dataset.v === "undo") { if (el.__snap) put(el.__snap); clearTimeout(el.__ut); draw(); }
   });
   document.body.append(el);
   return el;
@@ -99,7 +104,7 @@ export function openVocabList() {
   el.addEventListener("click", e => {
     if (e.target.closest(".vk-x") || e.target === el) return closeVocabList();
     const b = e.target.closest(".vk-li"); if (!b) return;
-    const it = read().find(x => x.w === b.dataset.w); if (it) openWordCard(it);
+    const it = read().find(x => x.w === b.dataset.w); if (it) openWordCard(it, { fromList: true });
   });
   addEventListener("malmun:vocab", () => { if (listEl === el) draw(); });
   document.body.append(el);

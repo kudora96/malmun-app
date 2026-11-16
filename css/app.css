@@ -1784,3 +1784,24 @@ html:has(.scr.learn),html:has(.scr.learn) body{overflow-anchor:none} /* 배우�
 
 /* 대표님 11-16: 노래방 불이 닿은 따옴표 한국어 낱말(흰 바탕 칸)도 칸 바탕이 진한 노랑으로(노랑이 맨 앞) — 스타일만 */
 .v9body .sn .kw.kar .gw,.v9body .sn .kw.kar b{background:#ffd21f;color:#1b1b1b}
+.vk-gone{margin:6px 2px 0;font-size:16px;font-weight:700}
+
+/* 대표님 11-16: ⛶ 크게 보기(.learn.big) 설명 창 맨 위 줄 — 한 줄에 다 들어가게(닫기는 ✕만 · 틈·여백 줄임 · 단추 높이는 그대로) · 크게 보기가 아닐 때는 안 걸림 */
+.learn.big .v9bar{flex-wrap:nowrap;gap:4px;padding-inline:8px}
+.learn.big .v9bar .closex .cw{display:none}
+.learn.big .v9bar .closex{padding-inline:10px;min-width:34px;justify-content:center}
+.learn.big .v9bar .romb{padding-inline:8px}
+.learn.big .v9bar .snum{min-width:0;font-size:10.5px}
+.learn.big .v9bar>*{flex-shrink:0}
+.learn.big .v9bar{gap:2px;padding-inline:4px}
+.learn.big .v9bar .bigb{width:28px;min-width:28px}
+.learn.big .v9bar .chip.vkstar{padding-inline:6px}
+.learn.big .v9bar .romb{padding-inline:5px}
+.learn.big .v9bar .closex{padding-inline:8px;min-width:30px}
+/* ⛶ 크게 보기 · 폰 가로 설명 창 — 「말해 보세요」 칸을 뺀 뒤 오른쪽이 비던 것: 왼쪽 = 낱말 칸 · 오른쪽 = 설명 글·짝 줄로 화면을 고르게(크게 보기 가로에서만) */
+@media (orientation:landscape) and (max-height:500px){
+  .learn.big .exv.v9 .v9body{grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);grid-auto-rows:min-content;align-content:start}
+  .learn.big .exv.v9 .v9body>.chips{grid-column:1;grid-row:1 / span 6;align-self:start}
+  .learn.big .exv.v9 .v9body>p,.learn.big .exv.v9 .v9body>.pairln{grid-column:2}
+}
+@media (orientation:landscape) and (max-height:500px){.learn.big .exv.v9 .v9body>.chips .chip{max-width:100%;box-sizing:border-box;white-space:normal}}
