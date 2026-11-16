@@ -1,8 +1,8 @@
 // ⭐ 내 단어장(시험판 · 네팔어 1편 · 본부 11-16 대표님 승인) — 낱말 칸을 톡 누르면 작은 카드 · 단어장은 이 기기(localStorage)에만
 // 소리 = 이미 있는 줄 소리(대사 낭독)에서 그 낱말 구간만 · 새 소리 안 만듦 · 학습자 말이 네팔어가 아니면 아무것도 안 보임
-import { lang, uiKoOn } from "./i18n.js?v=1023.41";
-import { esc } from "./text.js?v=1023.41";
-import { paths } from "./paths.js?v=1023.41";
+import { lang, uiKoOn } from "./i18n.js?v=1116.1";
+import { esc } from "./text.js?v=1116.1";
+import { paths } from "./paths.js?v=1116.1";
 
 const KEY = "malmun.vocab.ne";
 export const vocabOn = () => lang === "ne";

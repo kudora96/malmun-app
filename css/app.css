@@ -1779,3 +1779,6 @@ html:has(.scr.learn),html:has(.scr.learn) body{overflow-anchor:none} /* 배우�
 .v9bar .chip.vkstar{height:30px;min-height:30px;box-sizing:border-box;padding-block:0;justify-content:center}
 /* 대표님 11-16: 학습 제목 줄 — ⭐ N 을 「ने⇄한」과 같은 자리(위 2px 띄움·정렬 같게) */
 .learn .vtitle .chip.vkstar{align-self:auto;margin-top:2px}
+
+/* 대표님 11-16: 노래방 불이 닿은 따옴표 한국어 낱말(흰 바탕 칸)도 칸 바탕이 진한 노랑으로(노랑이 맨 앞) — 스타일만 */
+.v9body .sn .kw.kar .gw,.v9body .sn .kw.kar b{background:#ffd21f;color:#1b1b1b}
