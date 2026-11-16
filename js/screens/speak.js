@@ -202,7 +202,7 @@ export default async function speak(app, ep, id, opts = {}) {
     $(".mic").classList.toggle("on", !!st.rec); $(".mic").disabled = !!st.checking; $(".mic").setAttribute("aria-disabled", String(!!st.checking)); // 확인 중 = 🎤 막음(검사부 10-11)
     if (st.checking && !st.rec) $(".msg").textContent = t("checking");
     { const show = !st.rec && !st.checking && !st.kept && !st.note && sc != null, k = show ? `${sc}|${st.whyEnd}|${st.heardHTML}|${st.rhy?.L}|${st.late}|${st.i}` : ""; // 결과 안내 = 소리로 읽기(새 결과면 한 번 저절로 · ⇄ 면 같은 문장부터 그 말로)
-      fb.set(show ? fbPlan({ sc, why: st.whyEnd, hint: st.hint, rhy: st.rhy, late: st.late }) : [], show && k !== st.fbKey); st.fbKey = k; }
+      fb.set([], false); /* 대표님 11-16: 말하기 결과를 소리로 읽지 않음(글만) */ st.fbKey = k; }
     $(".mic .lab").textContent = st.rec ? (st.ready ? t("btn_stop") : "… " + t("mic_opening")) : "🎤 " + t("speak_now"); // 준비 중 → 마이크에 실제 소리가 들어오면 녹음 중 · 카드처럼 「🎤 बोल्नुहोस्」
     if (st.rec && st.ready) showStopTip($(".mic"), st.rec); else hideStopTip(); // 멈추기 풍선(대표님 11-16 · 처음 3번 · 네팔어만)
     $("[data-act=model]").setAttribute("aria-pressed", String(st.model));

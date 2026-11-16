@@ -815,7 +815,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     // 결과 안내 = 소리로 읽기 + 불(fbvoice.js) — 새 결과면 한 번 저절로 · ⇄ 는 onUiLang 이 같은 문장부터 그 말로
     if (!fbx || fbx.el !== msg) { fbx?.b.off(); fbx = { el: msg, b: fbBind(msg, { canPlay: () => !!sp && !sp.ctl && st.panel?.kind === "explain" && !ex.playing }) }; }
     fbx.mk = () => (sc != null && !switchedSR ? fbPlan({ sc, why: r.why, hint: hintX, rhy, late: rhy?.late, rhyAny: true }) : []);
-    fbx.b.set(fbx.mk(), true);
+    fbx.b.set([], false); /* 대표님 11-16: 결과 소리 읽기 뺌(글만) */
     box.classList.toggle("pass", sc != null && sc >= PASS);
     scoreFx(box.querySelector(".fx"), sc ?? (canScore() && !switchedSR ? 0 : null), { busy: () => !!sp?.ctl, full: isFull(sc, rhy) }); // 점수가 뜨는 순간 효과 한 번 · 아무 말도 없었어도 꽝(투덜이 10-08)
     const bh = bestFull(L[i].say.ko, r.heard); // 들린 말(덧붙은 말은 흐린 회색) — 점수를 낸 그 인식 결과 · 틀린 음절 빨간 밑줄 · 빠진 자리 _
@@ -1116,7 +1116,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     setRateWord(tq("speed")); // 속도 알약 말(rateLabel)도 새 언어로(다국어부 10-14 · 창 상태)
     if (!inP) st.cardKeep = st.cur; // 지금 카드 맞춤 단계 고정(⇄ 0px)
     if (!inP && panel.dataset.uiko != null) return; // 앱 전체 ⇄ = 창 그대로(창마다 독립 · 본부 10-23)
-    if (fbx?.el.isConnected) fbx.b.set(fbx.mk(), false); // 결과 안내 읽기 중이면 같은 문장부터 새 말로
+    if (fbx?.el.isConnected) fbx.b.set([], false); // 결과 안내 읽기 중이면 같은 문장부터 새 말로
     if (st.panel?.kind === "explain") st.uiFit = true; // 이 창이 닫히거나 다른 줄로 갈 때까지 창 크기 고정
     if (st.uiBar) return; const w = panelKo() ? "ko" : "L";
     v9set("snd", w); v9set("txt", w);
