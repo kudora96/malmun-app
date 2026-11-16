@@ -1742,3 +1742,6 @@ html:has(.scr.learn),html:has(.scr.learn) body{overflow-anchor:none} /* 배우�
 
 /* 대표님 11-16: 설명 창 읽는 문장 전체 노란 바탕 빼기 — 노래방 칠(글자에 닿으면 그 글자부터 켜짐) 하나만(코드는 그대로 · 스타일만) */
 .v9body .sn.cur{background:transparent}
+
+/* 대표님 11-16: 설명 창 노래방 칠 — 불이 닿은 글자(kar) 뒤에 진한 노란 바탕을 같이(반투명 아님 · 글자 칠은 그대로 · 스타일만) */
+.v9body .sn .kw.kar{background:#ffd21f;color:#1b1b1b;box-shadow:0 2px 0 var(--hi);border-radius:3px}
