@@ -1739,3 +1739,6 @@ html:has(.scr.learn),html:has(.scr.learn) body{overflow-anchor:none} /* 배우�
 .v9bar .romb{padding-inline:11px;font-size:12.5px;line-height:1}
 /* 대표님 11-16: 설명 창 「이제 말해 보세요」 칸 화면에서 빼기(코드는 그대로 · 숨김만) */
 .v9body .sayb{display:none!important}
+
+/* 대표님 11-16: 설명 창 읽는 문장 전체 노란 바탕 빼기 — 노래방 칠(글자에 닿으면 그 글자부터 켜짐) 하나만(코드는 그대로 · 스타일만) */
+.v9body .sn.cur{background:transparent}
