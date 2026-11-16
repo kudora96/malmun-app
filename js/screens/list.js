@@ -5,6 +5,7 @@ import { catalog } from "../data.js?v=1023.41";
 import { langChip, openLangSheet, progress, uiKoBtn } from "../ui.js?v=1023.41";
 import { rerender } from "../main.js?v=1023.41";
 import { VERSION } from "../version.js?v=1023.41";
+import { vocabMenuHTML, vocabCount, openVocabList } from "../vocab.js?v=1023.41"; // ⭐ 내 단어장(네팔어만 · 대표님 11-16)
 import { recCount, recDelEpisode } from "../recstore.js?v=1023.41";
 
 const mmss = s => `${Math.floor(s / 60)}:${String(Math.round(s % 60)).padStart(2, "0")}`;
@@ -39,6 +40,7 @@ export default async function list(app, unit = "L01-00") {
   app.innerHTML = `<section class="scr list">
     <div class="bar"><div class="grow"><div class="ut ko" lang="${LEARN}" data-ko="${esc(cat.units[unit] || unit)}"${tt[unit] ? ` data-tr="${esc(tt[unit])}"` : ""}>${esc(cat.units[unit] || unit)}</div>
       <div class="sub">${esc(unit)} · <span>${esc(t("n_episodes", { n: eps.length }))}</span></div></div><span class="hbt">${uiKoBtn()}${langChip()}</span></div>
+    ${vocabMenuHTML()}
     ${first ? `<a class="hero" href="#/learn/${first.id}"><img src="img/${first.id}.jpg" alt="">
       <div><div class="ttl">${esc(first.id.slice(-2))} ${ttl(first.id, first.title, tt)}</div>
       <div class="meta">${mmss(first.duration)} · <span>${esc(t("n_lines", { n: first.lines }))}</span>${seen ? ` · <span>${esc(t("seen_to", { n: seen }))}</span>` : ""}</div><!-- {n} 칸 글은 따로 감쌈 — ⇄ 때 그 자리에서 바뀌게(다국어부 10-15) -->
@@ -50,6 +52,7 @@ export default async function list(app, unit = "L01-00") {
     ${first ? `<p class="delall"><button data-ep="${esc(first.id)}" hidden>🗑 ${esc(t("del_all"))}</button></p>` : ""}
     <p class="ver">v${esc(VERSION)}</p>
   </section>`;
+  const vb = app.querySelector(".vk-menubtn"); if (vb) { vb.onclick = openVocabList; const up = () => { const n = app.querySelector(".vk-n"); if (n) n.textContent = `(${vocabCount()})`; }; if (!window.__vkWired) { window.__vkWired = true; addEventListener("malmun:vocab", () => { const n = document.querySelector(".list .vk-n"); if (n) n.textContent = `(${vocabCount()})`; }); } up(); }
   app.querySelector("[data-act=lang]").onclick = () => openLangSheet(rerender);
   fitUnit(); document.fonts?.ready.then(fitUnit); // 손글씨 글꼴이 늦게 오면 다시 잼
   // 「ने⇄한」 누르기는 ui.js 문서 한 곳이 받음(앱 전체 같이) · {n} 칸 글도 retext 가 그 자리에서 바꿈 → 다시 그리지 않음(스크롤·열린 언어 창 그대로 · 본부 10-15 「⇄ = 상태 그대로 글만」)

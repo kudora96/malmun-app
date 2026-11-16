@@ -55,6 +55,7 @@ import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf
 import { playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1023.41";
 import { heardHTML, endHint, scoreOf, bestFull, spanOf, sylsAt } from "../heard.js?v=1023.41"; // 덧붙은 말 빼고 견주기(본부 10-11)
 import { recDel, downloadRec, askPersist } from "../recstore.js?v=1023.41";
+import { vocabOn, openWordCard, wordSpan } from "../vocab.js?v=1023.41"; // ⭐ 내 단어장 시험판(네팔어 · 대표님 11-16)
 import { showStopTip, hideStopTip } from "../stoptip.js?v=1023.41";
 import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1023.41";
 import { scoreFx, stopFx } from "../scorefx.js?v=1023.41"; // 점수별 효과(본부 10-05)
@@ -410,7 +411,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
       <div class="v9bar">${lab("v9_listen")}<span class="seg snd">${v9L ? (x.audio?.[v9L]?.ex ? playBtn("L") : `<button class="pb nosnd" disabled aria-disabled="true"><span class="ic" aria-hidden="true">🔇</span> ${esc(v9name("L"))}</button>`) : ""}${playBtn("ko")}</span>${x.sent?.length ? `<span class="snum" aria-live="off">1/${x.sent.length}</span>` : ""}${bgmBtn()}${uikoChip(panelKo())}<button class="romb" data-x="v9rom" aria-pressed="${romOn()}"><span data-k="v9_rom">${esc(tq("v9_rom"))}</span></button><button class="pb closex" data-x="close" title="${esc(tq("close_word"))}" aria-label="${esc(tq("close_word"))}"><span class="cx">✕</span><span class="cw"> ${esc(tq("close_word"))}</span></button><div class="v9tip" hidden>${esc(tq("v9_tip"))}</div></div>
       ${v9L ? "" : `<div class="v9soon">${esc(tq("v9_lang_soon"))}</div>`}<div class="v9pop" hidden></div>
       <div class="v9body">
-        ${x.pieces?.length || fx ? `<div class="chips">${(x.pieces || []).map(c => `<span class="chip"><b class="ko" lang="${LEARN}">${esc(c.ko)}</b> <i>${c.rom != null ? `<span class="rom">${esc(c.rom)}${c.mean && v9L ? ", " : ""}</span>${v9L ? esc(c.mean || "") : ""}` : v9L ? esc(c.gloss || "") : ""}</i></span>`).join("")}${fx ? `<span class="fx">= <b>${esc(fx)}</b></span>` : ""}</div>` : ""}
+        ${x.pieces?.length || fx ? `<div class="chips">${(x.pieces || []).map((c, ci) => `<span class="chip"${vocabOn() ? ` data-x="wd" data-wi="${ci}"` : ""}><b class="ko" lang="${LEARN}">${esc(c.ko)}</b> <i>${c.rom != null ? `<span class="rom">${esc(c.rom)}${c.mean && v9L ? ", " : ""}</span>${v9L ? esc(c.mean || "") : ""}` : v9L ? esc(c.gloss || "") : ""}</i></span>`).join("")}${fx ? `<span class="fx">= <b>${esc(fx)}</b></span>` : ""}</div>` : ""}
         <p data-p="0">${v9Sent(i, code)}</p>${pairHTML(i, code, 0)}
         ${l.say ? `<div class="sayb"><p data-p="1" class="sayp">${sayHTML(i, code)}</p>
           <div class="sbtns" data-keep="${esc(tq("keep_short"))}"><button class="mic" data-x="rec">${micLbl()}</button><button data-x="model">▶ ${esc(tq("model"))}</button><button class="mrate" data-x="mrate" aria-label="${esc(tq("speed"))}" aria-pressed="${getRate("m") !== 1}">${rateLabel(getRate("m"))}</button><button data-x="mine" disabled>▶ ${esc(tq("my_voice"))}</button><button data-x="keep" title="${esc(tq("keep"))}" hidden>${esc(tq("keep_short"))}</button><button data-x="savedplay" title="${esc(tq("saved_title"))}" hidden>${esc(tq("saved_play"))}</button><span class="mini"><button data-x="savedl" class="small" title="${esc(tq("download"))}" hidden>⬇ ${esc(tq("dl_short"))}</button><button data-x="savedel" class="small" title="${esc(tq("del_one"))}" hidden>🗑 ${esc(tq("del_short"))}</button></span></div>
@@ -875,6 +876,11 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
       }
       if (going && cur.p === 1) { const from = items.findIndex(x => x.p === 1); ex.play(items, Math.max(0, from)); return sync(); }
       ex.play(items); return sync();
+    }
+    if (k === "wd") { // 낱말 칸 톡 = 단어 카드(네팔어만 · 소리는 그 줄 소리의 낱말 구간)
+      const c = L[i].v9?.pieces?.[+x.dataset.wi]; if (!c || !vocabOn()) return;
+      wordSpan(ep, L[i], c.ko).then(sp => openWordCard({ w: c.ko, rom: c.rom || "", mean: c.mean || "", ep, n: L[i].id, af: L[i].lineAudio || "", s: sp.s, e: sp.e, ko: L[i].ko, tr: L[i].v9?.tr || L[i].tr || "" }, { before: () => { try { ex.stop(); } catch {} } }));
+      return;
     }
     if (k === "gw") { const sn = x.closest(".sn"), h = popFor(x); if (sn) playFromSent(sn); return h ? v9Pop(x, h) : hidePop(); } // 따옴표 낱말 = 그 문장부터 재생 + 뜻이 있으면 작은 말풍선(본부 10-05)
     if (k === "sn") { hidePop(); if (x.classList.contains("cur") && x.closest(".v9body")) return togglePlay(); return playFromSent(x); } // 문장 = 그 문장부터 재생 · 지금 읽는 문장을 누르면 멈춤⇄다시(본부 10-08)
