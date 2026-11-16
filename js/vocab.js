@@ -1,8 +1,9 @@
 // ⭐ 내 단어장(시험판 · 네팔어 1편 · 본부 11-16 대표님 승인) — 낱말 칸을 톡 누르면 작은 카드 · 단어장은 이 기기(localStorage)에만
 // 소리 = 이미 만들어 둔 낱말 소리를 이어 붙여(wordsnd.json) · 없는 편은 줄 소리의 그 낱말 구간 · 학습자 말이 네팔어가 아니면 아무것도 안 보임
-import { lang, uiKoOn } from "./i18n.js?v=1116.10";
-import { esc } from "./text.js?v=1116.10";
-import { paths } from "./paths.js?v=1116.10";
+import { lang, uiKoOn, langShort } from "./i18n.js?v=1116.11";
+import { noteHTML, readNote, stopRead } from "./wordnote.js?v=1116.11"; // 단어 카드 설명(위 = 지금 말 · 아래 ↳ 다른 말) + 읽기 소리
+import { esc } from "./text.js?v=1116.11";
+import { paths } from "./paths.js?v=1116.11";
 
 const KEY = "malmun.vocab.ne";
 export const vocabOn = () => lang === "ne";
@@ -46,13 +47,13 @@ const sndMem = {};
 const sndOf = ep => (sndMem[ep] ||= fetch(paths.data(ep, ".wordsnd")).then(r => (r.ok ? r.json() : null)).catch(() => null));
 export const unitsFor = async (ep, n, w) => (await sndOf(ep))?.lines?.[String(n)]?.[clean(w)] || null;
 let au = null, stopT = 0, seq = 0;
-export function stopWordSound() { seq++; clearTimeout(stopT); if (au) { try { au.pause(); } catch {} au = null; } }
+export function stopWordSound() { stopRead(); seq++; clearTimeout(stopT); if (au) { try { au.pause(); } catch {} au = null; } }
 function playSpan(it, btn, before) {
   if (!it.af) return;
   before?.(); stopWordSound();
   const a = (au = new Audio(paths.audio(it.ep, it.af)));
   btn?.classList.add("playing");
-  const end = () => { clearTimeout(stopT); if (au === a) { try { a.pause(); } catch {} au = null; } btn?.classList.remove("playing"); };
+  const end = () => { clearTimeout(stopT); if (au === a) { try { a.pause(); } catch {} au = null; } btn?.classList.remove("playing"); it.__done?.(); };
   a.onended = a.onerror = end;
   a.addEventListener("loadedmetadata", () => { try { a.currentTime = it.s || 0; } catch {} }, { once: true });
   a.play().then(() => { if (it.e > it.s) { clearTimeout(stopT); stopT = setTimeout(end, Math.max(200, (it.e - (it.s || 0)) * 1000 + 80)); } }).catch(end);
@@ -64,7 +65,7 @@ async function playSnd(it, btn, before) { // 낱말 소리마다 [id, 시작, �
   if (!ids?.length) return playSpan(it, btn, before);
   before?.(); stopWordSound(); const my = seq;
   btn?.classList.add("playing");
-  const fin = () => { if (my === seq) { au = null; clearTimeout(stopT); btn?.classList.remove("playing"); } };
+  const fin = () => { if (my === seq) { au = null; clearTimeout(stopT); btn?.classList.remove("playing"); it.__done?.(); } };
   const as = ids.map(([id]) => { const a = new Audio(wsrc(it.ep, id)); a.preload = "auto"; return a; });
   const back = () => { if (it.af) { seq++; playSpan(it, btn); } else fin(); }; // 낱말 소리를 못 받으면 예전 길(줄 소리의 그 구간)
   const go = k => {
@@ -83,6 +84,9 @@ async function playSnd(it, btn, before) { // 낱말 소리마다 [id, 시작, �
 // ── 카드 — 단어 · 로마자 · 네팔어 뜻(같은 크기) · ▶ · 그 줄 문장(한국어 · 네팔어 같은 크기) · ⭐ 넣기
 let cardEl = null;
 export function closeCard() { stopWordSound(); cardEl?.remove(); cardEl = null; }
+// 낱말 설명(대표님 11-16 「저는」이면 저는에 대한 설명 · 한국어·네팔어 1:1) — data/<편>/<편>.wordnote.json: 낱말 → {ko_mean, ne_mean, ko_ex, ne_ex} · 없는 낱말만 영상 속 문장
+const noteMem = {};
+export const noteOf = ep => (noteMem[ep] ||= fetch(paths.data(ep, ".wordnote")).then(r => (r.ok ? r.json() : null)).catch(() => null));
 export function openWordCard(it, { before, fromList = false } = {}) {
   closeCard();
   const saved = () => has(it.w), roman = (document.querySelector(".exv.norom") ? "" : it.rom);
@@ -91,16 +95,20 @@ export function openWordCard(it, { before, fromList = false } = {}) {
   const draw = () => {
     el.innerHTML = `<div class="vk-card">
       <div class="vk-row"><button class="vk-snd" data-v="snd" aria-label="${esc(tx("listen"))}" title="${esc(tx("listen"))}">▶</button>
-        <div class="vk-main"><span class="vk-t ko" lang="ko">${esc(it.w)}</span>${roman ? `<span class="vk-rom">${esc(roman)}</span>` : ""}<span class="vk-t vk-mean" lang="ne">${esc(it.mean || "")}</span></div></div>
-      ${it.ko ? `<div class="vk-sent"><span class="vk-s ko" lang="ko">${esc(it.ko)}</span>${it.tr ? `<span class="vk-s vk-str" lang="ne">${esc(it.tr)}</span>` : ""}</div>` : ""}
+        <div class="vk-main"><span class="vk-t ko" lang="ko">${esc(it.w)}</span>${roman ? `<span class="vk-rom">${esc(roman)}</span>` : ""}<span class="vk-t vk-mean" lang="ne">${esc(it.mean || "")}</span></div>${lang === "ne" ? `<button class="chip uiko vk-uiko" data-act="uiko" aria-pressed="${uiKoOn()}" aria-label="नेपाली ⇄ 한국어"><span class="a" lang="ne">${esc(langShort("ne"))}</span><span class="ar" aria-hidden="true">⇄</span><span class="b" lang="ko">한</span></button>` : ""}</div>
+      ${noteHTML(it.note, uiKoOn()) || (it.ko ? `<div class="vk-sent"><span class="vk-s ko" lang="ko">${esc(it.ko)}</span>${it.tr ? `<span class="vk-s vk-str" lang="ne">${esc(it.tr)}</span>` : ""}</div>` : "")}
       <div class="vk-btns"><button class="vk-add" data-v="add" ${saved() ? "disabled" : ""}>${esc(saved() ? tx("has") : tx("add"))}</button>${saved() && fromList ? `<button class="vk-done" data-v="done">${esc(tx("done"))}</button>` : ""}</div></div>`;
   };
   draw();
+  const onLang = () => { if (cardEl !== el) return removeEventListener("malmun:uilang", onLang); stopRead(); draw(); }; addEventListener("malmun:uilang", onLang); // ⇄ = 그 자리에서 즉시 바뀜(설명 창과 같은 방식)
   el.addEventListener("click", e => {
     let b = e.target.closest("[data-v]"); if (b && !el.contains(b)) b = null; // 위쪽 칸의 data-v 를 잡지 않게
     if (!b) { if (!e.target.closest(".vk-card")) closeCard(); return; } // 화면 밖을 누르면 닫힘
     e.stopPropagation();
-    if (b.dataset.v === "snd") return playSnd(it, b, before);
+    if (b.dataset.v === "snd") { // 낱말 소리 → 설명 읽기 소리(지금 말 · 노래방 불)
+      stopRead(); it.__done = () => { if (cardEl === el && it.note) readNote(el, it, it.note, uiKoOn(), it.order); };
+      return playSnd(it, b, before);
+    }
     if (b.dataset.v === "add") { put(it); draw(); return; }
     if (b.dataset.v === "done") { // 지움 막기(대표님 11-16): 바로 지우지 않고 5초 「되돌리기」
       const snap = read().find(x => x.w === it.w); drop(it.w);
@@ -110,6 +118,7 @@ export function openWordCard(it, { before, fromList = false } = {}) {
     if (b.dataset.v === "undo") { if (el.__snap) put(el.__snap); clearTimeout(el.__ut); draw(); }
   });
   document.body.append(el);
+  if (it.ep) noteOf(it.ep).then(n => { const x = n?.[clean(it.w)]; if (x && cardEl === el) { it.note = x; it.key = clean(it.w); it.order = n._order || []; draw(); } }); // 설명이 있으면 문장 자리를 설명으로
   return el;
 }
 document.addEventListener("keydown", e => { if (e.key === "Escape" && cardEl) closeCard(); });

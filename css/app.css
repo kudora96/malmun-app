@@ -1805,3 +1805,13 @@ html:has(.scr.learn),html:has(.scr.learn) body{overflow-anchor:none} /* 배우�
   .learn.big .exv.v9 .v9body>p,.learn.big .exv.v9 .v9body>.pairln{grid-column:2}
 }
 @media (orientation:landscape) and (max-height:500px){.learn.big .exv.v9 .v9body>.chips .chip{max-width:100%;box-sizing:border-box;white-space:normal}}
+.vk-note .vk-exs{margin-top:6px;padding-top:6px;border-top:1px dashed var(--line)}
+/* 단어 카드 설명 — 설명 창 방식: 위 = 지금 말 · 아래 ↳ 다른 말(같은 크기) · 읽는 블록 불(노래방) */
+.vk-uiko{margin-left:auto;align-self:flex-start;flex:none}
+.vk-note{display:flex;flex-direction:column;gap:8px}
+.vk-blk{padding:4px 6px;border-radius:8px;border:1px solid transparent}
+.vk-blk.cur{border-color:var(--hi);background:var(--hi-soft)}
+.vk-blk .vk-s{margin:0}
+.vk-pair{color:var(--mute);margin-top:2px}
+.vk-pair .arr{color:var(--hi)}
+.vk-line .kw.kar{background:#ffd21f;color:#1b1b1b;border-radius:3px;box-shadow:0 2px 0 var(--hi)}
