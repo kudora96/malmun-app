@@ -203,6 +203,7 @@ export default async function speak(app, ep, id, opts = {}) {
     if (st.checking && !st.rec) $(".msg").textContent = t("checking");
     { const show = !st.rec && !st.checking && !st.kept && !st.note && sc != null, k = show ? `${sc}|${st.whyEnd}|${st.heardHTML}|${st.rhy?.L}|${st.late}|${st.i}` : ""; // 결과 안내 = 소리로 읽기(새 결과면 한 번 저절로 · ⇄ 면 같은 문장부터 그 말로)
       fb.set([], false); /* 대표님 11-16: 말하기 결과를 소리로 읽지 않음(글만) */ st.fbKey = k; }
+    if (!st.rec && cur()) paceFor(cur()); // 박자표 미리 받기(창을 열 때·문장이 바뀔 때)
     $(".mic .lab").textContent = st.rec ? (st.ready ? t(lang === "ne" ? "btn_score" : "btn_stop") : "… " + t("mic_opening")) : "🎤 " + t("speak_now"); // 준비 중 → 마이크에 실제 소리가 들어오면 녹음 중 · 카드처럼 「🎤 बोल्नुहोस्」
     hideStopTip(); /* 대표님 11-16: 이름이 「점수 보기」라 풍선 뺌 */ // 멈추기 풍선(대표님 11-16 · 처음 3번 · 네팔어만)
     $("[data-act=model]").setAttribute("aria-pressed", String(st.model));
@@ -300,8 +301,16 @@ export default async function speak(app, ep, id, opts = {}) {
     if (pace) paintPace($(".say").children, pace, el); // 본보기 음절 시각대로(본부 10-07)
   }
   const clearPace = () => { for (const c of $(".say")?.children || []) c.classList.remove("pace"); };
+  // 박자표 미리 받기(대표님 11-16 「불은 노래방 가사처럼 박자를 맞추는 길잡이」) — 본보기 소리 + 박자표를 창을 열 때·문장이 바뀔 때 미리 받아 두고,
+  //  「말하기」를 누른 순간 아직 없으면 받을 때까지 「준비 중」으로 기다렸다가 녹음과 불을 같이 출발(중간에 멈췄다 한꺼번에 켜지는 일 없게 · 학습자 목소리에 맞춰 출발하지 않음)
+  const paceMem = new Map();
+  const paceFor = p => { const u = p.src || lineSrc; if (!u) return Promise.resolve(null);
+    const key = `${u}|${p.key}|${p.text}|${getRate("m")}`;
+    if (!paceMem.has(key)) paceMem.set(key, sfx.load(u).then(async b => b ? { b, pc: await paceOf({ ep, key: p.src ? p.key : `${ep}_${String(line.id).padStart(2, "0")}_line`, text: p.text, rate: getRate("m"), buf: b }) } : null).catch(() => null).then(r => { if (!r) paceMem.delete(key); return r; }));
+    return paceMem.get(key); };
+  const paceWait = p => Promise.race([paceFor(p), new Promise(r => setTimeout(() => r(null), 5000))]); // 5초 넘게 못 받으면 불 없이 녹음(막히지 않게)
   async function startRec(switched) {
-    newAtt(); stopSounds();
+    newAtt(); const att0 = st.att; stopSounds();
     st.switched = !!switched;
     $(".msg").textContent = t("mic_opening");
     try { if (!(srOnlyMode() && SR)) await openMic(); st.micErr = ""; } // 받아쓰기만 = 마이크를 열지 않음(안드로이드는 녹음마다 마이크를 닫으므로 · 본부 10-08)
@@ -312,12 +321,13 @@ export default async function speak(app, ep, id, opts = {}) {
       return;
     }
     if (!st.alive) return;
+    const pr = await paceWait(cur()); if (!st.alive || st.att !== att0) return; // 박자표 준비(없으면 「마이크를 켜는 중…」 그대로 기다림)
     if (srOnlyMode() && SR) { // 받아쓰기만(이 기기는 녹음과 받아쓰기를 같이 못 함 — 본부 10-07) · 마이크 열기 없음
       closeMic(); scoreFx($(".fx"), null); st.score = null; st.note = null; st.kept = null; heard = []; srErr = null; st.why = "stop"; st.maxMs = maxMsFor(cur().say);
       st.diag = { t0: performance.now(), sr: [], track: "sronly", peak: 0, mic: "", mode: "받아쓰기만" };
       const c = recordSROnly({ maxMs: st.maxMs, onTick: (el, max) => tickBar(el, max, 0), quietFor: h => quietLimit(cur().say, h) }), fake = { state: "recording", onstop: () => {}, stop: () => c.stop() };
       st.rec = fake; st.ready = true; sr = { stop() {} }; paint();
-      st.pace = null; { const p = cur(), u = p.src || lineSrc; if (u) sfx.load(u).then(async b => { if (!b || st.rec !== fake) return; const pc = await paceOf({ ep, key: p.src ? p.key : `${ep}_${String(line.id).padStart(2, "0")}_line`, text: p.text, rate: getRate("m"), buf: b }); if (st.rec === fake) st.pace = pc; }).catch(() => {}); } // 받아쓰기만이어도 따라 읽기 칠(본부 10-10)
+      st.pace = pr?.pc || null; // 받아쓰기만이어도 따라 읽기 칠(본부 10-10) · 박자표는 위에서 미리 받음
       const r = await c.done; if (st.rec === fake) st.rec = null; if (fake.onstop === null || r.cancelled || !st.alive) return; // 버림(다른 토막·닫기)
       if (r.error) { $(".msg").textContent = st.micErr = t(noScoreKey()); paint(); return; }
       heard = r.heard; srErr = r.srErr; st.why = r.why; st.diag.sr = r.diag.sr; finish(null); return;
@@ -393,8 +403,7 @@ export default async function speak(app, ep, id, opts = {}) {
     st.maxMs = maxMsFor(cur().say); st.why = "stop";
     maxTimer = setTimeout(() => { st.why = "time"; stopRec(); }, st.maxMs);
     // 따라 읽기 칠 = rhythm.js paceOf · 최대 길이 = max(지금 식, 본보기 × 2 + 2초)(투덜이 10-07 허락 — 긴 줄 또박또박이면 빠듯)
-    st.pace = null; { const p = cur(), u = p.src || lineSrc, t0 = st.diag.t0, myRec = st.rec; if (u) sfx.load(u).then(async b => { if (!b || st.rec !== myRec) return; const pc = await paceOf({ ep, key: p.src ? p.key : `${ep}_${String(line.id).padStart(2, "0")}_line`, text: p.text, rate: getRate("m"), buf: b }); if (st.rec === myRec) st.pace = pc;
-      const m2 = Math.max(st.maxMs, b.duration * 2000 + 2000); if (m2 > st.maxMs) { st.maxMs = m2; clearTimeout(maxTimer); maxTimer = setTimeout(() => { st.why = "time"; stopRec(); }, Math.max(0, m2 - (performance.now() - t0))); } }).catch(() => {}); }
+    st.pace = pr?.pc || null; { const t0 = st.diag.t0; if (pr?.b) { const m2 = Math.max(st.maxMs, pr.b.duration * 2000 + 2000); if (m2 > st.maxMs) { st.maxMs = m2; clearTimeout(maxTimer); maxTimer = setTimeout(() => { st.why = "time"; stopRec(); }, Math.max(0, m2 - (performance.now() - t0))); } } }
     paint();
   }
   function stopRec(discard) {

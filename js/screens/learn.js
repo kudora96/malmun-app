@@ -737,7 +737,14 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     return (sp.audio = playMineRec(b, { keepFirst: keepFirstOf(L[sp.i]?.say?.ko), ref: L[sp.i]?.say?.src }));
   };
   // [내 목소리] = 방금 녹음(잘됐든 못됐든) · 80% 넘으면 [저장] → 눌러야 저장 · 저장한 것은 「저장됨 ▶」 · 열 때 예전 점수 안 보임(투덜이 10-04)
-  async function spInit(i) {
+  // 「말해 보세요」 박자표 미리 받기(대표님 11-16) — 카드를 열 때 받아 두고, 🎤 누른 순간 아직 없으면 받을 때까지 「준비 중」으로 기다렸다가 녹음과 불을 같이 출발
+  const sayPaceMem = new Map();
+  function sayPaceFor(i) { const l = L[i]; if (!l?.say?.ko) return Promise.resolve({ buf: null, pace: null });
+    const key = `${ep}|${l.id}|${getRate("m")}`;
+    if (!sayPaceMem.has(key)) sayPaceMem.set(key, (async () => { const buf = l.say.src ? await sfxL.load(l.say.src) : null;
+      return { buf, pace: await paceOf({ ep, key: `${ep}_${String(l.id).padStart(2, "0")}_say`, text: l.say.ko, rate: getRate("m"), buf }) }; })().catch(() => ({ buf: null, pace: null })).then(r => { if (!r.pace) sayPaceMem.delete(key); return r; }));
+    return sayPaceMem.get(key); }
+  async function spInit(i) { sayPaceFor(i); // 박자표 미리 받기
     const saved = await upgradeSaved(await recGet(sayKey(i)), { ep, key: `${ep}_${String(L[i].id).padStart(2, "0")}_say`, url: L[i].say.src, text: L[i].say.ko }, v => recPut(sayKey(i), v)); // 옛 판 저장본은 새 점수로
     if (st.panel?.i !== i || !saved?.blob) return;
     sp = { i, saved: { blob: saved.blob, score: saved.score, old: !!saved.old } };
@@ -755,8 +762,9 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     // 「준비 중」 → 마이크에서 실제 소리가 들어오기 시작하면 「녹음 중」(본부 10-03 — 그 전에 말하면 앞이 비어 버린다)
     quietWake(true); // 녹음하는 동안 깨우기 소리 멈춤(에코 제거가 말을 끊지 않게)
     const tb = box.querySelector(".tbar"), mm = ms => `${Math.floor(ms / 60000)}:${String(Math.floor(ms / 1000) % 60).padStart(2, "0")}`;
-    const sayBuf = L[i].say.src ? await Promise.race([sfxL.load(L[i].say.src), new Promise(r => setTimeout(() => r(null), 150))]) : null;
-    const pace = await Promise.race([paceOf({ ep, key: `${ep}_${String(L[i].id).padStart(2, "0")}_say`, text: L[i].say.ko, rate: getRate("m"), buf: sayBuf }), new Promise(r => setTimeout(() => r(null), 150))]); // 따라 읽기 칠 = 본보기 음절 시각(본부 10-07)
+    btn.textContent = "… " + tq("mic_opening"); // 박자표가 아직 없으면 받을 때까지 「준비 중」
+    const { buf: sayBuf, pace } = await Promise.race([sayPaceFor(i), new Promise(r => setTimeout(() => r({ buf: null, pace: null }), 5000))]); // 박자표 준비(없으면 받을 때까지 「준비 중」 · 5초 넘으면 불 없이)
+    if (spAtt !== att || st.panel?.i !== i) return;
     const seq = seqMode(); // 안드로이드 = 녹음만 → 끝나면 그 녹음 소리로 받아쓰기(본부 10-10 갤럭시)
     const ctl = (srOnlyMode() && canScore() ? recordSROnly : record)({ noSR: seq, // 받아쓰기만 기기 = 녹음 없이(본부 10-07)
       maxMs: Math.max(maxMsFor(L[i].say.ko), sayBuf ? sayBuf.duration * 2000 + 2000 : 0), // 최대 길이 = max(8, 3 + 0.8 × 음절, 본보기 × 2 + 2)초(투덜이 10-07 허락)
