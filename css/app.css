@@ -1727,3 +1727,5 @@ html:has(.scr.learn),html:has(.scr.learn) body{overflow-anchor:none} /* 배우�
 .cd-ph .cd-ar span,.cd-ph span{line-height:1.12}
 .cd-ph .cd-tr:lang(ur){line-height:1.38}
 .cd-ph .cd-ico{width:1.2em;height:1.2em} /* 폰 카드: 아이콘 줄여 낱말 폭 확보(ru 320 카드9 2px) */
+.stoptip{position:fixed;z-index:61;max-width:min(92vw,340px);padding:8px 12px;border-radius:10px;background:var(--ink);color:var(--bg);font-size:13px;line-height:1.4;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,.25);pointer-events:none}
+.stoptip span{display:block}

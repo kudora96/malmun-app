@@ -55,6 +55,7 @@ import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf
 import { playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1023.41";
 import { heardHTML, endHint, scoreOf, bestFull, spanOf, sylsAt } from "../heard.js?v=1023.41"; // 덧붙은 말 빼고 견주기(본부 10-11)
 import { recDel, downloadRec, askPersist } from "../recstore.js?v=1023.41";
+import { showStopTip, hideStopTip } from "../stoptip.js?v=1023.41";
 import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1023.41";
 import { scoreFx, stopFx } from "../scorefx.js?v=1023.41"; // 점수별 효과(본부 10-05)
 import { record, recordSROnly, srOnlyMode, setSrOnly, isAndroid, srMiss, micWhy, srWhy, canScore, closeMic, logRec, micOpen, seqMode, srOnBlob, devSR, setDevSR, srJudge, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1023.41";
@@ -765,9 +766,9 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
         const pl = tb.querySelector(".pace"); if (pl) { pl.hidden = !pace; if (pace) pl.style.left = Math.min(100, (100 * pace.end) / max) + "%"; }
         if (pace) paintPace(box.querySelector(".saybig")?.children || [], pace, el); },
       onLevel: v => { lvl.firstElementChild.style.width = Math.round(v * 100) + "%"; },
-      onStop: () => { for (const c of box.querySelector(".saybig")?.children || []) c.classList.remove("pace"); if (sp?.ctl === ctl) { msg.textContent = tq("checking"); lvl.hidden = true; } },
+      onStop: () => { hideStopTip(); for (const c of box.querySelector(".saybig")?.children || []) c.classList.remove("pace"); if (sp?.ctl === ctl) { msg.textContent = tq("checking"); lvl.hidden = true; } },
       onSwitch: () => { btn.textContent = "… " + tq("mic_opening"); lvl.hidden = true; msg.textContent = tq("mic_switched"); },
-      onReady: () => { if (sp?.ctl !== ctl) return; btn.textContent = "■ " + tq("btn_stop"); lvl.hidden = false; msg.textContent = tq("listening");
+      onReady: () => { if (sp?.ctl !== ctl) return; btn.textContent = "■ " + tq("btn_stop"); lvl.hidden = false; showStopTip(btn, ctl); msg.textContent = tq("listening");
         const nb = box.querySelector(".micname"); if (nb && micLabel()) { nb.textContent = `🎤 ${micLabel()} ✓`; nb.hidden = false; } }, // 지금 쓰는 마이크 — 자동이 틀렸을 때만 눌러 바꿈
     });
     sp = { i, ctl, saved: sp?.saved, blob: sp?.blob };

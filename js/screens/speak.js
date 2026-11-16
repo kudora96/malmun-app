@@ -16,6 +16,7 @@
 import { noScoreKey, ageHelpKey } from "../agepolicy.js?v=1023.41"; // 점수 없음 안내 = 나이 때문인지(대표님 10-19)
 import { learnInfo } from "../tl.js?v=1023.41";
 import { LEARN } from "../tl.js?v=1023.41";
+import { showStopTip, hideStopTip } from "../stoptip.js?v=1023.41";
 import { warmSTT } from "../sttserver.js?v=1023.41";
 import { t as tG, lang, langShort, tIn, tAltIn, uiKoIn } from "../i18n.js?v=1023.41";
 import { esc, sayParts, koq } from "../text.js?v=1023.41";
@@ -203,6 +204,7 @@ export default async function speak(app, ep, id, opts = {}) {
     { const show = !st.rec && !st.checking && !st.kept && !st.note && sc != null, k = show ? `${sc}|${st.whyEnd}|${st.heardHTML}|${st.rhy?.L}|${st.late}|${st.i}` : ""; // 결과 안내 = 소리로 읽기(새 결과면 한 번 저절로 · ⇄ 면 같은 문장부터 그 말로)
       fb.set(show ? fbPlan({ sc, why: st.whyEnd, hint: st.hint, rhy: st.rhy, late: st.late }) : [], show && k !== st.fbKey); st.fbKey = k; }
     $(".mic .lab").textContent = st.rec ? (st.ready ? t("btn_stop") : "… " + t("mic_opening")) : "🎤 " + t("speak_now"); // 준비 중 → 마이크에 실제 소리가 들어오면 녹음 중 · 카드처럼 「🎤 बोल्नुहोस्」
+    if (st.rec && st.ready) showStopTip($(".mic"), st.rec); else hideStopTip(); // 멈추기 풍선(대표님 11-16 · 처음 3번 · 네팔어만)
     $("[data-act=model]").setAttribute("aria-pressed", String(st.model));
     { const r = getRate("m"), mb = $("[data-act=mrate]"); mb.textContent = rateLabel(r); mb.setAttribute("aria-pressed", String(r !== 1)); }
     fitTask(); // 결과 문구·들은 말까지 다 넣은 뒤에 잼(투덜이 10-07 — 긴 결과 문구가 아래를 밀어 과제 글이 머리 줄·막대와 겹침)
