@@ -1,6 +1,6 @@
 // 단어 카드 설명(대표님 11-16 「설명 창 방식 그대로」) — 위 = 지금 말(⇄ 상태) 본문 · 아래 「↳」 한 줄 = 다른 말 · ⇄ 누르면 그 자리에서 즉시 바뀜
 // 읽기 소리 = 낱말 소리 다음에 뜻·쓰임 → 예문1 → 예문2 차례로(지금 말) · 읽는 줄에 노래방 불 · 파일 = media/wordnote/<편>/<낱말번호>_<ko|ne>_<mean|ex1|ex2>.mp3(말하기부가 만듦 · 없으면 건너뜀)
-import { esc } from "./text.js?v=1116.14";
+import { esc } from "./text.js?v=1116.15";
 
 const BLK = [["mean", "ko_mean", "ne_mean"], ["ex1", "ko_ex1", "ne_ex1"], ["ex2", "ko_ex2", "ne_ex2"]];
 const pick = (n, ko, k) => n?.[`${k ? "ko" : "ne"}_${ko}`] || n?.[`${k ? "ko" : "ne"}_${ko === "ex1" ? "ex" : ko}`] || ""; // ex1 = 옛 이름 ex 도 받음
@@ -28,7 +28,7 @@ export function readNote(root, it, n, koFirst, order) {
   const go = k => {
     if (job.dead || k >= bl.length) return k >= bl.length && stopRead();
     const blk = root.querySelector(`.vk-blk[data-b="${bl[k].b}"]`); if (!blk) return go(k + 1);
-    const a = (job.a = new Audio(`media/wordnote/${it.ep}/${no}_${lang}_${bl[k].b}.mp3?v=1`)); a.preload = "auto";
+    const a = (job.a = new Audio(`snd/wordnote/${it.ep}/${no}_${lang}_${bl[k].b}.mp3?v=1`)); a.preload = "auto";
     let started = false;
     a.onerror = () => { if (!started) go(k + 1); };
     a.onended = () => { blk.classList.remove("cur"); blk.querySelectorAll(".vk-line .kw").forEach(w => w.classList.add("kar")); setTimeout(() => go(k + 1), 350); };
