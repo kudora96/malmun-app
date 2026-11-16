@@ -505,7 +505,7 @@ export default async function speak(app, ep, id, opts = {}) {
   }, 100);
   paint();
   savedReady.then(() => { if (st.alive) paint(); }); // 저장된 ✓·「저장됨 ▶」은 읽히는 대로
-  try { if (!localStorage.getItem("malmun.sp.help")) { localStorage.setItem("malmun.sp.help", "1"); $(".helpbox").hidden = false; } } catch {} // 처음 한 번은 풍선이 저절로
+  /* 대표님 11-16: 말하기를 열 때 사용법 창이 저절로 뜨지 않음(「?」를 누를 때만) */ // 처음 한 번은 풍선이 저절로
   sfx.preload([lineSrc, ...parts.map(p => p.src)]);
   const release = hold();
   // 언어를 바꾸면(본부 10-13 안 A · retext 가 보내는 malmun:uilang) 결과 줄·토막 단추를 지금 상태 그대로 새 언어로 — 녹음·채점은 안 건드림 · 「확인 중…」 동안은 retext 가 바꾼 글 그대로
