@@ -91,7 +91,7 @@ export const recPut = async (key, val) => { try { const d = await db(); await ne
 // 단추 글 = 기호(◀ ▶ ? ✕) + 글 — 좁으면 글만 숨김(머리 줄 한 줄 유지)
 // 사용법 풍선 글(help_sp_*) — {b} = 「ने⇄한」 단추 이름(한국어 칸 · ⇄ 때 이 함수로 다시 씀)
 let curT = tG; // 지금 말하기 창의 글 함수(창 범위 · speak() 가 맞춤)
-const helpHTML = () => [1, 2, 3, 4, 5, 6, 7, 8, 9].map(k => "help_sp_" + k).concat(ageHelpKey() ? [ageHelpKey()] : []).filter(k => curT(k) !== k).map(k => `<p dir="auto">${esc(curT(k)).replace("{b}", `<span lang="ko">${esc(langShort(lang))}⇄한</span>`)}</p>`).join("") + `<p><button class="fbauto" data-act="fbauto" aria-pressed="${fbAuto()}"><span aria-hidden="true">🔊</span> <span data-k="fb_auto">${esc(curT("fb_auto"))}</span></button></p>` + `<p class="x">${esc(curT("help_close"))}</p>`; // 결과 안내 저절로 읽기 켬/끔(대표님 10-21 · 틀 0px = 「?」 안)
+const helpHTML = () => [1, 2, 3, 4, 5, 6, 7, 8, 9].map(k => "help_sp_" + k).concat(ageHelpKey() ? [ageHelpKey()] : []).filter(k => curT(k) !== k).map(k => `<p dir="auto">${esc(curT(k)).replace("{b}", `<span lang="ko">${esc(langShort(lang))}⇄한</span>`)}</p>`).join("") /* 대표님 11-16: 결과 소리 읽기를 빼서 켬/끔 단추도 뺌 */ + `<p class="x">${esc(curT("help_close"))}</p>`; // 결과 안내 저절로 읽기 켬/끔(대표님 10-21 · 틀 0px = 「?」 안)
 const lbl = k => { const s = curT(k), m = String(s).match(/^([^\p{L}\p{M}\p{N}]*)(.*?)([^\p{L}\p{M}\p{N}]*)$/u); return m ? `${m[1] ? `<i class="ic">${esc(m[1].trim())}</i>` : ""}<span class="lt" data-k="${k}" data-kcore>${esc(m[2])}</span>${m[3] ? `<i class="ic">${esc(m[3].trim())}</i>` : ""}` : esc(s); };
 export default async function speak(app, ep, id, opts = {}) {
   const t = (k, v) => tIn(app, k, v), tAlt = k => tAltIn(app, k); curT = t; // 창 범위 글(창 밖 = 앱 전체와 같음)
