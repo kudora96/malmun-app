@@ -1,8 +1,8 @@
 // ⭐ 내 단어장(시험판 · 네팔어 1편 · 본부 11-16 대표님 승인) — 낱말 칸을 톡 누르면 작은 카드 · 단어장은 이 기기(localStorage)에만
 // 소리 = 이미 만들어 둔 낱말 소리를 이어 붙여(wordsnd.json) · 없는 편은 줄 소리의 그 낱말 구간 · 학습자 말이 네팔어가 아니면 아무것도 안 보임
-import { lang, uiKoOn } from "./i18n.js?v=1116.9";
-import { esc } from "./text.js?v=1116.9";
-import { paths } from "./paths.js?v=1116.9";
+import { lang, uiKoOn } from "./i18n.js?v=1116.10";
+import { esc } from "./text.js?v=1116.10";
+import { paths } from "./paths.js?v=1116.10";
 
 const KEY = "malmun.vocab.ne";
 export const vocabOn = () => lang === "ne";
@@ -57,13 +57,15 @@ function playSpan(it, btn, before) {
   a.addEventListener("loadedmetadata", () => { try { a.currentTime = it.s || 0; } catch {} }, { once: true });
   a.play().then(() => { if (it.e > it.s) { clearTimeout(stopT); stopT = setTimeout(end, Math.max(200, (it.e - (it.s || 0)) * 1000 + 80)); } }).catch(end);
 }
+// 낱말 소리 = 공개판 저장소 안(snd/words/<편>/<id>.mp3 · 같은 사이트라 빠름 · R2 units/_k## 는 그대로 둠 · 대표님 11-16 「바로 나와야」)
+const wsrc = (ep, id) => `snd/words/${ep}/${id}.mp3?v=1`;
 async function playSnd(it, btn, before) { // 낱말 소리마다 [id, 시작, 끝](소리 나는 구간만 · 앞 저음·뒤 여백 뺌)을 차례로
   const ids = it.ep && it.n != null ? await unitsFor(it.ep, it.n, it.w) : null;
   if (!ids?.length) return playSpan(it, btn, before);
   before?.(); stopWordSound(); const my = seq;
   btn?.classList.add("playing");
   const fin = () => { if (my === seq) { au = null; clearTimeout(stopT); btn?.classList.remove("playing"); } };
-  const as = ids.map(([id]) => { const a = new Audio(paths.unit(it.ep, id)); a.preload = "auto"; return a; });
+  const as = ids.map(([id]) => { const a = new Audio(wsrc(it.ep, id)); a.preload = "auto"; return a; });
   const back = () => { if (it.af) { seq++; playSpan(it, btn); } else fin(); }; // 낱말 소리를 못 받으면 예전 길(줄 소리의 그 구간)
   const go = k => {
     if (my !== seq) return;
