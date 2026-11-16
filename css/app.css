@@ -1732,3 +1732,10 @@ html:has(.scr.learn),html:has(.scr.learn) body{overflow-anchor:none} /* 배우�
 
 /* 대표님 11-16: 자막 목록 맨 위 「▶ 시작」 줄 빼기(코드는 그대로 · 숨김만) */
 .learn .lines > .lend[data-end="start"]{display:none}
+
+/* 대표님 11-16: 설명 창 맨 위 줄 단추 높이 맞춤 — 「ने⇄한」·⛶·「로마자」 모두 30px · ⇄ 칩은 말하기 창처럼 납작한 알약 */
+.v9bar .bigb,.v9bar .chip.uiko.uiko.uiko.uiko,.v9bar .romb{height:30px;min-height:30px;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;padding-block:0;align-self:center}
+.v9bar .chip.uiko.uiko.uiko.uiko{padding-inline:10px}
+.v9bar .romb{padding-inline:11px;font-size:12.5px;line-height:1}
+/* 대표님 11-16: 설명 창 「이제 말해 보세요」 칸 화면에서 빼기(코드는 그대로 · 숨김만) */
+.v9body .sayb{display:none!important}

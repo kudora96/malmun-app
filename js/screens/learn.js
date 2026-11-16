@@ -424,8 +424,10 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     ...(v9src(i, k, "ex") ? [{ src: v9src(i, k, "ex"), p: 0, lang: v9code(k) }] : []),
     ...sayItems(i, k),
   ];
+  const SAY_HIDDEN = true;
   // 「이제 말해 보세요」 차례 = 머리말(듣는 언어) → 0.6초 쉼 → 본보기 문장(한국어) · 머리말·문장 소리가 없으면 옛 붙은 소리(say)
   function sayItems(i, k) {
+    if (SAY_HIDDEN) return []; // 대표님 11-16: 「이제 말해 보세요」 칸을 화면에서 뺌 → 안 보이는 소리도 안 냄(코드는 그대로 · false 로 되돌림)
     const head = d.v9head?.[v9code(k)], sent = L[i].v9?.audio?.ko?.sentence;
     if (head && sent) return [{ src: paths.v9(ep, head), p: 1, lang: v9code(k), part: "head" }, { src: paths.v9(ep, sent), p: 1, lang: v9code(k), part: "sent", gap: 600 }];
     return v9src(i, k, "say") ? [{ src: v9src(i, k, "say"), p: 1, lang: v9code(k) }] : [];
