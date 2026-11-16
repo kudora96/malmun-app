@@ -1,7 +1,7 @@
 // 대표님 확인용 바로가기(본부 10-23 · 로컬판에서만 · 공개판엔 아무 일 없음)
 //  ?go=L01-00-01&line=5&win=explain|speak|write|game|big&t=44  (line=end = 목록 맨 아래 「끝」 줄 · ?fresh=1·?lang=ne 와 함께 써도 됨)
 //  처음 실행 단계(언어·태어난 해)는 건너뜀 · 잘못된 값이면 편 목록으로 · 화면 틀·앱 코드는 안 바꾸고 학습자가 누르는 단추를 대신 누름
-const LOCAL = /^(localhost|127\.0\.0\.1|\[::1\]|10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+|172\.(1[6-9]|2\d|3[01])\.\d+\.\d+)$/.test(location.hostname);
+const LOCAL = /^(localhost|127\.0\.0\.1|\[::1\]|10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+|172\.(1[6-9]|2\d|3[01])\.\d+\.\d+)$/.test(location.hostname) || location.hostname === "kudora96.github.io"; // 대표님 11-16: 연습 중엔 공개판에서도 ?go= 바로가기(나이·언어 자동) · 🔴 런칭 전 이 줄 되돌림
 const W = ms => new Promise(r => setTimeout(r, ms));
 const wait = async (f, ms = 10000) => { for (let n = 0; n < ms / 100; n++) { const x = f(); if (x) return x; await W(100); } return null; };
 let job = null;
