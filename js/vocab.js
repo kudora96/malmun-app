@@ -1,10 +1,10 @@
 // ⭐ 내 단어장(시험판 · 네팔어 1편 · 본부 11-16 대표님 승인) — 낱말 칸을 톡 누르면 작은 카드 · 단어장은 이 기기(localStorage)에만
 // 소리 = 이미 만들어 둔 낱말 소리를 이어 붙여(wordsnd.json) · 없는 편은 줄 소리의 그 낱말 구간 · 학습자 말이 네팔어가 아니면 아무것도 안 보임
-import { lang, uiKoOn, langShort } from "./i18n.js?v=1116.13";
-import { noteHTML, readNote, stopRead } from "./wordnote.js?v=1116.13"; // 단어 카드 설명(위 = 지금 말 · 아래 ↳ 다른 말) + 읽기 소리
-import { esc } from "./text.js?v=1116.13";
-import { paths } from "./paths.js?v=1116.13";
-import { VERSION } from "./version.js?v=1116.13";
+import { lang, uiKoOn, langShort } from "./i18n.js?v=1116.14";
+import { noteHTML, readNote, stopRead } from "./wordnote.js?v=1116.14"; // 단어 카드 설명(위 = 지금 말 · 아래 ↳ 다른 말) + 읽기 소리
+import { esc } from "./text.js?v=1116.14";
+import { paths } from "./paths.js?v=1116.14";
+import { VERSION } from "./version.js?v=1116.14";
 
 const KEY = "malmun.vocab.ne";
 export const vocabOn = () => lang === "ne";
@@ -85,6 +85,15 @@ async function playSnd(it, btn, before) { // 낱말 소리마다 [id, 시작, �
 // ── 카드 — 단어 · 로마자 · 네팔어 뜻(같은 크기) · ▶ · 그 줄 문장(한국어 · 네팔어 같은 크기) · ⭐ 넣기
 let cardEl = null;
 export function closeCard() { stopWordSound(); cardEl?.remove(); cardEl = null; }
+// 「소리 준비 중…」(대표님 11-16) — ▶ 를 누르고 소리가 시작될 때까지(0.25초 넘게 걸릴 때만) 카드 맨 위에 작게 · 아무 소리나 시작하면 지움
+const WAIT_TX = { ne: "आवाज तयार हुँदै छ…", ko: "소리 준비 중…" };
+let waitT = 0;
+function hideWait() { clearTimeout(waitT); waitT = 0; document.querySelectorAll(".vk-wait").forEach(w => w.remove()); }
+function showWait(el) {
+  hideWait(); waitT = setTimeout(() => { const c = el.querySelector(".vk-card"); if (!c || cardEl !== el) return; const w = document.createElement("div"); w.className = "vk-wait"; w.setAttribute("role", "status"); w.textContent = uiKoOn() || lang !== "ne" ? WAIT_TX.ko : WAIT_TX.ne; c.prepend(w); }, 250);
+  setTimeout(hideWait, 9000); // 끝내 안 오면 지움
+}
+document.addEventListener("playing", hideWait, true); document.addEventListener("error", hideWait, true);
 // 낱말 설명(대표님 11-16 「저는」이면 저는에 대한 설명 · 한국어·네팔어 1:1) — data/<편>/<편>.wordnote.json: 낱말 → {ko_mean, ne_mean, ko_ex, ne_ex} · 없는 낱말만 영상 속 문장
 const noteMem = {};
 export const noteOf = ep => (noteMem[ep] ||= fetch(paths.data(ep, ".wordnote") + "?v=" + VERSION).then(r => (r.ok ? r.json() : null)).catch(() => null));
@@ -107,7 +116,7 @@ export function openWordCard(it, { before, fromList = false } = {}) {
     if (!b) { if (!e.target.closest(".vk-card")) closeCard(); return; } // 화면 밖을 누르면 닫힘
     e.stopPropagation();
     if (b.dataset.v === "snd") { // 낱말 소리 → 설명 읽기 소리(지금 말 · 노래방 불)
-      stopRead(); it.__done = () => { if (cardEl === el && it.note) readNote(el, it, it.note, uiKoOn(), it.order); };
+      showWait(el); stopRead(); it.__done = () => { if (cardEl === el && it.note) readNote(el, it, it.note, uiKoOn(), it.order); };
       return playSnd(it, b, before);
     }
     if (b.dataset.v === "add") { put(it); draw(); return; }

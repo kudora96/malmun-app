@@ -10,11 +10,11 @@
 //  R7 영상은 늘 맨 위 · 지금 줄은 영상 바로 아래(앞 줄은 영상 뒤로) — 손으로 목록을 움직이면 4초 동안은 따라가지 않음
 //  R8 듣기 모드(대사→설명 · 설명만)도 R1~R6 그대로(영상 대신 소리 조각) · 모드를 바꾸면 멈춤(▶ 로 시작)
 //  R9 다시 들어오면 마지막 줄이 선택된 채 멈춰 있음
-import { noScoreKey } from "../agepolicy.js?v=1116.13"; // 점수 없음 안내 = 나이 때문인지(대표님 10-19)
-import { LEARN } from "../tl.js?v=1116.13";
-import { warmSTT } from "../sttserver.js?v=1116.13";
-import * as sfxL from "../sfx.js?v=1116.13"; // 카드 말하기 최대 길이 = 본보기 길이로(10-07)
-import { t, tAlt, lang, langName, KO_UI, uiKoOn, preloadKoUi, tIn, uiKoIn } from "../i18n.js?v=1116.13";
+import { noScoreKey } from "../agepolicy.js?v=1116.14"; // 점수 없음 안내 = 나이 때문인지(대표님 10-19)
+import { LEARN } from "../tl.js?v=1116.14";
+import { warmSTT } from "../sttserver.js?v=1116.14";
+import * as sfxL from "../sfx.js?v=1116.14"; // 카드 말하기 최대 길이 = 본보기 길이로(10-07)
+import { t, tAlt, lang, langName, KO_UI, uiKoOn, preloadKoUi, tIn, uiKoIn } from "../i18n.js?v=1116.14";
 // 줄 카드 단추 = 그림만 다섯(대표님 10-20 B 선 아이콘 · 같은 크기 한 줄 · 카드 높이 0px) — ▶ 이 줄 듣기 · 📖 설명 · ✎ 쓰기 · 🎤 말하기 · 🎮 게임 · 이름 = 처음 한 번 차례 풍선말 + 길게 누르기
 const SV = d => `<svg class="ico" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
 const ACTS = [["once", "listen_line", '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M8 5.5v13l11-6.5z"/></svg>'], ["explain", "explain", SV('<path d="M4 5a2 2 0 0 1 2-2h5v17H6a2 2 0 0 0-2 2z"/><path d="M20 5a2 2 0 0 0-2-2h-5v17h5a2 2 0 0 1 2 2z"/>')], ["write", "write", SV('<path d="M16 3l5 5L8 21H3v-5z"/>')], ["speak", "speak", SV('<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>')], ["game", "line_game", SV('<rect x="2" y="7" width="20" height="11" rx="5"/><path d="M7 10v5M4.5 12.5h5"/><circle cx="16" cy="11.5" r="1" fill="currentColor"/><circle cx="18.5" cy="14" r="1" fill="currentColor"/>')]];
@@ -36,33 +36,33 @@ function gameWords(vl, uw, lg, ep) {   // 뜻 조각(v9 pieces)과 소리 낱말
   }
   return out;
 }
-import { setTx } from "../retext.js?v=1116.13";
-import { langfitRun } from "../langfit.js?v=1116.13";
-import { esc, renderText, glossCards, sayParts } from "../text.js?v=1116.13";
-import { episode } from "../data.js?v=1116.13";
-import { paths, MEDIA } from "../paths.js?v=1116.13";
-import { attachVq } from "../vq.js?v=1116.13";
-import { setReportCtx } from "../report.js?v=1116.13";
-import { fbBind, fbPlan } from "../fbvoice.js?v=1116.13";
-import { setupTurns } from "../turns.js?v=1116.13"; // 「따라 해 보세요」 양방향(대표님 10-21) // 결과 안내 소리로 읽기(대표님 10-21)
-import { setupOverlays } from "../overlays.js?v=1116.13"; // 영상 위 그림 카드(대표님 10-22 새 1편) // 「따라 해 보세요」 양방향(대표님 10-21) // 결과 안내 소리로 읽기(대표님 10-21)
-import { Sequence } from "../audio.js?v=1116.13";
-import { I, progress, SPEAKER, spkHtml, uiKoBtn, uikoChip, bgmBtn, switchUiKo, openUiScope, switchUiScope } from "../ui.js?v=1116.13";
-import writeView from "./write.js?v=1116.13";
-import { diagEnv, keepDiag } from "../diag.js?v=1116.13";
-import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1116.13";
-import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace, lateFactor, sylAt, paintAt, karaokeRun, isFull } from "../rhythm.js?v=1116.13";
-import { playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1116.13";
-import { heardHTML, endHint, scoreOf, bestFull, spanOf, sylsAt } from "../heard.js?v=1116.13"; // 덧붙은 말 빼고 견주기(본부 10-11)
-import { recDel, downloadRec, askPersist } from "../recstore.js?v=1116.13";
-import { vocabOn, openWordCard, wordSpan, starChip } from "../vocab.js?v=1116.13"; // ⭐ 내 단어장 시험판(네팔어 · 대표님 11-16)
-import { showStopTip, hideStopTip } from "../stoptip.js?v=1116.13";
-import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1116.13";
-import { scoreFx, stopFx } from "../scorefx.js?v=1116.13"; // 점수별 효과(본부 10-05)
-import { record, recordSROnly, srOnlyMode, setSrOnly, isAndroid, srMiss, micWhy, srWhy, canScore, closeMic, logRec, micOpen, seqMode, srOnBlob, devSR, setDevSR, srJudge, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1116.13";
-import { hold, quietWake } from "../wake.js?v=1116.13";
-import { hold as bgmHold } from "../bgm.js?v=1116.13"; // 🎮 게임 중 배경음악 멈춤
-import { setupCards } from "../cards.js?v=1116.13"; // 영상 위 AR 카드 = 앱이 직접 그림(얹기부 10-27 · 자료 있는 편)
+import { setTx } from "../retext.js?v=1116.14";
+import { langfitRun } from "../langfit.js?v=1116.14";
+import { esc, renderText, glossCards, sayParts } from "../text.js?v=1116.14";
+import { episode } from "../data.js?v=1116.14";
+import { paths, MEDIA } from "../paths.js?v=1116.14";
+import { attachVq } from "../vq.js?v=1116.14";
+import { setReportCtx } from "../report.js?v=1116.14";
+import { fbBind, fbPlan } from "../fbvoice.js?v=1116.14";
+import { setupTurns } from "../turns.js?v=1116.14"; // 「따라 해 보세요」 양방향(대표님 10-21) // 결과 안내 소리로 읽기(대표님 10-21)
+import { setupOverlays } from "../overlays.js?v=1116.14"; // 영상 위 그림 카드(대표님 10-22 새 1편) // 「따라 해 보세요」 양방향(대표님 10-21) // 결과 안내 소리로 읽기(대표님 10-21)
+import { Sequence } from "../audio.js?v=1116.14";
+import { I, progress, SPEAKER, spkHtml, uiKoBtn, uikoChip, bgmBtn, switchUiKo, openUiScope, switchUiScope } from "../ui.js?v=1116.14";
+import writeView from "./write.js?v=1116.14";
+import { diagEnv, keepDiag } from "../diag.js?v=1116.14";
+import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1116.14";
+import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace, lateFactor, sylAt, paintAt, karaokeRun, isFull } from "../rhythm.js?v=1116.14";
+import { playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1116.14";
+import { heardHTML, endHint, scoreOf, bestFull, spanOf, sylsAt } from "../heard.js?v=1116.14"; // 덧붙은 말 빼고 견주기(본부 10-11)
+import { recDel, downloadRec, askPersist } from "../recstore.js?v=1116.14";
+import { vocabOn, openWordCard, wordSpan, starChip } from "../vocab.js?v=1116.14"; // ⭐ 내 단어장 시험판(네팔어 · 대표님 11-16)
+import { showStopTip, hideStopTip } from "../stoptip.js?v=1116.14";
+import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1116.14";
+import { scoreFx, stopFx } from "../scorefx.js?v=1116.14"; // 점수별 효과(본부 10-05)
+import { record, recordSROnly, srOnlyMode, setSrOnly, isAndroid, srMiss, micWhy, srWhy, canScore, closeMic, logRec, micOpen, seqMode, srOnBlob, devSR, setDevSR, srJudge, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1116.14";
+import { hold, quietWake } from "../wake.js?v=1116.14";
+import { hold as bgmHold } from "../bgm.js?v=1116.14"; // 🎮 게임 중 배경음악 멈춤
+import { setupCards } from "../cards.js?v=1116.14"; // 영상 위 AR 카드 = 앱이 직접 그림(얹기부 10-27 · 자료 있는 편)
 
 const RATES = [1, 0.75, 0.5];
 const pref = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } };
@@ -378,6 +378,12 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   // ── 위 창 = 영상 · 설명 · 쓰기 중 하나(R12) — 조작은 줄 단추(토글) + 아래 막대 하나뿐(R14) ──
   const panel = app.querySelector(".panel"), vwrap = app.querySelector(".vmain"); // 영상 창 = 제목 줄 + 영상(위 창이 열리면 같이 숨김)
   const ex = new Sequence(); // 설명 읽기(대사 → 설명 문단)
+  // 「소리 준비 중…」(대표님 11-16) — 설명 소리가 시작될 때까지(0.25초 넘게 걸릴 때만) 작게 보이고 시작하면 지움
+  const WAIT_TX = { ne: "आवाज तयार हुँदै छ…", ko: "소리 준비 중…" };
+  let waitT = 0;
+  const waitOff = () => { clearTimeout(waitT); waitT = 0; const w = panel.querySelector(".v9wait"); if (w) w.hidden = true; };
+  const waitOn = () => { clearTimeout(waitT); waitT = setTimeout(() => { if (st.panel?.kind !== "explain" || !ex.playing) return; let w = panel.querySelector(".v9wait"); if (!w) { w = document.createElement("div"); w.className = "v9wait"; w.setAttribute("role", "status"); panel.append(w); } w.textContent = lang === "ne" && !panelKo() ? WAIT_TX.ne : WAIT_TX.ko; w.hidden = false; }, 250); };
+  ex.a.addEventListener("loadstart", () => { if (ex.playing) waitOn(); }); for (const ev of ["playing", "pause", "ended", "error", "emptied"]) ex.a.addEventListener(ev, waitOff);
   const romOn = () => pref("malmun.rom") !== "0";
   st.panel = null;
   // ── 새 설명(v9 시안 · 본부 10-03) — 설명 「소리 언어」와 「글 언어」를 따로(교차가 핵심 · 투덜이 철학) · 화면에는 표시형(text)만
@@ -759,7 +765,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   // [내 목소리] = 방금 녹음(잘됐든 못됐든) · 80% 넘으면 [저장] → 눌러야 저장 · 저장한 것은 「저장됨 ▶」 · 열 때 예전 점수 안 보임(투덜이 10-04)
   // 「말해 보세요」 박자표 미리 받기(대표님 11-16) — 카드를 열 때 받아 두고, 🎤 누른 순간 아직 없으면 받을 때까지 「준비 중」으로 기다렸다가 녹음과 불을 같이 출발
   const sayPaceMem = new Map();
-  function sayPaceFor(i) { const l = L[i]; if (!l?.say?.ko) return Promise.resolve({ buf: null, pace: null });
+  function sayPaceFor(i) { const l = L[i]; if (SAY_HIDDEN || !l?.say?.ko) return Promise.resolve({ buf: null, pace: null }); // 숨긴 「말해 보세요」 칸 소리는 미리 받지 않음(대표님 11-16 · 설명 소리를 먼저 받게)
     const key = `${ep}|${l.id}|${getRate("m")}`;
     if (!sayPaceMem.has(key)) sayPaceMem.set(key, (async () => { const buf = l.say.src ? await sfxL.load(l.say.src) : null;
       return { buf, pace: await paceOf({ ep, key: `${ep}_${String(l.id).padStart(2, "0")}_say`, text: l.say.ko, rate: getRate("m"), buf }) }; })().catch(() => ({ buf: null, pace: null })).then(r => { if (!r.pace) sayPaceMem.delete(key); return r; }));

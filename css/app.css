@@ -1815,3 +1815,6 @@ html:has(.scr.learn),html:has(.scr.learn) body{overflow-anchor:none} /* 배우�
 .vk-pair{color:var(--mute);margin-top:2px}
 .vk-pair .arr{color:var(--hi)}
 .vk-line .kw.kar{background:#ffd21f;color:#1b1b1b;border-radius:3px;box-shadow:0 2px 0 var(--hi)}
+/* 「소리 준비 중…」 — 설명 창·낱말 카드(대표님 11-16) */
+.v9wait{position:fixed;left:50%;bottom:92px;transform:translateX(-50%);z-index:40;padding:4px 14px;border-radius:999px;background:var(--ink);color:var(--bg);font-size:12.5px;white-space:nowrap;pointer-events:none}
+.vk-wait{margin:0 0 6px;padding:3px 12px;border-radius:999px;background:var(--bubble);border:1px solid var(--line);color:var(--mute);font-size:12.5px;align-self:center;width:fit-content}
