@@ -8,18 +8,18 @@ export const noteBlocks = n => BLK.map(([b]) => ({ b, ko: pick(n, b, true), ne: 
 const kws = (s, lang) => String(s).split(/(\s+)/).map(t => (/^\s*$/.test(t) ? t : `<span class="kw" lang="${lang}">${esc(t)}</span>`)).join("");
 
 // 본문 = 지금 말 한 줄만(블록마다) · 다른 말은 안 보이는 겹침(.ghost)으로 높이만 맞춤 · 「↳」 한 줄 = 지금 읽는 블록의 다른 말(맨 아래 하나 · 설명 읽기와 같음)
-const pairTxt = (n, b, lang) => { const x = noteBlocks(n).find(y => y.b === b) || noteBlocks(n)[0]; return x ? x[lang] : ""; };
 export function noteHTML(n, koFirst, curB) {
   const bl = noteBlocks(n); if (!bl.length) return "";
-  const al = koFirst ? "ko" : "ne", ol = koFirst ? "ne" : "ko";
-  const gh = bl.map(x => ["ko", "ne"].map(l => `<span class="ghost" aria-hidden="true" lang="${l}">↳ ${esc(x[l])}</span>`).join("")).join("");
-  return `<div class="vk-sent vk-note">${bl.map(x => `<div class="vk-blk" data-b="${x.b}"><p class="vk-s vk-line"><span class="vis" lang="${al}">${kws(x[al], al)}</span><span class="ghost" aria-hidden="true" lang="${ol}">${esc(x[ol])}</span></p></div>`).join("")}<p class="vk-s vk-pair pairln" lang="${ol}" data-k="${curB || bl[0].b}"><span class="vis"><span class="arr" aria-hidden="true">↳</span> ${esc(pairTxt(n, curB, ol))}</span>${gh}</p></div>`;
+  const al = koFirst ? "ko" : "ne", ol = koFirst ? "ne" : "ko", cb = curB || bl[0].b;
+  // 블록마다 바로 아래 「↳」 칸 — 칸 높이는 그 블록 두 말 중 긴 쪽(안 보이는 겹침) · 글은 지금 읽는 블록 칸에만 → 카드 높이 그대로
+  return `<div class="vk-sent vk-note">${bl.map(x => `<div class="vk-blk" data-b="${x.b}"><p class="vk-s vk-line"><span class="vis" lang="${al}">${kws(x[al], al)}</span><span class="ghost" aria-hidden="true" lang="${ol}">${esc(x[ol])}</span></p></div><p class="vk-s vk-pair pairln" data-pb="${x.b}" lang="${ol}"><span class="vis">${x.b === cb ? `<span class="arr" aria-hidden="true">↳</span> ${esc(x[ol])}` : ""}</span>${["ko", "ne"].map(l => `<span class="ghost" aria-hidden="true" lang="${l}">↳ ${esc(x[l])}</span>`).join("")}</p>`).join("")}</div>`;
 }
-function setPair(j, k) { // 읽는 블록의 다른 말 한 줄(바뀔 때만)
-  const p = j.root.querySelector(".vk-pair"), b = j.bl[k]; if (!p || !b) return;
-  const ol = j.lang === "ko" ? "ne" : "ko", key = b.b + ol; if (p.dataset.c === key) return;
-  p.dataset.c = key; p.dataset.k = b.b; p.setAttribute("lang", ol);
-  const v = p.querySelector(".vis"); if (v) v.innerHTML = `<span class="arr" aria-hidden="true">↳</span> ${esc(b[ol])}`;
+function setPair(j, k) { // 읽는 블록 바로 아래 칸에만 다른 말(바뀔 때만)
+  const b = j.bl[k]; if (!b) return;
+  const ol = j.lang === "ko" ? "ne" : "ko", key = b.b + ol, root = j.root;
+  if (root.__pairKey === key && root.querySelector(`.vk-pair[data-pb="${b.b}"] .vis`)?.firstChild) return;
+  root.__pairKey = key;
+  root.querySelectorAll(".vk-note > .vk-pair").forEach(p => { const v = p.querySelector(".vis"); if (p.dataset.pb === b.b) { p.setAttribute("lang", ol); v.innerHTML = `<span class="arr" aria-hidden="true">↳</span> ${esc(b[ol])}`; } else v.textContent = ""; });
 }
 export const curBlock = () => (cur ? cur.bl[cur.k]?.b : "");
 

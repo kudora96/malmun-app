@@ -1814,7 +1814,7 @@ html:has(.scr.learn),html:has(.scr.learn) body{overflow-anchor:none} /* 배우�
 .vk-blk{padding:4px 6px;border-radius:8px;border:1px solid transparent}
 .vk-blk.cur{border-color:var(--hi);background:var(--hi-soft)}
 .vk-blk .vk-s{margin:0}
-.vk-pair{color:var(--mute);margin:0 6px}
+.vk-pair{color:var(--mute);margin:0 6px}.vk-note>.vk-pair{margin:-6px 6px 0}
 .vk-line,.vk-pair{display:grid}.vk-line>.vis,.vk-line>.ghost,.vk-pair>.vis,.vk-pair>.ghost{grid-area:1/1;min-width:0}.vk-line>.ghost,.vk-pair>.ghost{visibility:hidden;pointer-events:none;user-select:none}
 .vk-pair .arr{color:var(--hi)}
 .vk-line .kw.kar{background:#ffd21f;color:#1b1b1b;border-radius:3px;box-shadow:0 2px 0 var(--hi)}
