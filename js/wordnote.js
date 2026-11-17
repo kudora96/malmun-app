@@ -1,6 +1,6 @@
 // 단어 카드 설명(대표님 11-16 「설명 창 방식 그대로」) — 위 = 지금 말(⇄ 상태) 본문 · 아래 「↳」 한 줄 = 다른 말 · ⇄ 누르면 그 자리에서 즉시 바뀜
 // 읽기 소리 = 낱말 소리 다음에 뜻·쓰임 → 예문1 → 예문2 차례로(지금 말) · 읽는 줄에 노래방 불 · 파일 = media/wordnote/<편>/<낱말번호>_<ko|ne>_<mean|ex1|ex2>.mp3(말하기부가 만듦 · 없으면 건너뜀)
-import { esc } from "./text.js?v=1116.16";
+import { esc } from "./text.js?v=1116.17";
 
 const BLK = [["mean", "ko_mean", "ne_mean"], ["ex1", "ko_ex1", "ne_ex1"], ["ex2", "ko_ex2", "ne_ex2"]];
 const pick = (n, ko, k) => n?.[`${k ? "ko" : "ne"}_${ko}`] || n?.[`${k ? "ko" : "ne"}_${ko === "ex1" ? "ex" : ko}`] || ""; // ex1 = 옛 이름 ex 도 받음
@@ -18,15 +18,17 @@ export function noteHTML(n, koFirst) {
 
 // ── 읽기 소리
 let cur = null, tick = 0;
-export function stopRead() { clearInterval(tick); tick = 0; if (cur) { try { cur.a.pause(); } catch {} cur.dead = true; cur = null; } document.querySelectorAll(".vk-blk.cur").forEach(e => e.classList.remove("cur")); document.querySelectorAll(".vk-note .kw.kar").forEach(e => e.classList.remove("kar")); }
+export const readingAt = () => (cur ? cur.k : -1); // 지금 읽는 블록 번호(없으면 -1) — ⇄ 때 그 자리에서 이어가기
+export function stopRead() { clearInterval(tick); tick = 0; if (cur) { try { cur.a?.pause(); } catch {} cur.dead = true; const f = cur.onState; cur = null; f?.(false); } document.querySelectorAll(".vk-blk.cur").forEach(e => e.classList.remove("cur")); document.querySelectorAll(".vk-note .kw.kar").forEach(e => e.classList.remove("kar")); }
 const LEAD = 0.1;
-export function readNote(root, it, n, koFirst, order) {
+export function readNote(root, it, n, koFirst, order, { from = 0, onState } = {}) { // from = 시작 블록(⇄ 때 같은 자리) · onState(켜짐?) = ▶/■ 단추
   stopRead();
   const no = (order || []).indexOf(String(it.key || "").trim()) + 1; if (!no) return; // 낱말 번호 = wordnote.json 의 _order 안 자리(1부터)
   const lang = koFirst ? "ko" : "ne", bl = noteBlocks(n);
-  const job = (cur = { dead: false, a: null });
+  const job = (cur = { dead: false, a: null, k: from, onState }); onState?.(true);
   const go = k => {
     if (job.dead || k >= bl.length) return k >= bl.length && stopRead();
+    job.k = k;
     const blk = root.querySelector(`.vk-blk[data-b="${bl[k].b}"]`); if (!blk) return go(k + 1);
     const a = (job.a = new Audio(`snd/wordnote/${it.ep}/${no}_${lang}_${bl[k].b}.mp3?v=1`)); a.preload = "auto";
     let started = false;
@@ -38,5 +40,5 @@ export function readNote(root, it, n, koFirst, order) {
       tick = setInterval(() => { if (job.dead) return; const fr = (a.currentTime + LEAD) / Math.max(0.2, a.duration || 1); let c = 0; ws.forEach(w => { w.classList.toggle("kar", c / tot <= fr); c += w.textContent.length; }); }, 40);
     }).catch(() => go(k + 1));
   };
-  go(0);
+  go(Math.min(from, bl.length - 1));
 }

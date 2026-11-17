@@ -1,10 +1,10 @@
 // ⭐ 내 단어장(시험판 · 네팔어 1편 · 본부 11-16 대표님 승인) — 낱말 칸을 톡 누르면 작은 카드 · 단어장은 이 기기(localStorage)에만
 // 소리 = 이미 만들어 둔 낱말 소리를 이어 붙여(wordsnd.json) · 없는 편은 줄 소리의 그 낱말 구간 · 학습자 말이 네팔어가 아니면 아무것도 안 보임
-import { lang, uiKoOn, langShort } from "./i18n.js?v=1116.16";
-import { noteHTML, readNote, stopRead } from "./wordnote.js?v=1116.16"; // 단어 카드 설명(위 = 지금 말 · 아래 ↳ 다른 말) + 읽기 소리
-import { esc } from "./text.js?v=1116.16";
-import { paths } from "./paths.js?v=1116.16";
-import { VERSION } from "./version.js?v=1116.16";
+import { lang, uiKoOn, langShort } from "./i18n.js?v=1116.17";
+import { noteHTML, readNote, stopRead, readingAt } from "./wordnote.js?v=1116.17"; // 단어 카드 설명(위 = 지금 말 · 아래 ↳ 다른 말) + 읽기 소리
+import { esc } from "./text.js?v=1116.17";
+import { paths } from "./paths.js?v=1116.17";
+import { VERSION } from "./version.js?v=1116.17";
 
 const KEY = "malmun.vocab.ne";
 export const vocabOn = () => lang === "ne";
@@ -110,13 +110,16 @@ export function openWordCard(it, { before, fromList = false } = {}) {
       <div class="vk-btns"><button class="vk-add" data-v="add" ${saved() ? "disabled" : ""}>${esc(saved() ? tx("has") : tx("add"))}</button>${saved() && fromList ? `<button class="vk-done" data-v="done">${esc(tx("done"))}</button>` : ""}</div></div>`;
   };
   draw();
-  const onLang = () => { if (cardEl !== el) return removeEventListener("malmun:uilang", onLang); stopRead(); draw(); }; addEventListener("malmun:uilang", onLang); // ⇄ = 그 자리에서 즉시 바뀜(설명 창과 같은 방식)
+  const setBtn = on => { const b = el.querySelector(".vk-snd"); if (!b) return; b.textContent = on ? "■" : "▶"; b.classList.toggle("playing", on); b.setAttribute("aria-pressed", String(on)); }; // 읽는 동안 ■(멈춤) · 끝나면 ▶
+  const onLang = () => { if (cardEl !== el) return removeEventListener("malmun:uilang", onLang); const k = readingAt(); stopRead(); draw(); if (k >= 0 && it.note) { readNote(el, it, it.note, uiKoOn(), it.order, { from: k, onState: setBtn }); setBtn(true); } }; // 읽는 중 ⇄ = 처음으로 안 가고 같은 블록부터 새 말로 addEventListener("malmun:uilang", onLang); // ⇄ = 그 자리에서 즉시 바뀜(설명 창과 같은 방식)
   el.addEventListener("click", e => {
     let b = e.target.closest("[data-v]"); if (b && !el.contains(b)) b = null; // 위쪽 칸의 data-v 를 잡지 않게
     if (!b) { if (!e.target.closest(".vk-card")) closeCard(); return; } // 화면 밖을 누르면 닫힘
     e.stopPropagation();
-    if (b.dataset.v === "snd") { // 낱말 소리 → 설명 읽기 소리(지금 말 · 노래방 불)
-      showWait(el); stopRead(); it.__done = () => { if (cardEl === el && it.note) readNote(el, it, it.note, uiKoOn(), it.order); };
+    if (b.dataset.v === "snd") { // ▶ = 설명 읽기(뜻 → 예문1 → 예문2 · 지금 말 · 노래방 불) · 낱말 소리는 따로 안 냄 · 읽는 중 다시 누르면 ■ 멈춤
+      if (b.classList.contains("playing")) { stopWordSound(); hideWait(); setBtn(false); return; }
+      if (it.note) { showWait(el); stopWordSound(); it.__done = null; readNote(el, it, it.note, uiKoOn(), it.order, { onState: setBtn }); return; }
+      showWait(el); stopRead(); it.__done = null;
       return playSnd(it, b, before);
     }
     if (b.dataset.v === "add") { put(it); draw(); return; }
