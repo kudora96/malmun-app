@@ -1821,3 +1821,11 @@ html:has(.scr.learn),html:has(.scr.learn) body{overflow-anchor:none} /* 배우�
 /* 「소리 준비 중…」 — 설명 창·낱말 카드(대표님 11-16) */
 .v9wait{position:fixed;left:50%;bottom:92px;transform:translateX(-50%);z-index:40;padding:4px 14px;border-radius:999px;background:var(--ink);color:var(--bg);font-size:12.5px;white-space:nowrap;pointer-events:none}
 .vk-card{position:relative}.vk-wait{position:absolute;top:4px;left:50%;transform:translateX(-50%);z-index:2;margin:0;padding:3px 12px;border-radius:999px;background:var(--bubble);border:1px solid var(--line);color:var(--mute);font-size:12.5px;align-self:center;width:fit-content}
+
+/* 조각 칩(시험판) — 구절 카드 아래 한 줄 + 조각 카드 · 두 말은 같은 칸에 겹쳐 ⇄ 해도 높이 그대로 */
+.vk-built,.vk-pos,.vk-piece .vk-pair,.vk-piece .vk-line{display:grid;margin:0}.vk-built>.vis,.vk-built>.ghost,.vk-pos>.vis,.vk-pos>.ghost,.vk-piece p>.vis,.vk-piece p>.ghost{grid-area:1/1;min-width:0}.vk-built>.ghost,.vk-pos>.ghost,.vk-piece p>.ghost{visibility:hidden;pointer-events:none;user-select:none}
+.vk-pcs{margin-top:8px;display:flex;flex-direction:column;gap:6px}.vk-built{font-size:13.5px;line-height:1.45;color:var(--mute)}
+.vk-chips{display:flex;flex-wrap:wrap;gap:6px}.vk-chip{min-height:34px;padding:0 14px;border-radius:999px;border:1px solid var(--hi);background:var(--card);color:var(--hi);font-size:16px;font-weight:700;box-shadow:0 1px 0 var(--line)}.vk-chip:active{transform:translateY(1px);box-shadow:none}
+.vk-back{flex:none;width:46px;height:46px;border-radius:50%;border:1px solid var(--hi);background:var(--card);color:var(--hi);font-size:20px;font-weight:700}
+.vk-pos{font-size:13px;color:var(--mute)}.vk-pex{display:flex;flex-direction:column;gap:2px;padding-top:6px;border-top:1px dashed var(--line)}.vk-pex .vk-pair{margin:0 6px}
+.vk-piece .vk-line .kw{background:none}

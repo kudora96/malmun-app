@@ -97,16 +97,39 @@ document.addEventListener("playing", hideWait, true); document.addEventListener(
 // 낱말 설명(대표님 11-16 「저는」이면 저는에 대한 설명 · 한국어·네팔어 1:1) — data/<편>/<편>.wordnote.json: 낱말 → {ko_mean, ne_mean, ko_ex, ne_ex} · 없는 낱말만 영상 속 문장
 const noteMem = {};
 export const noteOf = ep => (noteMem[ep] ||= fetch(paths.data(ep, ".wordnote") + "?v=" + VERSION).then(r => (r.ok ? r.json() : null)).catch(() => null));
+// ── 조각 칩(시험판 · 1편 1줄 구절만) — 구절 카드 아래 「이렇게 만들어졌어요」 한 줄 + 조각 칩 · 칩을 톡 = 그 조각 자기 카드(글만 · ▶ 없음) · ← = 구절 카드로
+const dictMem = {}, pcMem = {};
+const dictOf = () => (dictMem.d ||= fetch("data/dict/ko_ne.json?v=" + VERSION).then(r => (r.ok ? r.json() : null)).catch(() => null));
+const pcOf = ep => (pcMem[ep] ||= fetch(paths.data(ep, ".pieces") + "?v=" + VERSION).then(r => (r.ok ? r.json() : null)).catch(() => null));
+const stack = (cls, a, al, b, bl) => `<p class="${cls}"><span class="vis" lang="${al}">${a}</span><span class="ghost" aria-hidden="true" lang="${bl}">${b}</span></p>`; // 두 말을 같은 칸에 겹침 = ⇄ 해도 높이 그대로
+const PTX = { ne: { built: "यसरी बनेको", back: "फिर्ता" }, ko: { built: "이렇게 만들어졌어요", back: "돌아가기" } };
+function piecesHTML(pc, ents) {
+  if (!pc?.pieces?.length || !ents) return "";
+  const k = uiKoOn(), al = k ? "ko" : "ne", bl = k ? "ne" : "ko", t = pc[`built_${al}`] || "", o = pc[`built_${bl}`] || "";
+  const chips = pc.pieces.map(id => ents.find(e => e.id === id)).filter(Boolean).map(e => `<button class="vk-chip" data-v="piece" data-p="${esc(e.id)}" lang="ko">${esc(e.lemma)}</button>`).join("");
+  return chips ? `<div class="vk-pcs">${stack("vk-built", esc(t), al, esc(o), bl)}<div class="vk-chips">${chips}</div></div>` : "";
+}
+function pieceHTML(e, roman) {
+  const k = uiKoOn(), al = k ? "ko" : "ne", bl = k ? "ne" : "ko";
+  const two = (c, a, b) => stack(c, a, al, b, bl);
+  const exs = (e.ex || []).slice(0, 2).map(x => `<div class="vk-pex">${stack("vk-s vk-line", esc(x[al]), al, esc(x[bl]), bl)}${stack("vk-s vk-pair", `<span class="arr" aria-hidden="true">↳</span> ${esc(x[bl])}`, bl, `<span class="arr" aria-hidden="true">↳</span> ${esc(x[al])}`, al)}</div>`).join("");
+  return `<div class="vk-row"><button class="vk-back" data-v="back" aria-label="${esc(PTX[al].back)}" title="${esc(PTX[al].back)}">←</button>
+    <div class="vk-main"><span class="vk-t ko" lang="ko">${esc(e.lemma)}</span>${roman ? `<span class="vk-rom" lang="ne">${esc(e.dev || "")}</span>` : ""}${two("vk-s vk-pos", esc(e[`pos_${al}`] || ""), esc(e[`pos_${bl}`] || ""))}</div>${lang === "ne" ? `<button class="chip uiko vk-uiko" data-act="uiko" aria-pressed="${k}" aria-label="नेपाली ⇄ 한국어"><span class="a" lang="ne">${esc(langShort("ne"))}</span><span class="ar" aria-hidden="true">⇄</span><span class="b" lang="ko">한</span></button>` : ""}</div>
+    <div class="vk-sent vk-note vk-piece">${two("vk-s vk-line", esc(e[`${al}_mean`] || ""), esc(e[`${bl}_mean`] || ""))}${exs}</div>`;
+}
 export function openWordCard(it, { before, fromList = false } = {}) {
   closeCard();
   const saved = () => has(it.w), roman = (document.querySelector(".exv.norom") ? "" : it.rom);
   const el = (cardEl = document.createElement("div"));
   el.className = "vk-dim"; el.setAttribute("role", "dialog"); el.setAttribute("aria-modal", "true");
+  let pc = null, ents = null, view = null; // 조각 자료 · 지금 보는 조각 id(없으면 구절 카드)
   const draw = () => {
+    const pe = view && ents?.find(x => x.id === view);
+    if (pe) { el.innerHTML = `<div class="vk-card vk-pcard">${pieceHTML(pe, !document.querySelector(".exv.norom"))}</div>`; return; }
     el.innerHTML = `<div class="vk-card">
       <div class="vk-row"><button class="vk-snd" data-v="snd" aria-label="${esc(tx("listen"))}" title="${esc(tx("listen"))}">▶</button>
         <div class="vk-main"><span class="vk-t ko" lang="ko">${esc(it.w)}</span>${roman ? `<span class="vk-rom">${esc(roman)}</span>` : ""}<span class="vk-t vk-mean" lang="ne">${esc(it.mean || "")}</span></div>${lang === "ne" ? `<button class="chip uiko vk-uiko" data-act="uiko" aria-pressed="${uiKoOn()}" aria-label="नेपाली ⇄ 한국어"><span class="a" lang="ne">${esc(langShort("ne"))}</span><span class="ar" aria-hidden="true">⇄</span><span class="b" lang="ko">한</span></button>` : ""}</div>
-      ${noteHTML(it.note, uiKoOn(), curBlock()) || (it.ko ? `<div class="vk-sent"><span class="vk-s ko" lang="ko">${esc(it.ko)}</span>${it.tr ? `<span class="vk-s vk-str" lang="ne">${esc(it.tr)}</span>` : ""}</div>` : "")}
+      ${piecesHTML(pc, ents)}${noteHTML(it.note, uiKoOn(), curBlock()) || (it.ko ? `<div class="vk-sent"><span class="vk-s ko" lang="ko">${esc(it.ko)}</span>${it.tr ? `<span class="vk-s vk-str" lang="ne">${esc(it.tr)}</span>` : ""}</div>` : "")}
       <div class="vk-btns"><button class="vk-add" data-v="add" ${saved() ? "disabled" : ""}>${esc(saved() ? tx("has") : tx("add"))}</button>${saved() && fromList ? `<button class="vk-done" data-v="done">${esc(tx("done"))}</button>` : ""}</div></div>`;
   };
   before?.(); // 카드가 열리면 바깥 소리(설명 읽기)는 그 자리에서 멈춤 — 카드 소리만
@@ -119,6 +142,8 @@ export function openWordCard(it, { before, fromList = false } = {}) {
     let b = e.target.closest("[data-v]"); if (b && !el.contains(b)) b = null; // 위쪽 칸의 data-v 를 잡지 않게
     if (!b) { if (!e.target.closest(".vk-card")) closeCard(); else if (e.target.closest(".vk-note") && it.note) { const bk = e.target.closest(".vk-blk")?.dataset.b, kw = e.target.closest(".vk-line .kw"), wi = kw ? [...kw.parentNode.querySelectorAll(".kw")].indexOf(kw) : -1; if (!(bk ? (wi >= 0 ? tapWord(bk, wi) : tapBlock(bk)) : toggleRead())) startNote(bk, wi); } return; } // 화면 밖 = 닫힘 · 다른 블록 톡 = 그 블록부터 · 읽는 블록 톡 = 멈춤⇄이어서 · 다 읽은 뒤 톡 = 처음부터
     e.stopPropagation();
+    if (b.dataset.v === "piece") { stopRead(); view = b.dataset.p; draw(); return; } // 조각 카드(글만)
+    if (b.dataset.v === "back") { view = null; draw(); return; }
     if (b.dataset.v === "snd") { // ▶ = 처음부터 다시(설명 읽기 · 낱말 소리는 따로 안 냄)
       if (it.note) { if (isReading()) toggleRead(); else startNote(); return; } // ▶/⏸ — 읽는 중 = 멈춤 · 멈춤 = 이어서 · 끝난 뒤 = 처음부터
       showWait(el); stopRead(); it.__done = null;
@@ -133,7 +158,7 @@ export function openWordCard(it, { before, fromList = false } = {}) {
     if (b.dataset.v === "undo") { if (el.__snap) put(el.__snap); clearTimeout(el.__ut); draw(); }
   });
   document.body.append(el);
-  if (it.ep) noteOf(it.ep).then(n => { const x = n?.[clean(it.w)]; if (x && cardEl === el) { it.note = x; it.key = clean(it.w); it.order = n._order || []; draw(); startNote(); } }); // 설명이 있으면 문장 자리를 설명으로
+  if (it.ep) Promise.all([noteOf(it.ep), pcOf(it.ep), dictOf()]).then(([n, pcs, dc]) => { if (cardEl !== el) return; const x = n?.[clean(it.w)]; pc = pcs?.cards?.[clean(it.w)] || null; ents = dc?.entries || null; if (x) { it.note = x; it.key = clean(it.w); it.order = n._order || []; } if (x || (pc && ents)) { draw(); if (x) startNote(); } }); // 설명이 있으면 문장 자리를 설명으로 · 조각 자료가 있으면 칩
   return el;
 }
 document.addEventListener("keydown", e => { if (e.key === "Escape" && cardEl) closeCard(); });
