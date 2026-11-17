@@ -1,10 +1,10 @@
 // ⭐ 내 단어장(시험판 · 네팔어 1편 · 본부 11-16 대표님 승인) — 낱말 칸을 톡 누르면 작은 카드 · 단어장은 이 기기(localStorage)에만
 // 소리 = 이미 만들어 둔 낱말 소리를 이어 붙여(wordsnd.json) · 없는 편은 줄 소리의 그 낱말 구간 · 학습자 말이 네팔어가 아니면 아무것도 안 보임
-import { lang, uiKoOn, langShort } from "./i18n.js?v=1116.48";
-import { noteHTML, applyMode, readNote, stopRead, toggleRead, switchRead, tapBlock, tapWord, noteBlocks, curBlock, isReading, isPaused } from "./wordnote.js?v=1116.48"; // 단어 카드 설명(위 = 지금 말 · 아래 ↳ 다른 말) + 읽기 소리
-import { esc } from "./text.js?v=1116.48";
-import { paths } from "./paths.js?v=1116.48";
-import { VERSION } from "./version.js?v=1116.48";
+import { lang, uiKoOn, langShort } from "./i18n.js?v=1116.47";
+import { noteHTML, applyMode, fixSizes, readNote, stopRead, toggleRead, switchRead, tapBlock, tapWord, noteBlocks, curBlock, isReading, isPaused } from "./wordnote.js?v=1116.47"; // 단어 카드 설명(위 = 지금 말 · 아래 ↳ 다른 말) + 읽기 소리
+import { esc } from "./text.js?v=1116.47";
+import { paths } from "./paths.js?v=1116.47";
+import { VERSION } from "./version.js?v=1116.47";
 
 const KEY = "malmun.vocab.ne";
 export const vocabOn = () => lang === "ne";
@@ -98,7 +98,7 @@ export const noteOf = ep => (noteMem[ep] ||= fetch(paths.data(ep, ".wordnote") +
 const dictMem = {}, pcMem = {};
 const dictOf = () => (dictMem.d ||= fetch("data/dict/ko_ne.json?v=" + VERSION).then(r => (r.ok ? r.json() : null)).catch(() => null));
 const pcOf = ep => (pcMem[ep] ||= fetch(paths.data(ep, ".pieces") + "?v=" + VERSION).then(r => (r.ok ? r.json() : null)).catch(() => null));
-const stack = (cls, a, b) => `<p class="${cls}"><span class="vis ly mn" data-l="ko" lang="ko">${a}</span><span class="vis ly mn" data-l="ne" lang="ne">${b}</span></p>`; // 두 말을 같은 칸에 겹침(둘 다 그려 둠 · 보임만 바꿈) = ⇄ 해도 높이 그대로
+const stack = (cls, a, b) => `<p class="${cls} vk-sw" data-ko="${a}" data-ne="${b}"><span class="vis">${uiKoOn() ? a : b}</span></p>`; // 지금 말 글 하나만(⇄ 하면 같은 칸에서 글만 바뀜 · 높이는 fixSizes 가 큰 쪽으로 고정)
 const PTX = { ne: { built: "यसरी बनेको", back: "फिर्ता" }, ko: { built: "이렇게 만들어졌어요", back: "돌아가기" } };
 function piecesHTML(pc, ents) {
   if (!pc?.pieces?.length || !ents) return "";
@@ -118,10 +118,14 @@ export function openWordCard(it, { before, fromList = false } = {}) {
   const el = (cardEl = document.createElement("div"));
   el.className = "vk-dim"; el.setAttribute("role", "dialog"); el.setAttribute("aria-modal", "true");
   let pc = null, ents = null, view = null; // 조각 자료 · 지금 보는 조각 id(없으면 구절 카드)
-  const draw = () => {
+  const draw = () => { // 그리고 나서: 글 하나만 두고 높이는 두 말 중 큰 쪽으로 고정
+    draw0(); const c = el.querySelector(".vk-card"), pe = view && ents?.find(x => x.id === view);
+    if (c) { c.__nt = pe ? pnote(pe) : it.note; fixSizes(c); }
+  };
+  const draw0 = () => {
     const pe = view && ents?.find(x => x.id === view);
-    if (pe) { el.innerHTML = `<div class="vk-card vk-pcard" data-m="${uiKoOn() ? "ko" : "ne"}">${pieceHTML(pe, !document.querySelector(".exv.norom"))}</div>`; return; }
-    el.innerHTML = `<div class="vk-card" data-m="${uiKoOn() ? "ko" : "ne"}">
+    if (pe) { el.innerHTML = `<div class="vk-card vk-pcard" data-m="${uiKoOn() ? "ko" : "ne"}" data-ck="${esc(it.ep + "|" + it.w + "|" + view)}">${pieceHTML(pe, !document.querySelector(".exv.norom"))}</div>`; return; }
+    el.innerHTML = `<div class="vk-card" data-m="${uiKoOn() ? "ko" : "ne"}" data-ck="${esc(it.ep + "|" + it.w + "|")}">
       <div class="vk-row"><button class="vk-snd" data-v="snd" aria-label="${esc(tx("listen"))}" title="${esc(tx("listen"))}">▶</button>
         <div class="vk-main"><span class="vk-t ko" lang="ko">${esc(it.w)}</span>${romanNow() ? `<span class="vk-rom" lang="ne">${esc(romanNow())}</span>` : ""}<span class="vk-t vk-mean" lang="ne">${esc(it.mean || "")}</span></div>${lang === "ne" ? `<button class="chip uiko vk-uiko" data-act="uiko" aria-pressed="${uiKoOn()}" aria-label="नेपाली ⇄ 한국어"><span class="a" lang="ne">${esc(langShort("ne"))}</span><span class="ar" aria-hidden="true">⇄</span><span class="b" lang="ko">한</span></button>` : ""}</div>
       ${piecesHTML(pc, ents)}${noteHTML(it.note, uiKoOn()) || (it.ko ? `<div class="vk-sent"><span class="vk-s ko" lang="ko">${esc(it.ko)}</span>${it.tr ? `<span class="vk-s vk-str" lang="ne">${esc(it.tr)}</span>` : ""}</div>` : "")}

@@ -1833,6 +1833,5 @@ html:has(.scr.learn),html:has(.scr.learn) body{overflow-anchor:none} /* 배우�
 .vk-pair .ps{border-radius:3px}.vk-pair .ps.on{background:rgba(255,210,31,.3);box-shadow:0 0 0 2px rgba(255,210,31,.3)}.vk-wait{display:none!important}
 
 /* ⇄ = 글을 다시 그리지 않고 보이는 말만 바꿈(깜빡임 없음 · 전환 효과 없음) — 두 말 글이 같은 칸에 겹쳐 있음 */
-.vk-line>.ly,.vk-pair>.ly,.vk-built>.ly,.vk-pos>.ly{grid-area:1/1;min-width:0}
-.vk-card[data-m=ko] .mn[data-l=ne],.vk-card[data-m=ne] .mn[data-l=ko],.vk-card[data-m=ko] .pr[data-l=ko],.vk-card[data-m=ne] .pr[data-l=ne]{visibility:hidden;pointer-events:none;user-select:none}
 .vk-card,.vk-card *{transition:none!important}
+.vk-card{scrollbar-gutter:stable}

@@ -11,14 +11,31 @@ const kws = (s, lang, on = true) => String(s).split(/(\s+)/).map(t => (/^\s*$/.t
 const SENT_END = /[.!?。।][」"')]*$/;
 const splitSent = t => String(t).split(/(?<=[.!?。।][」"')]*)\s+/).filter(Boolean); // 문장 나누기(마침표 뒤 띄어쓰기) — 두 말을 순서대로 짝지음
 const pairInner = t => `<span class="arr" aria-hidden="true">↳</span> ${splitSent(t).map((x, i) => `<span class="ps" data-s="${i}">${esc(x)}</span>`).join(" ")}`;
-export function noteHTML(n, koFirst) { // 두 말 글을 처음부터 다 그려 둠 → ⇄ 는 글을 다시 그리지 않고 보임만 바꿈(applyMode)
+// 카드 글은 지금 말 하나만 DOM 에 둠(숨은 복사본 없음) — 높이는 열 때 두 말을 번갈아 재어 큰 쪽으로 고정(fixSizes) · ⇄ 는 같은 칸 안에서 글만 바꿈(applyMode)
+const lineIn = (x, l) => kws(x[l], l), pairIn = (x, l) => pairInner(x[l]);
+export function noteHTML(n, koFirst) {
   const bl = noteBlocks(n); if (!bl.length) return "";
-  return `<div class="vk-sent vk-note">${bl.map(x => `<div class="vk-blk" data-b="${x.b}"><p class="vk-s vk-line">${["ko", "ne"].map(l => `<span class="vis ly mn" data-l="${l}" lang="${l}">${kws(x[l], l, (l === "ko") === !!koFirst)}</span>`).join("")}</p></div><p class="vk-s vk-pair pairln" data-pb="${x.b}">${["ko", "ne"].map(l => `<span class="vis ly pr" data-l="${l}" lang="${l}">${pairInner(x[l])}</span>`).join("")}</p>`).join("")}</div>`;
+  const al = koFirst ? "ko" : "ne", ol = koFirst ? "ne" : "ko";
+  return `<div class="vk-sent vk-note">${bl.map(x => `<div class="vk-blk" data-b="${x.b}"><p class="vk-s vk-line" lang="${al}">${lineIn(x, al)}</p></div><p class="vk-s vk-pair pairln" data-pb="${x.b}" lang="${ol}">${pairIn(x, ol)}</p>`).join("")}</div>`;
 }
-// ⇄ — 카드 글을 그대로 두고 보이는 말만 바꿈(다시 그리지 않음 · 전환 효과 없음)
-export function applyMode(card, ko) {
-  const m = ko ? "ko" : "ne"; card.dataset.m = m;
-  card.querySelectorAll(".vk-line .mn").forEach(ly => ly.querySelectorAll(".kw,.kx").forEach(w => { const on = ly.dataset.l === m; w.classList.toggle("kw", on); w.classList.toggle("kx", !on); w.classList.remove("kar"); }));
+function fill(card, ko) { // 지금 말 글을 같은 칸에 채움(칸·블록 노드는 그대로)
+  const al = ko ? "ko" : "ne", ol = ko ? "ne" : "ko", nt = card.__nt;
+  if (nt) noteBlocks(nt).forEach(x => {
+    const ln = card.querySelector(`.vk-blk[data-b="${x.b}"] .vk-line`), pr = card.querySelector(`.vk-pair[data-pb="${x.b}"]`);
+    if (ln) { ln.setAttribute("lang", al); ln.innerHTML = lineIn(x, al); } if (pr) { pr.setAttribute("lang", ol); pr.innerHTML = pairIn(x, ol); }
+  });
+  card.querySelectorAll(".vk-sw").forEach(e => { const v = e.querySelector(".vis"); if (v) v.textContent = e.dataset[al]; });
+}
+const hCache = new Map(); // 카드+화면 폭 → 칸 높이(두 말 중 큰 쪽)
+export function fixSizes(card) { // 열 때 한 번: 두 말을 번갈아 채워 재고 큰 쪽으로 min-height 고정 · 같은 카드·폭이면 기억해 둔 값 그대로
+  const els = [...card.querySelectorAll(".vk-line, .vk-pair, .vk-sw")]; if (!els.length || !card.isConnected) return;
+  const ko = card.dataset.m === "ko", key = `${card.dataset.ck}|${Math.round(card.clientWidth)}|${ko}`; els.forEach(e => (e.style.minHeight = "")); const zf = card.offsetWidth ? card.getBoundingClientRect().width / card.offsetWidth : 1, H = e => e.getBoundingClientRect().height / (zf || 1); // 확대(zoom)된 카드도 같은 단위로
+  let hs = hCache.get(key);
+  if (!hs) { const m1 = els.map(H); fill(card, !ko); const m2 = els.map(H); fill(card, ko); hs = m1.map((h, i) => Math.ceil(Math.max(h, m2[i]) * 10) / 10); hCache.set(key, hs); }
+  els.forEach((e, i) => (e.style.minHeight = hs[i] + "px"));
+}
+export function applyMode(card, ko) { // ⇄ — 칸은 그대로 · 글만 바꿈
+  card.dataset.m = ko ? "ko" : "ne"; fill(card, ko);
   card.querySelectorAll(".ps.on").forEach(e => e.classList.remove("on"));
 }
 const clearHl = root => (root || document).querySelectorAll(".vk-note .ps.on").forEach(e => e.classList.remove("on"));
@@ -39,7 +56,7 @@ function show(j) { // 지금 블록 표시 + 노래방 불(소리 위치 그대�
   ws.forEach((w, i) => { if (starts[ids[i]] === undefined) starts[ids[i]] = c; c += wl(w); });
   let cs = 0; starts.forEach((s0, q) => { if (s0 / tot <= fr) cs = q; }); if (from && ids[from.wi] !== undefined) cs = Math.max(cs, ids[from.wi]); c = 0; // 톡한 낱말의 문장보다 앞 문장으로 되돌아가지 않음
   ws.forEach((w, i) => { w.classList.toggle("kar", ids[i] === cs && c / tot <= fr && !(from && i < from.wi)); c += wl(w); });
-  const ps = [...j.root.querySelectorAll(`.vk-note > .vk-pair[data-pb="${j.bl[j.k].b}"] .pr[data-l="${j.lang === "ko" ? "ne" : "ko"}"] .ps`)], tg = Math.min(cs, ps.length - 1);
+  const ps = [...j.root.querySelectorAll(`.vk-note > .vk-pair[data-pb="${j.bl[j.k].b}"] .ps`)], tg = Math.min(cs, ps.length - 1);
   j.root.querySelectorAll(".vk-note .ps.on").forEach(e => { if (e !== ps[tg]) e.classList.remove("on"); }); ps[tg]?.classList.add("on");
 }
 const run = j => { clearInterval(tick); tick = setInterval(() => { if (!j.dead && !j.paused) show(j); }, 40); };
