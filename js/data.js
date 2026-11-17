@@ -1,6 +1,6 @@
 // 편 불러오기 — 공통 + KR층 + 학습자 언어층을 sub_id 로 조인(app_build_spec §3-4)
-import { paths } from "./paths.js?v=1116.41";
-import { VERSION } from "./version.js?v=1116.41";
+import { paths } from "./paths.js?v=1116.42";
+import { VERSION } from "./version.js?v=1116.42";
 
 const cache = new Map();
 // 앱 판 번호를 붙여 받는다 — 새 판이면 옛 데이터를 쓰지 않게(tools/bump_version.py)
@@ -91,7 +91,8 @@ function v9view(nv, L, v2) {
     pieces: (nv.pieces || []).map(p => ({ ko: p.ko, rom: p.rom, dev: p.dev_by?.[L] || "", mean: p.mean_by?.[L] || "" })),
     text: { ...nv.text, ko: kb.ex != null ? { ex: kb.ex, say: kb.say ?? nv.text?.ko?.say } : nv.text?.ko },
     audio: { ...nv.audio, ko: { ...nv.audio?.ko, ex: koEx } },
-    sent: (nv.sent || []).map((x, k) => ({ ...x, ko: kb.sent?.[k] ?? x.ko, ko_s: kb.sent_s ? kb.sent_s[k] : x.ko_s })),
+    // 문장 짝 = 학습자 말마다 따로 받을 수 있음(sent_by[L] = [{ko, ko_s, <L>, <L>_s}] — 설명을 문장 단위로 새로 쓴 줄 · 다른 말의 sent 는 그대로)
+    sent: nv.sent_by?.[L] ? nv.sent_by[L].map(x => ({ ...x })) : (nv.sent || []).map((x, k) => ({ ...x, ko: kb.sent?.[k] ?? x.ko, ko_s: kb.sent_s ? kb.sent_s[k] : x.ko_s })),
     gloss: Object.fromEntries(Object.entries(nv.gloss || {}).map(([w, g]) => [w, { rom: g.rom, dev: g.dev_by?.[L] || "", mean: g.by?.[L] || "" }])),
   };
 }
