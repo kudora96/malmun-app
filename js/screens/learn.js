@@ -1184,7 +1184,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
       if (!st.panel && st.once && i === st.cur && playing()) { v.pause(); seq.pause(); st.once = false; return sync(); }
       closePanel(); return playLine(i);
     }
-    if (st.panel) { if (i !== st.panel.i) openPanel(st.panel.kind, i, st.panel.kind === "explain" ? { autoplay: !st.userPaused } : {}); else if (st.panel.kind === "explain") togglePlay(); return; } // 위 창이 메뉴면 누른 줄의 같은 메뉴(멈춘 채) · 설명 중 그 줄 카드(단추 밖) = 멈춤⇄다시(본부 10-08)
+    if (st.panel) { if (i !== st.panel.i) openPanel(st.panel.kind, i, st.panel.kind === "explain" ? { autoplay: true } : {}); else if (st.panel.kind === "explain") togglePlay(); return; } // 위 창이 메뉴면 누른 줄의 같은 메뉴(멈춘 채) · 설명 중 그 줄 카드(단추 밖) = 멈춤⇄다시(본부 10-08)
     onLineTap(i);
   };
   app.querySelector(".ctrl").onclick = e => {
@@ -1192,7 +1192,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     const b = e.target.closest("[data-act]");
     if (!b) return;
     const a = b.dataset.act;
-    if (st.panel && (a === "prev" || a === "next")) return openPanel(st.panel.kind, st.panel.i + (a === "next" ? 1 : -1), { autoplay: st.panel.kind === "explain" ? !st.userPaused : playing() }); // 설명: 다음·이전 줄도 바로 읽음(끝난 뒤에도) — 직접 멈춰 둔 때만 멈춘 채
+    if (st.panel && (a === "prev" || a === "next")) return openPanel(st.panel.kind, st.panel.i + (a === "next" ? 1 : -1), { autoplay: st.panel.kind === "explain" ? true : playing() }); // 설명: 다음·이전 줄도 바로 읽음(끝난 뒤에도) — 직접 멈춰 둔 때만 멈춘 채
     if (a === "play") togglePlay();
     else if (a === "prev") step(-1);
     else if (a === "next") step(1);
