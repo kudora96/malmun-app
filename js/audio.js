@@ -23,6 +23,12 @@ export class Sequence {
     };
     if (this.i === 0) go(); else this.timer = setTimeout(go, this.q[this.i].gap ?? GAP_MS); // 조각마다 앞 쉼을 따로 줄 수 있음(말해 보세요 머리말 → 0.6초 → 문장)
   }
+  // 소리는 안 내고 그 조각 그 자리에 맞춰 둠(멈춘 채 ⇄ — 다시 누르면 resume 이 그 자리에서 이어서)
+  cue(items, from = 0) {
+    this.stop(); this.q = items; this.i = from; this.on = false; const it = items[from]; if (!it) return;
+    this.onstep?.(it, from); this.a.src = it.src; this.a.playbackRate = this.rate;
+    if (it.at) { this.a.currentTime = it.at; this.a.addEventListener("loadedmetadata", () => { if (this.a.currentTime < it.at - 0.2) this.a.currentTime = it.at; }, { once: true }); }
+  }
   pause() { this.on = false; clearTimeout(this.timer); this.a.pause(); }
   resume() { if (!this.q.length) return; this.on = true; if (this.a.src && !this.a.ended && this.a.currentTime > 0) tv(this.a).play().catch(() => {}); else { this.i--; this.next(); } }
   stop() { this.on = false; clearTimeout(this.timer); this.a.pause(); this.q = []; }

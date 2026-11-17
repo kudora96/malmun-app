@@ -10,11 +10,11 @@
 //  R7 영상은 늘 맨 위 · 지금 줄은 영상 바로 아래(앞 줄은 영상 뒤로) — 손으로 목록을 움직이면 4초 동안은 따라가지 않음
 //  R8 듣기 모드(대사→설명 · 설명만)도 R1~R6 그대로(영상 대신 소리 조각) · 모드를 바꾸면 멈춤(▶ 로 시작)
 //  R9 다시 들어오면 마지막 줄이 선택된 채 멈춰 있음
-import { noScoreKey } from "../agepolicy.js?v=1116.33"; // 점수 없음 안내 = 나이 때문인지(대표님 10-19)
-import { LEARN } from "../tl.js?v=1116.33";
-import { warmSTT } from "../sttserver.js?v=1116.33";
-import * as sfxL from "../sfx.js?v=1116.33"; // 카드 말하기 최대 길이 = 본보기 길이로(10-07)
-import { t, tAlt, lang, langName, KO_UI, uiKoOn, preloadKoUi, tIn, uiKoIn } from "../i18n.js?v=1116.33";
+import { noScoreKey } from "../agepolicy.js?v=1116.34"; // 점수 없음 안내 = 나이 때문인지(대표님 10-19)
+import { LEARN } from "../tl.js?v=1116.34";
+import { warmSTT } from "../sttserver.js?v=1116.34";
+import * as sfxL from "../sfx.js?v=1116.34"; // 카드 말하기 최대 길이 = 본보기 길이로(10-07)
+import { t, tAlt, lang, langName, KO_UI, uiKoOn, preloadKoUi, tIn, uiKoIn } from "../i18n.js?v=1116.34";
 // 줄 카드 단추 = 그림만 다섯(대표님 10-20 B 선 아이콘 · 같은 크기 한 줄 · 카드 높이 0px) — ▶ 이 줄 듣기 · 📖 설명 · ✎ 쓰기 · 🎤 말하기 · 🎮 게임 · 이름 = 처음 한 번 차례 풍선말 + 길게 누르기
 const SV = d => `<svg class="ico" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
 const ACTS = [["once", "listen_line", '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M8 5.5v13l11-6.5z"/></svg>'], ["explain", "explain", SV('<path d="M4 5a2 2 0 0 1 2-2h5v17H6a2 2 0 0 0-2 2z"/><path d="M20 5a2 2 0 0 0-2-2h-5v17h5a2 2 0 0 1 2 2z"/>')], ["write", "write", SV('<path d="M16 3l5 5L8 21H3v-5z"/>')], ["speak", "speak", SV('<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>')], ["game", "line_game", SV('<rect x="2" y="7" width="20" height="11" rx="5"/><path d="M7 10v5M4.5 12.5h5"/><circle cx="16" cy="11.5" r="1" fill="currentColor"/><circle cx="18.5" cy="14" r="1" fill="currentColor"/>')]];
@@ -36,33 +36,33 @@ function gameWords(vl, uw, lg, ep) {   // 뜻 조각(v9 pieces)과 소리 낱말
   }
   return out;
 }
-import { setTx } from "../retext.js?v=1116.33";
-import { langfitRun } from "../langfit.js?v=1116.33";
-import { esc, renderText, glossCards, sayParts } from "../text.js?v=1116.33";
-import { episode } from "../data.js?v=1116.33";
-import { paths, MEDIA } from "../paths.js?v=1116.33";
-import { attachVq } from "../vq.js?v=1116.33";
-import { setReportCtx } from "../report.js?v=1116.33";
-import { fbBind, fbPlan } from "../fbvoice.js?v=1116.33";
-import { setupTurns } from "../turns.js?v=1116.33"; // 「따라 해 보세요」 양방향(대표님 10-21) // 결과 안내 소리로 읽기(대표님 10-21)
-import { setupOverlays } from "../overlays.js?v=1116.33"; // 영상 위 그림 카드(대표님 10-22 새 1편) // 「따라 해 보세요」 양방향(대표님 10-21) // 결과 안내 소리로 읽기(대표님 10-21)
-import { Sequence } from "../audio.js?v=1116.33";
-import { I, progress, SPEAKER, spkHtml, uiKoBtn, uikoChip, bgmBtn, switchUiKo, openUiScope, switchUiScope } from "../ui.js?v=1116.33";
-import writeView from "./write.js?v=1116.33";
-import { diagEnv, keepDiag } from "../diag.js?v=1116.33";
-import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1116.33";
-import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace, lateFactor, sylAt, paintAt, karaokeRun, isFull } from "../rhythm.js?v=1116.33";
-import { playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1116.33";
-import { heardHTML, endHint, scoreOf, bestFull, spanOf, sylsAt } from "../heard.js?v=1116.33"; // 덧붙은 말 빼고 견주기(본부 10-11)
-import { recDel, downloadRec, askPersist } from "../recstore.js?v=1116.33";
-import { vocabOn, openWordCard, wordSpan, starChip } from "../vocab.js?v=1116.33"; // ⭐ 내 단어장 시험판(네팔어 · 대표님 11-16)
-import { showStopTip, hideStopTip } from "../stoptip.js?v=1116.33";
-import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1116.33";
-import { scoreFx, stopFx } from "../scorefx.js?v=1116.33"; // 점수별 효과(본부 10-05)
-import { record, recordSROnly, srOnlyMode, setSrOnly, isAndroid, srMiss, micWhy, srWhy, canScore, closeMic, logRec, micOpen, seqMode, srOnBlob, devSR, setDevSR, srJudge, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1116.33";
-import { hold, quietWake } from "../wake.js?v=1116.33";
-import { hold as bgmHold } from "../bgm.js?v=1116.33"; // 🎮 게임 중 배경음악 멈춤
-import { setupCards } from "../cards.js?v=1116.33"; // 영상 위 AR 카드 = 앱이 직접 그림(얹기부 10-27 · 자료 있는 편)
+import { setTx } from "../retext.js?v=1116.34";
+import { langfitRun } from "../langfit.js?v=1116.34";
+import { esc, renderText, glossCards, sayParts } from "../text.js?v=1116.34";
+import { episode } from "../data.js?v=1116.34";
+import { paths, MEDIA } from "../paths.js?v=1116.34";
+import { attachVq } from "../vq.js?v=1116.34";
+import { setReportCtx } from "../report.js?v=1116.34";
+import { fbBind, fbPlan } from "../fbvoice.js?v=1116.34";
+import { setupTurns } from "../turns.js?v=1116.34"; // 「따라 해 보세요」 양방향(대표님 10-21) // 결과 안내 소리로 읽기(대표님 10-21)
+import { setupOverlays } from "../overlays.js?v=1116.34"; // 영상 위 그림 카드(대표님 10-22 새 1편) // 「따라 해 보세요」 양방향(대표님 10-21) // 결과 안내 소리로 읽기(대표님 10-21)
+import { Sequence } from "../audio.js?v=1116.34";
+import { I, progress, SPEAKER, spkHtml, uiKoBtn, uikoChip, bgmBtn, switchUiKo, openUiScope, switchUiScope } from "../ui.js?v=1116.34";
+import writeView from "./write.js?v=1116.34";
+import { diagEnv, keepDiag } from "../diag.js?v=1116.34";
+import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1116.34";
+import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace, lateFactor, sylAt, paintAt, karaokeRun, isFull } from "../rhythm.js?v=1116.34";
+import { playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1116.34";
+import { heardHTML, endHint, scoreOf, bestFull, spanOf, sylsAt } from "../heard.js?v=1116.34"; // 덧붙은 말 빼고 견주기(본부 10-11)
+import { recDel, downloadRec, askPersist } from "../recstore.js?v=1116.34";
+import { vocabOn, openWordCard, wordSpan, starChip } from "../vocab.js?v=1116.34"; // ⭐ 내 단어장 시험판(네팔어 · 대표님 11-16)
+import { showStopTip, hideStopTip } from "../stoptip.js?v=1116.34";
+import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1116.34";
+import { scoreFx, stopFx } from "../scorefx.js?v=1116.34"; // 점수별 효과(본부 10-05)
+import { record, recordSROnly, srOnlyMode, setSrOnly, isAndroid, srMiss, micWhy, srWhy, canScore, closeMic, logRec, micOpen, seqMode, srOnBlob, devSR, setDevSR, srJudge, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1116.34";
+import { hold, quietWake } from "../wake.js?v=1116.34";
+import { hold as bgmHold } from "../bgm.js?v=1116.34"; // 🎮 게임 중 배경음악 멈춤
+import { setupCards } from "../cards.js?v=1116.34"; // 영상 위 AR 카드 = 앱이 직접 그림(얹기부 10-27 · 자료 있는 편)
 
 const RATES = [1, 0.75, 0.5];
 const pref = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } };
@@ -564,6 +564,19 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     }
     st.karFrom = { s: +w.snEl.dataset.s, wi: w.wi }; playFromSent(w.snEl, w.t); panel.querySelectorAll(".v9body .sn .kw.kar").forEach(e => e.classList.remove("kar")); w.ws[w.wi].classList.add("kar"); return true; // 앞 낱말 칠은 지우고 이 낱말부터 새로 자람
   }
+  // ⇄ 로 말이 바뀔 때(대표님 11-17) — 지금 읽는 자리를 문장 안 비율로 잡아, 새 말 문장의 같은 비율 낱말에서 소리·칠이 같이 시작
+  function swapSnap(i) {
+    const it = ex.q[ex.i]; if (!it || it.p !== 0 || !(ex.playing || (ex.a.currentTime > 0 && !ex.a.ended)) || !L[i].v9?.sent?.length) return null;
+    const tm = ex.a.currentTime, sn = L[i].v9.sent, s = sentAt(i, it.lang, tm), starts = sn.map(x => x[`${it.lang}_s`]), s0 = starts[s] ?? 0, s1 = starts[s + 1] ?? (ex.a.duration || s0 + 1);
+    const sp = speechSpans(it.src, starts, ex.a.duration)?.[s], a0 = sp ? sp[0] : s0, a1 = sp ? sp[1] : s1;
+    return { s, fr: Math.max(0, Math.min(1, (tm + KAR_LEAD - a0) / Math.max(0.1, a1 - a0))), playing: ex.playing };
+  }
+  function swapTarget(snap) { // 새 말 글이 그려진 뒤 부름 → { at, s, wi, ws }
+    const ws = [...panel.querySelectorAll(`.v9body .sn[data-s="${snap.s}"] .kw`)]; if (!ws.length) return null;
+    const tot = ws.reduce((a, w) => a + w.textContent.length, 0) || 1; let c = 0, wi = 0; ws.forEach((w, j) => { if (c / tot <= snap.fr) wi = j; c += w.textContent.length; });
+    const w = wordStart(ws[wi]); return w ? { at: w.t, s: snap.s, wi, ws } : null;
+  }
+  function swapPaint(tg) { st.karFrom = { s: tg.s, wi: tg.wi }; panel.querySelectorAll(".v9body .sn .kw.kar").forEach(e => e.classList.remove("kar")); tg.ws[tg.wi].classList.add("kar"); panel.querySelectorAll(".v9body .sn").forEach(el => el.classList.toggle("cur", +el.dataset.s === tg.s)); }
   function playFromSent(el, atX) {
     if (atX == null) st.karFrom = null;
     const i = +el.dataset.i, s = +el.dataset.s, code = el.dataset.c, sn = L[i].v9?.sent?.[s]; if (!sn) return;
@@ -635,11 +648,13 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   ex.onstep = it => {
     const ps = [...panel.querySelectorAll(".paras p[data-p], .v9body p[data-p]")]; // v9 카드는 안쪽 스크롤이 없어 옮기지 않는다
     ps.forEach((el, k) => el.classList.toggle("cur", k === it.p));
+    if (it.p >= 1) clearPaint(); // 설명이 끝나고 「말해 보세요」 로 넘어가면 칠 지움
     if (!panel.querySelector(".v9")) ps[it.p]?.scrollIntoView({ block: "nearest", behavior: reduce ? "auto" : "smooth" });
     sync();
   };
+  const clearPaint = () => { st.karFrom = null; panel.querySelectorAll(".v9body .kw.kar").forEach(el => el.classList.remove("kar")); panel.querySelectorAll(".v9body .sn.cur").forEach(el => el.classList.remove("cur")); };
   ex.ondone = () => {
-    markPlay();
+    markPlay(); clearPaint(); // 끝나면 노란 칠 전부 지움
     panel.querySelectorAll(".paras p.cur").forEach(el => el.classList.remove("cur"));
     // 🔁 반복은 「그 줄 설명 듣기」만(st.exLoop) — 카드 안 [본보기]·[내 목소리]·[저장됨 ▶]는 한 번만 나오고 끝(본부 10-04 「끝없이 되풀이」)
     const loop = st.exLoop;
@@ -929,15 +944,15 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
       const langChange = koMode && (v === "ko") !== panelKo(); // 언어 하나(안 A) — 눌린 것처럼 보여도(시범 언어 = 한국어 소리로 대신) 언어가 바뀌면 멈춤이 아니라 바꿈
       if (!langChange && on && ex.playing) { ex.pause(); return sync(); }
       if (!langChange && on && ex.q.length) { ex.resume(); return sync(); }
-      const cur = ex.q[ex.i], going = ex.q.length && cur && (ex.playing || ex.a.currentTime > 0);
+      const cur = ex.q[ex.i], going = ex.q.length && cur && (ex.playing || ex.a.currentTime > 0), snap = going ? swapSnap(i) : null;
       v9set("snd", v); v9set("txt", v); uiLang(v === "ko"); clearTimeout(st.gap); st.gap = 0; v9Text(i, v); /* 언어 하나(안 A) — 화면 글도 같이 */
       const items = v9Items(i, { line: false, k: v }); if (!items.length) return;
       st.exLoop = items; markPlay(v);
       if (going && cur.p === 0 && L[i].v9.sent?.length) { // 듣는 중 언어 바꿈 = 같은 문장 번호부터 다른 언어로(본부 10-05)
-        const s = sentAt(i, cur.lang, ex.a.currentTime), at = L[i].v9.sent[s]?.[`${v9code(v)}_s`] || 0, from = items.findIndex(x => x.p === 0);
+        const s = sentAt(i, cur.lang, ex.a.currentTime), tg = snap && swapTarget(snap), at = tg ? tg.at : (L[i].v9.sent[s]?.[`${v9code(v)}_s`] || 0), from = items.findIndex(x => x.p === 0);
         const run = items.map((x, j) => (j === from ? { ...x, at } : x));
         ex.play(run, from);
-        panel.querySelectorAll(".v9body .sn").forEach(el => el.classList.toggle("cur", +el.dataset.s === s));
+        if (tg) swapPaint(tg); else panel.querySelectorAll(".v9body .sn").forEach(el => el.classList.toggle("cur", +el.dataset.s === s));
         return sync();
       }
       if (going && cur.p === 1) { const from = items.findIndex(x => x.p === 1); ex.play(items, Math.max(0, from)); return sync(); }
@@ -1205,7 +1220,10 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     const p = st.panel; if (p?.kind !== "explain" || !L[p.i]?.v9) return;
     panel.querySelectorAll(".v9bar [data-x=txt]").forEach(x => x.setAttribute("aria-selected", String(x.dataset.v === w)));
     const b = panel.querySelector(`.v9bar [data-x=ex][data-v="${w}"]`);
-    if (b && ex.playing && b.getAttribute("aria-pressed") !== "true") v9Click(b); else v9Text(p.i, w);
+    if (b && ex.playing && b.getAttribute("aria-pressed") !== "true") v9Click(b);
+    else { const snap = !ex.playing ? swapSnap(p.i) : null; v9Text(p.i, w);
+      if (snap) { const items = v9Items(p.i, { line: false, k: w }), from = items.findIndex(x => x.p === 0), tg = swapTarget(snap); // 멈춘 채 ⇄ = 그 낱말 자리에 소리를 맞춰 두고 멈춘 채(다시 누르면 거기서)
+        if (tg && from >= 0) { st.exLoop = items; markPlay(w); ex.cue(items.map((x, j) => (j === from ? { ...x, at: tg.at } : x)), from); swapPaint(tg); sync(); } } }
   };
   addEventListener("malmun:uilang", onUiLang);
   const onCapLang = () => capFill(st.cur); addEventListener("malmun:uilang", onCapLang); // ⇄ = 크게 보기 자막도 바로 한국어⇄학습자 말
