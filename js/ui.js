@@ -32,6 +32,7 @@ const BGM_I = { on: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" 
 export const bgmBtn = () => !MUSIC_ON ? `<span class="bgmb-anchor" hidden></span>` : `<button class="chip bgmb" data-act="bgmtog" data-on="${bgmOn()}" aria-pressed="${bgmOn()}" aria-label="${esc(t("bgm_short"))}" title="${esc(t("bgm_short"))}"><span class="bi" aria-hidden="true">${BGM_I[bgmOn() ? "on" : "off"]}</span></button>`;
 const paintBgm = () => document.querySelectorAll("[data-act=bgmtog]").forEach(b => { const on = bgmOn(); b.dataset.on = String(on); b.setAttribute("aria-pressed", String(on)); const i = b.querySelector(".bi"); if (i) i.innerHTML = BGM_I[on ? "on" : "off"]; });
 export async function toggleUiKo(after) { await switchUiKo(!uiKoOn()); after?.(); }
+export const syncScopes = ko => document.querySelectorAll("[data-uiko]").forEach(r => switchUiScope(r, ko)); // 창(data-uiko)도 전역 상태로 맞춤
 export async function switchUiKo(ko) {
   if (!KO_UI.includes(lang) || ko === uiKoOn()) return;
   const before = snapshot(); await setUiKo(ko); retext(before, document.body);
@@ -86,7 +87,7 @@ function backTip() {
 if (!window.__uikoWired) { // 문서 한 곳에서 받기(화면이 따로 손잡이를 안 달아도 됨)
   window.__uikoWired = true;
   // 잡기 단계(capture)에서 받고 멈춤 — 화면의 「바깥 누르면 닫힘」(? 방법·말풍선·마이크 목록) 손잡이까지 가지 않게 → ⇄ = 그 상태 그대로 글만(본부 10-15 투덜이 원칙)
-  document.addEventListener("click", e => { const b = e.target.closest?.("[data-act=uiko]"); if (!b) return; e.preventDefault(); e.stopPropagation(); const sc = b.closest("[data-uiko]"); if (sc) switchUiScope(sc); else switchUiKo(!uiKoOn()); }, true); // 창 안 ⇄ = 그 창만 · 밖 ⇄ = 앱 전체
+  document.addEventListener("click", e => { const b = e.target.closest?.("[data-act=uiko]"); if (!b) return; e.preventDefault(); e.stopPropagation(); const sc = b.closest("[data-uiko]"), ko = sc ? sc.dataset.uiko !== "1" : !uiKoOn(); if (sc) switchUiScope(sc, ko); switchUiKo(ko).then(() => syncScopes(ko)); }, true); // ⇄ 는 앱 전체 하나(대표님 11-17) — 어느 화면·카드에서 눌러도 전역 상태와 모든 창(설명 읽기 등)이 같이 바뀜
   document.addEventListener("click", e => { if (!MUSIC_ON || !e.target.closest?.("[data-act=bgmtog]")) return; e.preventDefault(); e.stopPropagation(); setBgm(!bgmOn()); paintBgm(); }, true); /* ⇄ 처럼 잡기 단계 = 바깥 누르면 닫힘에 안 감 */
   document.addEventListener("click", e => { if (MUSIC_ON && e.target.closest?.("[data-act=bgm], [data-act=musicbox]")) openMusicBox(); });
   preloadKoUi();

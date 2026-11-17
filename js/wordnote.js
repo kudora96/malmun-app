@@ -5,16 +5,21 @@ import { esc } from "./text.js?v=1116.43";
 const BLK = [["mean", "ko_mean", "ne_mean"], ["ex1", "ko_ex1", "ne_ex1"], ["ex2", "ko_ex2", "ne_ex2"]];
 const pick = (n, ko, k) => n?.[`${k ? "ko" : "ne"}_${ko}`] || n?.[`${k ? "ko" : "ne"}_${ko === "ex1" ? "ex" : ko}`] || ""; // ex1 = 옛 이름 ex 도 받음
 export const noteBlocks = n => BLK.map(([b]) => ({ b, ko: pick(n, b, true), ne: pick(n, b, false) })).filter(x => x.ko && x.ne);
-const kws = (s, lang) => String(s).split(/(\s+)/).map(t => (/^\s*$/.test(t) ? t : `<span class="kw" lang="${lang}">${esc(t)}</span>`)).join("");
+const kws = (s, lang, on = true) => String(s).split(/(\s+)/).map(t => (/^\s*$/.test(t) ? t : `<span class="${on ? "kw" : "kx"}" lang="${lang}">${esc(t)}</span>`)).join(""); // kw = 지금 말(톡·칠 대상) · kx = 숨은 말(⇄ 하면 서로 바뀜)
 
 // 본문 = 지금 말 한 줄만(블록마다) · 바로 아래 「↳」 한 줄 = 그 블록의 다른 말(항상 다 보임) · 두 말은 겹침(.ghost)으로 높이 맞춤 → ⇄ 해도 크기 그대로
 const SENT_END = /[.!?。।][」"')]*$/;
 const splitSent = t => String(t).split(/(?<=[.!?。।][」"')]*)\s+/).filter(Boolean); // 문장 나누기(마침표 뒤 띄어쓰기) — 두 말을 순서대로 짝지음
 const pairInner = t => `<span class="arr" aria-hidden="true">↳</span> ${splitSent(t).map((x, i) => `<span class="ps" data-s="${i}">${esc(x)}</span>`).join(" ")}`;
-export function noteHTML(n, koFirst) {
+export function noteHTML(n, koFirst) { // 두 말 글을 처음부터 다 그려 둠 → ⇄ 는 글을 다시 그리지 않고 보임만 바꿈(applyMode)
   const bl = noteBlocks(n); if (!bl.length) return "";
-  const al = koFirst ? "ko" : "ne", ol = koFirst ? "ne" : "ko";
-  return `<div class="vk-sent vk-note">${bl.map(x => `<div class="vk-blk" data-b="${x.b}"><p class="vk-s vk-line"><span class="vis" lang="${al}">${kws(x[al], al)}</span><span class="ghost" aria-hidden="true" lang="${ol}">${esc(x[ol])}</span></p></div><p class="vk-s vk-pair pairln" data-pb="${x.b}" lang="${ol}"><span class="vis">${pairInner(x[ol])}</span>${["ko", "ne"].map(l => `<span class="ghost" aria-hidden="true" lang="${l}">↳ ${esc(x[l])}</span>`).join("")}</p>`).join("")}</div>`;
+  return `<div class="vk-sent vk-note">${bl.map(x => `<div class="vk-blk" data-b="${x.b}"><p class="vk-s vk-line">${["ko", "ne"].map(l => `<span class="vis ly mn" data-l="${l}" lang="${l}">${kws(x[l], l, (l === "ko") === !!koFirst)}</span>`).join("")}</p></div><p class="vk-s vk-pair pairln" data-pb="${x.b}">${["ko", "ne"].map(l => `<span class="vis ly pr" data-l="${l}" lang="${l}">${pairInner(x[l])}</span>`).join("")}</p>`).join("")}</div>`;
+}
+// ⇄ — 카드 글을 그대로 두고 보이는 말만 바꿈(다시 그리지 않음 · 전환 효과 없음)
+export function applyMode(card, ko) {
+  const m = ko ? "ko" : "ne"; card.dataset.m = m;
+  card.querySelectorAll(".vk-line .mn").forEach(ly => ly.querySelectorAll(".kw,.kx").forEach(w => { const on = ly.dataset.l === m; w.classList.toggle("kw", on); w.classList.toggle("kx", !on); w.classList.remove("kar"); }));
+  card.querySelectorAll(".ps.on").forEach(e => e.classList.remove("on"));
 }
 const clearHl = root => (root || document).querySelectorAll(".vk-note .ps.on").forEach(e => e.classList.remove("on"));
 function setPair() {} // (옛) 읽는 블록 칸에만 글 — 이제 ↳ 줄은 항상 다 보임
@@ -34,7 +39,7 @@ function show(j) { // 지금 블록 표시 + 노래방 불(소리 위치 그대�
   ws.forEach((w, i) => { if (starts[ids[i]] === undefined) starts[ids[i]] = c; c += wl(w); });
   let cs = 0; starts.forEach((s0, q) => { if (s0 / tot <= fr) cs = q; }); if (from && ids[from.wi] !== undefined) cs = Math.max(cs, ids[from.wi]); c = 0; // 톡한 낱말의 문장보다 앞 문장으로 되돌아가지 않음
   ws.forEach((w, i) => { w.classList.toggle("kar", ids[i] === cs && c / tot <= fr && !(from && i < from.wi)); c += wl(w); });
-  const ps = [...j.root.querySelectorAll(`.vk-note > .vk-pair[data-pb="${j.bl[j.k].b}"] .vis .ps`)], tg = Math.min(cs, ps.length - 1);
+  const ps = [...j.root.querySelectorAll(`.vk-note > .vk-pair[data-pb="${j.bl[j.k].b}"] .pr[data-l="${j.lang === "ko" ? "ne" : "ko"}"] .ps`)], tg = Math.min(cs, ps.length - 1);
   j.root.querySelectorAll(".vk-note .ps.on").forEach(e => { if (e !== ps[tg]) e.classList.remove("on"); }); ps[tg]?.classList.add("on");
 }
 const run = j => { clearInterval(tick); tick = setInterval(() => { if (!j.dead && !j.paused) show(j); }, 40); };

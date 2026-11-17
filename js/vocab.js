@@ -1,7 +1,7 @@
 // ⭐ 내 단어장(시험판 · 네팔어 1편 · 본부 11-16 대표님 승인) — 낱말 칸을 톡 누르면 작은 카드 · 단어장은 이 기기(localStorage)에만
 // 소리 = 이미 만들어 둔 낱말 소리를 이어 붙여(wordsnd.json) · 없는 편은 줄 소리의 그 낱말 구간 · 학습자 말이 네팔어가 아니면 아무것도 안 보임
 import { lang, uiKoOn, langShort } from "./i18n.js?v=1116.43";
-import { noteHTML, readNote, stopRead, toggleRead, switchRead, tapBlock, tapWord, noteBlocks, curBlock, isReading, isPaused } from "./wordnote.js?v=1116.43"; // 단어 카드 설명(위 = 지금 말 · 아래 ↳ 다른 말) + 읽기 소리
+import { noteHTML, applyMode, readNote, stopRead, toggleRead, switchRead, tapBlock, tapWord, noteBlocks, curBlock, isReading, isPaused } from "./wordnote.js?v=1116.43"; // 단어 카드 설명(위 = 지금 말 · 아래 ↳ 다른 말) + 읽기 소리
 import { esc } from "./text.js?v=1116.43";
 import { paths } from "./paths.js?v=1116.43";
 import { VERSION } from "./version.js?v=1116.43";
@@ -98,20 +98,18 @@ export const noteOf = ep => (noteMem[ep] ||= fetch(paths.data(ep, ".wordnote") +
 const dictMem = {}, pcMem = {};
 const dictOf = () => (dictMem.d ||= fetch("data/dict/ko_ne.json?v=" + VERSION).then(r => (r.ok ? r.json() : null)).catch(() => null));
 const pcOf = ep => (pcMem[ep] ||= fetch(paths.data(ep, ".pieces") + "?v=" + VERSION).then(r => (r.ok ? r.json() : null)).catch(() => null));
-const stack = (cls, a, al, b, bl) => `<p class="${cls}"><span class="vis" lang="${al}">${a}</span><span class="ghost" aria-hidden="true" lang="${bl}">${b}</span></p>`; // 두 말을 같은 칸에 겹침 = ⇄ 해도 높이 그대로
+const stack = (cls, a, b) => `<p class="${cls}"><span class="vis ly mn" data-l="ko" lang="ko">${a}</span><span class="vis ly mn" data-l="ne" lang="ne">${b}</span></p>`; // 두 말을 같은 칸에 겹침(둘 다 그려 둠 · 보임만 바꿈) = ⇄ 해도 높이 그대로
 const PTX = { ne: { built: "यसरी बनेको", back: "फिर्ता" }, ko: { built: "이렇게 만들어졌어요", back: "돌아가기" } };
 function piecesHTML(pc, ents) {
   if (!pc?.pieces?.length || !ents) return "";
-  const k = uiKoOn(), al = k ? "ko" : "ne", bl = k ? "ne" : "ko", t = pc[`built_${al}`] || "", o = pc[`built_${bl}`] || "";
   const chips = pc.pieces.map(id => ents.find(e => e.id === id)).filter(Boolean).map(e => `<button class="vk-chip" data-v="piece" data-p="${esc(e.id)}" lang="ko">${esc(e.lemma)}</button>`).join("");
-  return chips ? `<div class="vk-pcs">${stack("vk-built", esc(t), al, esc(o), bl)}<div class="vk-chips">${chips}</div></div>` : "";
+  return chips ? `<div class="vk-pcs">${stack("vk-built", esc(pc.built_ko || ""), esc(pc.built_ne || ""))}<div class="vk-chips">${chips}</div></div>` : "";
 }
 const pnote = e => ({ ko_mean: e.ko_mean, ne_mean: e.ne_mean, ko_ex1: e.ex?.[0]?.ko, ne_ex1: e.ex?.[0]?.ne, ko_ex2: e.ex?.[1]?.ko, ne_ex2: e.ex?.[1]?.ne }); // 조각 카드 = 구절 카드와 같은 읽기 틀(뜻 → 예문1 → 예문2)
-const pstack = (a, al, b, bl) => stack("vk-s vk-pos", esc(a), al, esc(b), bl);
 function pieceHTML(e, roman) {
-  const k = uiKoOn(), al = k ? "ko" : "ne", bl = k ? "ne" : "ko";
-  return `<div class="vk-row"><button class="vk-back" data-v="back" aria-label="${esc(PTX[al].back)}" title="${esc(PTX[al].back)}">←</button><button class="vk-snd" data-v="snd" aria-label="${esc(tx("listen"))}" title="${esc(tx("listen"))}">▶</button>
-    <div class="vk-main"><span class="vk-t ko" lang="ko">${esc(e.lemma)}</span>${roman ? `<span class="vk-rom" lang="ne">${esc(e.dev || "")}</span>` : ""}${pstack(e[`pos_${al}`] || "", al, e[`pos_${bl}`] || "", bl)}</div>${lang === "ne" ? `<button class="chip uiko vk-uiko" data-act="uiko" aria-pressed="${k}" aria-label="नेपाली ⇄ 한국어"><span class="a" lang="ne">${esc(langShort("ne"))}</span><span class="ar" aria-hidden="true">⇄</span><span class="b" lang="ko">한</span></button>` : ""}</div>
+  const k = uiKoOn();
+  return `<div class="vk-row"><button class="vk-back" data-v="back" aria-label="${esc(PTX[k ? "ko" : "ne"].back)}" title="${esc(PTX[k ? "ko" : "ne"].back)}">←</button><button class="vk-snd" data-v="snd" aria-label="${esc(tx("listen"))}" title="${esc(tx("listen"))}">▶</button>
+    <div class="vk-main"><span class="vk-t ko" lang="ko">${esc(e.lemma)}</span>${roman ? `<span class="vk-rom" lang="ne">${esc(e.dev || "")}</span>` : ""}${stack("vk-s vk-pos", esc(e.pos_ko || ""), esc(e.pos_ne || ""))}</div>${lang === "ne" ? `<button class="chip uiko vk-uiko" data-act="uiko" aria-pressed="${k}" aria-label="नेपाली ⇄ 한국어"><span class="a" lang="ne">${esc(langShort("ne"))}</span><span class="ar" aria-hidden="true">⇄</span><span class="b" lang="ko">한</span></button>` : ""}</div>
     ${noteHTML(pnote(e), k)}`;
 }
 export function openWordCard(it, { before, fromList = false } = {}) {
@@ -122,8 +120,8 @@ export function openWordCard(it, { before, fromList = false } = {}) {
   let pc = null, ents = null, view = null; // 조각 자료 · 지금 보는 조각 id(없으면 구절 카드)
   const draw = () => {
     const pe = view && ents?.find(x => x.id === view);
-    if (pe) { el.innerHTML = `<div class="vk-card vk-pcard">${pieceHTML(pe, !document.querySelector(".exv.norom"))}</div>`; return; }
-    el.innerHTML = `<div class="vk-card">
+    if (pe) { el.innerHTML = `<div class="vk-card vk-pcard" data-m="${uiKoOn() ? "ko" : "ne"}">${pieceHTML(pe, !document.querySelector(".exv.norom"))}</div>`; return; }
+    el.innerHTML = `<div class="vk-card" data-m="${uiKoOn() ? "ko" : "ne"}">
       <div class="vk-row"><button class="vk-snd" data-v="snd" aria-label="${esc(tx("listen"))}" title="${esc(tx("listen"))}">▶</button>
         <div class="vk-main"><span class="vk-t ko" lang="ko">${esc(it.w)}</span>${romanNow() ? `<span class="vk-rom" lang="ne">${esc(romanNow())}</span>` : ""}<span class="vk-t vk-mean" lang="ne">${esc(it.mean || "")}</span></div>${lang === "ne" ? `<button class="chip uiko vk-uiko" data-act="uiko" aria-pressed="${uiKoOn()}" aria-label="नेपाली ⇄ 한국어"><span class="a" lang="ne">${esc(langShort("ne"))}</span><span class="ar" aria-hidden="true">⇄</span><span class="b" lang="ko">한</span></button>` : ""}</div>
       ${piecesHTML(pc, ents)}${noteHTML(it.note, uiKoOn()) || (it.ko ? `<div class="vk-sent"><span class="vk-s ko" lang="ko">${esc(it.ko)}</span>${it.tr ? `<span class="vk-s vk-str" lang="ne">${esc(it.tr)}</span>` : ""}</div>` : "")}
@@ -133,7 +131,7 @@ export function openWordCard(it, { before, fromList = false } = {}) {
   draw();
   const curNote = () => { const pe = view && ents?.find(x => x.id === view); return pe ? pnote(pe) : it.note; }; // 지금 보는 카드의 설명(구절 카드 또는 조각 카드)
   const startNote = (bk, wi = -1) => { const nt = curNote(); if (nt && cardEl === el) { const v = view; showWait(el); it.__done = null; readNote(el, it, nt, uiKoOn(), it.order, { from: Math.max(0, noteBlocks(nt).findIndex(x => x.b === bk)), wi, url: v ? (l, b) => `snd/dict/${v}_${l}_${b}.mp3?v=2` : null }); } }; // 설명 읽기 화면처럼 열리면 저절로 시작
-  const onLang = () => { if (cardEl !== el) return removeEventListener("malmun:uilang", onLang); draw(); switchRead(uiKoOn()); }; // ⇄ = 읽던 블록·그 위치에서 새 말로(처음으로 안 감 · 멈춰 있으면 멈춘 채)
+  const onLang = () => { if (cardEl !== el) return removeEventListener("malmun:uilang", onLang); const ko = uiKoOn(), c = el.querySelector(".vk-card"); if (c) { applyMode(c, ko); const u = c.querySelector(".vk-uiko"); u?.setAttribute("aria-pressed", String(ko)); const ad = c.querySelector(".vk-add"); if (ad && ad.textContent !== (has(it.w) ? tx("has") : tx("add"))) ad.textContent = has(it.w) ? tx("has") : tx("add"); const dn = c.querySelector(".vk-done"); if (dn && dn.textContent !== tx("done")) dn.textContent = tx("done"); c.querySelectorAll(".vk-snd").forEach(x => { x.setAttribute("aria-label", tx("listen")); x.title = tx("listen"); }); const bk = c.querySelector(".vk-back"); if (bk) { bk.setAttribute("aria-label", PTX[ko ? "ko" : "ne"].back); bk.title = PTX[ko ? "ko" : "ne"].back; } } switchRead(ko); }; // 다시 그리지 않고 보임만 바꿈 · ⇄ = 읽던 블록·그 위치에서 새 말로(처음으로 안 감 · 멈춰 있으면 멈춘 채)
   addEventListener("malmun:uilang", onLang);
   const sync = setInterval(() => { if (cardEl !== el) return clearInterval(sync); const b = el.querySelector(".vk-snd"), t = isReading() && !isPaused() ? "⏸" : "▶"; if (b && b.textContent !== t && curNote()) b.textContent = t; }, 100);
   el.addEventListener("click", e => {
