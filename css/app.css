@@ -329,7 +329,6 @@ a{color:inherit;text-decoration:none}
 .v9bar .pb[aria-pressed=true]{background:var(--hi);color:#fff}
 .v9body{padding:5px 12px 6px;display:flex;flex-direction:column;gap:5px}
 .exv.v9 .v9body{flex:1 0 auto}.v9body .sayb{margin-top:auto} /* 「말해 보세요」 칸 = 본문 맨 아래 고정(⇄ 로 본문 길이가 바뀌어도 단추 자리 0px · 다국어부 10-15) */
-.v9body .pairln{display:grid}.v9body .pairln>.vis,.v9body .pairln>.ghost{grid-area:1/1;min-width:0}.v9body .pairln>.ghost{visibility:hidden;pointer-events:none}.v9body p[data-p="0"]{display:grid}.v9body p[data-p="0"]>.vis,.v9body p[data-p="0"]>.ghost{grid-area:1/1;min-width:0}.v9body p[data-p="0"]>.ghost{visibility:hidden;pointer-events:none;user-select:none} /* 두 말 글을 겹쳐 높이 = 큰 쪽 */
 .v9body .chips{display:flex;flex-wrap:wrap;gap:3px 4px;line-height:1.35}
 .v9body .chip{background:var(--bubble);border-radius:6px;padding:1px 6px;font-size:11.5px}
 .v9body .chip b{font-size:12.5px;white-space:nowrap} /* 「읽을 수」처럼 띄어 쓴 조각도 한 덩어리로 */
