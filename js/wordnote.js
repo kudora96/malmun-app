@@ -1,6 +1,6 @@
 // 단어 카드 설명(대표님 11-16 「설명 창 방식 그대로」) — 위 = 지금 말(⇄ 상태) 본문 · 아래 「↳」 한 줄 = 다른 말 · ⇄ 누르면 그 자리에서 즉시 바뀜
 // 읽기 소리 = 낱말 소리 다음에 뜻·쓰임 → 예문1 → 예문2 차례로(지금 말) · 읽는 줄에 노래방 불 · 파일 = media/wordnote/<편>/<낱말번호>_<ko|ne>_<mean|ex1|ex2>.mp3(말하기부가 만듦 · 없으면 건너뜀)
-import { esc } from "./text.js?v=1116.28";
+import { esc } from "./text.js?v=1116.29";
 
 const BLK = [["mean", "ko_mean", "ne_mean"], ["ex1", "ko_ex1", "ne_ex1"], ["ex2", "ko_ex2", "ne_ex2"]];
 const pick = (n, ko, k) => n?.[`${k ? "ko" : "ne"}_${ko}`] || n?.[`${k ? "ko" : "ne"}_${ko === "ex1" ? "ex" : ko}`] || ""; // ex1 = 옛 이름 ex 도 받음
@@ -77,8 +77,11 @@ export function tapWord(b, wi) {
   const tot = ws.reduce((s, w) => s + w.textContent.length, 0) || 1, fr = ws.slice(0, wi).reduce((s, w) => s + w.textContent.length, 0) / tot;
   const playing = k === j.k && j.resumeK < 0 && j.a;
   if (playing) {
-    const on = ws.reduce((m, w, i) => (w.classList.contains("kar") ? i : m), -1); // 지금 불 켜진 낱말
-    if (on === wi) return toggleRead();
+    const pausedNow = j.paused || j.a.paused;
+    if (!pausedNow && ws[wi].classList.contains("kar")) { // 읽는 중 켜진 낱말 톡 = 그 낱말 시작에서 멈춤 · 그 낱말만 노랑
+      const d0 = j.a.duration || 0; if (d0) { try { j.a.currentTime = Math.max(0, fr * d0 - LEAD + 0.001); } catch {} }
+      from = { k, wi }; j.root.querySelectorAll(".vk-line .kw.kar").forEach(e => e.classList.remove("kar")); ws[wi].classList.add("kar"); return toggleRead();
+    }
     const d = j.a.duration || 0; clearTimeout(j.gap); j.gap = 0;
     if (d) { try { j.a.currentTime = Math.max(0, fr * d - LEAD + 0.001); } catch {} j.root.querySelectorAll(".vk-line .kw.kar").forEach(e => e.classList.remove("kar")); from = { k, wi }; ws[wi].classList.add("kar"); }
     if (j.paused || j.a.paused) { j.paused = false; j.a.play().then(() => { if (!j.dead && !j.paused) { show(j); run(j); } }).catch(() => {}); } else show(j);
