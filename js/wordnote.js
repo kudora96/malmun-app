@@ -1,6 +1,6 @@
 // 단어 카드 설명(대표님 11-16 「설명 창 방식 그대로」) — 위 = 지금 말(⇄ 상태) 본문 · 아래 「↳」 한 줄 = 다른 말 · ⇄ 누르면 그 자리에서 즉시 바뀜
 // 읽기 소리 = 낱말 소리 다음에 뜻·쓰임 → 예문1 → 예문2 차례로(지금 말) · 읽는 줄에 노래방 불 · 파일 = media/wordnote/<편>/<낱말번호>_<ko|ne>_<mean|ex1|ex2>.mp3(말하기부가 만듦 · 없으면 건너뜀)
-import { esc } from "./text.js?v=1116.44";
+import { esc } from "./text.js?v=1116.45";
 
 const BLK = [["mean", "ko_mean", "ne_mean"], ["ex1", "ko_ex1", "ne_ex1"], ["ex2", "ko_ex2", "ne_ex2"]];
 const pick = (n, ko, k) => n?.[`${k ? "ko" : "ne"}_${ko}`] || n?.[`${k ? "ko" : "ne"}_${ko === "ex1" ? "ex" : ko}`] || ""; // ex1 = 옛 이름 ex 도 받음
@@ -50,10 +50,11 @@ function play(j, k, at, hold, lead = 0) { // k 블록을 at(0~1 비율)부터 ·
   if (j.dead) return;
   if (k >= j.bl.length) return stopRead();
   j.k = k; const blk = blkOf(j); if (!blk) return play(j, k + 1, 0, hold); setPair(j, k);
-  const a = (j.a = new Audio(j.url(j.lang, j.bl[k].b))); a.preload = "auto"; j.resumeK = -1;
+  const pre = j.pre?.k === k ? j.pre.a : null; j.pre = null; const a = (j.a = pre || new Audio(j.url(j.lang, j.bl[k].b))); a.preload = "auto"; j.resumeK = -1;
+  if (!hold && j.bl[k + 1]) { try { const na = new Audio(j.url(j.lang, j.bl[k + 1].b)); na.preload = "auto"; na.load(); j.pre = { k: k + 1, a: na }; } catch {} } // 다음 블록 소리 미리 받아 두기(끊김 방지)
   let started = false;
   a.onerror = () => { if (!started && !j.dead) play(j, k + 1, 0, hold); };
-  a.onended = () => { clearInterval(tick); const b = blkOf(j); b?.classList.remove("cur"); j.root.querySelectorAll(".vk-line .kw.kar").forEach(w => w.classList.remove("kar")); clearHl(j.root); from = null; j.resumeK = k + 1; j.gap = setTimeout(() => { j.gap = 0; play(j, k + 1, 0, false); }, 350); };
+  a.onended = () => { clearInterval(tick); const b = blkOf(j); b?.classList.remove("cur"); j.root.querySelectorAll(".vk-line .kw.kar").forEach(w => w.classList.remove("kar")); clearHl(j.root); from = null; j.resumeK = k + 1; j.gap = setTimeout(() => { j.gap = 0; play(j, k + 1, 0, false); }, 300); };
   a.addEventListener("loadedmetadata", () => { if (at > 0 && a.duration) { try { a.currentTime = Math.max(0, at * a.duration - lead); } catch {} } if (hold && j.a === a) show(j); }, { once: true });
   if (hold) { j.paused = true; started = true; return; }
   j.paused = false;
