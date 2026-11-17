@@ -89,10 +89,7 @@ export function closeCard() { stopWordSound(); cardEl?.remove(); cardEl = null; 
 const WAIT_TX = { ne: "आवाज तयार हुँदै छ…", ko: "소리 준비 중…" };
 let waitT = 0;
 function hideWait() { clearTimeout(waitT); waitT = 0; document.querySelectorAll(".vk-wait").forEach(w => w.remove()); }
-function showWait(el) {
-  hideWait(); waitT = setTimeout(() => { const c = el.querySelector(".vk-card"); if (!c || cardEl !== el) return; const w = document.createElement("div"); w.className = "vk-wait"; w.setAttribute("role", "status"); w.textContent = uiKoOn() || lang !== "ne" ? WAIT_TX.ko : WAIT_TX.ne; c.prepend(w); }, 250);
-  setTimeout(hideWait, 9000); // 끝내 안 오면 지움
-}
+function showWait() {} // 「소리 준비 중」 안내는 없앰(대표님 11-17 · 표제어를 가렸음)
 document.addEventListener("playing", hideWait, true); document.addEventListener("error", hideWait, true);
 // 낱말 설명(대표님 11-16 「저는」이면 저는에 대한 설명 · 한국어·네팔어 1:1) — data/<편>/<편>.wordnote.json: 낱말 → {ko_mean, ne_mean, ko_ex, ne_ex} · 없는 낱말만 영상 속 문장
 const noteMem = {};
@@ -115,7 +112,7 @@ function pieceHTML(e, roman) {
   const k = uiKoOn(), al = k ? "ko" : "ne", bl = k ? "ne" : "ko";
   return `<div class="vk-row"><button class="vk-back" data-v="back" aria-label="${esc(PTX[al].back)}" title="${esc(PTX[al].back)}">←</button><button class="vk-snd" data-v="snd" aria-label="${esc(tx("listen"))}" title="${esc(tx("listen"))}">▶</button>
     <div class="vk-main"><span class="vk-t ko" lang="ko">${esc(e.lemma)}</span>${roman ? `<span class="vk-rom" lang="ne">${esc(e.dev || "")}</span>` : ""}${pstack(e[`pos_${al}`] || "", al, e[`pos_${bl}`] || "", bl)}</div>${lang === "ne" ? `<button class="chip uiko vk-uiko" data-act="uiko" aria-pressed="${k}" aria-label="नेपाली ⇄ 한국어"><span class="a" lang="ne">${esc(langShort("ne"))}</span><span class="ar" aria-hidden="true">⇄</span><span class="b" lang="ko">한</span></button>` : ""}</div>
-    ${noteHTML(pnote(e), k, curBlock())}`;
+    ${noteHTML(pnote(e), k)}`;
 }
 export function openWordCard(it, { before, fromList = false } = {}) {
   closeCard();
@@ -129,7 +126,7 @@ export function openWordCard(it, { before, fromList = false } = {}) {
     el.innerHTML = `<div class="vk-card">
       <div class="vk-row"><button class="vk-snd" data-v="snd" aria-label="${esc(tx("listen"))}" title="${esc(tx("listen"))}">▶</button>
         <div class="vk-main"><span class="vk-t ko" lang="ko">${esc(it.w)}</span>${romanNow() ? `<span class="vk-rom" lang="ne">${esc(romanNow())}</span>` : ""}<span class="vk-t vk-mean" lang="ne">${esc(it.mean || "")}</span></div>${lang === "ne" ? `<button class="chip uiko vk-uiko" data-act="uiko" aria-pressed="${uiKoOn()}" aria-label="नेपाली ⇄ 한국어"><span class="a" lang="ne">${esc(langShort("ne"))}</span><span class="ar" aria-hidden="true">⇄</span><span class="b" lang="ko">한</span></button>` : ""}</div>
-      ${piecesHTML(pc, ents)}${noteHTML(it.note, uiKoOn(), curBlock()) || (it.ko ? `<div class="vk-sent"><span class="vk-s ko" lang="ko">${esc(it.ko)}</span>${it.tr ? `<span class="vk-s vk-str" lang="ne">${esc(it.tr)}</span>` : ""}</div>` : "")}
+      ${piecesHTML(pc, ents)}${noteHTML(it.note, uiKoOn()) || (it.ko ? `<div class="vk-sent"><span class="vk-s ko" lang="ko">${esc(it.ko)}</span>${it.tr ? `<span class="vk-s vk-str" lang="ne">${esc(it.tr)}</span>` : ""}</div>` : "")}
       <div class="vk-btns"><button class="vk-add" data-v="add" ${saved() ? "disabled" : ""}>${esc(saved() ? tx("has") : tx("add"))}</button>${saved() && fromList ? `<button class="vk-done" data-v="done">${esc(tx("done"))}</button>` : ""}</div></div>`;
   };
   before?.(); // 카드가 열리면 바깥 소리(설명 읽기)는 그 자리에서 멈춤 — 카드 소리만

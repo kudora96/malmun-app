@@ -7,20 +7,17 @@ const pick = (n, ko, k) => n?.[`${k ? "ko" : "ne"}_${ko}`] || n?.[`${k ? "ko" : 
 export const noteBlocks = n => BLK.map(([b]) => ({ b, ko: pick(n, b, true), ne: pick(n, b, false) })).filter(x => x.ko && x.ne);
 const kws = (s, lang) => String(s).split(/(\s+)/).map(t => (/^\s*$/.test(t) ? t : `<span class="kw" lang="${lang}">${esc(t)}</span>`)).join("");
 
-// 본문 = 지금 말 한 줄만(블록마다) · 다른 말은 안 보이는 겹침(.ghost)으로 높이만 맞춤 · 「↳」 한 줄 = 지금 읽는 블록의 다른 말(맨 아래 하나 · 설명 읽기와 같음)
-export function noteHTML(n, koFirst, curB) {
+// 본문 = 지금 말 한 줄만(블록마다) · 바로 아래 「↳」 한 줄 = 그 블록의 다른 말(항상 다 보임) · 두 말은 겹침(.ghost)으로 높이 맞춤 → ⇄ 해도 크기 그대로
+const SENT_END = /[.!?。।][」"')]*$/;
+const splitSent = t => String(t).split(/(?<=[.!?。।][」"')]*)\s+/).filter(Boolean); // 문장 나누기(마침표 뒤 띄어쓰기) — 두 말을 순서대로 짝지음
+const pairInner = t => `<span class="arr" aria-hidden="true">↳</span> ${splitSent(t).map((x, i) => `<span class="ps" data-s="${i}">${esc(x)}</span>`).join(" ")}`;
+export function noteHTML(n, koFirst) {
   const bl = noteBlocks(n); if (!bl.length) return "";
-  const al = koFirst ? "ko" : "ne", ol = koFirst ? "ne" : "ko", cb = curB || bl[0].b;
-  // 블록마다 바로 아래 「↳」 칸 — 칸 높이는 그 블록 두 말 중 긴 쪽(안 보이는 겹침) · 글은 지금 읽는 블록 칸에만 → 카드 높이 그대로
-  return `<div class="vk-sent vk-note">${bl.map(x => `<div class="vk-blk" data-b="${x.b}"><p class="vk-s vk-line"><span class="vis" lang="${al}">${kws(x[al], al)}</span><span class="ghost" aria-hidden="true" lang="${ol}">${esc(x[ol])}</span></p></div><p class="vk-s vk-pair pairln" data-pb="${x.b}" lang="${ol}"><span class="vis">${x.b === cb ? `<span class="arr" aria-hidden="true">↳</span> ${esc(x[ol])}` : ""}</span>${["ko", "ne"].map(l => `<span class="ghost" aria-hidden="true" lang="${l}">↳ ${esc(x[l])}</span>`).join("")}</p>`).join("")}</div>`;
+  const al = koFirst ? "ko" : "ne", ol = koFirst ? "ne" : "ko";
+  return `<div class="vk-sent vk-note">${bl.map(x => `<div class="vk-blk" data-b="${x.b}"><p class="vk-s vk-line"><span class="vis" lang="${al}">${kws(x[al], al)}</span><span class="ghost" aria-hidden="true" lang="${ol}">${esc(x[ol])}</span></p></div><p class="vk-s vk-pair pairln" data-pb="${x.b}" lang="${ol}"><span class="vis">${pairInner(x[ol])}</span>${["ko", "ne"].map(l => `<span class="ghost" aria-hidden="true" lang="${l}">↳ ${esc(x[l])}</span>`).join("")}</p>`).join("")}</div>`;
 }
-function setPair(j, k) { // 읽는 블록 바로 아래 칸에만 다른 말(바뀔 때만)
-  const b = j.bl[k]; if (!b) return;
-  const ol = j.lang === "ko" ? "ne" : "ko", key = b.b + ol, root = j.root;
-  if (root.__pairKey === key && root.querySelector(`.vk-pair[data-pb="${b.b}"] .vis`)?.firstChild) return;
-  root.__pairKey = key;
-  root.querySelectorAll(".vk-note > .vk-pair").forEach(p => { const v = p.querySelector(".vis"); if (p.dataset.pb === b.b) { p.setAttribute("lang", ol); v.innerHTML = `<span class="arr" aria-hidden="true">↳</span> ${esc(b[ol])}`; } else v.textContent = ""; });
-}
+const clearHl = root => (root || document).querySelectorAll(".vk-note .ps.on").forEach(e => e.classList.remove("on"));
+function setPair() {} // (옛) 읽는 블록 칸에만 글 — 이제 ↳ 줄은 항상 다 보임
 export const curBlock = () => (cur ? cur.bl[cur.k]?.b : "");
 
 // ── 읽기 소리 — 설명 읽기 화면과 같은 방식: 저절로 시작 · 글을 톡 = 그 자리에서 멈춤 · 다시 톡 = 같은 자리에서 이어서 · ⇄ = 같은 블록·같은 위치에서 새 말로
@@ -32,10 +29,16 @@ function show(j) { // 지금 블록 표시 + 노래방 불(소리 위치 그대�
   if (!blk.classList.contains("cur")) { j.root.querySelectorAll(".vk-blk.cur").forEach(e => e.classList.remove("cur")); j.root.querySelectorAll(".vk-line .kw.kar").forEach(e => e.classList.remove("kar")); blk.classList.add("cur"); }
   const ws = [...blk.querySelectorAll(".vk-line .kw")], tot = ws.reduce((s, w) => s + wl(w), 0) || 1, fr = (j.a.currentTime + LEAD) / Math.max(0.2, j.a.duration || 1); let c = 0;
   if (from && from.k !== j.k) from = null;
-  ws.forEach((w, i) => { w.classList.toggle("kar", c / tot <= fr && !(from && i < from.wi)); c += wl(w); });
+  // 문장 안에서만 칠: 지금 소리 위치가 든 문장의 낱말만 불 · 앞 문장 칠은 지움 · 짝(↳) 줄의 같은 순서 문장에 연노랑
+  let sid = 0; const ids = ws.map(w => { const r = sid; if (SENT_END.test(w.textContent)) sid++; return r; }), starts = [];
+  ws.forEach((w, i) => { if (starts[ids[i]] === undefined) starts[ids[i]] = c; c += wl(w); });
+  let cs = 0; starts.forEach((s0, q) => { if (s0 / tot <= fr) cs = q; }); if (from && ids[from.wi] !== undefined) cs = Math.max(cs, ids[from.wi]); c = 0; // 톡한 낱말의 문장보다 앞 문장으로 되돌아가지 않음
+  ws.forEach((w, i) => { w.classList.toggle("kar", ids[i] === cs && c / tot <= fr && !(from && i < from.wi)); c += wl(w); });
+  const ps = [...j.root.querySelectorAll(`.vk-note > .vk-pair[data-pb="${j.bl[j.k].b}"] .vis .ps`)], tg = Math.min(cs, ps.length - 1);
+  j.root.querySelectorAll(".vk-note .ps.on").forEach(e => { if (e !== ps[tg]) e.classList.remove("on"); }); ps[tg]?.classList.add("on");
 }
 const run = j => { clearInterval(tick); tick = setInterval(() => { if (!j.dead && !j.paused) show(j); }, 40); };
-export function stopRead() { clearInterval(tick); tick = 0; if (cur) { clearTimeout(cur.gap); if (cur.a) { cur.a.onended = cur.a.onerror = null; try { cur.a.pause(); } catch {} } cur.dead = true; cur = null; } document.querySelectorAll(".vk-blk.cur").forEach(e => e.classList.remove("cur")); document.querySelectorAll(".vk-note .kw.kar").forEach(e => e.classList.remove("kar")); }
+export function stopRead() { clearInterval(tick); tick = 0; if (cur) { clearTimeout(cur.gap); if (cur.a) { cur.a.onended = cur.a.onerror = null; try { cur.a.pause(); } catch {} } cur.dead = true; cur = null; } document.querySelectorAll(".vk-blk.cur").forEach(e => e.classList.remove("cur")); document.querySelectorAll(".vk-note .kw.kar").forEach(e => e.classList.remove("kar")); clearHl(); }
 export const isReading = () => !!cur;
 export const isPaused = () => !!cur?.paused;
 function play(j, k, at, hold, lead = 0) { // k 블록을 at(0~1 비율)부터 · hold = 멈춘 채 그 자리만
@@ -45,7 +48,7 @@ function play(j, k, at, hold, lead = 0) { // k 블록을 at(0~1 비율)부터 ·
   const a = (j.a = new Audio(j.url(j.lang, j.bl[k].b))); a.preload = "auto"; j.resumeK = -1;
   let started = false;
   a.onerror = () => { if (!started && !j.dead) play(j, k + 1, 0, hold); };
-  a.onended = () => { clearInterval(tick); const b = blkOf(j); b?.classList.remove("cur"); j.root.querySelectorAll(".vk-line .kw.kar").forEach(w => w.classList.remove("kar")); from = null; j.resumeK = k + 1; j.gap = setTimeout(() => { j.gap = 0; play(j, k + 1, 0, false); }, 350); };
+  a.onended = () => { clearInterval(tick); const b = blkOf(j); b?.classList.remove("cur"); j.root.querySelectorAll(".vk-line .kw.kar").forEach(w => w.classList.remove("kar")); clearHl(j.root); from = null; j.resumeK = k + 1; j.gap = setTimeout(() => { j.gap = 0; play(j, k + 1, 0, false); }, 350); };
   a.addEventListener("loadedmetadata", () => { if (at > 0 && a.duration) { try { a.currentTime = Math.max(0, at * a.duration - lead); } catch {} } if (hold && j.a === a) show(j); }, { once: true });
   if (hold) { j.paused = true; started = true; return; }
   j.paused = false;
