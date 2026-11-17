@@ -25,14 +25,14 @@ export const curBlock = () => (cur ? cur.bl[cur.k]?.b : "");
 
 // ── 읽기 소리 — 설명 읽기 화면과 같은 방식: 저절로 시작 · 글을 톡 = 그 자리에서 멈춤 · 다시 톡 = 같은 자리에서 이어서 · ⇄ = 같은 블록·같은 위치에서 새 말로
 let cur = null, tick = 0, from = null; // from = 낱말을 톡 한 자리(블록·낱말 번호) — 노란 칠은 그 낱말부터 새로 자람(대표님 11-17)
-const LEAD = 0.1;
+const LEAD = 0.1, wl = w => w.textContent.replace(/[「」]/g, "").length; // 노래방 비율 = 소리 나는 글자만(「」는 안 읽음)
 const blkOf = j => j.root.querySelector(`.vk-blk[data-b="${j.bl[j.k]?.b}"]`);
 function show(j) { // 지금 블록 표시 + 노래방 불(소리 위치 그대로)
   const blk = blkOf(j); if (!blk || !j.a) return; setPair(j, j.k);
   if (!blk.classList.contains("cur")) { j.root.querySelectorAll(".vk-blk.cur").forEach(e => e.classList.remove("cur")); j.root.querySelectorAll(".vk-line .kw.kar").forEach(e => e.classList.remove("kar")); blk.classList.add("cur"); }
-  const ws = [...blk.querySelectorAll(".vk-line .kw")], tot = ws.reduce((s, w) => s + w.textContent.length, 0) || 1, fr = (j.a.currentTime + LEAD) / Math.max(0.2, j.a.duration || 1); let c = 0;
+  const ws = [...blk.querySelectorAll(".vk-line .kw")], tot = ws.reduce((s, w) => s + wl(w), 0) || 1, fr = (j.a.currentTime + LEAD) / Math.max(0.2, j.a.duration || 1); let c = 0;
   if (from && from.k !== j.k) from = null;
-  ws.forEach((w, i) => { w.classList.toggle("kar", c / tot <= fr && !(from && i < from.wi)); c += w.textContent.length; });
+  ws.forEach((w, i) => { w.classList.toggle("kar", c / tot <= fr && !(from && i < from.wi)); c += wl(w); });
 }
 const run = j => { clearInterval(tick); tick = setInterval(() => { if (!j.dead && !j.paused) show(j); }, 40); };
 export function stopRead() { clearInterval(tick); tick = 0; if (cur) { clearTimeout(cur.gap); if (cur.a) { cur.a.onended = cur.a.onerror = null; try { cur.a.pause(); } catch {} } cur.dead = true; cur = null; } document.querySelectorAll(".vk-blk.cur").forEach(e => e.classList.remove("cur")); document.querySelectorAll(".vk-note .kw.kar").forEach(e => e.classList.remove("kar")); }
@@ -42,7 +42,7 @@ function play(j, k, at, hold, lead = 0) { // k 블록을 at(0~1 비율)부터 ·
   if (j.dead) return;
   if (k >= j.bl.length) return stopRead();
   j.k = k; const blk = blkOf(j); if (!blk) return play(j, k + 1, 0, hold); setPair(j, k);
-  const a = (j.a = new Audio(`snd/wordnote/${j.it.ep}/${j.no}_${j.lang}_${j.bl[k].b}.mp3?v=1`)); a.preload = "auto"; j.resumeK = -1;
+  const a = (j.a = new Audio(j.url(j.lang, j.bl[k].b))); a.preload = "auto"; j.resumeK = -1;
   let started = false;
   a.onerror = () => { if (!started && !j.dead) play(j, k + 1, 0, hold); };
   a.onended = () => { clearInterval(tick); const b = blkOf(j); b?.classList.remove("cur"); j.root.querySelectorAll(".vk-line .kw.kar").forEach(w => w.classList.remove("kar")); from = null; j.resumeK = k + 1; j.gap = setTimeout(() => { j.gap = 0; play(j, k + 1, 0, false); }, 350); };
@@ -51,11 +51,11 @@ function play(j, k, at, hold, lead = 0) { // k 블록을 at(0~1 비율)부터 ·
   j.paused = false;
   a.play().then(() => { started = true; if (j.a === a && !j.dead) { show(j); run(j); } }).catch(() => { if (!j.dead && !j.paused && j.a === a) play(j, k + 1, 0, false); });
 }
-export function readNote(root, it, n, koFirst, order, { from: fk = 0, wi = -1 } = {}) {
+export function readNote(root, it, n, koFirst, order, { from: fk = 0, wi = -1, url = null } = {}) {
   stopRead();
-  const no = (order || []).indexOf(String(it.key || "").trim()) + 1; if (!no) return; // 낱말 번호 = wordnote.json 의 _order 안 자리(1부터)
+  const no = (order || []).indexOf(String(it.key || "").trim()) + 1; if (!no && !url) return; // 낱말 번호 = wordnote.json 의 _order 안 자리(1부터)
   const bl = noteBlocks(n); if (!bl.length) return;
-  const j = (cur = { dead: false, a: null, k: 0, root, it, no, bl, lang: koFirst ? "ko" : "ne", paused: false, gap: 0, resumeK: -1 });
+  const j = (cur = { dead: false, a: null, k: 0, root, it, no, bl, lang: koFirst ? "ko" : "ne", paused: false, gap: 0, resumeK: -1, url: url || ((l, b) => `snd/wordnote/${it.ep}/${no}_${l}_${b}.mp3?v=2`) });
   const k0 = Math.min(fk, bl.length - 1);
   if (wi >= 0) { setPair(j, k0); return startAt(j, k0, wi); }
   play(j, k0, 0, false);
@@ -83,7 +83,7 @@ export function tapBlock(b) {
 export function tapWord(b, wi) {
   const j = cur, k = j ? j.bl.findIndex(x => x.b === b) : -1; if (!j || k < 0) return false;
   const ws = [...(blkOf({ root: j.root, bl: j.bl, k })?.querySelectorAll(".vk-line .kw") || [])]; if (!ws[wi]) return tapBlock(b);
-  const tot = ws.reduce((s, w) => s + w.textContent.length, 0) || 1, fr = ws.slice(0, wi).reduce((s, w) => s + w.textContent.length, 0) / tot;
+  const tot = ws.reduce((s, w) => s + wl(w), 0) || 1, fr = ws.slice(0, wi).reduce((s, w) => s + wl(w), 0) / tot;
   const playing = k === j.k && j.resumeK < 0 && j.a;
   if (playing) {
     const pausedNow = j.paused || j.a.paused;
@@ -99,7 +99,7 @@ export function tapWord(b, wi) {
   return startAt(j, k, wi);
 }
 function startAt(j, k, wi) { // 그 낱말 시작 소리부터 새로 읽음(앞 칠 지움)
-  const ws = [...(blkOf({ root: j.root, bl: j.bl, k })?.querySelectorAll(".vk-line .kw") || [])], tot = ws.reduce((s, w) => s + w.textContent.length, 0) || 1, fr = ws.slice(0, wi).reduce((s, w) => s + w.textContent.length, 0) / tot;
+  const ws = [...(blkOf({ root: j.root, bl: j.bl, k })?.querySelectorAll(".vk-line .kw") || [])], tot = ws.reduce((s, w) => s + wl(w), 0) || 1, fr = ws.slice(0, wi).reduce((s, w) => s + wl(w), 0) / tot;
   clearTimeout(j.gap); j.gap = 0; clearInterval(tick);
   if (j.a) { j.a.onended = j.a.onerror = null; try { j.a.pause(); } catch {} }
   j.root.querySelectorAll(".vk-line .kw.kar").forEach(e => e.classList.remove("kar"));
