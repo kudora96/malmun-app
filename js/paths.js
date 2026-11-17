@@ -1,6 +1,6 @@
 // 음성·영상 경로는 여기서만 조립한다(app_build_spec §3-5 — JSON 에는 파일 이름만).
 // 로컬 미리보기 = media/(저장소 밖 연결) · 배포 = R2 버킷 malmun-media(tools/upload_media.py 로 올림)
-import { dataBase } from "./tl.js?v=1116.20";
+import { dataBase } from "./tl.js?v=1116.21";
 const R2 = "https://pub-5e6f50ff2dda412eaa13ca4d4302d599.r2.dev";
 const LOCAL = /^(localhost|127\.0\.0\.1|\[::1\]|10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+|172\.(1[6-9]|2\d|3[01])\.\d+\.\d+)$/.test(location.hostname); // 같은 와이파이 폰(사설 IP 주소)도 로컬 미리보기 = media/(10-22 대표님 폰에서 R2 옛 영상이 나옴)
 export const MEDIA = LOCAL ? "media" : R2;
@@ -20,7 +20,7 @@ export const paths = {
   jamo: name => `${MEDIA}/letters/j/${name}.mp3?v=3`,
   // 새 설명(v9) 시안 소리 — tools/sync_v9.py 가 로컬 media/v9 에만 복사(아직 R2 에 없음 · 「올려」 전)
   v9: (ep, rel) => { const enc = rel.split("/").map(encodeURIComponent).join("/");
-    if (ep === "L01-00-01" && /^새설명_소리_(ne|kr)\/[^/]+_설명\.mp3$/.test(rel)) return `snd/explain/${ep}/${enc}?v=1`; // 1편 설명 소리(한국어·네팔어) = 공개판 저장소 안(r2.dev 가 느려 5초↑ · 대표님 11-16) · 다른 편·다른 말 = R2 그대로
+    if (ep === "L01-00-01" && /^새설명_소리_(ne|kr)\/[^/]+_설명\.mp3$/.test(rel)) return `snd/explain/${ep}/${enc}?v=2`; // 1편 설명 소리(한국어·네팔어) = 공개판 저장소 안(r2.dev 가 느려 5초↑ · 대표님 11-16) · 다른 편·다른 말 = R2 그대로
     return `${MEDIA}/v9/${ep}/${enc}?v=11`; },
   sfx: name => `${MEDIA}/sfx/${name}.mp3?v=2`,
   bgm: file => `${MEDIA}/bgm/${file}?v=1`, // 배경음악(소리부 10-15 · 05_audio/_bgm) // 점수 효과음(본부 10-05 · 다시 맞추면 v 올림)
