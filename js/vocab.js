@@ -1,10 +1,10 @@
 // ⭐ 내 단어장(시험판 · 네팔어 1편 · 본부 11-16 대표님 승인) — 낱말 칸을 톡 누르면 작은 카드 · 단어장은 이 기기(localStorage)에만
 // 소리 = 이미 만들어 둔 낱말 소리를 이어 붙여(wordsnd.json) · 없는 편은 줄 소리의 그 낱말 구간 · 학습자 말이 네팔어가 아니면 아무것도 안 보임
-import { lang, uiKoOn, langShort } from "./i18n.js?v=1116.18";
-import { noteHTML, readNote, stopRead, toggleRead, switchRead } from "./wordnote.js?v=1116.18"; // 단어 카드 설명(위 = 지금 말 · 아래 ↳ 다른 말) + 읽기 소리
-import { esc } from "./text.js?v=1116.18";
-import { paths } from "./paths.js?v=1116.18";
-import { VERSION } from "./version.js?v=1116.18";
+import { lang, uiKoOn, langShort } from "./i18n.js?v=1116.19";
+import { noteHTML, readNote, stopRead, toggleRead, switchRead, tapBlock, noteBlocks } from "./wordnote.js?v=1116.19"; // 단어 카드 설명(위 = 지금 말 · 아래 ↳ 다른 말) + 읽기 소리
+import { esc } from "./text.js?v=1116.19";
+import { paths } from "./paths.js?v=1116.19";
+import { VERSION } from "./version.js?v=1116.19";
 
 const KEY = "malmun.vocab.ne";
 export const vocabOn = () => lang === "ne";
@@ -110,12 +110,12 @@ export function openWordCard(it, { before, fromList = false } = {}) {
       <div class="vk-btns"><button class="vk-add" data-v="add" ${saved() ? "disabled" : ""}>${esc(saved() ? tx("has") : tx("add"))}</button>${saved() && fromList ? `<button class="vk-done" data-v="done">${esc(tx("done"))}</button>` : ""}</div></div>`;
   };
   draw();
-  const startNote = () => { if (it.note && cardEl === el) { showWait(el); it.__done = null; readNote(el, it, it.note, uiKoOn(), it.order); } }; // 설명 읽기 화면처럼 열리면 저절로 시작
+  const startNote = bk => { if (it.note && cardEl === el) { showWait(el); it.__done = null; readNote(el, it, it.note, uiKoOn(), it.order, { from: Math.max(0, noteBlocks(it.note).findIndex(x => x.b === bk)) }); } }; // 설명 읽기 화면처럼 열리면 저절로 시작
   const onLang = () => { if (cardEl !== el) return removeEventListener("malmun:uilang", onLang); draw(); switchRead(uiKoOn()); }; // ⇄ = 읽던 블록·그 위치에서 새 말로(처음으로 안 감 · 멈춰 있으면 멈춘 채)
   addEventListener("malmun:uilang", onLang);
   el.addEventListener("click", e => {
     let b = e.target.closest("[data-v]"); if (b && !el.contains(b)) b = null; // 위쪽 칸의 data-v 를 잡지 않게
-    if (!b) { if (!e.target.closest(".vk-card")) closeCard(); else if (e.target.closest(".vk-note") && it.note && !toggleRead()) startNote(); return; } // 화면 밖 = 닫힘 · 설명 글 톡 = 멈춤⇄이어서(끝난 뒤엔 처음부터)
+    if (!b) { if (!e.target.closest(".vk-card")) closeCard(); else if (e.target.closest(".vk-note") && it.note) { const bk = e.target.closest(".vk-blk")?.dataset.b; if (!(bk ? tapBlock(bk) : toggleRead())) startNote(bk); } return; } // 화면 밖 = 닫힘 · 다른 블록 톡 = 그 블록부터 · 읽는 블록 톡 = 멈춤⇄이어서 · 다 읽은 뒤 톡 = 처음부터
     e.stopPropagation();
     if (b.dataset.v === "snd") { // ▶ = 처음부터 다시(설명 읽기 · 낱말 소리는 따로 안 냄)
       if (it.note) { startNote(); return; }

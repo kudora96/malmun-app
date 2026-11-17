@@ -1,6 +1,6 @@
 // 단어 카드 설명(대표님 11-16 「설명 창 방식 그대로」) — 위 = 지금 말(⇄ 상태) 본문 · 아래 「↳」 한 줄 = 다른 말 · ⇄ 누르면 그 자리에서 즉시 바뀜
 // 읽기 소리 = 낱말 소리 다음에 뜻·쓰임 → 예문1 → 예문2 차례로(지금 말) · 읽는 줄에 노래방 불 · 파일 = media/wordnote/<편>/<낱말번호>_<ko|ne>_<mean|ex1|ex2>.mp3(말하기부가 만듦 · 없으면 건너뜀)
-import { esc } from "./text.js?v=1116.18";
+import { esc } from "./text.js?v=1116.19";
 
 const BLK = [["mean", "ko_mean", "ne_mean"], ["ex1", "ko_ex1", "ne_ex1"], ["ex2", "ko_ex2", "ne_ex2"]];
 const pick = (n, ko, k) => n?.[`${k ? "ko" : "ne"}_${ko}`] || n?.[`${k ? "ko" : "ne"}_${ko === "ex1" ? "ex" : ko}`] || ""; // ex1 = 옛 이름 ex 도 받음
@@ -58,6 +58,15 @@ export function toggleRead() {
   if (j.resumeK >= 0 && j.a?.ended) { play(j, j.resumeK, 0, false); return true; }
   j.a.play().then(() => { if (!j.dead && !j.paused) { show(j); run(j); } }).catch(() => {});
   return true;
+}
+// 다른 문장 블록을 톡 = 그 블록 처음부터(지금 말 · 뒤 블록으로 이어 읽음) · 지금 읽는(멈춘) 블록이면 멈춤⇄이어서 · 끝난 뒤엔 어느 블록이든 그 블록부터
+export function tapBlock(b) {
+  const j = cur, k = j ? j.bl.findIndex(x => x.b === b) : -1; if (!j || k < 0) return false;
+  if (k === j.k && j.resumeK < 0) return toggleRead();
+  clearTimeout(j.gap); j.gap = 0; clearInterval(tick);
+  if (j.a) { j.a.onended = j.a.onerror = null; try { j.a.pause(); } catch {} }
+  j.root.querySelectorAll(".vk-line .kw.kar").forEach(e => e.classList.remove("kar"));
+  play(j, k, 0, false); return true;
 }
 // ⇄ — 글을 다시 그린 뒤 부름: 같은 블록 · 같은 비율 위치에서 새 말로(멈춰 있었으면 멈춘 채)
 export function switchRead(koFirst) {
