@@ -1,6 +1,6 @@
 // 편 불러오기 — 공통 + KR층 + 학습자 언어층을 sub_id 로 조인(app_build_spec §3-4)
-import { paths } from "./paths.js?v=1116.47";
-import { VERSION } from "./version.js?v=1116.47";
+import { paths, setSnd } from "./paths.js?v=1116.48";
+import { VERSION } from "./version.js?v=1116.48";
 
 const cache = new Map();
 // 앱 판 번호를 붙여 받는다 — 새 판이면 옛 데이터를 쓰지 않게(tools/bump_version.py)
@@ -32,14 +32,16 @@ export async function episode(ep, lang) {
   const key = `${ep}.${lang}`;
   if (cache.has(key)) return cache.get(key);
   const p = (async () => {
-    const [base, kr, tr, wt, un, v9] = await Promise.all([
+    const [base, kr, tr, wt, un, v9, sm] = await Promise.all([
       getJSON(paths.data(ep)),
       getJSON(paths.data(ep, ".kr")).catch(() => ({ explanations: [] })),
       getJSON(paths.data(ep, "." + lang)).catch(() => null),
       getJSON(paths.data(ep, ".words")).catch(() => ({ lines: {} })), // 대사 원음 안 낱말 시각(쓰기의 단어·부분 듣기)
       getJSON(paths.data(ep, ".units")).catch(() => ({ lines: {} })), // 쓰기 낱말·토막 목록(고정 · tools/writing_units.py)
       getJSON(paths.data(ep, ".v9")).catch(() => null), // 새 설명(v9 시안 · 본부 10-03) — 있으면 설명 창이 새 카드로
+      getJSON(paths.data(ep, ".snd_manifest")).catch(() => null), // 같은 사이트 snd/ 소리 목록(없으면 전부 R2)
     ]);
+    setSnd(ep, sm);
     const krBy = new Map(kr.explanations.map(e => [e.sub_id, e]));
     const trSub = new Map((tr?.subtitles || []).map(s => [s.id, s]));
     const trExp = new Map((tr?.explanations || []).map(e => [e.sub_id, e]));
