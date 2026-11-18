@@ -6,13 +6,13 @@ import { esc } from "./text.js?v=1118.27";
 const BLK = [["mean", "ko_mean", "ne_mean"], ["ex1", "ko_ex1", "ne_ex1"], ["ex2", "ko_ex2", "ne_ex2"]];
 const pick = (n, ko, k) => n?.[`${k ? "ko" : "ne"}_${ko}`] || n?.[`${k ? "ko" : "ne"}_${ko === "ex1" ? "ex" : ko}`] || ""; // ex1 = 옛 이름 ex 도 받음
 export const noteBlocks = n => BLK.map(([b]) => ({ b, ko: pick(n, b, true), ne: pick(n, b, false) })).filter(x => x.ko && x.ne);
-const gwWrap = (t, st) => { let o = "", b = ""; const fl = () => { if (b) { o += st.q ? `<span class="gw">${esc(b)}</span>` : esc(b); b = ""; } }; for (const c of t) { if (c === "「" && !st.q) { fl(); st.q = true; b = c; } else if (c === "」" && st.q) { b += c; fl(); st.q = false; } else b += c; } fl(); return o; }; // 「…」 = 설명 칸 .gw 와 같은 흰 상자(따옴표 문자는 상자 안) · 여러 낱말에 걸쳐도 낱말마다 상자
+const gwWrap = (t, st, wj = false) => { let o = "", b = ""; const fl = () => { if (b) { o += st.q ? `<span class="gw">${esc(b)}</span>` : esc(b); b = ""; } }; for (const c of t) { if (c === "「" && !st.q) { fl(); st.q = true; b = c; } else if (c === "」" && st.q) { b += c; fl(); st.q = false; } else b += c; } fl(); return wj ? o.replace(/<\/span>(?=[^\s<])/g, "</span>⁠") : o; }; // 상자 바로 뒤 조사는 줄이 갈리지 않게(wj=↳ 줄 · 낱말 줄은 .kw 가 nowrap · 대표님 11-18 16:27) // 「…」 = 설명 칸 .gw 와 같은 흰 상자(따옴표 문자는 상자 안) · 여러 낱말에 걸쳐도 낱말마다 상자
 const kws = (s, lang, on = true) => { const st = { q: false }; return String(s).split(/(\s+)/).map(t => (/^\s*$/.test(t) ? t : `<span class="${on ? "kw" : "kx"}" lang="${lang}">${gwWrap(t, st)}</span>`)).join(""); }; // kw = 지금 말(톡·칠 대상) · kx = 숨은 말(⇄ 하면 서로 바뀜)
 
 // 본문 = 지금 말 한 줄만(블록마다) · 바로 아래 「↳」 한 줄 = 그 블록의 다른 말(항상 다 보임) · 두 말은 겹침(.ghost)으로 높이 맞춤 → ⇄ 해도 크기 그대로
 const SENT_END = /[.!?。।][」"')]*$/;
 const splitSent = t => String(t).split(/(?<=[.!?。।][」"')]*)\s+/).filter(Boolean); // 문장 나누기(마침표 뒤 띄어쓰기) — 두 말을 순서대로 짝지음
-const pairInner = t => `<span class="arr" aria-hidden="true">↳</span> ${splitSent(t).map((x, i) => `<span class="ps" data-s="${i}">${gwWrap(x, { q: false })}</span>`).join(" ")}`;
+const pairInner = t => `<span class="arr" aria-hidden="true">↳</span> ${splitSent(t).map((x, i) => `<span class="ps" data-s="${i}">${gwWrap(x, { q: false }, true)}</span>`).join(" ")}`;
 // 카드 글은 지금 말 하나만 DOM 에 둠(숨은 복사본 없음) — 높이는 열 때 두 말을 번갈아 재어 큰 쪽으로 고정(fixSizes) · ⇄ 는 같은 칸 안에서 글만 바꿈(applyMode)
 const lineIn = (x, l) => kws(x[l], l), pairIn = (x, l) => pairInner(x[l]);
 export function noteHTML(n, koFirst) {

@@ -1941,3 +1941,6 @@ li.vl-row{position:relative;overflow:hidden;touch-action:pan-y}.vl-slide{display
 .vk-cbar .vp-b.vk-back,.vk-cbar .vp-b.vk-add,.vk-cbar .vp-b.vk-snd{width:auto;min-height:0;height:22px;padding:0 10px;border-radius:999px;border:2px solid transparent;background:var(--card);color:var(--ink);font-size:12px;font-weight:800;box-shadow:none}
 .vk-cbar .vp-b.vk-add:disabled{opacity:.75;color:var(--hi)}
 .vk-foot .vp-b.vk-back,.vk-foot .vp-b.vk-add,.vk-foot .vp-b.vk-snd{width:auto;min-height:0;height:34px;padding:0 14px;border-radius:999px}
+/* 조각 카드 「상자」+조사(11-18 16:27 대표님 「만나다는 사람을 띄어쓰기 이상」): 상자 오른쪽 여백 0 = 조사가 바짝 붙음 · 낱말(.kw)은 중간에 줄 안 갈림 · 낱말 사이 공백은 칠하기 밖 그대로 */
+.vk-note .gw{margin-right:0}
+.vk-line .kw{white-space:nowrap}
