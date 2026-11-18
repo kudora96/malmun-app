@@ -171,10 +171,13 @@ export function openVocabList() {
   closeVocabList();
   const el = (listEl = document.createElement("div"));
   el.className = "vk-dim vk-listdim"; el.setAttribute("role", "dialog"); el.setAttribute("aria-modal", "true");
-  const draw = () => {
-    const a = read();
+  const devOf = (x, N) => (lang === "ne" && N[x.ep]?.[clean(x.w)]?.dev) || ""; // 목록 발음 줄 = 카드와 같은 자료(note.dev · 학습자 글자) · 없으면 비움(로마자로 되돌리지 않음 · 대표님 11-18)
+  const draw = async () => {
+    const a = read(), N = {};
+    await Promise.all([...new Set(a.map(x => x.ep).filter(Boolean))].map(async ep => { N[ep] = await noteOf(ep); }));
+    if (listEl !== el) return;
     el.innerHTML = `<div class="vk-sheet"><div class="vk-head"><b>${esc(tx("title"))} (${a.length})</b><button class="vk-x" data-v="x">✕ ${esc(tx("close"))}</button></div>
-      ${a.length ? `<ul class="vk-ul">${a.map(x => `<li><button class="vk-li" data-w="${esc(x.w)}"><span class="vk-t ko" lang="ko">${esc(x.w)}</span>${x.rom ? `<span class="vk-rom">${esc(x.rom)}</span>` : ""}<span class="vk-t vk-mean" lang="ne">${esc(x.mean || "")}</span></button></li>`).join("")}</ul>` : `<p class="vk-empty">${esc(tx("empty"))}</p>`}</div>`;
+      ${a.length ? `<ul class="vk-ul">${a.map(x => `<li><button class="vk-li" data-w="${esc(x.w)}"><span class="vk-t ko" lang="ko">${esc(x.w)}</span>${devOf(x, N) ? `<span class="vk-rom" lang="ne">${esc(devOf(x, N))}</span>` : ""}<span class="vk-t vk-mean" lang="ne">${esc(x.mean || "")}</span></button></li>`).join("")}</ul>` : `<p class="vk-empty">${esc(tx("empty"))}</p>`}</div>`;
   };
   draw();
   el.addEventListener("click", e => {
