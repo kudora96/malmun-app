@@ -1765,9 +1765,8 @@ html:has(.scr.learn),html:has(.scr.learn) body{overflow-anchor:none} /* 배우�
 .vk-sent{margin-top:10px;padding:8px 10px;border-radius:10px;background:var(--bubble);border:1px solid var(--line);display:flex;flex-direction:column;gap:3px}
 .vk-s{font-size:16px;line-height:1.45}
 .vk-btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
-.vk-add,.vk-done,.vk-x{min-height:38px;padding:0 14px;border-radius:999px;border:1px solid var(--hi);background:var(--card);color:var(--hi);font-size:14px;font-weight:700;box-shadow:0 1px 0 var(--line)}
+.vk-add,.vk-x{min-height:38px;padding:0 14px;border-radius:999px;border:1px solid var(--hi);background:var(--card);color:var(--hi);font-size:14px;font-weight:700;box-shadow:0 1px 0 var(--line)}
 .vk-add:disabled{opacity:.6;border-color:var(--line);color:var(--mute);box-shadow:none}
-.vk-done{background:var(--hi);color:var(--on-hi)}
 .vk-x{min-height:32px;font-weight:500;border-color:var(--line);color:var(--hi)}
 .vk-listdim{align-items:center}
 .vk-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;font-size:17px}
@@ -1817,7 +1816,6 @@ li.vl-row{position:relative;overflow:hidden;touch-action:pan-y}.vl-slide{display
 
 /* 대표님 11-16: 노래방 불이 닿은 따옴표 한국어 낱말(흰 바탕 칸)도 칸 바탕이 진한 노랑으로(노랑이 맨 앞) — 스타일만 */
 .v9body .sn .kw.kar .gw,.v9body .sn .kw.kar b{background:#ffd21f;color:#1b1b1b}
-.vk-gone{margin:6px 2px 0;font-size:16px;font-weight:700}
 
 /* 대표님 11-16: ⛶ 크게 보기(.learn.big) 설명 창 맨 위 줄 — 한 줄에 다 들어가게(닫기는 ✕만 · 틈·여백 줄임 · 단추 높이는 그대로) · 크게 보기가 아닐 때는 안 걸림 */
 .learn.big .v9bar{flex-wrap:nowrap;gap:4px;padding-inline:8px}
