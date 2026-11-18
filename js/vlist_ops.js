@@ -32,7 +32,7 @@ export const loadSort = () => { try { const m = localStorage.getItem(SKEY); retu
 const saveSort = m => { try { localStorage.setItem(SKEY, m); } catch {} };
 
 const epKey = ep => { const m = String(ep ?? "").match(/\d+/g); return m ? m.map(n => n.padStart(6, "0")).join("-") : "Ffff"; }; // 숫자 크기 순(ne1 < ne2 < ne10)
-const posOf = x => { const v = x.order ?? x.line ?? x.li ?? x.idx; const n = Number(v); return v != null && Number.isFinite(n) ? n : null; };
+const posOf = x => { const v = x.order ?? x.line ?? x.li ?? x.idx ?? x.n; const n = Number(v); return v != null && Number.isFinite(n) ? n : null; };
 
 // 새 배열을 돌려줌(원본 안 바꿈) · lang = 'ko'|'ne' (abc 기준 글: ko=단어 · ne=뜻)
 export function sortItems(items, mode = "recent", lang = "ko") {
