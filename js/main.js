@@ -48,23 +48,27 @@ async function route() {
 export const go = hash => { location.hash = hash; };
 export const rerender = route;
 
-// 새 판 알림 — 열어 둔 탭이 옛 코드를 계속 쓰지 않게(본부 10-04) · 화면이 다시 보일 때와 10분마다 version.json 을 본다
-let newShown = false;
+// 새 판 알림 — 열어 둔 탭이 옛 코드를 계속 쓰지 않게(본부 10-04 · 11-18 12:53 대표님 「ㅇ 고쳐」) · 처음 켤 때·화면이 보일 때·창 포커스·1분마다 version.json 확인 · 새 판마다(같은 판은 한 번) 큰 단추 · 자동 새로고침 없음(학습 중 화면이 바뀌면 안 됨)
+let shownV = "", checking = false;
 async function checkNew() {
-  if (newShown || document.hidden) return; /* 화면 숨김(꺼짐·백그라운드) 동안엔 판 확인 쉼 — 다시 보이면 visibilitychange 가 확인(본부 10-11) */
+  if (document.hidden || checking) return; /* 화면 숨김 동안엔 쉼 — 다시 보이면 visibilitychange·focus 가 바로 확인 */
+  checking = true;
   try {
     const v = (await (await fetch("version.json?t=" + Date.now(), { cache: "no-store" })).json()).v;
-    if (v && v !== VERSION) {
-      newShown = true;
+    if (v && v !== VERSION && v !== shownV) {
+      shownV = v;
+      document.querySelectorAll(".newver").forEach(e => e.remove());
       const b = document.createElement("button");
-      b.className = "newver"; b.textContent = "↻ " + t("new_version");
+      b.className = "newver"; b.dataset.v = v; b.textContent = "↻ " + t("new_version");
       b.onclick = () => location.reload();
       document.body.append(b);
     }
-  } catch {}
+  } catch {} finally { checking = false; }
 }
 document.addEventListener("visibilitychange", () => document.visibilityState === "visible" && checkNew());
-setInterval(checkNew, 10 * 60 * 1000);
+window.addEventListener("focus", checkNew);
+setInterval(checkNew, 60 * 1000);
+checkNew();
 try { history.scrollRestoration = "manual"; } catch {} // 창을 닫을 때 걷어 내는 뒤로 가기 칸이 화면 위치를 되돌리지 않게(지금 줄은 앱이 맞춤)
 document.documentElement.dataset.v = VERSION;
 console.info("말문 판", VERSION);
