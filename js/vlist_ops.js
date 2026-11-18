@@ -39,10 +39,10 @@ export function sortItems(items, mode = "recent", lang = "ko") {
   const a = (items || []).map((x, i) => ({ x, i })); // i = 저장된 순서(= 담은 순 · 시각 없는 옛 항목의 대신)
   const ts = o => (Number.isFinite(o.x.t) ? o.x.t : null);
   const loc = lang === "ne" ? "ne" : "ko";
-  const key = o => String((lang === "ne" ? o.x.mean || o.x.w : o.x.w) || "");
+  const col = new Intl.Collator(loc), key = o => (o.k ??= String((lang === "ne" ? o.x.mean || o.x.w : o.x.w) || "")); // 1만 개도 빠르게: 비교기 하나 · 글 한 번만 뽑음
   const cmp = {
     recent: (p, q) => { const s = ts(p), t = ts(q); if (s != null && t != null) return t - s || q.i - p.i; if (s != null) return -1; if (t != null) return 1; return q.i - p.i; }, // 시각 없는 옛 항목은 맨 아래
-    abc: (p, q) => key(p).localeCompare(key(q), loc) || p.i - q.i,
+    abc: (p, q) => col.compare(key(p), key(q)) || p.i - q.i,
     ep: (p, q) => { const e = epKey(p.x.ep).localeCompare(epKey(q.x.ep)); if (e) return e; const s = posOf(p.x), t = posOf(q.x); if (s != null && t != null && s !== t) return s - t; return p.i - q.i; },
   }[mode] || (() => 0);
   return a.sort(cmp).map(o => o.x);
