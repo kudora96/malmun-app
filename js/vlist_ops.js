@@ -66,7 +66,7 @@ export function attachDelete(rowEl, item, onDelete, lang = "ko", tx) {
   while (rowEl.firstChild) slide.append(rowEl.firstChild);
   const mkBtn = (cls, txt, aria) => { const b = document.createElement("button"); b.type = "button"; b.className = cls; b.textContent = txt; if (aria) b.setAttribute("aria-label", aria); return b; };
   const delTxt = T("vlist.del", lang, tx);
-  const del = mkBtn("vl-del", delTxt), bin = mkBtn("vl-bin", "🗑", delTxt); bin.title = delTxt;
+  const del = mkBtn("vl-del", delTxt), bin = mkBtn("vl-bin", "🗑", delTxt); // 휴지통 = 항상 보임(11-18 13:39) · 도움말은 브라우저 기본 title 말고 앱 작은 글 상자(휴지통 위쪽 · 마우스일 때만)
   rowEl.append(slide, del, bin);
 
   // 밀기: 가로가 세로보다 클 때만(그 전엔 세로 스크롤에 맡김) · 마우스는 밀기 없음(휴지통 사용)
@@ -110,5 +110,14 @@ export function attachDelete(rowEl, item, onDelete, lang = "ko", tx) {
     ub.addEventListener("click", ev => { ev.preventDefault(); ev.stopPropagation(); clearTimeout(timer); timer = 0; undo.remove(); undo = null; rowEl.classList.remove("vl-gone"); });
   };
   del.addEventListener("click", start); bin.addEventListener("click", start);
-  return { destroy() { clearTimeout(timer); document.removeEventListener("pointerdown", outside, true); } };
+  let tip = null; const hideTip = () => { tip?.remove(); tip = null; };
+  bin.addEventListener("pointerenter", e => { // 마우스만 · 휴대폰(터치)은 도움말 없음 · 줄(overflow 숨김) 밖 칸(영상 칸·전체 화면 안)에 fixed 로 띄워 안 잘림
+    if (e.pointerType !== "mouse") return; hideTip();
+    tip = document.createElement("div"); tip.className = "vl-tip"; tip.setAttribute("role", "tooltip"); tip.textContent = delTxt;
+    (bin.closest(".vstage") || document.fullscreenElement || document.body).append(tip);
+    const r = bin.getBoundingClientRect(), t = tip.getBoundingClientRect(), vw = document.documentElement.clientWidth;
+    tip.style.left = Math.round(Math.max(4, Math.min(vw - t.width - 4, r.left + r.width / 2 - t.width / 2))) + "px"; tip.style.top = Math.round(Math.max(4, r.top - t.height - 6)) + "px"; // 휴지통 위쪽
+  });
+  for (const ev of ["pointerleave", "pointerdown", "blur"]) bin.addEventListener(ev, hideTip);
+  return { destroy() { clearTimeout(timer); hideTip(); document.removeEventListener("pointerdown", outside, true); } };
 }
