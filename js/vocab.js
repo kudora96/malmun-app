@@ -3,7 +3,11 @@
 import { lang, uiKoOn, langShort } from "./i18n.js?v=1118.11";
 import { noteHTML, applyMode, fixSizes, readNote, stopRead, toggleRead, switchRead, tapBlock, tapWord, noteBlocks, curBlock, isReading, isPaused } from "./wordnote.js?v=1118.11"; // 단어 카드 설명(위 = 지금 말 · 아래 ↳ 다른 말) + 읽기 소리
 import { claim, onSound } from "./onesound.js?v=1118.11";
+import * as sfx from "./sfx.js?v=1118.11";
+import { uikoChip } from "./ui.js?v=1118.11";
 import { esc } from "./text.js?v=1118.11";
+import { attachDragScroll } from "./dragscroll.js?v=1118.11";
+import { sortItems, makeSortButton, attachDelete, loadSort } from "./vlist_ops.js?v=1118.11";
 import { paths } from "./paths.js?v=1118.11";
 import { VERSION } from "./version.js?v=1118.11";
 
@@ -12,7 +16,7 @@ export const vocabOn = () => lang === "ne";
 
 // 새 글(네팔어 = Claude 도우미 교차 확인 · 한국어 = ⇄ 한 때)
 const TX = {
-  ne: { menu: "⭐ मेरो शब्द-सूची", add: "⭐ सूचीमा थप्नुहोस्", has: "⭐ सूचीमा छ", done: "✓ मैले याद गरिसकें", gone: "सूचीबाट हटाइयो", undo: "↩ फिर्ता गर्नुहोस्", empty: "अहिले केही छैन। कुनै शब्द थिचेर सूचीमा थप्नुहोस्।", title: "मेरो शब्द-सूची", listen: "सुन्नुहोस्", close: "बन्द" },
+  ne: { menu: "⭐ मेरो शब्दसूची", add: "⭐ सूचीमा थप्नुहोस्", has: "⭐ सूचीमा छ", done: "✓ मैले याद गरिसकें", gone: "सूचीबाट हटाइयो", undo: "↩ फिर्ता गर्नुहोस्", empty: "अहिले केही छैन। कुनै शब्द थिचेर सूचीमा थप्नुहोस्।", title: "मेरो शब्दसूची", listen: "सुन्नुहोस्", close: "बन्द" },
   ko: { menu: "⭐ 내 단어장", add: "⭐ 단어장에 넣기", has: "⭐ 단어장에 있음", done: "✓ 다 외웠어요", gone: "목록에서 뺐어요", undo: "↩ 되돌리기", empty: "아직 없어요. 낱말을 톡 눌러 넣어 보세요.", title: "내 단어장", listen: "듣기", close: "닫기" },
 };
 const tx = k => (uiKoOn() ? TX.ko : TX.ne)[k];
@@ -168,31 +172,56 @@ export function openWordCard(it, { before, fromList = false } = {}) {
 }
 document.addEventListener("keydown", e => { if (e.key === "Escape" && cardEl) closeCard(); });
 
-// ── 단어장 목록(편 목록 위 「⭐ 내 단어장 (N)」 → 목록 → 단어 → 같은 카드)
-let listEl = null;
-export function closeVocabList() { closeCard(); listEl?.remove(); listEl = null; }
+// 「톡」 — 새 소리 파일 없이 sfx.js 합성 소리 한 개(0.05초) · 읽기·카드 낭독·영상 등 다른 소리가 나는 중이면 안 냄(소리는 하나 · onesound)
+sfx.defineSynth("tok", mk => { const c = mk(1, 0.07), o = c.createOscillator(), g = c.createGain(); o.type = "sine"; o.frequency.setValueAtTime(900, 0); o.frequency.exponentialRampToValueAtTime(420, 0.05); g.gain.setValueAtTime(0, 0); g.gain.linearRampToValueAtTime(0.22, 0.004); g.gain.exponentialRampToValueAtTime(0.001, 0.06); o.connect(g); g.connect(c.destination); o.start(0); o.stop(0.07); return c.startRendering(); });
+const otherSound = () => sfx.playing() || isReading() || !!au || [...document.querySelectorAll("audio,video")].some(m => !m.paused && !m.ended);
+const tok = () => { try { if (!otherSound()) sfx.play("synth:tok").catch(() => {}); } catch {} };
+
+// ── 단어장 목록(대표님 11-18 13:07) — 배우는 화면에서는 영상 칸 자리 안에서 열림(설명 창이 열리는 자리 · 다른 칸 크기·배치 불변) · 그 밖의 화면은 예전처럼 겹쳐 뜸
+//    열면 영상 멈춤 · 오른쪽 위 ✕ = 닫고 영상 자리로 · 단어 누르면 카드 · ⇄ = 앱 전체 하나(한국어 쪽: 단어·발음·뜻 / 네팔어 쪽: 뜻·단어·발음)
+let listEl = null, listOff = [];
+export function closeVocabList() {
+  closeCard(); listOff.forEach(f => { try { f(); } catch {} }); listOff = [];
+  const st = listEl?.closest?.(".vstage"); listEl?.remove(); listEl = null; if (st) { st.classList.remove("vk-on"); st.style.removeProperty("height"); }
+}
 export function openVocabList() {
   closeVocabList();
-  const el = (listEl = document.createElement("div"));
-  el.className = "vk-dim vk-listdim"; el.setAttribute("role", "dialog"); el.setAttribute("aria-modal", "true");
+  const stage = document.querySelector(".learn .vstage"), el = (listEl = document.createElement("div"));
+  if (stage) { el.className = "vk-pane"; stage.style.height = stage.getBoundingClientRect().height + "px"; stage.classList.add("vk-on"); // 칸 크기 그대로(영상 칸 높이 · 다른 칸 안 밀림)
+   try { stage.querySelector("video")?.pause(); } catch {} claim("vocab"); } // 영상·읽기 소리 멈춤(닫아도 멈춘 채)
+  else { el.className = "vk-dim vk-listdim"; el.setAttribute("role", "dialog"); el.setAttribute("aria-modal", "true"); }
   const devOf = (x, N) => (lang === "ne" && N[x.ep]?.[clean(x.w)]?.dev) || ""; // 목록 발음 줄 = 카드와 같은 자료(note.dev · 학습자 글자) · 없으면 비움(로마자로 되돌리지 않음 · 대표님 11-18)
+  let N = {}, mode = loadSort(), offDrag = null;
   const draw = async () => {
-    const a = read(), N = {};
+    const a = sortItems(read(), mode, uiKoOn() ? "ko" : "ne"), total = a.length;
     await Promise.all([...new Set(a.map(x => x.ep).filter(Boolean))].map(async ep => { N[ep] = await noteOf(ep); }));
     if (listEl !== el) return;
-    el.innerHTML = `<div class="vk-sheet"><div class="vk-head"><b>${esc(tx("title"))} (${a.length})</b><button class="vk-x" data-v="x">✕ ${esc(tx("close"))}</button></div>
-      ${a.length ? `<ul class="vk-ul">${a.map(x => `<li><button class="vk-li" data-w="${esc(x.w)}"><span class="vk-t ko" lang="ko">${esc(x.w)}</span>${devOf(x, N) ? `<span class="vk-rom" lang="ne">${esc(devOf(x, N))}</span>` : ""}<span class="vk-t vk-mean" lang="ne">${esc(x.mean || "")}</span></button></li>`).join("")}</ul>` : `<p class="vk-empty">${esc(tx("empty"))}</p>`}</div>`;
+    const ko = uiKoOn();
+    const rowTx = x => { const w = `<span class="vk-t ko" lang="ko">${esc(x.w)}</span>`, r = devOf(x, N) ? `<span class="vk-rom" lang="ne">${esc(devOf(x, N))}</span>` : "", m = `<span class="vk-t vk-mean" lang="ne">${esc(x.mean || "")}</span>`; return ko ? w + r + m : m + w + r; };
+    const body = `<div class="vk-head"><b>${esc(tx("title"))} (${total})</b><span class="vk-sortslot"></span><span class="vk-uik">${uikoChip()}</span></div>
+      ${a.length ? `<div class="vk-cols" aria-hidden="true">${(ko ? [["단어", "ko"], ["발음", "ne"], ["뜻", "ne"]] : [["अर्थ", "ne"], ["शब्द", "ne"], ["उच्चारण", "ne"]]).map(([x, l]) => `<span lang="${l}">${x}</span>`).join("")}</div><ul class="vk-ul flick">${a.map(x => `<li class="vk-li"><button class="vk-pl" data-v="pl" data-w="${esc(x.w)}" aria-label="${esc(tx("listen"))}" title="${esc(tx("listen"))}">▶</button><button class="vk-lb" data-w="${esc(x.w)}">${rowTx(x)}</button></li>`).join("")}</ul>` : `<p class="vk-empty">${esc(tx("empty"))}</p>`}`;
+    el.innerHTML = stage ? `${XBTN}${body}` : `<div class="vk-sheet">${XBTN}${body}</div>`;
+    offDrag?.(); offDrag = null; const L = uiKoOn() ? "ko" : "ne";
+    el.querySelector(".vk-sortslot")?.append(makeSortButton(() => mode, m => { mode = m; draw(); }, L, k => (k.startsWith("vlist.") ? k : tx(k))));
+    const ul = el.querySelector(".vk-ul");
+    if (ul) { offDrag = attachDragScroll(ul, { friction: 0.95, threshold: 6, wheel: true }); ul.querySelectorAll(".vk-li").forEach((li, i) => attachDelete(li, a[i], it => drop(it.w), L)); }
   };
   draw();
   el.addEventListener("click", e => {
-    if (e.target.closest(".vk-x") || e.target === el) return closeVocabList();
-    const b = e.target.closest(".vk-li"); if (!b) return;
+    if (e.target.closest(".vk-x") || e.target === el && !stage) return closeVocabList();
+    const pl = e.target.closest(".vk-pl"); // 줄 ▶ = 그 단어 소리(카드 ▶ 와 같은 길 · claim("card") 이 다른 소리를 멈춤)
+    if (pl) { const it = read().find(x => x.w === pl.dataset.w); if (it) { it.__done = null; pl.classList.add("playing"); playSnd(it, pl).catch(() => {}).finally(() => setTimeout(() => pl.classList.remove("playing"), 0)); } return; }
+    const b = e.target.closest(".vk-lb"); if (!b) return;
     const it = read().find(x => x.w === b.dataset.w); if (it) openWordCard(it, { fromList: true });
   });
-  addEventListener("malmun:vocab", () => { if (listEl === el) draw(); });
-  document.body.append(el);
+  el.addEventListener("pointerdown", e => { if (e.target.closest(".vk-lb")) tok(); }); // 줄 누르는 순간 「톡」 — 다른 소리가 나는 중이면 안 냄
+  const on = (t, f, o) => { addEventListener(t, f, o); listOff.push(() => removeEventListener(t, f, o)); };
+  on("malmun:vocab", () => { if (listEl === el) draw(); });
+  on("malmun:uilang", () => { if (listEl === el) draw(); }); // ⇄ = 줄 순서·제목 바뀜(칸 크기는 그대로)
+  on("hashchange", () => closeVocabList()); // 다른 화면으로 가면 닫음
+  on("keydown", e => { if (e.key === "Escape" && !cardEl) closeVocabList(); });
+  (stage || document.body).append(el);
 }
-
 // 편 목록 위 단추 글 — 개수는 말 바뀔 때마다 다시
 export const vocabMenuHTML = () => (vocabOn() ? `<p class="vk-menu"><button class="vk-menubtn" data-act="vocab" data-n="${vocabCount()}">${esc(tx("menu"))} <span class="vk-n">(${vocabCount()})</span></button></p>` : "");
 

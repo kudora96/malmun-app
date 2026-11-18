@@ -1771,9 +1771,39 @@ html:has(.scr.learn),html:has(.scr.learn) body{overflow-anchor:none} /* 배우�
 .vk-x{min-height:32px;font-weight:500;border-color:var(--line);color:var(--mute)}
 .vk-listdim{align-items:center}
 .vk-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;font-size:17px}
-.vk-ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:3px}
-.vk-li{width:100%;display:flex;flex-direction:row;flex-wrap:wrap;align-items:baseline;column-gap:8px;row-gap:0;text-align:start;padding:4px 10px;border-radius:12px;border:1px solid var(--line);background:var(--bubble);color:var(--ink)}
-.vk-li .vk-t{font-size:19px;line-height:1.25}.vk-li .vk-rom{font-size:12px;opacity:.7;line-height:1.25}.vk-li .vk-mean{font-size:15px;font-weight:600;line-height:1.25}
+.vk-ul{list-style:none;margin:0;padding:2px 2px 6px;display:flex;flex-direction:column;gap:6px}
+.vk-sheet{position:relative}.vk-sheet>.vk-xw{position:sticky;top:0;height:0;z-index:5}.vk-sheet .vk-head{padding-right:36px;font-size:18px}
+/* 영상 칸 자리 안 단어장(대표님 11-18 13:07) — 읽기 창처럼 영상 칸을 덮음 · 다른 칸 크기·배치 불변 · 제목·정렬은 위에 고정, 줄만 넘김 */
+.learn .stick .vstage.vk-on>.vmain,.learn .stick .vstage.vk-on>.panel{display:none!important}
+.vk-pane{position:relative;flex:1;min-height:0;height:100%;box-sizing:border-box;display:flex;flex-direction:column;padding:8px 10px 0;background:var(--bg);border-bottom:6px solid var(--wood);overflow:hidden}
+.vk-pane>.vk-xw{position:absolute;top:18px;right:20px;height:0;z-index:5}
+.vk-pane .vk-head{flex:none;padding-right:40px;font-size:18px;min-height:36px}
+.vk-uik{display:inline-flex;margin-left:6px}.vk-pane .vk-head{gap:4px}.vk-cols{flex:none;display:flex;gap:8px;padding:0 12px 2px 58px;font-size:11.5px;color:var(--mute);line-height:1.2}
+.vk-sortslot{margin-left:auto;display:inline-flex;gap:6px;align-items:center}
+.vk-pane .vk-ul,.vk-sheet .vk-ul{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;scrollbar-width:none;-ms-overflow-style:none}
+.vk-pane .vk-ul::-webkit-scrollbar,.vk-sheet .vk-ul::-webkit-scrollbar,.vk-ul.flick::-webkit-scrollbar{display:none;width:0;height:0}
+.vk-pane .vk-empty{margin:12px 4px}
+.flick{scrollbar-width:none;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}.flick::-webkit-scrollbar{display:none}
+.vk-sortslot .chip{min-height:30px;padding:0 10px;font-size:13px}
+/* 지우기(밀기·휴지통·3초 되돌리기) — 도우미 C 파일 주석 그대로 */
+li.vl-row{position:relative;overflow:hidden;touch-action:pan-y}.vl-slide{display:flex;align-items:center;gap:8px;width:100%;min-height:48px;transition:transform .18s ease;will-change:transform}
+.vl-row.vl-drag .vl-slide{transition:none}.vl-row.vl-open .vl-slide{transform:translateX(-88px)}
+.vl-del{position:absolute;top:0;right:0;bottom:0;width:88px;border:0;background:var(--badc,#c0392b);color:#fff;font-weight:700;display:none;align-items:center;justify-content:center}
+.vl-row.vl-open .vl-del,.vl-row.vl-drag .vl-del{display:flex}
+.vl-bin{position:absolute;top:50%;right:8px;transform:translateY(-50%);width:32px;height:32px;border:0;border-radius:8px;background:transparent;color:var(--badc,#c0392b);display:none;cursor:pointer}
+@media (hover:hover) and (pointer:fine){.vl-row:hover .vl-bin,.vl-bin:focus-visible{display:block}}
+.vl-bin:hover{background:rgba(255,210,31,.3)}
+.vl-undo{position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;padding:0 12px;background:var(--bubble)}
+.vl-undo button{min-height:36px;padding:0 14px;border-radius:18px;border:1px solid currentColor;background:none;color:inherit;font-weight:700}
+.vl-row.vl-gone .vl-slide,.vl-row.vl-gone .vl-del,.vl-row.vl-gone .vl-bin{visibility:hidden}
+/* 단어장 줄 = 단어 카드와 같은 말(흰 바탕 · 그림자 · 둥근 모서리 · 갈색 ▶ 원) · 한 줄 가로는 그대로(대표님 11-18) */
+.vk-li{position:relative;display:flex;align-items:center;gap:8px;min-height:48px;padding:0 10px 0 8px;border-radius:14px;border:1px solid var(--line);background:var(--card);color:var(--ink);box-shadow:0 3px 10px rgba(0,0,0,.18);overflow:hidden;transition:transform .1s ease,box-shadow .1s ease,background-color .12s ease}
+.vk-pl{flex:none;width:34px;height:34px;border-radius:50%;border:1px solid var(--hi);background:var(--hi);color:var(--on-hi);font-size:13px;line-height:1;padding:0 0 0 2px;box-shadow:0 1px 0 var(--line);cursor:pointer}
+.vk-pl.playing{animation:v9glow 1.4s ease-in-out infinite}
+.vk-lb{flex:1;min-width:0;align-content:center;display:flex;flex-direction:row;flex-wrap:wrap;align-items:baseline;column-gap:8px;row-gap:0;text-align:start;min-height:48px;padding:6px 2px;border:0;background:transparent;color:inherit;cursor:pointer}
+.vk-li .vk-t{font-size:19px;line-height:1.25;font-weight:800}.vk-li .vk-rom{font-size:14px;color:var(--mute);opacity:1;font-weight:500;line-height:1.25}.vk-li .vk-mean{font-size:15px;font-weight:600;color:var(--hi);line-height:1.25}
+@media (hover:hover){.vk-li:hover{background:rgba(255,210,31,.3)}}
+.vk-li:active{transform:scale(.97);box-shadow:0 1px 3px rgba(0,0,0,.18)}
 .vk-empty{margin:12px 4px;color:var(--mute);font-size:14px}
 
 /* ⭐ N 작은 단추(대표님 11-16) — 「ने⇄한」 바로 왼쪽 · 같은 높이 납작한 알약 · 첫 화면 큰 「⭐ 내 단어장」 메뉴는 화면에서 뺌(코드는 그대로) */
