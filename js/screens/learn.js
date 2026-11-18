@@ -10,12 +10,12 @@
 //  R7 영상은 늘 맨 위 · 지금 줄은 영상 바로 아래(앞 줄은 영상 뒤로) — 손으로 목록을 움직이면 4초 동안은 따라가지 않음
 //  R8 듣기 모드(대사→설명 · 설명만)도 R1~R6 그대로(영상 대신 소리 조각) · 모드를 바꾸면 멈춤(▶ 로 시작)
 //  R9 다시 들어오면 마지막 줄이 선택된 채 멈춰 있음
-import { noScoreKey } from "../agepolicy.js?v=1118.20"; // 점수 없음 안내 = 나이 때문인지(대표님 10-19)
-import { LEARN } from "../tl.js?v=1118.20";
-import { warmSTT } from "../sttserver.js?v=1118.20";
-import { onSound, claim } from "../onesound.js?v=1118.20";
-import * as sfxL from "../sfx.js?v=1118.20"; // 카드 말하기 최대 길이 = 본보기 길이로(10-07)
-import { t, tAlt, lang, langName, KO_UI, uiKoOn, preloadKoUi, tIn, uiKoIn } from "../i18n.js?v=1118.20";
+import { noScoreKey } from "../agepolicy.js?v=1118.21"; // 점수 없음 안내 = 나이 때문인지(대표님 10-19)
+import { LEARN } from "../tl.js?v=1118.21";
+import { warmSTT } from "../sttserver.js?v=1118.21";
+import { onSound, claim } from "../onesound.js?v=1118.21";
+import * as sfxL from "../sfx.js?v=1118.21"; // 카드 말하기 최대 길이 = 본보기 길이로(10-07)
+import { t, tAlt, lang, langName, KO_UI, uiKoOn, preloadKoUi, tIn, uiKoIn } from "../i18n.js?v=1118.21";
 // 줄 카드 단추 = 그림만 다섯(대표님 10-20 B 선 아이콘 · 같은 크기 한 줄 · 카드 높이 0px) — ▶ 이 줄 듣기 · 📖 설명 · ✎ 쓰기 · 🎤 말하기 · 🎮 게임 · 이름 = 처음 한 번 차례 풍선말 + 길게 누르기
 const SV = d => `<svg class="ico" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
 const ACTS = [["once", "listen_line", '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M8 5.5v13l11-6.5z"/></svg>'], ["explain", "explain", SV('<path d="M4 5a2 2 0 0 1 2-2h5v17H6a2 2 0 0 0-2 2z"/><path d="M20 5a2 2 0 0 0-2-2h-5v17h5a2 2 0 0 1 2 2z"/>')], ["write", "write", SV('<path d="M16 3l5 5L8 21H3v-5z"/>')], ["speak", "speak", SV('<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>')], ["game", "line_game", SV('<rect x="2" y="7" width="20" height="11" rx="5"/><path d="M7 10v5M4.5 12.5h5"/><circle cx="16" cy="11.5" r="1" fill="currentColor"/><circle cx="18.5" cy="14" r="1" fill="currentColor"/>')]];
@@ -37,33 +37,33 @@ function gameWords(vl, uw, lg, ep) {   // 뜻 조각(v9 pieces)과 소리 낱말
   }
   return out;
 }
-import { setTx } from "../retext.js?v=1118.20";
-import { langfitRun } from "../langfit.js?v=1118.20";
-import { esc, renderText, glossCards, sayParts } from "../text.js?v=1118.20";
-import { episode } from "../data.js?v=1118.20";
-import { paths, MEDIA } from "../paths.js?v=1118.20";
-import { attachVq } from "../vq.js?v=1118.20";
-import { setReportCtx } from "../report.js?v=1118.20";
-import { fbBind, fbPlan } from "../fbvoice.js?v=1118.20";
-import { setupTurns } from "../turns.js?v=1118.20"; // 「따라 해 보세요」 양방향(대표님 10-21) // 결과 안내 소리로 읽기(대표님 10-21)
-import { setupOverlays } from "../overlays.js?v=1118.20"; // 영상 위 그림 카드(대표님 10-22 새 1편) // 「따라 해 보세요」 양방향(대표님 10-21) // 결과 안내 소리로 읽기(대표님 10-21)
-import { Sequence } from "../audio.js?v=1118.20";
-import { I, progress, SPEAKER, spkHtml, uiKoBtn, uikoChip, bgmBtn, switchUiKo, openUiScope, switchUiScope } from "../ui.js?v=1118.20";
-import writeView from "./write.js?v=1118.20";
-import { diagEnv, keepDiag } from "../diag.js?v=1118.20";
-import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1118.20";
-import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace, lateFactor, sylAt, paintAt, karaokeRun, isFull } from "../rhythm.js?v=1118.20";
-import { playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1118.20";
-import { heardHTML, endHint, scoreOf, bestFull, spanOf, sylsAt } from "../heard.js?v=1118.20"; // 덧붙은 말 빼고 견주기(본부 10-11)
-import { recDel, downloadRec, askPersist } from "../recstore.js?v=1118.20";
-import { vocabOn, openWordCard, wordSpan, starChip } from "../vocab.js?v=1118.20"; // ⭐ 내 단어장 시험판(네팔어 · 대표님 11-16)
-import { showStopTip, hideStopTip } from "../stoptip.js?v=1118.20";
-import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1118.20";
-import { scoreFx, stopFx } from "../scorefx.js?v=1118.20"; // 점수별 효과(본부 10-05)
-import { record, recordSROnly, srOnlyMode, setSrOnly, isAndroid, srMiss, micWhy, srWhy, canScore, closeMic, logRec, micOpen, seqMode, srOnBlob, devSR, setDevSR, srJudge, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1118.20";
-import { hold, quietWake } from "../wake.js?v=1118.20";
-import { hold as bgmHold } from "../bgm.js?v=1118.20"; // 🎮 게임 중 배경음악 멈춤
-import { setupCards } from "../cards.js?v=1118.20"; // 영상 위 AR 카드 = 앱이 직접 그림(얹기부 10-27 · 자료 있는 편)
+import { setTx } from "../retext.js?v=1118.21";
+import { langfitRun } from "../langfit.js?v=1118.21";
+import { esc, renderText, glossCards, sayParts } from "../text.js?v=1118.21";
+import { episode } from "../data.js?v=1118.21";
+import { paths, MEDIA } from "../paths.js?v=1118.21";
+import { attachVq } from "../vq.js?v=1118.21";
+import { setReportCtx } from "../report.js?v=1118.21";
+import { fbBind, fbPlan } from "../fbvoice.js?v=1118.21";
+import { setupTurns } from "../turns.js?v=1118.21"; // 「따라 해 보세요」 양방향(대표님 10-21) // 결과 안내 소리로 읽기(대표님 10-21)
+import { setupOverlays } from "../overlays.js?v=1118.21"; // 영상 위 그림 카드(대표님 10-22 새 1편) // 「따라 해 보세요」 양방향(대표님 10-21) // 결과 안내 소리로 읽기(대표님 10-21)
+import { Sequence } from "../audio.js?v=1118.21";
+import { I, progress, SPEAKER, spkHtml, uiKoBtn, uikoChip, bgmBtn, switchUiKo, openUiScope, switchUiScope } from "../ui.js?v=1118.21";
+import writeView from "./write.js?v=1118.21";
+import { diagEnv, keepDiag } from "../diag.js?v=1118.21";
+import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1118.21";
+import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace, lateFactor, sylAt, paintAt, karaokeRun, isFull } from "../rhythm.js?v=1118.21";
+import { playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1118.21";
+import { heardHTML, endHint, scoreOf, bestFull, spanOf, sylsAt } from "../heard.js?v=1118.21"; // 덧붙은 말 빼고 견주기(본부 10-11)
+import { recDel, downloadRec, askPersist } from "../recstore.js?v=1118.21";
+import { vocabOn, openWordCard, wordSpan, starChip } from "../vocab.js?v=1118.21"; // ⭐ 내 단어장 시험판(네팔어 · 대표님 11-16)
+import { showStopTip, hideStopTip } from "../stoptip.js?v=1118.21";
+import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1118.21";
+import { scoreFx, stopFx } from "../scorefx.js?v=1118.21"; // 점수별 효과(본부 10-05)
+import { record, recordSROnly, srOnlyMode, setSrOnly, isAndroid, srMiss, micWhy, srWhy, canScore, closeMic, logRec, micOpen, seqMode, srOnBlob, devSR, setDevSR, srJudge, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1118.21";
+import { hold, quietWake } from "../wake.js?v=1118.21";
+import { hold as bgmHold } from "../bgm.js?v=1118.21"; // 🎮 게임 중 배경음악 멈춤
+import { setupCards } from "../cards.js?v=1118.21"; // 영상 위 AR 카드 = 앱이 직접 그림(얹기부 10-27 · 자료 있는 편)
 
 const RATES = [1, 0.75, 0.5];
 const pref = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } };
@@ -117,7 +117,6 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
       <button class="iconbtn" data-act="next" aria-label="${esc(t("next"))}">${I.next}</button>
       <button class="spd" data-act="spd">1×</button>
       <button class="modeb" data-act="flip">${esc(t("explain"))}</button>
-      <div class="modetip" hidden>${esc(t("flip_tip"))}</div>
     </div>
   </section>`;
 
@@ -1150,7 +1149,6 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   // 아래 막대 오른쪽 토글(본부 10-05 투덜이 — 「대사+설명」「설명만」 방법은 화면에서 뺌 · 코드는 남김)
   //  설명 카드가 열려 있으면 [▶ 전체 영상] = 카드 닫고 그 줄부터 영상을 끝까지 · 영상이 보이면 [설명] = 지금 줄 설명 카드
   function flip() {
-    app.querySelector(".modetip").hidden = true;
     if (st.panel?.kind === "explain") { // 카드가 접히며 목록이 위로 당겨지므로 자리를 다시 본다(본부 10-05 — 지금 줄이 아래 막대 뒤로 가던 것)
       const i = st.panel.i; closePanel(); if (st.mode !== "video") setMode("video"); playFrom(i); fullTip();
       requestAnimationFrame(() => keepVisible(st.cur, { force: true }));
@@ -1159,7 +1157,6 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     openPanel("explain", st.panel?.i ?? st.cur, { autoplay: true });
   }
   function flipLabel() { const b = app.querySelector(".ctrl [data-act=flip]"), on = st.panel?.kind === "explain", txt = on ? `▶ ${t("full_video")}` : t("explain"); if (b && b.textContent !== txt) b.textContent = txt; }
-  if (pref("malmun.fliptip") !== "1") { pref("malmun.fliptip", "1"); const tip = app.querySelector(".modetip"); tip.hidden = false; setTimeout(() => { tip.hidden = true; }, 3500); } // 처음 한 번만
   // 진행 막대 — 영상이 보이면 영상 위치 · 설명 카드면 설명 소리 위치 · 쓰기·말하기 창이면 꺼짐(갈색 줄만)
   const seekEl = app.querySelector(".seek");
   const seekSrc = () => (st.panel?.kind === "explain" ? (ex.q.length ? ex.a : null) : st.panel ? null : v);
@@ -1204,7 +1201,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   const tipBtns = () => [...(items[st.cur]?.querySelectorAll(".acts [data-tipk]") || [])];
   function tipNext() { tip.step++; const bs = tipBtns(); if (tip.step >= bs.length) { tip.step = -1; tipOff(); try { localStorage.setItem("malmun.actstip", "1"); } catch {} document.removeEventListener("pointerdown", tipTap, true); return; } tipShow(bs[tip.step], tip.step + 1); }
   function tipTap(e) { if (tip.step < 0) return; if (e.target.closest?.(".actstip")) { e.preventDefault(); return tipNext(); } tip.step = 99; tipNext(); } /* 풍선말을 누르면 다음 · 다른 곳 누름 = 풍선말 닫고 그 누름은 그대로 통과(본부 10-20 「처음 들어와 바로 쓰기·다음 눌러도 안 막힘」) */
-  function tipStart() { let seen = false; try { seen = localStorage.getItem("malmun.actstip") === "1" || ((/[?&]mute=1/.test(location.search) || navigator.webdriver) && !window.__actsTip); } /* 점검 브라우저 = 안 띄움(점검이 켤 땐 __actsTip) */ catch {} if (seen || tip.step >= 0 || !tipBtns().length || !tipBtns()[0].offsetWidth) return; const mt = app.querySelector(".modetip"); if (mt && !mt.hidden && mt.offsetWidth) { clearTimeout(tip.wait); tip.wait = setTimeout(tipStart, 800); return; } /* 「누르면 설명 ↔ 영상」 안내가 사라진 뒤에(한 화면에 풍선 하나) */ tip.step = -1; document.addEventListener("pointerdown", tipTap, true); tipNext(); }
+  function tipStart() { let seen = false; try { seen = localStorage.getItem("malmun.actstip") === "1" || ((/[?&]mute=1/.test(location.search) || navigator.webdriver) && !window.__actsTip); } /* 점검 브라우저 = 안 띄움(점검이 켤 땐 __actsTip) */ catch {} if (seen || tip.step >= 0 || !tipBtns().length || !tipBtns()[0].offsetWidth) return; tip.step = -1; document.addEventListener("pointerdown", tipTap, true); tipNext(); }
   const onUiTip = () => { if (tip.step < 0) return; tipOff(); const again = () => { if (tip.step < 0) return; if (document.querySelector(".uikotip")) { tip.t = setTimeout(again, 300); return; } tipShow(tipBtns()[tip.step], tip.step + 1); }; tip.t = setTimeout(again, 60); }; window.addEventListener("malmun:uilang", onUiTip); /* ⇄ = 풍선말 글도 그 말로 · ⇄ 안내 풍선이 떠 있는 동안은 숨겼다가 사라지면 다시(한 화면 풍선 하나 · 검사1팀 10-20) */
   app.querySelector(".lines").addEventListener("pointerdown", e => { const b = e.target.closest(".acts [data-tipk]"); if (!b || tip.step >= 0) return; tip.lpFired = false; clearTimeout(tip.lp); tip.lp = setTimeout(() => { tip.lpFired = true; tipShow(b, 0); tip.t = setTimeout(tipOff, 1800); }, 480); });
   for (const ev of ["pointerup", "pointercancel", "pointerleave"]) app.querySelector(".lines").addEventListener(ev, () => clearTimeout(tip.lp));
