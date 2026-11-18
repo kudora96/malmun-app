@@ -103,9 +103,13 @@ const fsBtn = () => { const f = document.querySelector(".learn .vfs"); return f 
 const host = () => (fsOn() && listEl ? stageOf() : document.body); // 전체 화면 안에서는 겹쳐 뜨는 카드도 그 칸 안에 넣어야 보임
 function stageFree(st) { exitFs(); st.classList.remove("vk-on"); st.style.removeProperty("height"); syncBar(); }
 let pane = null; // 조각 카드가 영상 칸 안에 있는 동안 {own, st}
-function toPane(el) { const st = stageOf(); if (!st || pane) return; pane = { own: stageLock(st), st }; if (listEl) listEl.style.display = "none"; el.className = "vk-pane vk-ppane"; st.append(el); }
+function toPane(el) { const st = stageOf(); if (!st || pane) return; pane = { own: stageLock(st), st, ls: listEl?.querySelector(".vk-ul")?.scrollTop || 0 }; if (listEl) listEl.style.display = "none"; el.className = "vk-pane vk-ppane"; st.append(el); }
 function fromPane(el) { if (!pane) return; const { own, st } = pane; pane = null; if (own) stageFree(st); if (listEl) listEl.style.display = ""; el.className = "vk-dim"; host().append(el); }
-export function closeCard() { stopWordSound(); const el = cardEl; cardEl = null; if (pane) { const { own, st } = pane; pane = null; if (own) stageFree(st); if (listEl) closeVocabList(); } el?.remove(); }
+export function closeCard(back = false) { // back = 단어장 목록으로 돌아감(카드만 닫음) · 아니면 칸 안 전부 닫고 영상 자리로
+  stopWordSound(); const el = cardEl; cardEl = null;
+  if (pane) { const pane0 = pane, { own, st } = pane; pane = null; if (back && listEl) { listEl.style.display = ""; const u = listEl.querySelector(".vk-ul"); if (u) u.scrollTop = pane0.ls; } else { if (own) stageFree(st); if (listEl) closeVocabList(); } }
+  el?.remove();
+}
 addEventListener("hashchange", () => { if (pane) closeCard(); });
 document.addEventListener("fullscreenchange", () => { if (cardEl && !pane) host().append(cardEl); if (!document.fullscreenElement) stageOf()?.classList.remove("vk-pfs"); });
 // 「소리 준비 중…」(대표님 11-16) — ▶ 를 누르고 소리가 시작될 때까지(0.25초 넘게 걸릴 때만) 카드 맨 위에 작게 · 아무 소리나 시작하면 지움
@@ -142,6 +146,7 @@ export function openWordCard(it, { before, fromList = false } = {}) {
   const saved = () => has(it.w), romanNow = () => (document.querySelector(".exv.norom") ? "" : (lang === "ne" && it.note?.dev) || it.rom); // 네팔어 학습자 = 데바나가리 발음(dev) · 발음 토글(.norom)이 끄면 숨김
   const el = (cardEl = document.createElement("div"));
   el.className = "vk-dim"; el.setAttribute("role", "dialog"); el.setAttribute("aria-modal", "true");
+  toPane(el); // 배우는 화면이면 영상 칸 안에서(11-18 13:56 · 단어장 붙임 코드 그대로) · 그 밖의 화면은 예전처럼 겹쳐 뜸
   let pc = null, ents = null, view = null; // 조각 자료 · 지금 보는 조각 id(없으면 구절 카드)
   const draw = () => { // 그리고 나서: 글 하나만 두고 높이는 두 말 중 큰 쪽으로 고정
     draw0(); const c = el.querySelector(".vk-card"), pe = view && ents?.find(x => x.id === view);
@@ -151,10 +156,10 @@ export function openWordCard(it, { before, fromList = false } = {}) {
     const pe = view && ents?.find(x => x.id === view);
     if (pe) { el.innerHTML = `<div class="vk-card vk-pcard" data-m="${uiKoOn() ? "ko" : "ne"}" data-ck="${esc(it.ep + "|" + it.w + "|" + view)}">${pieceHTML(pe, !document.querySelector(".exv.norom"))}</div>${pane ? fsBtn() : ""}`; return; }
     el.innerHTML = `<div class="vk-card" data-m="${uiKoOn() ? "ko" : "ne"}" data-ck="${esc(it.ep + "|" + it.w + "|")}">
-      ${XBTN}<div class="vk-row"><button class="vk-snd" data-v="snd" aria-label="${esc(tx("listen"))}" title="${esc(tx("listen"))}">▶</button>
+      ${XBTN}<div class="vk-row">${pane && fromList && listEl ? `<button class="vk-back" data-v="lback" aria-label="${esc(PTX[uiKoOn() ? "ko" : "ne"].back)}" title="${esc(PTX[uiKoOn() ? "ko" : "ne"].back)}">←</button>` : ""}<button class="vk-snd" data-v="snd" aria-label="${esc(tx("listen"))}" title="${esc(tx("listen"))}">▶</button>
         <div class="vk-main"><span class="vk-t ko" lang="ko">${esc(it.w)}</span>${romanNow() ? `<span class="vk-rom" lang="ne">${esc(romanNow())}</span>` : ""}${meanHTML(it)}</div>${lang === "ne" ? `<button class="chip uiko vk-uiko" data-act="uiko" aria-pressed="${uiKoOn()}" aria-label="नेपाली ⇄ 한국어"><span class="a" lang="ne">${esc(langShort("ne"))}</span><span class="ar" aria-hidden="true">⇄</span><span class="b" lang="ko">한</span></button>` : ""}</div>
       ${piecesHTML(pc, ents)}${noteHTML(it.note, uiKoOn()) || (it.ko ? `<div class="vk-sent"><span class="vk-s ko" lang="ko">${esc(it.ko)}</span>${it.tr ? `<span class="vk-s vk-str" lang="ne">${esc(it.tr)}</span>` : ""}</div>` : "")}
-      <div class="vk-btns"><button class="vk-add" data-v="add" ${saved() ? "disabled" : ""}>${esc(saved() ? tx("has") : tx("add"))}</button>${saved() && fromList ? `<button class="vk-done" data-v="done">${esc(tx("done"))}</button>` : ""}</div></div>`;
+      <div class="vk-btns"><button class="vk-add" data-v="add" ${saved() ? "disabled" : ""}>${esc(saved() ? tx("has") : tx("add"))}</button>${saved() && fromList ? `<button class="vk-done" data-v="done">${esc(tx("done"))}</button>` : ""}</div></div>${pane ? fsBtn() : ""}`;
   };
   before?.(); // 카드가 열리면 바깥 소리(설명 읽기)는 그 자리에서 멈춤 — 카드 소리만
   draw();
@@ -170,7 +175,8 @@ export function openWordCard(it, { before, fromList = false } = {}) {
     if (b.dataset.v === "fs") { toggleFs(); return; } // ⛶ = 칸 통째 전체 화면 ⇄ 나가기
     if (b.dataset.v === "close") { if (pane && fsOn()) exitFs(); else closeCard(); return; } // 전체 화면 중 ✕ = 먼저 칸 안으로 · 다시 ✕ = 영상 자리로 // ✕ = 바깥 누르기와 똑같이 닫힘
     if (b.dataset.v === "piece") { stopRead(); view = b.dataset.p; toPane(el); draw(); startNote(); return; } // 조각 카드(글만)
-    if (b.dataset.v === "back") { stopRead(); view = null; fromPane(el); draw(); startNote(); return; }
+    if (b.dataset.v === "lback") { closeCard(true); return; } // ← = 단어장 목록 그 쪽·그 위치로(목록은 숨겨 둔 채 그대로 있었음)
+    if (b.dataset.v === "back") { stopRead(); view = null; draw(); startNote(); return; } // 조각 카드 ← = 카드(칸 안 그대로)
     if (b.dataset.v === "snd") { // ▶ = 처음부터 다시(설명 읽기 · 낱말 소리는 따로 안 냄)
       if (curNote()) { if (isReading()) toggleRead(); else startNote(); return; } // ▶/⏸ — 읽는 중 = 멈춤 · 멈춤 = 이어서 · 끝난 뒤 = 처음부터
       showWait(el); stopRead(); it.__done = null;
@@ -180,15 +186,15 @@ export function openWordCard(it, { before, fromList = false } = {}) {
     if (b.dataset.v === "done") { // 지움 막기(대표님 11-16): 바로 지우지 않고 5초 「되돌리기」
       const snap = read().find(x => x.w === it.w); drop(it.w);
       el.querySelector(".vk-card").innerHTML = `<p class="vk-gone">${esc(tx("gone"))}</p><div class="vk-btns"><button class="vk-add" data-v="undo">${esc(tx("undo"))}</button></div>`;
-      clearTimeout(el.__ut); el.__ut = setTimeout(() => { if (cardEl === el) closeCard(); }, 5000); el.__snap = snap; return;
+      clearTimeout(el.__ut); el.__ut = setTimeout(() => { if (cardEl === el) closeCard(!!listEl); }, 5000); el.__snap = snap; return;
     }
     if (b.dataset.v === "undo") { if (el.__snap) put(el.__snap); clearTimeout(el.__ut); draw(); }
   });
-  host().append(el);
+  if (!pane) host().append(el);
   if (it.ep) Promise.all([noteOf(it.ep), pcOf(it.ep), dictOf()]).then(([n, pcs, dc]) => { if (cardEl !== el) return; const x = n?.[clean(it.w)]; pc = pcs?.cards?.[clean(it.w)] || null; ents = dc?.entries || null; if (x) { it.note = x; it.key = clean(it.w); it.order = n._order || []; } if (x || (pc && ents)) { draw(); if (x) startNote(); } }); // 설명이 있으면 문장 자리를 설명으로 · 조각 자료가 있으면 칩
   return el;
 }
-document.addEventListener("keydown", e => { if (e.key === "Escape" && cardEl) closeCard(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape" && cardEl) closeCard(!!listEl); });
 
 // 「톡」 — 새 소리 파일 없이 sfx.js 합성 소리 한 개(0.05초) · 읽기·카드 낭독·영상 등 다른 소리가 나는 중이면 안 냄(소리는 하나 · onesound)
 sfx.defineSynth("tok", mk => { const c = mk(1, 0.07), o = c.createOscillator(), g = c.createGain(); o.type = "sine"; o.frequency.setValueAtTime(900, 0); o.frequency.exponentialRampToValueAtTime(420, 0.05); g.gain.setValueAtTime(0, 0); g.gain.linearRampToValueAtTime(0.22, 0.004); g.gain.exponentialRampToValueAtTime(0.001, 0.06); o.connect(g); g.connect(c.destination); o.start(0); o.stop(0.07); return c.startRendering(); });
