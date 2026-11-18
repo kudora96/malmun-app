@@ -10,11 +10,11 @@
 //  R7 영상은 늘 맨 위 · 지금 줄은 영상 바로 아래(앞 줄은 영상 뒤로) — 손으로 목록을 움직이면 4초 동안은 따라가지 않음
 //  R8 듣기 모드(대사→설명 · 설명만)도 R1~R6 그대로(영상 대신 소리 조각) · 모드를 바꾸면 멈춤(▶ 로 시작)
 //  R9 다시 들어오면 마지막 줄이 선택된 채 멈춰 있음
-import { noScoreKey } from "../agepolicy.js?v=1118.1"; // 점수 없음 안내 = 나이 때문인지(대표님 10-19)
-import { LEARN } from "../tl.js?v=1118.1";
-import { warmSTT } from "../sttserver.js?v=1118.1";
-import * as sfxL from "../sfx.js?v=1118.1"; // 카드 말하기 최대 길이 = 본보기 길이로(10-07)
-import { t, tAlt, lang, langName, KO_UI, uiKoOn, preloadKoUi, tIn, uiKoIn } from "../i18n.js?v=1118.1";
+import { noScoreKey } from "../agepolicy.js?v=1118.2"; // 점수 없음 안내 = 나이 때문인지(대표님 10-19)
+import { LEARN } from "../tl.js?v=1118.2";
+import { warmSTT } from "../sttserver.js?v=1118.2";
+import * as sfxL from "../sfx.js?v=1118.2"; // 카드 말하기 최대 길이 = 본보기 길이로(10-07)
+import { t, tAlt, lang, langName, KO_UI, uiKoOn, preloadKoUi, tIn, uiKoIn } from "../i18n.js?v=1118.2";
 // 줄 카드 단추 = 그림만 다섯(대표님 10-20 B 선 아이콘 · 같은 크기 한 줄 · 카드 높이 0px) — ▶ 이 줄 듣기 · 📖 설명 · ✎ 쓰기 · 🎤 말하기 · 🎮 게임 · 이름 = 처음 한 번 차례 풍선말 + 길게 누르기
 const SV = d => `<svg class="ico" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
 const ACTS = [["once", "listen_line", '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M8 5.5v13l11-6.5z"/></svg>'], ["explain", "explain", SV('<path d="M4 5a2 2 0 0 1 2-2h5v17H6a2 2 0 0 0-2 2z"/><path d="M20 5a2 2 0 0 0-2-2h-5v17h5a2 2 0 0 1 2 2z"/>')], ["write", "write", SV('<path d="M16 3l5 5L8 21H3v-5z"/>')], ["speak", "speak", SV('<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>')], ["game", "line_game", SV('<rect x="2" y="7" width="20" height="11" rx="5"/><path d="M7 10v5M4.5 12.5h5"/><circle cx="16" cy="11.5" r="1" fill="currentColor"/><circle cx="18.5" cy="14" r="1" fill="currentColor"/>')]];
@@ -36,33 +36,33 @@ function gameWords(vl, uw, lg, ep) {   // 뜻 조각(v9 pieces)과 소리 낱말
   }
   return out;
 }
-import { setTx } from "../retext.js?v=1118.1";
-import { langfitRun } from "../langfit.js?v=1118.1";
-import { esc, renderText, glossCards, sayParts } from "../text.js?v=1118.1";
-import { episode } from "../data.js?v=1118.1";
-import { paths, MEDIA } from "../paths.js?v=1118.1";
-import { attachVq } from "../vq.js?v=1118.1";
-import { setReportCtx } from "../report.js?v=1118.1";
-import { fbBind, fbPlan } from "../fbvoice.js?v=1118.1";
-import { setupTurns } from "../turns.js?v=1118.1"; // 「따라 해 보세요」 양방향(대표님 10-21) // 결과 안내 소리로 읽기(대표님 10-21)
-import { setupOverlays } from "../overlays.js?v=1118.1"; // 영상 위 그림 카드(대표님 10-22 새 1편) // 「따라 해 보세요」 양방향(대표님 10-21) // 결과 안내 소리로 읽기(대표님 10-21)
-import { Sequence } from "../audio.js?v=1118.1";
-import { I, progress, SPEAKER, spkHtml, uiKoBtn, uikoChip, bgmBtn, switchUiKo, openUiScope, switchUiScope } from "../ui.js?v=1118.1";
-import writeView from "./write.js?v=1118.1";
-import { diagEnv, keepDiag } from "../diag.js?v=1118.1";
-import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1118.1";
-import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace, lateFactor, sylAt, paintAt, karaokeRun, isFull } from "../rhythm.js?v=1118.1";
-import { playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1118.1";
-import { heardHTML, endHint, scoreOf, bestFull, spanOf, sylsAt } from "../heard.js?v=1118.1"; // 덧붙은 말 빼고 견주기(본부 10-11)
-import { recDel, downloadRec, askPersist } from "../recstore.js?v=1118.1";
-import { vocabOn, openWordCard, wordSpan, starChip } from "../vocab.js?v=1118.1"; // ⭐ 내 단어장 시험판(네팔어 · 대표님 11-16)
-import { showStopTip, hideStopTip } from "../stoptip.js?v=1118.1";
-import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1118.1";
-import { scoreFx, stopFx } from "../scorefx.js?v=1118.1"; // 점수별 효과(본부 10-05)
-import { record, recordSROnly, srOnlyMode, setSrOnly, isAndroid, srMiss, micWhy, srWhy, canScore, closeMic, logRec, micOpen, seqMode, srOnBlob, devSR, setDevSR, srJudge, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1118.1";
-import { hold, quietWake } from "../wake.js?v=1118.1";
-import { hold as bgmHold } from "../bgm.js?v=1118.1"; // 🎮 게임 중 배경음악 멈춤
-import { setupCards } from "../cards.js?v=1118.1"; // 영상 위 AR 카드 = 앱이 직접 그림(얹기부 10-27 · 자료 있는 편)
+import { setTx } from "../retext.js?v=1118.2";
+import { langfitRun } from "../langfit.js?v=1118.2";
+import { esc, renderText, glossCards, sayParts } from "../text.js?v=1118.2";
+import { episode } from "../data.js?v=1118.2";
+import { paths, MEDIA } from "../paths.js?v=1118.2";
+import { attachVq } from "../vq.js?v=1118.2";
+import { setReportCtx } from "../report.js?v=1118.2";
+import { fbBind, fbPlan } from "../fbvoice.js?v=1118.2";
+import { setupTurns } from "../turns.js?v=1118.2"; // 「따라 해 보세요」 양방향(대표님 10-21) // 결과 안내 소리로 읽기(대표님 10-21)
+import { setupOverlays } from "../overlays.js?v=1118.2"; // 영상 위 그림 카드(대표님 10-22 새 1편) // 「따라 해 보세요」 양방향(대표님 10-21) // 결과 안내 소리로 읽기(대표님 10-21)
+import { Sequence } from "../audio.js?v=1118.2";
+import { I, progress, SPEAKER, spkHtml, uiKoBtn, uikoChip, bgmBtn, switchUiKo, openUiScope, switchUiScope } from "../ui.js?v=1118.2";
+import writeView from "./write.js?v=1118.2";
+import { diagEnv, keepDiag } from "../diag.js?v=1118.2";
+import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1118.2";
+import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace, lateFactor, sylAt, paintAt, karaokeRun, isFull } from "../rhythm.js?v=1118.2";
+import { playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1118.2";
+import { heardHTML, endHint, scoreOf, bestFull, spanOf, sylsAt } from "../heard.js?v=1118.2"; // 덧붙은 말 빼고 견주기(본부 10-11)
+import { recDel, downloadRec, askPersist } from "../recstore.js?v=1118.2";
+import { vocabOn, openWordCard, wordSpan, starChip } from "../vocab.js?v=1118.2"; // ⭐ 내 단어장 시험판(네팔어 · 대표님 11-16)
+import { showStopTip, hideStopTip } from "../stoptip.js?v=1118.2";
+import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1118.2";
+import { scoreFx, stopFx } from "../scorefx.js?v=1118.2"; // 점수별 효과(본부 10-05)
+import { record, recordSROnly, srOnlyMode, setSrOnly, isAndroid, srMiss, micWhy, srWhy, canScore, closeMic, logRec, micOpen, seqMode, srOnBlob, devSR, setDevSR, srJudge, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1118.2";
+import { hold, quietWake } from "../wake.js?v=1118.2";
+import { hold as bgmHold } from "../bgm.js?v=1118.2"; // 🎮 게임 중 배경음악 멈춤
+import { setupCards } from "../cards.js?v=1118.2"; // 영상 위 AR 카드 = 앱이 직접 그림(얹기부 10-27 · 자료 있는 편)
 
 const RATES = [1, 0.75, 0.5];
 const pref = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } };
@@ -462,7 +462,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     const k = sndOf(i), code = v9code(txtOf(i));
     const lab = key => `<span class="glab"><span data-k="${key}">${esc(tq(key))}</span></span>`; // 괄호 속 한국어 덧붙임 뺌 — 화면 글은 한국어 ⇄ 학습자 언어 중 하나만(대표님 10-19 · 검사부 th · 다국어부 10-20)
     return `<div class="exv v9${romOn() ? "" : " norom"}">
-      <div class="v9bar">${lab("v9_listen")}<span class="seg snd">${v9L ? (x.audio?.[v9L]?.ex ? playBtn("L") : `<button class="pb nosnd" disabled aria-disabled="true"><span class="ic" aria-hidden="true">🔇</span> ${esc(v9name("L"))}</button>`) : ""}${playBtn("ko")}</span>${x.sent?.length ? `<span class="snum" aria-live="off">1/${x.sent.length}</span>` : ""}${bgmBtn()}${starChip()}${uikoChip(panelKo())}<button class="romb" data-x="v9rom" aria-pressed="${romOn()}"><span data-k="${romK}">${esc(tq(romK))}</span></button><button class="pb closex" data-x="close" title="${esc(tq("close_word"))}" aria-label="${esc(tq("close_word"))}"><span class="cx">✕</span><span class="cw"> ${esc(tq("close_word"))}</span></button><div class="v9tip" hidden>${esc(tq("v9_tip"))}</div></div>
+      <div class="v9bar">${lab("v9_listen")}<span class="seg snd">${v9L ? (x.audio?.[v9L]?.ex ? playBtn("L") : `<button class="pb nosnd" disabled aria-disabled="true"><span class="ic" aria-hidden="true">🔇</span> ${esc(v9name("L"))}</button>`) : ""}${playBtn("ko")}</span>${x.sent?.length ? `<span class="snum" aria-live="off">1/${x.sent.length}</span>` : ""}${bgmBtn()}${starChip()}${uikoChip(panelKo())}<button class="romb" data-x="v9rom" aria-pressed="${romOn()}"><span data-k="${romK}">${esc(tq(romK))}</span></button><button class="pb closex" data-x="close" title="${esc(tq("close_word"))}" aria-label="${esc(tq("close_word"))}"><span class="cx">✕</span><span class="cw"> ${esc(tq("close_word"))}</span></button></div>
       ${v9L ? "" : `<div class="v9soon">${esc(tq("v9_lang_soon"))}</div>`}<div class="v9pop" hidden></div>
       <div class="v9body">
         ${x.pieces?.length || fx ? `<div class="chips">${(x.pieces || []).map((c, ci) => `<span class="chip"${vocabOn() ? ` data-x="wd" data-wi="${ci}"` : ""}><b class="ko" lang="${LEARN}">${esc(c.ko)}</b> <i>${c.rom != null ? `<span class="rom"${c.dev ? ' lang="ne"' : ""}>${esc(c.dev || c.rom)}${c.mean && v9L ? ", " : ""}</span>${v9L ? esc(c.mean || "") : ""}` : v9L ? esc(c.gloss || "") : ""}</i></span>`).join("")}${fx ? `<span class="fx">= <b>${esc(fx)}</b></span>` : ""}</div>` : ""}
@@ -967,7 +967,6 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     }
     // 나중에 칩 글·폭이 바뀌어도(⇄ · 언어 폭 고정 · ■/▶) 넘치면 다시 맞춤(검사부 10-16 ne 375 — 머리 줄 양 끝 잘림)
     if (!bar.__ro && window.ResizeObserver) { let q = 0; bar.__ro = new ResizeObserver(() => { if (q) return; q = setTimeout(() => { q = 0; if (!bar.isConnected) return bar.__ro.disconnect(); if (v9Over(bar)) { v9Fit(); fitPanel(); } }, 200); }); bar.__ro.observe(bar); [...bar.children].forEach(e => bar.__ro.observe(e)); }
-    if (pref("malmun.v9tip") !== "1") { const tip = panel.querySelector(".v9tip"); pref("malmun.v9tip", "1"); tip.hidden = false; setTimeout(() => { tip.hidden = true; }, 3000); }
   }
   const markPlay = (k = null) => panel.querySelectorAll(".v9bar .pb[data-x=ex]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.v === k)));
   function v9Click(x) {
