@@ -1,6 +1,7 @@
 // 단어 카드 설명(대표님 11-16 「설명 창 방식 그대로」) — 위 = 지금 말(⇄ 상태) 본문 · 아래 「↳」 한 줄 = 다른 말 · ⇄ 누르면 그 자리에서 즉시 바뀜
 // 읽기 소리 = 낱말 소리 다음에 뜻·쓰임 → 예문1 → 예문2 차례로(지금 말) · 읽는 줄에 노래방 불 · 파일 = media/wordnote/<편>/<낱말번호>_<ko|ne>_<mean|ex1|ex2>.mp3(말하기부가 만듦 · 없으면 건너뜀)
-import { esc } from "./text.js?v=1118.8";
+import { claim, onSound } from "./onesound.js?v=1118.9";
+import { esc } from "./text.js?v=1118.9";
 
 const BLK = [["mean", "ko_mean", "ne_mean"], ["ex1", "ko_ex1", "ne_ex1"], ["ex2", "ko_ex2", "ne_ex2"]];
 const pick = (n, ko, k) => n?.[`${k ? "ko" : "ne"}_${ko}`] || n?.[`${k ? "ko" : "ne"}_${ko === "ex1" ? "ex" : ko}`] || ""; // ex1 = 옛 이름 ex 도 받음
@@ -82,7 +83,7 @@ function play(j, k, at, hold, lead = 0, sec = null) { // k 블록을 at(0~1 비�
   a.addEventListener("loadedmetadata", () => { if (sec != null) { try { a.currentTime = Math.max(0, sec - lead); } catch {} } else if (at > 0 && a.duration) { try { a.currentTime = Math.max(0, at * a.duration - lead); } catch {} } if (hold && j.a === a) show(j); }, { once: true });
   if (hold) { j.paused = true; started = true; return; }
   j.paused = false;
-  a.play().then(() => { started = true; if (j.a === a && !j.dead) { show(j); run(j); } }).catch(() => { if (!j.dead && !j.paused && j.a === a) play(j, k + 1, 0, false); });
+  claim("card"); a.play().then(() => { started = true; if (j.a === a && !j.dead) { show(j); run(j); } }).catch(() => { if (!j.dead && !j.paused && j.a === a) play(j, k + 1, 0, false); });
 }
 export function readNote(root, it, n, koFirst, order, { from: fk = 0, wi = -1, url = null } = {}) {
   stopRead();
@@ -99,7 +100,7 @@ export function toggleRead() {
   if (!j.paused) { j.paused = true; clearTimeout(j.gap); j.gap = 0; clearInterval(tick); try { j.a?.pause(); } catch {} return true; }
   j.paused = false; clearTimeout(j.gap); j.gap = 0;
   if (j.resumeK >= 0 && j.a?.ended) { play(j, j.resumeK, 0, false); return true; }
-  j.a.play().then(() => { if (!j.dead && !j.paused) { show(j); run(j); } }).catch(() => {});
+  claim("card"); j.a.play().then(() => { if (!j.dead && !j.paused) { show(j); run(j); } }).catch(() => {});
   return true;
 }
 // 다른 문장 블록을 톡 = 그 블록 처음부터(지금 말 · 뒤 블록으로 이어 읽음) · 지금 읽는(멈춘) 블록이면 멈춤⇄이어서 · 끝난 뒤엔 어느 블록이든 그 블록부터
@@ -127,7 +128,7 @@ export function tapWord(b, wi) {
     }
     const d = j.a.duration || 0; clearTimeout(j.gap); j.gap = 0;
     if (d) { try { j.a.currentTime = seek(d); } catch {} j.root.querySelectorAll(".vk-line .kw.kar, .kw.ks").forEach(e => e.classList.remove("kar", "ks", "kt")); from = { k, wi }; ws[wi].classList.add("kar"); }
-    if (j.paused || j.a.paused) { j.paused = false; j.a.play().then(() => { if (!j.dead && !j.paused) { show(j); run(j); } }).catch(() => {}); } else show(j);
+    if (j.paused || j.a.paused) { j.paused = false; claim("card"); j.a.play().then(() => { if (!j.dead && !j.paused) { show(j); run(j); } }).catch(() => {}); } else show(j);
     return true;
   }
   return startAt(j, k, wi);

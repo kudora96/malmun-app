@@ -1,10 +1,11 @@
 // 음성 조각 이어 재생 — 조각 사이 간격은 앱이 넣는다(app_build_spec: 기본 400ms)
+import { claim } from "./onesound.js?v=1118.9";
 export const GAP_MS = 400;
 
 // 점검 소리 끔(본부 10-17) — ?mute=1 이면 음소거 · window.__sfxVolume(점검기)이 있으면 그 크기 · 평소 학습자는 그대로(바꾸는 것 없음)
 const tv = a => { if (/[?&]mute=1(&|$)/.test(location.search)) a.muted = true; else if (window.__sfxVolume != null) a.volume = Math.max(0, Math.min(1, window.__sfxVolume)); return a; };
 export class Sequence {
-  constructor() { this.a = new Audio(); this.a.preload = "auto"; this.q = []; this.i = 0; this.on = false; this.gen = 0; this.timer = 0; this.rate = 1; this.onstep = null; this.ondone = null; this.a.onended = () => this.next(); this.a.onerror = () => this.next(); }
+  constructor() { this.a = new Audio(); this.a.preload = "auto"; this.q = []; this.i = 0; this.on = false; this.gen = 0; this.timer = 0; this.rate = 1; this.owner = "seq"; this.onstep = null; this.ondone = null; this.a.onended = () => this.next(); this.a.onerror = () => this.next(); }
   // items = [{src, ...meta}]
   play(items, from = 0) { this.stop(); this.q = items; this.i = from - 1; this.on = true; this.next(); }
   next() {
@@ -18,7 +19,7 @@ export class Sequence {
       this.a.src = it.src; this.a.playbackRate = this.rate;
       if (it.at) { this.a.currentTime = it.at; this.a.addEventListener("loadedmetadata", () => { if (this.a.currentTime < it.at - 0.2) this.a.currentTime = it.at; }, { once: true }); } // 그 문장부터(설명 언어 바꿔 이어 읽기)
       // 소리가 시작되기 전에 멈추거나 다른 소리로 바뀌면 앞 play() 가 AbortError 로 늦게 거절됨 → 그걸로 새 차례를 넘기지 않음(⇄·다음 줄을 열자마자 눌렀을 때 소리는 나는데 상태·칠이 안 따라가던 것)
-      const gen = this.gen; tv(this.a).play().catch(e => { if (gen === this.gen && e?.name !== "AbortError") this.next(); });
+      claim(this.owner); const gen = this.gen; tv(this.a).play().catch(e => { if (gen === this.gen && e?.name !== "AbortError") this.next(); });
       const nx = this.q[this.i + 1];
       if (nx) { const p = new Audio(); p.preload = "auto"; p.src = nx.src; }
     };
@@ -31,7 +32,7 @@ export class Sequence {
     if (it.at) { this.a.currentTime = it.at; this.a.addEventListener("loadedmetadata", () => { if (this.a.currentTime < it.at - 0.2) this.a.currentTime = it.at; }, { once: true }); }
   }
   pause() { this.gen++; this.on = false; clearTimeout(this.timer); this.a.pause(); }
-  resume() { if (!this.q.length) return; this.on = true; if (this.a.src && !this.a.ended && this.a.currentTime > 0) tv(this.a).play().catch(() => {}); else { this.i--; this.next(); } }
+  resume() { if (!this.q.length) return; this.on = true; if (this.a.src && !this.a.ended && this.a.currentTime > 0) { claim(this.owner); tv(this.a).play().catch(() => {}); } else { this.i--; this.next(); } }
   stop() { this.gen++; this.on = false; clearTimeout(this.timer); this.a.pause(); this.q = []; }
   setRate(r) { this.rate = r; this.a.playbackRate = r; }
   get playing() { return this.on; }
@@ -40,10 +41,10 @@ export class Sequence {
 // 한 소리 계속 반복(글자 반복 듣기)
 export class Looper {
   constructor() { this.a = new Audio(); this.src = null; this.timer = 0; this.a.onended = () => { if (this.src) this.timer = setTimeout(() => tv(this.a).play().catch(() => {}), 500); }; }
-  toggle(src) { if (this.src === src) { this.stop(); return false; } this.stop(); this.src = src; this.a.src = src; tv(this.a).play().catch(() => {}); return true; }
+  toggle(src) { if (this.src === src) { this.stop(); return false; } this.stop(); this.src = src; this.a.src = src; claim("loop"); tv(this.a).play().catch(() => {}); return true; }
   stop() { clearTimeout(this.timer); this.src = null; this.a.pause(); }
 }
 
 // 짧은 소리 한 번(자모)
 const one = new Audio();
-export function blip(src) { one.src = src; tv(one).play().catch(() => {}); }
+export function blip(src) { claim("blip"); one.src = src; tv(one).play().catch(() => {}); }

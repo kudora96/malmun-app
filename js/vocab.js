@@ -1,10 +1,11 @@
 // ⭐ 내 단어장(시험판 · 네팔어 1편 · 본부 11-16 대표님 승인) — 낱말 칸을 톡 누르면 작은 카드 · 단어장은 이 기기(localStorage)에만
 // 소리 = 이미 만들어 둔 낱말 소리를 이어 붙여(wordsnd.json) · 없는 편은 줄 소리의 그 낱말 구간 · 학습자 말이 네팔어가 아니면 아무것도 안 보임
-import { lang, uiKoOn, langShort } from "./i18n.js?v=1118.8";
-import { noteHTML, applyMode, fixSizes, readNote, stopRead, toggleRead, switchRead, tapBlock, tapWord, noteBlocks, curBlock, isReading, isPaused } from "./wordnote.js?v=1118.8"; // 단어 카드 설명(위 = 지금 말 · 아래 ↳ 다른 말) + 읽기 소리
-import { esc } from "./text.js?v=1118.8";
-import { paths } from "./paths.js?v=1118.8";
-import { VERSION } from "./version.js?v=1118.8";
+import { lang, uiKoOn, langShort } from "./i18n.js?v=1118.9";
+import { noteHTML, applyMode, fixSizes, readNote, stopRead, toggleRead, switchRead, tapBlock, tapWord, noteBlocks, curBlock, isReading, isPaused } from "./wordnote.js?v=1118.9"; // 단어 카드 설명(위 = 지금 말 · 아래 ↳ 다른 말) + 읽기 소리
+import { claim, onSound } from "./onesound.js?v=1118.9";
+import { esc } from "./text.js?v=1118.9";
+import { paths } from "./paths.js?v=1118.9";
+import { VERSION } from "./version.js?v=1118.9";
 
 const KEY = "malmun.vocab.ne";
 export const vocabOn = () => lang === "ne";
@@ -48,10 +49,11 @@ const sndMem = {};
 const sndOf = ep => (sndMem[ep] ||= fetch(paths.data(ep, ".wordsnd")).then(r => (r.ok ? r.json() : null)).catch(() => null));
 export const unitsFor = async (ep, n, w) => (await sndOf(ep))?.lines?.[String(n)]?.[clean(w)] || null;
 let au = null, stopT = 0, seq = 0;
+onSound("card", () => stopWordSound());
 export function stopWordSound() { stopRead(); seq++; clearTimeout(stopT); if (au) { try { au.pause(); } catch {} au = null; } }
 function playSpan(it, btn, before) {
   if (!it.af) return;
-  before?.(); stopWordSound();
+  before?.(); claim("card"); stopWordSound();
   const a = (au = new Audio(paths.audio(it.ep, it.af)));
   btn?.classList.add("playing");
   const end = () => { clearTimeout(stopT); if (au === a) { try { a.pause(); } catch {} au = null; } btn?.classList.remove("playing"); it.__done?.(); };
@@ -64,7 +66,7 @@ const wsrc = (ep, id) => `snd/words/${ep}/${id}.mp3?v=1`;
 async function playSnd(it, btn, before) { // 낱말 소리마다 [id, 시작, 끝](소리 나는 구간만 · 앞 저음·뒤 여백 뺌)을 차례로
   const ids = it.ep && it.n != null ? await unitsFor(it.ep, it.n, it.w) : null;
   if (!ids?.length) return playSpan(it, btn, before);
-  before?.(); stopWordSound(); const my = seq;
+  before?.(); claim("card"); stopWordSound(); const my = seq;
   btn?.classList.add("playing");
   const fin = () => { if (my === seq) { au = null; clearTimeout(stopT); btn?.classList.remove("playing"); it.__done?.(); } };
   const as = ids.map(([id]) => { const a = new Audio(wsrc(it.ep, id)); a.preload = "auto"; return a; });
@@ -115,7 +117,7 @@ function pieceHTML(e, roman) {
 }
 const meanHTML = it => { const kh = it.note?.ko_head; return kh ? `<span class="vk-t vk-mean vk-sw" data-ko="${esc(kh)}" data-ne="${esc(it.mean || "")}" data-lk="1" lang="${uiKoOn() ? "ko" : "ne"}"><span class="vis">${esc(uiKoOn() ? kh : it.mean || "")}</span></span>` : `<span class="vk-t vk-mean" lang="ne">${esc(it.mean || "")}</span>`; }; // 맨 위 뜻 줄: 한국어 뜻(ko_head)이 있으면 ⇄ 때 같은 칸에서 글만 바뀜(11-18)
 export function openWordCard(it, { before, fromList = false } = {}) {
-  closeCard();
+  closeCard(); claim("card"); // 어디서 열든(읽기 창·단어장 목록) 다른 소리는 멈춤 — before 를 안 넘겨도 하나
   const saved = () => has(it.w), romanNow = () => (document.querySelector(".exv.norom") ? "" : (lang === "ne" && it.note?.dev) || it.rom); // 네팔어 학습자 = 데바나가리 발음(dev) · 발음 토글(.norom)이 끄면 숨김
   const el = (cardEl = document.createElement("div"));
   el.className = "vk-dim"; el.setAttribute("role", "dialog"); el.setAttribute("aria-modal", "true");

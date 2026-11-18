@@ -3,8 +3,9 @@
 //  · <audio> 에 누를 때마다 src 를 바꿔 틀면 매번 새로 받고 풀고 출력이 열리며 첫 0.1~0.3초가 약하게/잘려 나온다 → 버퍼는 샘플 단위로 정확히 시작
 //  · 소리마다 노드(음량)가 따로라, 한 재생기의 음량을 여러 소리가 같이 건드려 튀던 문제가 없다
 // 긴 것(설명 낭독 · 영상)은 계속 <audio>/<video>.
-import { logErr } from "./errlog.js?v=1118.8";
-import { audioCtx } from "./wake.js?v=1118.8";
+import { logErr } from "./errlog.js?v=1118.9";
+import { claim, onSound } from "./onesound.js?v=1118.9";
+import { audioCtx } from "./wake.js?v=1118.9";
 
 const cache = new Map(); // url → Promise<AudioBuffer|null>(null = 파일 없음)
 const live = new Set();  // 지금 나는 소리
@@ -36,6 +37,7 @@ export async function play(url, { offset = 0, dur, fade = 0, tag = null } = {}) 
   const my = gen, buf = await load(url);
   if (!buf) return false;
   if (my !== gen) return true; // 받는 사이 멈춤 = 멈춘 것(없음 아님)
+  claim("sfx"); // 다른 쪽 소리(설명 읽기·카드 낭독 등)는 멈춤 — 소리는 언제나 하나
   const ctx = audioCtx();
   const src = ctx.createBufferSource(), g = ctx.createGain();
   src.buffer = buf; src.connect(g); g.connect(ctx.destination);
