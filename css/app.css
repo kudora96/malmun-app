@@ -1771,8 +1771,9 @@ html:has(.scr.learn),html:has(.scr.learn) body{overflow-anchor:none} /* 배우�
 .vk-x{min-height:32px;font-weight:500;border-color:var(--line);color:var(--mute)}
 .vk-listdim{align-items:center}
 .vk-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;font-size:17px}
-.vk-ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
-.vk-li{width:100%;display:flex;flex-direction:column;align-items:flex-start;gap:1px;text-align:start;padding:8px 12px;border-radius:12px;border:1px solid var(--line);background:var(--bubble);color:var(--ink)}
+.vk-ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:3px}
+.vk-li{width:100%;display:flex;flex-direction:row;flex-wrap:wrap;align-items:baseline;column-gap:8px;row-gap:0;text-align:start;padding:4px 10px;border-radius:12px;border:1px solid var(--line);background:var(--bubble);color:var(--ink)}
+.vk-li .vk-t{font-size:19px;line-height:1.25}.vk-li .vk-rom{font-size:12px;opacity:.7;line-height:1.25}.vk-li .vk-mean{font-size:15px;font-weight:600;line-height:1.25}
 .vk-empty{margin:12px 4px;color:var(--mute);font-size:14px}
 
 /* ⭐ N 작은 단추(대표님 11-16) — 「ने⇄한」 바로 왼쪽 · 같은 높이 납작한 알약 · 첫 화면 큰 「⭐ 내 단어장」 메뉴는 화면에서 뺌(코드는 그대로) */
