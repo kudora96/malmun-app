@@ -150,7 +150,7 @@ document.addEventListener("playing", hideWait, true); document.addEventListener(
 // 낱말 설명(대표님 11-16 「저는」이면 저는에 대한 설명 · 한국어·네팔어 1:1) — data/<편>/<편>.wordnote.json: 낱말 → {ko_mean, ne_mean, ko_ex, ne_ex} · 없는 낱말만 영상 속 문장
 const noteMem = {};
 export const noteOf = ep => (noteMem[ep] ||= fetch(paths.data(ep, ".wordnote") + "?v=" + VERSION).then(r => (r.ok ? r.json() : null)).catch(() => null));
-// ── 조각 칩(시험판 · 1편 1줄 구절만) — 구절 카드 아래 「이렇게 만들어졌어요」 한 줄 + 조각 칩 · 칩을 톡 = 그 조각 자기 카드(글만 · ▶ 없음) · ← = 구절 카드로
+// ── 조각 칩(1편 단어 카드 전부 · 조각 나누기 표 11-18) — 구절 카드 아래 「이렇게 만들어졌어요」 한 줄 + 조각 칩 · 칩을 톡 = 그 조각 자기 카드(글만 · ▶ 없음) · ← = 구절 카드로
 const dictMem = {}, pcMem = {};
 const dictOf = () => (dictMem.d ||= fetch("data/dict/ko_ne.json?v=" + VERSION).then(r => (r.ok ? r.json() : null)).catch(() => null));
 const pcOf = ep => (pcMem[ep] ||= fetch(paths.data(ep, ".pieces") + "?v=" + VERSION).then(r => (r.ok ? r.json() : null)).catch(() => null));
