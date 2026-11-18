@@ -31,14 +31,17 @@ export function attachDragScroll(el, opts) {
     raf = requestAnimationFrame(step);
   }
 
+  let tPid = -1, tMoved = false;
   function onDown(e) {
-    if (e.pointerType !== 'mouse' || e.button !== 0) return;
+    if (e.pointerType !== 'mouse') { tPid = e.pointerId; tMoved = false; sx = e.clientX; sy = e.clientY; return; } // 터치 = 브라우저 기본 관성 · 끌고 놓은 뒤 따라오는 클릭만 삼킴
+    if (e.button !== 0) return;
     stop();
     down = true; dragging = false; pid = e.pointerId;
     sx = e.clientX; sy = e.clientY; startTop = el.scrollTop;
     samples = [{ t: e.timeStamp, y: e.clientY }];
   }
   function onMove(e) {
+    if (e.pointerId === tPid && e.pointerType !== 'mouse') { if (Math.hypot(e.clientX - sx, e.clientY - sy) > o.threshold) tMoved = true; return; }
     if (!down || e.pointerId !== pid) return;
     const dy = e.clientY - sy;
     if (!dragging) {
@@ -52,6 +55,7 @@ export function attachDragScroll(el, opts) {
     while (samples.length > 2 && e.timeStamp - samples[0].t > 100) samples.shift();
   }
   function onUp(e) {
+    if (e.pointerId === tPid && e.pointerType !== 'mouse') { tPid = -1; if (tMoved) { swallow = true; clearTimeout(swallowTimer); swallowTimer = setTimeout(() => { swallow = false; }, 350); } return; }
     if (!down || e.pointerId !== pid) return;
     down = false;
     try { el.releasePointerCapture(pid); } catch (_) {}
@@ -68,7 +72,7 @@ export function attachDragScroll(el, opts) {
     }
   }
   function onClick(e) {
-    if (!swallow) return;
+    if (!swallow || e.target.closest?.('.vl-del,.vl-bin,.vl-undo')) return;
     swallow = false; clearTimeout(swallowTimer);
     e.stopPropagation(); e.preventDefault();
   }
