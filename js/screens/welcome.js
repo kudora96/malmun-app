@@ -22,16 +22,13 @@ export default function welcome(app) {
     <a class="cta" href="#/list">${esc(t("start"))}</a>
     <div class="ledge"></div>
   </section>`;
-  app.querySelector("[data-act=lang]").onclick = () => { tipOff(); openLangSheet(rerender); };
+  app.querySelector("[data-act=lang]").onclick = () => { openLangSheet(rerender); };
   // 처음 한 번 = 오른쪽 위 언어 단추를 가리키는 선생님 풍선말(본부 10-20 대표님 「처음 들어가서 언어를 직접 고르고 싶어」 · 화면 틀 그대로 · 누르거나 언어 단추를 누르면 다시 안 뜸)
-  const TIP = "malmun.langtip", lb = app.querySelector("[data-act=lang]"); let tip = null;
-  const tipOff = () => { try { localStorage.setItem(TIP, "1"); } catch {} tip?.remove(); tip = null; lb.classList.remove("tiphi"); };
-  try { if (!localStorage.getItem(TIP) && !started()) { const r = lb.getBoundingClientRect(); tip = document.createElement("div"); tip.className = "langtip"; tip.setAttribute("role", "status"); tip.innerHTML = `<b>${spkHtml("선생님")}</b><span dir="auto">🌐 ${esc(t("lang_hint"))}</span>`; tip.style.top = (r.bottom + window.scrollY + 10) + "px"; app.querySelector(".scr.welcome").append(tip); lb.classList.add("tiphi"); tip.onclick = tipOff; } } catch {}
   // ⇄ 는 retext 가 그 자리에서 글만 바꿈(다시 그리지 않음 · 본부 10-15)
   // 처음 [시작하기] = 그 위 선생님 풍선말로 태어난 해 + 사는 나라(대표님 10-20 · 틀 0px · birth.js) → 확인 뒤 편 목록
   const cta = app.querySelector(".cta");
   cta.onclick = e => {
-    if (needBirth()) { e.preventDefault(); tipOff(); askBirth(app.querySelector(".scr.welcome"), cta, () => { try { localStorage.setItem(KEY, "1"); } catch {} location.hash = "#/list"; }); return; }
+    if (needBirth()) { e.preventDefault(); askBirth(app.querySelector(".scr.welcome"), cta, () => { try { localStorage.setItem(KEY, "1"); } catch {} location.hash = "#/list"; }); return; }
     try { localStorage.setItem(KEY, "1"); } catch {}
   };
 }

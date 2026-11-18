@@ -579,8 +579,6 @@ a{color:inherit;text-decoration:none}
 .write .sent .w{display:inline-flex;gap:2px}
 .write .sent.flash .c{animation:wflash .9s ease-in-out 2}
 @keyframes wflash{50%{background:var(--hi-soft);border-color:var(--hi)}}
-.write .wtip{position:absolute;left:16px;top:100%;z-index:5;margin-top:-4px;padding:6px 10px;border-radius:10px;background:var(--ink);color:var(--bg);font-size:12px;box-shadow:0 4px 12px rgba(0,0,0,.2);pointer-events:none}
-.write .wtip::before{content:"";position:absolute;left:18px;bottom:100%;border:6px solid transparent;border-bottom-color:var(--ink)}
 @media (prefers-reduced-motion:reduce){.write .sent.flash .c{animation:none}}
 .learn .seek[data-off] .rail{visibility:hidden} /* 쓰기·말하기 창 = 갈색 줄만 */
 
@@ -642,8 +640,6 @@ a{color:inherit;text-decoration:none}
 /* 낮은 화면(창 높이 720px 아래 — 노트북 미리보기·작은 폰)에서는 쓰기 창이 화면을 조금 더(78%) 씀 — 자판 다섯 줄이 잘리지 않게 */
 @media (max-height:720px){.learn .panel.write{height:clamp(330px,78dvh,500px)}}
 /* 처음 한 번 말풍선(10-06 본부) = 위 글자 줄 「위쪽」(제목 줄 자리)에 · 화살표는 아래로 글자 줄을 가리킴 — 낱말·자모 칸·단추를 덮지 않게 */
-.write .wtip{top:auto;bottom:100%;margin:0 0 -2px;left:12px;max-width:calc(100% - 24px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.write .wtip::before{bottom:auto;top:100%;border-bottom-color:transparent;border-top-color:var(--ink)}
 
 /* 세 단추 = 낱말 「게」 옆 가로(넓은 창 · 10-06 투덜이) — 글자 칸 한 줄이 줄어 자판이 커짐 · 자리가 모자라면 낱말 아래 줄로 */
 .write .info .wordrow{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;min-width:0}
@@ -1077,17 +1073,6 @@ button.dim{opacity:.45}
 .learn .vsubt[aria-pressed=false] .cc::after{content:"";position:absolute;left:-3px;right:-3px;top:50%;border-top:2px solid #ff8a7a;transform:rotate(-25deg)} /* 끔 = 빗금 */
 .learn .seek[data-off] .vsubt{visibility:hidden}
 .learn .vsubt.rdp{display:none;justify-content:center}.learn .vsubt.rdp .cc{width:16.7px;text-align:center}.learn.rdr .seek .vsubt.rdp{display:inline-flex}.learn.rdr .seek .vsubt[data-act=subs]{display:none} /* 설명 읽기 창: CC 대신 ▶/⏸ */
-.learn .fstip{position:absolute;right:2px;top:calc(100% + 9px);z-index:5;width:max-content;max-width:min(calc(100vw - 24px),380px);box-sizing:border-box;padding:7px 36px 8px 11px;border-radius:12px;background:var(--card);color:var(--ink);box-shadow:0 4px 14px rgba(0,0,0,.35);font-size:12.5px;line-height:1.45;text-align:left;font-variant-numeric:normal}
-.learn .fstip::after{content:"";position:absolute;right:9px;bottom:100%;border:7px solid transparent;border-bottom-color:var(--card)}
-@media (orientation:landscape) and (max-height:500px){ /* 가로 폰 = 막대 아래가 재생 단추 줄 → 막대 위로(단추를 가리지 않게) · 왼쪽으로(⛶ 비움) */
-  .learn .fstip{top:auto;bottom:calc(100% + 9px);right:auto;left:2px;max-width:calc(100% - 64px)} /* ⛶(영상 오른쪽 아래)를 덮지 않게 왼쪽 */
-  .learn .fstip::after{display:none}
-}
-.learn .seek[data-off] .fstip{display:none}
-.learn .fstip .who{display:block;font-size:11px;font-weight:700;color:var(--hi)}
-.learn .fstip .who .spkg{font-weight:500;color:var(--mute)}
-.learn .fstip p{margin:0;unicode-bidi:plaintext;text-align:start}
-.learn .fstip .x{position:absolute;top:6px;right:6px;width:26px;height:26px;display:grid;place-items:center;border-radius:7px;border:1px solid var(--line);background:var(--bg2);color:var(--ink);font-size:12px;line-height:1}
 #vwrap:fullscreen .cap{bottom:max(6%,56px)} /* 자막이 아래 ⛶ 와 겹치지 않게 */
 /* 자막 끔 = 전체 화면 자막 · 영상 밑 큰 자막 · (영상 창일 때) 줄 카드 한국어·학습자 언어 글을 가림 — 자리는 그대로(흐림) */
 .learn.nosub .cap{display:none!important}
@@ -1141,8 +1126,6 @@ button.dim{opacity:.45}
 .write > .bar.b4{gap:6px;padding-left:10px;padding-right:10px}
 .write > .bar.b4 .grow{flex:none}
 /* 🔊 말풍선은 글자 줄 아래로(ur 320 처음에 머리 줄 ⇄한 을 덮던 것 · 검사부 10-14) */
-.write .segrow .wtip{top:100%;bottom:auto;margin:4px 0 0}
-.write .segrow .wtip::before{top:auto;bottom:100%;border-top-color:transparent;border-bottom-color:var(--ink)}
 /* 머리 줄 n3d(10-14) — 두 줄로 꺾기 전 마지막: 화자(· 선생님) 숨김 · 번호 「3 / 15」 만(ur 320 머리 줄 두 줄 → 손글씨 칸 129) */
 .write .whead.n3d .sub .sp{display:none}
 .write .whead.n3d{gap:3px;padding-inline:8px} /* ♪ 단추가 늘어 320 에서 두 줄(n4)로 꺾이며 칸이 27px 줄던 것(10-15) — 사이를 좁혀 한 줄 */
@@ -1333,9 +1316,6 @@ html:lang(ur) .write .hand .hpal{height:25px}
 .write .hjudge p.keeprow button.wrap2{white-space:normal;text-align:center}
 .write .hjudge p.keeprow button .kl{min-width:0}
 .write .hjudge p.keeprow button.ic .kl{display:none}.write .hjudge p.keeprow button.ic{min-height:26px;height:26px;padding-block:0;line-height:1;font-family:"Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif;font-size:15px}
-.write .keeptip{position:absolute;z-index:6;padding:6px 10px;border-radius:10px;background:var(--ink);color:var(--card);font-size:13px;font-weight:700;line-height:1.35;box-shadow:0 4px 14px rgba(0,0,0,.25);pointer-events:auto;animation:keepTipIn .25s ease-out}
-.write .keeptip::after{content:"";position:absolute;top:100%;left:var(--ax,50%);margin-left:-6px;border:6px solid transparent;border-top-color:var(--ink)}
-@keyframes keepTipIn{from{opacity:0;transform:translateY(4px)}}
 .keepov{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;background:rgba(20,24,22,.55);padding:12px}
 .keepov .kp{display:grid;gap:8px;width:min(560px,100%);max-height:100%;overflow:auto;padding:12px;border-radius:14px;background:var(--bg,#fff);box-shadow:0 10px 30px rgba(0,0,0,.3)}
 .keepov .kh{display:flex;align-items:center;justify-content:flex-end;gap:8px}.keepov .kh b{font-size:16px;margin-inline-end:auto}
@@ -1346,10 +1326,7 @@ html:lang(ur) .write .hand .hpal{height:25px}
 .keepov .kcv{display:flex;justify-content:center}.keepov .kcv canvas{width:min(100%,360px);height:auto;aspect-ratio:1240/1754;box-shadow:0 2px 10px rgba(0,0,0,.18);border-radius:2px;background:#fffdf7}
 .keepov .kname{display:flex;align-items:center;gap:8px;font-weight:700}.keepov .kname input{flex:1;min-height:34px;padding:4px 8px;border:1px solid var(--line,#ccc);border-radius:8px;font:inherit}
 .keepov .kbtns{display:flex;gap:10px;justify-content:center;position:relative}.keepov .kbtns > button{min-width:56px;min-height:46px;font-size:22px;padding:4px 12px}
-.keepov .ktip2{position:absolute;bottom:calc(100% + 10px);left:50%;transform:translateX(-50%);display:flex;gap:12px;padding:6px 12px;border-radius:10px;background:var(--ink,#222);color:var(--card,#fff);font-size:13px;font-weight:700;white-space:nowrap;max-width:calc(100vw - 40px);flex-wrap:nowrap;justify-content:center;box-shadow:0 4px 14px rgba(0,0,0,.25);animation:keepTipIn .25s ease-out}
-.keepov .ktip2::after{content:"";position:absolute;top:100%;left:50%;margin-left:-6px;border:6px solid transparent;border-top-color:var(--ink,#222)}
 .keepov .kbtns > button{display:inline-flex;align-items:center;justify-content:center;gap:3px}.keepov .kbtns .ico{width:24px;height:24px}.keepov .kbtns b{font-size:12px;font-weight:800}
-.keepov .ktip2 span{display:inline-flex;align-items:center;gap:4px}.keepov .ktip2 .ico{width:16px;height:16px}
 .keepov .kname > span{font-size:18px;color:var(--mute,#666)}.keepov .ktip{margin:0;font-size:12px;color:var(--mute,#666)}
 .keepprint{display:none}
 @media print{html,body{margin:0!important;padding:0!important;height:auto!important;min-height:0!important;overflow:hidden!important}body > *:not(.keepprint){display:none!important}.keepprint{display:block!important;margin:0;width:210mm;height:296mm;overflow:hidden;break-after:avoid;page-break-after:avoid}.keepprint img{width:100%;height:100%;object-fit:contain;display:block}@page{size:A4 portrait;margin:0}} /* 한 장만(대표님 10-20 2장 중 1장 빈 종이 · 297mm 꽉 차면 반올림으로 넘침 → 296mm) */
@@ -1540,8 +1517,6 @@ html.bigview,html.bigview body{overflow:hidden}
 .learn.lockh .line{display:flex;flex-direction:column}.learn.lockh .line .acts{margin-top:auto;padding-top:8px}.learn.lockh .line.fitc .acts{padding-top:4px} /* ⇄ 위아래 고정 높이 안에서 단추 줄은 카드 아래(자리 0px) */
 /* 첫 실행 언어 풍선말(본부 10-20) — 오른쪽 위 언어 단추 아래 · 틀 위에 떠 있음(배치 0px) */
 .welcome{position:relative}.welcome .langtip{position:absolute;right:16px;z-index:20;max-width:240px;background:var(--card);border:2px solid var(--hi);border-radius:14px;padding:8px 12px;font-size:14px;line-height:1.4;box-shadow:0 4px 12px rgba(0,0,0,.15);color:var(--ink);cursor:pointer;display:grid;gap:2px}
-.welcome .langtip b{font-size:12px;color:var(--hi)}.welcome .langtip::before{content:"";position:absolute;top:-9px;right:22px;width:14px;height:14px;background:var(--card);border-left:2px solid var(--hi);border-top:2px solid var(--hi);transform:rotate(45deg)}
-.welcome .tiphi{box-shadow:0 0 0 3px var(--hi)}
 /* 첫 실행 태어난 해 + 사는 나라 풍선말(birth.js · 대표님 10-20 · [시작하기] 위로 겹쳐 뜸 = 틀 0px) */
 .welcome .btip{position:absolute;left:16px;right:16px;z-index:21;box-sizing:border-box;grid-template-columns:minmax(0,1fr);background:var(--card);border:2px solid var(--hi);border-radius:14px;padding:10px 12px 12px;box-shadow:0 4px 14px rgba(0,0,0,.18);color:var(--ink);display:grid;gap:8px;text-align:start}
 .welcome .btip .who{font-size:12px;color:var(--hi)}

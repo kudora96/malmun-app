@@ -57,7 +57,6 @@ import { playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.
 import { heardHTML, endHint, scoreOf, bestFull, spanOf, sylsAt } from "../heard.js?v=1118.21"; // 덧붙은 말 빼고 견주기(본부 10-11)
 import { recDel, downloadRec, askPersist } from "../recstore.js?v=1118.21";
 import { vocabOn, openWordCard, wordSpan, starChip } from "../vocab.js?v=1118.21"; // ⭐ 내 단어장 시험판(네팔어 · 대표님 11-16)
-import { showStopTip, hideStopTip } from "../stoptip.js?v=1118.21";
 import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1118.21";
 import { scoreFx, stopFx } from "../scorefx.js?v=1118.21"; // 점수별 효과(본부 10-05)
 import { record, recordSROnly, srOnlyMode, setSrOnly, isAndroid, srMiss, micWhy, srWhy, canScore, closeMic, logRec, micOpen, seqMode, srOnBlob, devSR, setDevSR, srJudge, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1118.21";
@@ -100,7 +99,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     </div>
     <button class="bigb" data-act="big" aria-pressed="false" hidden aria-label="${esc(t("big_view"))}" title="${esc(t("big_view"))}"><span aria-hidden="true">⛶</span><span class="off" data-k="big_short">${esc(t("big_short"))}</span><span class="on" data-k="big_off">${esc(t("big_off"))}</span></button>
     <div class="seek" data-off><span class="t0">0:00</span><div class="trk" aria-label="${esc(t("seek_bar"))}"><div class="rail"><i></i></div></div><span class="t1">0:00</span><button class="vsubt" data-act="subs" aria-pressed="${subsOn()}" aria-label="${esc(t("subs_aria"))}" title="${esc(t("subs_aria"))}"><span class="cc" aria-hidden="true">CC</span></button><button class="vsubt rdp" data-act="rdp" aria-label="▶/⏸" title="▶/⏸"><span class="cc" aria-hidden="true">▶</span></button>
-      <div class="fstip" role="status" hidden><span class="who">${spkHtml("선생님")}</span><p data-k="subs_tip">${esc(t("subs_tip"))}</p><button class="x" data-act="tipx" aria-label="${esc(t("close_word"))}">✕</button></div></div>
+      </div>
     </div>
     <ol class="lines"><li class="lend" data-end="start" role="button" tabindex="0"><b lang="ko">▶ 시작</b><span><span data-k="ln_start">${esc(t("ln_start"))}</span> · 0:00${(x => x >= 1 ? ` – ${Math.floor(x / 60)}:${String(Math.floor(x % 60)).padStart(2, "0")}` : "")(L[0]?.start || 0)}</span></li>${L.map((l, i) => `<li class="line sp-${SPEAKER[l.speaker] || "x"} ${l.speaker === "선생님" ? "" : "right"}" data-i="${i}" data-peek="👁 ${esc(t("subs_peek"))}">
       <span class="who">${spkHtml(l.speaker)}</span>
@@ -897,7 +896,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
         const pl = tb.querySelector(".pace"); if (pl) { pl.hidden = !pace; if (pace) pl.style.left = Math.min(100, (100 * pace.end) / max) + "%"; }
         if (pace) paintPace(box.querySelector(".saybig")?.children || [], pace, el); },
       onLevel: v => { lvl.firstElementChild.style.width = Math.round(v * 100) + "%"; },
-      onStop: () => { hideStopTip(); for (const c of box.querySelector(".saybig")?.children || []) c.classList.remove("pace"); if (sp?.ctl === ctl) { msg.textContent = tq("checking"); lvl.hidden = true; } },
+      onStop: () => { for (const c of box.querySelector(".saybig")?.children || []) c.classList.remove("pace"); if (sp?.ctl === ctl) { msg.textContent = tq("checking"); lvl.hidden = true; } },
       onSwitch: () => { btn.textContent = "… " + tq("mic_opening"); lvl.hidden = true; msg.textContent = tq("mic_switched"); },
       onReady: () => { if (sp?.ctl !== ctl) return; btn.textContent = lang === "ne" ? tq("btn_score") : "■ " + tq("btn_stop"); lvl.hidden = false; /* 대표님 11-16 점수 보기 · 풍선 뺌 */ msg.textContent = tq("listening");
         const nb = box.querySelector(".micname"); if (nb && micLabel()) { nb.textContent = `🎤 ${micLabel()} ✓`; nb.hidden = false; } }, // 지금 쓰는 마이크 — 자동이 틀렸을 때만 눌러 바꿈
@@ -1150,7 +1149,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   //  설명 카드가 열려 있으면 [▶ 전체 영상] = 카드 닫고 그 줄부터 영상을 끝까지 · 영상이 보이면 [설명] = 지금 줄 설명 카드
   function flip() {
     if (st.panel?.kind === "explain") { // 카드가 접히며 목록이 위로 당겨지므로 자리를 다시 본다(본부 10-05 — 지금 줄이 아래 막대 뒤로 가던 것)
-      const i = st.panel.i; closePanel(); if (st.mode !== "video") setMode("video"); playFrom(i); fullTip();
+      const i = st.panel.i; closePanel(); if (st.mode !== "video") setMode("video"); playFrom(i);
       requestAnimationFrame(() => keepVisible(st.cur, { force: true }));
       [500, 1200, 2500].forEach(ms => setTimeout(() => keepVisible(st.cur), ms)); return;
     }
@@ -1199,15 +1198,11 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     d.innerHTML = `<b>${esc(a)}</b>${n ? `<i>${n}/5</i>` : ""}${b && b !== a ? `<small lang="${uiKoOn() ? lang : "ko"}">${esc(b)}</small>` : ""}${n === 5 ? `<small class="hold">${esc(t("hold_name"))}</small>` : ""}`; document.body.append(d);
     const r = btn.getBoundingClientRect(), w = d.offsetWidth, left = Math.max(12, Math.min(innerWidth - w - 12, r.left + r.width / 2 - w / 2)); d.style.left = left + "px"; d.style.top = Math.max(6, r.top - d.offsetHeight - 10) + "px"; d.style.setProperty("--ax", Math.round(r.left + r.width / 2 - left) + "px"); }
   const tipBtns = () => [...(items[st.cur]?.querySelectorAll(".acts [data-tipk]") || [])];
-  function tipNext() { tip.step++; const bs = tipBtns(); if (tip.step >= bs.length) { tip.step = -1; tipOff(); try { localStorage.setItem("malmun.actstip", "1"); } catch {} document.removeEventListener("pointerdown", tipTap, true); return; } tipShow(bs[tip.step], tip.step + 1); }
-  function tipTap(e) { if (tip.step < 0) return; if (e.target.closest?.(".actstip")) { e.preventDefault(); return tipNext(); } tip.step = 99; tipNext(); } /* 풍선말을 누르면 다음 · 다른 곳 누름 = 풍선말 닫고 그 누름은 그대로 통과(본부 10-20 「처음 들어와 바로 쓰기·다음 눌러도 안 막힘」) */
-  function tipStart() { let seen = false; try { seen = localStorage.getItem("malmun.actstip") === "1" || ((/[?&]mute=1/.test(location.search) || navigator.webdriver) && !window.__actsTip); } /* 점검 브라우저 = 안 띄움(점검이 켤 땐 __actsTip) */ catch {} if (seen || tip.step >= 0 || !tipBtns().length || !tipBtns()[0].offsetWidth) return; tip.step = -1; document.addEventListener("pointerdown", tipTap, true); tipNext(); }
   const onUiTip = () => { if (tip.step < 0) return; tipOff(); const again = () => { if (tip.step < 0) return; if (document.querySelector(".uikotip")) { tip.t = setTimeout(again, 300); return; } tipShow(tipBtns()[tip.step], tip.step + 1); }; tip.t = setTimeout(again, 60); }; window.addEventListener("malmun:uilang", onUiTip); /* ⇄ = 풍선말 글도 그 말로 · ⇄ 안내 풍선이 떠 있는 동안은 숨겼다가 사라지면 다시(한 화면 풍선 하나 · 검사1팀 10-20) */
   app.querySelector(".lines").addEventListener("pointerdown", e => { const b = e.target.closest(".acts [data-tipk]"); if (!b || tip.step >= 0) return; tip.lpFired = false; clearTimeout(tip.lp); tip.lp = setTimeout(() => { tip.lpFired = true; tipShow(b, 0); tip.t = setTimeout(tipOff, 1800); }, 480); });
   for (const ev of ["pointerup", "pointercancel", "pointerleave"]) app.querySelector(".lines").addEventListener(ev, () => clearTimeout(tip.lp));
   app.querySelector(".lines").addEventListener("click", e => { if (tip.lpFired && e.target.closest(".acts [data-tipk]")) { tip.lpFired = false; e.preventDefault(); e.stopImmediatePropagation(); } }, true); /* 길게 누름 = 이름만(그 단추 일은 안 함) */
   app.querySelector(".lines").addEventListener("contextmenu", e => { if (e.target.closest(".acts [data-tipk]")) e.preventDefault(); });
-  setTimeout(tipStart, 1400); app.__actsTip = tipStart; /* 점검용 */
   app.querySelector(".lines").onclick = e => {
     if (e.target.closest("a")) return;
     const sx = e.target.closest(".expl [data-x=gw], .expl [data-x=sn]"); if (sx) { if (sx.dataset.x === "gw") return hidePop(); hidePop(); return playFromSent(sx); } // 듣기 모드 설명 글 — 낱말 뜻 · 문장 = 그 문장부터
@@ -1278,29 +1273,18 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     else v.webkitEnterFullscreen?.();
   };
   // 자막 켬/끔 = 영상 밖 재생 막대 끝 작은 CC 칩(대표님 10-19 「영상 안엔 전체 보기만」 · 높이 0px) — 끄면 전체 화면 자막·영상 밑 큰 자막·줄 카드 글을 가림(소리는 그대로)
-  const fsTip = app.querySelector(".fstip"); let tipT = 0;
-  const hideTip = () => { clearTimeout(tipT); fsTip.hidden = true; };
+
   app.querySelector("[data-act=subs]").onclick = e => {
     const on = !subsOn(); pref("malmun.fullsub", on ? "1" : "0");
     e.currentTarget.setAttribute("aria-pressed", String(on)); app.querySelector(".learn").classList.toggle("nosub", !on); items.forEach(x => x.classList.remove("peek"));
-    if (!on) hideTip();
   };
-  app.querySelector("[data-act=tipx]").onclick = hideTip;
   app.querySelector("[data-act=rdp]").onclick = () => { if (st.panel?.kind !== "explain") return;
     const ended = ex.q.length && !ex.playing && !st.gap && (ex.i >= ex.q.length || ex.a.ended);
     if (ended) { const lst = st.exLoop?.length ? st.exLoop : exItems(st.panel.i); hushSay(); clearTimeout(st.gap); st.gap = 0; ex.play(lst, Math.max(0, lst.findIndex(x => x.p === 0))); sync(); } else togglePlay(); rdSync(); };
-  // 선생님 말풍선 = 영상 밖(재생 막대 CC 칩을 가리킴 · 겹쳐 뜸 = 0px) — 전체 영상을 처음 열 때 한 번만(대표님 10-19) · 8초 뒤 저절로 닫힘 · 자막이 이미 꺼져 있으면 안 띄움 · 전체 화면에 들어가면 닫음
-  function fullTip() {
-    if (!subsOn() || !fsTip || pref("malmun.subtip1")) return;
-    pref("malmun.subtip1", "1");
-    fsTip.hidden = false; clearTimeout(tipT); tipT = setTimeout(() => { fsTip.hidden = true; }, 8000);
-    fsTip.style.removeProperty("max-width"); // 가로 폰 = 막대 위 왼쪽 → ⛶ 왼쪽까지만
-    if (matchMedia("(orientation: landscape) and (max-height: 500px)").matches) { const fb = app.querySelector("[data-act=fs]").getBoundingClientRect(), sk = app.querySelector(".seek").getBoundingClientRect(); fsTip.style.maxWidth = Math.max(160, fb.left - sk.left - 10) + "px"; }
-  }
   // 크게 보기 안에도 CC(대표님 10-22) = 재생 막대의 그 CC 단추를 ⇄ 옆으로 옮겨 씀(새 단추 아님) · 나오면 제자리로
   const ccBtn = app.querySelector("[data-act=subs]"), ccHome = ccBtn.nextElementSibling;
   const seekEl0 = app.querySelector(".seek"), seekHome = seekEl0.nextElementSibling, seekPar = seekEl0.parentElement;
-  const onFsChange = () => { const fs = document.fullscreenElement, w = app.querySelector("#vwrap"); if (fs) hideTip();
+  const onFsChange = () => { const fs = document.fullscreenElement, w = app.querySelector("#vwrap"); 
     if (fs && fs === w) w.querySelector(".vuiko")?.prepend(ccBtn); else if (ccBtn.parentElement !== ccHome?.parentElement) ccHome?.before(ccBtn); capFill(st.cur);
     const on = !!fs && fs === w; w.classList.toggle("isfs", on); // 크게 보기(대표님 10-23) = 재생 막대(평소 그것)를 영상 안 아래로 · 단추 줄 · 나오면 제자리
     if (on) w.querySelector(".fsui").prepend(seekEl0); else if (seekEl0.parentElement !== seekPar) (seekHome && seekHome.parentElement === seekPar ? seekHome.before(seekEl0) : seekPar.append(seekEl0));
@@ -1345,5 +1329,5 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   if (reopen) openPanel(reopen.kind, reopen.i, { restore: reopen }); // ने⇄한 토글 전 창·자리
   else if (opts.explain) openPanel("explain", st.cur, { autoplay: true }); /* #/explain/{편}/{줄} = 그 줄 v9 설명 창(첫 터치 전엔 소리가 막힐 수 있음 — ▶ 로 시작) */
   const release = hold(); // 소리 장치 깨워 두기(첫소리 먹힘 방지)
-  return () => { offReader(); tipOff(); clearTimeout(tip.wait); tip.step = -1; document.removeEventListener("pointerdown", tipTap, true); window.removeEventListener("malmun:uilang", onUiTip); removeEventListener("malmun:uilang", onCapLang); if (gm.el) closeGame(true); removeEventListener("resize", onTurn); mqLand.removeEventListener?.("change", onLand); document.removeEventListener("keydown", onBigKey, true); document.documentElement.classList.remove("bigview"); clearTimeout(tipT); document.removeEventListener("fullscreenchange", onFsChange); clearInterval(edgeT); clearInterval(litT); clearInterval(seekTimer); clearInterval(hlTimer); document.removeEventListener("pointerdown", onDocDown, true); removeEventListener("popstate", onPop); removeEventListener("malmun:uilang", onUiLang); removeEventListener("malmun:langfit", onLfit); document.removeEventListener("visibilitychange", onHide); clearTimeout(st.animEnd); release(); st.panel?.cleanup?.(); ex.stop(); removeEventListener("resize", pad); removeEventListener("resize", onFit); clearInterval(timer); clearTimeout(st.gap); document.removeEventListener("keydown", onKey); seq.stop(); vqOff(); rpOff(); turns?.off(); ovl?.off(); v.pause(); v.removeAttribute("src"); v.load(); };
+  return () => { offReader(); tipOff(); clearTimeout(tip.wait); tip.step = -1; window.removeEventListener("malmun:uilang", onUiTip); removeEventListener("malmun:uilang", onCapLang); if (gm.el) closeGame(true); removeEventListener("resize", onTurn); mqLand.removeEventListener?.("change", onLand); document.removeEventListener("keydown", onBigKey, true); document.documentElement.classList.remove("bigview"); clearTimeout(tipT); document.removeEventListener("fullscreenchange", onFsChange); clearInterval(edgeT); clearInterval(litT); clearInterval(seekTimer); clearInterval(hlTimer); document.removeEventListener("pointerdown", onDocDown, true); removeEventListener("popstate", onPop); removeEventListener("malmun:uilang", onUiLang); removeEventListener("malmun:langfit", onLfit); document.removeEventListener("visibilitychange", onHide); clearTimeout(st.animEnd); release(); st.panel?.cleanup?.(); ex.stop(); removeEventListener("resize", pad); removeEventListener("resize", onFit); clearInterval(timer); clearTimeout(st.gap); document.removeEventListener("keydown", onKey); seq.stop(); vqOff(); rpOff(); turns?.off(); ovl?.off(); v.pause(); v.removeAttribute("src"); v.load(); };
 }

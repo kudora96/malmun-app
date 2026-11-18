@@ -129,7 +129,7 @@ export default async function write(app, ep, id, opts = {}) {
       ? `<div class="whead"><b>${esc(t("write"))}</b><span class="sub"><span class="ln">${li + 1} / ${d.lines.length}</span><span class="sp"> · ${spkS(line.speaker)}</span></span>${modeBtns()}${uiKoBtn(true)}<button class="whelp" data-act="help" aria-label="${esc(t("help"))}">${esc(t("help_btn"))}</button><button class="whelp wclose" data-act="close" aria-label="${esc(t("close_btn"))}">✕<span class="lt">${esc(String(t("close_btn")).replace(/^✕\s*/, " "))}</span></button><span class="loopnote" aria-live="polite"></span></div>`
       : `<div class="bar"><a class="iconbtn" href="#/learn/${ep}/${line.id}" aria-label="${esc(t("back"))}">${I.back}</a>
       <div class="grow"><div class="t">${esc(t("write"))}</div><div class="sub"><span class="ln">${li + 1} / ${d.lines.length}</span><span class="sp"> · ${spkS(line.speaker)}</span></div></div>${modeBtns()}${uiKoBtn(true)}<button class="whelp" data-act="help" aria-label="${esc(t("help"))}">${esc(t("help_btn"))}</button></div><div class="loopnote" aria-live="polite"></div>`}
-    <div class="segrow"><div class="sent" lang="${LEARN}"></div><div class="segnav"></div><div class="wtip" hidden></div></div>
+    <div class="segrow"><div class="sent" lang="${LEARN}"></div><div class="segnav"></div></div>
     <div class="work"></div>
     <div class="helpbox" hidden>${helpHtml(t)}</div>
     <div class="wbtns"><button data-act="hearch"></button><button data-act="auto"></button><button data-act="autoall"></button></div>
@@ -885,8 +885,6 @@ export default async function write(app, ep, id, opts = {}) {
       if (a2 === "print" || a2 === "pdf") { document.querySelector(".keepprint")?.remove(); const ps = document.createElement("div"); ps.className = "keepprint"; ps.innerHTML = `<img alt="" src="${cv.toDataURL("image/png")}">`; document.body.append(ps); const done = () => { ps.remove(); window.removeEventListener("afterprint", done); }; window.addEventListener("afterprint", done); setTimeout(() => window.print(), 50); return; } });
     ov.querySelector(".kname input").addEventListener("input", e => { try { localStorage.setItem("malmun.keepname", e.target.value.trim()); } catch {} draw(); });
     retv(); document.fonts?.ready.then(draw); draw();
-    let seen = false; try { seen = localStorage.getItem("malmun.keeptip2") === "1"; localStorage.setItem("malmun.keeptip2", "1"); } catch {} /* 아이콘 뜻 = 처음 한 번 풍선말 · 누르면 사라짐 */
-    if (!seen) { const tp = document.createElement("div"); tp.className = "ktip2"; tp.setAttribute("role", "status"); tp.innerHTML = ic.map(([, g, k]) => `<span>${g.replace("<b>PDF</b>", "")} ${esc(lab(k))}</span>`).join(""); ov.querySelector(".kbtns").append(tp); setTimeout(tipOff, 6000); }
   }
   // 판정 상자(투덜이 10-15) — 채점 뒤 1~3줄 · 상자 크기는 늘 같음 → 넘치면 글자 줄임(최소 12px) → 그래도 넘치면 뒤 줄부터 뺌
   function judgeLines(r, timeUp, ch = st.hand.ch, S = st.hand.strokes) {
@@ -932,10 +930,6 @@ export default async function write(app, ep, id, opts = {}) {
     const bx = b.closest(".hjudge"); if (bx && b.offsetHeight > bx.clientHeight - 4) { b.classList.remove("wrap2"); m.style.removeProperty("font-size"); b.classList.add("ic"); } } /* 판정 상자가 단추보다 낮으면(320 ur 37px) 💾 그림만(이름은 aria · 처음 풍선말) */
   // 처음 100점 때 한 번 풍선말 「100점 글씨를 저장할 수 있어요」(💾 단추 위 · 누르거나 5초 뒤 사라짐 · 자리 0px = 덮개)
   const keepTipOff = () => { clearTimeout(st.keepTipT); app.querySelector(".keeptip")?.remove(); };
-  function keepTip(tries = 0) { let seen = false; try { seen = localStorage.getItem("malmun.keeptip") === "1"; } catch {} if (seen || !st.alive) return; keepTipOff(); const b = work.querySelector(".hjudge .keeprow button"), wr = app.querySelector(".scr.write"); if (!b || !wr) return;
-    if (document.querySelector(".fxfull") && tries < 25) { st.keepTipT = setTimeout(() => keepTip(tries + 1), 200); return; } /* 🎉 100점 덮개가 걷힌 뒤에 */ try { localStorage.setItem("malmun.keeptip", "1"); } catch {}
-    const t = document.createElement("div"); t.className = "keeptip"; t.setAttribute("role", "status"); t.textContent = tx("wx_keep_tip"); wr.append(t); const R = wr.getBoundingClientRect(), r = b.getBoundingClientRect(), w = Math.min(t.offsetWidth, R.width - 16); t.style.maxWidth = (R.width - 16) + "px";
-    t.style.left = Math.round(Math.max(8, Math.min(R.width - w - 8, r.left - R.left + r.width / 2 - w / 2))) + "px"; t.style.top = Math.round(r.top - R.top - t.offsetHeight - 8) + "px"; t.style.setProperty("--ax", Math.round(r.left - R.left + r.width / 2 - parseFloat(t.style.left)) + "px"); t.addEventListener("pointerdown", keepTipOff); st.keepTipT = setTimeout(keepTipOff, 5000); }
   // 손글씨 단추 글 = 정해진 단추 폭 안에 들 때까지 글자만 줄임(12.5 → 9.5px · 그래도 길면 …) · 단추 크기는 그대로
   function fitHbtn() { work.querySelectorAll(".hbtns > button .ml, .hbtns > button .ms").forEach(m => { m.style.removeProperty("font-size"); if (!m.offsetWidth) return; const b = m.parentElement, d = m.querySelector(".dl"), sp = d?.firstElementChild; /* 두 겹 글 = 보이는 글·숨은 긴 글(::after) 중 넓은 쪽이 단추 안에 들 때까지 */
     const out = () => { if (!sp) return false; const br = b.getBoundingClientRect(), rg = document.createRange(); rg.selectNodeContents(sp); const r = rg.getBoundingClientRect(); return r.width > 0 && (r.left < br.left + 2 || r.right > br.right - 2); }; /* 양쪽 2px 여유(글꼴 차이) */ /* 가운데 맞춘 글이 양쪽으로 넘침(scrollWidth 로는 왼쪽 넘침이 안 잡힘) */
@@ -1252,7 +1246,6 @@ export default async function write(app, ep, id, opts = {}) {
 
   setNote(); render();
   autoAllNext = null; // 전체 자동 = 그 줄에서 멈춤(10-15 · 다음 줄 이어받기 없음)
-  try { const nTip = +(localStorage.getItem("malmun.wlinetip") || 0); if (nTip < 2) { localStorage.setItem("malmun.wlinetip", String(nTip + 1)); const tip = $(".wtip"); tip.textContent = t("w_line_tip"); tip.hidden = false; sentEl.classList.add("flash"); requestAnimationFrame(() => { const sp = sentEl.querySelector(".spkb"), row = tip.parentElement; if (!sp || !row) return; const r = sp.getBoundingClientRect(), rr = row.getBoundingClientRect(); tip.style.left = Math.max(4, Math.min(rr.width - tip.offsetWidth - 4, r.left + r.width / 2 - rr.left - 24)) + "px"; tip.style.right = "auto"; }); /* 말풍선 꼬리 = 🔊 단추 위치(ur 오른쪽→왼쪽에서 ◀▶ 를 가리키던 것 · 10-14) */ st.tipT = setTimeout(hideLineTip, 4000); } } catch {} // 🔊 = 이 줄 듣기 말풍선 처음 2번(투덜이 10-13)
   const release = hold();
   // 이 줄에서 쓸 소리를 미리 받아 풀어 둔다(대사 · 낱말·토막 · 글자 · 자판 자모) — 누르는 순간 바로 나오게
   sfx.preload([lineSrc, ...allWords.map(w => unitSrc(w.unit)), ...segs.map(g => unitSrc(g.unit)),

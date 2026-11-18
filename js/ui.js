@@ -80,7 +80,7 @@ if (!window.__pillWired) {
 }
 // 한국어로 바꾼 뒤 길을 잃지 않게(본부 10-14 ④) — 처음 두 번만, 모국어로 「ไทย⇄한 을 누르면 돌아와요」
 function backTip() {
-  const K = "malmun.uikotip"; let n = 0; try { n = +localStorage.getItem(K) || 0; if (n >= 2) return; localStorage.setItem(K, String(n + 1)); } catch {}
+  return; /* 대표님 11-18 14:54 「다 빼」 — ⇄ 안내 풍선 없음 */
   const d = Object.assign(document.createElement("div"), { className: "toast uikotip", textContent: tL("uiko_back_tip", { b: `${langShort(lang)}⇄한` }) });
   d.lang = lang; document.body.append(d); setTimeout(() => d.remove(), 4000);
 }
