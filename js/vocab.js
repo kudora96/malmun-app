@@ -1,17 +1,17 @@
 // ⭐ 내 단어장(시험판 · 네팔어 1편 · 본부 11-16 대표님 승인) — 낱말 칸을 톡 누르면 작은 카드 · 단어장은 이 기기(localStorage)에만
 // 소리 = 이미 만들어 둔 낱말 소리를 이어 붙여(wordsnd.json) · 없는 편은 줄 소리의 그 낱말 구간 · 학습자 말이 네팔어가 아니면 아무것도 안 보임
-import { lang, uiKoOn, langShort } from "./i18n.js?v=1118.21";
-import { noteHTML, applyMode, fixSizes, readNote, stopRead, toggleRead, switchRead, tapBlock, tapWord, noteBlocks, curBlock, isReading, isPaused } from "./wordnote.js?v=1118.21"; // 단어 카드 설명(위 = 지금 말 · 아래 ↳ 다른 말) + 읽기 소리
-import { claim, onSound } from "./onesound.js?v=1118.21";
-import * as sfx from "./sfx.js?v=1118.21";
-import { uikoChip } from "./ui.js?v=1118.21";
-import { esc } from "./text.js?v=1118.21";
-import { attachDragScroll } from "./dragscroll.js?v=1118.21";
-import { sortItems, makeSortButton, attachDelete, loadSort } from "./vlist_ops.js?v=1118.21";
-import { PAGE, pageCount, slicePage, clampPage, makePager } from "./vlist_pager.js?v=1118.21";
-import { filterItems, makeFindBox, indexLetters, makeIndexBar, groupByEp, findTx } from "./vlist_find.js?v=1118.21";
-import { paths } from "./paths.js?v=1118.21";
-import { VERSION } from "./version.js?v=1118.21";
+import { lang, uiKoOn, langShort } from "./i18n.js?v=1118.22";
+import { noteHTML, applyMode, fixSizes, readNote, stopRead, toggleRead, switchRead, tapBlock, tapWord, noteBlocks, curBlock, isReading, isPaused } from "./wordnote.js?v=1118.22"; // 단어 카드 설명(위 = 지금 말 · 아래 ↳ 다른 말) + 읽기 소리
+import { claim, onSound } from "./onesound.js?v=1118.22";
+import * as sfx from "./sfx.js?v=1118.22";
+import { uikoChip } from "./ui.js?v=1118.22";
+import { esc } from "./text.js?v=1118.22";
+import { attachDragScroll } from "./dragscroll.js?v=1118.22";
+import { sortItems, makeSortButton, attachDelete, loadSort } from "./vlist_ops.js?v=1118.22";
+import { PAGE, pageCount, slicePage, clampPage, makePager } from "./vlist_pager.js?v=1118.22";
+import { filterItems, makeFindBox, indexLetters, makeIndexBar, groupByEp, findTx } from "./vlist_find.js?v=1118.22";
+import { paths } from "./paths.js?v=1118.22";
+import { VERSION } from "./version.js?v=1118.22";
 
 const KEY = "malmun.vocab.ne";
 export const vocabOn = () => lang === "ne";
