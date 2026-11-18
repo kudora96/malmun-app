@@ -162,7 +162,7 @@ function piecesHTML(pc, ents) {
   return chips ? `<div class="vk-pcs">${stack("vk-built", esc(pc.built_ko || ""), esc(pc.built_ne || ""))}<div class="vk-chips">${chips}</div></div>` : "";
 }
 const XBTN = `<div class="vk-xw"><button class="vk-x" data-v="close" aria-label="✕" title="✕"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></button></div>`; // ✕ 닫기(카드 오른쪽 위 · 글자 없이 모양만 · 누르는 범위 44px · 바깥 누르기와 같은 closeCard · 대표님 11-18 12:33)
-const pnote = e => ({ ko_mean: e.ko_mean, ne_mean: e.ne_mean, ko_ex1: e.ex?.[0]?.ko, ne_ex1: e.ex?.[0]?.ne, ko_ex2: e.ex?.[1]?.ko, ne_ex2: e.ex?.[1]?.ne }); // 조각 카드 = 구절 카드와 같은 읽기 틀(뜻 → 예문1 → 예문2)
+const pnote = e => ({ ko_mean: e.ko_mean, ne_mean: e.ne_mean, ko_ex1: e.ex?.[0]?.ko, ne_ex1: e.ex?.[0]?.ne, ko_ex2: e.ex?.[1]?.ko, ne_ex2: e.ex?.[1]?.ne, ...(e.w || {}) }); // 조각 카드 = 구절 카드와 같은 읽기 틀(뜻 → 예문1 → 예문2) · e.w = 강제 정렬 낱말 시각(<말>_<블록>_w · 노래방 칠하기)
 function pieceHTML(e, roman, foot = "") {
   const k = uiKoOn();
   return `${XBTN}<div class="vk-row"><div class="vk-main"><span class="vk-t ko" lang="ko">${esc(e.lemma)}</span>${roman ? `<span class="vk-rom" lang="ne">${esc(e.dev || "")}</span>` : ""}${stack("vk-s vk-pos", esc(e.pos_ko || ""), esc(e.pos_ne || ""))}</div>${lang === "ne" ? `<button class="chip uiko vk-uiko" data-act="uiko" aria-pressed="${k}" aria-label="नेपाली ⇄ 한국어"><span class="a" lang="ne">${esc(langShort("ne"))}</span><span class="ar" aria-hidden="true">⇄</span><span class="b" lang="ko">한</span></button>` : ""}</div>
