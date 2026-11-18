@@ -1,7 +1,7 @@
 // 단어 카드 설명(대표님 11-16 「설명 창 방식 그대로」) — 위 = 지금 말(⇄ 상태) 본문 · 아래 「↳」 한 줄 = 다른 말 · ⇄ 누르면 그 자리에서 즉시 바뀜
 // 읽기 소리 = 낱말 소리 다음에 뜻·쓰임 → 예문1 → 예문2 차례로(지금 말) · 읽는 줄에 노래방 불 · 파일 = media/wordnote/<편>/<낱말번호>_<ko|ne>_<mean|ex1|ex2>.mp3(말하기부가 만듦 · 없으면 건너뜀)
-import { claim, onSound } from "./onesound.js?v=1118.17";
-import { esc } from "./text.js?v=1118.17";
+import { claim, onSound } from "./onesound.js?v=1118.18";
+import { esc } from "./text.js?v=1118.18";
 
 const BLK = [["mean", "ko_mean", "ne_mean"], ["ex1", "ko_ex1", "ne_ex1"], ["ex2", "ko_ex2", "ne_ex2"]];
 const pick = (n, ko, k) => n?.[`${k ? "ko" : "ne"}_${ko}`] || n?.[`${k ? "ko" : "ne"}_${ko === "ex1" ? "ex" : ko}`] || ""; // ex1 = 옛 이름 ex 도 받음
@@ -50,6 +50,29 @@ const LEAD = 0.1, wl = w => w.textContent.replace(/[「」]/g, "").length; // �
 // 낱말 시각(강제 정렬 · 11-17): wordnote.json 의 <말>_<블록>_w = [[시작,끝],…] (kw 낱말 수와 같을 때만 · 없으면 글자 수 비율로 대신)
 const wtOf = (n, l, b, cnt) => { const t = n?.[`${l}_${b}_w`]; return Array.isArray(t) && t.length === cnt && t.every(x => Array.isArray(x) && x.length >= 2) ? t : null; };
 const cntOf = (n, l, b) => String(n?.[`${l}_${b}`] || n?.[`${l}_${b === "ex1" ? "ex" : b}`] || "").split(/\s+/).filter(Boolean).length;
+// ── 카드 본문 따라 넘기기(대표님 11-18 14:05) — 자막 칸처럼 읽는 줄이 칸 위쪽 1/3 쯤에 오게 0.3초 부드럽게 · 머리(sticky)는 그대로 · 손(휠·터치·끌기)으로 넘기는 동안 4초 멈춤 · 다음 줄 읽기 시작하면 다시 따라감
+const HAND_MS = 4000, FOLLOW_MS = 300;
+const scrollerOf = root => root.querySelector(".vk-card") || root;
+function watchHand(card) { // 손 넘김 감지(코드로 옮기는 것은 wheel·touchmove·pointerdown 을 일으키지 않음)
+  if (card.__hf) return; card.__hf = 1; card.__hand = 0;
+  ["wheel", "touchstart", "touchmove", "pointerdown", "keydown"].forEach(e => card.addEventListener(e, () => { card.__hand = Date.now(); cancelAnimationFrame(card.__anim); }, { passive: true }));
+}
+function headBottom(card, r0, zf) { // 머리 고정(sticky) 부분의 아래 끝 = 읽는 줄이 가려지지 않는 맨 위
+  let hb = 0; for (const c of card.children) { if (c.classList.contains("vk-xw") || c.classList.contains("vk-wait")) continue; if (getComputedStyle(c).position === "sticky") hb = Math.max(hb, (c.getBoundingClientRect().bottom - r0.top) / zf); } return hb;
+}
+function followLine(j, anchor, fresh) { // fresh = 새 줄 시작(손 멈춤 풀고 따라감) · 아니면 줄이 칸 밖이고 손 넘김 4초 지난 뒤에만
+  const card = scrollerOf(j.root); if (!card || !anchor || !card.isConnected) return; watchHand(card);
+  if (fresh) card.__hand = 0; else if (Date.now() - card.__hand < HAND_MS) return;
+  const r0 = card.getBoundingClientRect(), zf = card.offsetWidth ? r0.width / card.offsetWidth : 1, ar = anchor.getBoundingClientRect();
+  const hb = headBottom(card, r0, zf), H = card.clientHeight, vis = Math.max(40, H - hb - 8), top = (ar.top - r0.top) / zf, bot = (ar.bottom - r0.top) / zf;
+  if (!fresh && top >= hb && bot <= H - 8) return; // 이미 다 보이면 그대로
+  const to = Math.max(0, Math.min(card.scrollHeight - H, card.scrollTop + top - (hb + vis / 3)));
+  if (Math.abs(to - card.scrollTop) < 2) return;
+  cancelAnimationFrame(card.__anim); const from = card.scrollTop, t0 = performance.now();
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches || document.hidden) { card.scrollTop = to; return; }
+  const step = now => { const k = Math.min(1, (now - t0) / FOLLOW_MS); card.scrollTop = from + (to - from) * (1 - (1 - k) ** 3); if (k < 1) card.__anim = requestAnimationFrame(step); };
+  card.__anim = requestAnimationFrame(step);
+}
 const blkOf = j => j.root.querySelector(`.vk-blk[data-b="${j.bl[j.k]?.b}"]`);
 function show(j) { // 지금 블록 표시 + 노래방 불(소리 위치 그대로)
   const blk = blkOf(j); if (!blk || !j.a) return; setPair(j, j.k);
@@ -65,10 +88,11 @@ function show(j) { // 지금 블록 표시 + 노래방 불(소리 위치 그대�
   ws.forEach((w, i) => { w.classList.toggle("kar", ids[i] === cs && (wt ? wt[i][0] <= tn : c / tot <= fr) && !(from && i < from.wi)); c += wl(w); });
   ws.forEach((w, i) => { w.classList.toggle("ks", ids[i] === cs && !(from && i < from.wi)); w.classList.toggle("kt", !!from && from.k === j.k && from.wi === i && w.classList.contains("kar")); }); // ks = 읽는 문장 연노랑(문장 단위) · kt = 톡한 낱말만 진한 노랑
   const ps = [...j.root.querySelectorAll(`.vk-note > .vk-pair[data-pb="${j.bl[j.k].b}"] .ps`)], tg = Math.min(cs, ps.length - 1);
+  { const key = j.k + ":" + cs, fresh = j.fk !== key; j.fk = key; followLine(j, blk.querySelector(".kw.ks") || blk, fresh); } // 읽는 문장(없으면 블록)을 따라 카드 본문 넘김
   j.root.querySelectorAll(".vk-note .ps.on").forEach(e => { if (e !== ps[tg]) e.classList.remove("on"); }); ps[tg]?.classList.add("on");
 }
 const run = j => { clearInterval(tick); tick = setInterval(() => { if (!j.dead && !j.paused) show(j); }, 40); };
-export function stopRead() { clearInterval(tick); tick = 0; if (cur) { clearTimeout(cur.gap); if (cur.a) { cur.a.onended = cur.a.onerror = null; try { cur.a.pause(); } catch {} } cur.dead = true; cur = null; } document.querySelectorAll(".vk-blk.cur").forEach(e => e.classList.remove("cur")); document.querySelectorAll(".vk-note .kw.kar, .kw.ks").forEach(e => e.classList.remove("kar", "ks", "kt")); clearHl(); }
+export function stopRead() { clearInterval(tick); document.querySelectorAll(".vk-card").forEach(c => cancelAnimationFrame(c.__anim)); tick = 0; if (cur) { clearTimeout(cur.gap); if (cur.a) { cur.a.onended = cur.a.onerror = null; try { cur.a.pause(); } catch {} } cur.dead = true; cur = null; } document.querySelectorAll(".vk-blk.cur").forEach(e => e.classList.remove("cur")); document.querySelectorAll(".vk-note .kw.kar, .kw.ks").forEach(e => e.classList.remove("kar", "ks", "kt")); clearHl(); }
 export const isReading = () => !!cur;
 export const isPaused = () => !!cur?.paused;
 function play(j, k, at, hold, lead = 0, sec = null) { // k 블록을 at(0~1 비율)부터 · hold = 멈춘 채 그 자리만

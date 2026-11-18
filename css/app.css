@@ -1931,3 +1931,6 @@ li.vl-row{position:relative;overflow:hidden;touch-action:pan-y}.vl-slide{display
 .vk-head .vk-fs svg,.vk-row .vk-fs svg{width:17px;height:17px}.vk-head .vk-fs:active,.vk-row .vk-fs:active{transform:scale(.93);background:var(--hi-soft)}
 .vk-row .vk-fs{margin-left:auto}.vk-row .vk-fs+.vk-uiko{margin-left:6px}
 @media (max-width:430px){.vk-pane .vk-head{gap:4px;padding-right:36px}.vk-pane .vk-tt{gap:4px}.vk-pane .vk-tt b{font-size:15px;white-space:nowrap}.vk-pane .vk-cnt{padding:2px 7px;font-size:11px}.vk-pane .vk-cnt i{display:none}.vk-pane .vk-sortslot{gap:4px}.vk-pane .vk-sortslot .chip{padding:0 8px}.vk-pane .vk-uik{margin-left:0}}
+
+/* 카드 본문 자동 넘김(11-18 14:05 · 도우미 H) — 머리 줄은 고정(sticky) · 본문만 읽는 줄 따라 넘어감(js/wordnote.js followLine) */
+.vk-body-scroll,.vk-card>.vk-row{position:sticky;top:0;z-index:4;background:var(--card)}
