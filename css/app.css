@@ -1891,3 +1891,6 @@ li.vl-row{position:relative;overflow:hidden;touch-action:pan-y}.vl-slide{display
 .vk-x{color:var(--hi)}.vk-x:active{background:var(--hi-soft)}
 .vk-ppane>.vk-card{scrollbar-width:none;scrollbar-gutter:auto}.vk-ppane>.vk-card::-webkit-scrollbar{display:none;width:0}
 .learn .stick .vstage:fullscreen .vk-pane,.learn .stick .vstage.vk-pfs .vk-pane{border-bottom:0}
+/* ── 공용 눌림(11-18 · 단어장 줄과 같은 값: scale .97 · 0.1초 · 그림자 줄임) — 모든 누르는 것 · 배치·크기 불변(특이도 0 = 각 단추 자기 규칙이 먼저) ── */
+:where(button,[role=button],summary){transition:transform .1s ease,background-color .12s ease,box-shadow .1s ease}
+:where(button,[role=button],summary):not(:disabled):active{transform:scale(.97);box-shadow:0 1px 3px rgba(0,0,0,.18)}
