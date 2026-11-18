@@ -10,7 +10,7 @@ import { paths } from "../paths.js?v=1118.3";
 import { charsF } from "../data.js?v=1118.3";
 import { audioCtx } from "../wake.js?v=1118.3";
 import * as sfx from "../sfx.js?v=1118.3";
-import { srOnlyMode, setSrOnly, devSR, setDevSR, seqMode, srFailCount, serverMode } from "../recorder.js?v=1118.3";
+import { srOnlyMode, setSrOnly, devSR, setDevSR, seqMode, srFailCount, serverMode, listMics, niceLabel, micLabel } from "../recorder.js?v=1118.3";
 import * as AP from "../agepolicy.js?v=1118.3"; // 나이·나라 · 켜진/막힌 기능(대표님 10-19 시험 스위치 ?age=15&country=NP)
 import { sttReady, sttURL, serverSTT } from "../sttserver.js?v=1118.3";
 import { diagCount, clearDiag } from "../diag.js?v=1118.3";
@@ -36,10 +36,14 @@ export default async function diag(app) {
   const srSess = (() => { try { return sessionStorage.getItem("malmun.srmode") === "only"; } catch { return false; } })(), srHow = devSR() === "sronly" ? "기기 기억 7일" : srOff ? `서버 연속 실패 → ${srOff}분 더 받아쓰기만` : srSess ? "이번 방문만" : "";
   // 기기 안 받아쓰기(본부 10-19 18세 미만 말하기 조사) — Chrome processLocally · 한국어 언어 팩 상태(available · 내려받기는 안 함)
   let onDev = "기능 없음(이 브라우저)"; if (SR?.available) { try { onDev = `한국어 ${await SR.available({ langs: ["ko-KR"], processLocally: true })} · 서버 받아쓰기 ${await SR.available({ langs: ["ko-KR"], processLocally: false })}`; } catch (e) { onDev = "확인 실패 " + e.message; } }
+  // 마이크 한 줄(대표님 11-18 12:26 · 장치가 다시 잡혀 번호가 바뀌면 기억한 마이크가 안 열림) — 앱이 기억한 것 + 지금 잡힌 장치 · 마이크는 열지 않음
+  let micLine = "?"; try { const ds = await listMics(), mem = localStorage.getItem("malmun.mic"), hit = ds.find(d => d.deviceId === mem), names = ds.map(d => niceLabel(d.label) || "(이름 없음)");
+    micLine = `기억 ${mem ? (hit ? `「${niceLabel(hit.label) || "있음"}」 ✓` : "있는데 지금 목록에 없음(장치 번호가 바뀜 → 앱이 알림·고르기를 엶)") : "없음(크롬 기본)"} · 쓰는 중 ${micLabel() || "-"} · 지금 잡힌 장치 ${names.length}개 ${names.join(" / ") || "(허락 전이면 이름이 안 보임)"}`; } catch (e) { micLine = "확인 실패 " + e.message; }
   const base = {
     "판": VERSION, "주소": location.href.replace(/[?#].*$/, ""), "브라우저": navigator.userAgent, "화면": `${screen.width}×${screen.height} · 창 ${innerWidth}×${innerHeight} · dpr ${devicePixelRatio}`,
     "받아쓰기 방식": srOnlyMode() ? `받아쓰기만(${srHow}${devSR() === "sronly" ? " — 녹음 소리로 받아쓰기가 연속 2번 안 됨" : ""})` : seqMode() && serverMode() ? `녹음 → 서버 받아쓰기(2안 · 안드로이드 기본 · ${devSR() === "server" ? "이 기기에서 됨 확인 · 기기 기억 7일" : "아직 확인 전"} · 실패하면 이번 방문만 받아쓰기만)` : seqMode() ? `녹음 먼저 → 그 소리로 받아쓰기(${devSR() === "seq-ok" ? "이 기기에서 됨 확인 · 기기 기억 7일" : "아직 확인 전"} · 연속 실패 ${srFailCount()}/2 · 이번 방문만)` : "녹음+받아쓰기 같이", "서버 받아쓰기": sttReady() ? `켜짐 · ${sttURL()}` : "꺼짐(주소 없음)", "받아쓰기 있음": SR ? (window.SpeechRecognition ? "SpeechRecognition" : "webkitSpeechRecognition") : "없음", "마이크 허락": micPerm,
     "기기 안 받아쓰기": onDev,
+    "마이크 장치": micLine,
     "나이 판정": AP.gateOn() ? `${AP.age() ?? "모름"}세 · 나라 ${AP.country() || "모름(가장 엄한 쪽)"}${AP.testMode() ? " · 시험 스위치(?age=off 로 끔)" : ""} · 판 ${AP.POLICY.version}` : "꺼짐(나이 화면 전 · 지금 앱 그대로) · 시험: 주소 끝 ?age=15&country=NP",
     "켜진 기능": AP.table().filter(x => x.ok).map(x => x.ko).join(" · ") || "-",
     "막힌 기능": AP.table().filter(x => !x.ok).map(x => `${x.ko}(${x.min === Infinity ? "보류" : x.min + "세부터"})`).join(" · ") || "없음",

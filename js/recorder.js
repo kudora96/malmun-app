@@ -23,7 +23,8 @@ const pref = v => {
   } catch { return null; }
 };
 const dead = new Set();
-let stream = null;
+let stream = null, warned = false; // warned = 「마이크가 바뀌었어요」를 이미 한 번 알림(고를 때까지 다시 알리지 않음 · 대표님 11-18 12:26)
+const changedErr = () => Object.assign(new Error("mic changed"), { name: "MicChangedError" });
 const devId = s => s?.getAudioTracks()[0]?.getSettings().deviceId || "";
 // 날소리로 녹음(본부 10-04) — 크롬 기본값(에코 제거·잡음 억제·자동 크기)이 말 도중 소리를 뚝뚝 끊었다 · 말하기 연습 녹음은 날소리가 맞다(녹음 중엔 앱이 소리를 안 틂)
 // 폰(안드로이드)은 폰 자체 잡음·울림 처리를 켬(투덜이 10-07 「폰 녹음에 PC 에 없던 잔잡음」) · PC 는 지금처럼 날소리 · 크기는 gainOf 로 맞춤 그대로
@@ -31,12 +32,15 @@ const RAW = /Android/i.test(navigator.userAgent) ? { echoCancellation: true, noi
 const openOne = c => Promise.race([navigator.mediaDevices.getUserMedia({ audio: { ...(c === true ? {} : c), ...RAW } }), new Promise((_, rej) => setTimeout(() => rej(Object.assign(new Error("timeout"), { name: "TimeoutError" })), 8000))]);
 
 // 마이크 열기 — 고른 마이크 → 기본 → 나머지 차례로(하나가 안 열려도 다음 것으로) · 별칭 장치는 건너뜀
-async function openMic() {
+// strict = 말하기 녹음 · 기억한 마이크가 없어졌거나 안 열리면 말없이 다른 마이크로 넘어가지 않고 MicChangedError 한 번(알림 + 마이크 고르기 · 대표님 11-18 12:26)
+async function openMic(strict) {
   if (stream?.getAudioTracks()[0]?.readyState === "live") return stream;
   stream = null;
   let last = null, devs = [];
   try { devs = (await navigator.mediaDevices.enumerateDevices()).filter(x => x.kind === "audioinput" && x.deviceId && !ALIAS(x.deviceId)).map(x => x.deviceId); } catch {}
-  for (const c of [...new Set([pref() || true, true, ...devs])]) {
+  const mine = pref();
+  if (strict && mine && !warned && devs.length && !devs.includes(mine)) { warned = true; throw changedErr(); } // 기억한 장치 번호가 목록에 없음(장치가 다시 잡혀 번호가 바뀜)
+  for (const c of [...new Set([mine || true, true, ...devs])]) {
     if (dead.has(c)) continue;
     try {
       const s = await openOne(c === true ? true : { deviceId: { exact: c } });
@@ -46,6 +50,7 @@ async function openMic() {
     } catch (e) {
       last = e;
       if (e.name === "NotAllowedError" || e.name === "SecurityError") break; // 허락을 안 한 것 — 다른 장치로 해도 같다
+      if (strict && mine && c === mine && !warned) { warned = true; throw changedErr(); } // 기억한 마이크가 안 열림 — 말없이 넘어가지 않음
     }
   }
   dead.clear();
@@ -57,11 +62,11 @@ export function closeMic() { stream?.getTracks().forEach(x => x.stop()); stream 
 export const niceLabel = l => String(l || "").replace(/\s*\([0-9a-f]{4}:[0-9a-f]{4}\)\s*$/i, "").replace(/(^|\()\s*\d+-\s*/g, "$1").trim();
 export const micLabel = () => niceLabel(stream?.getAudioTracks()[0]?.label);
 export async function listMics() { try { return (await navigator.mediaDevices.enumerateDevices()).filter(x => x.kind === "audioinput" && x.deviceId && !ALIAS(x.deviceId)); } catch { return []; } }
-export function chooseMic(id) { pref(id || ""); dead.clear(); closeMic(); }
+export function chooseMic(id) { pref(id || ""); dead.clear(); warned = false; closeMic(); }
 // 음성 인식이 아무것도 못 알아들었을 때 까닭 → 글자 열쇠
 export const srWhy = err => ({ "audio-capture": "sr_audio", network: "sr_network", "not-allowed": "sr_denied", "service-not-allowed": "sr_denied" })[err] || "sr_none";
 // 안 될 때 까닭 → 글자 열쇠(lang/*.json)
-export const micWhy = e => (e?.name === "NotAllowedError" || e?.name === "SecurityError" ? "mic_denied" : e?.name === "NotFoundError" || e?.name === "OverconstrainedError" ? "mic_none" : e?.name === "SilentError" ? "mic_silent" : "mic_busy");
+export const micWhy = e => (e?.name === "NotAllowedError" || e?.name === "SecurityError" ? "mic_denied" : e?.name === "NotFoundError" || e?.name === "OverconstrainedError" ? "mic_none" : e?.name === "SilentError" ? "mic_silent" : e?.name === "MicChangedError" ? "mic_changed" : "mic_busy");
 
 // ── 진단 기록(화면에 안 보임 · 본부 10-04) — 녹음이 끝날 때마다 localStorage malmun.lastrec 에 마지막 5개 ──
 // 「받아쓰기만」 방식(본부 10-07 투덜이 「알아서」 — 안드로이드는 녹음과 받아쓰기를 같이 못 하는 기기가 있음) — 그 기기에서 녹음+받아쓰기가 말소리는 있는데 들은 말 0 으로 끝나면
@@ -222,7 +227,7 @@ export function record({ onLevel = () => {}, onSwitch = () => {}, onReady = () =
   ctl.done = (async () => {
     for (let k = 0; k < 6; k++) {
       let s;
-      try { s = await openMic(); } catch (e) { return { error: e }; }
+      try { s = await openMic(true); } catch (e) { return { error: e }; }
       if (cancelled) return { cancelled: true };
       const r = await once(s, k > 0);
       if (r.dead) { dead.add(s.req); if (devId(s)) dead.add(devId(s)); closeMic(); onSwitch(); continue; }

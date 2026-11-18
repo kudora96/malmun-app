@@ -910,7 +910,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     if (st.panel?.i !== i || sp?.ctl !== ctl) return; // 다른 데로 감
     sp.ctl = null; btn.classList.remove("on"); lvl.hidden = true;
     if (r.cancelled) { btn.innerHTML = micLbl(); msg.textContent = ""; return; }
-    if (r.error) { btn.innerHTML = micLbl(); msg.textContent = tq(micWhy(r.error)); return; }
+    if (r.error) { btn.innerHTML = micLbl(); const why = micWhy(r.error); msg.textContent = tq(why); if (why === "mic_changed" || why === "mic_silent") box.querySelector("[data-x=mics]")?.click(); return; } // 마이크가 바뀜·소리 0 = 안내 한 번 + 있는 마이크 고르기를 엶(대표님 11-18)
     // 녹음 먼저 → 그 녹음 소리로 받아쓰기 · 말소리는 있었는데 들은 말 0 이고 아직 이 기기에서 된 적 없으면 = 이 기기는 안 됨 → 받아쓰기만(기기 기억) · 0점 대신 「한 번 더」(본부 10-10)
     //  판정 = recorder.js srJudge(검사부 10-11) — 연속 2번 기기 실패라야 받아쓰기만(7일 기억) · 인터넷·중단·말 없음·무음은 세지 않음 · "seq-ok" 여도 실패면 「한 번 더」
     //  기다리는 동안 🎤 막음(보통 모양) · 끝나면 어느 길이든 풂 · 닫기·새 녹음 = 시도 번호가 바뀜 → 버림
@@ -1016,7 +1016,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
       listMics().then(ds => {
         sel.innerHTML = ds.map(d => `<option value="${esc(d.deviceId)}" ${niceLabel(d.label) === micLabel() ? "selected" : ""}>${esc(niceLabel(d.label) || d.deviceId)}</option>`).join("");
         sel.hidden = false; x.hidden = true;
-        sel.onchange = () => { chooseMic(sel.value); x.textContent = `🎤 ${sel.selectedOptions[0]?.textContent || ""}`; x.hidden = false; sel.hidden = true; };
+        sel.onchange = () => { chooseMic(sel.value); const sm = panel.querySelector(".sayb .smsg"); if (sm) sm.textContent = tq("mic_chosen"); x.textContent = `🎤 ${sel.selectedOptions[0]?.textContent || ""}`; x.hidden = false; sel.hidden = true; };
       });
       return;
     }

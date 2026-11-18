@@ -260,7 +260,9 @@ export default async function speak(app, ep, id, opts = {}) {
     st.stream = null;
     let last = null, devs = [];
     try { devs = (await navigator.mediaDevices.enumerateDevices()).filter(x => x.kind === "audioinput" && x.deviceId && !ALIAS(x.deviceId)).map(x => x.deviceId); } catch {} // ◆
-    const tries = [...new Set([micPref() || true, true, ...devs])];
+    const mine = micPref();
+    if (mine && !st.micWarned && devs.length && !devs.includes(mine)) { st.micWarned = true; throw Object.assign(new Error("mic changed"), { name: "MicChangedError" }); } // 기억한 마이크가 없어짐 — 말없이 넘어가지 않음(대표님 11-18)
+    const tries = [...new Set([mine || true, true, ...devs])];
     for (const c of tries) {
       if (dead.has(c)) continue;
       try {
@@ -271,6 +273,7 @@ export default async function speak(app, ep, id, opts = {}) {
       } catch (e) {
         last = e;
         if (e.name === "NotAllowedError" || e.name === "SecurityError") break; // 허락을 안 한 것 — 다른 장치로 해도 같다
+        if (mine && c === mine && !st.micWarned) { st.micWarned = true; throw Object.assign(new Error("mic changed"), { name: "MicChangedError" }); }
       }
     }
     throw last || Object.assign(new Error("silent"), { name: "SilentError" }); // 열리는 마이크마다 소리가 0
@@ -317,7 +320,8 @@ export default async function speak(app, ep, id, opts = {}) {
     try { if (!(srOnlyMode() && SR)) await openMic(); st.micErr = ""; } // 받아쓰기만 = 마이크를 열지 않음(안드로이드는 녹음마다 마이크를 닫으므로 · 본부 10-08)
     catch (e) {
       // 거절·막힘 안내는 다시 그려도 남게 st.micErr 에 붙듦(본부 10-04 · 창은 그대로 · 본보기 듣기는 됨)
-      if (e.name === "SilentError") { dead.clear(); $(".msg").textContent = st.micErr = t("mic_silent"); showMics(t("mic_silent")); }
+      if (e.name === "MicChangedError") { $(".msg").textContent = st.micErr = t("mic_changed"); showMics(t("mic_changed")); }
+      else if (e.name === "SilentError") { dead.clear(); $(".msg").textContent = st.micErr = t("mic_silent"); showMics(t("mic_silent")); }
       else $(".msg").textContent = st.micErr = micWhy(e);
       return;
     }
@@ -468,7 +472,7 @@ export default async function speak(app, ep, id, opts = {}) {
     if (sg) return go(st.i + +sg.dataset.seg);
     const mc = e.target.closest("[data-mic]");
     if (mc) { // 마이크 고르기 → 기억하고 다음 녹음부터 그 마이크
-      micPref(mc.dataset.mic); dead.clear();
+      micPref(mc.dataset.mic); dead.clear(); st.micWarned = false;
       stopRec(true); closeMic();
       closeMics(); $(".msg").textContent = t("mic_chosen");
       return;
