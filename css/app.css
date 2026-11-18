@@ -1834,3 +1834,5 @@ html:has(.scr.learn),html:has(.scr.learn) body{overflow-anchor:none} /* 배우�
 /* ⇄ = 글을 다시 그리지 않고 보이는 말만 바꿈(깜빡임 없음 · 전환 효과 없음) — 두 말 글이 같은 칸에 겹쳐 있음 */
 .vk-card,.vk-card *{transition:none!important}
 .vk-card{scrollbar-gutter:stable}
+.vk-note .gw{padding:0 4px;margin:0 1px;border:1px solid var(--line);border-radius:5px;background:var(--card);box-shadow:0 1px 0 var(--line);-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.vk-line .kw.kar .gw,.vk-line .kw.kt .gw{background:#ffd21f;color:#1b1b1b}
