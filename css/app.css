@@ -1830,7 +1830,7 @@ html:has(.scr.learn),html:has(.scr.learn) body{overflow-anchor:none} /* 배우�
 .vk-pos{font-size:13px;color:var(--mute)}.vk-pex{display:flex;flex-direction:column;gap:2px;padding-top:6px;border-top:1px dashed var(--line)}.vk-pex .vk-pair{margin:0 6px}
 .vk-piece .vk-line .kw{background:none}
 
-.vk-pair .ps{border-radius:3px}.vk-pair .ps.on{background:rgba(255,210,31,.3);box-shadow:0 0 0 2px rgba(255,210,31,.3)}.vk-wait{display:none!important}
+.vk-pair .ps{border-radius:3px}.vk-pair .ps.on{background:rgba(255,210,31,.3);box-shadow:0 0 0 2px rgba(255,210,31,.3)}.vk-wait,.v9wait{display:none!important}
 
 /* ⇄ = 글을 다시 그리지 않고 보이는 말만 바꿈(깜빡임 없음 · 전환 효과 없음) — 두 말 글이 같은 칸에 겹쳐 있음 */
 .vk-card,.vk-card *{transition:none!important}
