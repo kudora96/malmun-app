@@ -1,12 +1,12 @@
-import { MUSIC_ON, bgmOn, setBgm, TRACKS, playTrack, bgmNow, onBgmChange, bgmVol, setBgmVol, playNext } from "./bgm.js?v=1118.31";
-import { LEARN } from "./tl.js?v=1118.31";
-import { paths } from "./paths.js?v=1118.31";
-import { t, tL, tAlt, lang, langName, LANGS, READY, setLang, KO_UI, uiKoOn, setUiKo, langShort, preloadKoUi } from "./i18n.js?v=1118.31";
-import { snapshot, retext } from "./retext.js?v=1118.31";
-import "./langfit.js?v=1118.31"; // ⇄ 때 단추 크기·자리 고정(다국어부 10-15)
-import { VERSION } from "./version.js?v=1118.31";
-import { esc } from "./text.js?v=1118.31";
-import { starChip } from "./vocab.js?v=1118.31";
+import { MUSIC_ON, bgmOn, setBgm, TRACKS, playTrack, bgmNow, onBgmChange, bgmVol, setBgmVol, playNext } from "./bgm.js?v=1118.32";
+import { LEARN } from "./tl.js?v=1118.32";
+import { paths } from "./paths.js?v=1118.32";
+import { t, tL, tAlt, lang, langName, LANGS, READY, setLang, KO_UI, uiKoOn, setUiKo, langShort, preloadKoUi } from "./i18n.js?v=1118.32";
+import { snapshot, retext } from "./retext.js?v=1118.32";
+import "./langfit.js?v=1118.32"; // ⇄ 때 단추 크기·자리 고정(다국어부 10-15)
+import { VERSION } from "./version.js?v=1118.32";
+import { esc } from "./text.js?v=1118.32";
+import { starChip } from "./vocab.js?v=1118.32";
 
 const svg = (d, fill) => `<svg class="ico" viewBox="0 0 24 24" ${fill ? 'fill="currentColor"' : 'fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"'} aria-hidden="true">${d}</svg>`;
 export const I = {
