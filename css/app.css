@@ -1774,7 +1774,7 @@ li.vl-row{position:relative;overflow:hidden;touch-action:pan-y}.vl-slide{display
 .vk-pl{flex:none;width:34px;height:34px;border-radius:50%;border:1px solid var(--hi);background:var(--hi);color:var(--on-hi);font-size:13px;line-height:1;padding:0 0 0 2px;box-shadow:0 1px 0 var(--line);cursor:pointer}
 .vk-pl.playing{animation:v9glow 1.4s ease-in-out infinite}
 .vk-lb{flex:1;min-width:0;align-content:center;display:flex;flex-direction:row;flex-wrap:wrap;align-items:baseline;column-gap:8px;row-gap:0;text-align:start;min-height:48px;padding:6px 2px;border:0;background:transparent;color:inherit;cursor:pointer}
-.vk-li .vk-t{font-size:19px;line-height:1.25;font-weight:800}.vk-li .vk-rom{font-size:14px;color:var(--mute);opacity:1;font-weight:500;line-height:1.25}.vk-li .vk-mean{font-size:15px;font-weight:600;color:var(--hi);line-height:1.25}
+.vk-li .vk-t{font-size:16px;line-height:1.25;font-weight:800}.vk-li .vk-rom{font-size:16px;color:var(--mute);opacity:1;font-weight:500;line-height:1.25}.vk-li .vk-mean{font-size:16px;font-weight:600;color:var(--hi);line-height:1.25}
 @media (hover:hover){.vk-li:hover{background:rgba(255,210,31,.3)}}
 .vk-li:active{transform:scale(.97);box-shadow:0 1px 3px rgba(0,0,0,.18)}
 .vk-empty{margin:12px 4px;color:var(--mute);font-size:14px}
@@ -1912,10 +1912,11 @@ li.vl-row{position:relative;overflow:hidden;touch-action:pan-y}.vl-slide{display
 /* ── 카드 머리 한 줄 + 아래 갈색 막대 = 조작 막대(대표님 11-18 14:09) ── */
 .vk-card .vk-row{align-items:flex-start;gap:8px}
 .vk-card .vk-main{flex:1;min-width:0;flex-direction:row;flex-wrap:wrap;align-items:baseline;column-gap:8px;row-gap:0;padding-top:2px}
-.vk-card .vk-main .vk-t.ko{font-size:22px;font-weight:800}
-.vk-card .vk-main .vk-rom{font-size:14px;color:var(--mute);font-weight:500}
-.vk-card .vk-main .vk-mean,.vk-card .vk-main .vk-pos{font-size:15px;font-weight:700;color:var(--hi);line-height:1.3;margin:0}
+.vk-card .vk-main .vk-t.ko{font-size:17px;font-weight:800}
+.vk-card .vk-main .vk-rom{font-size:17px;color:var(--mute);font-weight:500}
+.vk-card .vk-main .vk-mean,.vk-card .vk-main .vk-pos{font-size:17px;font-weight:700;color:var(--hi);line-height:1.3;margin:0}
 .vk-card[data-m=ne] .vk-main .vk-mean,.vk-card[data-m=ne] .vk-main .vk-pos{order:-1}
+.vk-pcard[data-m=ne] .vk-main .vk-pos{order:0} /* 조각 카드 머리 = 두 쪽 모두 표제→발음→품사(11-18 16:01) */
 .vk-card .vk-uiko{align-self:flex-start;margin-left:auto}
 .vk-cbar{position:absolute;inset:0;z-index:8;display:flex;align-items:center;gap:6px;padding:0 8px;pointer-events:none;color:#f6efe4}
 .vk-cbar>*{display:flex;align-items:center;gap:6px;min-width:0;pointer-events:none}
