@@ -143,7 +143,7 @@ function startAt(j, k, wi) { // 그 낱말 시작 소리부터 새로 읽음(앞
 export function switchRead(koFirst) {
   const j = cur; if (!j) return;
   const a = j.a, ended = !!a?.ended || j.resumeK >= 0, fr = !ended && a?.duration ? a.currentTime / a.duration : 0, k = ended ? (j.resumeK >= 0 ? j.resumeK : j.k) : j.k;
-  clearTimeout(j.gap); j.gap = 0; clearInterval(tick);
+  clearTimeout(j.gap); j.gap = 0; clearInterval(tick); j.pre = null; // 미리 받아 둔 다음 블록 소리는 옛 말 것 — 버림(블록 사이 틈에 ⇄ 하면 옛 말로 이어 읽던 것)
   if (a) { a.onended = a.onerror = null; try { a.pause(); } catch {} }
   // 같은 낱말에서: 두 말 다 낱말 시각이 있으면 지금 낱말 번호 → 새 말 그 낱말 시작 시각 · 없으면 소리 위치 비율
   let sec = null; const b = j.bl[k]?.b, nl = koFirst ? "ko" : "ne", ob = a && !ended && b ? wtOf(j.n, j.lang, b, cntOf(j.n, j.lang, b)) : null, nb = b ? wtOf(j.n, nl, b, cntOf(j.n, nl, b)) : null;
