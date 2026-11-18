@@ -1,17 +1,19 @@
 // ⭐ 내 단어장(시험판 · 네팔어 1편 · 본부 11-16 대표님 승인) — 낱말 칸을 톡 누르면 작은 카드 · 단어장은 이 기기(localStorage)에만
 // 소리 = 이미 만들어 둔 낱말 소리를 이어 붙여(wordsnd.json) · 없는 편은 줄 소리의 그 낱말 구간 · 학습자 말이 네팔어가 아니면 아무것도 안 보임
-import { lang, uiKoOn, langShort } from "./i18n.js?v=1118.29";
-import { noteHTML, applyMode, fixSizes, readNote, stopRead, toggleRead, switchRead, tapBlock, tapWord, noteBlocks, curBlock, isReading, isPaused } from "./wordnote.js?v=1118.29"; // 단어 카드 설명(위 = 지금 말 · 아래 ↳ 다른 말) + 읽기 소리
-import { claim, onSound } from "./onesound.js?v=1118.29";
-import * as sfx from "./sfx.js?v=1118.29";
-import { uikoChip } from "./ui.js?v=1118.29";
-import { esc } from "./text.js?v=1118.29";
-import { attachDragScroll } from "./dragscroll.js?v=1118.29";
-import { sortItems, makeSortButton, attachDelete, loadSort } from "./vlist_ops.js?v=1118.29";
-import { PAGE, pageCount, slicePage, clampPage, makePager } from "./vlist_pager.js?v=1118.29";
-import { filterItems, makeFindBox, indexLetters, makeIndexBar, groupByEp, findTx } from "./vlist_find.js?v=1118.29";
-import { paths } from "./paths.js?v=1118.29";
-import { VERSION } from "./version.js?v=1118.29";
+import { lang, uiKoOn, langShort } from "./i18n.js?v=1118.30";
+import { noteHTML, applyMode, fixSizes, readNote, stopRead, toggleRead, switchRead, tapBlock, tapWord, noteBlocks, curBlock, isReading, isPaused } from "./wordnote.js?v=1118.30"; // 단어 카드 설명(위 = 지금 말 · 아래 ↳ 다른 말) + 읽기 소리
+import { claim, onSound } from "./onesound.js?v=1118.30";
+import { hold } from "./wake.js?v=1118.30"; // 단어장·카드 ▶ 도 소리 장치 깨워 둠(목록 화면에서 열 때는 학습 화면의 깨우기가 없었음 · 대표님 11-18 「다음 사람」 첫 「다」 안 들림)
+let wakeRel = null; const wakeOn = () => { wakeRel ||= hold(); }, wakeOff = () => { const f = wakeRel; wakeRel = null; try { f?.(); } catch {} };
+import * as sfx from "./sfx.js?v=1118.30";
+import { uikoChip } from "./ui.js?v=1118.30";
+import { esc } from "./text.js?v=1118.30";
+import { attachDragScroll } from "./dragscroll.js?v=1118.30";
+import { sortItems, makeSortButton, attachDelete, loadSort } from "./vlist_ops.js?v=1118.30";
+import { PAGE, pageCount, slicePage, clampPage, makePager } from "./vlist_pager.js?v=1118.30";
+import { filterItems, makeFindBox, indexLetters, makeIndexBar, groupByEp, findTx } from "./vlist_find.js?v=1118.30";
+import { paths } from "./paths.js?v=1118.30";
+import { VERSION } from "./version.js?v=1118.30";
 
 const KEY = "malmun.vocab.ne";
 export const vocabOn = () => lang === "ne";
@@ -137,7 +139,7 @@ function fromPane(el) { if (!pane) return; const { own, st } = pane; pane = null
 export function closeCard(back = false) { // back = 단어장 목록으로 돌아감(카드만 닫음) · 아니면 칸 안 전부 닫고 영상 자리로
   stopWordSound(); const el = cardEl; cardEl = null;
   if (pane) { const pane0 = pane, { own, st } = pane; pane = null; if (back && listEl) { listEl.style.display = ""; const u = listEl.querySelector(".vk-ul"); if (u) u.scrollTop = pane0.ls; } else { if (own) stageFree(st); if (listEl) closeVocabList(); } }
-  el?.remove(); cardCtl = null; syncCBar();
+  el?.remove(); cardCtl = null; syncCBar(); if (!listEl) wakeOff();
 }
 addEventListener("hashchange", () => { if (pane) closeCard(); });
 document.addEventListener("fullscreenchange", () => { if (cardEl && !pane) host().append(cardEl); if (!document.fullscreenElement) stageOf()?.classList.remove("vk-pfs"); placeCBar(); });
@@ -170,7 +172,7 @@ function pieceHTML(e, roman, foot = "") {
 }
 const meanHTML = it => { const kh = it.note?.ko_head; return kh ? `<span class="vk-t vk-mean vk-sw" data-ko="${esc(kh)}" data-ne="${esc(it.mean || "")}" data-lk="1" lang="${uiKoOn() ? "ko" : "ne"}"><span class="vis">${esc(uiKoOn() ? kh : it.mean || "")}</span></span>` : `<span class="vk-t vk-mean" lang="ne">${esc(it.mean || "")}</span>`; }; // 맨 위 뜻 줄: 한국어 뜻(ko_head)이 있으면 ⇄ 때 같은 칸에서 글만 바뀜(11-18)
 export function openWordCard(it, { before, fromList = false, piece = null, ents: ents0 = null } = {}) { // piece = 단어장에서 조각 줄을 눌러 바로 그 조각 카드로(조각 id) · ents = 조각 사전 항목
-  closeCard(); claim("card"); // 어디서 열든(읽기 창·단어장 목록) 다른 소리는 멈춤 — before 를 안 넘겨도 하나
+  closeCard(); wakeOn(); claim("card"); // 어디서 열든(읽기 창·단어장 목록) 다른 소리는 멈춤 — before 를 안 넘겨도 하나
   let view = piece || null; // 지금 보는 조각 id(없으면 구절 카드)
   const saved = () => (view ? has("p:" + view) : has(it.w)), romanNow = () => (document.querySelector(".exv.norom") ? "" : (lang === "ne" && it.note?.dev) || it.rom); // 네팔어 학습자 = 데바나가리 발음(dev) · 발음 토글(.norom)이 끄면 숨김
   const el = (cardEl = document.createElement("div"));
@@ -196,7 +198,7 @@ export function openWordCard(it, { before, fromList = false, piece = null, ents:
   before?.(); // 카드가 열리면 바깥 소리(설명 읽기)는 그 자리에서 멈춤 — 카드 소리만
   draw();
   const curNote = () => { const pe = view && ents?.find(x => x.id === view); return pe ? pnote(pe) : it.note; }; // 지금 보는 카드의 설명(구절 카드 또는 조각 카드)
-  const startNote = (bk, wi = -1) => { const nt = curNote(); if (nt && cardEl === el) { const v = view; showWait(el); it.__done = null; readNote(el, it, nt, uiKoOn(), it.order, { from: Math.max(0, noteBlocks(nt).findIndex(x => x.b === bk)), wi, url: v ? (l, b) => `snd/dict/${v}_${l}_${b}.mp3?v=2` : null }); } }; // 설명 읽기 화면처럼 열리면 저절로 시작
+  const startNote = (bk, wi = -1) => { const nt = curNote(); if (nt && cardEl === el) { const v = view; showWait(el); it.__done = null; readNote(el, it, nt, uiKoOn(), it.order, { from: Math.max(0, noteBlocks(nt).findIndex(x => x.b === bk)), wi, url: v ? (l, b) => `snd/dict/${v}_${l}_${b}.mp3?v=3` : null }); } }; // 설명 읽기 화면처럼 열리면 저절로 시작
   const onLang = () => { if (cardEl !== el) return removeEventListener("malmun:uilang", onLang); const ko = uiKoOn(), c = el.querySelector(".vk-card"); if (c) { applyMode(c, ko); const u = c.querySelector(".vk-uiko"); u?.setAttribute("aria-pressed", String(ko)); c.querySelectorAll(".vk-snd").forEach(x => { x.setAttribute("aria-label", tx("listen")); x.title = tx("listen"); }); syncCBar(); } switchRead(ko); }; // 다시 그리지 않고 보임만 바꿈 · ⇄ = 읽던 블록·그 위치에서 새 말로(처음으로 안 감 · 멈춰 있으면 멈춘 채)
   addEventListener("malmun:uilang", onLang);
   const sync = setInterval(() => { if (cardEl !== el) return clearInterval(sync); const b = document.querySelector(".vk-snd"), t = isReading() && !isPaused() ? "⏸" : "▶"; if (b && b.textContent !== t && curNote()) b.textContent = t; }, 100);
@@ -237,10 +239,10 @@ let listEl = null, listOff = [];
 function openPieceFromList(it) { dictOf().then(dc => { if (dc?.entries) openWordCard({ w: it.w, rom: "", mean: it.mean, ep: it.ep, n: it.n, ko: "", tr: "" }, { fromList: true, piece: it.pid, ents: dc.entries }); }); }
 export function closeVocabList() {
   closeCard(); listOff.forEach(f => { try { f(); } catch {} }); listOff = [];
-  const st = listEl?.closest?.(".vstage"); listEl?.remove(); listEl = null; if (st) stageFree(st);
+  const st = listEl?.closest?.(".vstage"); listEl?.remove(); listEl = null; if (st) stageFree(st); wakeOff();
 }
 export function openVocabList() {
-  closeVocabList();
+  closeVocabList(); wakeOn();
   const stage = document.querySelector(".learn .vstage"), el = (listEl = document.createElement("div"));
   if (stage) { el.className = "vk-pane"; stageLock(stage); } // 칸 크기 그대로(영상 칸 높이 · 다른 칸 안 밀림) · 영상 멈춤 · 아래 막대 바탕만 // 영상·읽기 소리 멈춤(닫아도 멈춘 채)
   else { el.className = "vk-dim vk-listdim"; el.setAttribute("role", "dialog"); el.setAttribute("aria-modal", "true"); }
