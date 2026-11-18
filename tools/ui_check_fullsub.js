@@ -1,6 +1,6 @@
 // 영상 자막 켬/끔 + 선생님 말풍선 + #/explain 주소 점검(투덜이·본부 10-12) — #/learn/L01-00-01 을 연 채로 · 지금 창 크기에서
 // ⓐ 자막 단추 = 단추 모양(테두리·바탕) · aria-pressed · 영상 밖 재생 막대 끝 작은 CC 칩(대표님 10-19 「영상 안엔 전체 보기만」 · 막대 높이 그대로) ⓑ 끄면 자막(전체 화면 자막·영상 밑 큰 자막·줄 카드 글) 가림 · 켜면 보임
-// ⓒ 다시 열어도 기억 ⓓ 말풍선 = 처음 전체 영상 때 한 번 · 영상 밖(막대 아래 · 가로 폰은 위) · ✕ 로 닫힘 · 아래 단추와 안 겹침 · 두 번째부턴 안 뜸 · 저절로 닫힘
+// ⓒ 다시 열어도 기억 ⓓ 말풍선 없음(11-18 「다 빼」)
 // ⓔ #/explain/L01-00-01/3 = 학습 화면 + 3번 줄 새(v9) 설명 창(옛 kr.json 글 없음)
 (async () => {
   const W = ms => new Promise(s => setTimeout(s, ms)), $ = s => document.querySelector(s), res = [], ok = (c, m, x = "") => res.push(`${c ? "✓" : "✗"} ${m}${x ? " · " + x : ""}`);
@@ -59,25 +59,11 @@
     try { localStorage.removeItem("malmun.subtip1"); } catch {}
     const toFull = async () => { document.querySelectorAll(".line")[0].querySelector("[data-act=explain]").click(); await W(1200); $(".ctrl [data-act=flip]").click(); await W(700); };
     await toFull();
-    const tip = $(".fstip"), shown = vis(tip);
-    shot("tip"); await W(1500);
-    const tr = R(tip), vw = R($("#vwrap")), land = matchMedia("(orientation: landscape) and (max-height: 500px)").matches, others = [...document.querySelectorAll(".seek [data-act=subs], #vwrap [data-act=fs], .ctrl button, .ctrl a, .seek")].filter(vis);
-    const over = others.filter(o => hit(tr, R(o))).map(o => o.dataset.act || o.className);
-    ok(shown, "ⓓ 전체 영상을 처음 열면 선생님 말풍선이 뜸", shown ? `${box(tr)} · ${tip.textContent.trim().slice(0, 50)}` : "안 뜸");
-    ok(shown && !over.length && tr.left >= -0.5 && tr.right <= innerWidth + 0.5 && (land || tr.top >= vw.bottom - 0.5), "ⓓ 말풍선 = 영상 밖(막대 아래 · 가로 폰은 막대 위) · 자막 단추·⛶·막대·아래 단추와 안 겹침 · 화면 안", `겹침 ${over.join(",") || "없음"} · 말풍선 ${box(tr)} 영상 ${box(vw)}`);
-    const x = tip.querySelector("[data-act=tipx]"), xs = x && getComputedStyle(x);
-    ok(!!x && x.tagName === "BUTTON" && parseFloat(xs.borderTopWidth) > 0 && R(x).width >= 22, "ⓓ ✕ = 단추 모양", x ? box(R(x)) : "없음");
-    x?.click(); await W(150);
-    ok(!vis(tip), "ⓓ ✕ 누르면 닫힘");
-    $("video").pause();
-    await toFull(); const s2 = vis($(".fstip")); $("video").pause();
+    // ⓓ 선생님 말풍선(.fstip)은 11-18 「다 빼」로 없어짐 — 처음 열어도·다시 열어도·자막 꺼도 안 뜸
+    shot("tip"); await W(1500); const t1 = vis($(".fstip")); $("video").pause();
     try { localStorage.removeItem("malmun.subtip1"); } catch {}
-    await toFull(); const s3 = vis($(".fstip")); await W(8500); const auto = !vis($(".fstip")); $("video").pause();
-    ok(!s2 && s3 && auto, "ⓓ 한 번만 뜸(두 번째 안 뜸) · 8초 뒤 저절로 닫힘", `2번 ${s2} · 다시 처음 ${s3} 저절로 ${auto}`);
-    // 자막이 꺼져 있으면 말풍선 안 뜸
-    try { localStorage.removeItem("malmun.subtip1"); } catch {}
-    $(".seek [data-act=subs]").click(); await toFull(); const s5 = vis($(".fstip")); $("video").pause(); $(".seek [data-act=subs]").click();
-    ok(!s5, "ⓓ 자막을 이미 끈 사람에겐 말풍선 안 뜸");
+    await toFull(); const t2 = vis($(".fstip")); $("video").pause();
+    ok(!t1 && !t2, "ⓓ 전체 영상을 처음 열어도 선생님 말풍선 없음(11-18 「다 빼」)", `처음 ${t1} · 다시 처음 ${t2}`);
     // ⓔ #/explain 주소
     await openLearn("#/explain/L01-00-01/3"); await W(800);
     const p = $(".panel"), li = document.querySelectorAll(".line")[2];
