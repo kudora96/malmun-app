@@ -596,11 +596,16 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     const w = wordStart(kw); if (!w) return false;
     // 규칙(대표님 11-17): 읽는 중 · 안 켜진 낱말 톡 → 그 낱말로 건너뛰어 계속(칠은 거기서 새로 자람) · 켜진 낱말 톡 → 그 낱말 시작에서 멈춤(그 낱말만 노랑) / 멈춘·끝난 뒤 · 어느 낱말이든 그 낱말 시작부터 읽음
     const cs = w.snEl.classList.contains("cur"), rd = ex.playing && ex.q[ex.i]?.p === 0;
-    if (rd && cs && w.ws[w.wi].classList.contains("kar")) {
-      try { ex.a.currentTime = w.t; } catch {} st.karFrom = { s: +w.snEl.dataset.s, wi: w.wi }; togglePlay();
+    // 느린 소리(대표님 11-18): 낱말을 눌러 옮겨 가는 중(seeking · readyState<3 · 소리가 아직 그 낱말에서 안 남)에는 「켜진 낱말 = 멈춤」으로 보지 않음 → 같은 낱말을 또 누르면 그대로 옮겨 가는 중(다시 안 불러옴), 다른 낱말이면 마지막 낱말로 다시 옮겨 감 · 멈춤은 소리가 그 낱말에서 실제로 나고 있을 때만(공용 한 곳 = 여기)
+    const key = `${w.snEl.dataset.c}:${w.snEl.dataset.s}:${w.wi}`, au = ex.a, atWord = !!au && !au.paused && !au.seeking && au.readyState >= 3;
+    if (st.wordSeek && (atWord || performance.now() - st.wordSeek.at > 8000)) st.wordSeek = null;
+    const moving = !!st.wordSeek;
+    if (moving && st.wordSeek.key === key) return true; // 이 낱말로 옮겨 가는 중 — 또 눌러도 멈추지 않고 그대로
+    if (!moving && rd && cs && w.ws[w.wi].classList.contains("kar")) {
+      st.wordSeek = null; try { ex.a.currentTime = w.t; } catch {} st.karFrom = { s: +w.snEl.dataset.s, wi: w.wi }; togglePlay();
       panel.querySelectorAll(".v9body .sn .kw.kar").forEach(e => e.classList.remove("kar")); w.ws[w.wi].classList.add("kar"); return true;
     }
-    st.karFrom = { s: +w.snEl.dataset.s, wi: w.wi }; playFromSent(w.snEl, w.t); panel.querySelectorAll(".v9body .sn .kw.kar").forEach(e => e.classList.remove("kar")); w.ws[w.wi].classList.add("kar"); return true; // 앞 낱말 칠은 지우고 이 낱말부터 새로 자람
+    st.karFrom = { s: +w.snEl.dataset.s, wi: w.wi }; playFromSent(w.snEl, w.t); st.wordSeek = { key, at: performance.now() }; panel.querySelectorAll(".v9body .sn .kw.kar").forEach(e => e.classList.remove("kar")); w.ws[w.wi].classList.add("kar"); return true; // 앞 낱말 칠은 지우고 이 낱말부터 새로 자람
   }
   // ⇄ 로 말이 바뀔 때(대표님 11-17) — 지금 읽는 자리를 문장 안 비율로 잡아, 새 말 문장의 같은 비율 낱말에서 소리·칠이 같이 시작
   function swapSnap(i) {
