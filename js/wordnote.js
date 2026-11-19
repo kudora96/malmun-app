@@ -113,7 +113,7 @@ export function readNote(root, it, n, koFirst, order, { from: fk = 0, wi = -1, u
   stopRead();
   const no = (order || []).indexOf(String(it.key || "").trim()) + 1; if (!no && !url) return; // 낱말 번호 = wordnote.json 의 _order 안 자리(1부터)
   const bl = noteBlocks(n); if (!bl.length) return;
-  const j = (cur = { dead: false, a: null, k: 0, root, it, no, bl, n, lang: koFirst ? "ko" : "ne", paused: false, gap: 0, resumeK: -1, url: url || ((l, b) => `snd/wordnote/${it.ep}/${no}_${l}_${b}.mp3?v=7`) });
+  const j = (cur = { dead: false, a: null, k: 0, root, it, no, bl, n, lang: koFirst ? "ko" : "ne", paused: false, gap: 0, resumeK: -1, url: url || ((l, b) => `snd/wordnote/${it.ep}/${no}_${l}_${b}.mp3?v=8`) });
   const k0 = Math.min(fk, bl.length - 1);
   if (wi >= 0) { setPair(j, k0); return startAt(j, k0, wi); }
   play(j, k0, 0, false);
