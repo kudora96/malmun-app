@@ -83,7 +83,23 @@ function followLine(j, anchor, fresh) { // fresh = 새 줄 시작(손 멈춤 풀
   card.__anim = requestAnimationFrame(step);
 }
 const blkOf = j => j.root.querySelector(`.vk-blk[data-b="${j.bl[j.k]?.b}"]`);
+// ↳ 줄 소리 차례(자동 이어 듣기) — 그 말 소리의 낱말 시각(<말>_<블록>_w)대로 ↳ 줄의 지금 마디만 엷게(같은 칠하기 마디 규칙 · 낱말 시각 없으면 글자 수 비율)
+function showPair(j) {
+  const blk = blkOf(j); if (!blk || !j.a) return; const b = j.bl[j.k].b;
+  if (!blk.classList.contains("cur")) { j.root.querySelectorAll(".vk-blk.cur").forEach(e => e.classList.remove("cur")); blk.classList.add("cur"); }
+  blk.querySelectorAll(".vk-line .kw.kar, .kw.ks, .kw.kt").forEach(e => e.classList.remove("kar", "ks", "kt")); // 윗줄(지금 말) 칠은 지움 — 소리는 ↳ 줄 말
+  const pe = j.root.querySelector(`.vk-note > .vk-pair[data-pb="${b}"]`); if (!pe) return;
+  const ws = String(j.bl[j.k][j.pl] || "").split(/\s+/).filter(Boolean), tot = ws.reduce((s, w) => s + w.replace(/[「」]/g, "").length, 0) || 1, tn = j.a.currentTime + LEAD, fr = tn / Math.max(0.2, j.a.duration || 1);
+  const cm = clauseMap(ws), wt = wtOf(j.n, j.pl, b, ws.length); let cg = 0;
+  if (wt) wt.forEach((x, i) => { if (x[0] <= tn) cg = cm.gi[i]; }); else { let c = 0; const st = []; ws.forEach((w, i) => { if (st[cm.gi[i]] === undefined) st[cm.gi[i]] = c; c += w.replace(/[「」]/g, "").length; }); st.forEach((s0, q) => { if (s0 / tot <= fr) cg = q; }); }
+  const idx = cm.gi.indexOf(cg), cs = cm.ids[idx] ?? 0, cc = cm.cl[idx] ?? 0, ncl = Math.max(0, ...ws.map((_, i) => (cm.ids[i] === cs ? cm.cl[i] : -1))) + 1;
+  const ps = [...pe.querySelectorAll(".ps")], tg = Math.min(cs, ps.length - 1);
+  { const key = "p" + j.k + ":" + cs, fresh = j.fk !== key; j.fk = key; followLine(j, ps[tg] || pe, fresh); }
+  j.root.querySelectorAll(".vk-note .ps.on").forEach(e => { if (e !== ps[tg]) e.classList.remove("on"); }); ps[tg]?.classList.add("on");
+  j.root.querySelectorAll(".vk-note .pc.on").forEach(e => e.classList.remove("on")); markClause(ps[tg], cc, ncl);
+}
 function show(j) { // 지금 블록 표시 + 노래방 불(소리 위치 그대로)
+  if (j.ph) return showPair(j);
   const blk = blkOf(j); if (!blk || !j.a) return; setPair(j, j.k);
   if (!blk.classList.contains("cur")) { j.root.querySelectorAll(".vk-blk.cur").forEach(e => e.classList.remove("cur")); j.root.querySelectorAll(".vk-line .kw.kar, .kw.ks").forEach(e => e.classList.remove("kar", "ks", "kt")); blk.classList.add("cur"); }
   const ws = [...blk.querySelectorAll(".vk-line .kw")], tot = ws.reduce((s, w) => s + wl(w), 0) || 1, fr = (j.a.currentTime + LEAD) / Math.max(0.2, j.a.duration || 1); let c = 0;
@@ -108,23 +124,26 @@ export const isReading = () => !!cur;
 export const isPaused = () => !!cur?.paused;
 function play(j, k, at, hold, lead = 0, sec = null) { // k 블록을 at(0~1 비율)부터 · hold = 멈춘 채 그 자리만
   if (j.dead) return;
-  if (k >= j.bl.length) return stopRead();
-  j.k = k; j.n = j.n || null; const blk = blkOf(j); if (!blk) return play(j, k + 1, 0, hold); setPair(j, k);
-  const pre = j.pre?.k === k ? j.pre.a : null; j.pre = null; const a = (j.a = pre || new Audio(j.url(j.lang, j.bl[k].b))); a.preload = "auto"; j.resumeK = -1;
-  if (!hold && j.bl[k + 1]) { try { const na = new Audio(j.url(j.lang, j.bl[k + 1].b)); na.preload = "auto"; na.load(); j.pre = { k: k + 1, a: na }; } catch {} } // 다음 블록 소리 미리 받아 두기(끊김 방지)
+  if (k >= j.bl.length) { const f = j.done; stopRead(); f?.(); return; } // 끝까지 읽음 = 자동 이어 듣기가 다음으로(대표님 11-19 14:11)
+  const ph = j.nph | 0; j.nph = 0; j.ph = ph; j.k = k; j.n = j.n || null; const blk = blkOf(j); if (!blk) return play(j, k + 1, 0, hold); setPair(j, k);
+  // 두 말 듣기(대표님 11-19 14:30 · 기본 켬 · 자동/손 둘 다) = 블록마다 지금 말 소리 → 이어서 ↳ 다른 말 소리 · 끄면 한 말만
+  const other = l => (l === "ko" ? "ne" : "ko"), pl = ph ? other(j.lang) : j.lang; j.pl = pl;
+  const pre = j.pre?.k === k && j.pre.ph === ph ? j.pre.a : null; j.pre = null; const a = (j.a = pre || new Audio(j.url(pl, j.bl[k].b))); a.preload = "auto"; j.resumeK = -1; j.resumePh = 0;
+  const au = !!j.both?.(), nk = au && !ph ? k : k + 1, nph = au && !ph ? 1 : 0;
+  if (!hold && j.bl[nk]) { try { const na = new Audio(j.url(nph ? other(j.lang) : j.lang, j.bl[nk].b)); na.preload = "auto"; na.load(); j.pre = { k: nk, ph: nph, a: na }; } catch {} } // 다음 소리 미리 받아 두기(끊김 방지)
   let started = false;
-  a.onerror = () => { if (!started && !j.dead) play(j, k + 1, 0, hold); };
-  a.onended = () => { clearInterval(tick); const b = blkOf(j); b?.classList.remove("cur"); j.root.querySelectorAll(".vk-line .kw.kar, .kw.ks").forEach(w => w.classList.remove("kar", "ks", "kt")); clearHl(j.root); from = null; j.resumeK = k + 1; j.gap = setTimeout(() => { j.gap = 0; play(j, k + 1, 0, false); }, 300); };
+  a.onerror = () => { if (!started && !j.dead) { if (au && !ph) j.nph = 1; play(j, au && !ph ? k : k + 1, 0, hold); } };
+  a.onended = () => { clearInterval(tick); const b = blkOf(j); const two = !!j.both?.() && !ph; if (!two) b?.classList.remove("cur"); j.root.querySelectorAll(".vk-line .kw.kar, .kw.ks").forEach(w => w.classList.remove("kar", "ks", "kt")); clearHl(j.root); from = null; const nk2 = two ? k : k + 1; j.resumeK = nk2; j.resumePh = two ? 1 : 0; j.gap = setTimeout(() => { j.gap = 0; j.nph = j.resumePh; play(j, nk2, 0, false); }, 300); };
   a.addEventListener("loadedmetadata", () => { if (sec != null) { try { a.currentTime = Math.max(0, sec - lead); } catch {} } else if (at > 0 && a.duration) { try { a.currentTime = Math.max(0, at * a.duration - lead); } catch {} } if (hold && j.a === a) show(j); }, { once: true });
   if (hold) { j.paused = true; started = true; return; }
   j.paused = false;
   claim("card"); a.play().then(() => { started = true; if (j.a === a && !j.dead) { show(j); run(j); } }).catch(() => { if (!j.dead && !j.paused && j.a === a) play(j, k + 1, 0, false); });
 }
-export function readNote(root, it, n, koFirst, order, { from: fk = 0, wi = -1, url = null } = {}) {
+export function readNote(root, it, n, koFirst, order, { from: fk = 0, wi = -1, url = null, done = null, both = null } = {}) {
   stopRead();
   const no = (order || []).indexOf(String(it.key || "").trim()) + 1; if (!no && !url) return; // 낱말 번호 = wordnote.json 의 _order 안 자리(1부터)
   const bl = noteBlocks(n); if (!bl.length) return;
-  const j = (cur = { dead: false, a: null, k: 0, root, it, no, bl, n, lang: koFirst ? "ko" : "ne", paused: false, gap: 0, resumeK: -1, url: url || ((l, b) => `snd/wordnote/${it.ep}/${no}_${l}_${b}.mp3?v=10`) });
+  const j = (cur = { dead: false, a: null, k: 0, root, it, no, bl, n, lang: koFirst ? "ko" : "ne", paused: false, gap: 0, resumeK: -1, resumePh: 0, nph: 0, ph: 0, done, both, url: url || ((l, b) => `snd/wordnote/${it.ep}/${no}_${l}_${b}.mp3?v=10`) });
   const k0 = Math.min(fk, bl.length - 1);
   if (wi >= 0) { setPair(j, k0); return startAt(j, k0, wi); }
   play(j, k0, 0, false);
@@ -134,7 +153,7 @@ export function toggleRead() {
   const j = cur; if (!j) return false;
   if (!j.paused) { j.paused = true; clearTimeout(j.gap); j.gap = 0; clearInterval(tick); try { j.a?.pause(); } catch {} return true; }
   j.paused = false; clearTimeout(j.gap); j.gap = 0;
-  if (j.resumeK >= 0 && j.a?.ended) { play(j, j.resumeK, 0, false); return true; }
+  if (j.resumeK >= 0 && j.a?.ended) { j.nph = j.resumePh || 0; play(j, j.resumeK, 0, false); return true; }
   claim("card"); j.a.play().then(() => { if (!j.dead && !j.paused) { show(j); run(j); } }).catch(() => {});
   return true;
 }

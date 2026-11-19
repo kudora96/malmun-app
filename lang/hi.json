@@ -278,6 +278,8 @@
  "bgm_short": "संगीत",
  "big_view": "बड़ा दृश्य चालू/बंद",
  "auto_listen": "स्वतः",
+ "two_short": "Both",
+ "two_tip": "Listen in both languages",
  "auto_end": "आपने सब सुन लिया",
  "auto_again": "शुरू से फिर",
  "auto_close": "बंद करें",

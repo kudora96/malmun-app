@@ -278,6 +278,8 @@
  "bgm_short": "Música",
  "big_view": "Vista grande sí/no",
  "auto_listen": "Auto",
+ "two_short": "Both",
+ "two_tip": "Listen in both languages",
  "auto_end": "Lo escuchaste todo",
  "auto_again": "Empezar de nuevo",
  "auto_close": "Cerrar",

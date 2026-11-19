@@ -1941,9 +1941,15 @@ li.vl-row{position:relative;overflow:hidden;touch-action:pan-y}.vl-slide{display
 .vk-foot{margin-top:12px}.vk-foot .vp-b{height:34px;border:1px solid var(--hi);background:var(--card);color:var(--hi);font-size:14px}.vk-foot .vk-snd{width:auto;border-radius:999px;box-shadow:none}
 .vk-ppane>.vk-card{padding-bottom:12px}
 @media (max-width:339px){.vk-cbar .t{display:none}}
+@media (max-width:420px){.vk-cbar .vk-add .t{display:none}} /* 좁은 폰: 갈색 막대 한 줄에 ‹ ▶ 자동 두 말 ⭐ ⛶ 다 들어가게 ⭐ 는 그림만(글은 aria-label) */
 .learn .seek[data-off] .vk-cbar span{visibility:visible}.learn .seek[data-off] .vk-cbar .vk-fs svg{visibility:visible}
 .vk-cbar .vp-b.vk-back,.vk-cbar .vp-b.vk-add,.vk-cbar .vp-b.vk-snd{width:auto;min-height:0;height:22px;padding:0 10px;border-radius:999px;border:2px solid transparent;background:var(--card);color:var(--ink);font-size:12px;font-weight:800;box-shadow:none}
 .vk-cbar .vp-b.vk-add:disabled{opacity:.75;color:var(--hi)}
+/* 카드 「자동」(대표님 11-19 14:11) — 갈색 막대 오른쪽(⛶ 앞) · 설명 읽기 자동과 같은 한 설정 · 켜면 갈색 칠 */
+.vk-cbar .vp-b.vk-two,.vk-cbar .vp-b.vk-auto{width:auto;min-width:0;min-height:0;height:22px;padding:0 10px;border-radius:999px;border:2px solid transparent;background:var(--card);color:var(--ink);font-size:12px;font-weight:800;box-shadow:none;white-space:nowrap;transition:transform .1s ease,background-color .12s ease,color .12s ease}
+.vk-cbar .vp-b.vk-two,.vk-cbar .vp-b.vk-auto{cursor:pointer}.vk-cbar .vp-b.vk-auto[aria-pressed=true],.vk-cbar .vp-b.vk-two[aria-pressed=true]{background:var(--hi);color:var(--on-hi)}
+@media(hover:hover){.vk-cbar .vp-b.vk-two:hover,.vk-cbar .vp-b.vk-auto:hover{background:var(--hi-soft);color:var(--ink)}.vk-cbar .vp-b.vk-two[aria-pressed=true]:hover,.vk-cbar .vp-b.vk-auto[aria-pressed=true]:hover{background:var(--wood);color:var(--on-hi)}}
+.vk-cbar .vp-b.vk-auto:active,.vk-cbar .vp-b.vk-two:active{transform:scale(.97)}
 .vk-foot .vp-b.vk-back,.vk-foot .vp-b.vk-add,.vk-foot .vp-b.vk-snd{width:auto;min-height:0;height:34px;padding:0 14px;border-radius:999px}
 /* 조각 카드 「상자」+조사(11-18 16:27 대표님 「만나다는 사람을 띄어쓰기 이상」): 상자 오른쪽 여백 0 = 조사가 바짝 붙음 · 낱말(.kw)은 중간에 줄 안 갈림 · 낱말 사이 공백은 칠하기 밖 그대로 */
 .vk-note .gw{margin-right:0}

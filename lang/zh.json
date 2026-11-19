@@ -278,6 +278,8 @@
  "bgm_short": "音乐",
  "big_view": "放大/缩小",
  "auto_listen": "自动",
+ "two_short": "Both",
+ "two_tip": "Listen in both languages",
  "auto_end": "已经听完了",
  "auto_again": "从头再来",
  "auto_close": "关闭",

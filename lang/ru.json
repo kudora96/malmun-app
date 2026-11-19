@@ -278,6 +278,8 @@
  "bgm_short": "Музыка",
  "big_view": "Крупный вид вкл./выкл.",
  "auto_listen": "Авто",
+ "two_short": "Both",
+ "two_tip": "Listen in both languages",
  "auto_end": "Всё прослушано",
  "auto_again": "Сначала",
  "auto_close": "Закрыть",

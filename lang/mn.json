@@ -278,6 +278,8 @@
  "bgm_short": "Хөгжим",
  "big_view": "Том харагдац асаах/унтраах",
  "auto_listen": "Авто",
+ "two_short": "Both",
+ "two_tip": "Listen in both languages",
  "auto_end": "Бүгдийг сонслоо",
  "auto_again": "Эхнээс нь дахин",
  "auto_close": "Хаах",

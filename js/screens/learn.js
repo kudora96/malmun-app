@@ -57,7 +57,8 @@ import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf
 import { playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1119.37";
 import { heardHTML, endHint, scoreOf, bestFull, spanOf, sylsAt } from "../heard.js?v=1119.37"; // 덧붙은 말 빼고 견주기(본부 10-11)
 import { recDel, downloadRec, askPersist } from "../recstore.js?v=1119.37";
-import { vocabOn, openWordCard, wordSpan, starChip } from "../vocab.js?v=1119.37"; // ⭐ 내 단어장 시험판(네팔어 · 대표님 11-16)
+import { vocabOn, openWordCard, wordSpan, starChip, setCardNav } from "../vocab.js?v=1119.37"; // ⭐ 내 단어장 시험판(네팔어 · 대표님 11-16)
+import { autoOn, setAuto, autoSchedule, autoCancel, markAuto, autoAt, useEndCard } from "../autoplay.js?v=1119.37"; // 자동 이어 듣기 공용 엔진(설명·단어 카드·조각 카드 한 코드)
 import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1119.37";
 import { scoreFx, stopFx } from "../scorefx.js?v=1119.37"; // 점수별 효과(본부 10-05)
 import { record, recordSROnly, srOnlyMode, setSrOnly, isAndroid, srMiss, micWhy, srWhy, canScore, closeMic, logRec, micOpen, seqMode, srOnBlob, devSR, setDevSR, srJudge, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1119.37";
@@ -85,7 +86,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   const seq = new Sequence();
   let ready = false;
 
-  const exAutoOn = () => pref("malmun.exauto") === "1"; // 설명 읽기 「자동」 — 줄 소리가 끝나면 1초 뒤 다음 줄(대표님 11-19 13:21 · 기억 = localStorage)
+  const exAutoOn = autoOn; // 설명 읽기 「자동」 — 줄 소리가 끝나면 1초 뒤 다음 줄(대표님 11-19 13:21 · 기억 = localStorage)
   const subsOn = () => pref("malmun.fullsub") !== "0"; /* 영상 자막 켬/끔(투덜이 10-12) */
   app.innerHTML = `<section class="scr learn${subsOn() ? "" : " nosub"}">
     <div class="stick">
@@ -717,7 +718,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   function exAutoNext() {
     const mine = st.panel; if (!exAutoOn() || mine?.kind !== "explain" || st.userPaused) return;
     if (mine.i >= L.length - 1) return exAutoEnd();
-    clearTimeout(st.gap); const id = (st.gap = setTimeout(() => {
+    autoAt("explain", mine.i); clearTimeout(st.gap); const id = (st.gap = autoSchedule(() => {
       st.gap = 0; if (st.panel !== mine || !exAutoOn() || st.userPaused) return sync();
       const n = mine.i + 1; openPanel("explain", n, { autoplay: true }); try { v.currentTime = L[n].start; } catch {} // 다음 단추와 같은 길 + 뒤 영상도 그 줄 장면으로
     }, EX_AUTO_GAP)); st.autoGap = id;
@@ -1037,7 +1038,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     }
     if (k === "wd") { // 낱말 칸 톡 = 단어 카드(네팔어만 · 소리는 그 줄 소리의 낱말 구간)
       const c = L[i].v9?.pieces?.[+x.dataset.wi]; if (!c || !vocabOn()) return;
-      wordSpan(ep, L[i], c.ko).then(sp => openWordCard({ w: c.ko, rom: c.rom || "", mean: c.mean || "", ep, n: L[i].id, af: L[i].lineAudio || "", s: sp.s, e: sp.e, ko: L[i].ko, tr: L[i].v9?.tr || L[i].tr || "" }, { before: () => { try { clearTimeout(st.gap); st.gap = 0; ex.pause(); sync(); } catch {} } }));
+      cardItem(i, c).then(it => openWordCard(it, { before: cardBefore }));
       return;
     }
     if (k === "gw") { const sn = x.closest(".sn"); if (sn && !tapWordV9(x.closest(".kw"))) playFromSent(sn); return hidePop(); } // 낱말 말풍선은 없앰(대표님 11-17) — 낱말을 톡 = 건너뜀·멈춤 규칙만 // 따옴표 낱말 = 그 문장부터 재생 + 뜻이 있으면 작은 말풍선(본부 10-05)
@@ -1313,9 +1314,23 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     const on = !subsOn(); pref("malmun.fullsub", on ? "1" : "0");
     e.currentTarget.setAttribute("aria-pressed", String(on)); app.querySelector(".learn").classList.toggle("nosub", !on); items.forEach(x => x.classList.remove("peek"));
   };
-  exAutoMarkFn = () => { const b = app.querySelector("[data-act=exauto]"); if (!b) return; const on = exAutoOn(); if (b.getAttribute("aria-pressed") !== String(on)) b.setAttribute("aria-pressed", String(on)); const c = b.querySelector(".cc"), w = tq("auto_listen"); if (c && c.textContent !== w) { c.textContent = w; b.setAttribute("aria-label", w); } app.querySelectorAll(".endcard").forEach(e => e.setText?.({ title: tq("auto_end"), again: tq("auto_again"), close: tq("auto_close") })); }; // ⇄ 로 창 말이 바뀌면 글도 그 말로
+  exAutoMarkFn = () => { markAuto(() => tq("auto_listen")); app.querySelectorAll(".endcard").forEach(e => e.setText?.({ title: tq("auto_end"), again: tq("auto_again"), close: tq("auto_close") })); }; // ⇄ 로 창 말이 바뀌면 글도 그 말로
+  // 단어·조각 카드 자동 이어 듣기(대표님 11-19 14:11) — 자막 순서 = 줄마다 설명 위 단어 칩 순서 · vocab.js 가 부름
+  useEndCard(endCard); // 단어·조각 카드 끝 카드도 같은 공용 endCard
+  const cardItem = async (i, c) => { const sp = await wordSpan(ep, L[i], c.ko); return { w: c.ko, rom: c.rom || "", mean: c.mean || "", ep, n: L[i].id, af: L[i].lineAudio || "", s: sp.s, e: sp.e, ko: L[i].ko, tr: L[i].v9?.tr || L[i].tr || "" }; };
+  const cardBefore = () => { try { autoCancel(); clearTimeout(st.gap); st.gap = 0; ex.pause(); sync(); } catch {} };
+  const cardSeq = () => { const o = []; L.forEach((l, i) => (l.v9?.pieces || []).forEach(c => { if (c.ko) o.push({ i, c }); })); return o; };
+  setCardNav({
+    live: () => app.isConnected && !!app.querySelector(".learn"),
+    locate: it => { const s = cardSeq(), w = String(it.w); let p = s.findIndex(x => x.c.ko === w && L[x.i].id === it.n); if (p < 0) p = s.findIndex(x => x.c.ko === w); return p; },
+    at: async p => { const x = cardSeq()[p]; if (!x) return null; return { pos: p, i: x.i, it: await cardItem(x.i, x.c), before: cardBefore }; },
+    commit: x => { // 그 낱말이 있는 줄로 — 설명 창이 열려 있으면 그 줄 창으로 · 뒤 영상도 그 줄 장면으로
+      if (st.panel?.kind === "explain") { if (st.panel.i !== x.i) openPanel("explain", x.i, { autoplay: false }); } else if (!st.panel) select(x.i, { scroll: false });
+      try { v.currentTime = L[x.i].start; } catch {}
+    },
+  });
   app.querySelector("[data-act=exauto]").onclick = () => { if (st.panel?.kind !== "explain") return;
-    const on = !exAutoOn(); pref("malmun.exauto", on ? "1" : "0"); exAutoMarkFn(); exAutoEndOff();
+    const on = !exAutoOn(); setAuto(on); exAutoMarkFn(); exAutoEndOff();
     if (!on) { if (st.gap && st.gap === st.autoGap) { clearTimeout(st.gap); st.gap = 0; } } // 끄면 기다리던 다음 줄만 취소(지금 줄 소리는 그대로)
     else if (ex.q.length && !ex.playing && !st.gap && !st.userPaused && ex.a.ended) exAutoNext(); // 줄이 이미 끝나 있었으면 바로 이어 감
     sync(); };
