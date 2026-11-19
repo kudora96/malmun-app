@@ -1950,3 +1950,5 @@ li.vl-row{position:relative;overflow:hidden;touch-action:pan-y}.vl-slide{display
 .vk-line .kw{white-space:nowrap}
 /* ↳ 줄 「」 상자도 칠하기 따라 색 바뀜(11-19 10:13 대표님 · D-?) : 읽기 창 ↳ 줄 · 카드·조각·단어장 ↳ 줄의 칠한 조각 안 상자 = 연노랑 */
 .v9body .pairln .gw,.line .expl .pairln .gw,.vk-note .vk-pair .ps.on .pc.on .gw,.vk-pair .ps.on .pc.on .gw{background:rgba(255,210,31,.45);border-color:rgba(255,210,31,.75);color:var(--ink)}
+
+.v9body .pairln .pc{border-radius:3px}.v9body .pairln .pc.on{background:rgba(255,210,31,.3);box-shadow:0 0 0 2px rgba(255,210,31,.3)}.v9body .pairln .pc.on .gw{background:rgba(255,210,31,.45);border-color:rgba(255,210,31,.75)} /* 설명 읽기 ↳ 줄도 쉼표 마디 엷게(대표님 11-19 11:07) */
