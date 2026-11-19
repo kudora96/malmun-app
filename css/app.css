@@ -1984,6 +1984,8 @@ li.vl-row{position:relative;overflow:hidden;touch-action:pan-y}.vl-slide{display
 .learn .vsubt.exauto .cc{width:auto;min-width:0;max-width:52px;padding:0 3px;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .learn .vsubt.exauto[aria-pressed=false]{border-style:solid}.learn .vsubt.exauto[aria-pressed=false] .cc::after{content:none}
 .learn .vsubt.exauto:active{transform:scale(.94)}
+/* 설명 읽기 「두 말」 — 자동 단추와 같은 모양(대표님 11-19 14:55) */
+.learn .vsubt.twob{margin-inline-start:2px;transition:transform .08s,background .12s}.learn .vsubt.twob .cc{width:auto;min-width:0;max-width:52px;padding:0 3px;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.learn .vsubt.twob[aria-pressed=false]{border-style:solid}.learn .vsubt.twob[aria-pressed=false] .cc::after{content:none}.learn .vsubt.twob:active{transform:scale(.94)}
 /* 끝 카드(대표님 11-19 14:11 · ui.js endCard) — 흰 카드 + 갈색 포인트 · 검은 말풍선 아님 · 가로 한 줄(좁으면 줄바꿈) */
 .endcard{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:60;box-sizing:border-box;width:max-content;max-width:calc(100% - 32px);padding:10px 12px;border-radius:14px;background:var(--card);color:var(--ink);border:1px solid var(--line);border-top:3px solid var(--hi);box-shadow:0 6px 18px rgba(23,48,42,.18);display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px 12px}
 .endcard .ec-t{display:flex;align-items:center;gap:6px;font-size:15px;line-height:1.35}

@@ -3,7 +3,7 @@
 import { lang, uiKoOn, langShort } from "./i18n.js?v=1119.39";
 import { noteHTML, applyMode, fixSizes, readNote, stopRead, toggleRead, switchRead, tapBlock, tapWord, noteBlocks, curBlock, isReading, isPaused } from "./wordnote.js?v=1119.39"; // 단어 카드 설명(위 = 지금 말 · 아래 ↳ 다른 말) + 읽기 소리
 import { claim, onSound } from "./onesound.js?v=1119.39";
-import { autoOn, setAuto, autoSchedule, autoCancel, autoPending, autoHold, autoHeld, autoAt, markAuto, showAutoEnd } from "./autoplay.js?v=1119.39"; // 자동 이어 듣기 공용 엔진(설명·단어 카드·조각 카드 · 대표님 11-19 14:11)
+import { twoOn, setTwo, autoOn, setAuto, autoSchedule, autoCancel, autoPending, autoHold, autoHeld, autoAt, markAuto, showAutoEnd } from "./autoplay.js?v=1119.39"; // 자동 이어 듣기 공용 엔진(설명·단어 카드·조각 카드 · 대표님 11-19 14:11)
 import { hold } from "./wake.js?v=1119.39"; // 단어장·카드 ▶ 도 소리 장치 깨워 둠(목록 화면에서 열 때는 학습 화면의 깨우기가 없었음 · 대표님 11-18 「다음 사람」 첫 「다」 안 들림)
 let wakeRel = null; const wakeOn = () => { wakeRel ||= hold(); }, wakeOff = () => { const f = wakeRel; wakeRel = null; try { f?.(); } catch {} };
 import * as sfx from "./sfx.js?v=1119.39";
@@ -109,8 +109,6 @@ const CTX = { ko: { back: "돌아가기", add: "단어장에 담기", has: "단�
 // 자동 이어 듣기 — 순서(자막 낱말 순서)는 배우는 화면이 등록(setCardNav): locate(it)→자리 · at(자리)→{it,pos,before}|null · commit(그 자리) = 줄·뒤 영상을 옮김
 let cardNav = null; export const setCardNav = n => { cardNav = n; };
 const autoLabel = () => tx("auto");
-const twoOn = () => { try { return localStorage.getItem("malmun.twolang") !== "0"; } catch { return true; } }; // 두 말 듣기(기본 켬 · 대표님 11-19 14:30) — 학습자 말 줄 다음 한국어 ↳ 줄도 읽음
-const setTwo = on => { try { localStorage.setItem("malmun.twolang", on ? "1" : "0"); } catch {} document.querySelectorAll("[data-act=two]").forEach(b => b.setAttribute("aria-pressed", String(on))); };
 const twoBtn = () => `<button type="button" class="vp-b vk-two" data-act="two" data-v="two" aria-pressed="${twoOn()}" aria-label="${esc(tx("two_tip"))}"><span class="cc">${esc(tx("two"))}</span></button>`;
 const autoBtn = on => `<button type="button" class="vp-b vk-auto" data-act="exauto" data-v="auto" aria-pressed="${on}" aria-label="${esc(autoLabel())}"><span class="cc">${esc(autoLabel())}</span></button>`;
 let cbar = null, cardCtl = null; // cardCtl = 지금 열린 카드의 {act, back(), add(), saved()}

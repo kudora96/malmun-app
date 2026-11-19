@@ -5,11 +5,12 @@ export const GAP_MS = 400;
 // 점검 소리 끔(본부 10-17) — ?mute=1 이면 음소거 · window.__sfxVolume(점검기)이 있으면 그 크기 · 평소 학습자는 그대로(바꾸는 것 없음)
 const tv = a => { if (/[?&]mute=1(&|$)/.test(location.search)) a.muted = true; else if (window.__sfxVolume != null) a.volume = Math.max(0, Math.min(1, window.__sfxVolume)); return a; };
 export class Sequence {
-  constructor() { this.a = new Audio(); this.a.preload = "auto"; this.q = []; this.i = 0; this.on = false; this.gen = 0; this.timer = 0; this.rate = 1; this.owner = "seq"; this.onstep = null; this.ondone = null; this.a.onended = () => this.next(); this.a.onerror = () => this.next(); }
+  constructor() { this.a = new Audio(); this.a.preload = "auto"; this.q = []; this.i = 0; this.on = false; this.gen = 0; this.timer = 0; this.rate = 1; this.owner = "seq"; this.onstep = null; this.ondone = null; this.ut = 0; this.a.onended = () => this.next(); this.a.onerror = () => this.next(); }
   // items = [{src, ...meta}]
   play(items, from = 0) { this.stop(); this.q = items; this.i = from - 1; this.on = true; this.next(); }
+  arm(it) { clearInterval(this.ut); this.ut = 0; if (it?.until) this.ut = setInterval(() => { if (this.a.currentTime >= it.until) { clearInterval(this.ut); this.ut = 0; this.a.pause(); this.next(); } }, 30); } // 조각 끝(until) — 한 소리 파일의 한 구간만 재생(두 말 설명 읽기)
   next() {
-    clearTimeout(this.timer);
+    clearTimeout(this.timer); clearInterval(this.ut);
     if (!this.on) return;
     this.i++;
     if (this.i >= this.q.length) { this.on = false; this.ondone?.(); return; }
@@ -19,7 +20,7 @@ export class Sequence {
       this.a.src = it.src; this.a.playbackRate = this.rate;
       if (it.at) { this.a.currentTime = it.at; this.a.addEventListener("loadedmetadata", () => { if (this.a.currentTime < it.at - 0.2) this.a.currentTime = it.at; }, { once: true }); } // 그 문장부터(설명 언어 바꿔 이어 읽기)
       // 소리가 시작되기 전에 멈추거나 다른 소리로 바뀌면 앞 play() 가 AbortError 로 늦게 거절됨 → 그걸로 새 차례를 넘기지 않음(⇄·다음 줄을 열자마자 눌렀을 때 소리는 나는데 상태·칠이 안 따라가던 것)
-      claim(this.owner); const gen = this.gen; tv(this.a).play().catch(e => { if (gen === this.gen && e?.name !== "AbortError") this.next(); });
+      claim(this.owner); const gen = this.gen; this.arm(it); tv(this.a).play().catch(e => { if (gen === this.gen && e?.name !== "AbortError") this.next(); });
       const nx = this.q[this.i + 1];
       if (nx) { const p = new Audio(); p.preload = "auto"; p.src = nx.src; }
     };
@@ -31,9 +32,9 @@ export class Sequence {
     this.onstep?.(it, from); this.a.src = it.src; this.a.playbackRate = this.rate;
     if (it.at) { this.a.currentTime = it.at; this.a.addEventListener("loadedmetadata", () => { if (this.a.currentTime < it.at - 0.2) this.a.currentTime = it.at; }, { once: true }); }
   }
-  pause() { this.gen++; this.on = false; clearTimeout(this.timer); this.a.pause(); }
-  resume() { if (!this.q.length) return; this.on = true; if (this.a.src && !this.a.ended && this.a.currentTime > 0) { claim(this.owner); tv(this.a).play().catch(() => {}); } else { this.i--; this.next(); } }
-  stop() { this.gen++; this.on = false; clearTimeout(this.timer); this.a.pause(); this.q = []; }
+  pause() { this.gen++; this.on = false; clearTimeout(this.timer); clearInterval(this.ut); this.a.pause(); }
+  resume() { if (!this.q.length) return; this.on = true; if (this.a.src && !this.a.ended && this.a.currentTime > 0) { claim(this.owner); this.arm(this.q[this.i]); tv(this.a).play().catch(() => {}); } else { this.i--; this.next(); } }
+  stop() { this.gen++; this.on = false; clearTimeout(this.timer); clearInterval(this.ut); this.a.pause(); this.q = []; }
   setRate(r) { this.rate = r; this.a.playbackRate = r; }
   get playing() { return this.on; }
 }

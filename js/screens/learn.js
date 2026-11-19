@@ -58,7 +58,7 @@ import { playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.
 import { heardHTML, endHint, scoreOf, bestFull, spanOf, sylsAt } from "../heard.js?v=1119.39"; // 덧붙은 말 빼고 견주기(본부 10-11)
 import { recDel, downloadRec, askPersist } from "../recstore.js?v=1119.39";
 import { vocabOn, openWordCard, wordSpan, starChip, setCardNav } from "../vocab.js?v=1119.39"; // ⭐ 내 단어장 시험판(네팔어 · 대표님 11-16)
-import { autoOn, setAuto, autoSchedule, autoCancel, markAuto, autoAt, useEndCard } from "../autoplay.js?v=1119.39"; // 자동 이어 듣기 공용 엔진(설명·단어 카드·조각 카드 한 코드)
+import { twoOn, setTwo, autoOn, setAuto, autoSchedule, autoCancel, markAuto, autoAt, useEndCard } from "../autoplay.js?v=1119.39"; // 자동 이어 듣기 공용 엔진(설명·단어 카드·조각 카드 한 코드)
 import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1119.39";
 import { scoreFx, stopFx } from "../scorefx.js?v=1119.39"; // 점수별 효과(본부 10-05)
 import { record, recordSROnly, srOnlyMode, setSrOnly, isAndroid, srMiss, micWhy, srWhy, canScore, closeMic, logRec, micOpen, seqMode, srOnBlob, devSR, setDevSR, srJudge, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1119.39";
@@ -101,7 +101,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     <div class="panel" hidden></div>
     </div>
     <button class="bigb" data-act="big" aria-pressed="false" hidden aria-label="${esc(t("big_view"))}" title="${esc(t("big_view"))}"><span aria-hidden="true">⛶</span><span class="off" data-k="big_short">${esc(t("big_short"))}</span><span class="on" data-k="big_off">${esc(t("big_off"))}</span></button>
-    <div class="seek" data-off><span class="t0">0:00</span><div class="trk" aria-label="${esc(t("seek_bar"))}"><div class="rail"><i></i></div></div><span class="t1">0:00</span><button class="vsubt" data-act="subs" aria-pressed="${subsOn()}" aria-label="${esc(t("subs_aria"))}" title="${esc(t("subs_aria"))}"><span class="cc" aria-hidden="true">CC</span></button><button class="vsubt rdp exauto" data-act="exauto" aria-pressed="${exAutoOn()}" aria-label="${esc(t("auto_listen"))}"><span class="cc">${esc(t("auto_listen"))}</span></button><button class="vsubt rdp" data-act="rdp" aria-label="▶/⏸" title="▶/⏸"><span class="cc" aria-hidden="true">▶</span></button>
+    <div class="seek" data-off><span class="t0">0:00</span><div class="trk" aria-label="${esc(t("seek_bar"))}"><div class="rail"><i></i></div></div><span class="t1">0:00</span><button class="vsubt" data-act="subs" aria-pressed="${subsOn()}" aria-label="${esc(t("subs_aria"))}" title="${esc(t("subs_aria"))}"><span class="cc" aria-hidden="true">CC</span></button><button class="vsubt rdp twob" data-act="two" aria-pressed="${twoOn()}" aria-label="${esc(t("two_tip"))}"><span class="cc">${esc(t("two_short"))}</span></button><button class="vsubt rdp exauto" data-act="exauto" aria-pressed="${exAutoOn()}" aria-label="${esc(t("auto_listen"))}"><span class="cc">${esc(t("auto_listen"))}</span></button><button class="vsubt rdp" data-act="rdp" aria-label="▶/⏸" title="▶/⏸"><span class="cc" aria-hidden="true">▶</span></button>
       </div>
     </div>
     <ol class="lines"><li class="lend" data-end="start" role="button" tabindex="0"><b lang="ko">▶ 시작</b><span><span data-k="ln_start">${esc(t("ln_start"))}</span> · 0:00${(x => x >= 1 ? ` – ${Math.floor(x / 60)}:${String(Math.floor(x % 60)).padStart(2, "0")}` : "")(L[0]?.start || 0)}</span></li>${L.map((l, i) => `<li class="line sp-${SPEAKER[l.speaker] || "x"} ${l.speaker === "선생님" ? "" : "right"}" data-i="${i}" data-peek="👁 ${esc(t("subs_peek"))}">
@@ -360,7 +360,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   const clearExpl = () => items.forEach(li => { const e = li.querySelector(".expl"); if (e.classList.contains("on") || e.firstChild) { e.classList.remove("on"); e.textContent = ""; } });
   // 설명 읽기 창이 열려 있는 동안 막대 끝 CC 자리에 ▶/⏸ 한 단추(대표님 11-17) — CC·자막 끄기(.nosub)는 영상 화면 그대로 · 읽는 중 ⏸ · 멈춤·끝 ▶ · 끝난 뒤 ▶ = 그 줄 처음부터
   let exAutoMarkFn = null; // 「자동」 단추 글·눌림 맞춤(tq 가 아래에서 만들어진 뒤 채움)
-  const rdSync = () => { const L0 = app.querySelector(".learn"), b = app.querySelector("[data-act=rdp] .cc"); if (!L0 || !b) return; const on = st.panel?.kind === "explain"; L0.classList.toggle("rdr", on); if (on) { const t0 = ex.playing || !!st.gap ? "⏸" : "▶"; if (b.textContent !== t0) b.textContent = t0; exAutoMarkFn?.(); } };
+  const rdSync = () => { const L0 = app.querySelector(".learn"), b = app.querySelector("[data-act=rdp] .cc"); if (!L0 || !b) return; const on = st.panel?.kind === "explain"; L0.classList.toggle("rdr", on); if (on) { const tw = String(twoOn()); app.querySelectorAll("[data-act=two].twob").forEach(x => { if (x.getAttribute("aria-pressed") !== tw) x.setAttribute("aria-pressed", tw); }); } if (on) { const t0 = ex.playing || !!st.gap ? "⏸" : "▶"; if (b.textContent !== t0) b.textContent = t0; exAutoMarkFn?.(); } };
   const sync = () => {
     rdSync();
     playBtn.innerHTML = playing() ? I.pause : I.play; const fp = app.querySelector("[data-act=fsplay]"); if (fp) fp.innerHTML = playBtn.innerHTML; fsArm();
@@ -407,7 +407,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     for (let i = from; i < (onlyOne ? from + 1 : L.length); i++) {
       const l = L[i];
       if (st.mode === "full" && l.lineAudio) out.push({ src: paths.audio(ep, l.lineAudio), i, p: -1 });
-      if (l.v9) { const it = v9Items(i, { line: false })[0]; if (it) out.push({ ...it, i }); }
+      if (l.v9) { const it = v9Items(i, { line: false, two: false })[0]; if (it) out.push({ ...it, i }); }
       else l.krAudio.forEach((f, p) => out.push({ src: paths.audio(ep, f), i, p }));
     }
     return out;
@@ -430,7 +430,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
 
   // ── 위 창 = 영상 · 설명 · 쓰기 중 하나(R12) — 조작은 줄 단추(토글) + 아래 막대 하나뿐(R14) ──
   const panel = app.querySelector(".panel"), vwrap = app.querySelector(".vmain"); // 영상 창 = 제목 줄 + 영상(위 창이 열리면 같이 숨김)
-  const ex = new Sequence(); // 설명 읽기(대사 → 설명 문단)
+  const ex = window.__ex = new Sequence(); // 설명 읽기(대사 → 설명 문단)
   ex.owner = seq.owner = "reader"; v.addEventListener("play", () => claim("reader")); const offReader = onSound("reader", () => { clearTimeout(st.gap); st.gap = 0; ex.pause(); try { if (!v.paused) v.pause(); } catch {} try { sync(); } catch {} }); // 다른 소리(단어 카드·말하기·글자)가 시작되면 읽기·영상은 멈춘 채 남음(▶ 하면 이어서) — 공용 onesound.js
   // 「소리 준비 중…」(대표님 11-16) — 설명 소리가 시작될 때까지(0.25초 넘게 걸릴 때만) 작게 보이고 시작하면 지움
   const WAIT_TX = { ne: "आवाज तयार हुँदै छ…", ko: "소리 준비 중…" };
@@ -481,9 +481,20 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
 </div>`;
   }
   // v9 설명 소리 차례: (대사) → 설명 → 「이제 말해 보세요」 — 고른(마지막에 누른) 소리 언어
-  const v9Items = (i, { line = true, k = sndOf(i) } = {}) => [
+  // 두 말(대표님 11-19 14:55) — 문장마다 [듣는 말 구간] → [짝(↳) 말 구간] · 새 소리 없이 기존 설명 소리 두 개의 구간(ko_w·L_w 시각 + 앞 0.15·뒤 0.15초)만 이어 틀음 · 시각 없는 문장이 있으면 옛 방식(한 말 통째)
+  const TWO_PAD = 0.15;
+  function twoItems(i, k) {
+    const x = L[i].v9, sn = x?.sent || [], pc = v9code(k), sc = pc === "ko" ? v9L : "ko", ps = v9src(i, k, "ex"), ss = v9src(i, pc === "ko" ? "L" : "ko", "ex");
+    if (!v9L || !sc || pc === sc || !sn.length || !ps || !ss) return null;
+    const seg = (code, q) => { const w = wTimes(sn, q, code); if (!w) return null; const e0 = w[w.length - 1][1] || w[w.length - 1][0] + 0.1, nx = sn[q + 1]?.[`${code}_s`], e = e0 + TWO_PAD; return { at: Math.max(0, w[0][0] - TWO_PAD), until: nx != null && nx > e0 ? Math.min(e, nx) : e }; };
+    const out = [];
+    for (let q = 0; q < sn.length; q++) { const a = seg(pc, q), b = seg(sc, q); if (!a || !b) return null; out.push({ src: ps, p: 0, lang: pc, sk: q, ...a, gap: 250 }, { src: ss, p: 0, lang: sc, main: pc, pair: true, sk: q, ...b, gap: 250 }); }
+    return out;
+  }
+  const fromSent = (items, s) => { const j = items.findIndex(x => x.p === 0 && !x.pair && (x.sk === undefined || x.sk === s)); return j; };
+  const v9Items = (i, { line = true, k = sndOf(i), two = true } = {}) => [
     ...(line && L[i].lineAudio ? [{ src: paths.audio(ep, L[i].lineAudio), p: -1 }] : []),
-    ...(v9src(i, k, "ex") ? [{ src: v9src(i, k, "ex"), p: 0, lang: v9code(k) }] : []),
+    ...(v9src(i, k, "ex") ? (two && twoOn() && twoItems(i, k)) || [{ src: v9src(i, k, "ex"), p: 0, lang: v9code(k) }] : []),
     ...sayItems(i, k),
   ];
   const SAY_HIDDEN = true;
@@ -522,10 +533,10 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     if (st.panel?.kind === "explain" && L[st.panel.i]?.v9 && ex.playing) {
       const it = ex.q[ex.i];
       if (it) {
-        const k = it.p === 0 ? sentAt(st.panel.i, it.lang, ex.a.currentTime) : -1;
+        const k = it.p === 0 ? (it.sk ?? sentAt(st.panel.i, it.lang, ex.a.currentTime)) : -1;
         panel.querySelectorAll(".v9body .sn").forEach(el => el.classList.toggle("cur", +el.dataset.s === k));
         // 문장 안 노래방 칠(본부 10-08) — 그 문장 시작 ~ 다음 문장 시작 사이를 낱말 글자 수 비례로
-        { const sn = L[st.panel.i].v9?.sent || [], tm = ex.a.currentTime, s0 = sn[k]?.[`${it.lang}_s`] ?? 0, s1 = sn[k + 1]?.[`${it.lang}_s`] ?? (ex.a.duration || s0 + 1), wt = wTimes(sn, k, it.lang), sp = wt ? wSpan(sn, k, it.lang) : speechSpans(it.src, sn.map(x => x[`${it.lang}_s`]), ex.a.duration)?.[k], a0 = sp ? sp[0] : s0, a1 = sp ? sp[1] : s1, fr = (tm + KAR_LEAD - a0) / Math.max(0.1, a1 - a0); // 대표님 11-16: 문장 끝 무음을 뺀 실제 말소리 구간에만 글자 수 비율 · 100ms 먼저 켬(소리를 못 받으면 옛 구간)
+        if (it.pair) panel.querySelectorAll(".v9body .sn .kw.kar").forEach(e => e.classList.remove("kar")); else { const sn = L[st.panel.i].v9?.sent || [], tm = ex.a.currentTime, s0 = sn[k]?.[`${it.lang}_s`] ?? 0, s1 = sn[k + 1]?.[`${it.lang}_s`] ?? (ex.a.duration || s0 + 1), wt = wTimes(sn, k, it.lang), sp = wt ? wSpan(sn, k, it.lang) : speechSpans(it.src, sn.map(x => x[`${it.lang}_s`]), ex.a.duration)?.[k], a0 = sp ? sp[0] : s0, a1 = sp ? sp[1] : s1, fr = (tm + KAR_LEAD - a0) / Math.max(0.1, a1 - a0); // 대표님 11-16: 문장 끝 무음을 뺀 실제 말소리 구간에만 글자 수 비율 · 100ms 먼저 켬(소리를 못 받으면 옛 구간)
           panel.querySelectorAll(".v9body .sn").forEach(el => { const ws = [...el.querySelectorAll(".kw")], on = +el.dataset.s === k, tot = ws.reduce((a, w) => a + w.textContent.length, 0) || 1; let c = 0;
             if (st.karFrom && st.karFrom.s !== k) st.karFrom = null; const gm = clauseMap(ws.map(w => w.textContent)).gi, sd = ws.map((w, j) => { const r = on && (wt && wt.length === ws.length ? tm + KAR_LEAD >= wt[j][0] : c / tot <= fr) && !(st.karFrom && on && j < st.karFrom.wi); c += w.textContent.length; return r; }); let cg = -1; sd.forEach((r, j) => { if (r) cg = Math.max(cg, gm[j]); }); ws.forEach((w, j) => w.classList.toggle("kar", sd[j] && gm[j] === cg)); }); } // 지금 마디(문장 끝·인용 끝·괄호 앞뒤·쉼표)만 칠 · 앞 마디는 지움(대표님 11-19 13:31)
         // 「이제 말해 보세요」 문장 = 견본 소리 따라 글자 칠
@@ -536,17 +547,25 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
         panel.querySelector(".v9body .sayp .sayin")?.classList.toggle("cur", head || old);
         panel.querySelector(".v9body .sayp .saybig")?.classList.toggle("cur", say && !head);
         const vb = panel.querySelector(".v9body");
-        if (k >= 0) { setPair(vb, st.panel.i, it.lang, k); setNum(k); }
+        if (k >= 0) { setPair(vb, st.panel.i, it.main || it.lang, k); setNum(k); }
         else if (head) setPair(vb, st.panel.i, it.lang, "sayhead");
         else if (say && it.part === "sent") setPair(vb, st.panel.i, it.lang, "saymean");
         else if (old) setPair(vb, st.panel.i, it.lang, "say");
-        { const cur = panel.querySelector(".v9body .sn.cur"), pl = vb.querySelector(".pairln"); if (pl && cur && k >= 0) { const ws = [...cur.querySelectorAll(".kw")], cm = clauseMap(ws.map(w => w.textContent)); let j = -1; ws.forEach((w, q) => { if (w.classList.contains("kar")) j = q; }); const cgi = cm.gi[Math.max(0, j)] ?? 0, wt2 = wTimes(L[st.panel.i].v9?.sent || [], k, it.lang); let span = null; if (wt2 && wt2.length === ws.length) { const ix = cm.gi.map((g, q) => (g === cgi ? q : -1)).filter(q => q >= 0), a0 = wt2[0][0], a1 = wt2[wt2.length - 1][1] || wt2[wt2.length - 1][0] + 0.1, d = Math.max(0.1, a1 - a0); span = [(wt2[ix[0]][0] - a0) / d, ((wt2[ix[ix.length - 1]][1] || wt2[ix[ix.length - 1]][0] + 0.1) - a0) / d]; } markClause(pl, cgi, cm.ncum, span); } else if (pl) markClause(pl, 0, 0); } // ↳ 줄도 윗줄 읽는 쉼표 마디만 엷게(마디 수 다르면 문장 통째 · 대표님 11-19 11:07)
+        if (it.pair) pairPaint(vb, st.panel.i, it, k); else { const cur = panel.querySelector(".v9body .sn.cur"), pl = vb.querySelector(".pairln"); if (pl && cur && k >= 0) { const ws = [...cur.querySelectorAll(".kw")], cm = clauseMap(ws.map(w => w.textContent)); let j = -1; ws.forEach((w, q) => { if (w.classList.contains("kar")) j = q; }); const cgi = cm.gi[Math.max(0, j)] ?? 0, wt2 = wTimes(L[st.panel.i].v9?.sent || [], k, it.lang); let span = null; if (wt2 && wt2.length === ws.length) { const ix = cm.gi.map((g, q) => (g === cgi ? q : -1)).filter(q => q >= 0), a0 = wt2[0][0], a1 = wt2[wt2.length - 1][1] || wt2[wt2.length - 1][0] + 0.1, d = Math.max(0.1, a1 - a0); span = [(wt2[ix[0]][0] - a0) / d, ((wt2[ix[ix.length - 1]][1] || wt2[ix[ix.length - 1]][0] + 0.1) - a0) / d]; } markClause(pl, cgi, cm.ncum, span); } else if (pl) markClause(pl, 0, 0); } // ↳ 줄도 윗줄 읽는 쉼표 마디만 엷게(마디 수 다르면 문장 통째 · 대표님 11-19 11:07)
       }
     }
     if (seq.playing) {
       const it = seq.q[seq.i];
       if (it?.lang && it.p === 0) { const k = sentAt(it.i, it.lang, seq.a.currentTime); items[it.i]?.querySelectorAll(".expl .sn").forEach(el => el.classList.toggle("cur", +el.dataset.s === k)); setPair(items[it.i]?.querySelector(".expl"), it.i, it.lang, k); }
     }
+  }
+  // 두 말 — 짝(↳) 줄 소리가 날 때 ↳ 줄의 지금 마디만 엷게 칠(그 말의 낱말 시각 w 로 · 윗줄 칠과 같은 마디 규칙 · 대표님 11-19 14:55)
+  function pairPaint(vb, i, it, k) {
+    const pl = vb.querySelector(".pairln"); if (!pl) return; const sn = L[i].v9?.sent || [], wt = wTimes(sn, k, it.lang), ws = String(sn[k]?.[it.lang] || "").match(/"[^"]*"\S*|\S+/g) || [];
+    if (!wt || wt.length !== ws.length) return markClause(pl, 0, 0);
+    const tm = ex.a.currentTime + KAR_LEAD; let j = 0; wt.forEach((w, q) => { if (tm >= w[0]) j = q; });
+    const cm = clauseMap(ws), cgi = cm.gi[j] ?? 0, ix = cm.gi.map((g, q) => (g === cgi ? q : -1)).filter(q => q >= 0), e = q => wt[q][1] || wt[q][0] + 0.1, a0 = wt[0][0], d = Math.max(0.1, e(wt.length - 1) - a0);
+    markClause(pl, cgi, cm.ncum, [(wt[ix[0]][0] - a0) / d, (e(ix[ix.length - 1]) - a0) / d]);
   }
   // 설명 소리 → 문장별 실제 말소리 구간(말소리 시작~끝) — 소리를 디코딩해 에너지로 찾음(한 번만 · 못 받으면 null = 옛 방식)
   const KAR_LEAD = 0.1, spCache = new Map();
@@ -617,7 +636,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   }
   // ⇄ 로 말이 바뀔 때(대표님 11-17) — 지금 읽는 자리를 문장 안 비율로 잡아, 새 말 문장의 같은 비율 낱말에서 소리·칠이 같이 시작
   function swapSnap(i) {
-    const it = ex.q[ex.i]; if (!it || it.p !== 0 || !(ex.playing || (ex.a.currentTime > 0 && !ex.a.ended)) || !L[i].v9?.sent?.length) return null;
+    const it = ex.q[ex.i]; if (it?.pair) return { s: it.sk, fr: 0, playing: ex.playing }; if (!it || it.p !== 0 || !(ex.playing || (ex.a.currentTime > 0 && !ex.a.ended)) || !L[i].v9?.sent?.length) return null;
     const tm = ex.a.currentTime, sn = L[i].v9.sent, s = sentAt(i, it.lang, tm), starts = sn.map(x => x[`${it.lang}_s`]), s0 = starts[s] ?? 0, s1 = starts[s + 1] ?? (ex.a.duration || s0 + 1);
     const sp = wSpan(sn, s, it.lang) || speechSpans(it.src, starts, ex.a.duration)?.[s], a0 = sp ? sp[0] : s0, a1 = sp ? sp[1] : s1;
     return { s, fr: Math.max(0, Math.min(1, (tm + KAR_LEAD - a0) / Math.max(0.1, a1 - a0))), playing: ex.playing };
@@ -638,7 +657,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
       items[i].querySelectorAll(".expl .sn").forEach(x => x.classList.toggle("cur", +x.dataset.s === s)); setPair(items[i].querySelector(".expl"), i, code, s);
       return sync();
     }
-    const k = sndOf(i), list = v9Items(i, { line: false, k }), from = list.findIndex(x => x.p === 0); if (from < 0) return;
+    const k = sndOf(i), list = v9Items(i, { line: false, k }), from = fromSent(list, s); if (from < 0) return;
     clearTimeout(st.gap); st.gap = 0; hushSay(); st.exLoop = list; markPlay(k);
     ex.play(list.map((x, j) => (j === from ? { ...x, at } : x)), from);
     panel.querySelectorAll(".v9body .sn").forEach(x => x.classList.toggle("cur", +x.dataset.s === s)); setPair(panel.querySelector(".v9body"), i, code, s); setNum(s);
@@ -1027,7 +1046,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
       const items = v9Items(i, { line: false, k: v }); if (!items.length) return;
       st.exLoop = items; markPlay(v);
       if (going && cur.p === 0 && L[i].v9.sent?.length) { // 듣는 중 언어 바꿈 = 같은 문장 번호부터 다른 언어로(본부 10-05)
-        const s = sentAt(i, cur.lang, ex.a.currentTime), tg = snap && swapTarget(snap), at = tg ? tg.at : (L[i].v9.sent[s]?.[`${v9code(v)}_s`] || 0), from = items.findIndex(x => x.p === 0);
+        const s = cur.sk ?? sentAt(i, cur.lang, ex.a.currentTime), tg = snap && swapTarget(snap), at = tg ? tg.at : (L[i].v9.sent[s]?.[`${v9code(v)}_s`] || 0), from = Math.max(0, fromSent(items, s));
         const run = items.map((x, j) => (j === from ? { ...x, at } : x));
         ex.play(run, from);
         if (tg) swapPaint(tg); else panel.querySelectorAll(".v9body .sn").forEach(el => el.classList.toggle("cur", +el.dataset.s === s));
@@ -1295,7 +1314,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     const b = panel.querySelector(`.v9bar [data-x=ex][data-v="${w}"]`);
     if (b && ex.playing && b.getAttribute("aria-pressed") !== "true") v9Click(b);
     else { const snap = !ex.playing ? swapSnap(p.i) : null; v9Text(p.i, w);
-      if (snap) { const items = v9Items(p.i, { line: false, k: w }), from = items.findIndex(x => x.p === 0), tg = swapTarget(snap); // 멈춘 채 ⇄ = 그 낱말 자리에 소리를 맞춰 두고 멈춘 채(다시 누르면 거기서)
+      if (snap) { const items = v9Items(p.i, { line: false, k: w }), from = fromSent(items, snap.s), tg = swapTarget(snap); // 멈춘 채 ⇄ = 그 낱말 자리에 소리를 맞춰 두고 멈춘 채(다시 누르면 거기서)
         if (tg && from >= 0) { st.exLoop = items; markPlay(w); ex.cue(items.map((x, j) => (j === from ? { ...x, at: tg.at } : x)), from); swapPaint(tg); sync(); } } }
   };
   addEventListener("malmun:uilang", onUiLang);
@@ -1314,7 +1333,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     const on = !subsOn(); pref("malmun.fullsub", on ? "1" : "0");
     e.currentTarget.setAttribute("aria-pressed", String(on)); app.querySelector(".learn").classList.toggle("nosub", !on); items.forEach(x => x.classList.remove("peek"));
   };
-  exAutoMarkFn = () => { markAuto(() => tq("auto_listen")); app.querySelectorAll(".endcard").forEach(e => e.setText?.({ title: tq("auto_end"), again: tq("auto_again"), close: tq("auto_close") })); }; // ⇄ 로 창 말이 바뀌면 글도 그 말로
+  exAutoMarkFn = () => { markAuto(() => tq("auto_listen")); app.querySelectorAll("[data-act=two].twob").forEach(b => { const c = b.querySelector(".cc"), w = tq("two_short"); if (c && c.textContent !== w) { c.textContent = w; b.setAttribute("aria-label", tq("two_tip")); } }); app.querySelectorAll(".endcard").forEach(e => e.setText?.({ title: tq("auto_end"), again: tq("auto_again"), close: tq("auto_close") })); }; // ⇄ 로 창 말이 바뀌면 글도 그 말로
   // 단어·조각 카드 자동 이어 듣기(대표님 11-19 14:11) — 자막 순서 = 줄마다 설명 위 단어 칩 순서 · vocab.js 가 부름
   useEndCard(endCard); // 단어·조각 카드 끝 카드도 같은 공용 endCard
   const cardItem = async (i, c) => { const sp = await wordSpan(ep, L[i], c.ko); return { w: c.ko, rom: c.rom || "", mean: c.mean || "", ep, n: L[i].id, af: L[i].lineAudio || "", s: sp.s, e: sp.e, ko: L[i].ko, tr: L[i].v9?.tr || L[i].tr || "" }; };
@@ -1329,6 +1348,9 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
       try { v.currentTime = L[x.i].start; } catch {}
     },
   });
+  app.querySelector("[data-act=two]").onclick = () => { if (st.panel?.kind !== "explain") return; setTwo(!twoOn()); // 두 말 켬/끔 — 지금 줄은 그대로 · 다음에 틀 때부터(소리가 나던 중이면 같은 문장부터 다시 짜서 이어 감)
+    const p = st.panel, i = p.i, cur = ex.q[ex.i]; if (!(ex.playing && cur)) return;
+    const s = cur.sk ?? sentAt(i, cur.lang, ex.a.currentTime), items = v9Items(i, { line: false, k: sndOf(i) }), from = Math.max(0, fromSent(items, s)); st.exLoop = items; ex.play(items, from); sync(); };
   app.querySelector("[data-act=exauto]").onclick = () => { if (st.panel?.kind !== "explain") return;
     const on = !exAutoOn(); setAuto(on); exAutoMarkFn(); exAutoEndOff();
     if (!on) { if (st.gap && st.gap === st.autoGap) { clearTimeout(st.gap); st.gap = 0; } } // 끄면 기다리던 다음 줄만 취소(지금 줄 소리는 그대로)
