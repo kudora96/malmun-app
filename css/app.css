@@ -1104,8 +1104,7 @@ button.dim{opacity:.45}
 /* 오른쪽→왼쪽(ur) — 줄 번호 「1 / 15」·머리 줄 번호는 왼쪽→오른쪽(15 / 1 로 뒤집혀 보이던 것 · 검사부 10-12) */
 [dir=rtl] .vtitle .n,[dir=rtl] .whead .sub,[dir=rtl] .exhead .sub{direction:ltr;unicode-bidi:isolate}
 
-/* ===================================================================================================
-   부서별 구역(본부 10-12) — 위의 기존 규칙과 「앱개발부(공용)」 구역은 앱개발부 몫 · 고칠 일은 앱개발부에 요청
+/* ============================================================================================   부서별 구역(본부 10-12) — 위의 기존 규칙과 「앱개발부(공용)」 구역은 앱개발부 몫 · 고칠 일은 앱개발부에 요청
    각 부서는 자기 구역 안에만 새 규칙을 더함(다른 구역·위 규칙은 건드리지 않음 · 겹치면 요청)
    =================================================================================================== */
 /* ==== 앱개발부(공용 · 말하기·배우기·영상·설명) ==== */
@@ -1981,3 +1980,25 @@ li.vl-row{position:relative;overflow:hidden;touch-action:pan-y}.vl-slide{display
 .endcard .ec-b button:focus-visible{outline:2px solid var(--hi);outline-offset:2px}
 
 .ctrl [data-act=next] .rs{font-size:22px;line-height:1;font-weight:700;display:block}
+=======
+.toast.exend{pointer-events:none}
+
+/* ═══ 누르는 것 공통 층 (P0-171 · 대표님 11-19 14:27): 마우스 올림 = 색 바뀜 + 손가락 · 누름 = 색 바뀜 + 살짝 줄어듦(scale .97) · 키보드 = 포커스 테두리 · 약 130ms · 크기·배치 안 바꿈(안쪽 그림자 + scale 속성만)
+   밝은 단추 = 크림·모래·갈색 · 갈색 막대 단추 = 더 짙은 갈색 · 노랑은 읽는 줄 칠에만(.sn·.gw 는 연한 갈색 밑줄) · 칩은 11-19 13:01 칩 올림 모양 그대로 */
+:root{--pr-h:rgba(138,100,67,.15);--pr-a:rgba(138,100,67,.28);--pr-ring:rgba(138,100,67,.42)}
+@media (prefers-color-scheme: dark){:root{--pr-h:rgba(242,210,122,.15);--pr-a:rgba(242,210,122,.28);--pr-ring:rgba(242,210,122,.42)}}
+:where(button,[role=button],a[href],[data-act],[data-x],[data-vk],.vk-chip,.vk-li,.vk-lb,.ib,.trk):not(:disabled,[aria-disabled=true],[data-off]){cursor:pointer;transition:background-color .13s,box-shadow .13s,scale .13s,transform .13s,border-color .13s}
+@media (hover:hover){
+  :where(button,[role=button],a[href],[data-act],[data-x],[data-vk],.vk-chip,.vk-li,.vk-lb,.ib,.trk,.lend):not(:disabled,[aria-disabled=true],[data-off]):hover{box-shadow:inset 0 0 0 999px var(--pr-h)}
+  .learn .seek :is(button,[role=button],a[href],[data-act],.vsubt,.chip,.ib,.trk):not(:disabled,[data-off]):hover,.learn .vk-cbar :is(button,[data-act],.chip):not(:disabled):hover,.learn .vp-bar :is(button,.vp-pn,.vp-mid):not(:disabled):hover,.fsui :is(button,[data-act],.chip):not(:disabled):hover{box-shadow:inset 0 0 0 999px rgba(0,0,0,.16);background-color:#76543a}
+  .v9body :is(.sn,.gw)[data-x]:hover{box-shadow:inset 0 -2px 0 var(--pr-ring)}
+  .vk-chip:hover{background:color-mix(in srgb,var(--hi) 16%,var(--bubble-cur));box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--hi) 70%,transparent),0 2px 6px rgba(23,48,42,.16)}
+}
+:where(button,[role=button],a[href],[data-act],[data-x],[data-vk],.vk-chip,.vk-li,.vk-lb,.ib,.lend):not(:disabled,[aria-disabled=true],[data-off]):active{box-shadow:inset 0 0 0 999px var(--pr-a);scale:.97;background-color:var(--pr-h)}
+.learn .seek :is(button,[role=button],a[href],[data-act],.vsubt,.chip,.ib):not(:disabled,[data-off]):active,.learn .vk-cbar :is(button,[data-act],.chip):not(:disabled):active,.learn .vp-bar :is(button,.vp-pn,.vp-mid):not(:disabled):active,.fsui :is(button,[data-act],.chip):not(:disabled):active{box-shadow:inset 0 0 0 999px rgba(0,0,0,.28);background-color:#654530;scale:.97}
+.learn .seek .trk:not([data-off]):active{background-color:rgba(0,0,0,.12)}
+.v9body :is(.sn,.gw)[data-x]:active{background-color:var(--hi-soft);scale:1;box-shadow:none}
+.vk-chip:active{background:var(--hi-soft);scale:.97}
+:where(button,[role=button],a[href],[data-act],[data-x],[data-vk],.vk-chip,.vk-li,.vk-lb,.ib,.lend,[tabindex]):focus-visible{outline:2px solid var(--hi);outline-offset:2px}
+.learn .seek :focus-visible,.fsui :focus-visible,.learn .vk-cbar :focus-visible{outline-color:#f2d27a}
+@media (prefers-reduced-motion:reduce){:where(button,[role=button],[data-act],.vk-chip){transition:none}}
