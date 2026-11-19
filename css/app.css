@@ -2089,3 +2089,4 @@ html.vk-bglock{overscroll-behavior:none}.vk-card,.vk-sheet,.hk-sheet,.vk-pane,.v
 .chip.uiko:not([style*="--pw"])[aria-pressed=false] .a,.chip.uiko:not([style*="--pw"])[aria-pressed=true] .b{background:var(--sel-bg)!important;box-shadow:var(--sel-sh)!important}
 #vwrap:fullscreen>.vuiko .chip.uiko::before{background:#ffd27a!important}
 .v9body .sn .kw.ks{background:rgba(255,210,31,.3);border-radius:3px;box-shadow:0 0 0 2px rgba(255,210,31,.3)}.v9body .sn .kw.ks .gw,.v9body .sn .kw.ks b{background:rgba(255,210,31,.45)}.v9body .sn .kw.kar.ks{background:#ffd21f}/* 안 읽는 윗줄의 짝 마디 엷게(대표님 11-19 16:22) */
+.v9body .pairln .pc.pcx{display:none}
