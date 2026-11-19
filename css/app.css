@@ -1952,3 +1952,8 @@ li.vl-row{position:relative;overflow:hidden;touch-action:pan-y}.vl-slide{display
 .v9body .pairln .gw,.line .expl .pairln .gw,.vk-note .vk-pair .ps.on .pc.on .gw,.vk-pair .ps.on .pc.on .gw{background:rgba(255,210,31,.45);border-color:rgba(255,210,31,.75);color:var(--ink)}
 
 .v9body .pairln .pc{border-radius:3px}.v9body .pairln .pc.on{background:rgba(255,210,31,.3);box-shadow:0 0 0 2px rgba(255,210,31,.3)}.v9body .pairln .pc.on .gw{background:rgba(255,210,31,.45);border-color:rgba(255,210,31,.75)} /* 설명 읽기 ↳ 줄도 쉼표 마디 엷게(대표님 11-19 11:07) */
+
+/* 설명 위 단어 칩 = 「단어 단추」 엷은 크림 바탕+얇은 갈색 테두리(크기 0px 변화 = 안쪽 그림자) · 아래 인용 흰 상자와 구별(대표님 11-19 12:21 · P0-171) */
+.v9body .chips{margin-bottom:8px}
+.v9body .chip{background:var(--bubble-cur);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--hi) 38%,transparent);transition:background-color .12s,transform .12s}
+.v9body .chip[data-x=wd]:active{background:var(--hi-soft);transform:scale(.97)}
