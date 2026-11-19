@@ -23,7 +23,7 @@ export const paths = {
   jamo: name => `${MEDIA}/letters/j/${name}.mp3?v=3`,
   // 새 설명(v9) 시안 소리 — tools/sync_v9.py 가 로컬 media/v9 에만 복사(아직 R2 에 없음 · 「올려」 전)
   v9: (ep, rel) => { const enc = rel.split("/").map(encodeURIComponent).join("/");
-    if (sndHas(ep, rel)) return `snd/explain/${ep}/${enc}?v=14`; // 같은 사이트(공개판 저장소) snd/ 안에 있는 설명 소리 = data/<편>/<편>.snd_manifest.json 목록(content_pipeline/snd_manifest.py) · 없는 것만 R2(r2.dev 가 느려 5초↑ · 대표님 11-16)
+    if (sndHas(ep, rel)) return `snd/explain/${ep}/${enc}?v=15`; // 같은 사이트(공개판 저장소) snd/ 안에 있는 설명 소리 = data/<편>/<편>.snd_manifest.json 목록(content_pipeline/snd_manifest.py) · 없는 것만 R2(r2.dev 가 느려 5초↑ · 대표님 11-16)
     return `${MEDIA}/v9/${ep}/${enc}?v=12`; },
   sfx: name => `${MEDIA}/sfx/${name}.mp3?v=2`,
   bgm: file => `${MEDIA}/bgm/${file}?v=1`, // 배경음악(소리부 10-15 · 05_audio/_bgm) // 점수 효과음(본부 10-05 · 다시 맞추면 v 올림)

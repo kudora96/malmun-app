@@ -73,7 +73,7 @@ function playSpan(it, btn, before) {
   a.play().then(() => { if (it.e > it.s) { clearTimeout(stopT); stopT = setTimeout(end, Math.max(200, (it.e - (it.s || 0)) * 1000 + 80)); } }).catch(end);
 }
 // 낱말 소리 = 공개판 저장소 안(snd/words/<편>/<id>.mp3 · 같은 사이트라 빠름 · R2 units/_k## 는 그대로 둠 · 대표님 11-16 「바로 나와야」)
-const wsrc = (ep, id) => `snd/words/${ep}/${id}.mp3?v=1`;
+const wsrc = (ep, id) => `snd/words/${ep}/${id}.mp3?v=2`;
 async function playSnd(it, btn, before) { // 낱말 소리마다 [id, 시작, 끝](소리 나는 구간만 · 앞 저음·뒤 여백 뺌)을 차례로
   const ids = it.ep && it.n != null ? await unitsFor(it.ep, it.n, it.w) : null;
   if (!ids?.length) return playSpan(it, btn, before);
