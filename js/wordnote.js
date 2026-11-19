@@ -98,6 +98,7 @@ function showPair(j) {
   { const key = "p" + j.k + ":" + cs, fresh = j.fk !== key; j.fk = key; followLine(j, ps[tg] || pe, fresh); }
   j.root.querySelectorAll(".vk-note .ps.on").forEach(e => { if (e !== ps[tg]) e.classList.remove("on"); }); ps[tg]?.classList.add("on");
   j.root.querySelectorAll(".vk-note .pc.on").forEach(e => e.classList.remove("on")); markClause(ps[tg], cc, ncl);
+  { const tw = [...blk.querySelectorAll(".vk-line .kw")], tm = clauseMap(tw.map(w => w.textContent)), nT = Math.max(0, ...tw.map((_, i) => (tm.ids[i] === cs ? tm.cl[i] : -1))) + 1; tw.forEach((w, i) => w.classList.toggle("ks", tm.ids[i] === cs && (nT !== ncl || tm.cl[i] === cc))); } // 안 읽는 윗줄 = ↳ 읽는 마디의 짝 마디만 엷게
   { let wi = 0; if (wt) wt.forEach((x, i) => { if (x[0] <= tn) wi = i; }); else { let c = 0; ws.forEach((w, i) => { if (c / tot <= fr) wi = i; c += w.replace(/[「」]/g, "").length; }); } pe.querySelectorAll(".pw").forEach(e => e.classList.toggle("pk", +e.dataset.w === wi)); } // ↳ 소리 = 지금 낱말 하나만 진한 노랑(그 말 w 시각)
 }
 function show(j) { // 지금 블록 표시 + 노래방 불(소리 위치 그대로)
@@ -118,7 +119,7 @@ function show(j) { // 지금 블록 표시 + 노래방 불(소리 위치 그대�
   const ps = [...j.root.querySelectorAll(`.vk-note > .vk-pair[data-pb="${j.bl[j.k].b}"] .ps`)], tg = Math.min(cs, ps.length - 1);
   { const key = j.k + ":" + cs, fresh = j.fk !== key; j.fk = key; followLine(j, blk.querySelector(".kw.ks") || blk, fresh); } // 읽는 문장(없으면 블록)을 따라 카드 본문 넘김
   j.root.querySelectorAll(".vk-note .ps.on").forEach(e => { if (e !== ps[tg]) e.classList.remove("on"); }); ps[tg]?.classList.add("on");
-  j.root.querySelectorAll(".vk-note .pc.on").forEach(e => e.classList.remove("on")); j.root.querySelectorAll(".vk-note .pw.pk").forEach(e => e.classList.remove("pk")); if (twoOn()) j.root.querySelectorAll(".vk-note .pc.on").forEach(e => e.classList.remove("on")); else markClause(ps[tg], cc, ncl); // 두 말 = 윗줄 읽는 동안 ↳ 줄은 칠 안 함(↳ 소리 때 그 말 시각으로만 · 대표님 11-19 16:03) · 한 말 = ↳ 도 같은 순서 마디만 · 마디 수 다르면 문장 통째
+  j.root.querySelectorAll(".vk-note .pc.on").forEach(e => e.classList.remove("on")); j.root.querySelectorAll(".vk-note .pw.pk").forEach(e => e.classList.remove("pk")); markClause(ps[tg], cc, ncl); // 읽는 쪽 = 낱말 진한 노랑 + 마디 엷게 · 안 읽는 쪽 = 짝 마디만 엷게(한 말·두 말 같음 · 마디 수 다르면 문장 통째 · 대표님 11-19 16:22)
 }
 const run = j => { clearInterval(tick); tick = setInterval(() => { if (!j.dead && !j.paused) show(j); }, 40); };
 export function stopRead() { clearInterval(tick); document.querySelectorAll(".vk-card").forEach(c => cancelAnimationFrame(c.__anim)); tick = 0; if (cur) { clearTimeout(cur.gap); if (cur.a) { cur.a.onended = cur.a.onerror = null; try { cur.a.pause(); } catch {} } cur.dead = true; cur = null; } document.querySelectorAll(".vk-blk.cur").forEach(e => e.classList.remove("cur")); document.querySelectorAll(".vk-note .kw.kar, .kw.ks").forEach(e => e.classList.remove("kar", "ks", "kt")); document.querySelectorAll(".vk-note .pw.pk").forEach(e => e.classList.remove("pk")); clearHl(); }
@@ -135,7 +136,7 @@ function play(j, k, at, hold, lead = 0, sec = null) { // k 블록을 at(0~1 비�
   if (!hold && j.bl[nk]) { try { const na = new Audio(j.url(nph ? other(j.lang) : j.lang, j.bl[nk].b)); na.preload = "auto"; na.load(); j.pre = { k: nk, ph: nph, a: na }; } catch {} } // 다음 소리 미리 받아 두기(끊김 방지)
   let started = false;
   a.onerror = () => { if (!started && !j.dead) { if (au && !ph) j.nph = 1; play(j, au && !ph ? k : k + 1, 0, hold); } };
-  a.onended = () => { clearInterval(tick); const b = blkOf(j); const two = !!j.both?.() && !ph; if (!two) b?.classList.remove("cur"); j.root.querySelectorAll(".vk-line .kw.kar, .kw.ks").forEach(w => w.classList.remove("kar", "ks", "kt")); j.root.querySelectorAll(".pw.pk").forEach(w => w.classList.remove("pk")); clearHl(j.root); from = null; const nk2 = two ? k : k + 1; j.resumeK = nk2; j.resumePh = two ? 1 : 0; j.gap = setTimeout(() => { j.gap = 0; j.nph = j.resumePh; play(j, nk2, 0, false); }, 300); };
+  a.onended = () => { clearInterval(tick); const b = blkOf(j); const two = !!j.both?.() && !ph; if (!two) b?.classList.remove("cur"); j.root.querySelectorAll(".vk-line .kw.kar, .kw.ks").forEach(w => w.classList.remove("kar", "ks", "kt")); j.root.querySelectorAll(".pw.pk").forEach(w => w.classList.remove("pk")); j.root.querySelectorAll(".vk-note .pc.on, .vk-note .ps.on").forEach(w => w.classList.remove("on")); clearHl(j.root); from = null; const nk2 = two ? k : k + 1; j.resumeK = nk2; j.resumePh = two ? 1 : 0; j.gap = setTimeout(() => { j.gap = 0; j.nph = j.resumePh; play(j, nk2, 0, false); }, 300); };
   a.addEventListener("loadedmetadata", () => { if (sec != null) { try { a.currentTime = Math.max(0, sec - lead); } catch {} } else if (at > 0 && a.duration) { try { a.currentTime = Math.max(0, at * a.duration - lead); } catch {} } if (hold && j.a === a) show(j); }, { once: true });
   if (hold) { j.paused = true; started = true; return; }
   j.paused = false;
