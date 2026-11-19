@@ -10,13 +10,17 @@ const gwWrap = (t, st, wj = false) => { let o = "", b = ""; const fl = () => { i
 const kws = (s, lang, on = true) => { const st = { q: false }; return String(s).split(/(\s+)/).map(t => (/^\s*$/.test(t) ? t : `<span class="${on ? "kw" : "kx"}" lang="${lang}">${gwWrap(t, st)}</span>`)).join(""); }; // kw = 지금 말(톡·칠 대상) · kx = 숨은 말(⇄ 하면 서로 바뀜)
 
 // 본문 = 지금 말 한 줄만(블록마다) · 바로 아래 「↳」 한 줄 = 그 블록의 다른 말(항상 다 보임) · 두 말은 겹침(.ghost)으로 높이 맞춤 → ⇄ 해도 크기 그대로
-export const SENT_END = /[.!?。।][」"')]*$/;
-const splitSent = t => String(t).split(/(?<=[.!?。।][」"')]*)\s+/).filter(Boolean); // 문장 나누기(마침표 뒤 띄어쓰기) — 두 말을 순서대로 짝지음
-export const COMMA = /[,，、][」"')]*$/; // 쉼표 마디(대표님 11-19 10:59 · 칠하기 단위) · 마침표(SENT_END)는 문장 끝
-export const splitClause = x => String(x).split(/(?<=[,，、][」"')]*)\s+/).filter(Boolean);
-// ── 쉼표 마디 칠하기 공용(카드·설명 읽기 둘 다 · 대표님 11-19 10:59·11:07) — 낱말 글 배열 → 문장·마디 번호 / ↳ 줄의 지금 마디만 .on(마디 수 다르면 문장 통째)
-export const clauseMap = texts => { let sid = 0, cid = 0, g = 0, cu = 0; const ids = [], cl = [], gi = [], cum = []; texts.forEach(t => { ids.push(sid); cl.push(cid); gi.push(g); cum.push(cu); if (COMMA.test(t)) cu++; if (SENT_END.test(t)) { sid++; cid = 0; g++; } else if (COMMA.test(t)) { cid++; g++; } }); return { ids, cl, gi, cum, ncum: cu + 1 }; }; // cum = 앞 낱말까지 쉼표 수(문장 끝 안 끊김 · ↳ 줄은 쉼표로만 나눠서 같은 셈) · ncum = 쉼표 마디 수
-export const markClause = (pairEl, cc, ncl) => { const pcs = [...(pairEl?.querySelectorAll(".pc") || [])]; pcs.forEach((e, i) => e.classList.toggle("on", pcs.length === ncl ? i === cc : true)); };
+export const SENT_END = /[.!?。।][」"')”’』»]*$/;
+const splitSent = t => String(t).split(/(?<=[.!?。।][」"')”’』»]*)\s+/).filter(Boolean); // 문장 나누기(마침표 뒤 띄어쓰기) — 두 말을 순서대로 짝지음
+export const COMMA = /[,，、][」"')”’』»]*$/; // 쉼표 마디(대표님 11-19 10:59 · 칠하기 단위) · 마침표(SENT_END)는 문장 끝
+const PAR_OPEN = /^[「"'“‘『«]*\(/, PAR_CLOSE = /\)[」"'”’』»]*$/, TOK = /"[^"]*"\S*|\S+|\s+/g; // 괄호 (…) 는 앞뒤로 마디가 갈림(대표님 11-19 13:31)
+// ── 칠하기 마디 공용(카드·설명 읽기 둘 다 · 대표님 11-19 13:31) — 마디 = 문장 끝(따옴표 끝 포함)·괄호 앞뒤·쉼표에서 끝남 · 낱말 글 배열 → 마디 번호(gi) / ↳ 줄의 지금 마디만 .on
+export const clauseMap = texts => { let sid = 0, cid = 0, g = 0, n = 0, open = false; const ids = [], cl = [], gi = []; texts.forEach(t => { if (PAR_OPEN.test(t) && n > 0) { cid++; g++; n = 0; } if (PAR_OPEN.test(t)) open = true; ids.push(sid); cl.push(cid); gi.push(g); n++; if (SENT_END.test(t)) { sid++; cid = 0; g++; n = 0; open = false; } else if (COMMA.test(t) || (open && PAR_CLOSE.test(t))) { cid++; g++; n = 0; if (PAR_CLOSE.test(t)) open = false; } }); return { ids, cl, gi, cum: gi, ncum: gi.length ? gi[gi.length - 1] + 1 : 1 }; }; // gi = 낱말이 든 마디(문장 통틀어) · ncum = 마디 수
+export const splitClause = (x, qa = false) => { const tk = (qa ? String(x).match(TOK) : String(x).split(/(\s+)/)) || [], ws = tk.filter(t => t && !/^\s+$/.test(t)), gi = clauseMap(ws).gi, out = []; ws.forEach((t, i) => { out[gi[i]] = out[gi[i]] ? out[gi[i]] + " " + t : t; }); return out.filter(Boolean); }; // qa = 따옴표 한 덩어리(설명 읽기 윗줄과 같은 낱말 나누기)
+export const markClause = (pairEl, cc, ncl, span = null) => { const pcs = [...(pairEl?.querySelectorAll(".pc") || [])]; // 마디 수가 같으면 같은 순서 마디 · 다르면 시각(span = 지금 마디의 문장 안 [시작,끝] 0~1)과 겹치는 마디 · 시각 없으면 문장 통째
+  if (pcs.length === ncl) pcs.forEach((e, i) => e.classList.toggle("on", i === cc));
+  else if (span && pcs.length) { const L = pcs.map(e => Math.max(1, e.textContent.length)), T = L.reduce((a, b) => a + b, 0); let a = 0; pcs.forEach((e, i) => { const s0 = a / T; a += L[i]; e.classList.toggle("on", a / T > span[0] + 1e-6 && s0 < span[1] - 1e-6); }); }
+  else pcs.forEach(e => e.classList.add("on")); };
 const pairInner = t => `<span class="arr" aria-hidden="true">↳</span> ${splitSent(t).map((x, i) => { const st = { q: false }; return `<span class="ps" data-s="${i}">${splitClause(x).map((c, j) => `<span class="pc" data-c="${j}">${gwWrap(c, st, true)}</span>`).join(" ")}</span>`; }).join(" ")}`;
 // 카드 글은 지금 말 하나만 DOM 에 둠(숨은 복사본 없음) — 높이는 열 때 두 말을 번갈아 재어 큰 쪽으로 고정(fixSizes) · ⇄ 는 같은 칸 안에서 글만 바꿈(applyMode)
 const lineIn = (x, l) => kws(x[l], l), pairIn = (x, l) => pairInner(x[l]);
