@@ -2094,5 +2094,8 @@ html.vk-bglock{overscroll-behavior:none}.vk-card,.vk-sheet,.hk-sheet,.vk-pane,.v
 .v9body .pairln .pc.pcx{display:none}
 
 /* 발음·켜고 끄는 단추(.romb·.toggles·.keepov · 대표님 11-19 16:35): 꺼짐 = 점선 + 빗금(자막 끔 CC 와 같은 모양·아이콘 없음) · 켜짐 = 금색 + ○ (위 규칙) · 글자는 반드시 CSS 이스케이프로(깨짐 방지) */
-.v9bar .romb[aria-pressed=false],.toggles button[aria-pressed=false],.keepov button[aria-pressed=false]{position:relative;border-style:dashed}
-.v9bar .romb[aria-pressed=false]::after,.toggles button[aria-pressed=false]::after,.keepov button[aria-pressed=false]::after{content:"";position:absolute;left:3px;right:3px;top:50%;border-top:2px solid #d9604f;transform:rotate(-12deg);pointer-events:none}
+.v9bar .romb[aria-pressed=false],.toggles button[aria-pressed=false],.keepov button[aria-pressed=false]{position:relative;border-style:dashed;border-color:transparent;background:transparent;box-shadow:none;color:var(--ink);opacity:1;font-weight:700}
+.v9bar .romb[aria-pressed=false]>*,.toggles button[aria-pressed=false]>*,.keepov button[aria-pressed=false]>*{opacity:.8}
+.v9bar .romb[aria-pressed=false]::before,.toggles button[aria-pressed=false]::before,.keepov button[aria-pressed=false]::before{content:"";position:absolute;inset:2px;border:1px dashed var(--ink);border-radius:inherit;opacity:.55;pointer-events:none}
+.v9bar .romb[aria-pressed=false]::after,.toggles button[aria-pressed=false]::after,.keepov button[aria-pressed=false]::after{content:"";position:absolute;left:24%;right:24%;top:50%;border-top:max(1.5px,.14em) solid #d9604f;transform:rotate(-14deg);pointer-events:none}
+/* 꺼짐 공용 모양(대표님 11-19 16:44): 안쪽 가는 점선 + 글자 위 짧은 빗금 · 글자는 갈색(조금 옅게) · 모서리는 켜짐과 같음 */
