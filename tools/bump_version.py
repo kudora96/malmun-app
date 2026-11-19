@@ -66,6 +66,30 @@ def suggest(base):
     return f"{day}.{n}"
 
 
+MARK = re.compile(r"^(<<<<<<< |>>>>>>> |=======\r?$)", re.M)
+
+
+def conflict_files():
+    """충돌 표시(<<<<<<< ======= >>>>>>>)가 든 js/css/html/json 파일 목록 (11-19 1119.21 사고)."""
+    bad = []
+    for root, ds, files in os.walk(APP):
+        ds[:] = [d for d in ds if d not in (".git", "node_modules")]
+        for f in files:
+            if f.endswith((".js", ".css", ".html", ".json")):
+                fp = os.path.join(root, f)
+                try:
+                    if MARK.search(read_text(fp)):
+                        bad.append(os.path.relpath(fp, APP))
+                except Exception:
+                    pass
+    return bad
+
+
+def diff_check_marks():
+    r = subprocess.run(["git", "-C", APP, "diff", "--check", "HEAD"], capture_output=True, text=True, encoding="utf-8", errors="replace")
+    return [l for l in r.stdout.splitlines() if "conflict marker" in l]
+
+
 def fail(msg):
     print("X", msg)
     print(USAGE)
@@ -120,6 +144,9 @@ def main():
     for name, ref in (("지금 판", old), ("origin 판", ov)):
         if FORM.match(ref or "") and key(v) <= key(ref):
             fail(f"새 판 {v} 은 {name} {ref} 보다 커야 합니다(작거나 같으면 거부)")
+    bad = conflict_files() + diff_check_marks()
+    if bad:
+        fail("충돌 표시가 남아 있어 판을 올리지 않습니다: " + ", ".join(bad[:5]))
     apply(v, old)
 
 
