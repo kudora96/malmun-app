@@ -1,7 +1,7 @@
 // 앱 공용 작은 도움말 상자(11-18 · 대표님 「도움말은 위로 · 아래로 뜨면 마우스와 겹침」)
 // title="…" 은 브라우저 기본 말풍선(아래로 뜸) 대신 data-tip 으로 옮겨, 단추 위쪽에 .vl-tip 모양 상자로 보여 준다.
 // 마우스일 때만(휴대폰·터치는 없음) · 마우스를 떼면 사라짐 · 글은 뜰 때마다 지금 값(⇄ 하면 따라감).
-import { starChip } from "./vocab.js?v=1119.6"; // ⭐ 단추 이름은 문구표(vocab.js)에서 뜰 때마다 다시 읽음(⇄ 뒤 새 말)
+import { starChip } from "./vocab.js?v=1119.7"; // ⭐ 단추 이름은 문구표(vocab.js)에서 뜰 때마다 다시 읽음(⇄ 뒤 새 말)
 const TIP_CLASS = "vl-tip";
 let tip = null, cur = null;
 const hide = () => { tip?.remove(); tip = null; cur = null; };
