@@ -1838,6 +1838,8 @@ li.vl-row{position:relative;overflow:hidden;touch-action:pan-y}.vl-slide{display
 .vk-card,.vk-card *{transition:none!important}
 .vk-card{scrollbar-gutter:stable}
 .vk-note .gw{padding:0 4px;margin:0 1px;border:1px solid var(--line);border-radius:5px;background:var(--card);box-shadow:0 1px 0 var(--line);-webkit-box-decoration-break:clone;box-decoration-break:clone}
+/* 윗줄 칠하는 문장 안 「」 상자도 줄 연노랑(11-19 10:43 대표님 · D-89) — 자기 낱말에 닿으면(kar·kt) 아래 진한 노랑 */
+.vk-line .kw.ks .gw{background:rgba(255,210,31,.45);border-color:rgba(255,210,31,.75);color:var(--ink)}
 .vk-line .kw.kar .gw,.vk-line .kw.kt .gw{background:#ffd21f;color:#1b1b1b}
 .vk-card>.vk-xw,.vk-pcard>.vk-xw{position:sticky;top:0;height:0;z-index:5}
 .vk-x{box-shadow:none;position:absolute;top:-10px;right:-10px;width:44px;height:44px;padding:0;border:0;border-radius:50%;background:transparent;color:var(--mute);display:flex;align-items:center;justify-content:center;cursor:pointer}
