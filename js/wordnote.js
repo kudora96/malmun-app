@@ -2,6 +2,7 @@
 // 읽기 소리 = 낱말 소리 다음에 뜻·쓰임 → 예문1 → 예문2 차례로(지금 말) · 읽는 줄에 노래방 불 · 파일 = media/wordnote/<편>/<낱말번호>_<ko|ne>_<mean|ex1|ex2>.mp3(말하기부가 만듦 · 없으면 건너뜀)
 import { claim, onSound } from "./onesound.js?v=1119.45";
 import { esc } from "./text.js?v=1119.45";
+import { twoOn } from "./autoplay.js?v=1119.45";
 
 const BLK = [["mean", "ko_mean", "ne_mean"], ["ex1", "ko_ex1", "ne_ex1"], ["ex2", "ko_ex2", "ne_ex2"]];
 const pick = (n, ko, k) => n?.[`${k ? "ko" : "ne"}_${ko}`] || n?.[`${k ? "ko" : "ne"}_${ko === "ex1" ? "ex" : ko}`] || ""; // ex1 = 옛 이름 ex 도 받음
@@ -116,7 +117,7 @@ function show(j) { // 지금 블록 표시 + 노래방 불(소리 위치 그대�
   const ps = [...j.root.querySelectorAll(`.vk-note > .vk-pair[data-pb="${j.bl[j.k].b}"] .ps`)], tg = Math.min(cs, ps.length - 1);
   { const key = j.k + ":" + cs, fresh = j.fk !== key; j.fk = key; followLine(j, blk.querySelector(".kw.ks") || blk, fresh); } // 읽는 문장(없으면 블록)을 따라 카드 본문 넘김
   j.root.querySelectorAll(".vk-note .ps.on").forEach(e => { if (e !== ps[tg]) e.classList.remove("on"); }); ps[tg]?.classList.add("on");
-  j.root.querySelectorAll(".vk-note .pc.on").forEach(e => e.classList.remove("on")); markClause(ps[tg], cc, ncl); // ↳ 도 같은 순서 마디만 · 마디 수 다르면 문장 통째
+  j.root.querySelectorAll(".vk-note .pc.on").forEach(e => e.classList.remove("on")); if (twoOn()) j.root.querySelectorAll(".vk-note .pc.on").forEach(e => e.classList.remove("on")); else markClause(ps[tg], cc, ncl); // 두 말 = 윗줄 읽는 동안 ↳ 줄은 칠 안 함(↳ 소리 때 그 말 시각으로만 · 대표님 11-19 16:03) · 한 말 = ↳ 도 같은 순서 마디만 · 마디 수 다르면 문장 통째
 }
 const run = j => { clearInterval(tick); tick = setInterval(() => { if (!j.dead && !j.paused) show(j); }, 40); };
 export function stopRead() { clearInterval(tick); document.querySelectorAll(".vk-card").forEach(c => cancelAnimationFrame(c.__anim)); tick = 0; if (cur) { clearTimeout(cur.gap); if (cur.a) { cur.a.onended = cur.a.onerror = null; try { cur.a.pause(); } catch {} } cur.dead = true; cur = null; } document.querySelectorAll(".vk-blk.cur").forEach(e => e.classList.remove("cur")); document.querySelectorAll(".vk-note .kw.kar, .kw.ks").forEach(e => e.classList.remove("kar", "ks", "kt")); clearHl(); }

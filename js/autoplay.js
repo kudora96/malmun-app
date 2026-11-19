@@ -2,6 +2,7 @@
 // 바깥 시험용 손잡이 = window.__auto { on, kind, idx, paused, next() } · 끝 카드 = .endcard.autoend
 const KEY = "malmun.exauto";
 export const AUTO_GAP = 1000; // 소리가 끝나고 다음까지 1.0초
+try { localStorage.removeItem("malmun.exauto"); localStorage.removeItem("malmun.twolang"); sessionStorage.removeItem("malmun.exauto"); sessionStorage.removeItem("malmun.twolang"); } catch {} // 앱을 열 때마다 자동·두 말 꺼짐 — 옛 저장값도 한 번 지움(기억 안 함 · 대표님 11-19 16:03) · 켠 상태는 이 열림 동안만
 const pref = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } };
 export const twoOn = () => { try { return localStorage.getItem("malmun.twolang") === "1"; } catch { return false; } }; // 두 말 듣기(기본 꺼짐 · 대표님 11-19 15:50 · 저장된 선택만 켬) — 카드·설명 읽기 공용 한 상태
 export const setTwo = on => { pref("malmun.twolang", on ? "1" : "0"); document.querySelectorAll("[data-act=two]").forEach(b => b.setAttribute("aria-pressed", String(on))); };
