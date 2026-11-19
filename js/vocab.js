@@ -179,7 +179,7 @@ export function openWordCard(it, { before, fromList = false, piece = null, ents:
   el.className = "vk-dim"; el.setAttribute("role", "dialog"); el.setAttribute("aria-modal", "true");
   toPane(el); // 배우는 화면이면 영상 칸 안에서(11-18 13:56 · 단어장 붙임 코드 그대로) · 그 밖의 화면은 예전처럼 겹쳐 뜸
   let pc = null, ents = ents0, act = null; // 조각 자료
-  cardCtl = { act: (v, b) => act?.(v, b), back: () => (view ? (piece ? "lback" : "back") : pane && fromList && listEl ? "lback" : ""), add: () => (view ? "padd" : "add"), saved }; // 조작 막대가 부르는 손잡이
+  cardCtl = { act: (v, b) => act?.(v, b), back: () => (view ? (piece ? "lback" : "back") : fromList && listEl ? "lback" : "close"), add: () => (view ? "padd" : "add"), saved }; // 조작 막대가 부르는 손잡이
   const foot = () => (pane ? "" : `<div class="vk-btns vk-foot">${ctlBtns(cardCtl).join("")}</div>`); // 영상 칸 밖(겹쳐 뜨는 카드)만 카드 아래에 조작 단추 · 칸 안이면 아래 갈색 막대
   const draw = () => { // 그리고 나서: 글 하나만 두고 높이는 두 말 중 큰 쪽으로 고정
     draw0(); const c = el.querySelector(".vk-card"), pe = view && ents?.find(x => x.id === view);
