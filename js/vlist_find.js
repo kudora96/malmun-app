@@ -80,7 +80,8 @@ export function epLabel(ep, ko, multiLesson) {
 // pageItems → [{head:'1편'|null, x}] (같은 편이 이어지는 동안 한 번만 제목) · allItems = 과 구분이 필요한지 보려고(없으면 pageItems)
 export function groupByEp(pageItems, ko, allItems) {
   const ls = new Set((allItems || pageItems).map(x => (nums(x.ep).length >= 3 ? nums(x.ep)[0] : -1))), multi = ls.size > 1;
+  const one = new Set((allItems || pageItems).map(x => x.ep ?? "")).size < 2; // 편이 하나뿐이면 제목 줄·구분선 없음(11-19)
   let prev = Symbol(); const out = [];
-  for (const x of pageItems) { const k = x.ep ?? ""; out.push({ head: k !== prev ? epLabel(x.ep, ko, multi) || null : null, x }); prev = k; }
+  for (const x of pageItems) { if (one) { out.push({ head: null, x }); continue; } const k = x.ep ?? ""; out.push({ head: k !== prev ? epLabel(x.ep, ko, multi) || null : null, x }); prev = k; }
   return out;
 }
