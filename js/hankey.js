@@ -8,10 +8,11 @@ export const HK_TX = {
   ne: { han: "कोरियाली किबोर्ड", ne: "नेपाली किबोर्ड", close: "किबोर्ड बन्द गर्नुहोस्", bs: "एउटा अक्षर मेट्नुहोस्", sp: "स्पेस", title: "किबोर्ड" },
 };
 const KO_ROWS = [[..."ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊ"], [..."ㅋㅌㅍㅎㄲㄸㅃㅆㅉ"], [..."ㅏㅑㅓㅕㅗㅛㅜㅠㅡㅣ"], [..."ㅐㅒㅔㅖ", " ", "⌫"]];
+// 네팔 글자 = 한글 자판과 같은 4줄(높이 같게) · 줄이 넓으면 가로로 밀어 봄(.hk-row.sc) — 모음·모음표 / 자음 / 자음·기호 / 받침표·띄어쓰기·지우기
 const NE_ROWS = [
-  [..."अआइईउऊएऐओऔ"],
-  [..."कखगघङचछजझञ"], [..."टठडढणतथदधन"], [..."पफबभमयरलवश"], ["ष", "स", "ह", "क्ष", "त्र", "ज्ञ", "ळ", "ॐ", "।"],
-  [..."ािीुूेैोौं"], [..."ँ्ॉ", "ृ", " ", "⌫"],
+  [..."अआइईउऊएऐओऔ", ..."ािीुूेैोौ"],
+  [..."कखगघङचछजझञटठडढणतथदधन"], [..."पफबभमयरलवश", "ष", "स", "ह", "क्ष", "त्र", "ज्ञ", "ळ", "ॐ", "।"],
+  [..."ंँ्ॉ", "ृ", " ", "⌫"],
 ];
 const VOW_KO = new Set([..."ㅏㅑㅓㅕㅗㅛㅜㅠㅡㅣㅐㅒㅔㅖ"]), VOW_NE = new Set([..."अआइईउऊएऐओऔािीुूेैोौंँ्ॉृ"]);
 const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;");
@@ -27,7 +28,7 @@ export function makeKeypad({ input, onChange, lang = "ko", ui = true, host, onCl
     const rows = L === "ko" ? KO_ROWS : NE_ROWS, t = T();
     d.dataset.lang = L; d.setAttribute("aria-label", t.title);
     d.innerHTML = `<div class="hk-top"><button type="button" class="hk-tab${L === "ko" ? " on" : ""}" data-l="ko" lang="ko" aria-label="${esc(t.han)}">한</button><button type="button" class="hk-tab${L === "ne" ? " on" : ""}" data-l="ne" lang="ne" aria-label="${esc(t.ne)}">ने</button><span class="hk-gap"></span><button type="button" class="hk-x" aria-label="${esc(t.close)}"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"/></svg></button></div>`
-      + rows.map(r => `<div class="hk-row">${r.map(k => (k === " " ? `<button type="button" class="hk-key hk-sp" data-k=" " aria-label="${esc(t.sp)}">␣</button>`
+      + rows.map(r => `<div class="hk-row${r.length > 12 ? " sc" : ""}">${r.map(k => (k === " " ? `<button type="button" class="hk-key hk-sp" data-k=" " aria-label="${esc(t.sp)}">␣</button>`
         : k === "⌫" ? `<button type="button" class="hk-key hk-bs" data-k="⌫" aria-label="${esc(t.bs)}"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M9 5h11v14H9L3 12z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M12.5 9.5l5 5M17.5 9.5l-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>`
         : `<button type="button" class="hk-key${(L === "ko" ? VOW_KO : VOW_NE).has(k) ? " v" : ""}" data-k="${k}" lang="${L}">${k}</button>`)).join("")}</div>`).join("");
   };

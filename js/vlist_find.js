@@ -46,8 +46,8 @@ export function makeFindBox(onInput, ko = true) {
     hold.poll = setInterval(() => { if (!d.isConnected) return closeKp(); if (!k.isConnected) k.place(); }, 300); // 목록이 다시 그려지거나 닫히면 따라감
   };
   const lab = k => { curKo = k; const t = T(k); inp.placeholder = t.find; inp.setAttribute("aria-label", t.find); x.setAttribute("aria-label", t.clear); inp.lang = k ? "ko" : "ne";
-    const H = k ? HK_TX.ko : HK_TX.ne, V = k ? VOICE_TX.ko : VOICE_TX.ne; han.setAttribute("aria-label", H.han); mic.setAttribute("aria-label", V[voice.active() ? "stop" : "voice"]); hold.kp?.setUi(k); };
-  lab(ko);
+    const H = k ? HK_TX.ko : HK_TX.ne, V = k ? VOICE_TX.ko : VOICE_TX.ne; han.textContent = k ? "한" : "ने"; han.lang = k ? "ko" : "ne"; const hn = k ? H.han : H.ne; han.setAttribute("aria-label", hn); han.setAttribute("data-tip", hn); mic.setAttribute("aria-label", V[voice.active() ? "stop" : "voice"]); hold.kp?.setUi(k); };
+  lab(ko); // 단추 글자 = ⇄ 따라감(한국어 먼저=한 · 네팔어 먼저=ने)
   inp.addEventListener("input", fire); // 쳐는 즉시
   x.addEventListener("click", e => { e.preventDefault(); e.stopPropagation(); inp.value = ""; x.hidden = true; onInput?.(""); inp.focus(); });
   mic.addEventListener("click", e => { e.preventDefault(); e.stopPropagation(); voice.toggle(); });
