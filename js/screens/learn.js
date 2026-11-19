@@ -85,6 +85,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   const seq = new Sequence();
   let ready = false;
 
+  const exAutoOn = () => pref("malmun.exauto") === "1"; // 설명 읽기 「자동」 — 줄 소리가 끝나면 1초 뒤 다음 줄(대표님 11-19 13:21 · 기억 = localStorage)
   const subsOn = () => pref("malmun.fullsub") !== "0"; /* 영상 자막 켬/끔(투덜이 10-12) */
   app.innerHTML = `<section class="scr learn${subsOn() ? "" : " nosub"}">
     <div class="stick">
@@ -99,7 +100,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     <div class="panel" hidden></div>
     </div>
     <button class="bigb" data-act="big" aria-pressed="false" hidden aria-label="${esc(t("big_view"))}" title="${esc(t("big_view"))}"><span aria-hidden="true">⛶</span><span class="off" data-k="big_short">${esc(t("big_short"))}</span><span class="on" data-k="big_off">${esc(t("big_off"))}</span></button>
-    <div class="seek" data-off><span class="t0">0:00</span><div class="trk" aria-label="${esc(t("seek_bar"))}"><div class="rail"><i></i></div></div><span class="t1">0:00</span><button class="vsubt" data-act="subs" aria-pressed="${subsOn()}" aria-label="${esc(t("subs_aria"))}" title="${esc(t("subs_aria"))}"><span class="cc" aria-hidden="true">CC</span></button><button class="vsubt rdp" data-act="rdp" aria-label="▶/⏸" title="▶/⏸"><span class="cc" aria-hidden="true">▶</span></button>
+    <div class="seek" data-off><span class="t0">0:00</span><div class="trk" aria-label="${esc(t("seek_bar"))}"><div class="rail"><i></i></div></div><span class="t1">0:00</span><button class="vsubt" data-act="subs" aria-pressed="${subsOn()}" aria-label="${esc(t("subs_aria"))}" title="${esc(t("subs_aria"))}"><span class="cc" aria-hidden="true">CC</span></button><button class="vsubt rdp exauto" data-act="exauto" aria-pressed="${exAutoOn()}" aria-label="${esc(t("auto_listen"))}"><span class="cc">${esc(t("auto_listen"))}</span></button><button class="vsubt rdp" data-act="rdp" aria-label="▶/⏸" title="▶/⏸"><span class="cc" aria-hidden="true">▶</span></button>
       </div>
     </div>
     <ol class="lines"><li class="lend" data-end="start" role="button" tabindex="0"><b lang="ko">▶ 시작</b><span><span data-k="ln_start">${esc(t("ln_start"))}</span> · 0:00${(x => x >= 1 ? ` – ${Math.floor(x / 60)}:${String(Math.floor(x % 60)).padStart(2, "0")}` : "")(L[0]?.start || 0)}</span></li>${L.map((l, i) => `<li class="line sp-${SPEAKER[l.speaker] || "x"} ${l.speaker === "선생님" ? "" : "right"}" data-i="${i}" data-peek="👁 ${esc(t("subs_peek"))}">
@@ -354,7 +355,8 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   const playing = () => (st.panel?.kind === "explain" ? ex.playing || !!st.gap : st.mode === "video" ? !v.paused || !!st.gap : seq.playing);
   const clearExpl = () => items.forEach(li => { const e = li.querySelector(".expl"); if (e.classList.contains("on") || e.firstChild) { e.classList.remove("on"); e.textContent = ""; } });
   // 설명 읽기 창이 열려 있는 동안 막대 끝 CC 자리에 ▶/⏸ 한 단추(대표님 11-17) — CC·자막 끄기(.nosub)는 영상 화면 그대로 · 읽는 중 ⏸ · 멈춤·끝 ▶ · 끝난 뒤 ▶ = 그 줄 처음부터
-  const rdSync = () => { const L0 = app.querySelector(".learn"), b = app.querySelector("[data-act=rdp] .cc"); if (!L0 || !b) return; const on = st.panel?.kind === "explain"; L0.classList.toggle("rdr", on); if (on) { const t0 = ex.playing || !!st.gap ? "⏸" : "▶"; if (b.textContent !== t0) b.textContent = t0; } };
+  let exAutoMarkFn = null; // 「자동」 단추 글·눌림 맞춤(tq 가 아래에서 만들어진 뒤 채움)
+  const rdSync = () => { const L0 = app.querySelector(".learn"), b = app.querySelector("[data-act=rdp] .cc"); if (!L0 || !b) return; const on = st.panel?.kind === "explain"; L0.classList.toggle("rdr", on); if (on) { const t0 = ex.playing || !!st.gap ? "⏸" : "▶"; if (b.textContent !== t0) b.textContent = t0; exAutoMarkFn?.(); } };
   const sync = () => {
     rdSync();
     playBtn.innerHTML = playing() ? I.pause : I.play; const fp = app.querySelector("[data-act=fsplay]"); if (fp) fp.innerHTML = playBtn.innerHTML; fsArm();
@@ -447,7 +449,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   const koMode = KO_UI.includes(lang);
   if (koMode) { preloadKoUi(); const w0 = uiKoOn() ? "ko" : "L"; if (v9pref().snd !== w0) v9set("snd", w0); if (v9pref().txt !== w0) v9set("txt", w0); }
   const panelKo = () => (panel.dataset.uiko != null ? uiKoIn(panel) : uiKoOn()), tq = (k, v) => (panel.dataset.uiko != null ? tIn(panel, k, v) : t(k, v)); // 설명·말하기 창 = 창 상태
-  async function uiLang(ko) { st.uiBar = true; try { if (panel.dataset.uiko != null) switchUiScope(panel, ko); else await switchUiKo(ko); } finally { st.uiBar = false; } } // 설명 막대 고르기 → 앱 글도(되돌아오기 안내 포함) · 소리·본문은 그 손잡이가 맞춤
+  async function uiLang(ko) { st.uiBar = true; try { if (panel.dataset.uiko != null) switchUiScope(panel, ko); else await switchUiKo(ko); } finally { st.uiBar = false; exAutoMarkFn?.(); } } // 설명 막대 고르기 → 앱 글도(되돌아오기 안내 포함) · 소리·본문은 그 손잡이가 맞춤
   const v9code = k => (k === "ko" || !v9L ? "ko" : v9L); // 학습자 언어 설명이 없으면 한국어만(언어부 10-11)
   const v9name = k => (k === "ko" || !v9L ? "한국어" : langName(v9L));
   const v9src = (i, k, what) => { const a = L[i].v9?.audio?.[v9code(k)]?.[what]; return a ? paths.v9(ep, a) : null; };
@@ -704,8 +706,23 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     // 🔁 반복은 「그 줄 설명 듣기」만(st.exLoop) — 카드 안 [본보기]·[내 목소리]·[저장됨 ▶]는 한 번만 나오고 끝(본부 10-04 「끝없이 되풀이」)
     const loop = st.exLoop;
     if (st.rep && st.panel?.kind === "explain" && loop) st.gap = setTimeout(() => { st.gap = 0; if (st.rep && st.panel?.kind === "explain" && st.exLoop === loop) ex.play(loop); sync(); }, LOOP_GAP);
+    else exAutoNext();
     sync();
   };
+  // 자동 이어 듣기(대표님 11-19 13:21) — 줄 소리가 끝나고 1초 뒤 「다음」 을 누른 것처럼 다음 줄(영상 장면도 함께) · 마지막 줄이면 끝 안내 · 대기 중 누르면(togglePlay)·다른 소리·창 닫기 = st.gap 이 지워져 멈춤(단추는 켜진 채)
+  const EX_AUTO_GAP = 1000;
+  function exAutoNext() {
+    const mine = st.panel; if (!exAutoOn() || mine?.kind !== "explain" || st.userPaused) return;
+    if (mine.i >= L.length - 1) return exAutoEnd();
+    clearTimeout(st.gap); const id = (st.gap = setTimeout(() => {
+      st.gap = 0; if (st.panel !== mine || !exAutoOn() || st.userPaused) return sync();
+      const n = mine.i + 1; openPanel("explain", n, { autoplay: true }); try { v.currentTime = L[n].start; } catch {} // 다음 단추와 같은 길 + 뒤 영상도 그 줄 장면으로
+    }, EX_AUTO_GAP)); st.autoGap = id;
+  }
+  function exAutoEnd() { // 끝 안내 — 작은 말풍선 하나(알림창 아님) · 4초 뒤·무엇을 누르든 사라짐
+    exAutoEndOff(); const d = Object.assign(document.createElement("div"), { className: "toast exend", textContent: `✓ ${tq("auto_end")}` }); d.setAttribute("role", "status"); app.querySelector(".learn")?.append(d); st.autoEndT = setTimeout(exAutoEndOff, 4000);
+  }
+  function exAutoEndOff() { clearTimeout(st.autoEndT); app.querySelectorAll(".exend").forEach(e => e.remove()); }
   ex.a.addEventListener("timeupdate", () => { const a = ex.a, bar = panel.querySelector(".exprog i"); if (bar && a.duration) bar.style.width = (100 * a.currentTime) / a.duration + "%"; });
   const markButtons = () => items.forEach((li, k) => li.querySelectorAll("[data-act=explain],[data-act=write],[data-act=speak]").forEach(b => b.setAttribute("aria-pressed", String(!!st.panel && k === st.panel.i && b.dataset.act === st.panel.kind))));
 
@@ -760,7 +777,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   async function openPanel(kind, i, { autoplay = false, task, restore = null } = {}) {
     if (!st.panel && !(restore && nav.depth > 0)) navPush(); // 처음 열 때만 한 칸(토글로 다시 열 때는 있던 칸 그대로)
     i = Math.max(0, Math.min(L.length - 1, i));
-    const wasPaused = !!st.userPaused; stopAll(); ex.stop(); st.once = false; st.uiFit = false; st.bodyZ = 0; select(i, { scroll: false }); st.userPaused = autoplay ? false : wasPaused && !!st.panel;
+    exAutoEndOff(); const wasPaused = !!st.userPaused; stopAll(); ex.stop(); st.once = false; st.uiFit = false; st.bodyZ = 0; select(i, { scroll: false }); st.userPaused = autoplay ? false : wasPaused && !!st.panel;
     st.panel?.cleanup?.();
     const keepKo = st.panel && st.panel.kind === kind && panel.dataset.uiko != null ? panel.dataset.uiko === "1" : null; // 같은 창에서 다음 줄 = 창 ⇄ 상태 이어 감
     const mine = (st.panel = { kind, i });
@@ -786,7 +803,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   function closePanel(fromNav) {
     if (!st.panel) return;
     if (!fromNav) navPop(); // 단추로 닫으면 쌓아 둔 뒤로 가기 칸도 걷어 냄
-    st.panel.cleanup?.(); ex.stop(); clearTimeout(st.gap); st.gap = 0; st.panel = null;
+    st.panel.cleanup?.(); ex.stop(); clearTimeout(st.gap); st.gap = 0; st.panel = null; exAutoEndOff();
     setBig(false); bigB.hidden = true; bigHome.before(bigB); // 창을 닫으면 크게 보기도 끝 · 칩은 제자리(숨김)
     panel.hidden = true; panel.innerHTML = ""; delete panel.dataset.uiko; panel.classList.remove("uiko"); vwrap.hidden = false; vsubFill(st.cur); fitCard(st.cur); // 영상 창도 같은 카드 자리 · 창 범위 버림(바깥 상태 그대로)
     markButtons();
@@ -1285,6 +1302,12 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     const on = !subsOn(); pref("malmun.fullsub", on ? "1" : "0");
     e.currentTarget.setAttribute("aria-pressed", String(on)); app.querySelector(".learn").classList.toggle("nosub", !on); items.forEach(x => x.classList.remove("peek"));
   };
+  exAutoMarkFn = () => { const b = app.querySelector("[data-act=exauto]"); if (!b) return; const on = exAutoOn(); if (b.getAttribute("aria-pressed") !== String(on)) b.setAttribute("aria-pressed", String(on)); const c = b.querySelector(".cc"), w = tq("auto_listen"); if (c && c.textContent !== w) { c.textContent = w; b.setAttribute("aria-label", w); } }; // ⇄ 로 창 말이 바뀌면 글도 그 말로
+  app.querySelector("[data-act=exauto]").onclick = () => { if (st.panel?.kind !== "explain") return;
+    const on = !exAutoOn(); pref("malmun.exauto", on ? "1" : "0"); exAutoMarkFn(); exAutoEndOff();
+    if (!on) { if (st.gap && st.gap === st.autoGap) { clearTimeout(st.gap); st.gap = 0; } } // 끄면 기다리던 다음 줄만 취소(지금 줄 소리는 그대로)
+    else if (ex.q.length && !ex.playing && !st.gap && !st.userPaused && ex.a.ended) exAutoNext(); // 줄이 이미 끝나 있었으면 바로 이어 감
+    sync(); };
   app.querySelector("[data-act=rdp]").onclick = () => { if (st.panel?.kind !== "explain") return;
     const ended = ex.q.length && !ex.playing && !st.gap && (ex.i >= ex.q.length || ex.a.ended);
     if (ended) { const lst = st.exLoop?.length ? st.exLoop : exItems(st.panel.i); hushSay(); clearTimeout(st.gap); st.gap = 0; ex.play(lst, Math.max(0, lst.findIndex(x => x.p === 0))); sync(); } else togglePlay(); rdSync(); };
