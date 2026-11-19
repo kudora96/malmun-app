@@ -551,7 +551,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
         else if (head) setPair(vb, st.panel.i, it.lang, "sayhead");
         else if (say && it.part === "sent") setPair(vb, st.panel.i, it.lang, "saymean");
         else if (old) setPair(vb, st.panel.i, it.lang, "say");
-        if (it.pair) pairPaint(vb, st.panel.i, it, k); else if (twoOn()) vb.querySelectorAll(".pairln .pc.on").forEach(e => e.classList.remove("on")); /* 두 말: 윗줄 읽는 동안 ↳ 칠 없음(대표님 11-19 16:03) */ else { const cur = panel.querySelector(".v9body .sn.cur"), pl = vb.querySelector(".pairln"); if (pl && cur && k >= 0) { const ws = [...cur.querySelectorAll(".kw")], cm = clauseMap(ws.map(w => w.textContent)); let j = -1; ws.forEach((w, q) => { if (w.classList.contains("kar")) j = q; }); const cgi = cm.gi[Math.max(0, j)] ?? 0, wt2 = wTimes(L[st.panel.i].v9?.sent || [], k, it.lang); let span = null; if (wt2 && wt2.length === ws.length) { const ix = cm.gi.map((g, q) => (g === cgi ? q : -1)).filter(q => q >= 0), a0 = wt2[0][0], a1 = wt2[wt2.length - 1][1] || wt2[wt2.length - 1][0] + 0.1, d = Math.max(0.1, a1 - a0); span = [(wt2[ix[0]][0] - a0) / d, ((wt2[ix[ix.length - 1]][1] || wt2[ix[ix.length - 1]][0] + 0.1) - a0) / d]; } markClause(pl, cgi, cm.ncum, span); } else if (pl) markClause(pl, 0, 0); } // ↳ 줄도 윗줄 읽는 쉼표 마디만 엷게(마디 수 다르면 문장 통째 · 대표님 11-19 11:07)
+        if (it.pair) pairPaint(vb, st.panel.i, it, k); else if (twoOn()) vb.querySelectorAll(".pairln .pc.on, .pairln .pw.pk").forEach(e => e.classList.remove("on", "pk")); /* 두 말: 윗줄 읽는 동안 ↳ 칠 없음(대표님 11-19 16:03) */ else { const cur = panel.querySelector(".v9body .sn.cur"), pl = vb.querySelector(".pairln"); if (pl && cur && k >= 0) { const ws = [...cur.querySelectorAll(".kw")], cm = clauseMap(ws.map(w => w.textContent)); let j = -1; ws.forEach((w, q) => { if (w.classList.contains("kar")) j = q; }); const cgi = cm.gi[Math.max(0, j)] ?? 0, wt2 = wTimes(L[st.panel.i].v9?.sent || [], k, it.lang); let span = null; if (wt2 && wt2.length === ws.length) { const ix = cm.gi.map((g, q) => (g === cgi ? q : -1)).filter(q => q >= 0), a0 = wt2[0][0], a1 = wt2[wt2.length - 1][1] || wt2[wt2.length - 1][0] + 0.1, d = Math.max(0.1, a1 - a0); span = [(wt2[ix[0]][0] - a0) / d, ((wt2[ix[ix.length - 1]][1] || wt2[ix[ix.length - 1]][0] + 0.1) - a0) / d]; } markClause(pl, cgi, cm.ncum, span); } else if (pl) markClause(pl, 0, 0); } // ↳ 줄도 윗줄 읽는 쉼표 마디만 엷게(마디 수 다르면 문장 통째 · 대표님 11-19 11:07)
       }
     }
     if (seq.playing) {
@@ -564,6 +564,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     const pl = vb.querySelector(".pairln"); if (!pl) return; const sn = L[i].v9?.sent || [], wt = wTimes(sn, k, it.lang), ws = String(sn[k]?.[it.lang] || "").match(/"[^"]*"\S*|\S+/g) || [];
     if (!wt || wt.length !== ws.length) return markClause(pl, 0, 0);
     const tm = ex.a.currentTime + KAR_LEAD; let j = 0; wt.forEach((w, q) => { if (tm >= w[0]) j = q; });
+    pl.querySelectorAll(".pw").forEach(e => e.classList.toggle("pk", +e.dataset.w === j)); // ↳ 소리 = 지금 낱말 하나만 진한 노랑(그 말 w 시각 · 대표님 11-19 16:03)
     const cm = clauseMap(ws), cgi = cm.gi[j] ?? 0, ix = cm.gi.map((g, q) => (g === cgi ? q : -1)).filter(q => q >= 0), e = q => wt[q][1] || wt[q][0] + 0.1, a0 = wt[0][0], d = Math.max(0.1, e(wt.length - 1) - a0);
     markClause(pl, cgi, cm.ncum, [(wt[ix[0]][0] - a0) / d, (e(ix[ix.length - 1]) - a0) / d]);
   }
@@ -590,7 +591,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   // 짝 줄(본부 10-05 투덜이 「하이라이트를 따라다니며 자동으로」) — 설명 글 바로 아래 고정 한 줄 · 불 켜진 문장의 다른 언어 짝 · 멈추면 그대로 · 재생 전엔 첫 문장
   const otherOf = code => (code === "ko" ? v9L : "ko");
   // 짝 줄 = 보이는 글(.vis) + 가장 긴 후보 글 둘(한국어·학습자 말 · .ghost · 안 보임)을 같은 격자 칸에 겹침 → 어느 문장·어느 말이어도 줄 높이가 같음(⇄ 때 크기 그대로)
-  const pairInner = (i, txt) => `<span class="vis"><span class="arr" aria-hidden="true">↳</span> ${splitClause(txt, true).map(c => `<span class="pc">${bold(c)}</span>`).join(" ")}</span>`;
+  const pairInner = (i, txt) => { let w = 0; return `<span class="vis"><span class="arr" aria-hidden="true">↳</span> ${splitClause(txt, true).map(c => `<span class="pc">${(c.match(/"[^"]*"\S*|\S+/g) || []).map(tk => `<span class="pw" data-w="${w++}">${bold(tk)}</span>`).join(" ")}</span>`).join(" ")}</span>`; };
   function pairHTML(i, code, k) {
     const s = L[i].v9?.sent?.[k]; if (!s) return "";
     const o = otherOf(code);
