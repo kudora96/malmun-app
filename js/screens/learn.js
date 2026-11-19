@@ -49,7 +49,7 @@ import { fbBind, fbPlan } from "../fbvoice.js?v=1119.35";
 import { setupTurns } from "../turns.js?v=1119.35"; // 「따라 해 보세요」 양방향(대표님 10-21) // 결과 안내 소리로 읽기(대표님 10-21)
 import { setupOverlays } from "../overlays.js?v=1119.35"; // 영상 위 그림 카드(대표님 10-22 새 1편) // 「따라 해 보세요」 양방향(대표님 10-21) // 결과 안내 소리로 읽기(대표님 10-21)
 import { Sequence } from "../audio.js?v=1119.35";
-import { I, progress, SPEAKER, spkHtml, uiKoBtn, uikoChip, bgmBtn, switchUiKo, openUiScope, switchUiScope } from "../ui.js?v=1119.35";
+import { I, progress, SPEAKER, spkHtml, uiKoBtn, uikoChip, bgmBtn, switchUiKo, openUiScope, switchUiScope, endCard } from "../ui.js?v=1119.35";
 import writeView from "./write.js?v=1119.35";
 import { diagEnv, keepDiag } from "../diag.js?v=1119.35";
 import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1119.35";
@@ -181,7 +181,10 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   const playBtn = app.querySelector("[data-act=play]");
   // 맨 앞 줄에선 |◀, 맨 끝 줄에선 ▶| 못 누름(투덜이 10-08 — 다른 ◀ ▶ 처럼) · 설명·쓰기 창이면 그 창의 줄 기준
   const prevBtn = app.querySelector(".ctrl [data-act=prev]"), nextBtn = app.querySelector(".ctrl [data-act=next]");
-  const edgeT = setInterval(() => { const i = st.panel ? st.panel.i : st.cur; if (prevBtn) prevBtn.disabled = !(i > 0); if (nextBtn) nextBtn.disabled = !(i < L.length - 1); }, 150);
+  const edgeT = setInterval(() => { const i = st.panel ? st.panel.i : st.cur; if (prevBtn) prevBtn.disabled = !(i > 0); if (nextBtn) { const last = L.length > 0 && i >= L.length - 1; nextBtn.disabled = !L.length; setNextRestart(last); } }, 150);
+  // 맨 끝 줄에서는 ▷| 가 「↺ 처음부터」 단추로(대표님 11-19 14:15) — 같은 크기·자리 · 누르면 1번 줄로(끝 카드의 「처음부터 다시」와 같은 함수) · 글(aria)은 지금 ⇄ 말
+  const nextHtml = nextBtn ? nextBtn.innerHTML : "";
+  function setNextRestart(on) { if (!nextBtn) return; const w = t("from_start"); if (on) { if (nextBtn.dataset.restart !== "1") { nextBtn.dataset.restart = "1"; nextBtn.innerHTML = '<span class="rs" aria-hidden="true">↺</span>'; } if (nextBtn.getAttribute("aria-label") !== w) nextBtn.setAttribute("aria-label", w); } else if (nextBtn.dataset.restart === "1") { delete nextBtn.dataset.restart; nextBtn.innerHTML = nextHtml; nextBtn.setAttribute("aria-label", t("next")); } else if (nextBtn.getAttribute("aria-label") !== t("next")) nextBtn.setAttribute("aria-label", t("next")); }
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   // ── 선택 · 따라가기 ──
@@ -719,8 +722,15 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
       const n = mine.i + 1; openPanel("explain", n, { autoplay: true }); try { v.currentTime = L[n].start; } catch {} // 다음 단추와 같은 길 + 뒤 영상도 그 줄 장면으로
     }, EX_AUTO_GAP)); st.autoGap = id;
   }
-  function exAutoEnd() { // 끝 안내 — 작은 말풍선 하나(알림창 아님) · 4초 뒤·무엇을 누르든 사라짐
-    exAutoEndOff(); const d = Object.assign(document.createElement("div"), { className: "toast exend", textContent: `✓ ${tq("auto_end")}` }); d.setAttribute("role", "status"); app.querySelector(".learn")?.append(d); st.autoEndT = setTimeout(exAutoEndOff, 4000);
+  function exAutoEnd() { // 끝 카드(대표님 11-19 14:11) — 「끝까지 들었어요」 + [↺ 처음부터 다시] + [닫기] · 누를 때까지 떠 있음(창을 닫거나 다른 줄을 열면 사라짐) · 알림창 아님
+    exAutoEndOff(); const txt = () => ({ title: tq("auto_end"), again: tq("auto_again"), close: tq("auto_close") });
+    endCard(app.querySelector(".learn"), { ...txt(), onAgain: exAutoRestart, onClose: exAutoEndOff });
+  }
+  function exAutoRestart() { restartLines(); } // 끝 카드 [↺ 처음부터 다시]
+  function restartLines() { // 처음부터 다시(끝 카드 · 맨 끝 줄 ▷| 가 같이 씀) — 1번 줄로(뒤 영상도 그 장면) · 설명 창이면 자동이 켜져 있을 때 거기서부터 자동 재생
+    exAutoEndOff();
+    if (st.panel) openPanel(st.panel.kind, 0, { autoplay: st.panel.kind === "explain" ? true : playing() }); else { select(0, { scroll: true }); }
+    try { v.currentTime = L[0].start; } catch {}
   }
   function exAutoEndOff() { clearTimeout(st.autoEndT); app.querySelectorAll(".exend").forEach(e => e.remove()); }
   ex.a.addEventListener("timeupdate", () => { const a = ex.a, bar = panel.querySelector(".exprog i"); if (bar && a.duration) bar.style.width = (100 * a.currentTime) / a.duration + "%"; });
@@ -1253,6 +1263,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     const b = e.target.closest("[data-act]");
     if (!b) return;
     const a = b.dataset.act;
+    if (a === "next" && b.dataset.restart === "1") return restartLines();
     if (st.panel && (a === "prev" || a === "next")) return openPanel(st.panel.kind, st.panel.i + (a === "next" ? 1 : -1), { autoplay: st.panel.kind === "explain" ? true : playing() }); // 설명: 다음·이전 줄도 바로 읽음(끝난 뒤에도) — 직접 멈춰 둔 때만 멈춘 채
     if (a === "play") togglePlay();
     else if (a === "prev") step(-1);
@@ -1302,7 +1313,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     const on = !subsOn(); pref("malmun.fullsub", on ? "1" : "0");
     e.currentTarget.setAttribute("aria-pressed", String(on)); app.querySelector(".learn").classList.toggle("nosub", !on); items.forEach(x => x.classList.remove("peek"));
   };
-  exAutoMarkFn = () => { const b = app.querySelector("[data-act=exauto]"); if (!b) return; const on = exAutoOn(); if (b.getAttribute("aria-pressed") !== String(on)) b.setAttribute("aria-pressed", String(on)); const c = b.querySelector(".cc"), w = tq("auto_listen"); if (c && c.textContent !== w) { c.textContent = w; b.setAttribute("aria-label", w); } }; // ⇄ 로 창 말이 바뀌면 글도 그 말로
+  exAutoMarkFn = () => { const b = app.querySelector("[data-act=exauto]"); if (!b) return; const on = exAutoOn(); if (b.getAttribute("aria-pressed") !== String(on)) b.setAttribute("aria-pressed", String(on)); const c = b.querySelector(".cc"), w = tq("auto_listen"); if (c && c.textContent !== w) { c.textContent = w; b.setAttribute("aria-label", w); } app.querySelectorAll(".endcard").forEach(e => e.setText?.({ title: tq("auto_end"), again: tq("auto_again"), close: tq("auto_close") })); }; // ⇄ 로 창 말이 바뀌면 글도 그 말로
   app.querySelector("[data-act=exauto]").onclick = () => { if (st.panel?.kind !== "explain") return;
     const on = !exAutoOn(); pref("malmun.exauto", on ? "1" : "0"); exAutoMarkFn(); exAutoEndOff();
     if (!on) { if (st.gap && st.gap === st.autoGap) { clearTimeout(st.gap); st.gap = 0; } } // 끄면 기다리던 다음 줄만 취소(지금 줄 소리는 그대로)

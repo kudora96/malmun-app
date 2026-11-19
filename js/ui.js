@@ -170,3 +170,15 @@ export const SPEAKER = { "선생님": "teacher", "콩": "kong", "두부": "dubu"
 // 화자 이름 옆 학습자 말(본부 10-08 투덜이) — 선생님 = 그 나라 말 「선생님」(뜻) · 두부·콩 = 이름 로마자(로마자 끄기와 무관) · 표 = lang/*.json 「spk_<id>」(없으면 en)
 export const spkGloss = ko => { const id = SPEAKER[ko], k = "spk_" + id, g = id ? t(k) : ""; return g && g !== k && g !== ko ? g : ""; };
 export const spkHtml = ko => { const g = spkGloss(ko); return `<span class="ko" lang="${LEARN}">${esc(ko)}</span>${g ? `<span class="spkg"> · ${esc(g)}</span>` : ""}`; };
+
+// 끝 카드(대표님 11-19 14:11) — 「끝까지 들었어요」 + [↺ 처음부터 다시] + [닫기] · 설명 자동·단어 카드 자동·조각 자동이 같이 씀(검은 말풍선 대신)
+//  endCard(host, { title, again, close, onAgain, onClose, cls }) → 카드 요소(.endcard.exend) · el.setText({title, again, close}) 로 ⇄ 때 글 바꿈 · 알림창 없음 · 누를 때까지 떠 있음
+export function endCard(host, { title, again, close, onAgain, onClose, cls = "" } = {}) {
+  const el = document.createElement("div"); el.className = `endcard exend autoend ${cls}`.trim(); el.setAttribute("role", "status");
+  el.innerHTML = `<div class="ec-t"><i aria-hidden="true">✓</i><b></b></div><div class="ec-b"><button type="button" class="ec-go" data-act="ecagain"></button><button type="button" class="ec-x" data-act="ecclose"></button></div>`;
+  el.setText = o => { if (o.title != null) el.querySelector(".ec-t b").textContent = o.title; if (o.again != null) el.querySelector(".ec-go").textContent = "↺ " + o.again; if (o.close != null) el.querySelector(".ec-x").textContent = o.close; };
+  el.setText({ title, again, close });
+  el.querySelector(".ec-go").onclick = e => { e.stopPropagation(); onAgain?.(); };
+  el.querySelector(".ec-x").onclick = e => { e.stopPropagation(); onClose?.(); };
+  host?.append(el); return el;
+}

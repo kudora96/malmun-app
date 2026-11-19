@@ -279,6 +279,8 @@
  "big_view": "Full view on/off",
  "auto_listen": "Auto",
  "auto_end": "You listened to it all",
+ "auto_again": "Start over",
+ "auto_close": "Close",
  "big_short": "Full view",
  "big_off": "Exit",
  "music_on": "Music on",

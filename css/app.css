@@ -1965,4 +1965,19 @@ li.vl-row{position:relative;overflow:hidden;touch-action:pan-y}.vl-slide{display
 .learn .vsubt.exauto .cc{width:auto;min-width:0;max-width:52px;padding:0 3px;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .learn .vsubt.exauto[aria-pressed=false]{border-style:solid}.learn .vsubt.exauto[aria-pressed=false] .cc::after{content:none}
 .learn .vsubt.exauto:active{transform:scale(.94)}
-.toast.exend{pointer-events:none}
+/* 끝 카드(대표님 11-19 14:11 · ui.js endCard) — 흰 카드 + 갈색 포인트 · 검은 말풍선 아님 · 가로 한 줄(좁으면 줄바꿈) */
+.endcard{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:60;box-sizing:border-box;width:max-content;max-width:calc(100% - 32px);padding:10px 12px;border-radius:14px;background:var(--card);color:var(--ink);border:1px solid var(--line);border-top:3px solid var(--hi);box-shadow:0 6px 18px rgba(23,48,42,.18);display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px 12px}
+.endcard .ec-t{display:flex;align-items:center;gap:6px;font-size:15px;line-height:1.35}
+.endcard .ec-t i{font-style:normal;color:var(--hi);font-weight:700}
+.endcard .ec-t b{font-weight:700;color:var(--ink)}
+.endcard .ec-b{display:flex;gap:8px}
+.endcard .ec-b button{min-height:44px;padding:0 14px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;transition:transform .08s,background .12s,box-shadow .12s}
+.endcard .ec-go{background:var(--hi);color:var(--on-hi);border:1px solid var(--hi)}
+.endcard .ec-x{background:var(--hi-soft);color:var(--ink);border:1px solid var(--line)}
+.endcard .ec-b button:active{transform:scale(.97)}
+.endcard .ec-go:active{background:var(--wood);border-color:var(--wood)}
+.endcard .ec-x:active{background:var(--line)}
+@media(hover:hover){.endcard .ec-go:hover{background:var(--wood);border-color:var(--wood)}.endcard .ec-x:hover{background:var(--line)}}
+.endcard .ec-b button:focus-visible{outline:2px solid var(--hi);outline-offset:2px}
+
+.ctrl [data-act=next] .rs{font-size:22px;line-height:1;font-weight:700;display:block}
