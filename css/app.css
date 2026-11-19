@@ -1908,6 +1908,8 @@ li.vl-row{position:relative;overflow:hidden;touch-action:pan-y}.vl-slide{display
 
 /* 카드 본문 자동 넘김(11-18 14:05 · 도우미 H) — 머리 줄은 고정(sticky) · 본문만 읽는 줄 따라 넘어감(js/wordnote.js followLine) */
 .vk-body-scroll,.vk-card>.vk-row{position:sticky;top:0;z-index:4;background:var(--card)}
+/* 머리 뒤로 깔끔히(대표님 11-19 10:04) — 머리를 카드 맨 위 끝(패딩 자리)까지 늘려 위 틈·옆 틈에 본문이 비치지 않게 · 불투명 */
+.vk-card>.vk-row{top:-14px;margin:-14px -14px 0;padding:14px 50px 6px 14px;z-index:4;background-color:var(--card);background-image:none;box-sizing:border-box}
 
 /* ── 카드 머리 한 줄 + 아래 갈색 막대 = 조작 막대(대표님 11-18 14:09) ── */
 .vk-card .vk-row{align-items:flex-start;gap:8px}
