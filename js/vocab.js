@@ -14,6 +14,7 @@ import { sortItems, makeSortButton, attachDelete, loadSort } from "./vlist_ops.j
 import { PAGE, pageCount, slicePage, clampPage, makePager } from "./vlist_pager.js?v=1119.38";
 import { filterItems, makeFindBox, indexLetters, makeIndexBar, groupByEp, findTx } from "./vlist_find.js?v=1119.38";
 import { paths } from "./paths.js?v=1119.38";
+import { catalog, episode } from "./data.js?v=1119.38";
 import { VERSION } from "./version.js?v=1119.38";
 
 const KEY = "malmun.vocab.ne";
@@ -21,8 +22,8 @@ export const vocabOn = () => lang === "ne";
 
 // 새 글(네팔어 = Claude 도우미 교차 확인 · 한국어 = ⇄ 한 때)
 const TX = {
-  ne: { menu: "⭐ मेरो शब्दसूची", add: "⭐ सूचीमा थप्नुहोस्", has: "⭐ सूचीमा छ", empty: "अहिले केही छैन। कुनै शब्द थिचेर सूचीमा थप्नुहोस्।", title: "मेरो शब्दसूची", listen: "सुन्नुहोस्", close: "बन्द", auto: "स्वतः", two: "दुवै भाषा", two_tip: "दुवै भाषामा सुन्नुहोस्", auto_end: "तपाईंले सबै सुन्नुभयो", auto_again: "सुरुदेखि फेरि" },
-  ko: { menu: "⭐ 내 단어장", add: "⭐ 단어장에 담기", has: "⭐ 단어장에 있음", empty: "아직 없어요. 낱말을 톡 눌러 넣어 보세요.", title: "내 단어장", listen: "듣기", close: "닫기", auto: "자동", two: "두 말", two_tip: "두 말로 듣기", auto_end: "끝까지 들었어요", auto_again: "처음부터 다시" },
+  ne: { menu: "⭐ मेरो शब्दसूची", add: "⭐ सूचीमा थप्नुहोस्", has: "⭐ सूचीमा छ", empty: "अहिले केही छैन। कुनै शब्द थिचेर सूचीमा थप्नुहोस्।", title: "मेरो शब्दसूची", listen: "सुन्नुहोस्", close: "बन्द", auto: "स्वतः", two: "दुवै भाषा", two_tip: "दुवै भाषामा सुन्नुहोस्", auto_end: "तपाईंले सबै सुन्नुभयो", auto_again: "सुरुदेखि फेरि", tabAll: "सबै", tabMine: "मैले राखेको", addRow: "सूचीमा थप्नुहोस्", hasRow: "सूचीमा छ" },
+  ko: { menu: "⭐ 내 단어장", add: "⭐ 단어장에 담기", has: "⭐ 단어장에 있음", empty: "아직 없어요. 낱말을 톡 눌러 넣어 보세요.", title: "내 단어장", listen: "듣기", close: "닫기", auto: "자동", two: "두 말", two_tip: "두 말로 듣기", auto_end: "끝까지 들었어요", auto_again: "처음부터 다시", tabAll: "전체", tabMine: "내가 담은", addRow: "단어장에 담기", hasRow: "단어장에 있음" },
 };
 const tx = k => (uiKoOn() ? TX.ko : TX.ne)[k];
 const cntTx = n => (uiKoOn() ? `${n}개` : `${n} शब्द`), cntHTML = n => { const t = cntTx(n), m = t.match(/^(\d+)(.*)$/); return m ? `${m[1]}<i>${esc(m[2])}</i>` : esc(t); }; // 좁은 화면에서는 숫자만(css가 단위 글 <i> 를 가림 · 글은 그대로 있음) // 단어장 제목 옆 숫자 배지 글(대표님 11-18 13:41 · 괄호 숫자 대신)
@@ -34,7 +35,7 @@ export const vocabCount = () => read().length;
 // 항목 열쇠: 단어 = 단어 글 그대로 · 조각 = "p:" + 조각 id (같은 낱말이 문장 단위·조각 단위로 둘 다 담겨도 각각 1개 · 같은 조각 id 끼리만 중복 막음 · 대표님 11-18 14:00)
 const kOf = x => (x.kind === "piece" ? "p:" + x.pid : x.w);
 const has = k => read().some(x => kOf(x) === k);
-const put = it => { if (!has(kOf(it))) write([...read(), { ...it, t: Date.now() }]); };
+const put = it => { if (!has(kOf(it))) { const { line, ...r } = it; write([...read(), { ...r, t: Date.now() }]); } };
 const drop = k => write(read().filter(x => kOf(x) !== k));
 
 // ── 낱말 소리 구간 = 줄 소리(대사 낭독) 안에서 · 낱말 시각(words) 우선 · 없으면 음절 정렬(align)
@@ -286,13 +287,39 @@ export function closeVocabList() {
   closeCard(); listOff.forEach(f => { try { f(); } catch {} }); listOff = [];
   const st = listEl?.closest?.(".vstage"); listEl?.remove(); listEl = null; if (st) stageFree(st); wakeOff();
 }
+// ── 두 탭(대표님 11-19 14:42) — 「전체」= 편의 모든 단어 카드(+조각) 자동 · 「내가 담은」= ⭐ 한 것만 · 고른 탭은 기억
+const TABKEY = "malmun.vocab.tab";
+const loadTab = () => { try { return localStorage.getItem(TABKEY) === "all" ? "all" : "mine"; } catch { return "mine"; } };
+const saveTab = t => { try { localStorage.setItem(TABKEY, t); } catch {} };
+let allMem = null; // 전체 탭 자료(편마다 한 번만 읽음)
+export const allWords = () => (allMem ||= (async () => {
+  const cat = await catalog().catch(() => null), parents = [], seen = new Set();
+  for (const e of (cat?.episodes || []).filter(x => x.ready)) {
+    let E = null; try { E = await episode(e.id, lang); } catch {} if (!E) continue;
+    let order = 0;
+    for (const line of E.lines || []) for (const c of line.v9?.pieces || []) {
+      const k = clean(c.ko); if (!k || seen.has(k)) continue; seen.add(k);
+      const sp = await wordSpan(e.id, line, c.ko);
+      parents.push({ w: c.ko, rom: c.rom || "", mean: c.mean || "", ep: e.id, n: line.id, af: line.lineAudio || "", s: sp.s, e: sp.e, ko: line.ko, tr: line.v9?.tr || line.tr || "", order: order++ });
+    }
+  }
+  return parents;
+})());
+// 단어 하나의 조각 줄(단어 바로 아래 · 같은 조각이 여러 단어에 있어도 단어마다 따로) — ⭐ 로 담는 조각과 같은 모양
+let entMap = null;
+async function subsCtx(eps) { // 편마다 조각 표 한 번 · 사전 한 번 읽고 나면 단어마다 바로(1만 개여도 빠르게)
+  const [dc, ...pcs] = await Promise.all([dictOf(), ...eps.map(pcOf)]); entMap ||= new Map((dc?.entries || []).map(e => [e.id, e]));
+  const byEp = Object.fromEntries(eps.map((ep, i) => [ep, pcs[i]]));
+  return x => (x.kind === "piece" || !x.ep ? [] : (byEp[x.ep]?.cards?.[clean(x.w)]?.pieces || []).map(id => entMap.get(id)).filter(Boolean).map(e => ({ kind: "piece", pid: e.id, w: e.lemma, rom: "", dev: e.dev || "", mean: e.pos_ne || "", ep: x.ep, n: x.n })));
+}
+
 export function openVocabList() {
   closeVocabList(); wakeOn();
   const stage = document.querySelector(".learn .vstage"), el = (listEl = document.createElement("div"));
   if (stage) { el.className = "vk-pane"; stageLock(stage); } // 칸 크기 그대로(영상 칸 높이 · 다른 칸 안 밀림) · 영상 멈춤 · 아래 막대 바탕만 // 영상·읽기 소리 멈춤(닫아도 멈춘 채)
   else { el.className = "vk-dim vk-listdim"; el.setAttribute("role", "dialog"); el.setAttribute("aria-modal", "true"); }
   const devOf = (x, N) => (lang === "ne" && (x.kind === "piece" ? x.dev : N[x.ep]?.[clean(x.w)]?.dev)) || ""; // 목록 발음 줄 = 카드와 같은 자료(note.dev · 학습자 글자) · 없으면 비움(로마자로 되돌리지 않음 · 대표님 11-18)
-  let N = {}, mode = loadSort(), offDrag = null, cur = 0, all = [], view = [], devMap = new Map(), pager = null, ul = null, wrap = null;
+  let N = {}, tab = loadTab(), subs = new Map(), byKey = new Map(), mode = loadSort(), offDrag = null, cur = 0, all = [], view = [], devMap = new Map(), pager = null, ul = null, wrap = null;
   const find = makeFindBox(() => { cur = 0; drawList(); }, uiKoOn()); // 찾기 칸(앱 칩 모양) — 한 번 만들어 계속 씀(글·초점 유지)
   const rowTx = (x, ko) => { const d = devMap.get(x) || "", w = `<span class="vk-t ko" lang="ko">${esc(x.w)}</span>`, r = d ? `<span class="vk-rom" lang="ne">${esc(d)}</span>` : "", m = `<span class="vk-t vk-mean" lang="ne">${esc(x.mean || "")}</span>`; return ko ? w + r + m : m + w + r; };
   const mountPager = () => { // 쪽 넘김 = 영상 칸 아래 갈색 막대(.seek · 목록이 열려 있는 동안 바탕만 남은 자리) · 영상 칸이 없는 화면은 목록 맨 아래 갈색 줄
@@ -300,28 +327,36 @@ export function openVocabList() {
     if (pager && pager.host === host) return;
     pager?.destroy(); pager = makePager(host, p => { cur = p; drawList(); }, !seek); pager.host = host;
   };
+  const filterGroups = q => all.filter(x => filterItems([x], q, d => devMap.get(d)).length || (subs.get(x) || []).some(sx => filterItems([sx], q, d => devMap.get(d)).length)); // 찾기 = 단어 또는 그 조각 어느 쪽이든 맞으면 단어째 남김(걸러내는 곳은 여기 한 곳)
   const scrollToRow = i => { const li = ul?.querySelectorAll(".vk-li")[i]; if (li) ul.scrollTop += li.getBoundingClientRect().top - ul.getBoundingClientRect().top - (mode === "ep" ? 26 : 2); };
   const drawList = (focusIdx = -1) => { // 쪽 안만 다시 그림 — 찾기·쪽 넘기기·색인은 여기(1만 개여도 20줄만 그림)
     if (listEl !== el || !ul) return;
     const ko = uiKoOn(), L = ko ? "ko" : "ne";
-    view = filterItems(all, find.value(), x => devMap.get(x)); cur = clampPage(cur, view.length);
-    const pg = slicePage(view, cur), rows = x => `<li class="vk-li"><button class="vk-pl" data-v="pl" data-w="${esc(kOf(x))}" aria-label="${esc(tx("listen"))}" title="${esc(tx("listen"))}">▶</button><button class="vk-lb" data-w="${esc(kOf(x))}">${rowTx(x, ko)}</button></li>`;
+    view = filterGroups(find.value()); cur = clampPage(cur, view.length); // 쪽 = 단어(윗줄)만 셈 · 조각 줄은 단어 밑에 그대로
+    byKey.clear(); const isAll = tab === "all", T = k => esc(tx(k));
+    const star = x => { const sv = has(kOf(x)); return isAll ? `<button class="vk-st" data-v="st" data-w="${esc(kOf(x))}" aria-pressed="${sv}" ${sv ? "disabled" : ""} aria-label="${T(sv ? "hasRow" : "addRow")}">${sv ? "⭐" : "☆"}</button>` : ""; };
+    const one = (x, cls) => { byKey.set(kOf(x), x); return `<li class="${cls}"><button class="vk-pl" data-v="pl" data-w="${esc(kOf(x))}" aria-label="${T("listen")}" title="${T("listen")}">▶</button><button class="vk-lb" data-w="${esc(kOf(x))}">${rowTx(x, ko)}</button>${star(x)}</li>`; };
+    const rows = x => one(x, "vk-li") + (subs.get(x) || []).map(sx => one(sx, "vk-sub")).join("");
+    const pg = slicePage(view, cur);
     ul.innerHTML = mode === "ep" ? groupByEp(pg, ko, view).map(g => (g.head ? `<li class="vp-grp" aria-hidden="true">${esc(g.head)}</li>` : "") + rows(g.x)).join("") : pg.map(rows).join("");
     wrap.querySelector(".vk-empty")?.remove(); ul.hidden = !pg.length;
     const ik = mode === "abc" && pg.length ? `${L}|${find.value()}|${view.length}` : "", idx = wrap.querySelector(".vp-idx"); // 색인 막대는 같은 목록이면 그대로 둠(쪽이 바뀌어도 미끄러뜨리는 손가락이 안 끊김)
     if (idx && idx.dataset.ik !== ik) idx.remove();
     if (!pg.length) wrap.insertAdjacentHTML("afterbegin", `<p class="vk-empty">${esc(findTx("nofound", ko))}</p>`);
     else if (ik && !wrap.querySelector(".vp-idx")) { const ib = wrap.appendChild(makeIndexBar(indexLetters(view, L), i => { const p = Math.floor(i / PAGE); if (p !== cur) { cur = p; drawList(i % PAGE); } else scrollToRow(i % PAGE); }, ko)); ib.dataset.ik = ik; } // 가나다 색인 = 글자 있는 쪽·줄로
-    ul.scrollTop = 0; ul.querySelectorAll(".vk-li").forEach((li, i) => attachDelete(li, pg[i], it => drop(kOf(it)), L));
+    ul.scrollTop = 0; if (!isAll) ul.querySelectorAll(".vk-li").forEach((li, i) => attachDelete(li, pg[i], it => drop(kOf(it)), L)); // 휴지통 = 「내가 담은」 탭만
     pager?.update(cur, pageCount(view.length), ko);
     if (focusIdx >= 0) scrollToRow(focusIdx);
   };
   const draw = async () => {
-    const L = uiKoOn() ? "ko" : "ne"; all = sortItems(read(), mode, L); const total = all.length;
+    const L = uiKoOn() ? "ko" : "ne", isAll = tab === "all", pend = tab, src = isAll ? await allWords() : read();
+    all = sortItems(src, mode, L); const total = all.length;
     await Promise.all([...new Set(all.map(x => x.ep).filter(Boolean))].map(async ep => { N[ep] = await noteOf(ep); }));
-    if (listEl !== el) return;
-    const ko = uiKoOn(); devMap = new Map(all.map(x => [x, devOf(x, N)])); find.setLang(ko);
-    const body = `<div class="vk-head"><span class="vk-tt"><b>${esc(tx("title"))}</b><span class="vk-cnt">${cntHTML(total)}</span></span><span class="vk-sortslot"></span><span class="vk-uik">${uikoChip()}</span></div>
+    const sf = await subsCtx([...new Set(all.map(x => x.ep).filter(Boolean))]); if (listEl !== el || pend !== tab) return;
+    subs = new Map(all.map(x => [x, sf(x)]));
+    const ko = uiKoOn(); devMap = new Map(); for (const x of all) { devMap.set(x, devOf(x, N)); for (const sx of subs.get(x)) devMap.set(sx, devOf(sx, N)); } find.setLang(ko);
+    const tb = (t, k) => `<button type="button" class="vk-tab" role="tab" data-v="tab" data-t="${t}" aria-selected="${tab === t}"><b>${esc(tx(k))}</b>${tab === t ? `<span class="vk-cnt">${cntHTML(total)}</span>` : ""}</button>`;
+    const body = `<div class="vk-head"><span class="vk-tt" role="tablist">${tb("all", "tabAll")}${tb("mine", "tabMine")}</span><span class="vk-sortslot"></span><span class="vk-uik">${uikoChip()}</span></div>
       ${total ? `<div class="vp-frow"><span class="vp-findslot"></span></div><div class="vp-wrap"><ul class="vk-ul flick"></ul></div>` : `<p class="vk-empty">${esc(tx("empty"))}</p>`}`;
     el.innerHTML = stage ? `${XBTN}${body}` : `<div class="vk-sheet">${XBTN}${body}</div>`;
     offDrag?.(); offDrag = null; ul = el.querySelector(".vk-ul"); wrap = el.querySelector(".vp-wrap");
@@ -334,16 +369,18 @@ export function openVocabList() {
     if (e.target.closest(".vk-fs")) return toggleFs();
     if (e.target.closest(".vk-x")) return fsOn() ? exitFs() : closeVocabList(); // 전체 화면 중 ✕ = 먼저 칸 안으로 · 다시 ✕ = 영상 자리로
     if (e.target === el && !stage) return closeVocabList();
+    const tb = e.target.closest(".vk-tab"); if (tb) { if (tb.dataset.t !== tab) { tab = tb.dataset.t; saveTab(tab); cur = 0; draw(); } return; } // 탭 바꿈(기억)
+    const st = e.target.closest(".vk-st"); if (st) { const it = byKey.get(st.dataset.w); if (it && !has(kOf(it))) put(it); return; } // 전체 탭 ⭐ = 「내가 담은」 에 담기
     const pl = e.target.closest(".vk-pl"); // 줄 ▶ = 그 단어 소리(카드 ▶ 와 같은 길 · claim("card") 이 다른 소리를 멈춤)
-    if (pl) { const it = read().find(x => kOf(x) === pl.dataset.w); if (it && it.kind === "piece") return openPieceFromList(it); if (it) { it.__done = null; pl.classList.add("playing"); playSnd(it, pl).catch(() => {}).finally(() => setTimeout(() => pl.classList.remove("playing"), 0)); } return; }
+    if (pl) { const it = byKey.get(pl.dataset.w) || read().find(x => kOf(x) === pl.dataset.w); if (it && it.kind === "piece") return openPieceFromList(it); if (it) { it.__done = null; pl.classList.add("playing"); playSnd(it, pl).catch(() => {}).finally(() => setTimeout(() => pl.classList.remove("playing"), 0)); } return; }
     const b = e.target.closest(".vk-lb"); if (!b) return;
-    const it = read().find(x => kOf(x) === b.dataset.w); if (it && it.kind === "piece") return openPieceFromList(it); if (it) openWordCard(it, { fromList: true });
+    const it = byKey.get(b.dataset.w) || read().find(x => kOf(x) === b.dataset.w); if (it && it.kind === "piece") return openPieceFromList(it); if (it) openWordCard(it, { fromList: true });
   });
-  el.addEventListener("pointerdown", e => { if (e.target.closest(".vk-lb")) tok(); const sb = e.target.closest(".vl-sortbtn"); if (sb) { tok(); sb.classList.add("hit"); setTimeout(() => sb.classList.remove("hit"), 220); } }); // 정렬 단추도 줄처럼 「톡」+눌림 · 갈색 바탕이 잠깐 채워졌다 돌아옴 // 줄 누르는 순간 「톡」 — 다른 소리가 나는 중이면 안 냄
+  el.addEventListener("pointerdown", e => { if (e.target.closest(".vk-lb,.vk-st,.vk-tab")) tok(); const sb = e.target.closest(".vl-sortbtn"); if (sb) { tok(); sb.classList.add("hit"); setTimeout(() => sb.classList.remove("hit"), 220); } }); // 정렬 단추도 줄처럼 「톡」+눌림 · 갈색 바탕이 잠깐 채워졌다 돌아옴 // 줄 누르는 순간 「톡」 — 다른 소리가 나는 중이면 안 냄
   const on = (t, f, o) => { addEventListener(t, f, o); listOff.push(() => removeEventListener(t, f, o)); };
   listOff.push(() => { pager?.destroy(); pager = null; });
   on("pointerdown", e => { if (listEl === el && e.target.closest?.(".vp-bar .vp-b:not(:disabled),.vp-po,.vp-clr")) tok(); }, true); // 쪽 넘김·쪽 번호·찾기 ✕ 도 줄처럼 「톡」(다른 소리가 나는 중이면 안 냄)
-  on("malmun:vocab", () => { if (listEl === el) draw(); });
+  on("malmun:vocab", () => { if (listEl !== el) return; if (tab !== "all") return draw(); ul?.querySelectorAll(".vk-st").forEach(b => { const sv = has(b.dataset.w); b.textContent = sv ? "⭐" : "☆"; b.disabled = sv; b.setAttribute("aria-pressed", String(sv)); b.setAttribute("aria-label", tx(sv ? "hasRow" : "addRow")); }); }); // 전체 탭은 ⭐ 만 바꿈(쪽·자리 그대로)
   on("malmun:uilang", () => { if (listEl === el) draw(); }); // ⇄ = 줄 순서·제목 바뀜(칸 크기는 그대로)
   on("hashchange", () => closeVocabList()); // 다른 화면으로 가면 닫음
   on("keydown", e => { if (e.key === "Escape" && !cardEl) closeVocabList(); });

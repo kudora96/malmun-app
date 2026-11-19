@@ -1777,6 +1777,19 @@ li.vl-row{position:relative;overflow:hidden;touch-action:pan-y}.vl-slide{display
 .vk-li .vk-t{font-size:16px;line-height:1.25;font-weight:800}.vk-li .vk-rom{font-size:16px;color:var(--mute);opacity:1;font-weight:500;line-height:1.25}.vk-li .vk-mean{font-size:16px;font-weight:600;color:var(--hi);line-height:1.25}
 @media (hover:hover){.vk-li:hover{background:rgba(255,210,31,.3)}}
 .vk-li:active{transform:scale(.97);box-shadow:0 1px 3px rgba(0,0,0,.18)}
+/* 단어장 두 탭 + 조각 줄(대표님 11-19 14:42) — 탭은 정렬 칩·⇄ 와 한 줄 · 조각 줄은 흰 줄 그대로 조금 작게·안쪽으로·왼쪽 얇은 갈색 선 */
+.vk-tt{gap:4px}.vk-tab{flex:none;display:inline-flex;align-items:center;gap:4px;min-height:32px;box-sizing:border-box;padding:0 9px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--mute);font:inherit;font-size:13px;font-weight:800;line-height:1;cursor:pointer;white-space:nowrap;transition:transform .1s ease,background-color .12s ease,color .12s ease}
+.vk-tab b{color:inherit;font-size:13px}.vk-tab[aria-selected=true]{background:var(--hi-soft);border-color:var(--hi);color:var(--hi)}
+.vk-tab:active{transform:scale(.97)}.vk-tab:focus-visible{outline:2px solid var(--hi);outline-offset:2px}
+@media (hover:hover){.vk-tab:hover{background:rgba(255,210,31,.3);color:var(--hi)}}
+.vk-tab .vk-cnt{padding:1px 6px;font-size:11px}.vk-pane .vk-head .vk-tt{gap:3px}
+.vk-sub{position:relative;display:flex;align-items:center;gap:6px;min-height:44px;margin-left:22px;padding:0 6px 0 8px;border-radius:12px;border:1px solid var(--line);border-left:3px solid var(--hi);background:var(--card);color:var(--ink);box-shadow:0 2px 6px rgba(0,0,0,.14);overflow:hidden;transition:transform .1s ease,box-shadow .1s ease,background-color .12s ease}
+.vk-sub .vk-pl{width:28px;height:28px;font-size:11px}.vk-sub .vk-lb{min-height:44px}
+.vk-sub .vk-t{font-size:14.5px;line-height:1.25;font-weight:800}.vk-sub .vk-rom{font-size:14.5px;color:var(--mute);font-weight:500;line-height:1.25}.vk-sub .vk-mean{font-size:14.5px;font-weight:600;color:var(--hi);line-height:1.25}
+@media (hover:hover){.vk-sub:hover{background:rgba(255,210,31,.3)}}
+.vk-sub:active{transform:scale(.97);box-shadow:0 1px 3px rgba(0,0,0,.18)}
+.vk-st{flex:none;width:34px;height:34px;border:0;border-radius:8px;background:transparent;color:var(--hi);font-size:19px;line-height:1;padding:0;cursor:pointer;transition:transform .1s ease,background-color .12s ease}
+.vk-st:disabled{cursor:default}@media (hover:hover){.vk-st:not(:disabled):hover{background:rgba(255,210,31,.3)}}.vk-st:not(:disabled):active{transform:scale(.93)}.vk-st:focus-visible{outline:2px solid var(--hi);outline-offset:1px}
 .vk-empty{margin:12px 4px;color:var(--mute);font-size:14px}
 
 /* ⭐ N 작은 단추(대표님 11-16) — 「ने⇄한」 바로 왼쪽 · 같은 높이 납작한 알약 · 첫 화면 큰 「⭐ 내 단어장」 메뉴는 화면에서 뺌(코드는 그대로) */
