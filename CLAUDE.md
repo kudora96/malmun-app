@@ -3,6 +3,7 @@
 > 이 창 = **앱 작업 창**. 말문 콘텐츠(영상·자막·설명·음성)를 학습자에게 보여 주는 앱을 만든다.
 > 투덜이(사용자)에게는 **한국어로**, 쉽게 말한다. 코드·파일은 Claude 가 직접 고치고, 투덜이는 결과를 확인한다.
 > 🔴 **git push = 빠른 확인(`D:\malmun_work\qa\run_checks.py`) 통과 뒤 바로 main 에 빨리감기 push**(투덜이 11-17·11-18 확정 「ㅇ 질문 3도 그렇게 바꿔」 · 예전 「매번 투덜이 확인 뒤에만」 폐기) · 강제 push 금지 · push 직전 fetch·rebase 하고 판 번호를 origin 보다 하나 올림 · 공개판 주소는 하나(https://kudora96.github.io/malmun-app/). 커밋은 자유. push 전 run_checks 가 충돌 표시를 먼저 막음(11-19 1119.21 사고).
+> 🔴 git 훅이 충돌 표시·강제 push를 막음 · --no-verify 금지 (pre-commit·pre-push 훅 · 모든 클론 .git/hooks 에 설치 · 원본 C:/Users/user/hooks_src)
 
 ## 먼저 읽을 것
 1. `D:\gdrive\malmun\_hq\app_survey_2026-09-30.md` — 옛 앱(`C:\kdrama-topik`) 조사: 살릴 것·바꿀 것·버릴 것
