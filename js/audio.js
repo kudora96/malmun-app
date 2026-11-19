@@ -8,7 +8,7 @@ export class Sequence {
   constructor() { this.a = new Audio(); this.a.preload = "auto"; this.q = []; this.i = 0; this.on = false; this.gen = 0; this.timer = 0; this.rate = 1; this.owner = "seq"; this.onstep = null; this.ondone = null; this.ut = 0; this.a.onended = () => this.next(); this.a.onerror = () => this.next(); }
   // items = [{src, ...meta}]
   play(items, from = 0) { this.stop(); this.q = items; this.i = from - 1; this.on = true; this.next(); }
-  arm(it) { clearInterval(this.ut); this.ut = 0; if (it?.until) this.ut = setInterval(() => { if (this.a.currentTime >= it.until) { clearInterval(this.ut); this.ut = 0; this.a.pause(); this.next(); } }, 30); } // 조각 끝(until) — 한 소리 파일의 한 구간만 재생(두 말 설명 읽기)
+  arm(it) { clearInterval(this.ut); this.ut = 0; if (it?.until) this.ut = setInterval(() => { const t = this.a.currentTime, sk = it.skip?.find(x => t >= x[0] && t < x[1]); if (sk) { try { this.a.currentTime = sk[1]; } catch {} return; } /* 건너뛸 구간(소리에 끼운 괄호 뜻 · 두 말) */ if (t >= it.until) { clearInterval(this.ut); this.ut = 0; this.a.pause(); this.next(); } }, it.skip ? 10 : 30); } // 조각 끝(until) — 한 소리 파일의 한 구간만 재생(두 말 설명 읽기)
   next() {
     clearTimeout(this.timer); clearInterval(this.ut);
     if (!this.on) return;
