@@ -15,7 +15,7 @@ const getSR = () => window.SpeechRecognition || window.webkitSpeechRecognition; 
 export function makeVoice({ getKo, onText, onNote, onState }) {
   let r = null, on = false;
   const T = () => (getKo() ? VOICE_TX.ko : VOICE_TX.ne);
-  const set = v => { on = v; onState?.(v); };
+  const set = v => { on = v; window.__micBusy = v ? 1 : 0; onState?.(v); }; // __micBusy = 듣는 동안 누르는 소리(tick.js) 안 냄
   const stop = () => { const x = r; r = null; if (x) { x.onresult = x.onerror = x.onend = null; try { x.stop(); } catch {} } if (on) set(false); };
   async function begin(lang) {
     const SR = getSR(); if (!SR) { onNote?.(T().nosr); return; }

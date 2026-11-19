@@ -1294,7 +1294,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
       if (st.rep) { st.once = false; if (playing() && !st.panel) playLine(st.cur); } // 위 창(설명·쓰기·말하기)이 떠 있으면 가려진 영상을 틀지 않는다 — 반복은 그 창의 설명 듣기에만
       else { clearTimeout(st.gap); st.gap = 0; }
       sync();
-    } else if (a === "spd") { st.rate = (st.rate + 1) % RATES.length; const r = RATES[st.rate]; b.textContent = r + "×"; v.playbackRate = r; seq.setRate(r); ex.setRate(r); }
+    } else if (a === "spd") { st.rate = (st.rate + 1) % RATES.length; const r = RATES[st.rate]; b.textContent = r + "×"; b.setAttribute("aria-pressed", String(r !== 1)); v.playbackRate = r; seq.setRate(r); ex.setRate(r); }
   };
   v.addEventListener("click", togglePlay);
   // 「ने⇄한」 = 언어 하나(안 A) — 어느 화면·창의 단추든(ui.js 문서 한 곳이 받음 · 다국어부 10-14) 앱 글이 바뀌면 설명 소리·본문도 그 언어로(듣는 중이면 같은 문장부터) · 설명 막대 안 고르기(uiLang)는 제 손잡이가 이미 맞춤

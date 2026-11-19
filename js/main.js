@@ -1,4 +1,5 @@
 import "./agepolicy.js?v=1119.51"; // 기능별 나이(대표님 10-19) — 받아쓰기 막기는 다른 것보다 먼저
+import "./tick.js?v=1119.51"; // 누르는 「톡」 소리(Web Audio 합성 · 학습 소리 안 끊음)
 import { initAppTip } from "./apptip.js?v=1119.51"; initAppTip(); // 공용 도움말(title → 위쪽 작은 상자)
 import { detectLang, setLang, LANGS, t } from "./i18n.js?v=1119.51";
 import { VERSION } from "./version.js?v=1119.51";

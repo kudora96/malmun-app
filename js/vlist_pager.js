@@ -30,7 +30,7 @@ export function makePager(host, onPage, foot = false) {
   let cur = 0, total = 1, ko = true, pick = null;
   const closePick = () => { pick?.remove(); pick = null; };
   const go = p => { closePick(); p = Math.max(0, Math.min(total - 1, p)); if (p !== cur) onPage?.(p); };
-  const btn = (cls, txt, on, dis) => { const b = document.createElement("button"); b.type = "button"; b.className = cls; b.textContent = txt; if (dis) b.disabled = true; b.addEventListener("click", e => { e.preventDefault(); e.stopPropagation(); on(); }); return b; };
+  const btn = (cls, txt, on, dis, curPg) => { const b = document.createElement("button"); b.type = "button"; b.className = cls; b.textContent = txt; if (dis) b.disabled = true; if (curPg) b.setAttribute("aria-current", "page"); b.addEventListener("click", e => { e.preventDefault(); e.stopPropagation(); on(); }); return b; };
   const wide = () => bar.clientWidth >= 420;
   function render() {
     closePick(); bar.textContent = ""; bar.hidden = total <= 1; const t = PAGER_TX[ko ? "ko" : "ne"]; bar.setAttribute("aria-label", t.aria);
@@ -39,7 +39,7 @@ export function makePager(host, onPage, foot = false) {
     if (wide()) {
       bar.classList.add("w"); bar.classList.remove("n");
       bar.append(btn("vp-b vp-pv", "‹", () => go(cur - 1), cur === 0));
-      for (const n of pageWindow(cur + 1, total)) bar.append(n === "…" ? Object.assign(document.createElement("span"), { className: "vp-dots", textContent: "…" }) : btn("vp-b vp-pn" + (n === cur + 1 ? " on" : ""), String(n), () => go(n - 1)));
+      for (const n of pageWindow(cur + 1, total)) bar.append(n === "…" ? Object.assign(document.createElement("span"), { className: "vp-dots", textContent: "…" }) : btn("vp-b vp-pn" + (n === cur + 1 ? " on" : ""), String(n), () => go(n - 1), false, n === cur + 1));
       bar.append(btn("vp-b vp-nx", "›", () => go(cur + 1), cur === total - 1));
     } else {
       bar.classList.add("n"); bar.classList.remove("w");
@@ -51,7 +51,7 @@ export function makePager(host, onPage, foot = false) {
   function togglePick() { // 쪽 번호 고르기 작은 목록
     if (pick) return closePick();
     const t = PAGER_TX[ko ? "ko" : "ne"], d = (pick = document.createElement("div")); d.className = "vp-pick"; d.setAttribute("role", "listbox"); d.setAttribute("aria-label", t.pick);
-    d.innerHTML = Array.from({ length: total }, (_, i) => `<button type="button" role="option" class="vp-po${i === cur ? " on" : ""}" data-p="${i}">${i + 1}</button>`).join("");
+    d.innerHTML = Array.from({ length: total }, (_, i) => `<button type="button" role="option" class="vp-po${i === cur ? " on" : ""}"${i === cur ? ' aria-current="page"' : ""} data-p="${i}">${i + 1}</button>`).join("");
     d.addEventListener("click", e => { const b = e.target.closest(".vp-po"); e.stopPropagation(); if (b) go(+b.dataset.p); });
     bar.append(d); const on = d.querySelector(".on"); if (on) d.scrollTop = on.offsetTop - d.clientHeight / 2;
   }

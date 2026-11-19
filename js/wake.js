@@ -25,6 +25,7 @@ function start() {
 
 // 녹음하는 동안은 깨우기 소리를 멈춘다 — 출력(블루투스)과 입력(USB)이 다를 때 크롬 에코 제거가 이 소리를 「상대가 말하는 중」으로 보고
 // 내 목소리를 100~200ms 마다 끊었다(본부 10-04 진단 녹음 포락선) · 녹음이 끝나면 다시
+export const isQuiet = () => quiet; // 녹음 중 = 누르는 소리(tick.js)도 안 냄
 export function quietWake(on) {
   quiet = !!on;
   if (quiet && osc) { try { osc.stop(); } catch {} osc = null; }

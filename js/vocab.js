@@ -299,7 +299,7 @@ document.addEventListener("keydown", e => { if (e.key === "Escape" && cardEl) cl
 // 「톡」 — 새 소리 파일 없이 sfx.js 합성 소리 한 개(0.05초) · 읽기·카드 낭독·영상 등 다른 소리가 나는 중이면 안 냄(소리는 하나 · onesound)
 sfx.defineSynth("tok", mk => { const c = mk(1, 0.07), o = c.createOscillator(), g = c.createGain(); o.type = "sine"; o.frequency.setValueAtTime(900, 0); o.frequency.exponentialRampToValueAtTime(420, 0.05); g.gain.setValueAtTime(0, 0); g.gain.linearRampToValueAtTime(0.22, 0.004); g.gain.exponentialRampToValueAtTime(0.001, 0.06); o.connect(g); g.connect(c.destination); o.start(0); o.stop(0.07); return c.startRendering(); });
 const otherSound = () => sfx.playing() || isReading() || !!au || [...document.querySelectorAll("audio,video")].some(m => !m.paused && !m.ended);
-const tok = () => { try { if (!otherSound()) sfx.play("synth:tok").catch(() => {}); } catch {} };
+const tok = () => {}; // 누르는 「톡」은 이제 앱 전체 한 곳(js/tick.js · Web Audio 틱 · 학습 소리 안 끊음) — 여기서 따로 안 냄(소리 두 번 방지)
 
 // ── 단어장 목록(대표님 11-18 13:07) — 배우는 화면에서는 영상 칸 자리 안에서 열림(설명 창이 열리는 자리 · 다른 칸 크기·배치 불변) · 그 밖의 화면은 예전처럼 겹쳐 뜸
 //    열면 영상 멈춤 · 오른쪽 위 ✕ = 닫고 영상 자리로 · 단어 누르면 카드 · ⇄ = 앱 전체 하나(한국어 쪽: 단어·발음·뜻 / 네팔어 쪽: 뜻·단어·발음)
