@@ -1,9 +1,9 @@
 // 내 단어장 찾기·색인·편 묶음 (도우미 E · 11-18) — vocab.js 가 불러 붙임. 이 파일은 다른 파일을 건드리지 않음.
 // 항목 모양: { w:단어, mean:뜻(네팔어), ep:편 ID, n/order/…:편 안 순서 } · 발음(데바나가리)은 vocab.js 의 devOf 가 줌
 
-import { vocabMatch } from "./search.js?v=1119.57"; // 찾기 규칙(초성·네팔어·로마자 · 대표님 11-19)
-import { makeKeypad, HK_TX } from "./hankey.js?v=1119.57"; // 앱 안 자판(한/ने)
-import { makeVoice, VOICE_TX } from "./voicefind.js?v=1119.57"; // 말로 찾기 🎤
+import { vocabMatch } from "./search.js?v=1119.58"; // 찾기 규칙(초성·네팔어·로마자 · 대표님 11-19)
+import { makeKeypad, HK_TX } from "./hankey.js?v=1119.58"; // 앱 안 자판(한/ने)
+import { makeVoice, VOICE_TX } from "./voicefind.js?v=1119.58"; // 말로 찾기 🎤
 
 // 새 글(네팔어 = Claude 도우미 2명 교차 · 11-18)
 export const FIND_TX = {
