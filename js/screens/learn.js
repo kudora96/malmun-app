@@ -37,34 +37,6 @@ function gameWords(vl, uw, lg, ep) {   // 뜻 조각(v9 pieces)과 소리 낱말
   }
   return out;
 }
-<<<<<<< HEAD
-import { setTx } from "../retext.js?v=1119.21";
-import { langfitRun } from "../langfit.js?v=1119.21";
-import { esc, renderText, glossCards, sayParts } from "../text.js?v=1119.21";
-import { episode } from "../data.js?v=1119.21";
-import { paths, MEDIA } from "../paths.js?v=1119.21";
-import { attachVq } from "../vq.js?v=1119.21";
-import { setReportCtx } from "../report.js?v=1119.21";
-import { fbBind, fbPlan } from "../fbvoice.js?v=1119.21";
-import { setupTurns } from "../turns.js?v=1119.21"; // 「따라 해 보세요」 양방향(대표님 10-21) // 결과 안내 소리로 읽기(대표님 10-21)
-import { setupOverlays } from "../overlays.js?v=1119.21"; // 영상 위 그림 카드(대표님 10-22 새 1편) // 「따라 해 보세요」 양방향(대표님 10-21) // 결과 안내 소리로 읽기(대표님 10-21)
-import { Sequence } from "../audio.js?v=1119.21";
-import { I, progress, SPEAKER, spkHtml, uiKoBtn, uikoChip, bgmBtn, switchUiKo, openUiScope, switchUiScope } from "../ui.js?v=1119.21";
-import writeView from "./write.js?v=1119.21";
-import { diagEnv, keepDiag } from "../diag.js?v=1119.21";
-import { playMine as playMineRec, keepFirstOf } from "../playmine.js?v=1119.21";
-import { rhythmOf, withRhythm, rhyText, upgradeSaved, keptScore, SCORE_V, paceOf, paintPace, lateFactor, sylAt, paintAt, karaokeRun, isFull } from "../rhythm.js?v=1119.21";
-import { playSlow, getRate, nextRate, rateLabel, setRateWord } from "../compare.js?v=1119.21";
-import { heardHTML, endHint, scoreOf, bestFull, spanOf, sylsAt } from "../heard.js?v=1119.21"; // 덧붙은 말 빼고 견주기(본부 10-11)
-import { recDel, downloadRec, askPersist } from "../recstore.js?v=1119.21";
-import { vocabOn, openWordCard, wordSpan, starChip } from "../vocab.js?v=1119.21"; // ⭐ 내 단어장 시험판(네팔어 · 대표님 11-16)
-import speakView, { similarity, PASS, PERFECT, starOf, scoreLine, maxMsFor, recGet, recPut } from "./speak.js?v=1119.21";
-import { scoreFx, stopFx } from "../scorefx.js?v=1119.21"; // 점수별 효과(본부 10-05)
-import { record, recordSROnly, srOnlyMode, setSrOnly, isAndroid, srMiss, micWhy, srWhy, canScore, closeMic, logRec, micOpen, seqMode, srOnBlob, devSR, setDevSR, srJudge, micLabel, niceLabel, listMics, chooseMic } from "../recorder.js?v=1119.21";
-import { hold, quietWake } from "../wake.js?v=1119.21";
-import { hold as bgmHold } from "../bgm.js?v=1119.21"; // 🎮 게임 중 배경음악 멈춤
-import { setupCards } from "../cards.js?v=1119.21"; // 영상 위 AR 카드 = 앱이 직접 그림(얹기부 10-27 · 자료 있는 편)
-=======
 import { setTx } from "../retext.js?v=1119.21";
 import { langfitRun } from "../langfit.js?v=1119.21";
 import { esc, renderText, glossCards, sayParts } from "../text.js?v=1119.21";
@@ -92,7 +64,6 @@ import { record, recordSROnly, srOnlyMode, setSrOnly, isAndroid, srMiss, micWhy,
 import { hold, quietWake } from "../wake.js?v=1119.21";
 import { hold as bgmHold } from "../bgm.js?v=1119.21"; // 🎮 게임 중 배경음악 멈춤
 import { setupCards } from "../cards.js?v=1119.21"; // 영상 위 AR 카드 = 앱이 직접 그림(얹기부 10-27 · 자료 있는 편)
->>>>>>> bb403293 (설명 읽기 ↳ 줄도 쉼표 마디 엷게 칠하기(카드와 같은 공용 clauseMap·markClause) · 대표님 11-19 11:07 · 결함 D-94)
 
 const RATES = [1, 0.75, 0.5];
 const pref = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } };
