@@ -2049,3 +2049,14 @@ li.vl-row{position:relative;overflow:hidden;touch-action:pan-y}.vl-slide{display
 .hk-key:active,.hk-tab:active,.hk-x:active{transform:scale(.93);background:var(--hi-soft)}
 .hk-tab.on:active{background:var(--hi)}
 @media (hover:hover){.hk-key:hover,.hk-tab:hover,.hk-x:hover{background:var(--hi-soft)}.hk-tab.on:hover{background:var(--hi)}}
+
+/* 「내가 담은」 탭 배지 늘 보임 + ⭐ 톡 + 담았어요 말풍선(대표님 11-19 15:53) — 앱 기존 색(--hi·--hi-soft·--card)만 · 어두운 토스트 아님 */
+.vk-cnt.vk-mn{min-width:1.4em;text-align:center;font-variant-numeric:tabular-nums}
+.vk-cnt.bump{animation:vkbump .2s ease-out}
+@keyframes vkbump{0%{transform:scale(1)}45%{transform:scale(1.28)}100%{transform:scale(1)}}
+.vk-st.pop{animation:vkpop .22s ease-out}
+@keyframes vkpop{0%{transform:scale(1)}40%{transform:scale(1.4)}100%{transform:scale(1)}}
+.vk-st{color:var(--hi)}.vk-st[aria-pressed=false]{opacity:.85}
+.vk-tst{position:absolute;left:50%;bottom:14px;transform:translate(-50%,8px);z-index:8;padding:8px 16px;border-radius:999px;background:var(--hi-soft);border:1px solid var(--hi);color:var(--hi);font-size:14px;font-weight:800;line-height:1.2;white-space:nowrap;max-width:calc(100% - 32px);box-shadow:0 2px 8px rgba(0,0,0,.12);opacity:0;pointer-events:none;transition:opacity .15s ease,transform .15s ease}
+.vk-tst.on{opacity:1;transform:translate(-50%,0)}
+@media (prefers-reduced-motion:reduce){.vk-cnt.bump,.vk-st.pop{animation:none}.vk-tst{transition:none}}

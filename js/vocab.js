@@ -22,8 +22,8 @@ export const vocabOn = () => lang === "ne";
 
 // 새 글(네팔어 = Claude 도우미 교차 확인 · 한국어 = ⇄ 한 때)
 const TX = {
-  ne: { menu: "⭐ मेरो शब्दसूची", add: "⭐ सूचीमा थप्नुहोस्", has: "⭐ सूचीमा छ", empty: "अहिले केही छैन। कुनै शब्द थिचेर सूचीमा थप्नुहोस्।", title: "मेरो शब्दसूची", listen: "सुन्नुहोस्", close: "बन्द", auto: "अटो", two: "दुवै भाषा", two_tip: "दुवै भाषामा सुन्नुहोस्", auto_end: "तपाईंले सबै सुन्नुभयो", auto_again: "सुरुबाट फेरि", tabAll: "सबै", tabMine: "मैले सेभ गरेको", addRow: "सूचीमा थप्नुहोस्", hasRow: "सूचीमा छ" },
-  ko: { menu: "⭐ 내 단어장", add: "⭐ 단어장에 담기", has: "⭐ 단어장에 있음", empty: "아직 없어요. 낱말을 톡 눌러 넣어 보세요.", title: "내 단어장", listen: "듣기", close: "닫기", auto: "자동", two: "두 말", two_tip: "두 말로 듣기", auto_end: "끝까지 들었어요", auto_again: "처음부터 다시", tabAll: "전체", tabMine: "내가 담은", addRow: "단어장에 담기", hasRow: "단어장에 있음" },
+  ne: { menu: "⭐ मेरो शब्दसूची", add: "⭐ सूचीमा थप्नुहोस्", has: "⭐ सूचीमा छ", empty: "अहिले केही छैन। कुनै शब्द थिचेर सूचीमा थप्नुहोस्।", title: "मेरो शब्दसूची", listen: "सुन्नुहोस्", close: "बन्द", auto: "अटो", two: "दुवै भाषा", two_tip: "दुवै भाषामा सुन्नुहोस्", auto_end: "तपाईंले सबै सुन्नुभयो", auto_again: "सुरुबाट फेरि", tabAll: "सबै", tabMine: "मैले सेभ गरेको", addRow: "सूचीमा थप्नुहोस्", hasRow: "सूचीमा छ", offRow: "सूचीबाट हटाउनुहोस्", tAdd: "सूचीमा थपियो", tDel: "सूचीबाट हटाइयो" },
+  ko: { menu: "⭐ 내 단어장", add: "⭐ 단어장에 담기", has: "⭐ 단어장에 있음", empty: "아직 없어요. 낱말을 톡 눌러 넣어 보세요.", title: "내 단어장", listen: "듣기", close: "닫기", auto: "자동", two: "두 말", two_tip: "두 말로 듣기", auto_end: "끝까지 들었어요", auto_again: "처음부터 다시", tabAll: "전체", tabMine: "내가 담은", addRow: "단어장에 담기", hasRow: "단어장에 있음", offRow: "단어장에서 빼기", tAdd: "담았어요", tDel: "뺐어요" },
 };
 const tx = k => (uiKoOn() ? TX.ko : TX.ne)[k];
 const cntTx = n => (uiKoOn() ? `${n}개` : `${n} शब्द`), cntHTML = n => { const t = cntTx(n), m = t.match(/^(\d+)(.*)$/); return m ? `${m[1]}<i>${esc(m[2])}</i>` : esc(t); }; // 좁은 화면에서는 숫자만(css가 단위 글 <i> 를 가림 · 글은 그대로 있음) // 단어장 제목 옆 숫자 배지 글(대표님 11-18 13:41 · 괄호 숫자 대신)
@@ -317,6 +317,9 @@ export function openVocabList() {
   if (stage) { el.className = "vk-pane"; stageLock(stage); } // 칸 크기 그대로(영상 칸 높이 · 다른 칸 안 밀림) · 영상 멈춤 · 아래 막대 바탕만 // 영상·읽기 소리 멈춤(닫아도 멈춘 채)
   else { el.className = "vk-dim vk-listdim"; el.setAttribute("role", "dialog"); el.setAttribute("aria-modal", "true"); }
   const devOf = (x, N) => (lang === "ne" && (x.kind === "piece" ? x.dev : N[x.ep]?.[clean(x.w)]?.dev)) || ""; // 목록 발음 줄 = 카드와 같은 자료(note.dev · 학습자 글자) · 없으면 비움(로마자로 되돌리지 않음 · 대표님 11-18)
+  let shownN = null, tstT = 0, popKey = null;
+  const bump = b => { if (!b) return; b.classList.remove("bump"); void b.offsetWidth; b.classList.add("bump"); }; // 배지 톡 튐 ~200ms
+  const toast = k => { let t = el.querySelector(".vk-tst"); if (!t) { t = document.createElement("div"); t.className = "vk-tst"; t.setAttribute("role", "status"); t.setAttribute("aria-live", "polite"); el.append(t); } t.textContent = "⭐ " + tx(k); t.classList.remove("on"); void t.offsetWidth; t.classList.add("on"); clearTimeout(tstT); tstT = setTimeout(() => t.classList.remove("on"), 1200); };
   let N = {}, tab = loadTab(), subs = new Map(), byKey = new Map(), mode = loadSort(), offDrag = null, cur = 0, all = [], view = [], devMap = new Map(), pager = null, ul = null, wrap = null;
   const find = makeFindBox(() => { cur = 0; drawList(); }, uiKoOn()); // 찾기 칸(앱 칩 모양) — 한 번 만들어 계속 씀(글·초점 유지)
   const rowTx = (x, ko) => { const d = devMap.get(x) || "", w = `<span class="vk-t ko" lang="ko">${esc(x.w)}</span>`, r = d ? `<span class="vk-rom" lang="ne">${esc(d)}</span>` : "", m = `<span class="vk-t vk-mean" lang="ne">${esc(x.mean || "")}</span>`; return ko ? w + r + m : m + w + r; };
@@ -332,7 +335,7 @@ export function openVocabList() {
     const ko = uiKoOn(), L = ko ? "ko" : "ne";
     view = filterGroups(find.value()); cur = clampPage(cur, view.length); // 쪽 = 단어(윗줄)만 셈 · 조각 줄은 단어 밑에 그대로
     byKey.clear(); const isAll = tab === "all", T = k => esc(tx(k));
-    const star = x => { const sv = has(kOf(x)); return isAll ? `<button class="vk-st" data-v="st" data-w="${esc(kOf(x))}" aria-pressed="${sv}" ${sv ? "disabled" : ""} aria-label="${T(sv ? "hasRow" : "addRow")}">${sv ? "⭐" : "☆"}</button>` : ""; };
+    const star = x => { const sv = has(kOf(x)); return isAll ? `<button class="vk-st" data-v="st" data-w="${esc(kOf(x))}" aria-pressed="${sv}" aria-label="${T(sv ? "offRow" : "addRow")}">${sv ? "⭐" : "☆"}</button>` : ""; };
     const one = (x, cls) => { byKey.set(kOf(x), x); return `<li class="${cls}"><button class="vk-pl" data-v="pl" data-w="${esc(kOf(x))}" aria-label="${T("listen")}" title="${T("listen")}">▶</button><button class="vk-lb" data-w="${esc(kOf(x))}">${rowTx(x, ko)}</button>${star(x)}</li>`; };
     const rows = x => one(x, "vk-li") + (subs.get(x) || []).map(sx => one(sx, "vk-sub")).join("");
     const pg = slicePage(view, cur);
@@ -353,10 +356,11 @@ export function openVocabList() {
     const sf = await subsCtx([...new Set(all.map(x => x.ep).filter(Boolean))]); if (listEl !== el || pend !== tab) return;
     subs = new Map(all.map(x => [x, sf(x)]));
     const ko = uiKoOn(); devMap = new Map(); for (const x of all) { devMap.set(x, devOf(x, N)); for (const sx of subs.get(x)) devMap.set(sx, devOf(sx, N)); } find.setLang(ko);
-    const tb = (t, k) => `<button type="button" class="vk-tab" role="tab" data-v="tab" data-t="${t}" aria-selected="${tab === t}"><b>${esc(tx(k))}</b>${tab === t ? `<span class="vk-cnt">${cntHTML(total)}</span>` : ""}</button>`;
+    const tb = (t, k) => `<button type="button" class="vk-tab" role="tab" data-v="tab" data-t="${t}" aria-selected="${tab === t}"><b>${esc(tx(k))}</b>${t === "mine" ? `<span class="vk-cnt vk-mn" data-n="${vocabCount()}">${cntHTML(vocabCount())}</span>` : tab === t ? `<span class="vk-cnt">${cntHTML(total)}</span>` : ""}</button>`; // 「내가 담은」 탭 배지 = 어느 탭에서도 늘 보임(담은 개수 · 단어+조각 각 1 · 대표님 11-19 15:53)
     const body = `<div class="vk-head"><span class="vk-tt" role="tablist">${tb("all", "tabAll")}${tb("mine", "tabMine")}</span><span class="vk-sortslot"></span><span class="vk-uik">${uikoChip()}</span></div>
       ${total ? `<div class="vp-frow"><span class="vp-findslot"></span></div><div class="vp-wrap"><ul class="vk-ul flick"></ul></div>` : `<p class="vk-empty">${esc(tx("empty"))}</p>`}`;
     el.innerHTML = stage ? `${XBTN}${body}` : `<div class="vk-sheet">${XBTN}${body}</div>`;
+    { const n = vocabCount(); if (shownN != null && shownN !== n) bump(el.querySelector(".vk-mn")); shownN = n; }
     offDrag?.(); offDrag = null; ul = el.querySelector(".vk-ul"); wrap = el.querySelector(".vp-wrap");
     el.querySelector(".vk-sortslot")?.append(makeSortButton(() => mode, m => { mode = m; cur = 0; draw(); }, L, k => (k.startsWith("vlist.") ? k : tx(k))));
     el.querySelector(".vp-findslot")?.replaceWith(find); mountPager();
@@ -368,7 +372,7 @@ export function openVocabList() {
     if (e.target.closest(".vk-x")) return fsOn() ? exitFs() : closeVocabList(); // 전체 화면 중 ✕ = 먼저 칸 안으로 · 다시 ✕ = 영상 자리로
     if (e.target === el && !stage) return closeVocabList();
     const tb = e.target.closest(".vk-tab"); if (tb) { if (tb.dataset.t !== tab) { tab = tb.dataset.t; saveTab(tab); cur = 0; draw(); } return; } // 탭 바꿈(기억)
-    const st = e.target.closest(".vk-st"); if (st) { const it = byKey.get(st.dataset.w); if (it && !has(kOf(it))) put(it); return; } // 전체 탭 ⭐ = 「내가 담은」 에 담기
+    const st = e.target.closest(".vk-st"); if (st) { const it = byKey.get(st.dataset.w); if (it) { const k = kOf(it), was = has(k); popKey = k; toast(was ? "tDel" : "tAdd"); if (was) drop(k); else put(it); } return; } // 전체 탭 ⭐ = 담기 · 다시 누르면 빼기(개수 배지가 바로 오르내림)
     const pl = e.target.closest(".vk-pl"); // 줄 ▶ = 그 단어 소리(카드 ▶ 와 같은 길 · claim("card") 이 다른 소리를 멈춤)
     if (pl) { const it = byKey.get(pl.dataset.w) || read().find(x => kOf(x) === pl.dataset.w); if (it && it.kind === "piece") return openPieceFromList(it); if (it) { it.__done = null; pl.classList.add("playing"); playSnd(it, pl).catch(() => {}).finally(() => setTimeout(() => pl.classList.remove("playing"), 0)); } return; }
     const b = e.target.closest(".vk-lb"); if (!b) return;
@@ -378,7 +382,7 @@ export function openVocabList() {
   const on = (t, f, o) => { addEventListener(t, f, o); listOff.push(() => removeEventListener(t, f, o)); };
   listOff.push(() => { pager?.destroy(); pager = null; });
   on("pointerdown", e => { if (listEl === el && e.target.closest?.(".vp-bar .vp-b:not(:disabled),.vp-po,.vp-clr,.vp-mic,.vp-han,.hk-key,.hk-tab,.hk-x")) tok(); }, true); // 쪽 넘김·쪽 번호·찾기 ✕ 도 줄처럼 「톡」(다른 소리가 나는 중이면 안 냄)
-  on("malmun:vocab", () => { if (listEl !== el) return; if (tab !== "all") return draw(); ul?.querySelectorAll(".vk-st").forEach(b => { const sv = has(b.dataset.w); b.textContent = sv ? "⭐" : "☆"; b.disabled = sv; b.setAttribute("aria-pressed", String(sv)); b.setAttribute("aria-label", tx(sv ? "hasRow" : "addRow")); }); }); // 전체 탭은 ⭐ 만 바꿈(쪽·자리 그대로)
+  on("malmun:vocab", () => { if (listEl !== el) return; if (tab !== "all") return draw(); ul?.querySelectorAll(".vk-st").forEach(b => { const sv = has(b.dataset.w); b.textContent = sv ? "⭐" : "☆"; b.disabled = false; b.setAttribute("aria-pressed", String(sv)); b.setAttribute("aria-label", tx(sv ? "offRow" : "addRow")); if (b.dataset.w === popKey) { b.classList.remove("pop"); void b.offsetWidth; b.classList.add("pop"); } }); popKey = null; const n = vocabCount(), mb = el.querySelector(".vk-mn"); if (mb && shownN !== n) { mb.innerHTML = cntHTML(n); mb.dataset.n = String(n); bump(mb); } shownN = n; }); // 전체 탭은 ⭐ 과 「내가 담은」 배지만 바꿈(쪽·자리 그대로)
   on("malmun:uilang", () => { if (listEl === el) draw(); }); // ⇄ = 줄 순서·제목 바뀜(칸 크기는 그대로)
   on("hashchange", () => closeVocabList()); // 다른 화면으로 가면 닫음
   on("keydown", e => { if (e.key === "Escape" && !cardEl) closeVocabList(); });
