@@ -40,7 +40,7 @@ function gameWords(vl, uw, lg, ep) {   // 뜻 조각(v9 pieces)과 소리 낱말
 import { setTx } from "../retext.js?v=1119.58";
 import { langfitRun } from "../langfit.js?v=1119.58";
 import { esc, renderText, glossCards, sayParts } from "../text.js?v=1119.58";
-import { clauseMap, markClause, splitClause } from "../wordnote.js?v=1119.58"; // 쉼표 마디 칠하기 공용(카드와 같은 코드)
+import { clauseMap, commaMap, markClause, splitClause } from "../wordnote.js?v=1119.58"; // 쉼표 마디 칠하기 공용(카드와 같은 코드)
 import { episode } from "../data.js?v=1119.58";
 import { paths, MEDIA } from "../paths.js?v=1119.58";
 import { attachVq } from "../vq.js?v=1119.58";
@@ -551,26 +551,25 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
         else if (head) setPair(vb, st.panel.i, it.lang, "sayhead");
         else if (say && it.part === "sent") setPair(vb, st.panel.i, it.lang, "saymean");
         else if (old) setPair(vb, st.panel.i, it.lang, "say");
-        if (it.pair) pairPaint(vb, st.panel.i, it, k); else { vb.querySelectorAll(".pairln .pw.pk").forEach(e => e.classList.remove("pk")); panel.querySelectorAll(".v9body .sn .kw.ks").forEach(e => e.classList.remove("ks")); /* 읽는 윗줄 = 낱말 진한 노랑 · ↳ = 짝 마디 엷게(대표님 11-19 16:22) */ const cur = panel.querySelector(".v9body .sn.cur"), pl = vb.querySelector(".pairln"); if (pl && cur && k >= 0) { const ws = [...cur.querySelectorAll(".kw")], cm = clauseMap(ws.map(w => w.textContent)); let j = -1; ws.forEach((w, q) => { if (w.classList.contains("kar")) j = q; }); const cgi = cm.gi[Math.max(0, j)] ?? 0, wt2 = wTimes(L[st.panel.i].v9?.sent || [], k, it.lang); let span = null; if (wt2 && wt2.length === ws.length) { const ix = cm.gi.map((g, q) => (g === cgi ? q : -1)).filter(q => q >= 0), a0 = wt2[0][0], a1 = wt2[wt2.length - 1][1] || wt2[wt2.length - 1][0] + 0.1, d = Math.max(0.1, a1 - a0); span = [(wt2[ix[0]][0] - a0) / d, ((wt2[ix[ix.length - 1]][1] || wt2[ix[ix.length - 1]][0] + 0.1) - a0) / d]; } markClause(pl, cgi, cm.ncum, span); clipPair(pl); } else if (pl) { markClause(pl, 0, 0); clipPair(pl); } } // ↳ 줄도 윗줄 읽는 쉼표 마디만 엷게(마디 수 다르면 문장 통째 · 대표님 11-19 11:07)
+        if (it.pair) pairPaint(vb, st.panel.i, it, k); else { vb.querySelectorAll(".pairln .pw.pk").forEach(e => e.classList.remove("pk")); /* 읽는 윗줄 = 낱말 진한 노랑 · ↳ = 짝 마디 엷게(대표님 11-19 16:22) */ const cur = panel.querySelector(".v9body .sn.cur"), pl = vb.querySelector(".pairln"); if (pl && cur && k >= 0) { const ws = [...cur.querySelectorAll(".kw")], cm = commaMap(ws.map(w => w.textContent)); let j = -1; ws.forEach((w, q) => { if (w.classList.contains("kar")) j = q; }); const jj = Math.max(0, j), cgi = cm.cl[jj] ?? 0, ncl2 = cm.n, wt2 = wTimes(L[st.panel.i].v9?.sent || [], k, it.lang); let span = null; if (wt2 && wt2.length === ws.length) { const ix = cm.cl.map((g, q) => (g === cgi ? q : -1)).filter(q => q >= 0), a0 = wt2[0][0], a1 = wt2[wt2.length - 1][1] || wt2[wt2.length - 1][0] + 0.1, d = Math.max(0.1, a1 - a0); span = [(wt2[ix[0]][0] - a0) / d, ((wt2[ix[ix.length - 1]][1] || wt2[ix[ix.length - 1]][0] + 0.1) - a0) / d]; } markClause(pl, cgi, ncl2, span, true); clipPair(pl); } else if (pl) { markClause(pl, 0, 0, null, true); clipPair(pl); } } // ↳ 줄도 윗줄 읽는 쉼표 마디만 엷게(마디 수 다르면 문장 통째 · 대표님 11-19 11:07)
       }
     }
-    try { if (st.panel?.kind === "explain" && !ex.playing && ex.a && (ex.a.ended || (isFinite(ex.a.duration) && ex.a.duration > 0 && ex.a.duration - ex.a.currentTime < 0.06))) panel.querySelectorAll(".v9body .kw.kar, .v9body .kw.ks, .v9body .kw.kt, .v9body .pairln .pc.on, .v9body .pairln .pw.pk, .v9body .pairln .pc.pcx").forEach(e => e.classList.remove("kar", "ks", "kt", "on", "pk", "pcx")); } catch {} // 소리가 다 끝나면 윗줄·↳ 칠 전부 지움 · 멈춘 중간엔 그대로(대표님 11-19 16:24)
+    try { if (st.panel?.kind === "explain" && !ex.playing && ex.a && (ex.a.ended || (isFinite(ex.a.duration) && ex.a.duration > 0 && ex.a.duration - ex.a.currentTime < 0.06))) panel.querySelectorAll(".v9body .kw.kar, .v9body .kw.ks, .v9body .kw.kt, .v9body .pairln .pc.pcm, .v9body .pairln .pw.pk, .v9body .pairln .pc.pcx").forEach(e => e.classList.remove("kar", "ks", "kt", "on", "pcm", "pk", "pcx")); } catch {} // 소리가 다 끝나면 윗줄·↳ 칠 전부 지움 · 멈춘 중간엔 그대로(대표님 11-19 16:24)
     if (seq.playing) {
       const it = seq.q[seq.i];
       if (it?.lang && it.p === 0) { const k = sentAt(it.i, it.lang, seq.a.currentTime); items[it.i]?.querySelectorAll(".expl .sn").forEach(el => el.classList.toggle("cur", +el.dataset.s === k)); setPair(items[it.i]?.querySelector(".expl"), it.i, it.lang, k); }
     }
   }
   // 두 말 — 짝(↳) 줄 소리가 날 때 ↳ 줄의 지금 마디만 엷게 칠(그 말의 낱말 시각 w 로 · 윗줄 칠과 같은 마디 규칙 · 대표님 11-19 14:55)
-  const clipPair = pl => { const pcs = [...(pl?.querySelectorAll(".pc") || [])], on = pcs.filter(e => e.classList.contains("on")).length; pcs.forEach(e => e.classList.toggle("pcx", pcs.length > 1 && on === 1 && !e.classList.contains("on"))); }; // ↳ 칸 = 지금 마디의 짝 마디만(쉼표도 한 문장으로 봄 · 마디 수 다르면 문장 통째 · 대표님 11-19 16:25)
+  const clipPair = pl => { const pcs = [...(pl?.querySelectorAll(".pc") || [])], on = pcs.filter(e => e.classList.contains("pcm")).length; pcs.forEach(e => e.classList.toggle("pcx", pcs.length > 1 && on > 0 && on < pcs.length && !e.classList.contains("pcm"))); }; // ↳ 칸 = 지금 마디의 짝 마디만(쉼표도 한 문장으로 봄 · 마디 수 다르면 문장 통째 · 대표님 11-19 16:25)
   function pairPaint(vb, i, it, k) {
     const pl = vb.querySelector(".pairln"); if (!pl) return; const sn = L[i].v9?.sent || [], wt = wTimes(sn, k, it.lang), ws = String(sn[k]?.[it.lang] || "").match(/"[^"]*"\S*|\S+/g) || [];
-    if (!wt || wt.length !== ws.length) { markClause(pl, 0, 0); return clipPair(pl); }
-    const cm0 = clauseMap(ws), tm = ex.a.currentTime + KAR_LEAD; let j = 0; wt.forEach((w, q) => { if (tm >= w[0]) j = q; });
+    if (!wt || wt.length !== ws.length) { return; }
+    const tm = ex.a.currentTime + KAR_LEAD; let j = 0; wt.forEach((w, q) => { if (tm >= w[0]) j = q; });
     pl.querySelectorAll(".pw").forEach(e => e.classList.toggle("pk", +e.dataset.w === j));
-    { const tws = [...panel.querySelectorAll(".v9body .sn.cur .kw")], tm2 = clauseMap(tws.map(w => w.textContent)); tws.forEach((w, q) => w.classList.toggle("ks", tm2.ncum === cm0.ncum ? tm2.gi[q] === cm0.gi[j] : true)); } // 안 읽는 윗줄 = ↳ 읽는 마디의 짝 마디만 엷게(마디 수 다르면 문장 통째) // ↳ 소리 = 지금 낱말 하나만 진한 노랑(그 말 w 시각 · 대표님 11-19 16:03)
-    const cm = clauseMap(ws), cgi = cm.gi[j] ?? 0, ix = cm.gi.map((g, q) => (g === cgi ? q : -1)).filter(q => q >= 0), e = q => wt[q][1] || wt[q][0] + 0.1, a0 = wt[0][0], d = Math.max(0.1, e(wt.length - 1) - a0);
-    markClause(pl, cgi, cm.ncum, [(wt[ix[0]][0] - a0) / d, (e(ix[ix.length - 1]) - a0) / d]); clipPair(pl);
+    { const cm0 = commaMap(ws); markClause(pl, cm0.cl[j] ?? 0, cm0.n, null, true); clipPair(pl); } // 엷은 칠 없음 · 읽는 낱말 하나만 진한 노랑 · ↳ 칸은 지금 마디 한 줄만(지웠다 다시 켜지 않음 · 대표님 11-19 16:52)
   }
+
   // 설명 소리 → 문장별 실제 말소리 구간(말소리 시작~끝) — 소리를 디코딩해 에너지로 찾음(한 번만 · 못 받으면 null = 옛 방식)
   const KAR_LEAD = 0.1, spCache = new Map();
   const wTimes = (sn, k, code) => { const w = sn?.[k]?.[`${code}_w`]; return Array.isArray(w) && w.length ? w : null; }; // 소리에 맞춰 잰 낱말 시각([시작,끝] · 강제정렬 · 대표님 11-17) — 없으면 null = 옛 글자 수 비율
@@ -1352,9 +1351,11 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
       try { v.currentTime = L[x.i].start; } catch {}
     },
   });
-  app.querySelector("[data-act=two]").onclick = () => { if (st.panel?.kind !== "explain") return; setTwo(!twoOn()); // 두 말 켬/끔 — 지금 줄은 그대로 · 다음에 틀 때부터(소리가 나던 중이면 같은 문장부터 다시 짜서 이어 감)
-    const p = st.panel, i = p.i, cur = ex.q[ex.i]; if (!(ex.playing && cur)) return;
-    const s = cur.sk ?? sentAt(i, cur.lang, ex.a.currentTime), items = v9Items(i, { line: false, k: sndOf(i) }), from = Math.max(0, fromSent(items, s)); st.exLoop = items; ex.play(items, from); sync(); };
+  app.querySelector("[data-act=two]").onclick = () => { if (st.panel?.kind !== "explain") return; setTwo(!twoOn()); // 두 말 켬/끔 — 상태·단추만 바꿈 · 지금 소리·글은 다시 그리지도 다시 틀지도 않음(대표님 11-19 16:40) · 새 설정은 지금 마디(문장) 끝 뒤 다음 문장부터(남은 줄만 갈아 끼움)
+    const p = st.panel, i = p.i, cur = ex.q[ex.i]; if (!(ex.playing && cur) || cur.sk === undefined) return; // 한 덩어리 소리(두 말 꺼짐)는 그 줄이 끝난 뒤 다음 줄부터 적용
+    const s = cur.sk, items = v9Items(i, { line: false, k: sndOf(i) }), j = fromSent(items, s + 1), head = ex.q.slice(0, ex.i + 1);
+    if (j < 0) { ex.q = head; st.exLoop = head; return; } // 마지막 문장이면 지금 소리까지만
+    ex.q = [...head, ...items.slice(j)]; st.exLoop = ex.q; }; // 지금 문장의 짝(↳) 소리는 두 말을 끈 뒤엔 안 틂
   app.querySelector("[data-act=exauto]").onclick = () => { if (st.panel?.kind !== "explain") return;
     const on = !exAutoOn(); setAuto(on); exAutoMarkFn(); exAutoEndOff();
     if (!on) { if (st.gap && st.gap === st.autoGap) { clearTimeout(st.gap); st.gap = 0; } } // 끄면 기다리던 다음 줄만 취소(지금 줄 소리는 그대로)

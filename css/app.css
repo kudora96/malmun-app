@@ -1832,7 +1832,7 @@ li.vl-row{position:relative;overflow:hidden;touch-action:pan-y}.vl-slide{display
 .vk-pair{color:var(--mute);margin:0 6px}.vk-note>.vk-pair{margin:-6px 6px 0}
 .vk-line,.vk-pair{display:block}.vk-line>.vis,.vk-line>.ghost,.vk-pair>.vis,.vk-pair>.ghost{grid-area:1/1;min-width:0}.vk-line>.ghost,.vk-pair>.ghost{visibility:hidden;pointer-events:none;user-select:none}
 .vk-pair .arr{color:var(--hi)}
-.vk-line .kw.ks{background:rgba(255,210,31,.3);color:inherit;border-radius:3px;box-shadow:0 0 0 2px rgba(255,210,31,.3)}.vk-line .kw.kar,.vk-line .kw.kt{background:#ffd21f;color:#1b1b1b;border-radius:3px;box-shadow:0 2px 0 var(--hi)}/* 낱말 칠(kar)=진한 노랑 · 마디(ks)=엷게 — 1116.54 가 kar 를 엷게 합쳐 낱말 따라가기가 사라졌던 것 복구(대표님 11-19 16:15) */
+.vk-line .kw.kar,.vk-line .kw.kt{background:#ffd21f;color:#1b1b1b;border-radius:3px;box-shadow:0 2px 0 var(--hi)}/* 낱말 칠(kar)=진한 노랑 · 마디(ks)=엷게 — 1116.54 가 kar 를 엷게 합쳐 낱말 따라가기가 사라졌던 것 복구(대표님 11-19 16:15) */
 /* 「소리 준비 중…」 — 설명 창·낱말 카드(대표님 11-16) */
 .v9wait{position:fixed;left:50%;bottom:92px;transform:translateX(-50%);z-index:40;padding:4px 14px;border-radius:999px;background:var(--ink);color:var(--bg);font-size:12.5px;white-space:nowrap;pointer-events:none}
 .vk-card{position:relative}.vk-wait{position:absolute;top:4px;left:50%;transform:translateX(-50%);z-index:2;margin:0;padding:3px 12px;border-radius:999px;background:var(--bubble);border:1px solid var(--line);color:var(--mute);font-size:12.5px;align-self:center;width:fit-content}
@@ -1845,14 +1845,14 @@ li.vl-row{position:relative;overflow:hidden;touch-action:pan-y}.vl-slide{display
 .vk-pos{font-size:13px;color:var(--mute)}.vk-pex{display:flex;flex-direction:column;gap:2px;padding-top:6px;border-top:1px dashed var(--line)}.vk-pex .vk-pair{margin:0 6px}
 .vk-piece .vk-line .kw{background:none}
 
-.vk-pair .ps,.vk-pair .pc{border-radius:3px}.vk-pair .ps.on .pc.on{background:rgba(255,210,31,.3);box-shadow:0 0 0 2px rgba(255,210,31,.3)}.vk-wait,.v9wait{display:none!important}
+.vk-pair .ps,.vk-pair .pc{border-radius:3px}.vk-wait,.v9wait{display:none!important}
 
 /* ⇄ = 글을 다시 그리지 않고 보이는 말만 바꿈(깜빡임 없음 · 전환 효과 없음) — 두 말 글이 같은 칸에 겹쳐 있음 */
 .vk-card,.vk-card *{transition:none!important}
 .vk-card{scrollbar-gutter:stable}
 .vk-note .gw{padding:0 4px;margin:0 1px;border:1px solid var(--line);border-radius:5px;background:var(--card);box-shadow:0 1px 0 var(--line);-webkit-box-decoration-break:clone;box-decoration-break:clone}
 /* 윗줄 칠하는 문장 안 「」 상자도 줄 연노랑(11-19 10:43 대표님 · D-89) — 자기 낱말에 닿으면(kar·kt) 아래 진한 노랑 */
-.vk-line .kw.ks .gw{background:rgba(255,210,31,.45);border-color:rgba(255,210,31,.75);color:var(--ink)}
+
 .vk-line .kw.kar .gw,.vk-line .kw.kt .gw{background:#ffd21f;color:#1b1b1b}
 .vk-card>.vk-xw,.vk-pcard>.vk-xw{position:sticky;top:0;height:0;z-index:5}
 .vk-x{box-shadow:none;position:absolute;top:-10px;right:-10px;width:44px;height:44px;padding:0;border:0;border-radius:50%;background:transparent;color:var(--mute);display:flex;align-items:center;justify-content:center;cursor:pointer}
@@ -1968,9 +1968,9 @@ li.vl-row{position:relative;overflow:hidden;touch-action:pan-y}.vl-slide{display
 .vk-note .gw{margin-right:0}
 .vk-line .kw{white-space:nowrap}
 /* ↳ 줄 「」 상자도 칠하기 따라 색 바뀜(11-19 10:13 대표님 · D-?) : 읽기 창 ↳ 줄 · 카드·조각·단어장 ↳ 줄의 칠한 조각 안 상자 = 연노랑 */
-.v9body .pairln .gw,.line .expl .pairln .gw,.vk-note .vk-pair .ps.on .pc.on .gw,.vk-pair .ps.on .pc.on .gw{background:rgba(255,210,31,.45);border-color:rgba(255,210,31,.75);color:var(--ink)}
+.v9body .pairln .gw,.line .expl .pairln .gw{background:rgba(255,210,31,.45);border-color:rgba(255,210,31,.75);color:var(--ink)}
 
-.v9body .pairln .pc{border-radius:3px}.v9body .pairln .pc.on{background:rgba(255,210,31,.3);box-shadow:0 0 0 2px rgba(255,210,31,.3)}.v9body .pairln .pc.on .gw{background:rgba(255,210,31,.45);border-color:rgba(255,210,31,.75)} /* 설명 읽기 ↳ 줄도 쉼표 마디 엷게(대표님 11-19 11:07) */
+.v9body .pairln .pc{border-radius:3px}/* 엷은 칠 전부 없앰(대표님 11-19 16:52) */
 
 /* 설명 위 단어 칩 = 「단어 단추」 엷은 크림 바탕+얇은 갈색 테두리(크기 0px 변화 = 안쪽 그림자) · 아래 인용 흰 상자와 구별(대표님 11-19 12:21 · P0-171) */
 .v9body .chips{margin-bottom:8px}
@@ -2090,7 +2090,7 @@ html.vk-bglock{overscroll-behavior:none}.vk-card,.vk-sheet,.hk-sheet,.vk-pane,.v
 .chip.uiko[aria-pressed=false] .a,.chip.uiko[aria-pressed=true] .b{color:var(--sel-ink)!important}
 .chip.uiko:not([style*="--pw"])[aria-pressed=false] .a,.chip.uiko:not([style*="--pw"])[aria-pressed=true] .b{background:var(--sel-bg)!important;box-shadow:var(--sel-sh)!important}
 #vwrap:fullscreen>.vuiko .chip.uiko::before{background:#ffd27a!important}
-.v9body .sn .kw.ks{background:rgba(255,210,31,.3);border-radius:3px;box-shadow:0 0 0 2px rgba(255,210,31,.3)}.v9body .sn .kw.ks .gw,.v9body .sn .kw.ks b{background:rgba(255,210,31,.45)}.v9body .sn .kw.kar.ks{background:#ffd21f}/* 안 읽는 윗줄의 짝 마디 엷게(대표님 11-19 16:22) */
+
 .v9body .pairln .pc.pcx{display:none}
 
 /* 발음·켜고 끄는 단추(.romb·.toggles·.keepov · 대표님 11-19 16:35): 꺼짐 = 점선 + 빗금(자막 끔 CC 와 같은 모양·아이콘 없음) · 켜짐 = 금색 + ○ (위 규칙) · 글자는 반드시 CSS 이스케이프로(깨짐 방지) */

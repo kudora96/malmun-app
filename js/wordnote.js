@@ -18,10 +18,15 @@ const PAR_OPEN = /^[「"'“‘『«]*\(/, PAR_CLOSE = /\)[」"'”’』»]*$/,
 // ── 칠하기 마디 공용(카드·설명 읽기 둘 다 · 대표님 11-19 13:31) — 마디 = 문장 끝(따옴표 끝 포함)·괄호 앞뒤·쉼표에서 끝남 · 낱말 글 배열 → 마디 번호(gi) / ↳ 줄의 지금 마디만 .on
 export const clauseMap = texts => { let sid = 0, cid = 0, g = 0, n = 0, open = false; const ids = [], cl = [], gi = []; texts.forEach(t => { if (PAR_OPEN.test(t) && n > 0) { cid++; g++; n = 0; } if (PAR_OPEN.test(t)) open = true; ids.push(sid); cl.push(cid); gi.push(g); n++; if (SENT_END.test(t)) { sid++; cid = 0; g++; n = 0; open = false; } else if (COMMA.test(t) || (open && PAR_CLOSE.test(t))) { cid++; g++; n = 0; if (PAR_CLOSE.test(t)) open = false; } }); return { ids, cl, gi, cum: gi, ncum: gi.length ? gi[gi.length - 1] + 1 : 1 }; }; // gi = 낱말이 든 마디(문장 통틀어) · ncum = 마디 수
 export const splitClause = (x, qa = false) => { const tk = (qa ? String(x).match(TOK) : String(x).split(/(\s+)/)) || [], ws = tk.filter(t => t && !/^\s+$/.test(t)), gi = clauseMap(ws).gi, out = []; ws.forEach((t, i) => { out[gi[i]] = out[gi[i]] ? out[gi[i]] + " " + t : t; }); return out.filter(Boolean); }; // qa = 따옴표 한 덩어리(설명 읽기 윗줄과 같은 낱말 나누기)
-export const markClause = (pairEl, cc, ncl, span = null) => { const pcs = [...(pairEl?.querySelectorAll(".pc") || [])]; // 마디 수가 같으면 같은 순서 마디 · 다르면 시각(span = 지금 마디의 문장 안 [시작,끝] 0~1)과 겹치는 마디 · 시각 없으면 문장 통째
-  if (pcs.length === ncl) pcs.forEach((e, i) => e.classList.toggle("on", i === cc));
-  else if (span && pcs.length) { const L = pcs.map(e => Math.max(1, e.textContent.length)), T = L.reduce((a, b) => a + b, 0); let a = 0; pcs.forEach((e, i) => { const s0 = a / T; a += L[i]; e.classList.toggle("on", a / T > span[0] + 1e-6 && s0 < span[1] - 1e-6); }); }
-  else pcs.forEach(e => e.classList.add("on")); };
+export const commaMap = texts => { let cid = 0, q = false; const cl = []; texts.forEach(t => { cl.push(cid); if ((String(t).match(/"/g) || []).length % 2) q = !q; if (!q && (COMMA.test(t) || SENT_END.test(t))) cid++; }); return { cl, n: texts.length && cl[cl.length - 1] === cid ? cid + 1 : cid || 1 }; }; // 쉼표·마침표에서만 갈리는 마디(따옴표 안 쉼표는 안 갈림 · 괄호로는 안 갈림) — 두 말 ↳ 짝 맞춤 기준(대표님 11-19 16:37 「쉼표가 경계 · 「र …」 는 다음 마디」)
+export const markClause = (pairEl, cc, ncl, span = null, byComma = false) => { let pcs = [...(pairEl?.querySelectorAll(".pc") || [])];
+  if (byComma) { const gs = []; let cur = []; let q = false; pcs.forEach(e => { const t = e.textContent.trim(); cur.push(e); if ((t.match(/"/g) || []).length % 2) q = !q; if (!q && (COMMA.test(t) || SENT_END.test(t))) { gs.push(cur); cur = []; } }); if (cur.length) gs.push(cur); // 쉼표 묶음 · 같은 수면 같은 순서 · 다르면 시각 겹침
+    const L = gs.map(g => Math.max(1, g.reduce((a, e) => a + e.textContent.length, 0))), T = L.reduce((a, b) => a + b, 0); let a = 0;
+    gs.forEach((g, i) => { const s0 = a / T; a += L[i]; const on = gs.length === ncl ? i === cc : span ? a / T > span[0] + 1e-6 && s0 < span[1] - 1e-6 : true; g.forEach(e => e.classList.toggle("pcm", on)); }); return; }
+ // 마디 수가 같으면 같은 순서 마디 · 다르면 시각(span = 지금 마디의 문장 안 [시작,끝] 0~1)과 겹치는 마디 · 시각 없으면 문장 통째
+  if (pcs.length === ncl) pcs.forEach((e, i) => e.classList.toggle("pcm", i === cc));
+  else if (span && pcs.length) { const L = pcs.map(e => Math.max(1, e.textContent.length)), T = L.reduce((a, b) => a + b, 0); let a = 0; pcs.forEach((e, i) => { const s0 = a / T; a += L[i]; e.classList.toggle("pcm", a / T > span[0] + 1e-6 && s0 < span[1] - 1e-6); }); }
+  else pcs.forEach(e => e.classList.add("pcm")); };
 const pairInner = t => { let w = 0; return `<span class="arr" aria-hidden="true">↳</span> ${splitSent(t).map((x, i) => { const st = { q: false }; return `<span class="ps" data-s="${i}">${splitClause(x).map((c, j) => `<span class="pc" data-c="${j}">${c.split(" ").map(tk => `<span class="pw" data-w="${w++}">${gwWrap(tk, st, true)}</span>`).join(" ")}</span>`).join(" ")}</span>`; }).join(" ")}`; }; // ↳ 글도 윗줄처럼 낱말마다 .pw(같은 낱말 나누기 · 「」 상자 그대로) — ↳ 소리 때 지금 낱말만 진한 노랑(.pk · 대표님 11-19 16:03)
 // 카드 글은 지금 말 하나만 DOM 에 둠(숨은 복사본 없음) — 높이는 열 때 두 말을 번갈아 재어 큰 쪽으로 고정(fixSizes) · ⇄ 는 같은 칸 안에서 글만 바꿈(applyMode)
 const lineIn = (x, l) => kws(x[l], l), pairIn = (x, l) => pairInner(x[l]);
@@ -98,7 +103,7 @@ function showPair(j) {
   { const key = "p" + j.k + ":" + cs, fresh = j.fk !== key; j.fk = key; followLine(j, ps[tg] || pe, fresh); }
   j.root.querySelectorAll(".vk-note .ps.on").forEach(e => { if (e !== ps[tg]) e.classList.remove("on"); }); ps[tg]?.classList.add("on");
   j.root.querySelectorAll(".vk-note .pc.on").forEach(e => e.classList.remove("on")); markClause(ps[tg], cc, ncl);
-  { const tw = [...blk.querySelectorAll(".vk-line .kw")], tm = clauseMap(tw.map(w => w.textContent)), nT = Math.max(0, ...tw.map((_, i) => (tm.ids[i] === cs ? tm.cl[i] : -1))) + 1; tw.forEach((w, i) => w.classList.toggle("ks", tm.ids[i] === cs && (nT !== ncl || tm.cl[i] === cc))); } // 안 읽는 윗줄 = ↳ 읽는 마디의 짝 마디만 엷게
+  { const tw = [...blk.querySelectorAll(".vk-line .kw")], tm = clauseMap(tw.map(w => w.textContent)), nT = Math.max(0, ...tw.map((_, i) => (tm.ids[i] === cs ? tm.cl[i] : -1))) + 1; tw.forEach((w, i) => w.classList.remove("ks")); } // 안 읽는 윗줄 = ↳ 읽는 마디의 짝 마디만 엷게
   { let wi = 0; if (wt) wt.forEach((x, i) => { if (x[0] <= tn) wi = i; }); else { let c = 0; ws.forEach((w, i) => { if (c / tot <= fr) wi = i; c += w.replace(/[「」]/g, "").length; }); } pe.querySelectorAll(".pw").forEach(e => e.classList.toggle("pk", +e.dataset.w === wi)); } // ↳ 소리 = 지금 낱말 하나만 진한 노랑(그 말 w 시각)
 }
 function show(j) { // 지금 블록 표시 + 노래방 불(소리 위치 그대로)
