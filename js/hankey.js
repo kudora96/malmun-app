@@ -1,7 +1,7 @@
 // 앱 안 자판(대표님 11-19 14:45~14:49 · P0-171) — 한글(한)·네팔 글자(ने) 두 벌 · 아래에서 올라오는 시트 · 찾기 칸 글을 직접 씀
 //  한글: 자음 14+쌍자음 5 · 모음 · 치면 음절이 조합(ㅇ+ㅏ+ㄴ→안) · 네팔 글자: 모음·자음·모음표·받침표(्)는 그냥 이어 붙임(글꼴이 겹글자로 합침)
 //  휴대폰에선 시트가 화면 맨 아래(영상 칸 아래 갈색 막대 밑)에 떠서 결과 목록을 안 가림 · 겹치면 목록 칸 맨 아래 한 줄로 끼움
-import { hangulCompose, hangulBackspace } from "./search.js?v=1119.43";
+import { hangulCompose, hangulBackspace } from "./search.js?v=1119.44";
 
 export const HK_TX = {
   ko: { han: "한글 자판", ne: "네팔 글자 자판", close: "자판 닫기", bs: "한 글자 지우기", sp: "띄어쓰기", title: "자판" },
