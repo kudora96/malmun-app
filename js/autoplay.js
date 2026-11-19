@@ -3,7 +3,7 @@
 const KEY = "malmun.exauto";
 export const AUTO_GAP = 1000; // 소리가 끝나고 다음까지 1.0초
 const pref = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } };
-export const twoOn = () => { try { return localStorage.getItem("malmun.twolang") !== "0"; } catch { return true; } }; // 두 말 듣기(기본 켬 · 대표님 11-19 14:30) — 카드·설명 읽기 공용 한 상태
+export const twoOn = () => { try { return localStorage.getItem("malmun.twolang") === "1"; } catch { return false; } }; // 두 말 듣기(기본 꺼짐 · 대표님 11-19 15:50 · 저장된 선택만 켬) — 카드·설명 읽기 공용 한 상태
 export const setTwo = on => { pref("malmun.twolang", on ? "1" : "0"); document.querySelectorAll("[data-act=two]").forEach(b => b.setAttribute("aria-pressed", String(on))); };
 export const autoOn = () => pref(KEY) === "1";
 export const setAuto = on => { pref(KEY, on ? "1" : "0"); markAuto(); };
