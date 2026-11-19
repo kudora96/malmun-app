@@ -57,6 +57,7 @@ async function openMic(strict) {
   throw last || Object.assign(new Error("silent"), { name: "SilentError" }); // 열리는 마이크마다 소리가 0
 }
 export const getMic = () => openMic(); // 따라 하기 듣기(vowel.js) — 말하기와 같은 마이크 고르기
+export async function guardMic() { const s = await openMic(true); closeMic(); return s; } // 말로 찾기(js/voicefind.js) — 말하기와 같은 마이크 규칙: 기억한 마이크가 바뀌었으면 MicChangedError 한 번(말없이 다른 마이크로 안 넘어감 · 대표님 11-18)
 export function closeMic() { stream?.getTracks().forEach(x => x.stop()); stream = null; }
 // 장치 이름에서 학습자에게 소음인 것 빼기 — 끝의 「(1b3f:2008)」 장치 번호 · 「2- 」 같은 앞번호(본부 10-04)
 export const niceLabel = l => String(l || "").replace(/\s*\([0-9a-f]{4}:[0-9a-f]{4}\)\s*$/i, "").replace(/(^|\()\s*\d+-\s*/g, "$1").trim();

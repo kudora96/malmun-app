@@ -377,7 +377,7 @@ export function openVocabList() {
   el.addEventListener("pointerdown", e => { if (e.target.closest(".vk-lb,.vk-st,.vk-tab")) tok(); const sb = e.target.closest(".vl-sortbtn"); if (sb) { tok(); sb.classList.add("hit"); setTimeout(() => sb.classList.remove("hit"), 220); } }); // 정렬 단추도 줄처럼 「톡」+눌림 · 갈색 바탕이 잠깐 채워졌다 돌아옴 // 줄 누르는 순간 「톡」 — 다른 소리가 나는 중이면 안 냄
   const on = (t, f, o) => { addEventListener(t, f, o); listOff.push(() => removeEventListener(t, f, o)); };
   listOff.push(() => { pager?.destroy(); pager = null; });
-  on("pointerdown", e => { if (listEl === el && e.target.closest?.(".vp-bar .vp-b:not(:disabled),.vp-po,.vp-clr")) tok(); }, true); // 쪽 넘김·쪽 번호·찾기 ✕ 도 줄처럼 「톡」(다른 소리가 나는 중이면 안 냄)
+  on("pointerdown", e => { if (listEl === el && e.target.closest?.(".vp-bar .vp-b:not(:disabled),.vp-po,.vp-clr,.vp-mic,.vp-han,.hk-key,.hk-tab,.hk-x")) tok(); }, true); // 쪽 넘김·쪽 번호·찾기 ✕ 도 줄처럼 「톡」(다른 소리가 나는 중이면 안 냄)
   on("malmun:vocab", () => { if (listEl !== el) return; if (tab !== "all") return draw(); ul?.querySelectorAll(".vk-st").forEach(b => { const sv = has(b.dataset.w); b.textContent = sv ? "⭐" : "☆"; b.disabled = sv; b.setAttribute("aria-pressed", String(sv)); b.setAttribute("aria-label", tx(sv ? "hasRow" : "addRow")); }); }); // 전체 탭은 ⭐ 만 바꿈(쪽·자리 그대로)
   on("malmun:uilang", () => { if (listEl === el) draw(); }); // ⇄ = 줄 순서·제목 바뀜(칸 크기는 그대로)
   on("hashchange", () => closeVocabList()); // 다른 화면으로 가면 닫음
