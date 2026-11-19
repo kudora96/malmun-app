@@ -1946,3 +1946,5 @@ li.vl-row{position:relative;overflow:hidden;touch-action:pan-y}.vl-slide{display
 /* 조각 카드 「상자」+조사(11-18 16:27 대표님 「만나다는 사람을 띄어쓰기 이상」): 상자 오른쪽 여백 0 = 조사가 바짝 붙음 · 낱말(.kw)은 중간에 줄 안 갈림 · 낱말 사이 공백은 칠하기 밖 그대로 */
 .vk-note .gw{margin-right:0}
 .vk-line .kw{white-space:nowrap}
+/* ↳ 줄 「」 상자도 칠하기 따라 색 바뀜(11-19 10:13 대표님 · D-?) : 읽기 창 ↳ 줄 · 카드·조각·단어장 ↳ 줄의 칠한 조각 안 상자 = 연노랑 */
+.v9body .pairln .gw,.line .expl .pairln .gw,.vk-note .vk-pair .ps.on .gw,.vk-pair .ps.on .gw{background:rgba(255,210,31,.45);border-color:rgba(255,210,31,.75);color:var(--ink)}
