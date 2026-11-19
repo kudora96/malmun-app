@@ -1,7 +1,12 @@
 // 앱 안 자판(대표님 11-19 14:45~14:49 · P0-171) — 한글(한)·네팔 글자(ने) 두 벌 · 아래에서 올라오는 시트 · 찾기 칸 글을 직접 씀
 //  한글: 자음 14+쌍자음 5 · 모음 · 치면 음절이 조합(ㅇ+ㅏ+ㄴ→안) · 네팔 글자: 모음·자음·모음표·받침표(्)는 그냥 이어 붙임(글꼴이 겹글자로 합침)
 //  휴대폰에선 시트가 화면 맨 아래(영상 칸 아래 갈색 막대 밑)에 떠서 결과 목록을 안 가림 · 겹치면 목록 칸 맨 아래 한 줄로 끼움
+<<<<<<< HEAD
 import { hangulCompose, hangulBackspace } from "./search.js?v=1119.46";
+=======
+import { hangulCompose, hangulBackspace } from "./search.js?v=1119.45";
+import { uiKoOn } from "./i18n.js?v=1119.45";
+>>>>>>> 420148b1 (자판이 열린 채 ⇄ 를 바꾸면 열린 자판도 곧바로 한글/네팔 글자로 따라감)
 
 export const HK_TX = {
   ko: { han: "한글 자판", ne: "네팔 글자 자판", close: "자판 닫기", bs: "한 글자 지우기", sp: "띄어쓰기", title: "자판" },
@@ -47,6 +52,10 @@ export function makeKeypad({ input, onChange, lang = "ko", ui = true, host, onCl
   d.addEventListener("keydown", e => e.stopPropagation());
   d.setUi = k => { K = k; draw(); }; d.setLang = l => { L = l; draw(); };
   draw();
+  // ⇄ 가 바뀌면(열려 있는 동안) 자판도 곧바로 따라감: 한국어 먼저=한글 · 네팔어 먼저=네팔 글자(시트 안 「한/ने」 도 같이) · 그 뒤 손으로 바꾼 건 그대로(⇄ 가 바뀔 때만 움직임)
+  let lastK = uiKoOn();
+  const onUi = () => { if (!d.isConnected) return removeEventListener("malmun:uilang", onUi); const k = uiKoOn(); if (k === lastK) return; lastK = k; K = k; L = k ? "ko" : "ne"; draw(); };
+  addEventListener("malmun:uilang", onUi);
   // 자리 잡기: 화면 맨 아래에 붙이고, 결과 목록 칸과 겹치면 목록 칸 맨 아래 한 줄로
   d.place = () => {
     d.classList.remove("in"); document.body.appendChild(d);
