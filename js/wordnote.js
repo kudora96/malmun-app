@@ -12,7 +12,9 @@ const kws = (s, lang, on = true) => { const st = { q: false }; return String(s).
 // 본문 = 지금 말 한 줄만(블록마다) · 바로 아래 「↳」 한 줄 = 그 블록의 다른 말(항상 다 보임) · 두 말은 겹침(.ghost)으로 높이 맞춤 → ⇄ 해도 크기 그대로
 const SENT_END = /[.!?。।][」"')]*$/;
 const splitSent = t => String(t).split(/(?<=[.!?。।][」"')]*)\s+/).filter(Boolean); // 문장 나누기(마침표 뒤 띄어쓰기) — 두 말을 순서대로 짝지음
-const pairInner = t => `<span class="arr" aria-hidden="true">↳</span> ${splitSent(t).map((x, i) => `<span class="ps" data-s="${i}">${gwWrap(x, { q: false }, true)}</span>`).join(" ")}`;
+const COMMA = /[,，、][」"')]*$/; // 쉼표 마디(대표님 11-19 10:59 · 칠하기 단위) · 마침표(SENT_END)는 문장 끝
+const splitClause = x => String(x).split(/(?<=[,，、][」"')]*)\s+/).filter(Boolean);
+const pairInner = t => `<span class="arr" aria-hidden="true">↳</span> ${splitSent(t).map((x, i) => { const st = { q: false }; return `<span class="ps" data-s="${i}">${splitClause(x).map((c, j) => `<span class="pc" data-c="${j}">${gwWrap(c, st, true)}</span>`).join(" ")}</span>`; }).join(" ")}`;
 // 카드 글은 지금 말 하나만 DOM 에 둠(숨은 복사본 없음) — 높이는 열 때 두 말을 번갈아 재어 큰 쪽으로 고정(fixSizes) · ⇄ 는 같은 칸 안에서 글만 바꿈(applyMode)
 const lineIn = (x, l) => kws(x[l], l), pairIn = (x, l) => pairInner(x[l]);
 export function noteHTML(n, koFirst) {
@@ -38,9 +40,9 @@ export function fixSizes(card, again = false) { // 열 때 한 번: 두 말을 �
 }
 export function applyMode(card, ko) { // ⇄ — 칸은 그대로 · 글만 바꿈
   card.dataset.m = ko ? "ko" : "ne"; fill(card, ko);
-  card.querySelectorAll(".ps.on").forEach(e => e.classList.remove("on"));
+  card.querySelectorAll(".ps.on, .pc.on").forEach(e => e.classList.remove("on"));
 }
-const clearHl = root => (root || document).querySelectorAll(".vk-note .ps.on").forEach(e => e.classList.remove("on"));
+const clearHl = root => (root || document).querySelectorAll(".vk-note .ps.on, .vk-note .pc.on").forEach(e => e.classList.remove("on"));
 function setPair() {} // (옛) 읽는 블록 칸에만 글 — 이제 ↳ 줄은 항상 다 보임
 export const curBlock = () => (cur ? cur.bl[cur.k]?.b : "");
 
@@ -80,16 +82,18 @@ function show(j) { // 지금 블록 표시 + 노래방 불(소리 위치 그대�
   const ws = [...blk.querySelectorAll(".vk-line .kw")], tot = ws.reduce((s, w) => s + wl(w), 0) || 1, fr = (j.a.currentTime + LEAD) / Math.max(0.2, j.a.duration || 1); let c = 0;
   if (from && from.k !== j.k) from = null;
   // 문장 안에서만 칠: 지금 소리 위치가 든 문장의 낱말만 불 · 앞 문장 칠은 지움 · 짝(↳) 줄의 같은 순서 문장에 연노랑
-  let sid = 0; const ids = ws.map(w => { const r = sid; if (SENT_END.test(w.textContent)) sid++; return r; }), starts = [];
-  ws.forEach((w, i) => { if (starts[ids[i]] === undefined) starts[ids[i]] = c; c += wl(w); });
+  let sid = 0, cid = 0, g = 0; const ids = [], cl = [], gi = [], starts = []; ws.forEach(w => { ids.push(sid); cl.push(cid); gi.push(g); if (SENT_END.test(w.textContent)) { sid++; cid = 0; g++; } else if (COMMA.test(w.textContent)) { cid++; g++; } }); // 칠하기 단위 = 쉼표 마디(gi) · ids = 문장 · cl = 문장 안 마디
+  ws.forEach((w, i) => { if (starts[gi[i]] === undefined) starts[gi[i]] = c; c += wl(w); });
   const wt = wtOf(j.n, j.lang, j.bl[j.k].b, ws.length), tn = j.a.currentTime + LEAD; // wt = 강제 정렬 낱말 시각(있으면 그대로 · 없으면 글자 수 비율)
-  let cs = 0; if (wt) { wt.forEach((x, i) => { if (x[0] <= tn) cs = ids[i]; }); } else starts.forEach((s0, q) => { if (s0 / tot <= fr) cs = q; });
-  if (from && ids[from.wi] !== undefined) cs = Math.max(cs, ids[from.wi]); c = 0; // 톡한 낱말의 문장보다 앞 문장으로 되돌아가지 않음
-  ws.forEach((w, i) => { w.classList.toggle("kar", ids[i] === cs && (wt ? wt[i][0] <= tn : c / tot <= fr) && !(from && i < from.wi)); c += wl(w); });
-  ws.forEach((w, i) => { w.classList.toggle("ks", ids[i] === cs && !(from && i < from.wi)); w.classList.toggle("kt", !!from && from.k === j.k && from.wi === i && w.classList.contains("kar")); }); // ks = 읽는 문장 연노랑(문장 단위) · kt = 톡한 낱말만 진한 노랑
+  let cg = 0; if (wt) { wt.forEach((x, i) => { if (x[0] <= tn) cg = gi[i]; }); } else starts.forEach((s0, q) => { if (s0 / tot <= fr) cg = q; });
+  if (from && gi[from.wi] !== undefined) cg = Math.max(cg, gi[from.wi]); c = 0; // 톡한 낱말의 마디보다 앞으로 되돌아가지 않음
+  const cs = ids[gi.indexOf(cg)] ?? 0, cc = cl[gi.indexOf(cg)] ?? 0, ncl = Math.max(0, ...ws.map((_, i) => (ids[i] === cs ? cl[i] : -1))) + 1;
+  ws.forEach((w, i) => { w.classList.toggle("kar", gi[i] === cg && (wt ? wt[i][0] <= tn : c / tot <= fr) && !(from && i < from.wi)); c += wl(w); });
+  ws.forEach((w, i) => { w.classList.toggle("ks", gi[i] === cg && !(from && i < from.wi)); w.classList.toggle("kt", !!from && from.k === j.k && from.wi === i && w.classList.contains("kar")); }); // ks = 읽는 마디 연노랑(쉼표 마디 · 지난 마디 칠 지움) · kt = 톡한 낱말만 진한 노랑
   const ps = [...j.root.querySelectorAll(`.vk-note > .vk-pair[data-pb="${j.bl[j.k].b}"] .ps`)], tg = Math.min(cs, ps.length - 1);
   { const key = j.k + ":" + cs, fresh = j.fk !== key; j.fk = key; followLine(j, blk.querySelector(".kw.ks") || blk, fresh); } // 읽는 문장(없으면 블록)을 따라 카드 본문 넘김
   j.root.querySelectorAll(".vk-note .ps.on").forEach(e => { if (e !== ps[tg]) e.classList.remove("on"); }); ps[tg]?.classList.add("on");
+  j.root.querySelectorAll(".vk-note .pc.on").forEach(e => e.classList.remove("on")); { const pcs = [...(ps[tg]?.querySelectorAll(".pc") || [])]; if (pcs.length === ncl) pcs[cc]?.classList.add("on"); else pcs.forEach(e => e.classList.add("on")); } // ↳ 도 같은 순서 마디만 · 마디 수 다르면 문장 통째
 }
 const run = j => { clearInterval(tick); tick = setInterval(() => { if (!j.dead && !j.paused) show(j); }, 40); };
 export function stopRead() { clearInterval(tick); document.querySelectorAll(".vk-card").forEach(c => cancelAnimationFrame(c.__anim)); tick = 0; if (cur) { clearTimeout(cur.gap); if (cur.a) { cur.a.onended = cur.a.onerror = null; try { cur.a.pause(); } catch {} } cur.dead = true; cur = null; } document.querySelectorAll(".vk-blk.cur").forEach(e => e.classList.remove("cur")); document.querySelectorAll(".vk-note .kw.kar, .kw.ks").forEach(e => e.classList.remove("kar", "ks", "kt")); clearHl(); }

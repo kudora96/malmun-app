@@ -1832,7 +1832,7 @@ li.vl-row{position:relative;overflow:hidden;touch-action:pan-y}.vl-slide{display
 .vk-pos{font-size:13px;color:var(--mute)}.vk-pex{display:flex;flex-direction:column;gap:2px;padding-top:6px;border-top:1px dashed var(--line)}.vk-pex .vk-pair{margin:0 6px}
 .vk-piece .vk-line .kw{background:none}
 
-.vk-pair .ps{border-radius:3px}.vk-pair .ps.on{background:rgba(255,210,31,.3);box-shadow:0 0 0 2px rgba(255,210,31,.3)}.vk-wait,.v9wait{display:none!important}
+.vk-pair .ps,.vk-pair .pc{border-radius:3px}.vk-pair .ps.on .pc.on{background:rgba(255,210,31,.3);box-shadow:0 0 0 2px rgba(255,210,31,.3)}.vk-wait,.v9wait{display:none!important}
 
 /* ⇄ = 글을 다시 그리지 않고 보이는 말만 바꿈(깜빡임 없음 · 전환 효과 없음) — 두 말 글이 같은 칸에 겹쳐 있음 */
 .vk-card,.vk-card *{transition:none!important}
@@ -1949,4 +1949,4 @@ li.vl-row{position:relative;overflow:hidden;touch-action:pan-y}.vl-slide{display
 .vk-note .gw{margin-right:0}
 .vk-line .kw{white-space:nowrap}
 /* ↳ 줄 「」 상자도 칠하기 따라 색 바뀜(11-19 10:13 대표님 · D-?) : 읽기 창 ↳ 줄 · 카드·조각·단어장 ↳ 줄의 칠한 조각 안 상자 = 연노랑 */
-.v9body .pairln .gw,.line .expl .pairln .gw,.vk-note .vk-pair .ps.on .gw,.vk-pair .ps.on .gw{background:rgba(255,210,31,.45);border-color:rgba(255,210,31,.75);color:var(--ink)}
+.v9body .pairln .gw,.line .expl .pairln .gw,.vk-note .vk-pair .ps.on .pc.on .gw,.vk-pair .ps.on .pc.on .gw{background:rgba(255,210,31,.45);border-color:rgba(255,210,31,.75);color:var(--ink)}
