@@ -1832,7 +1832,7 @@ li.vl-row{position:relative;overflow:hidden;touch-action:pan-y}.vl-slide{display
 .vk-pair{color:var(--mute);margin:0 6px}.vk-note>.vk-pair{margin:-6px 6px 0}
 .vk-line,.vk-pair{display:block}.vk-line>.vis,.vk-line>.ghost,.vk-pair>.vis,.vk-pair>.ghost{grid-area:1/1;min-width:0}.vk-line>.ghost,.vk-pair>.ghost{visibility:hidden;pointer-events:none;user-select:none}
 .vk-pair .arr{color:var(--hi)}
-.vk-line .kw.kar,.vk-line .kw.ks{background:rgba(255,210,31,.3);color:inherit;border-radius:3px;box-shadow:0 0 0 2px rgba(255,210,31,.3)}.vk-line .kw.kt{background:#ffd21f;color:#1b1b1b;box-shadow:0 2px 0 var(--hi)}
+.vk-line .kw.ks{background:rgba(255,210,31,.3);color:inherit;border-radius:3px;box-shadow:0 0 0 2px rgba(255,210,31,.3)}.vk-line .kw.kar,.vk-line .kw.kt{background:#ffd21f;color:#1b1b1b;border-radius:3px;box-shadow:0 2px 0 var(--hi)}/* 낱말 칠(kar)=진한 노랑 · 마디(ks)=엷게 — 1116.54 가 kar 를 엷게 합쳐 낱말 따라가기가 사라졌던 것 복구(대표님 11-19 16:15) */
 /* 「소리 준비 중…」 — 설명 창·낱말 카드(대표님 11-16) */
 .v9wait{position:fixed;left:50%;bottom:92px;transform:translateX(-50%);z-index:40;padding:4px 14px;border-radius:999px;background:var(--ink);color:var(--bg);font-size:12.5px;white-space:nowrap;pointer-events:none}
 .vk-card{position:relative}.vk-wait{position:absolute;top:4px;left:50%;transform:translateX(-50%);z-index:2;margin:0;padding:3px 12px;border-radius:999px;background:var(--bubble);border:1px solid var(--line);color:var(--mute);font-size:12.5px;align-self:center;width:fit-content}
@@ -2076,3 +2076,5 @@ li.vl-row{position:relative;overflow:hidden;touch-action:pan-y}.vl-slide{display
 
 /* 뒤 화면 잠금(대표님 11-19 16:08 · P0-171) — 겹친 창이 열린 동안 뒤 화면은 안 움직임 · 창 안 스크롤이 뒤로 번지지 않음(js/vocab.js bgLock) */
 html.vk-bglock{overscroll-behavior:none}.vk-card,.vk-sheet,.hk-sheet,.vk-pane,.vk-dim,.vk-ul,.vk-chips{overscroll-behavior:contain}
+/* ↳ 소리 = 지금 낱말 하나만 진한 노랑(대표님 11-19 16:03 · 윗줄 .kar/.kt 와 같은 색) · 마디 엷은 칠은 그대로 */
+.vk-pair .pw.pk,.v9body .pairln .pw.pk{background:#ffd21f;color:#1b1b1b;border-radius:3px;box-shadow:0 2px 0 var(--hi)}.vk-pair .pw.pk .gw,.v9body .pairln .pw.pk .gw,.v9body .pairln .pw.pk b{background:#ffd21f;color:#1b1b1b;border-color:rgba(255,210,31,.75)}
