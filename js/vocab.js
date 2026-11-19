@@ -198,7 +198,7 @@ export function openWordCard(it, { before, fromList = false, piece = null, ents:
   before?.(); // 카드가 열리면 바깥 소리(설명 읽기)는 그 자리에서 멈춤 — 카드 소리만
   draw();
   const curNote = () => { const pe = view && ents?.find(x => x.id === view); return pe ? pnote(pe) : it.note; }; // 지금 보는 카드의 설명(구절 카드 또는 조각 카드)
-  const startNote = (bk, wi = -1) => { const nt = curNote(); if (nt && cardEl === el) { const v = view; showWait(el); it.__done = null; readNote(el, it, nt, uiKoOn(), it.order, { from: Math.max(0, noteBlocks(nt).findIndex(x => x.b === bk)), wi, url: v ? (l, b) => `snd/dict/${v}_${l}_${b}.mp3?v=6` : null }); } }; // 설명 읽기 화면처럼 열리면 저절로 시작
+  const startNote = (bk, wi = -1) => { const nt = curNote(); if (nt && cardEl === el) { const v = view; showWait(el); it.__done = null; readNote(el, it, nt, uiKoOn(), it.order, { from: Math.max(0, noteBlocks(nt).findIndex(x => x.b === bk)), wi, url: v ? (l, b) => `snd/dict/${v}_${l}_${b}.mp3?v=7` : null }); } }; // 설명 읽기 화면처럼 열리면 저절로 시작
   const onLang = () => { if (cardEl !== el) return removeEventListener("malmun:uilang", onLang); const ko = uiKoOn(), c = el.querySelector(".vk-card"); if (c) { applyMode(c, ko); const u = c.querySelector(".vk-uiko"); u?.setAttribute("aria-pressed", String(ko)); c.querySelectorAll(".vk-snd").forEach(x => { x.setAttribute("aria-label", tx("listen")); x.title = tx("listen"); }); syncCBar(); } switchRead(ko); }; // 다시 그리지 않고 보임만 바꿈 · ⇄ = 읽던 블록·그 위치에서 새 말로(처음으로 안 감 · 멈춰 있으면 멈춘 채)
   addEventListener("malmun:uilang", onLang);
   const sync = setInterval(() => { if (cardEl !== el) return clearInterval(sync); const b = document.querySelector(".vk-snd"), t = isReading() && !isPaused() ? "⏸" : "▶"; if (b && b.textContent !== t && curNote()) b.textContent = t; }, 100);
