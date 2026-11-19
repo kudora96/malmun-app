@@ -101,7 +101,32 @@ async function playSnd(it, btn, before) { // 낱말 소리마다 [id, 시작, �
 let cardEl = null;
 // 영상 칸 안 열림(단어장·조각 카드) 공통 — 칸 높이 잠금 · 영상 멈춤 · 아래 갈색 막대는 바탕만(시간 글·진행 막대·▶ 숨기고 못 누름 · 높이 그대로) — 닫으면 원래대로
 const stageOf = () => document.querySelector(".learn .vstage");
-const syncBar = () => { const L = document.querySelector(".learn"), on = !!stageOf()?.classList.contains("vk-on"); L?.classList.toggle("vk-open", on); L?.querySelectorAll(".lines,.ctrl").forEach(e => { e.inert = on; }); }; // 열려 있는 동안: 갈색 막대는 바탕만 · 아래 자막 줄·조작 줄은 흐리게 + 못 누름(inert = 누르기·키보드 포커스 둘 다 막음)
+// ── 뒤 화면 잠금(대표님 11-19 16:08 · P0-171) — 겹친 창(단어장·자판·카드·조각 카드)이 열린 동안 뒤 화면(자막 줄·배우기 화면)은 누르기도 움직이기도 안 됨
+//    한 곳: syncBar(영상 칸 안 열림·닫힘) + body 에 겹쳐 뜨는 .vk-dim 카드 → bgLock() · 휠·손가락 끌기가 창 안 목록이 더 못 가는 끝에서 뒤로 번지면 막음(창 안 목록은 그대로 스크롤) · 닫으면 열기 전 스크롤 자리로
+let bgY = null;
+const bgOpen = () => !!document.querySelector(".learn .vstage.vk-on, body > .vk-dim, .vstage > .vk-dim");
+const canMove = (e, dx, dy) => { // 이 칸이 그 방향으로 더 갈 수 있나
+  const cs = getComputedStyle(e);
+  if (dy && /(auto|scroll)/.test(cs.overflowY) && e.scrollHeight > e.clientHeight + 1 && (dy < 0 ? e.scrollTop > 0 : e.scrollTop + e.clientHeight < e.scrollHeight - 1)) return true;
+  if (dx && /(auto|scroll)/.test(cs.overflowX) && e.scrollWidth > e.clientWidth + 1 && (dx < 0 ? e.scrollLeft > 0 : e.scrollLeft + e.clientWidth < e.scrollWidth - 1)) return true;
+  return false;
+};
+function guardScroll(ev, dx, dy) {
+  if (bgY == null || (!dx && !dy)) return;
+  for (let e = ev.target instanceof Element ? ev.target : null; e && e !== document.documentElement && e !== document.body; e = e.parentElement) if (canMove(e, dx, dy)) return; // 창 안 목록이 갈 수 있으면 그대로
+  if (ev.cancelable) ev.preventDefault();
+}
+let tY = 0, tX = 0;
+addEventListener("wheel", e => { if (!e.ctrlKey) guardScroll(e, e.deltaX, e.deltaY); }, { passive: false, capture: true });
+addEventListener("touchstart", e => { const t = e.touches[0]; if (t) { tX = t.clientX; tY = t.clientY; } }, { passive: true, capture: true });
+addEventListener("touchmove", e => { if (e.touches.length !== 1) return; const t = e.touches[0], dx = tX - t.clientX, dy = tY - t.clientY; tX = t.clientX; tY = t.clientY; guardScroll(e, dx, dy); }, { passive: false, capture: true });
+function bgLock() {
+  const on = bgOpen(), se = document.scrollingElement;
+  if (on && bgY == null) { bgY = se.scrollTop; document.documentElement.classList.add("vk-bglock"); }
+  else if (!on && bgY != null) { const y = bgY; bgY = null; document.documentElement.classList.remove("vk-bglock"); if (Math.abs(se.scrollTop - y) > 0.5) se.scrollTop = y; }
+}
+new MutationObserver(bgLock).observe(document.body, { childList: true });
+const syncBar = () => { bgLock();  const L = document.querySelector(".learn"), on = !!stageOf()?.classList.contains("vk-on"); L?.classList.toggle("vk-open", on); L?.querySelectorAll(".lines,.ctrl").forEach(e => { e.inert = on; }); }; // 열려 있는 동안: 갈색 막대는 바탕만 · 아래 자막 줄·조작 줄은 흐리게 + 못 누름(inert = 누르기·키보드 포커스 둘 다 막음)
 function stageLock(st) { const own = !st.classList.contains("vk-on"); if (own) { st.style.height = st.getBoundingClientRect().height + "px"; st.classList.add("vk-on"); } try { st.querySelector("video")?.pause(); } catch {} claim("vocab"); syncBar(); return own; }
 // ── 아래 갈색 막대 = 조작 막대(대표님 11-18 14:09) — 단어장·조각 카드가 영상 칸 안에 열려 있는 동안: 단어장 = 쪽 넘김(가운데) + ⛶(오른쪽 끝) · 카드 = ‹ 돌아가기(왼쪽) · ▶/⏸ · ⭐ 단어장에 담기(가운데) · ⛶(오른쪽 끝)
 //    전체 화면(영상 칸 통째)에서는 갈색 막대가 칸 밖이라 같은 막대를 칸 맨 아래로 옮겨 보여 줌

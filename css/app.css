@@ -2073,3 +2073,6 @@ li.vl-row{position:relative;overflow:hidden;touch-action:pan-y}.vl-slide{display
 .learn .vk-cbar .vp-b[data-act=two][aria-pressed=true]:hover,.learn .vk-cbar .vp-b[data-act=exauto][aria-pressed=true]:hover,.learn .seek .vsubt[data-act=two][aria-pressed=true]:hover,.learn .seek .vsubt[data-act=exauto][aria-pressed=true]:hover{background:#ffd56b;color:#2b1c0e}}
 .learn .vk-cbar .vp-b[data-act=two]:active,.learn .vk-cbar .vp-b[data-act=exauto]:active,.learn .seek .vsubt[data-act=two]:active,.learn .seek .vsubt[data-act=exauto]:active{transform:scale(.97);background:#e0a93a;color:#2b1c0e}
 .learn .seek .vsubt[data-act=two] .cc,.learn .seek .vsubt[data-act=exauto] .cc{max-width:70px}
+
+/* 뒤 화면 잠금(대표님 11-19 16:08 · P0-171) — 겹친 창이 열린 동안 뒤 화면은 안 움직임 · 창 안 스크롤이 뒤로 번지지 않음(js/vocab.js bgLock) */
+html.vk-bglock{overscroll-behavior:none}.vk-card,.vk-sheet,.hk-sheet,.vk-pane,.vk-dim,.vk-ul,.vk-chips{overscroll-behavior:contain}
