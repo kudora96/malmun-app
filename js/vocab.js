@@ -286,9 +286,10 @@ export function closeVocabList() {
   const st = listEl?.closest?.(".vstage"); listEl?.remove(); listEl = null; if (st) stageFree(st); wakeOff();
 }
 // ── 두 탭(대표님 11-19 14:42) — 「전체」= 편의 모든 단어 카드(+조각) 자동 · 「내가 담은」= ⭐ 한 것만 · 고른 탭은 기억
-const TABKEY = "malmun.vocab.tab";
-const loadTab = () => { try { return localStorage.getItem(TABKEY) === "all" ? "all" : "mine"; } catch { return "mine"; } };
-const saveTab = t => { try { localStorage.setItem(TABKEY, t); } catch {} };
+const TABKEY = "malmun.vocab.tab"; // 11-19 16:08 대표님: 탭도 기억 안 함 — 열 때마다 「전체」 · 옛 저장값은 지움
+const dropTab = () => { try { localStorage.removeItem(TABKEY); } catch {} };
+dropTab();
+const loadTab = () => { dropTab(); return "all"; };
 let allMem = null; // 전체 탭 자료(편마다 한 번만 읽음)
 export const allWords = () => (allMem ||= (async () => {
   const cat = await catalog().catch(() => null), parents = [], seen = new Set();
@@ -371,7 +372,7 @@ export function openVocabList() {
     if (e.target.closest(".vk-fs")) return toggleFs();
     if (e.target.closest(".vk-x")) return fsOn() ? exitFs() : closeVocabList(); // 전체 화면 중 ✕ = 먼저 칸 안으로 · 다시 ✕ = 영상 자리로
     if (e.target === el && !stage) return closeVocabList();
-    const tb = e.target.closest(".vk-tab"); if (tb) { if (tb.dataset.t !== tab) { tab = tb.dataset.t; saveTab(tab); cur = 0; draw(); } return; } // 탭 바꿈(기억)
+    const tb = e.target.closest(".vk-tab"); if (tb) { if (tb.dataset.t !== tab) { tab = tb.dataset.t; cur = 0; draw(); } return; } // 탭 바꿈(열려 있는 동안만)
     const st = e.target.closest(".vk-st"); if (st) { const it = byKey.get(st.dataset.w); if (it) { const k = kOf(it), was = has(k); popKey = k; toast(was ? "tDel" : "tAdd"); if (was) drop(k); else put(it); } return; } // 전체 탭 ⭐ = 담기 · 다시 누르면 빼기(개수 배지가 바로 오르내림)
     const pl = e.target.closest(".vk-pl"); // 줄 ▶ = 그 단어 소리(카드 ▶ 와 같은 길 · claim("card") 이 다른 소리를 멈춤)
     if (pl) { const it = byKey.get(pl.dataset.w) || read().find(x => kOf(x) === pl.dataset.w); if (it && it.kind === "piece") return openPieceFromList(it); if (it) { it.__done = null; pl.classList.add("playing"); playSnd(it, pl).catch(() => {}).finally(() => setTimeout(() => pl.classList.remove("playing"), 0)); } return; }

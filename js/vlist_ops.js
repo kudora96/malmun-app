@@ -28,8 +28,10 @@ const FALL = {
 };
 const T = (key, lang, tx) => { try { const v = tx?.(key); if (v && v !== key) return v; } catch {} return (FALL[lang === "ko" ? "ko" : "ne"] || FALL.ko)[key] || key; };
 
-export const loadSort = () => { try { const m = localStorage.getItem(SKEY); return SORT_MODES.includes(m) ? m : "recent"; } catch { return "recent"; } };
-const saveSort = m => { try { localStorage.setItem(SKEY, m); } catch {} };
+// 11-19 16:06 대표님: 정렬은 기억 안 함 — 열 때마다 「편 순서」 · 옛날에 저장된 값은 지움(열 동안만 바꿀 수 있음)
+const dropSort = () => { try { localStorage.removeItem(SKEY); } catch {} };
+dropSort();
+export const loadSort = () => { dropSort(); return "ep"; };
 
 const epKey = ep => { const m = String(ep ?? "").match(/\d+/g); return m ? m.map(n => n.padStart(6, "0")).join("-") : "Ffff"; }; // 숫자 크기 순(ne1 < ne2 < ne10)
 const posOf = x => { const v = x.order ?? x.line ?? x.li ?? x.idx ?? x.n; const n = Number(v); return v != null && Number.isFinite(n) ? n : null; };
@@ -54,7 +56,7 @@ export function makeSortButton(getMode, setMode, lang = "ko", tx) {
   b.type = "button"; b.className = "chip vl-sortbtn";
   const cur = () => { const m = getMode?.() ?? loadSort(); return SORT_MODES.includes(m) ? m : "recent"; };
   const label = () => { const m = cur(), t = T(`vlist.sort.${m}`, lang, tx); b.textContent = `⇅ ${t}`; b.dataset.mode = m; b.setAttribute("aria-label", t); };
-  b.addEventListener("click", () => { const n = SORT_MODES[(SORT_MODES.indexOf(cur()) + 1) % SORT_MODES.length]; saveSort(n); setMode?.(n); label(); });
+  b.addEventListener("click", () => { const n = SORT_MODES[(SORT_MODES.indexOf(cur()) + 1) % SORT_MODES.length]; setMode?.(n); label(); });
   label(); b.refresh = label; return b;
 }
 
