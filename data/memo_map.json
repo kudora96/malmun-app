@@ -56,8 +56,8 @@
    "word",
    "word"
   ],
-  "ne_snd": "snd/memo/ne_002.mp3",
-  "ne_word_snd": "snd/memo/ne_002.mp3"
+  "ne_snd": "snd/memo/ne_002.mp3?v=1120.36",
+  "ne_word_snd": "snd/memo/ne_002.mp3?v=1120.36"
  },
  "p:jeo": {
   "mode": "word",
@@ -76,8 +76,8 @@
    "word",
    "word"
   ],
-  "ne_snd": "snd/memo/ne_003.mp3",
-  "ne_word_snd": "snd/memo/ne_003.mp3"
+  "ne_snd": "snd/memo/ne_003.mp3?v=1120.36",
+  "ne_word_snd": "snd/memo/ne_003.mp3?v=1120.36"
  },
  "p:neun": {
   "mode": "mean",
@@ -236,8 +236,8 @@
    "word",
    "word"
   ],
-  "ne_snd": "snd/memo/ne_007.mp3",
-  "ne_word_snd": "snd/memo/ne_007.mp3"
+  "ne_snd": "snd/memo/ne_007.mp3?v=1120.36",
+  "ne_word_snd": "snd/memo/ne_007.mp3?v=1120.36"
  },
  "p:mannada": {
   "mode": "word",
@@ -346,7 +346,7 @@
   "ne_word": "इन्चोन",
   "list_ne": "व्यक्तिवाचक संज्ञा",
   "ko_snd": [
-   "snd/memo/ko_018.mp3"
+   "snd/memo/ko_018.mp3?v=1120.36"
   ],
   "ne_mean_snd": "snd/dict/incheon_ne_mean.mp3",
   "ko_mean_snd": "snd/dict/incheon_ko_mean.mp3",
@@ -406,7 +406,7 @@
   "ne_word": "आउनु",
   "list_ne": "क्रिया",
   "ko_snd": [
-   "snd/memo/ko_021.mp3"
+   "snd/memo/ko_021.mp3?v=1120.36"
   ],
   "ne_mean_snd": "snd/dict/oda_ne_mean.mp3",
   "ko_mean_snd": "snd/dict/oda_ko_mean.mp3",
@@ -556,8 +556,8 @@
    "word",
    "word"
   ],
-  "ne_snd": "snd/memo/ne_016.mp3",
-  "ne_word_snd": "snd/memo/ne_016.mp3"
+  "ne_snd": "snd/memo/ne_016.mp3?v=1120.36",
+  "ne_word_snd": "snd/memo/ne_016.mp3?v=1120.36"
  },
  "p:iseo": {
   "mode": "mean",
@@ -566,7 +566,7 @@
   "ne_word": null,
   "list_ne": "विभक्ति",
   "ko_snd": [
-   "snd/memo/ko_029.mp3"
+   "snd/memo/ko_029.mp3?v=1120.36"
   ],
   "ne_mean_snd": "snd/dict/iseo_ne_mean.mp3",
   "ko_mean_snd": "snd/dict/iseo_ko_mean.mp3",
@@ -636,8 +636,8 @@
    "word",
    "word"
   ],
-  "ne_snd": "snd/memo/ne_019.mp3",
-  "ne_word_snd": "snd/memo/ne_019.mp3"
+  "ne_snd": "snd/memo/ne_019.mp3?v=1120.36",
+  "ne_word_snd": "snd/memo/ne_019.mp3?v=1120.36"
  },
  "p:gwa": {
   "mode": "mean",
@@ -676,8 +676,8 @@
    "word",
    "word"
   ],
-  "ne_snd": "snd/memo/ne_020.mp3",
-  "ne_word_snd": "snd/memo/ne_020.mp3"
+  "ne_snd": "snd/memo/ne_020.mp3?v=1120.36",
+  "ne_word_snd": "snd/memo/ne_020.mp3?v=1120.36"
  },
  "p:aju": {
   "mode": "word",
@@ -716,8 +716,8 @@
    "word",
    "word"
   ],
-  "ne_snd": "snd/memo/ne_022.mp3",
-  "ne_word_snd": "snd/memo/ne_022.mp3"
+  "ne_snd": "snd/memo/ne_022.mp3?v=1120.36",
+  "ne_word_snd": "snd/memo/ne_022.mp3?v=1120.36"
  },
  "p:buteo": {
   "mode": "mean",
@@ -726,7 +726,7 @@
   "ne_word": null,
   "list_ne": "विभक्ति",
   "ko_snd": [
-   "snd/memo/ko_037.mp3"
+   "snd/memo/ko_037.mp3?v=1120.36"
   ],
   "ne_mean_snd": "snd/dict/buteo_ne_mean.mp3",
   "ko_mean_snd": "snd/dict/buteo_ko_mean.mp3",
@@ -876,8 +876,8 @@
    "word",
    "word"
   ],
-  "ne_snd": "snd/memo/ne_027.mp3",
-  "ne_word_snd": "snd/memo/ne_027.mp3"
+  "ne_snd": "snd/memo/ne_027.mp3?v=1120.36",
+  "ne_word_snd": "snd/memo/ne_027.mp3?v=1120.36"
  },
  "p:hamkkehada": {
   "mode": "word",
@@ -906,7 +906,7 @@
   "ne_word": "उत्साहित हुनु",
   "list_ne": "क्रिया",
   "ko_snd": [
-   "snd/memo/ko_046.mp3"
+   "snd/memo/ko_046.mp3?v=1120.36"
   ],
   "ne_mean_snd": "snd/dict/seolleda_ne_mean.mp3",
   "ko_mean_snd": "snd/dict/seolleda_ko_mean.mp3",
@@ -926,7 +926,7 @@
   "ne_word": null,
   "list_ne": "नकारात्मक अभिव्यक्ति",
   "ko_snd": [
-   "snd/memo/ko_047.mp3"
+   "snd/memo/ko_047.mp3?v=1120.36"
   ],
   "ne_mean_snd": "snd/dict/jianta_ne_mean.mp3",
   "ko_mean_snd": "snd/dict/jianta_ko_mean.mp3",
@@ -976,8 +976,8 @@
    "word",
    "word"
   ],
-  "ne_snd": "snd/memo/ne_030.mp3",
-  "ne_word_snd": "snd/memo/ne_030.mp3"
+  "ne_snd": "snd/memo/ne_030.mp3?v=1120.36",
+  "ne_word_snd": "snd/memo/ne_030.mp3?v=1120.36"
  },
  "p:ga": {
   "mode": "mean",
@@ -1106,7 +1106,7 @@
   "ne_word": null,
   "list_ne": "विभक्ति",
   "ko_snd": [
-   "snd/memo/ko_055.mp3"
+   "snd/memo/ko_055.mp3?v=1120.36"
   ],
   "ne_mean_snd": "snd/dict/ro_ne_mean.mp3",
   "ko_mean_snd": "snd/dict/ro_ko_mean.mp3",
@@ -1126,7 +1126,7 @@
   "ne_word": "सुन्नु",
   "list_ne": "क्रिया",
   "ko_snd": [
-   "snd/memo/ko_056.mp3"
+   "snd/memo/ko_056.mp3?v=1120.36"
   ],
   "ne_mean_snd": "snd/dict/deutda_ne_mean.mp3",
   "ko_mean_snd": "snd/dict/deutda_ko_mean.mp3",
@@ -1186,7 +1186,7 @@
   "ne_word": "बोल्नु",
   "list_ne": "क्रिया",
   "ko_snd": [
-   "snd/memo/ko_059.mp3"
+   "snd/memo/ko_059.mp3?v=1120.36"
   ],
   "ne_mean_snd": "snd/dict/malhada_ne_mean.mp3",
   "ko_mean_snd": "snd/dict/malhada_ko_mean.mp3",
@@ -1196,8 +1196,8 @@
    "word",
    "word"
   ],
-  "ne_snd": "snd/memo/ne_035.mp3",
-  "ne_word_snd": "snd/memo/ne_035.mp3"
+  "ne_snd": "snd/memo/ne_035.mp3?v=1120.36",
+  "ne_word_snd": "snd/memo/ne_035.mp3?v=1120.36"
  },
  "p:sseuda": {
   "mode": "word",
@@ -1246,7 +1246,7 @@
   "ne_word": "हेर्नु",
   "list_ne": "क्रिया",
   "ko_snd": [
-   "snd/memo/ko_062.mp3"
+   "snd/memo/ko_062.mp3?v=1120.36"
   ],
   "ne_mean_snd": "snd/dict/boda_ne_mean.mp3",
   "ko_mean_snd": "snd/dict/boda_ko_mean.mp3",
@@ -1256,8 +1256,8 @@
    "word",
    "word"
   ],
-  "ne_snd": "snd/memo/ne_037.mp3",
-  "ne_word_snd": "snd/memo/ne_037.mp3"
+  "ne_snd": "snd/memo/ne_037.mp3?v=1120.36",
+  "ne_word_snd": "snd/memo/ne_037.mp3?v=1120.36"
  },
  "p:gi": {
   "mode": "mean",
@@ -1366,7 +1366,7 @@
   "ne_word": "बढ्नु",
   "list_ne": "क्रिया",
   "ko_snd": [
-   "snd/memo/ko_068.mp3"
+   "snd/memo/ko_068.mp3?v=1120.36"
   ],
   "ne_mean_snd": "snd/dict/neulda_ne_mean.mp3",
   "ko_mean_snd": "snd/dict/neulda_ko_mean.mp3",
@@ -1456,8 +1456,8 @@
    "word",
    "word"
   ],
-  "ne_snd": "snd/memo/ne_042.mp3",
-  "ne_word_snd": "snd/memo/ne_042.mp3"
+  "ne_snd": "snd/memo/ne_042.mp3?v=1120.36",
+  "ne_word_snd": "snd/memo/ne_042.mp3?v=1120.36"
  },
  "p:naeda": {
   "mode": "word",
@@ -1516,8 +1516,8 @@
    "word",
    "word"
   ],
-  "ne_snd": "snd/memo/ne_044.mp3",
-  "ne_word_snd": "snd/memo/ne_044.mp3"
+  "ne_snd": "snd/memo/ne_044.mp3?v=1120.36",
+  "ne_word_snd": "snd/memo/ne_044.mp3?v=1120.36"
  },
  "p:deo": {
   "mode": "word",
@@ -1536,8 +1536,8 @@
    "word",
    "word"
   ],
-  "ne_snd": "snd/memo/ne_045.mp3",
-  "ne_word_snd": "snd/memo/ne_045.mp3"
+  "ne_snd": "snd/memo/ne_045.mp3?v=1120.36",
+  "ne_word_snd": "snd/memo/ne_045.mp3?v=1120.36"
  },
  "p:jal": {
   "mode": "word",
@@ -1606,7 +1606,7 @@
   "ne_word": "हुनु",
   "list_ne": "क्रिया",
   "ko_snd": [
-   "snd/memo/ko_079.mp3"
+   "snd/memo/ko_079.mp3?v=1120.36"
   ],
   "ne_mean_snd": "snd/dict/doeda_ne_mean.mp3",
   "ko_mean_snd": "snd/dict/doeda_ko_mean.mp3",
@@ -1616,8 +1616,8 @@
    "word",
    "word"
   ],
-  "ne_snd": "snd/memo/ne_049.mp3",
-  "ne_word_snd": "snd/memo/ne_049.mp3"
+  "ne_snd": "snd/memo/ne_049.mp3?v=1120.36",
+  "ne_word_snd": "snd/memo/ne_049.mp3?v=1120.36"
  },
  "p:yeongu": {
   "mode": "word",
@@ -1636,8 +1636,8 @@
    "word",
    "word"
   ],
-  "ne_snd": "snd/memo/ne_050.mp3",
-  "ne_word_snd": "snd/memo/ne_050.mp3"
+  "ne_snd": "snd/memo/ne_050.mp3?v=1120.36",
+  "ne_word_snd": "snd/memo/ne_050.mp3?v=1120.36"
  },
  "p:itda": {
   "mode": "word",
@@ -1656,8 +1656,8 @@
    "word",
    "word"
   ],
-  "ne_snd": "snd/memo/ne_049.mp3",
-  "ne_word_snd": "snd/memo/ne_049.mp3"
+  "ne_snd": "snd/memo/ne_049.mp3?v=1120.36",
+  "ne_word_snd": "snd/memo/ne_049.mp3?v=1120.36"
  },
  "p:geim": {
   "mode": "word",
@@ -1676,8 +1676,8 @@
    "word",
    "word"
   ],
-  "ne_snd": "snd/memo/ne_051.mp3",
-  "ne_word_snd": "snd/memo/ne_051.mp3"
+  "ne_snd": "snd/memo/ne_051.mp3?v=1120.36",
+  "ne_word_snd": "snd/memo/ne_051.mp3?v=1120.36"
  },
  "p:nolda": {
   "mode": "word",
@@ -1686,7 +1686,7 @@
   "ne_word": "खेल्नु",
   "list_ne": "क्रिया",
   "ko_snd": [
-   "snd/memo/ko_083.mp3"
+   "snd/memo/ko_083.mp3?v=1120.36"
   ],
   "ne_mean_snd": "snd/dict/nolda_ne_mean.mp3",
   "ko_mean_snd": "snd/dict/nolda_ko_mean.mp3",
@@ -1726,7 +1726,7 @@
   "ne_word": "अभ्यास गर्नु",
   "list_ne": "क्रिया",
   "ko_snd": [
-   "snd/memo/ko_085.mp3"
+   "snd/memo/ko_085.mp3?v=1120.36"
   ],
   "ne_mean_snd": "snd/dict/ikhida_ne_mean.mp3",
   "ko_mean_snd": "snd/dict/ikhida_ko_mean.mp3",
@@ -1816,8 +1816,8 @@
    "word",
    "word"
   ],
-  "ne_snd": "snd/memo/ne_054.mp3",
-  "ne_word_snd": "snd/memo/ne_054.mp3"
+  "ne_snd": "snd/memo/ne_054.mp3?v=1120.36",
+  "ne_word_snd": "snd/memo/ne_054.mp3?v=1120.36"
  },
  "p:aep": {
   "mode": "word",
@@ -1896,8 +1896,8 @@
    "word",
    "word"
   ],
-  "ne_snd": "snd/memo/ne_057.mp3",
-  "ne_word_snd": "snd/memo/ne_057.mp3"
+  "ne_snd": "snd/memo/ne_057.mp3?v=1120.36",
+  "ne_word_snd": "snd/memo/ne_057.mp3?v=1120.36"
  },
  "p:seoro": {
   "mode": "word",
@@ -1926,7 +1926,7 @@
   "ne_word": "कसरी",
   "list_ne": "क्रियाविशेषण",
   "ko_snd": [
-   "snd/memo/ko_094.mp3"
+   "snd/memo/ko_094.mp3?v=1120.36"
   ],
   "ne_mean_snd": "snd/dict/eotteoke_ne_mean.mp3",
   "ko_mean_snd": "snd/dict/eotteoke_ko_mean.mp3",
@@ -1936,8 +1936,8 @@
    "word",
    "word"
   ],
-  "ne_snd": "snd/memo/ne_059.mp3",
-  "ne_word_snd": "snd/memo/ne_059.mp3"
+  "ne_snd": "snd/memo/ne_059.mp3?v=1120.36",
+  "ne_word_snd": "snd/memo/ne_059.mp3?v=1120.36"
  },
  "p:saenggida": {
   "mode": "word",
@@ -2036,8 +2036,8 @@
    "word",
    "word"
   ],
-  "ne_snd": "snd/memo/ne_063.mp3",
-  "ne_word_snd": "snd/memo/ne_063.mp3"
+  "ne_snd": "snd/memo/ne_063.mp3?v=1120.36",
+  "ne_word_snd": "snd/memo/ne_063.mp3?v=1120.36"
  },
  "p:eot": {
   "mode": "mean",
@@ -2066,7 +2066,7 @@
   "ne_word": "अनि",
   "list_ne": "संयोजक क्रियाविशेषण",
   "ko_snd": [
-   "snd/memo/ko_101.mp3"
+   "snd/memo/ko_101.mp3?v=1120.36"
   ],
   "ne_mean_snd": "snd/dict/geurigo_ne_mean.mp3",
   "ko_mean_snd": "snd/dict/geurigo_ko_mean.mp3",
@@ -2106,7 +2106,7 @@
   "ne_word": "राष्ट्रभाषा",
   "list_ne": "संज्ञा",
   "ko_snd": [
-   "snd/memo/ko_103.mp3"
+   "snd/memo/ko_103.mp3?v=1120.36"
   ],
   "ne_mean_snd": "snd/dict/gugeo_ne_mean.mp3",
   "ko_mean_snd": "snd/dict/gugeo_ko_mean.mp3",
