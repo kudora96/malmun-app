@@ -143,7 +143,7 @@ function play(j, k, at, hold, lead = 0, sec = null) { // k 블록을 at(0~1 비�
   if (!hold && j.bl[nk]) { try { const na = new Audio(j.url(nph ? other(j.lang) : j.lang, j.bl[nk].b)); na.preload = "auto"; na.load(); j.pre = { k: nk, ph: nph, a: na }; } catch {} } // 다음 소리 미리 받아 두기(끊김 방지)
   let started = false;
   a.onerror = () => { if (!started && !j.dead) { const au2 = !!j.both?.(); if (au2 && !ph) j.nph = 1; play(j, au2 && !ph ? k : k + 1, 0, hold); } };
-  a.onended = () => { clearInterval(tick); const b = blkOf(j); const two = !!j.both?.() && !ph; if (!two) b?.classList.remove("cur"); j.root.querySelectorAll(".vk-line .kw.kar, .kw.ks").forEach(w => w.classList.remove("kar", "ks", "kt")); j.root.querySelectorAll(".pw.pk").forEach(w => w.classList.remove("pk")); j.root.querySelectorAll(".vk-note .pc.on, .vk-note .ps.on").forEach(w => w.classList.remove("on")); clearHl(j.root); from = null; j.endK = k; j.endPh = ph; j.resumeK = two ? k : k + 1; j.resumePh = two ? 1 : 0; j.gap = setTimeout(() => { j.gap = 0; const [nk2, np] = nxt(j); j.nph = np; play(j, nk2, 0, false); }, 300); };
+  a.onended = () => { clearInterval(tick); const ph = j.ph, b = blkOf(j); const two = !!j.both?.() && !ph; if (!two) b?.classList.remove("cur"); j.root.querySelectorAll(".vk-line .kw.kar, .kw.ks").forEach(w => w.classList.remove("kar", "ks", "kt")); j.root.querySelectorAll(".pw.pk").forEach(w => w.classList.remove("pk")); j.root.querySelectorAll(".vk-note .pc.on, .vk-note .ps.on").forEach(w => w.classList.remove("on")); clearHl(j.root); from = null; j.endK = k; j.endPh = ph; j.resumeK = two ? k : k + 1; j.resumePh = two ? 1 : 0; j.gap = setTimeout(() => { j.gap = 0; const [nk2, np] = nxt(j); j.nph = np; play(j, nk2, 0, false); }, 300); };
   a.addEventListener("loadedmetadata", () => { if (sec != null) { try { a.currentTime = Math.max(0, sec - lead); } catch {} } else if (at > 0 && a.duration) { try { a.currentTime = Math.max(0, at * a.duration - lead); } catch {} } if (hold && j.a === a) show(j); }, { once: true });
   if (hold) { j.paused = true; started = true; return; }
   j.paused = false;
@@ -209,6 +209,11 @@ function startAt(j, k, wi) { // 그 낱말 시작 소리부터 새로 읽음(앞
 export function switchRead(koFirst) {
   const j = cur; if (!j) return;
   const a = j.a, ended = !!a?.ended || j.resumeK >= 0, fr = !ended && a?.duration ? a.currentTime / a.duration : 0, k = ended ? (j.resumeK >= 0 ? j.resumeK : j.k) : j.k;
+  if (a && !ended && j.a === a && a.currentTime > 0) { // ⇄ = 지금 소리를 처음으로 안 돌리고 그대로 이어 읽음(칠도 이어짐) · 줄 끝나면 바뀐 순서대로 다음 블록(대표님 11-20 13:30 · D-125)
+    const nl2 = koFirst ? "ko" : "ne", other = l => (l === "ko" ? "ne" : "ko"); j.lang = nl2; j.ph = j.pl === nl2 ? 0 : 1; j.pre = null;
+    { const au = !!j.both?.(), nk = au && !j.ph ? k : k + 1, nph = au && !j.ph ? 1 : 0; if (!j.paused && j.bl[nk]) { try { const na = new Audio(j.url(nph ? other(j.lang) : j.lang, j.bl[nk].b)); na.preload = "auto"; na.load(); j.pre = { k: nk, ph: nph, a: na }; } catch {} } }
+    j.root.querySelectorAll(".vk-line .kw.kar, .kw.ks, .kw.kt").forEach(e => e.classList.remove("kar", "ks", "kt")); j.root.querySelectorAll(".pw.pk").forEach(w => w.classList.remove("pk")); clearHl(j.root); from = null; show(j); return;
+  }
   clearTimeout(j.gap); j.gap = 0; clearInterval(tick); j.pre = null; // 미리 받아 둔 다음 블록 소리는 옛 말 것 — 버림(블록 사이 틈에 ⇄ 하면 옛 말로 이어 읽던 것)
   if (a) { a.onended = a.onerror = null; try { a.pause(); } catch {} }
   // 같은 낱말에서: 두 말 다 낱말 시각이 있으면 지금 낱말 번호 → 새 말 그 낱말 시작 시각 · 없으면 소리 위치 비율
