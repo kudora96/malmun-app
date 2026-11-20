@@ -287,7 +287,7 @@ export function openWordCard(it, { before, fromList = false, piece = null, ents:
     if (v === "padd") { const e = ents?.find(x => x.id === view); if (e) { put({ kind: "piece", pid: e.id, w: e.lemma, rom: "", dev: e.dev || "", mean: e.pos_ne || "", ep: it.ep, n: it.n }); draw(); } return; } // 조각도 단어장에(줄 하나 · 개수 1)
   };
   if (!pane) host().append(el);
-  if (it.ep) Promise.all([noteOf(it.ep), pcOf(it.ep), dictOf()]).then(([n, pcs, dc]) => { if (cardEl !== el) return; const x = n?.[clean(it.w)]; pc = pcs?.cards?.[clean(it.w)] || null; ents = dc?.entries || null; if (x) { it.note = x; it.key = clean(it.w); it.order = n._order || []; } if (autoRun !== "piece" && (x || (pc && ents))) { draw(); if (x) startNote(); }
+  if (it.ep) Promise.all([noteOf(it.ep), pcOf(it.ep), dictOf()]).then(([n, pcs, dc]) => { if (cardEl !== el) return; const x = n?.[clean(it.w)]; pc = pcs?.cards?.[clean(it.w)] || null; ents = dc?.entries || null; if (x) { it.note = x; it.key = clean(it.w); it.order = n._order || []; } if (autoRun !== "piece" && (x || view || (pc && ents))) { draw(); if (x || view) startNote(); }
     if (autoRun === "piece" && pc?.pieces?.length && ents) { stopRead(); view = pc.pieces[0]; toPane(el); draw(); startNote(); el.style.visibility = ""; } // 자동 조각 이어 듣기 = 새 낱말의 첫 조각 카드로 바로
     else if (autoRun === "piece") { el.style.visibility = ""; aFinished(); } // 조각 없음 = 다음으로
     else if (!x && autoElig() && autoOn()) { if (it.af) { it.__done = aFinished; playSnd(it, null, before); } else aFinished(); } // 설명이 없는 낱말 = 낱말 소리 한 번 뒤 다음으로
