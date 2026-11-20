@@ -115,7 +115,7 @@ export function attachDelete(rowEl, item, onDelete, lang = "ko", tx) {
   let tip = null; const hideTip = () => { tip?.remove(); tip = null; };
   bin.addEventListener("pointerenter", e => { // 마우스만 · 휴대폰(터치)은 도움말 없음 · 줄(overflow 숨김) 밖 칸(영상 칸·전체 화면 안)에 fixed 로 띄워 안 잘림
     if (e.pointerType !== "mouse") return; hideTip();
-    tip = document.createElement("div"); tip.className = "vl-tip"; tip.setAttribute("role", "tooltip"); tip.textContent = delTxt;
+    tip = document.createElement("div"); tip.className = "vl-tip"; tip.setAttribute("role", "tooltip"); tip.textContent = window.__sentText?.("bin") || delTxt; // 풍선 = 「단어장에서 지워요」 설명 문장(apptip.js · 11-20)
     (bin.closest(".vstage") || document.fullscreenElement || document.body).append(tip);
     const r = bin.getBoundingClientRect(), t = tip.getBoundingClientRect(), vw = document.documentElement.clientWidth;
     tip.style.left = Math.round(Math.max(4, Math.min(vw - t.width - 4, r.left + r.width / 2 - t.width / 2))) + "px"; tip.style.top = Math.round(Math.max(4, r.top - t.height - 6)) + "px"; // 휴지통 위쪽
