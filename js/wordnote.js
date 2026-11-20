@@ -1,8 +1,8 @@
 // 단어 카드 설명(대표님 11-16 「설명 창 방식 그대로」) — 위 = 지금 말(⇄ 상태) 본문 · 아래 「↳」 한 줄 = 다른 말 · ⇄ 누르면 그 자리에서 즉시 바뀜
 // 읽기 소리 = 낱말 소리 다음에 뜻·쓰임 → 예문1 → 예문2 차례로(지금 말) · 읽는 줄에 노래방 불 · 파일 = media/wordnote/<편>/<낱말번호>_<ko|ne>_<mean|ex1|ex2>.mp3(말하기부가 만듦 · 없으면 건너뜀)
-import { claim, onSound } from "./onesound.js?v=1120.17";
-import { esc } from "./text.js?v=1120.17";
-import { twoOn } from "./autoplay.js?v=1120.17";
+import { claim, onSound } from "./onesound.js?v=1120.18";
+import { esc } from "./text.js?v=1120.18";
+import { twoOn } from "./autoplay.js?v=1120.18";
 
 const BLK = [["mean", "ko_mean", "ne_mean"], ["ex1", "ko_ex1", "ne_ex1"], ["ex2", "ko_ex2", "ne_ex2"]];
 const pick = (n, ko, k) => n?.[`${k ? "ko" : "ne"}_${ko}`] || n?.[`${k ? "ko" : "ne"}_${ko === "ex1" ? "ex" : ko}`] || ""; // ex1 = 옛 이름 ex 도 받음
@@ -128,16 +128,17 @@ function show(j) { // 지금 블록 표시 + 노래방 불(소리 위치 그대�
   j.root.querySelectorAll(".vk-note .pc.on").forEach(e => e.classList.remove("on")); j.root.querySelectorAll(".vk-note .pw.pk").forEach(e => e.classList.remove("pk")); markClause(ps[tg], cc, ncl); // 읽는 쪽 = 낱말 진한 노랑 + 마디 엷게 · 안 읽는 쪽 = 짝 마디만 엷게(한 말·두 말 같음 · 마디 수 다르면 문장 통째 · 대표님 11-19 16:22)
 }
 const run = j => { clearInterval(tick); tick = setInterval(() => { if (!j.dead && !j.paused) { show(j); segCheck(j); } }, 40); };
-// ── 마디 통역(대표님 11-20 13:20) — 두 말을 켜면 마디(쉼표·마침표로 끊은 단위)마다 [지금 말 마디] → [다른 말 마디] 번갈아 · 새 소리 없이 기존 블록 소리에서 마디 구간(낱말 시각 _w · 앞뒤 0.15초)만 틀음 · 두 말의 마디 수가 다른 블록 · 낱말 시각 없는 블록은 블록 통째 번갈아(옛 방식)
+// ── 마디 통역(대표님 11-20 13:20) — 두 말을 켜면 마디(쉼표·마침표로 끊은 단위)마다 [지금 말 마디] → [다른 말 마디] 번갈아 · 새 소리 없이 기존 블록 소리에서 마디 구간(낱말 시각 _w · 앞뒤 0.15초)만 틀음 · 마디 수가 다르면 문장 수가 같은 블록은 문장 번갈아 · 그것도 다르면 · 낱말 시각 없는 블록은 블록 통째 번갈아(옛 방식)
 const other = l => (l === "ko" ? "ne" : "ko"), PAD = 0.15;
-function mkPlan(j, k) {
-  const b = j.bl[k].b, o = {};
-  for (const l of ["ko", "ne"]) {
-    const ws = String(j.bl[k][l] || "").split(/\s+/).filter(Boolean), wt = wtOf(j.n, l, b, ws.length); if (!wt) return null;
-    const cm = commaMap(ws), gs = []; ws.forEach((_, i) => { (gs[cm.cl[i]] ||= []).push(i); }); const g2 = gs.filter(Boolean); if (!g2.length) return null;
-    let pe = 0; o[l] = g2.map((g, ci) => { const st = wt[g[0]][0], ls = wt[g[g.length - 1]], e0 = ls[1] || ls[0] + 0.1, ns = g2[ci + 1] ? wt[g2[ci + 1][0]][0] : null, e = e0 + PAD, s = { st, i0: g[0], at: Math.max(pe, st - PAD), until: ns != null ? Math.max(e0, Math.min(e, ns - LEAD - 0.01)) : e }; pe = e0; return s; });
-  }
-  return o.ko.length === o.ne.length ? o : null;
+const SENT2 = /[.!?।॥][」"')”’』»]*$/; // 문장 끝(. ? ! । ॥ · 따옴표 안은 안 끊음)
+const sentMap = texts => { let cid = 0, q = false; const cl = []; texts.forEach(t => { cl.push(cid); if ((String(t).match(/"/g) || []).length % 2) q = !q; if (!q && SENT2.test(t)) cid++; }); return { cl }; };
+function mkPlan(j, k, mode) { // 단계(대표님 11-20 14:05) — ① 마디(쉼표·마침표) 수 같음 ② 아니면 문장 수 같음 ③ 아니면 null(블록 통째) · mode = "clause" | "sent"(검사용: 정해진 단계만)
+  const b = j.bl[k].b, per = {};
+  for (const l of ["ko", "ne"]) { const ws = String(j.bl[k][l] || "").split(/\s+/).filter(Boolean), wt = wtOf(j.n, l, b, ws.length); if (!wt) return null; per[l] = { ws, wt }; }
+  const mk = (l, mp) => { const { ws, wt } = per[l], cm = mp(ws), gs = []; ws.forEach((_, i) => { (gs[cm.cl[i]] ||= []).push(i); }); const g2 = gs.filter(Boolean); if (!g2.length) return null;
+    let pe = 0; return g2.map((g, ci) => { const st = wt[g[0]][0], ls = wt[g[g.length - 1]], e0 = ls[1] || ls[0] + 0.1, ns = g2[ci + 1] ? wt[g2[ci + 1][0]][0] : null, e = e0 + PAD, s = { st, i0: g[0], at: Math.max(pe, st - PAD), until: ns != null ? Math.max(e0, Math.min(e, ns - LEAD - 0.01)) : e }; pe = e0; return s; }); };
+  for (const [nm, mp] of [["clause", commaMap], ["sent", sentMap]]) { if (mode && mode !== nm) continue; const o = { ko: mk("ko", mp), ne: mk("ne", mp) }; if (o.ko && o.ne && o.ko.length === o.ne.length) { o.level = nm; return o; } }
+  return null;
 }
 const planOf = (j, k) => { j.plans = j.plans || {}; const key = k + ":" + j.lang; if (!(key in j.plans)) { let p = null; try { p = mkPlan(j, k); } catch {} j.plans[key] = p; } return j.plans[key]; };
 export const planBlocks = (n, lang = "ne") => { const bl = noteBlocks(n), j = { n, lang, bl, plans: {} }; return bl.map((x, k) => ({ b: x.b, plan: planOf(j, k) })); }; // 검사·점검용: 블록마다 마디 구간표(없으면 null = 통째 번갈아)
