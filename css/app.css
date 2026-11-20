@@ -1968,7 +1968,7 @@ li.vl-row{position:relative;overflow:hidden;touch-action:pan-y}.vl-slide{display
 .vk-note .gw{margin-right:0}
 .vk-line .kw{white-space:nowrap}
 /* ↳ 줄 「」 상자도 칠하기 따라 색 바뀜(11-19 10:13 대표님 · D-?) : 읽기 창 ↳ 줄 · 카드·조각·단어장 ↳ 줄의 칠한 조각 안 상자 = 연노랑 */
-.v9body .pairln .gw,.line .expl .pairln .gw{background:rgba(255,210,31,.45);border-color:rgba(255,210,31,.75);color:var(--ink)}
+.v9body .pairln .gw,.line .expl .pairln .gw{background:var(--card);border-color:var(--line);color:var(--ink)}/* 엷은 노랑 바탕 없음(대표님 11-20 13:11 · chip_fill) */
 
 .v9body .pairln .pc{border-radius:3px}/* 엷은 칠 전부 없앰(대표님 11-19 16:52) */
 
@@ -2105,4 +2105,4 @@ html.vk-bglock{overscroll-behavior:none}.vk-card,.vk-sheet,.hk-sheet,.vk-pane,.v
 .v9body .sn .kw.kq.kar .gw,.v9body .sn .kw.kq.kar b{background:var(--card);color:var(--ink)}
 .v9body .sn .kw.kar .qw.qk,.v9body .pairln .pw.pk .qw.qk{background:#ffd21f;color:#1b1b1b;border-radius:3px;box-shadow:0 2px 0 var(--hi)}
 .v9body .pairln .pw.pq.pk{background:none;box-shadow:none}
-.v9body .pairln .pw.pq.pk .gw,.v9body .pairln .pw.pq.pk b{background:rgba(255,210,31,.45);border-color:rgba(255,210,31,.75);color:var(--ink)}
+.v9body .pairln .pw.pq.pk .gw,.v9body .pairln .pw.pq.pk b{background:var(--card);border-color:var(--line);color:var(--ink)}
