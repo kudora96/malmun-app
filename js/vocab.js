@@ -204,8 +204,8 @@ function pieceHTML(e, roman, foot = "") {
     ${noteHTML(pnote(e), k)}${foot}`;
 }
 const meanHTML = it => { const kh = it.note?.ko_head; return kh ? `<span class="vk-t vk-mean vk-sw" data-ko="${esc(kh)}" data-ne="${esc(it.mean || "")}" data-lk="1" lang="${uiKoOn() ? "ko" : "ne"}"><span class="vis">${esc(uiKoOn() ? kh : it.mean || "")}</span></span>` : `<span class="vk-t vk-mean" lang="ne">${esc(it.mean || "")}</span>`; }; // 맨 위 뜻 줄: 한국어 뜻(ko_head)이 있으면 ⇄ 때 같은 칸에서 글만 바뀜(11-18)
-export function openWordCard(it, { before, fromList = false, piece = null, ents: ents0 = null, autoRun = "", autoPos = -1 } = {}) { // piece = 단어장에서 조각 줄을 눌러 바로 그 조각 카드로(조각 id) · ents = 조각 사전 항목
-  closeCard(); autoHold(false); wakeOn(); claim("card"); // 어디서 열든(읽기 창·단어장 목록) 다른 소리는 멈춤 — before 를 안 넘겨도 하나
+export function openWordCard(it, { before, fromList = false, piece = null, ents: ents0 = null, autoRun = "", autoPos = -1, lseq = null, lpos = -1, keep = false } = {}) { // lseq·lpos = 단어장에서 연 카드의 「보이는 순서」(단어 → 그 조각들 → 다음 단어…) 줄 목록과 이 카드 자리(자동 이어 듣기 · 대표님 11-20 13:17) · keep = 자동으로 넘어갈 때 단어장은 닫지 않음 // piece = 단어장에서 조각 줄을 눌러 바로 그 조각 카드로(조각 id) · ents = 조각 사전 항목
+  closeCard(keep && !!lseq); autoHold(false); wakeOn(); claim("card"); // 어디서 열든(읽기 창·단어장 목록) 다른 소리는 멈춤 — before 를 안 넘겨도 하나
   let view = piece || null; // 지금 보는 조각 id(없으면 구절 카드)
   const saved = () => (view ? has("p:" + view) : has(it.w)), romanNow = () => (document.querySelector(".exv.norom") ? "" : (lang === "ne" && it.note?.dev) || it.rom); // 네팔어 학습자 = 데바나가리 발음(dev) · 발음 토글(.norom)이 끄면 숨김
   const el = (cardEl = document.createElement("div"));
@@ -214,10 +214,11 @@ export function openWordCard(it, { before, fromList = false, piece = null, ents:
   let pc = null, ents = ents0, act = null; // 조각 자료
   cardCtl = { act: (v, b) => act?.(v, b), back: () => (view ? (piece ? "lback" : "back") : fromList && listEl ? "lback" : "close"), add: () => (view ? "padd" : "add"), saved, auto: () => autoElig(), two: () => !!(view ? ents?.find(x => x.id === view) : it.note) }; // 조작 막대가 부르는 손잡이
   // ── 자동 이어 듣기(대표님 11-19 14:11) — 카드 소리가 끝나면 1.0초 뒤 다음 카드(단어 카드 = 자막 낱말 순서 · 조각 카드 = 같은 낱말 남은 조각 → 다음 낱말 조각) · 뒤 영상도 그 줄 장면으로
-  let apos = fromList || piece || !cardNav?.live?.() ? -1 : (cardNav.locate?.(it) ?? -1); // 이 카드의 자막 순서 자리(없으면 자동 단추 없음)
-  const autoElig = () => apos >= 0 && !!pane && !fromList && !piece;
+  let apos = lseq ? lpos : fromList || piece || !cardNav?.live?.() ? -1 : (cardNav.locate?.(it) ?? -1); // 이 카드의 자막 순서 자리(없으면 자동 단추 없음) · 단어장 카드 = 줄 목록 자리
+  const wpos = lpos; let lcur = lpos; // 단어장 카드: wpos = 단어 카드 자리 · lcur = 지금 보는 줄(단어 카드 안 조각 칩을 누르면 그 조각 줄 자리)
+  const autoElig = () => (lseq ? lcur >= 0 : apos >= 0 && !!pane && !fromList && !piece);
   const aKind = () => (view ? "piece" : "word");
-  const aMark = () => { if (autoElig()) { const k = view && pc?.pieces ? pc.pieces.indexOf(view) : -1; autoAt(aKind(), view ? apos + (k + 1) / 100 : apos, aNext); } };
+  const aMark = () => { if (autoElig()) { const k = view && pc?.pieces ? pc.pieces.indexOf(view) : -1; autoAt(aKind(), lseq ? lcur : view ? apos + (k + 1) / 100 : apos, aNext); } };
   const aGo = async kind => { // 다음 낱말 카드(kind=word) / 다음 낱말의 첫 조각(kind=piece · 조각 없는 낱말은 건너뜀)
     let p = apos; for (;;) {
       p++; const nx = await cardNav.at(p); if (cardEl !== el) return; if (!nx) return aEnd(kind);
@@ -230,8 +231,18 @@ export function openWordCard(it, { before, fromList = false, piece = null, ents:
     showAutoEnd(kind, host, { title: tx("auto_end"), again: tx("auto_again"), close: tx("close"), onAgain: () => aRestart(kind), onClose: () => { if (cardEl === el) closeCard(); } });
   };
   const aRestart = async kind => { let p = -1; for (;;) { p++; const nx = await cardNav.at(p); if (!nx) return; if (kind === "piece") { const pcs = await pcOf(nx.it.ep); if (!pcs?.cards?.[clean(nx.it.w)]?.pieces?.length) continue; } cardNav.commit(nx); openWordCard(nx.it, { before: nx.before, autoRun: kind, autoPos: p }); return; } };
+  const aGoL = async p => { // 단어장 순서대로 다음 줄(단어 또는 조각) 카드 · 끝이면 끝 카드
+    const nx = lseq[p]; if (!nx) return aEndL();
+    if (nx.kind === "piece") { const dc = await dictOf(); if (cardEl !== el) return; if (!dc?.entries) return aEndL(); openWordCard({ w: nx.w, rom: "", mean: nx.mean, ep: nx.ep, n: nx.n, ko: "", tr: "" }, { fromList: true, piece: nx.pid, ents: dc.entries, lseq, lpos: p, keep: true }); }
+    else openWordCard(nx, { fromList: true, lseq, lpos: p, keep: true });
+  };
+  const aEndL = () => {
+    const host = document.querySelector(".learn") || document.body;
+    showAutoEnd(aKind(), host, { title: tx("auto_end"), again: tx("auto_again"), close: tx("close"), onAgain: () => { if (cardEl === el) aGoL(0); }, onClose: () => { if (cardEl === el) closeCard(true); } });
+  };
   const aNext = () => { // 지금 카드가 끝났다 치고 다음으로(단추·__auto.next())
     if (cardEl !== el || !autoElig()) return;
+    if (lseq) return aGoL(lcur + 1);
     if (view) { const ids = pc?.pieces || [], k = ids.indexOf(view); if (k >= 0 && k < ids.length - 1) { stopRead(); view = ids[k + 1]; toPane(el); draw(); aMark(); startNote(); return; } return aGo("piece"); }
     return aGo("word");
   };
@@ -274,9 +285,9 @@ export function openWordCard(it, { before, fromList = false, piece = null, ents:
     if (v === "two") { setTwo(!twoOn()); return; } // 두 말 켬/끔(기억)
     if (v === "fs") { toggleFs(); return; } // ⛶ = 칸 통째 전체 화면 ⇄ 나가기
     if (v === "close") { if (pane && fsOn()) exitFs(); else closeCard(); return; } // 전체 화면 중 ✕ = 먼저 칸 안으로 · 다시 ✕ = 영상 자리로 // ✕ = 바깥 누르기와 똑같이 닫힘
-    if (v === "piece") { stopRead(); view = b.dataset.p; toPane(el); draw(); startNote(); return; } // 조각 카드(글만)
+    if (v === "piece") { stopRead(); view = b.dataset.p; if (lseq && !piece) { let j = wpos + 1; while (lseq[j]?.kind === "piece" && lseq[j].pid !== view) j++; if (lseq[j]?.kind === "piece") lcur = j; aMark(); } toPane(el); draw(); startNote(); return; } // 조각 카드(글만)
     if (v === "lback") { closeCard(true); return; } // ← = 단어장 목록 그 쪽·그 위치로(목록은 숨겨 둔 채 그대로 있었음)
-    if (v === "back") { stopRead(); view = null; draw(); startNote(); return; } // 조각 카드 ← = 카드(칸 안 그대로)
+    if (v === "back") { stopRead(); view = null; if (lseq) { lcur = wpos; aMark(); } draw(); startNote(); return; } // 조각 카드 ← = 카드(칸 안 그대로)
     if (v === "snd") { // ▶ = 처음부터 다시(설명 읽기 · 낱말 소리는 따로 안 냄)
       if (autoHeld()) { autoHold(false); if (!isReading()) { startNote(); return; } }
       if (curNote()) { if (isReading()) toggleRead(); else startNote(); return; } // ▶/⏸ — 읽는 중 = 멈춤 · 멈춤 = 이어서 · 끝난 뒤 = 처음부터
@@ -290,7 +301,7 @@ export function openWordCard(it, { before, fromList = false, piece = null, ents:
   if (it.ep) Promise.all([noteOf(it.ep), pcOf(it.ep), dictOf()]).then(([n, pcs, dc]) => { if (cardEl !== el) return; const x = n?.[clean(it.w)]; pc = pcs?.cards?.[clean(it.w)] || null; ents = dc?.entries || null; if (x) { it.note = x; it.key = clean(it.w); it.order = n._order || []; } if (autoRun !== "piece" && (x || view || (pc && ents))) { draw(); if (x || view) startNote(); }
     if (autoRun === "piece" && pc?.pieces?.length && ents) { stopRead(); view = pc.pieces[0]; toPane(el); draw(); startNote(); el.style.visibility = ""; } // 자동 조각 이어 듣기 = 새 낱말의 첫 조각 카드로 바로
     else if (autoRun === "piece") { el.style.visibility = ""; aFinished(); } // 조각 없음 = 다음으로
-    else if (!x && autoElig() && autoOn()) { if (it.af) { it.__done = aFinished; playSnd(it, null, before); } else aFinished(); } // 설명이 없는 낱말 = 낱말 소리 한 번 뒤 다음으로
+    else if (!x && !view && autoElig() && autoOn()) { if (it.af) { it.__done = aFinished; playSnd(it, null, before); } else aFinished(); } // 설명이 없는 낱말 = 낱말 소리 한 번 뒤 다음으로
     aMark(); }); // 설명이 있으면 문장 자리를 설명으로 · 조각 자료가 있으면 칩
   return el;
 }
@@ -305,7 +316,7 @@ const tok = () => {}; // 누르는 「톡」은 이제 앱 전체 한 곳(js/tic
 //    열면 영상 멈춤 · 오른쪽 위 ✕ = 닫고 영상 자리로 · 단어 누르면 카드 · ⇄ = 앱 전체 하나(한국어 쪽: 단어·발음·뜻 / 네팔어 쪽: 뜻·단어·발음)
 let listEl = null, listOff = [];
 // 단어장 조각 줄 = 그 조각 카드를 영상 칸 안에서(조각 사전은 한 번 받아 둔 것)
-function openPieceFromList(it) { dictOf().then(dc => { if (dc?.entries) openWordCard({ w: it.w, rom: "", mean: it.mean, ep: it.ep, n: it.n, ko: "", tr: "" }, { fromList: true, piece: it.pid, ents: dc.entries }); }); }
+function openPieceFromList(it, lseq = null, lpos = -1) { dictOf().then(dc => { if (dc?.entries) openWordCard({ w: it.w, rom: "", mean: it.mean, ep: it.ep, n: it.n, ko: "", tr: "" }, { fromList: true, piece: it.pid, ents: dc.entries, lseq, lpos }); }); }
 export function closeVocabList() {
   closeCard(); listOff.forEach(f => { try { f(); } catch {} }); listOff = [];
   const st = listEl?.closest?.(".vstage"); listEl?.remove(); listEl = null; if (st) stageFree(st); wakeOff();
@@ -399,10 +410,11 @@ export function openVocabList() {
     if (e.target === el && !stage) return closeVocabList();
     const tb = e.target.closest(".vk-tab"); if (tb) { if (tb.dataset.t !== tab) { tab = tb.dataset.t; cur = 0; draw(); } return; } // 탭 바꿈(열려 있는 동안만)
     const st = e.target.closest(".vk-st"); if (st) { const it = byKey.get(st.dataset.w); if (it) { const k = kOf(it), was = has(k); popKey = k; toast(was ? "tDel" : "tAdd"); if (was) drop(k); else put(it); } return; } // 전체 탭 ⭐ = 담기 · 다시 누르면 빼기(개수 배지가 바로 오르내림)
+    const seqAt = btn => { const sq = view.flatMap(x => [x, ...(subs.get(x) || [])]), li = btn.closest("li"), lis = [...ul.querySelectorAll("li.vk-li,li.vk-sub")], pg0 = slicePage(view, cur)[0], base = pg0 ? sq.indexOf(pg0) : 0, p = lis.indexOf(li); return p >= 0 && base >= 0 && sq[base + p] ? { sq, p: base + p } : { sq, p: -1 }; }; // 눌린 줄의 「보이는 순서」 자리(탭·정렬·찾기·쪽 · 단어 아래 조각 포함)
     const pl = e.target.closest(".vk-pl"); // 줄 ▶ = 그 단어 소리(카드 ▶ 와 같은 길 · claim("card") 이 다른 소리를 멈춤)
-    if (pl) { const it = byKey.get(pl.dataset.w) || read().find(x => kOf(x) === pl.dataset.w); if (it && it.kind === "piece") return openPieceFromList(it); if (it) { it.__done = null; pl.classList.add("playing"); playSnd(it, pl).catch(() => {}).finally(() => setTimeout(() => pl.classList.remove("playing"), 0)); } return; }
+    if (pl) { const it = byKey.get(pl.dataset.w) || read().find(x => kOf(x) === pl.dataset.w); if (it && it.kind === "piece") { const { sq, p } = seqAt(pl); return openPieceFromList(p >= 0 ? sq[p] : it, p >= 0 ? sq : null, p); } if (it) { it.__done = null; pl.classList.add("playing"); playSnd(it, pl).catch(() => {}).finally(() => setTimeout(() => pl.classList.remove("playing"), 0)); } return; }
     const b = e.target.closest(".vk-lb"); if (!b) return;
-    const it = byKey.get(b.dataset.w) || read().find(x => kOf(x) === b.dataset.w); if (it && it.kind === "piece") return openPieceFromList(it); if (it) openWordCard(it, { fromList: true });
+    const it = byKey.get(b.dataset.w) || read().find(x => kOf(x) === b.dataset.w); const { sq, p } = seqAt(b), at = p >= 0 ? sq[p] : it; if (at && at.kind === "piece") return openPieceFromList(at, p >= 0 ? sq : null, p); if (at) openWordCard(at, { fromList: true, lseq: p >= 0 ? sq : null, lpos: p });
   });
   el.addEventListener("pointerdown", e => { if (e.target.closest(".vk-lb,.vk-st,.vk-tab")) tok(); const sb = e.target.closest(".vl-sortbtn"); if (sb) { tok(); sb.classList.add("hit"); setTimeout(() => sb.classList.remove("hit"), 220); } }); // 정렬 단추도 줄처럼 「톡」+눌림 · 갈색 바탕이 잠깐 채워졌다 돌아옴 // 줄 누르는 순간 「톡」 — 다른 소리가 나는 중이면 안 냄
   const on = (t, f, o) => { addEventListener(t, f, o); listOff.push(() => removeEventListener(t, f, o)); };
