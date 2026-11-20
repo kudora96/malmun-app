@@ -130,7 +130,7 @@ const syncBar = () => { bgLock();  const L = document.querySelector(".learn"), o
 function stageLock(st) { const own = !st.classList.contains("vk-on"); if (own) { st.style.height = st.getBoundingClientRect().height + "px"; st.classList.add("vk-on"); } try { st.querySelector("video")?.pause(); } catch {} claim("vocab"); syncBar(); return own; }
 // ── 아래 갈색 막대 = 조작 막대(대표님 11-18 14:09) — 단어장·조각 카드가 영상 칸 안에 열려 있는 동안: 단어장 = 쪽 넘김(가운데) + ⛶(오른쪽 끝) · 카드 = ‹ 돌아가기(왼쪽) · ▶/⏸ · ⭐ 단어장에 담기(가운데) · ⛶(오른쪽 끝)
 //    전체 화면(영상 칸 통째)에서는 갈색 막대가 칸 밖이라 같은 막대를 칸 맨 아래로 옮겨 보여 줌
-const CTX = { ko: { back: "돌아가기", add: "단어장에 담기", has: "단어장에 있음" }, ne: { back: "फिर्ता", add: "सूचीमा थप्नुहोस्", has: "सूचीमा छ" } };
+const CTX = { ko: { back: "돌아가기", add: "단어장에 담기", has: "단어장에 있음", next: "다음" }, ne: { back: "फिर्ता", add: "सूचीमा थप्नुहोस्", has: "सूचीमा छ", next: "अर्को" } }; // next = 「다음 ›」(대표님 11-20 14:12 · 자동이 꺼져도 다음 카드로 바로 감)
 // 자동 이어 듣기 — 순서(자막 낱말 순서)는 배우는 화면이 등록(setCardNav): locate(it)→자리 · at(자리)→{it,pos,before}|null · commit(그 자리) = 줄·뒤 영상을 옮김
 let cardNav = null; export const setCardNav = n => { cardNav = n; };
 const autoLabel = () => tx("auto");
@@ -142,7 +142,8 @@ function ctlBtns(c) {
   return [bk ? `<button type="button" class="vp-b vk-back" data-v="${bk}" aria-label="${esc(t.back)}" title="${esc(t.back)}"><span aria-hidden="true">‹</span><span class="t">${esc(t.back)}</span></button>` : "",
     `<button type="button" class="vp-b vk-snd" data-v="snd" aria-label="${lis}" title="${lis}">▶</button>`
     + (c.two?.() ? twoBtn() : "") + (c.auto?.() ? autoBtn(autoOn()) : "")
-    + `<button type="button" class="vp-b vk-add" data-v="${c.add()}" ${sv ? "disabled" : ""} aria-label="${esc(sv ? t.has : t.add)}" title="${esc(sv ? t.has : t.add)}"><span aria-hidden="true">⭐</span><span class="t">${esc(sv ? t.has : t.add)}</span></button>`];
+    + `<button type="button" class="vp-b vk-add" data-v="${c.add()}" ${sv ? "disabled" : ""} aria-label="${esc(sv ? t.has : t.add)}" title="${esc(sv ? t.has : t.add)}"><span aria-hidden="true">⭐</span><span class="t">${esc(sv ? t.has : t.add)}</span></button>`
+    + (c.next?.() ? `<button type="button" class="vp-b vk-next" data-v="next" aria-label="${esc(t.next)}" title="${esc(t.next)}"><span class="t">${esc(t.next)}</span><span aria-hidden="true">›</span></button>` : "")];
 }
 function placeCBar() { // 평소 = 갈색 막대(.seek) 안 · 전체 화면 = 영상 칸 맨 아래
   if (!cbar) return; const st = stageOf(), seek = document.querySelector(".learn .seek"), to = fsOn() ? st : seek;
@@ -212,7 +213,7 @@ export function openWordCard(it, { before, fromList = false, piece = null, ents:
   el.className = "vk-dim"; el.setAttribute("role", "dialog"); el.setAttribute("aria-modal", "true");
   toPane(el); // 배우는 화면이면 영상 칸 안에서(11-18 13:56 · 단어장 붙임 코드 그대로) · 그 밖의 화면은 예전처럼 겹쳐 뜸
   let pc = null, ents = ents0, act = null; // 조각 자료
-  cardCtl = { act: (v, b) => act?.(v, b), back: () => (view ? (piece ? "lback" : "back") : fromList && listEl ? "lback" : "close"), add: () => (view ? "padd" : "add"), saved, auto: () => autoElig(), two: () => !!(view ? ents?.find(x => x.id === view) : it.note) }; // 조작 막대가 부르는 손잡이
+  cardCtl = { act: (v, b) => act?.(v, b), back: () => (view ? (piece ? "lback" : "back") : fromList && listEl ? "lback" : "close"), add: () => (view ? "padd" : "add"), saved, auto: () => autoElig(), next: () => autoElig(), two: () => !!(view ? ents?.find(x => x.id === view) : it.note) }; // 조작 막대가 부르는 손잡이
   // ── 자동 이어 듣기(대표님 11-19 14:11) — 카드 소리가 끝나면 1.0초 뒤 다음 카드(단어 카드 = 자막 낱말 순서 · 조각 카드 = 같은 낱말 남은 조각 → 다음 낱말 조각) · 뒤 영상도 그 줄 장면으로
   let apos = lseq ? lpos : fromList || piece || !cardNav?.live?.() ? -1 : (cardNav.locate?.(it) ?? -1); // 이 카드의 자막 순서 자리(없으면 자동 단추 없음) · 단어장 카드 = 줄 목록 자리
   const wpos = lpos; let lcur = lpos; // 단어장 카드: wpos = 단어 카드 자리 · lcur = 지금 보는 줄(단어 카드 안 조각 칩을 누르면 그 조각 줄 자리)
@@ -282,6 +283,7 @@ export function openWordCard(it, { before, fromList = false, piece = null, ents:
   });
   act = (v, b) => {
     if (v === "auto") { const on = !autoOn(); setAuto(on); autoHold(false); if (!on) autoCancel(); else if (!isReading() && !autoPending()) aFinished(); return; } // 자동 켜기/끄기(하나의 설정) · 이미 끝나 있었으면 바로 이어 감
+    if (v === "next") { autoCancel(); aNext(); return; } // 다음 › = 자동 켬·끔과 무관하게 자동이 넘어가는 것과 같은 순서의 다음 카드(마지막이면 끝 카드)
     if (v === "two") { setTwo(!twoOn()); return; } // 두 말 켬/끔(기억)
     if (v === "fs") { toggleFs(); return; } // ⛶ = 칸 통째 전체 화면 ⇄ 나가기
     if (v === "close") { if (pane && fsOn()) exitFs(); else closeCard(); return; } // 전체 화면 중 ✕ = 먼저 칸 안으로 · 다시 ✕ = 영상 자리로 // ✕ = 바깥 누르기와 똑같이 닫힘
