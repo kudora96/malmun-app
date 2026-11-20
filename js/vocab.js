@@ -1,22 +1,22 @@
 // ⭐ 내 단어장(시험판 · 네팔어 1편 · 본부 11-16 대표님 승인) — 낱말 칸을 톡 누르면 작은 카드 · 단어장은 이 기기(localStorage)에만
 // 소리 = 이미 만들어 둔 낱말 소리를 이어 붙여(wordsnd.json) · 없는 편은 줄 소리의 그 낱말 구간 · 학습자 말이 네팔어가 아니면 아무것도 안 보임
-import { lang, uiKoOn, langShort } from "./i18n.js?v=1120.33";
-import { noteHTML, applyMode, fixSizes, readNote, stopRead, toggleRead, switchRead, tapBlock, tapWord, hitText, noteBlocks, curBlock, isReading, isPaused } from "./wordnote.js?v=1120.33"; // 단어 카드 설명(위 = 지금 말 · 아래 ↳ 다른 말) + 읽기 소리
-import { claim, onSound } from "./onesound.js?v=1120.33";
-import { twoOn, setTwo, autoOn, setAuto, autoSchedule, autoCancel, autoPending, autoHold, autoHeld, autoAt, markAuto, showAutoEnd } from "./autoplay.js?v=1120.33"; // 자동 이어 듣기 공용 엔진(설명·단어 카드·조각 카드 · 대표님 11-19 14:11)
-import { hold } from "./wake.js?v=1120.33"; // 단어장·카드 ▶ 도 소리 장치 깨워 둠(목록 화면에서 열 때는 학습 화면의 깨우기가 없었음 · 대표님 11-18 「다음 사람」 첫 「다」 안 들림)
+import { lang, uiKoOn, langShort } from "./i18n.js?v=1120.34";
+import { noteHTML, applyMode, fixSizes, readNote, stopRead, toggleRead, switchRead, tapBlock, tapWord, hitText, noteBlocks, curBlock, isReading, isPaused } from "./wordnote.js?v=1120.34"; // 단어 카드 설명(위 = 지금 말 · 아래 ↳ 다른 말) + 읽기 소리
+import { claim, onSound } from "./onesound.js?v=1120.34";
+import { twoOn, setTwo, autoOn, setAuto, autoSchedule, autoCancel, autoPending, autoHold, autoHeld, autoAt, markAuto, showAutoEnd } from "./autoplay.js?v=1120.34"; // 자동 이어 듣기 공용 엔진(설명·단어 카드·조각 카드 · 대표님 11-19 14:11)
+import { hold } from "./wake.js?v=1120.34"; // 단어장·카드 ▶ 도 소리 장치 깨워 둠(목록 화면에서 열 때는 학습 화면의 깨우기가 없었음 · 대표님 11-18 「다음 사람」 첫 「다」 안 들림)
 let wakeRel = null; const wakeOn = () => { wakeRel ||= hold(); }, wakeOff = () => { const f = wakeRel; wakeRel = null; try { f?.(); } catch {} };
-import * as sfx from "./sfx.js?v=1120.33";
-import { uikoChip } from "./ui.js?v=1120.33";
-import { esc } from "./text.js?v=1120.33";
-import { attachDragScroll } from "./dragscroll.js?v=1120.33";
-import { sortItems, makeSortButton, attachDelete, loadSort } from "./vlist_ops.js?v=1120.33";
-import { PAGE, pageCount, slicePage, clampPage, makePager } from "./vlist_pager.js?v=1120.33";
-import { filterItems, makeFindBox, indexLetters, makeIndexBar, groupByEp, findTx } from "./vlist_find.js?v=1120.33";
-import { paths } from "./paths.js?v=1120.33";
-import { catalog, episode } from "./data.js?v=1120.33";
-import { VERSION } from "./version.js?v=1120.33";
-import { createMemo, memoBtns, TXM } from "./memo.js?v=1120.33"; // 외우기(대표님 11-20 15:10)
+import * as sfx from "./sfx.js?v=1120.34";
+import { uikoChip } from "./ui.js?v=1120.34";
+import { esc } from "./text.js?v=1120.34";
+import { attachDragScroll } from "./dragscroll.js?v=1120.34";
+import { sortItems, makeSortButton, attachDelete, loadSort } from "./vlist_ops.js?v=1120.34";
+import { PAGE, pageCount, slicePage, clampPage, makePager } from "./vlist_pager.js?v=1120.34";
+import { filterItems, makeFindBox, indexLetters, makeIndexBar, groupByEp, findTx } from "./vlist_find.js?v=1120.34";
+import { paths } from "./paths.js?v=1120.34";
+import { catalog, episode } from "./data.js?v=1120.34";
+import { VERSION } from "./version.js?v=1120.34";
+import { createMemo, memoBtns, TXM, firstSentence } from "./memo.js?v=1120.34"; // 외우기(대표님 11-20 15:10)
 
 const KEY = "malmun.vocab.ne";
 export const vocabOn = () => lang === "ne";
@@ -424,17 +424,19 @@ export function openVocabList() {
   const sndOf = (m, f) => { let v = m?.[f]; if (Array.isArray(v)) v = v[0]; return typeof v === "string" && /^snd\//.test(v) ? v : null; }; // 앱 안 상대 주소만 · 아직 없는 항목은 null → 뜻풀이 첫 문장(임시)
   const mname = (it, m) => (m && m.mode === "word" && (m.ne_word || m.list_ne)) || it.mean || ""; // 뜻 낱말 · 짝 없으면 갈래 이름
   const mkSeq = () => { const out = [], seen = new Set(), add = x => { const k = x.kind === "piece" ? "p:" + x.pid : "w:" + clean(x.w); if (!seen.has(k)) { seen.add(k); out.push(x); } }; for (const x of view) { if (x.kind === "piece") { add(x); continue; } const sb = subs.get(x) || []; if (sb.length) sb.forEach(add); else add(x); } return out; }; // 묶음 머리는 빼고 조각만(조각 없는 낱말은 그 낱말 자체가 조각 하나)
+  const meanOf = it => { if (it.kind === "piece") { const e = entMap?.get(it.pid); return e ? { note: pnote(e), url: l => `snd/dict/${it.pid}_${l}_mean.mp3?v=10` } : null; } const nt = N[it.ep], k = clean(it.w), no = (nt?._order || []).indexOf(k) + 1; return nt?.[k] && no ? { note: nt[k], url: l => `snd/wordnote/${it.ep}/${no}_${l}_mean.mp3?v=10` } : null; }
   const memo = createMemo({
     seq: () => mseq, ko: () => uiKoOn(), host: () => document.querySelector(".learn") || document.body,
     show: i => { const lis = mview?.querySelectorAll("li") || []; lis.forEach(e => e.classList.remove("vm-on")); mview?.querySelectorAll(".vm-say").forEach(e => e.classList.remove("vm-say")); if (i < 0) return; const li = lis[i]; if (!li) return; li.classList.add("vm-on"); const u = mview, off = li.getBoundingClientRect().top - u.getBoundingClientRect().top - (u.clientHeight - li.offsetHeight) / 2; u.scrollTo ? u.scrollTo({ top: u.scrollTop + off, behavior: off && Math.abs(off) < 900 ? "smooth" : "auto" }) : (u.scrollTop += off); },
-    side: (i, l) => { const li = mview?.querySelectorAll("li")[i]; li?.querySelectorAll(".vm-say").forEach(e => e.classList.remove("vm-say")); if (l && li) li.querySelector(l === "ko" ? ".vm-k" : ".vm-m")?.classList.add("vm-say"); },
+    side: (i, l) => { const li = mview?.querySelectorAll("li")[i]; li?.querySelectorAll(".vm-say").forEach(e => e.classList.remove("vm-say")); if (l && li) { const t = li.querySelector(l === "ko" ? ".vm-k" : ".vm-m"); if (t && !t.classList.contains("vm-sent")) t.classList.add("vm-say"); } },
+    tick: (i, t) => { const li = mview?.querySelectorAll("li")[i]; if (!li) return; const sp = [...li.querySelectorAll(".vm-wd")]; if (!sp.length) return; const it = mseq[i], w = it && firstSentence(meanOf(it)?.note, "ne").w; let j = -1; if (w && t >= 0) { w.forEach((x, n) => { if (x[0] <= t + 0.03) j = n; }); if (j >= 0 && t > w[j][1] + 0.3) j = -1; if (j >= sp.length) j = sp.length - 1; } sp.forEach((e, n) => e.classList.toggle("vm-say", n === j)); },
     stopWord: () => stopWordSound(),
     word: async (it, done, guard) => { const ids = it.kind !== "piece" && it.ep && it.n != null ? await unitsFor(it.ep, it.n, it.w) : null; if (!ids?.length && !(it.kind !== "piece" && it.af)) return done(); it.__done = done; guard(() => playSnd(it, null, null, ids || null)); },
-    mean: it => { if (it.kind === "piece") { const e = entMap?.get(it.pid); return e ? { note: pnote(e), url: l => `snd/dict/${it.pid}_${l}_mean.mp3?v=10` } : null; } const nt = N[it.ep], k = clean(it.w), no = (nt?._order || []).indexOf(k) + 1; return nt?.[k] && no ? { note: nt[k], url: l => `snd/wordnote/${it.ep}/${no}_${l}_mean.mp3?v=10` } : null; },
+    mean: it => meanOf(it),
     shortUrl: (it, l) => { const m = mapOf(it); if (!m) return null; if (l === "ko") return sndOf(m, "ko_snd"); return m.mode === "word" ? sndOf(m, "ne_word_snd") : null; }, // 짧은 소리(조각 한국어 낱말·짧은 뜻 낱말) · 없으면 뜻풀이 첫 문장(임시) · mean 항목은 뜻풀이 한 문장
     onState: () => drawMemo(),
   });
-  const mrow = (it, ko, i) => { const m = mapOf(it), d = devMap.get(it) || it.dev || "", k = `<span class="vm-k ko" lang="ko">${esc(it.w)}</span>`, r = d ? `<span class="vm-r" lang="ne">${esc(d)}</span>` : "", n = `<span class="vm-m" lang="ne">${esc(mname(it, m))}</span>`; return `<li class="vm-row"><button type="button" class="vm-lb" data-i="${i}">${ko ? k + r + n : n + k + r}</button></li>`; };
+  const mrow = (it, ko, i) => { const m = mapOf(it), d = devMap.get(it) || it.dev || "", k = `<span class="vm-k ko" lang="ko">${esc(it.w)}</span>`, r = d ? `<span class="vm-r" lang="ne">${esc(d)}</span>` : ""; let n; const mn = m && m.mode === "mean" && meanOf(it)?.note, fs = mn && firstSentence(mn, "ne"); if (fs && fs.tk.length) n = `<span class="vm-m vm-sent" lang="ne">${fs.tk.map(t => `<span class="vm-wd">${esc(t)}</span>`).join(" ")}</span>`; else n = `<span class="vm-m" lang="ne">${esc(mname(it, m))}</span>`; return `<li class="vm-row"><button type="button" class="vm-lb" data-i="${i}">${ko ? k + r + n : n + k + r}</button></li>`; }; // 짝 낱말 없는 조각(mean) = 읽는 뜻풀이 한 문장 글 그대로(낱말마다 칠이 따라감)
   const drawMemoRows = () => { if (!mview) return; const ko = uiKoOn(); mview.innerHTML = mseq.map((it, i) => mrow(it, ko, i)).join(""); tmpN = mseq.filter(it => { const m = mapOf(it); return !(m && sndOf(m, "ko_snd") && (m.mode === "mean" || sndOf(m, "ne_word_snd"))); }).length; window.__memo.temp = tmpN; window.__memo.n = mseq.length; };
   const drawMemo = () => { // 전용 보기 갈색 막대(‹ 돌아가기 · ▶/⏸ · ×N) — 쪽 넘김 막대 자리(목록 화면에는 없음)
     if (listEl !== el) return; const host = stage ? document.querySelector(".learn .seek") : el.querySelector(".vk-sheet") || el; if (!host) return;
@@ -473,7 +475,7 @@ export function openVocabList() {
     const tb = e.target.closest(".vk-tab"); if (tb) { if (tb.dataset.t === "memo") { if (!memoOn) enterMemo(); return; } if (memoOn && tb.dataset.t === tab) return leaveMemo(); if (tb.dataset.t !== tab) { memoOn = false; tab = tb.dataset.t; cur = 0; draw(); } return; } // 탭 바꿈(열려 있는 동안만)
     const st = e.target.closest(".vk-st"); if (st) { const it = byKey.get(st.dataset.w); if (it) { const k = kOf(it), was = has(k); popKey = k; toast(was ? "tDel" : "tAdd"); if (was) drop(k); else put(it); } return; } // 전체 탭 ⭐ = 담기 · 다시 누르면 빼기(개수 배지가 바로 오르내림)
     const seqAt = btn => { const sq = view.flatMap(x => [x, ...(subs.get(x) || [])]), li = btn.closest("li"), lis = [...ul.querySelectorAll("li.vk-li,li.vk-sub")], pg0 = slicePage(view, cur)[0], base = pg0 ? sq.indexOf(pg0) : 0, p = lis.indexOf(li); return p >= 0 && base >= 0 && sq[base + p] ? { sq, p: base + p } : { sq, p: -1 }; }; // 눌린 줄의 「보이는 순서」 자리(탭·정렬·찾기·쪽 · 단어 아래 조각 포함)
-    if (memoOn) { const lb0 = e.target.closest(".vm-lb"); if (lb0) memo.jump(+lb0.dataset.i); return; } // 외우기 보기에서 줄을 누르면 거기부터 이어 감(멈춘 때도)
+    if (memoOn) { const lb0 = e.target.closest(".vm-lb"); if (lb0 && hitText(lb0, e)) memo.jump(+lb0.dataset.i); else if (lb0 || !e.target.closest("button,a,input,.vk-head,.vm-bar")) memo.toggle(); return; } // 외우기 보기에서 줄을 누르면 거기부터 이어 감(멈춘 때도)
     const pl = e.target.closest(".vk-pl"); // 줄 ▶ = 그 단어 소리(카드 ▶ 와 같은 길 · claim("card") 이 다른 소리를 멈춤)
     if (pl) { const it = byKey.get(pl.dataset.w) || read().find(x => kOf(x) === pl.dataset.w); if (it && it.kind === "piece") { const { sq, p } = seqAt(pl); return openPieceFromList(p >= 0 ? sq[p] : it, p >= 0 ? sq : null, p); } if (it) { it.__done = null; pl.classList.add("playing"); playSnd(it, pl).catch(() => {}).finally(() => setTimeout(() => pl.classList.remove("playing"), 0)); } return; }
     const b = e.target.closest(".vk-lb"); if (!b) return;

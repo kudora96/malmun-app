@@ -2,9 +2,9 @@
 // 줄마다 한 짝 = 한국어 낱말 소리 + 학습자 말 짧은 뜻 소리(⇄ 순서) · 반복 ×N 이면 그 짝을 N 번 · 짝 사이 0.4초 · 줄 사이 0.8초
 // 뜻 소리 = 짧은 뜻 낱말 소리(data/memo_map.json 이 알려 주는 것)가 있으면 그것 · 없으면 카드 뜻풀이 첫 문장(낱말 시각 w 로 자름)
 // 소리는 언제나 하나(onesound) — vocab.js 가 이 엔진에 줄 목록·낱말 소리·뜻 소리 자리를 건네 줌
-import { claim, onSound } from "./onesound.js?v=1120.33";
-import { showAutoEnd, hideAutoEnd } from "./autoplay.js?v=1120.33";
-import { esc } from "./text.js?v=1120.33";
+import { claim, onSound } from "./onesound.js?v=1120.34";
+import { showAutoEnd, hideAutoEnd } from "./autoplay.js?v=1120.34";
+import { esc } from "./text.js?v=1120.34";
 
 let repMem = 1; // 이 앱을 연 동안만(새로 열면 ×1)
 export const GAP_PAIR = 400, GAP_ROW = 800;
@@ -17,9 +17,10 @@ export const TXM = {
 // 뜻풀이 첫 문장 구간(초) — 낱말 시각 w[낱말][시작,끝] · 글 낱말 수와 같지 않아도 첫 마침표 낱말 번호로 자름
 export function firstSentence(note, l) {
   const w = note?.[`${l}_mean_w`], tx = String(note?.[`${l}_mean`] || ""), tk = tx.split(/\s+/).filter(Boolean);
-  if (!w?.length) return { s: 0, e: 0 };
-  let k = tk.findIndex(t => SENT_END.test(t)); if (k < 0 || k >= w.length) k = w.length - 1;
-  return { s: Math.max(0, w[0][0] - 0.12), e: w[k][1] + 0.15 };
+  let k = tk.findIndex(t => SENT_END.test(t)); if (k < 0) k = tk.length - 1;
+  if (!w?.length) return { s: 0, e: 0, k, tk: tk.slice(0, k + 1), w: null };
+  if (k >= w.length) k = w.length - 1;
+  return { s: Math.max(0, w[0][0] - 0.12), e: w[k][1] + 0.15, k, tk: tk.slice(0, k + 1), w: w.slice(0, k + 1) };
 }
 
 // api = { seq(): 줄 목록 · ko(): 한국어 먼저? · show(i): 그 줄이 보이게(쪽 넘김·금색 테두리) · word(it, done): 낱말 소리(없으면 done 바로) · stopWord() ·
@@ -32,13 +33,13 @@ export function createMemo(api) {
   const sleep = ms => new Promise(r => { curRes = r; timer = setTimeout(() => { timer = 0; curRes = null; r(); }, log.skip ? 5 : ms); });
   const stopAu = () => { clearTimeout(timer); timer = 0; if (curA) { try { curA.onended = curA.onerror = null; curA.pause(); } catch {} curA = null; } api.stopWord?.(); const r = curRes; curRes = null; r?.(); };
   function halt() { tok++; running = false; stopAu(); api.onState?.(); }
-  function clip(src, s, e) { // 이미 있는 소리 파일의 한 구간
+  function clip(src, s, e, tick) { // 이미 있는 소리 파일의 한 구간 · tick(초) = 읽는 낱말 따라가기(끝나면 tick(-1))
     return new Promise(res => {
-      let done = false; const fin = () => { if (done) return; done = true; clearTimeout(timer); timer = 0; curRes = null; if (curA === a) { try { a.pause(); } catch {} curA = null; } res(); };
+      let done = false, iv = 0; const fin = () => { if (done) return; done = true; clearInterval(iv); if (tick) tick(-1); clearTimeout(timer); timer = 0; curRes = null; if (curA === a) { try { a.pause(); } catch {} curA = null; } res(); };
       const a = (curA = new Audio(src)); curRes = fin; self++; claim("memo"); self--;
       a.onended = a.onerror = fin;
       a.addEventListener("loadedmetadata", () => { try { a.currentTime = s || 0; } catch {} }, { once: true });
-      a.play().then(() => { if (e > s) { clearTimeout(timer); timer = setTimeout(fin, Math.max(200, (e - (s || 0)) * 1000)); } }).catch(fin);
+      a.play().then(() => { if (tick && !done) iv = setInterval(() => { if (curA === a) tick(a.currentTime); }, 40); if (e > s) { clearTimeout(timer); timer = setTimeout(fin, Math.max(200, (e - (s || 0)) * 1000)); } }).catch(fin);
     });
   }
   async function part(it, l) {
@@ -46,7 +47,7 @@ export function createMemo(api) {
     if (log.skip) return sleep(5);
     const short = api.shortUrl?.(it, l); if (short) return clip(short, 0, 0); // 짧은 소리(만들어진 것)
     if (l === "ko" && it.kind !== "piece") return new Promise(res => { curRes = res; const t = setTimeout(res, 20000); api.word(it, () => { clearTimeout(t); res(); }, f => { self++; try { f(); } finally { self--; } }); }); // 단어 카드 낱말 소리
-    const m = api.mean?.(it); if (!m?.note) return; const sp = firstSentence(m.note, l); return clip(m.url(l), sp.s, sp.e); // 조각·뜻풀이 만 있는 항목(조사·어미) 또는 짧은 소리가 아직 없는 항목(임시) = 뜻풀이 첫 문장
+    const m = api.mean?.(it); if (!m?.note) return; const sp = firstSentence(m.note, l), ix = idx; return clip(m.url(l), sp.s, sp.e, l !== "ko" && api.tick ? t => api.tick(ix, t) : null); // 조각·뜻풀이 만 있는 항목(조사·어미) 또는 짧은 소리가 아직 없는 항목(임시) = 뜻풀이 첫 문장
   }
   async function run(i) {
     const my = ++tok; stopAu(); idx = i; running = true; started = true; hideAutoEnd(); api.onState?.();
