@@ -1,17 +1,17 @@
-import "./agepolicy.js?v=1120.24"; // 기능별 나이(대표님 10-19) — 받아쓰기 막기는 다른 것보다 먼저
-import "./tick.js?v=1120.24"; // 누르는 「톡」 소리(Web Audio 합성 · 학습 소리 안 끊음)
-import { initAppTip } from "./apptip.js?v=1120.24"; initAppTip(); // 공용 도움말(title → 위쪽 작은 상자)
-import { detectLang, setLang, LANGS, t } from "./i18n.js?v=1120.24";
-import { VERSION } from "./version.js?v=1120.24";
-import { bgmScene } from "./bgm.js?v=1120.24";
-import welcome from "./screens/welcome.js?v=1120.24";
-import list from "./screens/list.js?v=1120.24";
-import learn from "./screens/learn.js?v=1120.24";
-import write from "./screens/write.js?v=1120.24";
-import speak from "./screens/speak.js?v=1120.24";
-import diag from "./screens/diag.js?v=1120.24";
-import "./errlog.js?v=1120.24"; // 오류 기록(진단 화면용 · 기록만)
-import { devgoPrep, devgoRun } from "./devgo.js?v=1120.24"; // 대표님 확인용 바로가기 ?go=(로컬판에서만 · 본부 10-23)
+import "./agepolicy.js?v=1120.25"; // 기능별 나이(대표님 10-19) — 받아쓰기 막기는 다른 것보다 먼저
+import "./tick.js?v=1120.25"; // 누르는 「톡」 소리(Web Audio 합성 · 학습 소리 안 끊음)
+import { initAppTip } from "./apptip.js?v=1120.25"; initAppTip(); // 공용 도움말(title → 위쪽 작은 상자)
+import { detectLang, setLang, LANGS, t } from "./i18n.js?v=1120.25";
+import { VERSION } from "./version.js?v=1120.25";
+import { bgmScene } from "./bgm.js?v=1120.25";
+import welcome from "./screens/welcome.js?v=1120.25";
+import list from "./screens/list.js?v=1120.25";
+import learn from "./screens/learn.js?v=1120.25";
+import write from "./screens/write.js?v=1120.25";
+import speak from "./screens/speak.js?v=1120.25";
+import diag from "./screens/diag.js?v=1120.25";
+import "./errlog.js?v=1120.25"; // 오류 기록(진단 화면용 · 기록만)
+import { devgoPrep, devgoRun } from "./devgo.js?v=1120.25"; // 대표님 확인용 바로가기 ?go=(로컬판에서만 · 본부 10-23)
 
 const app = document.getElementById("app");
 const explain = (app, ep, id) => learn(app, ep, id, { explain: true }); /* #/explain/{편}/{줄} = 학습 화면 + 그 줄 새(v9) 설명 창(10-12 · 옛 explain.js 화면 대신 · 책 QR 주소 그대로) */

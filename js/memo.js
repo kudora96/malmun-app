@@ -2,9 +2,9 @@
 // 줄마다 한 짝 = 한국어 낱말 소리 + 학습자 말 뜻 소리(⇄ 순서) · 반복 ×N 이면 그 짝을 N 번 · 짝 사이 0.4초 · 줄 사이 0.8초
 // 뜻 소리 = 짧은 뜻 낱말 소리(data/memo_map.json 이 알려 주는 것)가 있으면 그것 · 없으면 카드 뜻풀이 첫 문장(낱말 시각 w 로 자름)
 // 소리는 언제나 하나(onesound) — vocab.js 가 이 엔진에 줄 목록·낱말 소리·뜻 소리 자리를 건네 줌
-import { claim, onSound } from "./onesound.js?v=1120.24";
-import { showAutoEnd, hideAutoEnd } from "./autoplay.js?v=1120.24";
-import { esc } from "./text.js?v=1120.24";
+import { claim, onSound } from "./onesound.js?v=1120.25";
+import { showAutoEnd, hideAutoEnd } from "./autoplay.js?v=1120.25";
+import { esc } from "./text.js?v=1120.25";
 
 let repMem = 1; // 이 앱을 연 동안만(새로 열면 ×1)
 export const GAP_PAIR = 400, GAP_ROW = 800;
