@@ -4,7 +4,7 @@
 //  · 켜고 끄는 단추(aria-pressed/aria-selected/탭/⇄)는 올라가는 두 음, 보통 단추는 내려가는 한 음
 //  · 숨은 설정: localStorage["malmun.tick"]="0" (또는 window.__tickOff) 이면 끔 · 소리 크기는 window.__sfxVolume 따름(점검은 크롬 --mute-audio 로 조용히)
 //  · 블루투스 깨우기(wake.hold)는 안 씀 — 맨 첫 틱이 먹혀도 괜찮음
-import { audioCtx, isQuiet } from "./wake.js?v=1120.10";
+import { audioCtx, isQuiet } from "./wake.js?v=1120.11";
 
 const SEL = 'button,[role=button],[role=tab],[role=option],.chip,[data-v],[data-act],summary,a.btn,label.sw,input[type=checkbox],input[type=radio]';
 const NO = '.mic,.vp-mic,[data-x=rec],[data-act=rec],[data-act=mic],[data-notick]'; // 마이크 시작 단추는 소리 없이

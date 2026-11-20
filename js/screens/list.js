@@ -1,12 +1,12 @@
-import { t, lang, uiKoOn, epTitles } from "../i18n.js?v=1120.10";
-import { LEARN } from "../tl.js?v=1120.10";
-import { esc } from "../text.js?v=1120.10";
-import { catalog } from "../data.js?v=1120.10";
-import { langChip, openLangSheet, progress, uiKoBtn } from "../ui.js?v=1120.10";
-import { rerender } from "../main.js?v=1120.10";
-import { VERSION } from "../version.js?v=1120.10";
-import { vocabMenuHTML, vocabCount, openVocabList } from "../vocab.js?v=1120.10"; // ⭐ 내 단어장(네팔어만 · 대표님 11-16)
-import { recCount, recDelEpisode } from "../recstore.js?v=1120.10";
+import { t, lang, uiKoOn, epTitles } from "../i18n.js?v=1120.11";
+import { LEARN } from "../tl.js?v=1120.11";
+import { esc } from "../text.js?v=1120.11";
+import { catalog } from "../data.js?v=1120.11";
+import { langChip, openLangSheet, progress, uiKoBtn } from "../ui.js?v=1120.11";
+import { rerender } from "../main.js?v=1120.11";
+import { VERSION } from "../version.js?v=1120.11";
+import { vocabMenuHTML, vocabCount, openVocabList } from "../vocab.js?v=1120.11"; // ⭐ 내 단어장(네팔어만 · 대표님 11-16)
+import { recCount, recDelEpisode } from "../recstore.js?v=1120.11";
 
 const mmss = s => `${Math.floor(s / 60)}:${String(Math.round(s % 60)).padStart(2, "0")}`;
 

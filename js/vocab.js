@@ -1,21 +1,21 @@
 // ⭐ 내 단어장(시험판 · 네팔어 1편 · 본부 11-16 대표님 승인) — 낱말 칸을 톡 누르면 작은 카드 · 단어장은 이 기기(localStorage)에만
 // 소리 = 이미 만들어 둔 낱말 소리를 이어 붙여(wordsnd.json) · 없는 편은 줄 소리의 그 낱말 구간 · 학습자 말이 네팔어가 아니면 아무것도 안 보임
-import { lang, uiKoOn, langShort } from "./i18n.js?v=1120.10";
-import { noteHTML, applyMode, fixSizes, readNote, stopRead, toggleRead, switchRead, tapBlock, tapWord, noteBlocks, curBlock, isReading, isPaused } from "./wordnote.js?v=1120.10"; // 단어 카드 설명(위 = 지금 말 · 아래 ↳ 다른 말) + 읽기 소리
-import { claim, onSound } from "./onesound.js?v=1120.10";
-import { twoOn, setTwo, autoOn, setAuto, autoSchedule, autoCancel, autoPending, autoHold, autoHeld, autoAt, markAuto, showAutoEnd } from "./autoplay.js?v=1120.10"; // 자동 이어 듣기 공용 엔진(설명·단어 카드·조각 카드 · 대표님 11-19 14:11)
-import { hold } from "./wake.js?v=1120.10"; // 단어장·카드 ▶ 도 소리 장치 깨워 둠(목록 화면에서 열 때는 학습 화면의 깨우기가 없었음 · 대표님 11-18 「다음 사람」 첫 「다」 안 들림)
+import { lang, uiKoOn, langShort } from "./i18n.js?v=1120.11";
+import { noteHTML, applyMode, fixSizes, readNote, stopRead, toggleRead, switchRead, tapBlock, tapWord, noteBlocks, curBlock, isReading, isPaused } from "./wordnote.js?v=1120.11"; // 단어 카드 설명(위 = 지금 말 · 아래 ↳ 다른 말) + 읽기 소리
+import { claim, onSound } from "./onesound.js?v=1120.11";
+import { twoOn, setTwo, autoOn, setAuto, autoSchedule, autoCancel, autoPending, autoHold, autoHeld, autoAt, markAuto, showAutoEnd } from "./autoplay.js?v=1120.11"; // 자동 이어 듣기 공용 엔진(설명·단어 카드·조각 카드 · 대표님 11-19 14:11)
+import { hold } from "./wake.js?v=1120.11"; // 단어장·카드 ▶ 도 소리 장치 깨워 둠(목록 화면에서 열 때는 학습 화면의 깨우기가 없었음 · 대표님 11-18 「다음 사람」 첫 「다」 안 들림)
 let wakeRel = null; const wakeOn = () => { wakeRel ||= hold(); }, wakeOff = () => { const f = wakeRel; wakeRel = null; try { f?.(); } catch {} };
-import * as sfx from "./sfx.js?v=1120.10";
-import { uikoChip } from "./ui.js?v=1120.10";
-import { esc } from "./text.js?v=1120.10";
-import { attachDragScroll } from "./dragscroll.js?v=1120.10";
-import { sortItems, makeSortButton, attachDelete, loadSort } from "./vlist_ops.js?v=1120.10";
-import { PAGE, pageCount, slicePage, clampPage, makePager } from "./vlist_pager.js?v=1120.10";
-import { filterItems, makeFindBox, indexLetters, makeIndexBar, groupByEp, findTx } from "./vlist_find.js?v=1120.10";
-import { paths } from "./paths.js?v=1120.10";
-import { catalog, episode } from "./data.js?v=1120.10";
-import { VERSION } from "./version.js?v=1120.10";
+import * as sfx from "./sfx.js?v=1120.11";
+import { uikoChip } from "./ui.js?v=1120.11";
+import { esc } from "./text.js?v=1120.11";
+import { attachDragScroll } from "./dragscroll.js?v=1120.11";
+import { sortItems, makeSortButton, attachDelete, loadSort } from "./vlist_ops.js?v=1120.11";
+import { PAGE, pageCount, slicePage, clampPage, makePager } from "./vlist_pager.js?v=1120.11";
+import { filterItems, makeFindBox, indexLetters, makeIndexBar, groupByEp, findTx } from "./vlist_find.js?v=1120.11";
+import { paths } from "./paths.js?v=1120.11";
+import { catalog, episode } from "./data.js?v=1120.11";
+import { VERSION } from "./version.js?v=1120.11";
 
 const KEY = "malmun.vocab.ne";
 export const vocabOn = () => lang === "ne";
@@ -141,7 +141,7 @@ function ctlBtns(c) {
   const t = CTX[uiKoOn() ? "ko" : "ne"], bk = c.back(), sv = c.saved(), lis = esc(tx("listen"));
   return [bk ? `<button type="button" class="vp-b vk-back" data-v="${bk}" aria-label="${esc(t.back)}" title="${esc(t.back)}"><span aria-hidden="true">‹</span><span class="t">${esc(t.back)}</span></button>` : "",
     `<button type="button" class="vp-b vk-snd" data-v="snd" aria-label="${lis}" title="${lis}">▶</button>`
-    + (c.auto?.() ? autoBtn(autoOn()) : "") + (c.two?.() ? twoBtn() : "")
+    + (c.two?.() ? twoBtn() : "") + (c.auto?.() ? autoBtn(autoOn()) : "")
     + `<button type="button" class="vp-b vk-add" data-v="${c.add()}" ${sv ? "disabled" : ""} aria-label="${esc(sv ? t.has : t.add)}" title="${esc(sv ? t.has : t.add)}"><span aria-hidden="true">⭐</span><span class="t">${esc(sv ? t.has : t.add)}</span></button>`];
 }
 function placeCBar() { // 평소 = 갈색 막대(.seek) 안 · 전체 화면 = 영상 칸 맨 아래
