@@ -1,0 +1,2122 @@
+{
+ "p:annyeonghada": {
+  "mode": "word",
+  "memo": "word",
+  "ko": "안녕하다",
+  "ne_word": "सन्चो हुनु",
+  "list_ne": "विशेषण",
+  "ko_snd": [
+   "snd/memo/ko_001.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/annyeonghada_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/annyeonghada_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "word",
+   "word",
+   "word"
+  ],
+  "ne_snd": "snd/memo/ne_001.mp3",
+  "ne_word_snd": "snd/memo/ne_001.mp3"
+ },
+ "p:seyo": {
+  "mode": "mean",
+  "memo": "mean",
+  "ko": "-세요",
+  "ne_word": null,
+  "list_ne": "प्रत्यय",
+  "ko_snd": [
+   "snd/memo/ko_002.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/seyo_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/seyo_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "mean",
+   "mean",
+   "mean"
+  ],
+  "ne_snd": null,
+  "ne_word_snd": null
+ },
+ "p:yeoreobun": {
+  "mode": "word",
+  "memo": "word",
+  "ko": "여러분",
+  "ne_word": "साथीहरू",
+  "list_ne": "सर्वनाम",
+  "ko_snd": [
+   "snd/memo/ko_003.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/yeoreobun_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/yeoreobun_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "word",
+   "word",
+   "word"
+  ],
+  "ne_snd": "snd/memo/ne_002.mp3",
+  "ne_word_snd": "snd/memo/ne_002.mp3"
+ },
+ "p:jeo": {
+  "mode": "word",
+  "memo": "word",
+  "ko": "저",
+  "ne_word": "म",
+  "list_ne": "सर्वनाम",
+  "ko_snd": [
+   "snd/memo/ko_004.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/jeo_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/jeo_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "word",
+   "word",
+   "word"
+  ],
+  "ne_snd": "snd/memo/ne_003.mp3",
+  "ne_word_snd": "snd/memo/ne_003.mp3"
+ },
+ "p:neun": {
+  "mode": "mean",
+  "memo": "mean",
+  "ko": "는",
+  "ne_word": null,
+  "list_ne": "विभक्ति",
+  "ko_snd": [
+   "snd/memo/ko_005.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/neun_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/neun_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "mean",
+   "mean",
+   "mean"
+  ],
+  "ne_snd": null,
+  "ne_word_snd": null
+ },
+ "p:hanguk": {
+  "mode": "word",
+  "memo": "word",
+  "ko": "한국",
+  "ne_word": "कोरिया",
+  "list_ne": "संज्ञा",
+  "ko_snd": [
+   "snd/memo/ko_006.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/hanguk_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/hanguk_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "word",
+   "word",
+   "word"
+  ],
+  "ne_snd": "snd/memo/ne_004.mp3",
+  "ne_word_snd": "snd/memo/ne_004.mp3"
+ },
+ "p:eo_lang": {
+  "mode": "mean",
+  "memo": "mean",
+  "ko": "-어",
+  "ne_word": null,
+  "list_ne": "प्रत्यय",
+  "ko_snd": [
+   "snd/memo/ko_007.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/eo_lang_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/eo_lang_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "mean",
+   "mean",
+   "mean"
+  ],
+  "ne_snd": null,
+  "ne_word_snd": null
+ },
+ "p:seonsaengnim": {
+  "mode": "word",
+  "memo": "word",
+  "ko": "선생님",
+  "ne_word": "शिक्षक",
+  "list_ne": "संज्ञा",
+  "ko_snd": [
+   "snd/memo/ko_008.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/seonsaengnim_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/seonsaengnim_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "word",
+   "word",
+   "word"
+  ],
+  "ne_snd": "snd/memo/ne_005.mp3",
+  "ne_word_snd": "snd/memo/ne_005.mp3"
+ },
+ "p:ieyo": {
+  "mode": "mean",
+  "memo": "mean",
+  "ko": "이에요",
+  "ne_word": null,
+  "list_ne": "विधेय विभक्ति",
+  "ko_snd": [
+   "snd/memo/ko_009.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/ieyo_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/ieyo_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "mean",
+   "mean",
+   "mean"
+  ],
+  "ne_snd": null,
+  "ne_word_snd": null
+ },
+ "p:seong": {
+  "mode": "word",
+  "memo": "word",
+  "ko": "성",
+  "ne_word": "थर",
+  "list_ne": "संज्ञा",
+  "ko_snd": [
+   "snd/memo/ko_010.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/seong_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/seong_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "word",
+   "word",
+   "word"
+  ],
+  "ne_snd": "snd/memo/ne_006.mp3",
+  "ne_word_snd": "snd/memo/ne_006.mp3"
+ },
+ "p:eun": {
+  "mode": "mean",
+  "memo": "mean",
+  "ko": "은",
+  "ne_word": null,
+  "list_ne": "विभक्ति",
+  "ko_snd": [
+   "snd/memo/ko_011.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/eun_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/eun_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "mean",
+   "mean",
+   "mean"
+  ],
+  "ne_snd": null,
+  "ne_word_snd": null
+ },
+ "p:ireum": {
+  "mode": "word",
+  "memo": "word",
+  "ko": "이름",
+  "ne_word": "नाम",
+  "list_ne": "संज्ञा",
+  "ko_snd": [
+   "snd/memo/ko_012.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/ireum_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/ireum_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "word",
+   "word",
+   "word"
+  ],
+  "ne_snd": "snd/memo/ne_007.mp3",
+  "ne_word_snd": "snd/memo/ne_007.mp3"
+ },
+ "p:mannada": {
+  "mode": "word",
+  "memo": "word",
+  "ko": "만나다",
+  "ne_word": "भेट्नु",
+  "list_ne": "क्रिया",
+  "ko_snd": [
+   "snd/memo/ko_013.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/mannada_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/mannada_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "word",
+   "word",
+   "word"
+  ],
+  "ne_snd": "snd/memo/ne_008.mp3",
+  "ne_word_snd": "snd/memo/ne_008.mp3"
+ },
+ "p:aseo": {
+  "mode": "mean",
+  "memo": "mean",
+  "ko": "-아서",
+  "ne_word": null,
+  "list_ne": "संयोजक प्रत्यय",
+  "ko_snd": [
+   "snd/memo/ko_014.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/aseo_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/aseo_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "mean",
+   "mean",
+   "mean"
+  ],
+  "ne_snd": null,
+  "ne_word_snd": null
+ },
+ "p:bangapda": {
+  "mode": "word",
+  "memo": "word",
+  "ko": "반갑다",
+  "ne_word": "खुसी लाग्नु",
+  "list_ne": "विशेषण",
+  "ko_snd": [
+   "snd/memo/ko_015.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/bangapda_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/bangapda_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "word",
+   "word",
+   "word"
+  ],
+  "ne_snd": "snd/memo/ne_009.mp3",
+  "ne_word_snd": "snd/memo/ne_009.mp3"
+ },
+ "p:eoyo": {
+  "mode": "mean",
+  "memo": "mean",
+  "ko": "-어요",
+  "ne_word": null,
+  "list_ne": "प्रत्यय",
+  "ko_snd": [
+   "snd/memo/ko_016.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/eoyo_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/eoyo_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "mean",
+   "mean",
+   "mean"
+  ],
+  "ne_snd": null,
+  "ne_word_snd": null
+ },
+ "p:yeogi": {
+  "mode": "word",
+  "memo": "word",
+  "ko": "여기",
+  "ne_word": "यहाँ",
+  "list_ne": "सर्वनाम",
+  "ko_snd": [
+   "snd/memo/ko_017.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/yeogi_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/yeogi_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "word",
+   "word",
+   "word"
+  ],
+  "ne_snd": "snd/memo/ne_010.mp3",
+  "ne_word_snd": "snd/memo/ne_010.mp3"
+ },
+ "p:incheon": {
+  "mode": "word",
+  "memo": "word",
+  "ko": "인천",
+  "ne_word": "इन्चोन",
+  "list_ne": "व्यक्तिवाचक संज्ञा",
+  "ko_snd": [
+   "snd/memo/ko_018.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/incheon_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/incheon_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "word",
+   "word",
+   "word"
+  ],
+  "ne_snd": "snd/memo/ne_011.mp3",
+  "ne_word_snd": "snd/memo/ne_011.mp3"
+ },
+ "p:gonghang": {
+  "mode": "word",
+  "memo": "word",
+  "ko": "공항",
+  "ne_word": "विमानस्थल",
+  "list_ne": "संज्ञा",
+  "ko_snd": [
+   "snd/memo/ko_019.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/gonghang_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/gonghang_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "word",
+   "word",
+   "word"
+  ],
+  "ne_snd": "snd/memo/ne_012.mp3",
+  "ne_word_snd": "snd/memo/ne_012.mp3"
+ },
+ "p:e": {
+  "mode": "mean",
+  "memo": "mean",
+  "ko": "에",
+  "ne_word": null,
+  "list_ne": "विभक्ति",
+  "ko_snd": [
+   "snd/memo/ko_020.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/e_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/e_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "mean",
+   "mean",
+   "mean"
+  ],
+  "ne_snd": null,
+  "ne_word_snd": null
+ },
+ "p:oda": {
+  "mode": "word",
+  "memo": "word",
+  "ko": "오다",
+  "ne_word": "आउनु",
+  "list_ne": "क्रिया",
+  "ko_snd": [
+   "snd/memo/ko_021.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/oda_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/oda_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "word",
+   "word",
+   "word"
+  ],
+  "ne_snd": "snd/memo/ne_013.mp3",
+  "ne_word_snd": "snd/memo/ne_013.mp3"
+ },
+ "p:n_gwan": {
+  "mode": "mean",
+  "memo": "mean",
+  "ko": "-ㄴ",
+  "ne_word": null,
+  "list_ne": "विशेषण प्रत्यय",
+  "ko_snd": [
+   "snd/memo/ko_022.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/n_gwan_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/n_gwan_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "mean",
+   "mean",
+   "mean"
+  ],
+  "ne_snd": null,
+  "ne_word_snd": null
+ },
+ "p:geot": {
+  "mode": "mean",
+  "memo": "mean",
+  "ko": "것",
+  "ne_word": null,
+  "list_ne": "आश्रित संज्ञा",
+  "ko_snd": [
+   "snd/memo/ko_023.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/geot_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/geot_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "mean",
+   "word",
+   "mean"
+  ],
+  "ne_snd": null,
+  "ne_word_snd": null
+ },
+ "p:hwanyeonghada": {
+  "mode": "word",
+  "memo": "word",
+  "ko": "환영하다",
+  "ne_word": "स्वागत गर्नु",
+  "list_ne": "क्रिया",
+  "ko_snd": [
+   "snd/memo/ko_024.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/hwanyeonghada_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/hwanyeonghada_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "word",
+   "word",
+   "word"
+  ],
+  "ne_snd": "snd/memo/ne_014.mp3",
+  "ne_word_snd": "snd/memo/ne_014.mp3"
+ },
+ "p:ap": {
+  "mode": "word",
+  "memo": "word",
+  "ko": "앞",
+  "ne_word": "अगाडि",
+  "list_ne": "संज्ञा",
+  "ko_snd": [
+   "snd/memo/ko_025.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/ap_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/ap_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "word",
+   "word",
+   "word"
+  ],
+  "ne_snd": "snd/memo/ne_015.mp3",
+  "ne_word_snd": "snd/memo/ne_015.mp3"
+ },
+ "p:euro": {
+  "mode": "mean",
+  "memo": "mean",
+  "ko": "으로",
+  "ne_word": null,
+  "list_ne": "विभक्ति",
+  "ko_snd": [
+   "snd/memo/ko_026.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/euro_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/euro_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "mean",
+   "mean",
+   "mean"
+  ],
+  "ne_snd": null,
+  "ne_word_snd": null
+ },
+ "p:wa": {
+  "mode": "mean",
+  "memo": "mean",
+  "ko": "와",
+  "ne_word": null,
+  "list_ne": "विभक्ति",
+  "ko_snd": [
+   "snd/memo/ko_027.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/wa_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/wa_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "mean",
+   "mean",
+   "mean"
+  ],
+  "ne_snd": null,
+  "ne_word_snd": null
+ },
+ "p:dul": {
+  "mode": "word",
+  "memo": "word",
+  "ko": "둘",
+  "ne_word": "दुई",
+  "list_ne": "संख्यावाचक शब्द",
+  "ko_snd": [
+   "snd/memo/ko_028.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/dul_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/dul_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "word",
+   "word",
+   "word"
+  ],
+  "ne_snd": "snd/memo/ne_016.mp3",
+  "ne_word_snd": "snd/memo/ne_016.mp3"
+ },
+ "p:iseo": {
+  "mode": "mean",
+  "memo": "mean",
+  "ko": "이서",
+  "ne_word": null,
+  "list_ne": "विभक्ति",
+  "ko_snd": [
+   "snd/memo/ko_029.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/iseo_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/iseo_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "mean",
+   "mean",
+   "mean"
+  ],
+  "ne_snd": null,
+  "ne_word_snd": null
+ },
+ "p:gongbuhada": {
+  "mode": "word",
+  "memo": "word",
+  "ko": "공부하다",
+  "ne_word": "पढ्नु",
+  "list_ne": "क्रिया",
+  "ko_snd": [
+   "snd/memo/ko_030.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/gongbuhada_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/gongbuhada_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "word",
+   "word",
+   "word"
+  ],
+  "ne_snd": "snd/memo/ne_017.mp3",
+  "ne_word_snd": "snd/memo/ne_017.mp3"
+ },
+ "p:hangeul": {
+  "mode": "word",
+  "memo": "word",
+  "ko": "한글",
+  "ne_word": "हङ्गुल",
+  "list_ne": "व्यक्तिवाचक संज्ञा",
+  "ko_snd": [
+   "snd/memo/ko_031.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/hangeul_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/hangeul_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "word",
+   "word",
+   "word"
+  ],
+  "ne_snd": "snd/memo/ne_018.mp3",
+  "ne_word_snd": "snd/memo/ne_018.mp3"
+ },
+ "p:jaeum": {
+  "mode": "word",
+  "memo": "word",
+  "ko": "자음",
+  "ne_word": "व्यञ्जन",
+  "list_ne": "संज्ञा",
+  "ko_snd": [
+   "snd/memo/ko_032.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/jaeum_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/jaeum_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "word",
+   "word",
+   "word"
+  ],
+  "ne_snd": "snd/memo/ne_019.mp3",
+  "ne_word_snd": "snd/memo/ne_019.mp3"
+ },
+ "p:gwa": {
+  "mode": "mean",
+  "memo": "mean",
+  "ko": "과",
+  "ne_word": null,
+  "list_ne": "विभक्ति",
+  "ko_snd": [
+   "snd/memo/ko_033.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/gwa_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/gwa_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "mean",
+   "mean",
+   "mean"
+  ],
+  "ne_snd": null,
+  "ne_word_snd": null
+ },
+ "p:moeum": {
+  "mode": "word",
+  "memo": "word",
+  "ko": "모음",
+  "ne_word": "स्वर",
+  "list_ne": "संज्ञा",
+  "ko_snd": [
+   "snd/memo/ko_034.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/moeum_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/moeum_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "word",
+   "word",
+   "word"
+  ],
+  "ne_snd": "snd/memo/ne_020.mp3",
+  "ne_word_snd": "snd/memo/ne_020.mp3"
+ },
+ "p:aju": {
+  "mode": "word",
+  "memo": "word",
+  "ko": "아주",
+  "ne_word": "धेरै",
+  "list_ne": "क्रियाविशेषण",
+  "ko_snd": [
+   "snd/memo/ko_035.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/aju_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/aju_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "word",
+   "word",
+   "word"
+  ],
+  "ne_snd": "snd/memo/ne_021.mp3",
+  "ne_word_snd": "snd/memo/ne_021.mp3"
+ },
+ "p:gicho": {
+  "mode": "word",
+  "memo": "word",
+  "ko": "기초",
+  "ne_word": "आधार",
+  "list_ne": "संज्ञा",
+  "ko_snd": [
+   "snd/memo/ko_036.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/gicho_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/gicho_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "word",
+   "word",
+   "word"
+  ],
+  "ne_snd": "snd/memo/ne_022.mp3",
+  "ne_word_snd": "snd/memo/ne_022.mp3"
+ },
+ "p:buteo": {
+  "mode": "mean",
+  "memo": "mean",
+  "ko": "부터",
+  "ne_word": null,
+  "list_ne": "विभक्ति",
+  "ko_snd": [
+   "snd/memo/ko_037.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/buteo_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/buteo_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "mean",
+   "mean",
+   "mean"
+  ],
+  "ne_snd": null,
+  "ne_word_snd": null
+ },
+ "p:sijakhada": {
+  "mode": "word",
+  "memo": "word",
+  "ko": "시작하다",
+  "ne_word": "सुरु गर्नु",
+  "list_ne": "क्रिया",
+  "ko_snd": [
+   "snd/memo/ko_038.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/sijakhada_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/sijakhada_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "word",
+   "word",
+   "word"
+  ],
+  "ne_snd": "snd/memo/ne_023.mp3",
+  "ne_word_snd": "snd/memo/ne_023.mp3"
+ },
+ "p:eoseo": {
+  "mode": "mean",
+  "memo": "mean",
+  "ko": "-어서",
+  "ne_word": null,
+  "list_ne": "संयोजक प्रत्यय",
+  "ko_snd": [
+   "snd/memo/ko_039.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/eoseo_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/eoseo_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "mean",
+   "mean",
+   "mean"
+  ],
+  "ne_snd": null,
+  "ne_word_snd": null
+ },
+ "p:saenghwal": {
+  "mode": "word",
+  "memo": "word",
+  "ko": "생활",
+  "ne_word": "जीवन",
+  "list_ne": "संज्ञा",
+  "ko_snd": [
+   "snd/memo/ko_040.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/saenghwal_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/saenghwal_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "word",
+   "word",
+   "word"
+  ],
+  "ne_snd": "snd/memo/ne_024.mp3",
+  "ne_word_snd": "snd/memo/ne_024.mp3"
+ },
+ "p:siheom": {
+  "mode": "word",
+  "memo": "word",
+  "ko": "시험",
+  "ne_word": "परीक्षा",
+  "list_ne": "संज्ञा",
+  "ko_snd": [
+   "snd/memo/ko_041.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/siheom_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/siheom_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "word",
+   "word",
+   "word"
+  ],
+  "ne_snd": "snd/memo/ne_025.mp3",
+  "ne_word_snd": "snd/memo/ne_025.mp3"
+ },
+ "p:junbi": {
+  "mode": "word",
+  "memo": "word",
+  "ko": "준비",
+  "ne_word": "तयारी",
+  "list_ne": "संज्ञा",
+  "ko_snd": [
+   "snd/memo/ko_042.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/junbi_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/junbi_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "word",
+   "word",
+   "word"
+  ],
+  "ne_snd": "snd/memo/ne_026.mp3",
+  "ne_word_snd": "snd/memo/ne_026.mp3"
+ },
+ "p:kkaji": {
+  "mode": "mean",
+  "memo": "mean",
+  "ko": "까지",
+  "ne_word": null,
+  "list_ne": "सहायक विभक्ति",
+  "ko_snd": [
+   "snd/memo/ko_043.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/kkaji_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/kkaji_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "mean",
+   "mean",
+   "mean"
+  ],
+  "ne_snd": null,
+  "ne_word_snd": null
+ },
+ "p:modu": {
+  "mode": "word",
+  "memo": "word",
+  "ko": "모두",
+  "ne_word": "सबै",
+  "list_ne": "क्रियाविशेषण",
+  "ko_snd": [
+   "snd/memo/ko_044.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/modu_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/modu_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "word",
+   "word",
+   "word"
+  ],
+  "ne_snd": "snd/memo/ne_027.mp3",
+  "ne_word_snd": "snd/memo/ne_027.mp3"
+ },
+ "p:hamkkehada": {
+  "mode": "word",
+  "memo": "word",
+  "ko": "함께하다",
+  "ne_word": "सँगै गर्नु",
+  "list_ne": "क्रिया",
+  "ko_snd": [
+   "snd/memo/ko_045.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/hamkkehada_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/hamkkehada_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "word",
+   "word",
+   "word"
+  ],
+  "ne_snd": "snd/memo/ne_028.mp3",
+  "ne_word_snd": "snd/memo/ne_028.mp3"
+ },
+ "p:seolleda": {
+  "mode": "word",
+  "memo": "word",
+  "ko": "설레다",
+  "ne_word": "उत्साहित हुनु",
+  "list_ne": "क्रिया",
+  "ko_snd": [
+   "snd/memo/ko_046.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/seolleda_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/seolleda_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "word",
+   "word",
+   "word"
+  ],
+  "ne_snd": "snd/memo/ne_029.mp3",
+  "ne_word_snd": "snd/memo/ne_029.mp3"
+ },
+ "p:jianta": {
+  "mode": "mean",
+  "memo": "mean",
+  "ko": "-지 않다",
+  "ne_word": null,
+  "list_ne": "नकारात्मक अभिव्यक्ति",
+  "ko_snd": [
+   "snd/memo/ko_047.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/jianta_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/jianta_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "mean",
+   "mean",
+   "mean"
+  ],
+  "ne_snd": null,
+  "ne_word_snd": null
+ },
+ "p:euseyo": {
+  "mode": "mean",
+  "memo": "mean",
+  "ko": "-으세요",
+  "ne_word": null,
+  "list_ne": "प्रत्यय",
+  "ko_snd": [
+   "snd/memo/ko_048.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/euseyo_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/euseyo_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "mean",
+   "mean",
+   "mean"
+  ],
+  "ne_snd": null,
+  "ne_word_snd": null
+ },
+ "p:agi": {
+  "mode": "word",
+  "memo": "word",
+  "ko": "아기",
+  "ne_word": "बच्चा",
+  "list_ne": "संज्ञा",
+  "ko_snd": [
+   "snd/memo/ko_049.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/agi_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/agi_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "word",
+   "word",
+   "word"
+  ],
+  "ne_snd": "snd/memo/ne_030.mp3",
+  "ne_word_snd": "snd/memo/ne_030.mp3"
+ },
+ "p:ga": {
+  "mode": "mean",
+  "memo": "mean",
+  "ko": "가",
+  "ne_word": null,
+  "list_ne": "विभक्ति",
+  "ko_snd": [
+   "snd/memo/ko_050.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/ga_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/ga_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "mean",
+   "mean",
+   "mean"
+  ],
+  "ne_snd": null,
+  "ne_word_snd": null
+ },
+ "p:mal": {
+  "mode": "word",
+  "memo": "word",
+  "ko": "말",
+  "ne_word": "बोली",
+  "list_ne": "संज्ञा",
+  "ko_snd": [
+   "snd/memo/ko_051.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/mal_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/mal_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "word",
+   "word",
+   "word"
+  ],
+  "ne_snd": "snd/memo/ne_031.mp3",
+  "ne_word_snd": "snd/memo/ne_031.mp3"
+ },
+ "p:eul": {
+  "mode": "mean",
+  "memo": "mean",
+  "ko": "을",
+  "ne_word": null,
+  "list_ne": "विभक्ति",
+  "ko_snd": [
+   "snd/memo/ko_052.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/eul_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/eul_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "mean",
+   "mean",
+   "mean"
+  ],
+  "ne_snd": null,
+  "ne_word_snd": null
+ },
+ "p:baeuda": {
+  "mode": "word",
+  "memo": "word",
+  "ko": "배우다",
+  "ne_word": "सिक्नु",
+  "list_ne": "क्रिया",
+  "ko_snd": [
+   "snd/memo/ko_053.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/baeuda_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/baeuda_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "word",
+   "word",
+   "word"
+  ],
+  "ne_snd": "snd/memo/ne_032.mp3",
+  "ne_word_snd": "snd/memo/ne_032.mp3"
+ },
+ "p:neun_eomi": {
+  "mode": "mean",
+  "memo": "mean",
+  "ko": "-는",
+  "ne_word": null,
+  "list_ne": "विशेषण प्रत्यय",
+  "ko_snd": [
+   "snd/memo/ko_005.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/neun_eomi_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/neun_eomi_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "mean",
+   "mean",
+   "mean"
+  ],
+  "ne_snd": null,
+  "ne_word_snd": null
+ },
+ "p:cheoreom": {
+  "mode": "mean",
+  "memo": "mean",
+  "ko": "처럼",
+  "ne_word": null,
+  "list_ne": "विभक्ति",
+  "ko_snd": [
+   "snd/memo/ko_054.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/cheoreom_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/cheoreom_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "mean",
+   "word",
+   "mean"
+  ],
+  "ne_snd": null,
+  "ne_word_snd": null
+ },
+ "p:ro": {
+  "mode": "mean",
+  "memo": "mean",
+  "ko": "로",
+  "ne_word": null,
+  "list_ne": "विभक्ति",
+  "ko_snd": [
+   "snd/memo/ko_055.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/ro_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/ro_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "mean",
+   "mean",
+   "mean"
+  ],
+  "ne_snd": null,
+  "ne_word_snd": null
+ },
+ "p:deutda": {
+  "mode": "word",
+  "memo": "word",
+  "ko": "듣다",
+  "ne_word": "सुन्नु",
+  "list_ne": "क्रिया",
+  "ko_snd": [
+   "snd/memo/ko_056.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/deutda_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/deutda_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "word",
+   "word",
+   "word"
+  ],
+  "ne_snd": "snd/memo/ne_033.mp3",
+  "ne_word_snd": "snd/memo/ne_033.mp3"
+ },
+ "p:go": {
+  "mode": "mean",
+  "memo": "mean",
+  "ko": "-고",
+  "ne_word": null,
+  "list_ne": "संयोजक प्रत्यय",
+  "ko_snd": [
+   "snd/memo/ko_057.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/go_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/go_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "mean",
+   "mean",
+   "mean"
+  ],
+  "ne_snd": null,
+  "ne_word_snd": null
+ },
+ "p:jikjeop": {
+  "mode": "word",
+  "memo": "word",
+  "ko": "직접",
+  "ne_word": "आफैँ",
+  "list_ne": "क्रियाविशेषण",
+  "ko_snd": [
+   "snd/memo/ko_058.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/jikjeop_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/jikjeop_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "word",
+   "word",
+   "word"
+  ],
+  "ne_snd": "snd/memo/ne_034.mp3",
+  "ne_word_snd": "snd/memo/ne_034.mp3"
+ },
+ "p:malhada": {
+  "mode": "word",
+  "memo": "word",
+  "ko": "말하다",
+  "ne_word": "बोल्नु",
+  "list_ne": "क्रिया",
+  "ko_snd": [
+   "snd/memo/ko_059.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/malhada_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/malhada_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "word",
+   "word",
+   "word"
+  ],
+  "ne_snd": "snd/memo/ne_035.mp3",
+  "ne_word_snd": "snd/memo/ne_035.mp3"
+ },
+ "p:sseuda": {
+  "mode": "word",
+  "memo": "word",
+  "ko": "쓰다",
+  "ne_word": "लेख्नु",
+  "list_ne": "क्रिया",
+  "ko_snd": [
+   "snd/memo/ko_060.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/sseuda_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/sseuda_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "word",
+   "word",
+   "word"
+  ],
+  "ne_snd": "snd/memo/ne_036.mp3",
+  "ne_word_snd": "snd/memo/ne_036.mp3"
+ },
+ "p:eobwa": {
+  "mode": "mean",
+  "memo": "mean",
+  "ko": "-어 보다",
+  "ne_word": null,
+  "list_ne": "अभिव्यक्ति",
+  "ko_snd": [
+   "snd/memo/ko_061.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/eobwa_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/eobwa_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "mean",
+   "mean",
+   "mean"
+  ],
+  "ne_snd": null,
+  "ne_word_snd": null
+ },
+ "p:boda": {
+  "mode": "word",
+  "memo": "word",
+  "ko": "보다",
+  "ne_word": "हेर्नु",
+  "list_ne": "क्रिया",
+  "ko_snd": [
+   "snd/memo/ko_062.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/boda_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/boda_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "word",
+   "word",
+   "word"
+  ],
+  "ne_snd": "snd/memo/ne_037.mp3",
+  "ne_word_snd": "snd/memo/ne_037.mp3"
+ },
+ "p:gi": {
+  "mode": "mean",
+  "memo": "mean",
+  "ko": "-기",
+  "ne_word": null,
+  "list_ne": "संज्ञा बनाउने प्रत्यय",
+  "ko_snd": [
+   "snd/memo/ko_063.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/gi_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/gi_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "mean",
+   "mean",
+   "mean"
+  ],
+  "ne_snd": null,
+  "ne_word_snd": null
+ },
+ "p:man": {
+  "mode": "mean",
+  "memo": "mean",
+  "ko": "만",
+  "ne_word": null,
+  "list_ne": "सहायक विभक्ति",
+  "ko_snd": [
+   "snd/memo/ko_064.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/man_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/man_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "mean",
+   "word",
+   "mean"
+  ],
+  "ne_snd": null,
+  "ne_word_snd": null
+ },
+ "p:hada": {
+  "mode": "word",
+  "memo": "word",
+  "ko": "하다",
+  "ne_word": "गर्नु",
+  "list_ne": "क्रिया",
+  "ko_snd": [
+   "snd/memo/ko_065.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/hada_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/hada_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "word",
+   "word",
+   "word"
+  ],
+  "ne_snd": "snd/memo/ne_038.mp3",
+  "ne_word_snd": "snd/memo/ne_038.mp3"
+ },
+ "p:myeon": {
+  "mode": "mean",
+  "memo": "mean",
+  "ko": "-면",
+  "ne_word": null,
+  "list_ne": "संयोजक प्रत्यय",
+  "ko_snd": [
+   "snd/memo/ko_066.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/myeon_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/myeon_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "mean",
+   "mean",
+   "mean"
+  ],
+  "ne_snd": null,
+  "ne_word_snd": null
+ },
+ "p:gugyeong": {
+  "mode": "word",
+  "memo": "word",
+  "ko": "구경",
+  "ne_word": "हेराइ",
+  "list_ne": "संज्ञा",
+  "ko_snd": [
+   "snd/memo/ko_067.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/gugyeong_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/gugyeong_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "word",
+   "word",
+   "word"
+  ],
+  "ne_snd": "snd/memo/ne_039.mp3",
+  "ne_word_snd": "snd/memo/ne_039.mp3"
+ },
+ "p:neulda": {
+  "mode": "word",
+  "memo": "word",
+  "ko": "늘다",
+  "ne_word": "बढ्नु",
+  "list_ne": "क्रिया",
+  "ko_snd": [
+   "snd/memo/ko_068.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/neulda_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/neulda_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "word",
+   "word",
+   "word"
+  ],
+  "ne_snd": "snd/memo/ne_040.mp3",
+  "ne_word_snd": "snd/memo/ne_040.mp3"
+ },
+ "p:eoya": {
+  "mode": "mean",
+  "memo": "mean",
+  "ko": "-어야",
+  "ne_word": null,
+  "list_ne": "संयोजक प्रत्यय",
+  "ko_snd": [
+   "snd/memo/ko_069.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/eoya_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/eoya_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "mean",
+   "mean",
+   "mean"
+  ],
+  "ne_snd": null,
+  "ne_word_snd": null
+ },
+ "p:sillyeok": {
+  "mode": "word",
+  "memo": "word",
+  "ko": "실력",
+  "ne_word": "सीप",
+  "list_ne": "संज्ञा",
+  "ko_snd": [
+   "snd/memo/ko_070.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/sillyeok_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/sillyeok_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "word",
+   "word",
+   "word"
+  ],
+  "ne_snd": "snd/memo/ne_041.mp3",
+  "ne_word_snd": "snd/memo/ne_041.mp3"
+ },
+ "p:i_josa": {
+  "mode": "mean",
+  "memo": "mean",
+  "ko": "이",
+  "ne_word": null,
+  "list_ne": "कर्ता विभक्ति",
+  "ko_snd": [
+   "snd/memo/ko_071.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/i_josa_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/i_josa_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "mean",
+   "mean",
+   "mean"
+  ],
+  "ne_snd": null,
+  "ne_word_snd": null
+ },
+ "p:sori": {
+  "mode": "word",
+  "memo": "word",
+  "ko": "소리",
+  "ne_word": "आवाज",
+  "list_ne": "संज्ञा",
+  "ko_snd": [
+   "snd/memo/ko_072.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/sori_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/sori_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "word",
+   "word",
+   "word"
+  ],
+  "ne_snd": "snd/memo/ne_042.mp3",
+  "ne_word_snd": "snd/memo/ne_042.mp3"
+ },
+ "p:naeda": {
+  "mode": "word",
+  "memo": "word",
+  "ko": "내다",
+  "ne_word": "निकाल्नु",
+  "list_ne": "क्रिया",
+  "ko_snd": [
+   "snd/memo/ko_073.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/naeda_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/naeda_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "word",
+   "word",
+   "word"
+  ],
+  "ne_snd": "snd/memo/ne_043.mp3",
+  "ne_word_snd": "snd/memo/ne_043.mp3"
+ },
+ "p:eo_yeon": {
+  "mode": "mean",
+  "memo": "mean",
+  "ko": "-어",
+  "ne_word": null,
+  "list_ne": "संयोजक प्रत्यय",
+  "ko_snd": [
+   "snd/memo/ko_007.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/eo_yeon_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/eo_yeon_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "mean",
+   "mean",
+   "mean"
+  ],
+  "ne_snd": null,
+  "ne_word_snd": null
+ },
+ "p:nanmal": {
+  "mode": "word",
+  "memo": "word",
+  "ko": "낱말",
+  "ne_word": "शब्द",
+  "list_ne": "संज्ञा",
+  "ko_snd": [
+   "snd/memo/ko_074.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/nanmal_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/nanmal_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "word",
+   "word",
+   "word"
+  ],
+  "ne_snd": "snd/memo/ne_044.mp3",
+  "ne_word_snd": "snd/memo/ne_044.mp3"
+ },
+ "p:deo": {
+  "mode": "word",
+  "memo": "word",
+  "ko": "더",
+  "ne_word": "अझ",
+  "list_ne": "क्रियाविशेषण",
+  "ko_snd": [
+   "snd/memo/ko_075.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/deo_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/deo_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "word",
+   "word",
+   "word"
+  ],
+  "ne_snd": "snd/memo/ne_045.mp3",
+  "ne_word_snd": "snd/memo/ne_045.mp3"
+ },
+ "p:jal": {
+  "mode": "word",
+  "memo": "word",
+  "ko": "잘",
+  "ne_word": "राम्रोसँग",
+  "list_ne": "क्रियाविशेषण",
+  "ko_snd": [
+   "snd/memo/ko_076.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/jal_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/jal_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "word",
+   "word",
+   "word"
+  ],
+  "ne_snd": "snd/memo/ne_046.mp3",
+  "ne_word_snd": "snd/memo/ne_046.mp3"
+ },
+ "p:orae": {
+  "mode": "word",
+  "memo": "word",
+  "ko": "오래",
+  "ne_word": "लामो समय",
+  "list_ne": "क्रियाविशेषण",
+  "ko_snd": [
+   "snd/memo/ko_077.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/orae_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/orae_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "word",
+   "word",
+   "word"
+  ],
+  "ne_snd": "snd/memo/ne_047.mp3",
+  "ne_word_snd": "snd/memo/ne_047.mp3"
+ },
+ "p:gieok": {
+  "mode": "word",
+  "memo": "word",
+  "ko": "기억",
+  "ne_word": "सम्झना",
+  "list_ne": "संज्ञा",
+  "ko_snd": [
+   "snd/memo/ko_078.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/gieok_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/gieok_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "word",
+   "word",
+   "word"
+  ],
+  "ne_snd": "snd/memo/ne_048.mp3",
+  "ne_word_snd": "snd/memo/ne_048.mp3"
+ },
+ "p:doeda": {
+  "mode": "word",
+  "memo": "word",
+  "ko": "되다",
+  "ne_word": "हुनु",
+  "list_ne": "क्रिया",
+  "ko_snd": [
+   "snd/memo/ko_079.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/doeda_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/doeda_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "word",
+   "word",
+   "word"
+  ],
+  "ne_snd": "snd/memo/ne_049.mp3",
+  "ne_word_snd": "snd/memo/ne_049.mp3"
+ },
+ "p:yeongu": {
+  "mode": "word",
+  "memo": "word",
+  "ko": "연구",
+  "ne_word": "अनुसन्धान",
+  "list_ne": "संज्ञा",
+  "ko_snd": [
+   "snd/memo/ko_080.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/yeongu_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/yeongu_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "word",
+   "word",
+   "word"
+  ],
+  "ne_snd": "snd/memo/ne_050.mp3",
+  "ne_word_snd": "snd/memo/ne_050.mp3"
+ },
+ "p:itda": {
+  "mode": "word",
+  "memo": "word",
+  "ko": "있다",
+  "ne_word": "हुनु",
+  "list_ne": "विशेषण",
+  "ko_snd": [
+   "snd/memo/ko_081.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/itda_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/itda_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "word",
+   "word",
+   "word"
+  ],
+  "ne_snd": "snd/memo/ne_049.mp3",
+  "ne_word_snd": "snd/memo/ne_049.mp3"
+ },
+ "p:geim": {
+  "mode": "word",
+  "memo": "word",
+  "ko": "게임",
+  "ne_word": "खेल",
+  "list_ne": "संज्ञा",
+  "ko_snd": [
+   "snd/memo/ko_082.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/geim_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/geim_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "word",
+   "word",
+   "word"
+  ],
+  "ne_snd": "snd/memo/ne_051.mp3",
+  "ne_word_snd": "snd/memo/ne_051.mp3"
+ },
+ "p:nolda": {
+  "mode": "word",
+  "memo": "word",
+  "ko": "놀다",
+  "ne_word": "खेल्नु",
+  "list_ne": "क्रिया",
+  "ko_snd": [
+   "snd/memo/ko_083.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/nolda_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/nolda_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "word",
+   "word",
+   "word"
+  ],
+  "ne_snd": "snd/memo/ne_052.mp3",
+  "ne_word_snd": "snd/memo/ne_052.mp3"
+ },
+ "p:myeonseo": {
+  "mode": "mean",
+  "memo": "mean",
+  "ko": "-면서",
+  "ne_word": null,
+  "list_ne": "संयोजक प्रत्यय",
+  "ko_snd": [
+   "snd/memo/ko_084.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/myeonseo_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/myeonseo_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "mean",
+   "mean",
+   "mean"
+  ],
+  "ne_snd": null,
+  "ne_word_snd": null
+ },
+ "p:ikhida": {
+  "mode": "word",
+  "memo": "word",
+  "ko": "익히다",
+  "ne_word": "अभ्यास गर्नु",
+  "list_ne": "क्रिया",
+  "ko_snd": [
+   "snd/memo/ko_085.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/ikhida_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/ikhida_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "word",
+   "word",
+   "word"
+  ],
+  "ne_snd": "snd/memo/ne_053.mp3",
+  "ne_word_snd": "snd/memo/ne_053.mp3"
+ },
+ "p:l_gwan": {
+  "mode": "mean",
+  "memo": "mean",
+  "ko": "-ㄹ",
+  "ne_word": null,
+  "list_ne": "विशेषण प्रत्यय",
+  "ko_snd": [
+   "snd/memo/ko_086.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/l_gwan_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/l_gwan_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "mean",
+   "mean",
+   "mean"
+  ],
+  "ne_snd": null,
+  "ne_word_snd": null
+ },
+ "p:su": {
+  "mode": "mean",
+  "memo": "mean",
+  "ko": "수",
+  "ne_word": null,
+  "list_ne": "आश्रित संज्ञा",
+  "ko_snd": [
+   "snd/memo/ko_087.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/su_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/su_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "mean",
+   "mean",
+   "mean"
+  ],
+  "ne_snd": null,
+  "ne_word_snd": null
+ },
+ "p:do": {
+  "mode": "mean",
+  "memo": "mean",
+  "ko": "도",
+  "ne_word": null,
+  "list_ne": "विभक्ति",
+  "ko_snd": [
+   "snd/memo/ko_088.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/do_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/do_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "mean",
+   "word",
+   "mean"
+  ],
+  "ne_snd": null,
+  "ne_word_snd": null
+ },
+ "p:i_gwan": {
+  "mode": "word",
+  "memo": "word",
+  "ko": "이",
+  "ne_word": "यो",
+  "list_ne": "विशेषण",
+  "ko_snd": [
+   "snd/memo/ko_071.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/i_gwan_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/i_gwan_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "word",
+   "word",
+   "word"
+  ],
+  "ne_snd": "snd/memo/ne_054.mp3",
+  "ne_word_snd": "snd/memo/ne_054.mp3"
+ },
+ "p:aep": {
+  "mode": "word",
+  "memo": "word",
+  "ko": "앱",
+  "ne_word": "एप",
+  "list_ne": "संज्ञा",
+  "ko_snd": [
+   "snd/memo/ko_089.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/aep_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/aep_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "word",
+   "word",
+   "word"
+  ],
+  "ne_snd": "snd/memo/ne_055.mp3",
+  "ne_word_snd": "snd/memo/ne_055.mp3"
+ },
+ "p:eseo": {
+  "mode": "mean",
+  "memo": "mean",
+  "ko": "에서",
+  "ne_word": null,
+  "list_ne": "विभक्ति",
+  "ko_snd": [
+   "snd/memo/ko_090.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/eseo_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/eseo_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "mean",
+   "mean",
+   "mean"
+  ],
+  "ne_snd": null,
+  "ne_word_snd": null
+ },
+ "p:cheoeum": {
+  "mode": "word",
+  "memo": "word",
+  "ko": "처음",
+  "ne_word": "सुरु",
+  "list_ne": "संज्ञा",
+  "ko_snd": [
+   "snd/memo/ko_091.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/cheoeum_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/cheoeum_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "word",
+   "word",
+   "word"
+  ],
+  "ne_snd": "snd/memo/ne_056.mp3",
+  "ne_word_snd": "snd/memo/ne_056.mp3"
+ },
+ "p:kkeut": {
+  "mode": "word",
+  "memo": "word",
+  "ko": "끝",
+  "ne_word": "अन्त्य",
+  "list_ne": "संज्ञा",
+  "ko_snd": [
+   "snd/memo/ko_092.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/kkeut_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/kkeut_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "word",
+   "word",
+   "word"
+  ],
+  "ne_snd": "snd/memo/ne_057.mp3",
+  "ne_word_snd": "snd/memo/ne_057.mp3"
+ },
+ "p:seoro": {
+  "mode": "word",
+  "memo": "word",
+  "ko": "서로",
+  "ne_word": "एकअर्का",
+  "list_ne": "क्रियाविशेषण",
+  "ko_snd": [
+   "snd/memo/ko_093.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/seoro_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/seoro_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "word",
+   "word",
+   "word"
+  ],
+  "ne_snd": "snd/memo/ne_058.mp3",
+  "ne_word_snd": "snd/memo/ne_058.mp3"
+ },
+ "p:eotteoke": {
+  "mode": "word",
+  "memo": "word",
+  "ko": "어떻게",
+  "ne_word": "कसरी",
+  "list_ne": "क्रियाविशेषण",
+  "ko_snd": [
+   "snd/memo/ko_094.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/eotteoke_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/eotteoke_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "word",
+   "word",
+   "word"
+  ],
+  "ne_snd": "snd/memo/ne_059.mp3",
+  "ne_word_snd": "snd/memo/ne_059.mp3"
+ },
+ "p:saenggida": {
+  "mode": "word",
+  "memo": "word",
+  "ko": "생기다",
+  "ne_word": "देखिनु",
+  "list_ne": "क्रिया",
+  "ko_snd": [
+   "snd/memo/ko_095.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/saenggida_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/saenggida_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "word",
+   "word",
+   "word"
+  ],
+  "ne_snd": "snd/memo/ne_060.mp3",
+  "ne_word_snd": "snd/memo/ne_060.mp3"
+ },
+ "p:neunji": {
+  "mode": "mean",
+  "memo": "mean",
+  "ko": "-는지",
+  "ne_word": null,
+  "list_ne": "संयोजक प्रत्यय",
+  "ko_snd": [
+   "snd/memo/ko_096.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/neunji_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/neunji_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "mean",
+   "mean",
+   "mean"
+  ],
+  "ne_snd": null,
+  "ne_word_snd": null
+ },
+ "p:daeum": {
+  "mode": "word",
+  "memo": "word",
+  "ko": "다음",
+  "ne_word": "अर्को",
+  "list_ne": "संज्ञा",
+  "ko_snd": [
+   "snd/memo/ko_097.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/daeum_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/daeum_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "word",
+   "word",
+   "word"
+  ],
+  "ne_snd": "snd/memo/ne_061.mp3",
+  "ne_word_snd": "snd/memo/ne_061.mp3"
+ },
+ "p:sigan": {
+  "mode": "word",
+  "memo": "word",
+  "ko": "시간",
+  "ne_word": "समय",
+  "list_ne": "संज्ञा",
+  "ko_snd": [
+   "snd/memo/ko_098.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/sigan_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/sigan_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "word",
+   "word",
+   "word"
+  ],
+  "ne_snd": "snd/memo/ne_062.mp3",
+  "ne_word_snd": "snd/memo/ne_062.mp3"
+ },
+ "p:oneul": {
+  "mode": "word",
+  "memo": "word",
+  "ko": "오늘",
+  "ne_word": "आज",
+  "list_ne": "संज्ञा",
+  "ko_snd": [
+   "snd/memo/ko_099.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/oneul_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/oneul_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "word",
+   "word",
+   "word"
+  ],
+  "ne_snd": "snd/memo/ne_063.mp3",
+  "ne_word_snd": "snd/memo/ne_063.mp3"
+ },
+ "p:eot": {
+  "mode": "mean",
+  "memo": "mean",
+  "ko": "-었",
+  "ne_word": null,
+  "list_ne": "भूतकाल प्रत्यय",
+  "ko_snd": [
+   "snd/memo/ko_100.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/eot_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/eot_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "mean",
+   "mean",
+   "mean"
+  ],
+  "ne_snd": null,
+  "ne_word_snd": null
+ },
+ "p:geurigo": {
+  "mode": "word",
+  "memo": "word",
+  "ko": "그리고",
+  "ne_word": "अनि",
+  "list_ne": "संयोजक क्रियाविशेषण",
+  "ko_snd": [
+   "snd/memo/ko_101.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/geurigo_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/geurigo_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "word",
+   "word",
+   "word"
+  ],
+  "ne_snd": "snd/memo/ne_064.mp3",
+  "ne_word_snd": "snd/memo/ne_064.mp3"
+ },
+ "p:han_seong": {
+  "mode": "mean",
+  "memo": "mean",
+  "ko": "한",
+  "ne_word": null,
+  "list_ne": "संज्ञा",
+  "ko_snd": [
+   "snd/memo/ko_102.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/han_seong_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/han_seong_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "word",
+   "word",
+   "mean"
+  ],
+  "ne_snd": null,
+  "ne_word_snd": null
+ },
+ "p:gugeo": {
+  "mode": "word",
+  "memo": "word",
+  "ko": "국어",
+  "ne_word": "राष्ट्रभाषा",
+  "list_ne": "संज्ञा",
+  "ko_snd": [
+   "snd/memo/ko_103.mp3"
+  ],
+  "ne_mean_snd": "snd/dict/gugeo_ne_mean.mp3",
+  "ko_mean_snd": "snd/dict/gugeo_ko_mean.mp3",
+  "ne_mean_w": true,
+  "votes": [
+   "word",
+   "word",
+   "word"
+  ],
+  "ne_snd": "snd/memo/ne_065.mp3",
+  "ne_word_snd": "snd/memo/ne_065.mp3"
+ }
+}
