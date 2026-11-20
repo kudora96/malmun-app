@@ -1345,12 +1345,12 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   exAutoMarkFn = () => { markAuto(() => tq("auto_listen")); app.querySelectorAll("[data-act=two].twob").forEach(b => { const c = b.querySelector(".cc"), w = tq("two_short"); if (c && c.textContent !== w) { c.textContent = w; b.setAttribute("aria-label", tq("two_tip")); } }); app.querySelectorAll(".endcard").forEach(e => e.setText?.({ title: tq("auto_end"), again: tq("auto_again"), close: tq("auto_close") })); }; // ⇄ 로 창 말이 바뀌면 글도 그 말로
   // 단어·조각 카드 자동 이어 듣기(대표님 11-19 14:11) — 자막 순서 = 줄마다 설명 위 단어 칩 순서 · vocab.js 가 부름
   useEndCard(endCard); // 단어·조각 카드 끝 카드도 같은 공용 endCard
-  const cardItem = async (i, c) => { const sp = await wordSpan(ep, L[i], c.ko); return { w: c.ko, rom: c.rom || "", mean: c.mean || "", ep, n: L[i].id, af: L[i].lineAudio || "", s: sp.s, e: sp.e, ko: L[i].ko, tr: L[i].v9?.tr || L[i].tr || "" }; };
+  const cardItem = async (i, c) => { const sp = await wordSpan(ep, L[i], c.ko); return { w: c.ko, wi: (L[i].v9?.pieces || []).indexOf(c), rom: c.rom || "", mean: c.mean || "", ep, n: L[i].id, af: L[i].lineAudio || "", s: sp.s, e: sp.e, ko: L[i].ko, tr: L[i].v9?.tr || L[i].tr || "" }; };
   const cardBefore = () => { try { autoCancel(); clearTimeout(st.gap); st.gap = 0; ex.pause(); sync(); } catch {} };
-  const cardSeq = () => { const o = []; L.forEach((l, i) => (l.v9?.pieces || []).forEach(c => { if (c.ko) o.push({ i, c }); })); return o; };
+  const cardSeq = () => { const o = []; L.forEach((l, i) => (l.v9?.pieces || []).forEach((c, wi) => { if (c.ko) o.push({ i, c, wi }); })); return o; };
   setCardNav({
     live: () => app.isConnected && !!app.querySelector(".learn"),
-    locate: it => { const s = cardSeq(), w = String(it.w); let p = s.findIndex(x => x.c.ko === w && L[x.i].id === it.n); if (p < 0) p = s.findIndex(x => x.c.ko === w); return p; },
+    locate: it => { const s = cardSeq(), w = String(it.w); let p = it.wi >= 0 ? s.findIndex(x => x.c.ko === w && L[x.i].id === it.n && x.wi === it.wi) : -1; /* 같은 줄에 같은 낱말이 두 번이면 칩 순번(wi)으로 자리 고름(D-124) */ if (p < 0) p = s.findIndex(x => x.c.ko === w && L[x.i].id === it.n); if (p < 0) p = s.findIndex(x => x.c.ko === w); return p; },
     at: async p => { const x = cardSeq()[p]; if (!x) return null; return { pos: p, i: x.i, it: await cardItem(x.i, x.c), before: cardBefore }; },
     commit: x => { // 그 낱말이 있는 줄로 — 설명 창이 열려 있으면 그 줄 창으로 · 뒤 영상도 그 줄 장면으로
       if (st.panel?.kind === "explain") { if (st.panel.i !== x.i) openPanel("explain", x.i, { autoplay: false }); } else if (!st.panel) select(x.i, { scroll: false });
