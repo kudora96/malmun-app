@@ -1,21 +1,21 @@
 // ⭐ 내 단어장(시험판 · 네팔어 1편 · 본부 11-16 대표님 승인) — 낱말 칸을 톡 누르면 작은 카드 · 단어장은 이 기기(localStorage)에만
 // 소리 = 이미 만들어 둔 낱말 소리를 이어 붙여(wordsnd.json) · 없는 편은 줄 소리의 그 낱말 구간 · 학습자 말이 네팔어가 아니면 아무것도 안 보임
-import { lang, uiKoOn, langShort } from "./i18n.js?v=1120.21";
-import { noteHTML, applyMode, fixSizes, readNote, stopRead, toggleRead, switchRead, tapBlock, tapWord, hitText, noteBlocks, curBlock, isReading, isPaused } from "./wordnote.js?v=1120.21"; // 단어 카드 설명(위 = 지금 말 · 아래 ↳ 다른 말) + 읽기 소리
-import { claim, onSound } from "./onesound.js?v=1120.21";
-import { twoOn, setTwo, autoOn, setAuto, autoSchedule, autoCancel, autoPending, autoHold, autoHeld, autoAt, markAuto, showAutoEnd } from "./autoplay.js?v=1120.21"; // 자동 이어 듣기 공용 엔진(설명·단어 카드·조각 카드 · 대표님 11-19 14:11)
-import { hold } from "./wake.js?v=1120.21"; // 단어장·카드 ▶ 도 소리 장치 깨워 둠(목록 화면에서 열 때는 학습 화면의 깨우기가 없었음 · 대표님 11-18 「다음 사람」 첫 「다」 안 들림)
+import { lang, uiKoOn, langShort } from "./i18n.js?v=1120.22";
+import { noteHTML, applyMode, fixSizes, readNote, stopRead, toggleRead, switchRead, tapBlock, tapWord, hitText, noteBlocks, curBlock, isReading, isPaused } from "./wordnote.js?v=1120.22"; // 단어 카드 설명(위 = 지금 말 · 아래 ↳ 다른 말) + 읽기 소리
+import { claim, onSound } from "./onesound.js?v=1120.22";
+import { twoOn, setTwo, autoOn, setAuto, autoSchedule, autoCancel, autoPending, autoHold, autoHeld, autoAt, markAuto, showAutoEnd } from "./autoplay.js?v=1120.22"; // 자동 이어 듣기 공용 엔진(설명·단어 카드·조각 카드 · 대표님 11-19 14:11)
+import { hold } from "./wake.js?v=1120.22"; // 단어장·카드 ▶ 도 소리 장치 깨워 둠(목록 화면에서 열 때는 학습 화면의 깨우기가 없었음 · 대표님 11-18 「다음 사람」 첫 「다」 안 들림)
 let wakeRel = null; const wakeOn = () => { wakeRel ||= hold(); }, wakeOff = () => { const f = wakeRel; wakeRel = null; try { f?.(); } catch {} };
-import * as sfx from "./sfx.js?v=1120.21";
-import { uikoChip } from "./ui.js?v=1120.21";
-import { esc } from "./text.js?v=1120.21";
-import { attachDragScroll } from "./dragscroll.js?v=1120.21";
-import { sortItems, makeSortButton, attachDelete, loadSort } from "./vlist_ops.js?v=1120.21";
-import { PAGE, pageCount, slicePage, clampPage, makePager } from "./vlist_pager.js?v=1120.21";
-import { filterItems, makeFindBox, indexLetters, makeIndexBar, groupByEp, findTx } from "./vlist_find.js?v=1120.21";
-import { paths } from "./paths.js?v=1120.21";
-import { catalog, episode } from "./data.js?v=1120.21";
-import { VERSION } from "./version.js?v=1120.21";
+import * as sfx from "./sfx.js?v=1120.22";
+import { uikoChip } from "./ui.js?v=1120.22";
+import { esc } from "./text.js?v=1120.22";
+import { attachDragScroll } from "./dragscroll.js?v=1120.22";
+import { sortItems, makeSortButton, attachDelete, loadSort } from "./vlist_ops.js?v=1120.22";
+import { PAGE, pageCount, slicePage, clampPage, makePager } from "./vlist_pager.js?v=1120.22";
+import { filterItems, makeFindBox, indexLetters, makeIndexBar, groupByEp, findTx } from "./vlist_find.js?v=1120.22";
+import { paths } from "./paths.js?v=1120.22";
+import { catalog, episode } from "./data.js?v=1120.22";
+import { VERSION } from "./version.js?v=1120.22";
 
 const KEY = "malmun.vocab.ne";
 export const vocabOn = () => lang === "ne";
@@ -130,7 +130,7 @@ const syncBar = () => { bgLock();  const L = document.querySelector(".learn"), o
 function stageLock(st) { const own = !st.classList.contains("vk-on"); if (own) { st.style.height = st.getBoundingClientRect().height + "px"; st.classList.add("vk-on"); } try { st.querySelector("video")?.pause(); } catch {} claim("vocab"); syncBar(); return own; }
 // ── 아래 갈색 막대 = 조작 막대(대표님 11-18 14:09) — 단어장·조각 카드가 영상 칸 안에 열려 있는 동안: 단어장 = 쪽 넘김(가운데) + ⛶(오른쪽 끝) · 카드 = ‹ 돌아가기(왼쪽) · ▶/⏸ · ⭐ 단어장에 담기(가운데) · ⛶(오른쪽 끝)
 //    전체 화면(영상 칸 통째)에서는 갈색 막대가 칸 밖이라 같은 막대를 칸 맨 아래로 옮겨 보여 줌
-const CTX = { ko: { back: "돌아가기", add: "단어장에 담기", has: "단어장에 있음", next: "다음" }, ne: { back: "फिर्ता", add: "सूचीमा थप्नुहोस्", has: "सूचीमा छ", next: "अर्को" } }; // next = 「다음 ›」(대표님 11-20 14:12 · 자동이 꺼져도 다음 카드로 바로 감)
+const CTX = { ko: { back: "돌아가기", add: "단어장에 담기", has: "단어장에 있음", next: "다음", prev: "이전" }, ne: { back: "फिर्ता", add: "सूचीमा थप्नुहोस्", has: "सूचीमा छ", next: "अर्को", prev: "अघिल्लो" } }; // next = 「다음 ›」(대표님 11-20 14:12 · 자동이 꺼져도 다음 카드로 바로 감)
 // 자동 이어 듣기 — 순서(자막 낱말 순서)는 배우는 화면이 등록(setCardNav): locate(it)→자리 · at(자리)→{it,pos,before}|null · commit(그 자리) = 줄·뒤 영상을 옮김
 let cardNav = null; export const setCardNav = n => { cardNav = n; };
 const autoLabel = () => tx("auto");
@@ -143,7 +143,7 @@ function ctlBtns(c) {
     `<button type="button" class="vp-b vk-snd" data-v="snd" aria-label="${lis}" title="${lis}">▶</button>`
     + (c.two?.() ? twoBtn() : "") + (c.auto?.() ? autoBtn(autoOn()) : "")
     + `<button type="button" class="vp-b vk-add" data-v="${c.add()}" ${sv ? "disabled" : ""} aria-label="${esc(sv ? t.has : t.add)}" title="${esc(sv ? t.has : t.add)}"><span aria-hidden="true">⭐</span><span class="t">${esc(sv ? t.has : t.add)}</span></button>`
-    + (c.next?.() ? `<button type="button" class="vp-b vk-next" data-v="next" aria-label="${esc(t.next)}" title="${esc(t.next)}"><span class="t">${esc(t.next)}</span><span aria-hidden="true">›</span></button>` : "")];
+    + (c.next?.() ? `<span class="vk-navpair">` + (() => { const off = !c.prev?.(); return `<button type="button" class="vp-b vk-prev${off ? " vk-off" : ""}" data-v="prev" aria-label="${esc(t.prev)}" title="${esc(t.prev)}"${off ? ' aria-disabled="true"' : ""}><span aria-hidden="true">‹</span><span class="t">${esc(t.prev)}</span></button>`; })() + `<button type="button" class="vp-b vk-next" data-v="next" aria-label="${esc(t.next)}" title="${esc(t.next)}"><span class="t">${esc(t.next)}</span><span aria-hidden="true">›</span></button></span>` : "")];
 }
 function placeCBar() { // 평소 = 갈색 막대(.seek) 안 · 전체 화면 = 영상 칸 맨 아래
   if (!cbar) return; const st = stageOf(), seek = document.querySelector(".learn .seek"), to = fsOn() ? st : seek;
@@ -205,7 +205,7 @@ function pieceHTML(e, roman, foot = "") {
     ${noteHTML(pnote(e), k)}${foot}`;
 }
 const meanHTML = it => { const kh = it.note?.ko_head; return kh ? `<span class="vk-t vk-mean vk-sw" data-ko="${esc(kh)}" data-ne="${esc(it.mean || "")}" data-lk="1" lang="${uiKoOn() ? "ko" : "ne"}"><span class="vis">${esc(uiKoOn() ? kh : it.mean || "")}</span></span>` : `<span class="vk-t vk-mean" lang="ne">${esc(it.mean || "")}</span>`; }; // 맨 위 뜻 줄: 한국어 뜻(ko_head)이 있으면 ⇄ 때 같은 칸에서 글만 바뀜(11-18)
-export function openWordCard(it, { before, fromList = false, piece = null, ents: ents0 = null, autoRun = "", autoPos = -1, lseq = null, lpos = -1, keep = false } = {}) { // lseq·lpos = 단어장에서 연 카드의 「보이는 순서」(단어 → 그 조각들 → 다음 단어…) 줄 목록과 이 카드 자리(자동 이어 듣기 · 대표님 11-20 13:17) · keep = 자동으로 넘어갈 때 단어장은 닫지 않음 // piece = 단어장에서 조각 줄을 눌러 바로 그 조각 카드로(조각 id) · ents = 조각 사전 항목
+export function openWordCard(it, { before, fromList = false, piece = null, ents: ents0 = null, autoRun = "", autoPos = -1, lseq = null, lpos = -1, keep = false, pLast = false } = {}) { // lseq·lpos = 단어장에서 연 카드의 「보이는 순서」(단어 → 그 조각들 → 다음 단어…) 줄 목록과 이 카드 자리(자동 이어 듣기 · 대표님 11-20 13:17) · keep = 자동으로 넘어갈 때 단어장은 닫지 않음 // piece = 단어장에서 조각 줄을 눌러 바로 그 조각 카드로(조각 id) · ents = 조각 사전 항목
   closeCard(keep && !!lseq); autoHold(false); wakeOn(); claim("card"); // 어디서 열든(읽기 창·단어장 목록) 다른 소리는 멈춤 — before 를 안 넘겨도 하나
   let view = piece || null; // 지금 보는 조각 id(없으면 구절 카드)
   const saved = () => (view ? has("p:" + view) : has(it.w)), romanNow = () => (document.querySelector(".exv.norom") ? "" : (lang === "ne" && it.note?.dev) || it.rom); // 네팔어 학습자 = 데바나가리 발음(dev) · 발음 토글(.norom)이 끄면 숨김
@@ -213,7 +213,7 @@ export function openWordCard(it, { before, fromList = false, piece = null, ents:
   el.className = "vk-dim"; el.setAttribute("role", "dialog"); el.setAttribute("aria-modal", "true");
   toPane(el); // 배우는 화면이면 영상 칸 안에서(11-18 13:56 · 단어장 붙임 코드 그대로) · 그 밖의 화면은 예전처럼 겹쳐 뜸
   let pc = null, ents = ents0, act = null; // 조각 자료
-  cardCtl = { act: (v, b) => act?.(v, b), back: () => (view ? (piece ? "lback" : "back") : fromList && listEl ? "lback" : "close"), add: () => (view ? "padd" : "add"), saved, auto: () => autoElig(), next: () => autoElig(), two: () => !!(view ? ents?.find(x => x.id === view) : it.note) }; // 조작 막대가 부르는 손잡이
+  cardCtl = { act: (v, b) => act?.(v, b), back: () => (view ? (piece ? "lback" : "back") : fromList && listEl ? "lback" : "close"), add: () => (view ? "padd" : "add"), saved, auto: () => autoElig(), next: () => autoElig(), prev: () => canPrev(), two: () => !!(view ? ents?.find(x => x.id === view) : it.note) }; // 조작 막대가 부르는 손잡이
   // ── 자동 이어 듣기(대표님 11-19 14:11) — 카드 소리가 끝나면 1.0초 뒤 다음 카드(단어 카드 = 자막 낱말 순서 · 조각 카드 = 같은 낱말 남은 조각 → 다음 낱말 조각) · 뒤 영상도 그 줄 장면으로
   let apos = lseq ? lpos : fromList || piece || !cardNav?.live?.() ? -1 : (cardNav.locate?.(it) ?? -1); // 이 카드의 자막 순서 자리(없으면 자동 단추 없음) · 단어장 카드 = 줄 목록 자리
   const wpos = lpos; let lcur = lpos; // 단어장 카드: wpos = 단어 카드 자리 · lcur = 지금 보는 줄(단어 카드 안 조각 칩을 누르면 그 조각 줄 자리)
@@ -246,6 +246,20 @@ export function openWordCard(it, { before, fromList = false, piece = null, ents:
     if (lseq) return aGoL(lcur + 1);
     if (view) { const ids = pc?.pieces || [], k = ids.indexOf(view); if (k >= 0 && k < ids.length - 1) { stopRead(); view = ids[k + 1]; toPane(el); draw(); aMark(); startNote(); return; } return aGo("piece"); }
     return aGo("word");
+  };
+  const canPrev = () => { if (!autoElig()) return false; if (lseq) return lcur > 0; const k = view && pc?.pieces ? pc.pieces.indexOf(view) : -1; return apos > 0 || k > 0; };
+  const aBack = async kind => { // 앞 낱말 카드(kind=word) / 앞 낱말의 마지막 조각(kind=piece · 조각 없는 낱말은 건너뜀) · 없으면 그대로
+    let p = apos; for (;;) {
+      p--; if (p < 0) return; const nx = await cardNav.at(p); if (cardEl !== el) return; if (!nx) return;
+      if (kind === "piece") { const pcs = await pcOf(nx.it.ep); if (cardEl !== el) return; if (!pcs?.cards?.[clean(nx.it.w)]?.pieces?.length) continue; }
+      cardNav.commit(nx); openWordCard(nx.it, { before: nx.before, autoRun: kind, autoPos: p, pLast: true }); return;
+    }
+  };
+  const aPrev = () => { // 이전 ‹ = 다음 › 과 같은 순서의 바로 앞 카드(첫 카드면 아무 일 없음)
+    if (cardEl !== el || !canPrev()) return;
+    if (lseq) return aGoL(lcur - 1);
+    if (view) { const ids = pc?.pieces || [], k = ids.indexOf(view); if (k > 0) { stopRead(); view = ids[k - 1]; toPane(el); draw(); aMark(); startNote(); return; } return aBack("piece"); }
+    return aBack("word");
   };
   const aFinished = () => { if (cardEl !== el || !autoElig() || !autoOn()) return; autoSchedule(() => { if (cardEl !== el || !autoOn() || autoHeld()) return; aNext(); }); }; // 소리 끝 → 1.0초 뒤
   const aTap = () => { // 카드 안 톡 = 멈춤(기다리는 중이면 기다림 취소) · 멈춘 뒤 톡 = 이어서
@@ -283,6 +297,7 @@ export function openWordCard(it, { before, fromList = false, piece = null, ents:
   });
   act = (v, b) => {
     if (v === "auto") { const on = !autoOn(); setAuto(on); autoHold(false); if (!on) autoCancel(); else if (!isReading() && !autoPending()) aFinished(); return; } // 자동 켜기/끄기(하나의 설정) · 이미 끝나 있었으면 바로 이어 감
+    if (v === "prev") { autoCancel(); aPrev(); return; } // 이전 ‹ = 다음 › 의 거꾸로
     if (v === "next") { autoCancel(); aNext(); return; } // 다음 › = 자동 켬·끔과 무관하게 자동이 넘어가는 것과 같은 순서의 다음 카드(마지막이면 끝 카드)
     if (v === "two") { setTwo(!twoOn()); return; } // 두 말 켬/끔(기억)
     if (v === "fs") { toggleFs(); return; } // ⛶ = 칸 통째 전체 화면 ⇄ 나가기
@@ -301,7 +316,7 @@ export function openWordCard(it, { before, fromList = false, piece = null, ents:
   };
   if (!pane) host().append(el);
   if (it.ep) Promise.all([noteOf(it.ep), pcOf(it.ep), dictOf()]).then(([n, pcs, dc]) => { if (cardEl !== el) return; const x = n?.[clean(it.w)]; pc = pcs?.cards?.[clean(it.w)] || null; ents = dc?.entries || null; if (x) { it.note = x; it.key = clean(it.w); it.order = n._order || []; } if (autoRun !== "piece" && (x || view || (pc && ents))) { draw(); if (x || view) startNote(); }
-    if (autoRun === "piece" && pc?.pieces?.length && ents) { stopRead(); view = pc.pieces[0]; toPane(el); draw(); startNote(); el.style.visibility = ""; } // 자동 조각 이어 듣기 = 새 낱말의 첫 조각 카드로 바로
+    if (autoRun === "piece" && pc?.pieces?.length && ents) { stopRead(); view = pLast ? pc.pieces[pc.pieces.length - 1] : pc.pieces[0]; toPane(el); draw(); startNote(); el.style.visibility = ""; } // 자동 조각 이어 듣기 = 새 낱말의 첫 조각 카드로 바로
     else if (autoRun === "piece") { el.style.visibility = ""; aFinished(); } // 조각 없음 = 다음으로
     else if (!x && !view && autoElig() && autoOn()) { if (it.af) { it.__done = aFinished; playSnd(it, null, before); } else aFinished(); } // 설명이 없는 낱말 = 낱말 소리 한 번 뒤 다음으로
     aMark(); }); // 설명이 있으면 문장 자리를 설명으로 · 조각 자료가 있으면 칩
