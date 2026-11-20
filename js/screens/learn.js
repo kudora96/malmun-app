@@ -536,7 +536,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     try { if (st.panel?.kind === "explain" && !ex.playing && !sp?.slow?.playing) { const sb = panel.querySelector(".v9body .sayp .saybig"); if (sb?.querySelector(".kar")) paintAt(sb.children, null, 0); } } catch {} // 견본이 끝나면 글자 칠 지움
     if (st.panel?.kind === "explain" && L[st.panel.i]?.v9 && ex.playing) {
       const it = ex.q[ex.i];
-      if (it) {
+      if (it && !ex.gapping) { // 조각 사이 쉼(0.4초)엔 소리가 아직 앞 조각이라 새 조각 칠을 하면 엉뚱한 낱말이 깜빡 켜졌다 꺼짐 → 앞 상태 그대로 둠
         const k = it.p === 0 ? (it.sk ?? sentAt(st.panel.i, it.lang, ex.a.currentTime)) : -1;
         panel.querySelectorAll(".v9body .sn").forEach(el => el.classList.toggle("cur", +el.dataset.s === k));
         // 문장 안 노래방 칠(본부 10-08) — 그 문장 시작 ~ 다음 문장 시작 사이를 낱말 글자 수 비례로

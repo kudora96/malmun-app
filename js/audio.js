@@ -18,13 +18,14 @@ export class Sequence {
       const it = this.q[this.i];
       this.onstep?.(it, this.i);
       this.a.src = it.src; this.a.playbackRate = this.rate;
+      this.gapping = false; // 새 소리가 걸린 뒤부터 칠하기가 이 조각 시각을 읽음(사이 쉼 동안은 앞 소리 시각이라 읽지 않음 · 대표님 11-20 깜빡임)
       if (it.at) { this.a.currentTime = it.at; this.a.addEventListener("loadedmetadata", () => { if (this.a.currentTime < it.at - 0.2) this.a.currentTime = it.at; }, { once: true }); } // 그 문장부터(설명 언어 바꿔 이어 읽기)
       // 소리가 시작되기 전에 멈추거나 다른 소리로 바뀌면 앞 play() 가 AbortError 로 늦게 거절됨 → 그걸로 새 차례를 넘기지 않음(⇄·다음 줄을 열자마자 눌렀을 때 소리는 나는데 상태·칠이 안 따라가던 것)
       claim(this.owner); const gen = this.gen; this.arm(it); tv(this.a).play().catch(e => { if (gen === this.gen && e?.name !== "AbortError") this.next(); });
       const nx = this.q[this.i + 1];
       if (nx) { const p = new Audio(); p.preload = "auto"; p.src = nx.src; }
     };
-    if (this.i === 0) go(); else this.timer = setTimeout(go, this.q[this.i].gap ?? GAP_MS); // 조각마다 앞 쉼을 따로 줄 수 있음(말해 보세요 머리말 → 0.6초 → 문장)
+    if (this.i === 0) go(); else { this.gapping = true; this.timer = setTimeout(go, this.q[this.i].gap ?? GAP_MS); } // 조각마다 앞 쉼을 따로 줄 수 있음(말해 보세요 머리말 → 0.6초 → 문장)
   }
   // 소리는 안 내고 그 조각 그 자리에 맞춰 둠(멈춘 채 ⇄ — 다시 누르면 resume 이 그 자리에서 이어서)
   cue(items, from = 0) {
@@ -32,9 +33,9 @@ export class Sequence {
     this.onstep?.(it, from); this.a.src = it.src; this.a.playbackRate = this.rate;
     if (it.at) { this.a.currentTime = it.at; this.a.addEventListener("loadedmetadata", () => { if (this.a.currentTime < it.at - 0.2) this.a.currentTime = it.at; }, { once: true }); }
   }
-  pause() { this.gen++; this.on = false; clearTimeout(this.timer); clearInterval(this.ut); this.a.pause(); }
+  pause() { this.gen++; this.gapping = false; this.on = false; clearTimeout(this.timer); clearInterval(this.ut); this.a.pause(); }
   resume() { if (!this.q.length) return; this.on = true; if (this.a.src && !this.a.ended && this.a.currentTime > 0) { claim(this.owner); this.arm(this.q[this.i]); tv(this.a).play().catch(() => {}); } else { this.i--; this.next(); } }
-  stop() { this.gen++; this.on = false; clearTimeout(this.timer); clearInterval(this.ut); this.a.pause(); this.q = []; }
+  stop() { this.gen++; this.gapping = false; this.on = false; clearTimeout(this.timer); clearInterval(this.ut); this.a.pause(); this.q = []; }
   setRate(r) { this.rate = r; this.a.playbackRate = r; }
   get playing() { return this.on; }
 }
