@@ -2099,3 +2099,10 @@ html.vk-bglock{overscroll-behavior:none}.vk-card,.vk-sheet,.hk-sheet,.vk-pane,.v
 .v9bar .romb[aria-pressed=false]::before,.toggles button[aria-pressed=false]::before,.keepov button[aria-pressed=false]::before{content:"";position:absolute;inset:2px;border:1px dashed var(--ink);border-radius:inherit;opacity:.55;pointer-events:none}
 .v9bar .romb[aria-pressed=false]::after,.toggles button[aria-pressed=false]::after,.keepov button[aria-pressed=false]::after{content:"";position:absolute;left:24%;right:24%;top:50%;border-top:max(1.5px,.14em) solid #d9604f;transform:rotate(-14deg);pointer-events:none}
 /* 꺼짐 공용 모양(대표님 11-19 16:44): 안쪽 가는 점선 + 글자 위 짧은 빗금 · 글자는 갈색(조금 옅게) · 모서리는 켜짐과 같음 */
+
+/* 따옴표 칩 안 낱말 하나씩 칠(대표님 11-20 09:09 · P0-171) : 칩 통째 노랑 대신 읽는 낱말(.qw.qk)만 진한 노랑 · 칩 흰 테두리·바탕 모양은 그대로 */
+.v9body .sn .kw.kq.kar{background:none;box-shadow:none}
+.v9body .sn .kw.kq.kar .gw,.v9body .sn .kw.kq.kar b{background:var(--card);color:var(--ink)}
+.v9body .sn .kw.kar .qw.qk,.v9body .pairln .pw.pk .qw.qk{background:#ffd21f;color:#1b1b1b;border-radius:3px;box-shadow:0 2px 0 var(--hi)}
+.v9body .pairln .pw.pq.pk{background:none;box-shadow:none}
+.v9body .pairln .pw.pq.pk .gw,.v9body .pairln .pw.pq.pk b{background:rgba(255,210,31,.45);border-color:rgba(255,210,31,.75);color:var(--ink)}
