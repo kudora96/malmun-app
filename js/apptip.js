@@ -18,7 +18,7 @@ const fresh = el => {
 };
 // 11-20 대표님 「X표 모르는 사람 없잖아 · 도움말 풍선은 진짜 필요할 때만 · 풍선은 이름 되풀이 말고 「누르면 무슨 일이 일어나는지」 한 문장」.
 // ① 단추에 글이 보이면 풍선 없음 ② 누구나 아는 기호(✕ ▶ ⏸ ‹ ›) 풍선 없음 ③ 남기는 것 = 아래 SENT 설명 문장(그 화면 말 ⇄ 따라감: 한국어 / 네팔어) · 예외 표시 data-notip(안 띄움)
-// title/aria-label 은 그대로(화면 낭독용) — 풍선만 안 뜸. 두 말·자동은 글이 보여도 뜻이 낯설어 예외로 설명 풍선(본부안 11-20).
+// title/aria-label 은 그대로(화면 낭독용) — 풍선만 안 뜸. 두 말·자동·⭐ 단어장은 글이 보여도 뜻이 낯설어 예외로 설명 풍선(본부안 11-20).
 const TIP_KEEP = ".vp-han,.vkstar,[data-vk=star]"; // 이름 풍선 그대로 남김(자판 한/ने · ⭐ 단어장 단추)
 const SENT = { // 네팔어 = Claude 서브에이전트 3명 블라인드 다수결(11-20)
   star_add: ["누르면 내 단어장에 담겨요", "थिचेपछि मेरो शब्दसूचीमा थपिन्छ"], star_has: ["내 단어장에 있어요 · 누르면 빠져요", "मेरो शब्दसूचीमा छ · थिचेपछि हटिन्छ"],
@@ -31,7 +31,7 @@ const sentKey = el => el.matches(".vk-star") ? (el.dataset.on === "1" ? "star_ha
 export function tipText(el, v) {
   if (el.hasAttribute("data-notip")) return null;
   const k = el.matches(SENT_SEL) ? sentKey(el) : null;
-  if (k) { if (k !== "two" && k !== "auto" && /\p{L}/u.test(el.innerText || "")) return null; // 글이 보이면 풍선 없음(좁은 폭에서 글이 숨겨진 때만)
+  if (k) { if (k !== "two" && k !== "auto" && !k.startsWith("star") && /\p{L}/u.test(el.innerText || "")) return null; // 글이 보이면 풍선 없음(좁은 폭에서 글이 숨겨진 때만)
     if (SENT[k]) return uiKoOn() ? SENT[k][0] : (lang === "ne" ? SENT[k][1] : null); }
   v = (v || "").trim(); if (!v || !el.matches(TIP_KEEP)) return null;
   return v;
