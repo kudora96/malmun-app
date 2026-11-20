@@ -2133,22 +2133,17 @@ html.vk-bglock{overscroll-behavior:none}.vk-card,.vk-sheet,.hk-sheet,.vk-pane,.v
 /* ── 갈색 막대 정리(대표님 11-20 15:18~15:19) ─────────────────────────────── */
 /* 막대 = ‹ 돌아가기 · ▶ · 두 말 · 자동 · ‹ 이전 · 다음 › · ⛶ (⭐ 는 카드 머리로) · 모자라면 JS(fitCBar)가 단계로 줄임 */
 .vk-cbar.s1 .vk-prev .t,.vk-cbar.s1 .vk-next .t{display:none}
-.vk-cbar.s2 .vk-back .t{display:none}
-.vk-cbar.s3{gap:3px;padding:0 4px}.vk-cbar.s3>*{gap:3px}.vk-cbar.s3 .vp-b.vk-back,.vk-cbar.s3 .vp-b.vk-snd,.vk-cbar.s3 .vp-b.vk-next,.vk-cbar.s3 .vp-b.vk-prev,.vk-cbar.s3 .vp-b.vk-two,.vk-cbar.s3 .vp-b.vk-auto,.vk-cbar.s3 .vk-fs{padding:0 6px;min-width:0}
-.vk-cbar.s4{gap:2px}.vk-cbar.s4>*{gap:2px}.vk-cbar.s4 .vp-b,.vk-cbar.s4 .vk-fs{font-size:11px!important;padding:0 4px!important}
+.vk-cbar.s2 .vk-star .t{display:none}
+.vk-cbar.s3 .vk-back .t{display:none}
+.vk-cbar.s4{gap:3px;padding:0 4px}.vk-cbar.s4>*{gap:3px}.vk-cbar.s4 .vp-b.vk-back,.vk-cbar.s4 .vp-b.vk-snd,.vk-cbar.s4 .vp-b.vk-next,.vk-cbar.s4 .vp-b.vk-prev,.vk-cbar.s4 .vp-b.vk-two,.vk-cbar.s4 .vp-b.vk-auto,.vk-cbar.s4 .vp-b.vk-star,.vk-cbar.s4 .vk-fs{padding:0 6px;min-width:0}
+.vk-cbar.s5{gap:2px}.vk-cbar.s5>*{gap:2px}.vk-cbar.s5 .vp-b,.vk-cbar.s5 .vk-fs{font-size:11px!important;padding:0 4px!important}
 .vk-cbar .vp-b{flex:none}
 /* 첫 카드의 이전 = 누를 수 없음이 보이되 어둡지 않게: 흰 알약 그대로 · 글씨만 옅은 회갈색 */
 .vk-navpair .vp-b.vk-off,.vk-cbar .vk-navpair .vp-b.vk-off{opacity:1;background:var(--card);color:#a8998a;cursor:default;box-shadow:none}
 .vk-cbar .vp-b.vk-off:active:not(:disabled){transform:none;background:var(--card);color:#a8998a;box-shadow:none}
 /* 눌림 = 정말 안으로 들어간 느낌(두 말·자동 켜짐과 같은 깊이 · 1px 내려앉음 · 크기 변화 0) */
-.learn .vk-cbar .vp-b:not(:disabled,.vk-off):active,.learn .vk-cbar .vk-fs:active,.vk-star:not([data-on="1"]):active{background:var(--sel-bg)!important;color:var(--sel-ink)!important;box-shadow:var(--press-sh)!important;transform:translateY(1px)!important;scale:none!important;border-color:var(--sel-bg)!important}
-/* 머리 ⭐ (⇄ 바로 왼쪽) */
-.vk-star{flex:none;position:relative;align-self:flex-start;width:36px;height:32px;padding:0;border-radius:999px;border:2px solid var(--hi);background:var(--card);color:var(--hi);display:inline-grid;place-items:center;cursor:pointer;box-shadow:none;transition:background-color .12s ease,box-shadow .12s ease}
-.vk-star::before{content:"";position:absolute;inset:-6px -4px}
-.vk-star svg{fill:none;stroke:currentColor;stroke-width:2;pointer-events:none}
-.vk-star[data-on="1"]{cursor:default;color:#b97a08}.vk-star[data-on="1"] svg{fill:#f2b01e;stroke:#b97a08}
-.vk-card .vk-uiko{margin-left:0}.vk-card .vk-star{margin-left:auto}
-/* 머리 한 줄: 표제·발음은 그대로 · 품사/뜻 글이 모자라면 말줄임 */
-.vk-card .vk-main{flex-wrap:nowrap}.vk-card .vk-main .vk-t,.vk-card .vk-main .vk-rom{flex:none}
-.vk-card .vk-main .vk-mean,.vk-card .vk-main .vk-pos{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.vk-card .vk-main .vk-mean .vis,.vk-card .vk-main .vk-pos .vis{white-space:nowrap}
+.learn .vk-cbar .vp-b:not(:disabled,.vk-off):active,.learn .vk-cbar .vk-fs:active,.vk-star:active{background:var(--sel-bg)!important;color:var(--sel-ink)!important;box-shadow:var(--press-sh)!important;transform:translateY(1px)!important;scale:none!important;border-color:var(--sel-bg)!important}
+/* 막대 ⭐ 단어장 = 흰 알약 · 별 모양으로만 상태(☆ 빈 별 · ★ 찬 금색 별) · 글·배경은 그대로 또렷 */
+.vk-cbar .vp-b.vk-star{gap:4px;width:auto;min-height:0;height:22px;padding:0 10px;border-radius:999px;border:2px solid transparent;background:var(--card);color:var(--ink);font-size:12px;font-weight:800;box-shadow:none;cursor:pointer}.vk-star svg{fill:none;stroke:currentColor;stroke-width:2;pointer-events:none;flex:none}
+.vk-star.on svg{fill:#f2b01e;stroke:#b97a08}.vk-cbar .vp-b.vk-star.on{color:var(--ink);opacity:1;background:var(--card)}
+.vk-cbar[class*=" s"] :is(.vp-b,.vk-fs){min-width:0!important;max-width:none!important} /* langfit 이 단추 폭을 한 말 기준으로 고정해 둔 것을 풀어 줘야 줄인 글이 자리를 비움 */
