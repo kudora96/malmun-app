@@ -248,6 +248,7 @@ export function switchRead(koFirst) {
     { const au = !!j.both?.(), nk = au && !j.ph ? k : k + 1, nph = au && !j.ph ? 1 : 0; if (!j.paused && j.bl[nk]) { try { const na = new Audio(j.url(nph ? other(j.lang) : j.lang, j.bl[nk].b)); na.preload = "auto"; na.load(); j.pre = { k: nk, ph: nph, a: na }; } catch {} } }
     j.root.querySelectorAll(".vk-line .kw.kar, .kw.ks, .kw.kt").forEach(e => e.classList.remove("kar", "ks", "kt")); j.root.querySelectorAll(".pw.pk").forEach(w => w.classList.remove("pk")); clearHl(j.root); from = null; show(j); return;
   }
+  if (ended && !j.dead) { j.lang = koFirst ? "ko" : "ne"; j.pre = null; return; } // 소리가 막 끝난 틈(0.3초·⏸) 중 ⇄ = 아무것도 다시 안 틂 — 다음 차례는 finish 가 정한 대로(이미 읽은 말·마디는 건너뛰고 안 읽은 쪽부터) · 이후 블록·마디만 새 말 순서(대표님 11-20 15:06 · D-126)
   clearTimeout(j.gap); j.gap = 0; clearInterval(tick); j.pre = null; // 미리 받아 둔 다음 블록 소리는 옛 말 것 — 버림(블록 사이 틈에 ⇄ 하면 옛 말로 이어 읽던 것)
   if (a) { a.onended = a.onerror = null; try { a.pause(); } catch {} }
   // 같은 낱말에서: 두 말 다 낱말 시각이 있으면 지금 낱말 번호 → 새 말 그 낱말 시작 시각 · 없으면 소리 위치 비율
