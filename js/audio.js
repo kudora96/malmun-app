@@ -1,5 +1,5 @@
 // 음성 조각 이어 재생 — 조각 사이 간격은 앱이 넣는다(app_build_spec: 기본 400ms)
-import { claim } from "./onesound.js?v=1120.29";
+import { claim } from "./onesound.js?v=1120.30";
 export const GAP_MS = 400;
 
 // 점검 소리 끔(본부 10-17) — ?mute=1 이면 음소거 · window.__sfxVolume(점검기)이 있으면 그 크기 · 평소 학습자는 그대로(바꾸는 것 없음)

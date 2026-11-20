@@ -1,8 +1,8 @@
 // 단어 카드 설명(대표님 11-16 「설명 창 방식 그대로」) — 위 = 지금 말(⇄ 상태) 본문 · 아래 「↳」 한 줄 = 다른 말 · ⇄ 누르면 그 자리에서 즉시 바뀜
 // 읽기 소리 = 낱말 소리 다음에 뜻·쓰임 → 예문1 → 예문2 차례로(지금 말) · 읽는 줄에 노래방 불 · 파일 = media/wordnote/<편>/<낱말번호>_<ko|ne>_<mean|ex1|ex2>.mp3(말하기부가 만듦 · 없으면 건너뜀)
-import { claim, onSound } from "./onesound.js?v=1120.29";
-import { esc } from "./text.js?v=1120.29";
-import { twoOn } from "./autoplay.js?v=1120.29";
+import { claim, onSound } from "./onesound.js?v=1120.30";
+import { esc } from "./text.js?v=1120.30";
+import { twoOn } from "./autoplay.js?v=1120.30";
 
 const BLK = [["mean", "ko_mean", "ne_mean"], ["ex1", "ko_ex1", "ne_ex1"], ["ex2", "ko_ex2", "ne_ex2"]];
 const pick = (n, ko, k) => n?.[`${k ? "ko" : "ne"}_${ko}`] || n?.[`${k ? "ko" : "ne"}_${ko === "ex1" ? "ex" : ko}`] || ""; // ex1 = 옛 이름 ex 도 받음
@@ -243,7 +243,7 @@ function startAt(j, k, wi) { // 그 낱말 시작 소리부터 새로 읽음(앞
 export function switchRead(koFirst) {
   const j = cur; if (!j) return;
   const a = j.a, ended = !!a?.ended || j.resumeK >= 0, fr = !ended && a?.duration ? a.currentTime / a.duration : 0, k = ended ? (j.resumeK >= 0 ? j.resumeK : j.k) : j.k;
-  if (a && !ended && j.a === a && a.currentTime > 0) { // ⇄ = 지금 소리를 처음으로 안 돌리고 그대로 이어 읽음(칠도 이어짐) · 줄 끝나면 바뀐 순서대로 다음 블록(대표님 11-20 13:30 · D-125)
+  if (a && !ended && j.a === a && (a.currentTime > 0 || j.c0 >= 0 || j.ci1 >= 0)) { // 마디 소리가 막 시작(받는 중 · 시각 0)이어도 같은 소리 그대로 이어 읽음 — 처음부터·같은 마디 다시 읽지 않음(11-20 15:33 · D-127) // ⇄ = 지금 소리를 처음으로 안 돌리고 그대로 이어 읽음(칠도 이어짐) · 줄 끝나면 바뀐 순서대로 다음 블록(대표님 11-20 13:30 · D-125)
     const nl2 = koFirst ? "ko" : "ne", other = l => (l === "ko" ? "ne" : "ko"); j.lang = nl2; j.ph = j.pl === nl2 ? 0 : 1; j.pre = null;
     { const au = !!j.both?.(), nk = au && !j.ph ? k : k + 1, nph = au && !j.ph ? 1 : 0; if (!j.paused && j.bl[nk]) { try { const na = new Audio(j.url(nph ? other(j.lang) : j.lang, j.bl[nk].b)); na.preload = "auto"; na.load(); j.pre = { k: nk, ph: nph, a: na }; } catch {} } }
     j.root.querySelectorAll(".vk-line .kw.kar, .kw.ks, .kw.kt").forEach(e => e.classList.remove("kar", "ks", "kt")); j.root.querySelectorAll(".pw.pk").forEach(w => w.classList.remove("pk")); clearHl(j.root); from = null; show(j); return;
