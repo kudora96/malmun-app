@@ -66,7 +66,7 @@
   "ne_word": "म",
   "list_ne": "सर्वनाम",
   "ko_snd": [
-   "snd/memo/ko_004.mp3"
+   "snd/memo/ko_004.mp3?v=1120.32"
   ],
   "ne_mean_snd": "snd/dict/jeo_ne_mean.mp3",
   "ko_mean_snd": "snd/dict/jeo_ko_mean.mp3",
@@ -86,7 +86,7 @@
   "ne_word": null,
   "list_ne": "विभक्ति",
   "ko_snd": [
-   "snd/memo/ko_005.mp3"
+   "snd/memo/ko_005.mp3?v=1120.32"
   ],
   "ne_mean_snd": "snd/dict/neun_ne_mean.mp3",
   "ko_mean_snd": "snd/dict/neun_ko_mean.mp3",
@@ -126,7 +126,7 @@
   "ne_word": null,
   "list_ne": "प्रत्यय",
   "ko_snd": [
-   "snd/memo/ko_007.mp3"
+   "snd/memo/ko_007.mp3?v=1120.32"
   ],
   "ne_mean_snd": "snd/dict/eo_lang_ne_mean.mp3",
   "ko_mean_snd": "snd/dict/eo_lang_ko_mean.mp3",
@@ -186,7 +186,7 @@
   "ne_word": "थर",
   "list_ne": "संज्ञा",
   "ko_snd": [
-   "snd/memo/ko_010.mp3"
+   "snd/memo/ko_010.mp3?v=1120.32"
   ],
   "ne_mean_snd": "snd/dict/seong_ne_mean.mp3",
   "ko_mean_snd": "snd/dict/seong_ko_mean.mp3",
@@ -206,7 +206,7 @@
   "ne_word": null,
   "list_ne": "विभक्ति",
   "ko_snd": [
-   "snd/memo/ko_011.mp3"
+   "snd/memo/ko_011.mp3?v=1120.32"
   ],
   "ne_mean_snd": "snd/dict/eun_ne_mean.mp3",
   "ko_mean_snd": "snd/dict/eun_ko_mean.mp3",
@@ -386,7 +386,7 @@
   "ne_word": null,
   "list_ne": "विभक्ति",
   "ko_snd": [
-   "snd/memo/ko_020.mp3"
+   "snd/memo/ko_020.mp3?v=1120.32"
   ],
   "ne_mean_snd": "snd/dict/e_ne_mean.mp3",
   "ko_mean_snd": "snd/dict/e_ko_mean.mp3",
@@ -426,7 +426,7 @@
   "ne_word": null,
   "list_ne": "विशेषण प्रत्यय",
   "ko_snd": [
-   "snd/memo/ko_022.mp3"
+   "snd/memo/ko_022.mp3?v=1120.32"
   ],
   "ne_mean_snd": "snd/dict/n_gwan_ne_mean.mp3",
   "ko_mean_snd": "snd/dict/n_gwan_ko_mean.mp3",
@@ -446,7 +446,7 @@
   "ne_word": null,
   "list_ne": "आश्रित संज्ञा",
   "ko_snd": [
-   "snd/memo/ko_023.mp3"
+   "snd/memo/ko_023.mp3?v=1120.32"
   ],
   "ne_mean_snd": "snd/dict/geot_ne_mean.mp3",
   "ko_mean_snd": "snd/dict/geot_ko_mean.mp3",
@@ -486,7 +486,7 @@
   "ne_word": "अगाडि",
   "list_ne": "संज्ञा",
   "ko_snd": [
-   "snd/memo/ko_025.mp3"
+   "snd/memo/ko_025.mp3?v=1120.32"
   ],
   "ne_mean_snd": "snd/dict/ap_ne_mean.mp3",
   "ko_mean_snd": "snd/dict/ap_ko_mean.mp3",
@@ -526,7 +526,7 @@
   "ne_word": null,
   "list_ne": "विभक्ति",
   "ko_snd": [
-   "snd/memo/ko_027.mp3"
+   "snd/memo/ko_027.mp3?v=1120.32"
   ],
   "ne_mean_snd": "snd/dict/wa_ne_mean.mp3",
   "ko_mean_snd": "snd/dict/wa_ko_mean.mp3",
@@ -546,7 +546,7 @@
   "ne_word": "दुई",
   "list_ne": "संख्यावाचक शब्द",
   "ko_snd": [
-   "snd/memo/ko_028.mp3"
+   "snd/memo/ko_028.mp3?v=1120.32"
   ],
   "ne_mean_snd": "snd/dict/dul_ne_mean.mp3",
   "ko_mean_snd": "snd/dict/dul_ko_mean.mp3",
@@ -646,7 +646,7 @@
   "ne_word": null,
   "list_ne": "विभक्ति",
   "ko_snd": [
-   "snd/memo/ko_033.mp3"
+   "snd/memo/ko_033.mp3?v=1120.32"
   ],
   "ne_mean_snd": "snd/dict/gwa_ne_mean.mp3",
   "ko_mean_snd": "snd/dict/gwa_ko_mean.mp3",
@@ -986,7 +986,7 @@
   "ne_word": null,
   "list_ne": "विभक्ति",
   "ko_snd": [
-   "snd/memo/ko_050.mp3"
+   "snd/memo/ko_050.mp3?v=1120.32"
   ],
   "ne_mean_snd": "snd/dict/ga_ne_mean.mp3",
   "ko_mean_snd": "snd/dict/ga_ko_mean.mp3",
@@ -1006,7 +1006,7 @@
   "ne_word": "बोली",
   "list_ne": "संज्ञा",
   "ko_snd": [
-   "snd/memo/ko_051.mp3"
+   "snd/memo/ko_051.mp3?v=1120.32"
   ],
   "ne_mean_snd": "snd/dict/mal_ne_mean.mp3",
   "ko_mean_snd": "snd/dict/mal_ko_mean.mp3",
@@ -1026,7 +1026,7 @@
   "ne_word": null,
   "list_ne": "विभक्ति",
   "ko_snd": [
-   "snd/memo/ko_052.mp3"
+   "snd/memo/ko_052.mp3?v=1120.32"
   ],
   "ne_mean_snd": "snd/dict/eul_ne_mean.mp3",
   "ko_mean_snd": "snd/dict/eul_ko_mean.mp3",
@@ -1066,7 +1066,7 @@
   "ne_word": null,
   "list_ne": "विशेषण प्रत्यय",
   "ko_snd": [
-   "snd/memo/ko_005.mp3"
+   "snd/memo/ko_005.mp3?v=1120.32"
   ],
   "ne_mean_snd": "snd/dict/neun_eomi_ne_mean.mp3",
   "ko_mean_snd": "snd/dict/neun_eomi_ko_mean.mp3",
@@ -1266,7 +1266,7 @@
   "ne_word": null,
   "list_ne": "संज्ञा बनाउने प्रत्यय",
   "ko_snd": [
-   "snd/memo/ko_063.mp3"
+   "snd/memo/ko_063.mp3?v=1120.32"
   ],
   "ne_mean_snd": "snd/dict/gi_ne_mean.mp3",
   "ko_mean_snd": "snd/dict/gi_ko_mean.mp3",
@@ -1286,7 +1286,7 @@
   "ne_word": null,
   "list_ne": "सहायक विभक्ति",
   "ko_snd": [
-   "snd/memo/ko_064.mp3"
+   "snd/memo/ko_064.mp3?v=1120.32"
   ],
   "ne_mean_snd": "snd/dict/man_ne_mean.mp3",
   "ko_mean_snd": "snd/dict/man_ko_mean.mp3",
@@ -1326,7 +1326,7 @@
   "ne_word": null,
   "list_ne": "संयोजक प्रत्यय",
   "ko_snd": [
-   "snd/memo/ko_066.mp3"
+   "snd/memo/ko_066.mp3?v=1120.32"
   ],
   "ne_mean_snd": "snd/dict/myeon_ne_mean.mp3",
   "ko_mean_snd": "snd/dict/myeon_ko_mean.mp3",
@@ -1426,7 +1426,7 @@
   "ne_word": null,
   "list_ne": "कर्ता विभक्ति",
   "ko_snd": [
-   "snd/memo/ko_071.mp3"
+   "snd/memo/ko_071.mp3?v=1120.32"
   ],
   "ne_mean_snd": "snd/dict/i_josa_ne_mean.mp3",
   "ko_mean_snd": "snd/dict/i_josa_ko_mean.mp3",
@@ -1486,7 +1486,7 @@
   "ne_word": null,
   "list_ne": "संयोजक प्रत्यय",
   "ko_snd": [
-   "snd/memo/ko_007.mp3"
+   "snd/memo/ko_007.mp3?v=1120.32"
   ],
   "ne_mean_snd": "snd/dict/eo_yeon_ne_mean.mp3",
   "ko_mean_snd": "snd/dict/eo_yeon_ko_mean.mp3",
@@ -1526,7 +1526,7 @@
   "ne_word": "अझ",
   "list_ne": "क्रियाविशेषण",
   "ko_snd": [
-   "snd/memo/ko_075.mp3"
+   "snd/memo/ko_075.mp3?v=1120.32"
   ],
   "ne_mean_snd": "snd/dict/deo_ne_mean.mp3",
   "ko_mean_snd": "snd/dict/deo_ko_mean.mp3",
@@ -1546,7 +1546,7 @@
   "ne_word": "राम्रोसँग",
   "list_ne": "क्रियाविशेषण",
   "ko_snd": [
-   "snd/memo/ko_076.mp3"
+   "snd/memo/ko_076.mp3?v=1120.32"
   ],
   "ne_mean_snd": "snd/dict/jal_ne_mean.mp3",
   "ko_mean_snd": "snd/dict/jal_ko_mean.mp3",
@@ -1746,7 +1746,7 @@
   "ne_word": null,
   "list_ne": "विशेषण प्रत्यय",
   "ko_snd": [
-   "snd/memo/ko_086.mp3"
+   "snd/memo/ko_086.mp3?v=1120.32"
   ],
   "ne_mean_snd": "snd/dict/l_gwan_ne_mean.mp3",
   "ko_mean_snd": "snd/dict/l_gwan_ko_mean.mp3",
@@ -1786,7 +1786,7 @@
   "ne_word": null,
   "list_ne": "विभक्ति",
   "ko_snd": [
-   "snd/memo/ko_088.mp3"
+   "snd/memo/ko_088.mp3?v=1120.32"
   ],
   "ne_mean_snd": "snd/dict/do_ne_mean.mp3",
   "ko_mean_snd": "snd/dict/do_ko_mean.mp3",
@@ -1806,7 +1806,7 @@
   "ne_word": "यो",
   "list_ne": "विशेषण",
   "ko_snd": [
-   "snd/memo/ko_071.mp3"
+   "snd/memo/ko_071.mp3?v=1120.32"
   ],
   "ne_mean_snd": "snd/dict/i_gwan_ne_mean.mp3",
   "ko_mean_snd": "snd/dict/i_gwan_ko_mean.mp3",
@@ -1826,7 +1826,7 @@
   "ne_word": "एप",
   "list_ne": "संज्ञा",
   "ko_snd": [
-   "snd/memo/ko_089.mp3"
+   "snd/memo/ko_089.mp3?v=1120.32"
   ],
   "ne_mean_snd": "snd/dict/aep_ne_mean.mp3",
   "ko_mean_snd": "snd/dict/aep_ko_mean.mp3",
@@ -1886,7 +1886,7 @@
   "ne_word": "अन्त्य",
   "list_ne": "संज्ञा",
   "ko_snd": [
-   "snd/memo/ko_092.mp3"
+   "snd/memo/ko_092.mp3?v=1120.32"
   ],
   "ne_mean_snd": "snd/dict/kkeut_ne_mean.mp3",
   "ko_mean_snd": "snd/dict/kkeut_ko_mean.mp3",
@@ -2046,7 +2046,7 @@
   "ne_word": null,
   "list_ne": "भूतकाल प्रत्यय",
   "ko_snd": [
-   "snd/memo/ko_100.mp3"
+   "snd/memo/ko_100.mp3?v=1120.32"
   ],
   "ne_mean_snd": "snd/dict/eot_ne_mean.mp3",
   "ko_mean_snd": "snd/dict/eot_ko_mean.mp3",
@@ -2086,7 +2086,7 @@
   "ne_word": null,
   "list_ne": "संज्ञा",
   "ko_snd": [
-   "snd/memo/ko_102.mp3"
+   "snd/memo/ko_102.mp3?v=1120.32"
   ],
   "ne_mean_snd": "snd/dict/han_seong_ne_mean.mp3",
   "ko_mean_snd": "snd/dict/han_seong_ko_mean.mp3",
