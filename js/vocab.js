@@ -1,22 +1,22 @@
 // ⭐ 내 단어장(시험판 · 네팔어 1편 · 본부 11-16 대표님 승인) — 낱말 칸을 톡 누르면 작은 카드 · 단어장은 이 기기(localStorage)에만
 // 소리 = 이미 만들어 둔 낱말 소리를 이어 붙여(wordsnd.json) · 없는 편은 줄 소리의 그 낱말 구간 · 학습자 말이 네팔어가 아니면 아무것도 안 보임
-import { lang, uiKoOn, langShort } from "./i18n.js?v=1120.37";
-import { noteHTML, applyMode, fixSizes, readNote, stopRead, toggleRead, switchRead, tapBlock, tapWord, hitText, noteBlocks, curBlock, isReading, isPaused } from "./wordnote.js?v=1120.37"; // 단어 카드 설명(위 = 지금 말 · 아래 ↳ 다른 말) + 읽기 소리
-import { claim, onSound } from "./onesound.js?v=1120.37";
-import { twoOn, setTwo, autoOn, setAuto, autoSchedule, autoCancel, autoPending, autoHold, autoHeld, autoAt, markAuto, showAutoEnd } from "./autoplay.js?v=1120.37"; // 자동 이어 듣기 공용 엔진(설명·단어 카드·조각 카드 · 대표님 11-19 14:11)
-import { hold } from "./wake.js?v=1120.37"; // 단어장·카드 ▶ 도 소리 장치 깨워 둠(목록 화면에서 열 때는 학습 화면의 깨우기가 없었음 · 대표님 11-18 「다음 사람」 첫 「다」 안 들림)
+import { lang, uiKoOn, langShort } from "./i18n.js?v=1120.38";
+import { noteHTML, applyMode, fixSizes, readNote, stopRead, toggleRead, switchRead, tapBlock, tapWord, hitText, noteBlocks, curBlock, isReading, isPaused } from "./wordnote.js?v=1120.38"; // 단어 카드 설명(위 = 지금 말 · 아래 ↳ 다른 말) + 읽기 소리
+import { claim, onSound } from "./onesound.js?v=1120.38";
+import { twoOn, setTwo, autoOn, setAuto, autoSchedule, autoCancel, autoPending, autoHold, autoHeld, autoAt, markAuto, showAutoEnd } from "./autoplay.js?v=1120.38"; // 자동 이어 듣기 공용 엔진(설명·단어 카드·조각 카드 · 대표님 11-19 14:11)
+import { hold } from "./wake.js?v=1120.38"; // 단어장·카드 ▶ 도 소리 장치 깨워 둠(목록 화면에서 열 때는 학습 화면의 깨우기가 없었음 · 대표님 11-18 「다음 사람」 첫 「다」 안 들림)
 let wakeRel = null; const wakeOn = () => { wakeRel ||= hold(); }, wakeOff = () => { const f = wakeRel; wakeRel = null; try { f?.(); } catch {} };
-import * as sfx from "./sfx.js?v=1120.37";
-import { uikoChip } from "./ui.js?v=1120.37";
-import { esc } from "./text.js?v=1120.37";
-import { attachDragScroll } from "./dragscroll.js?v=1120.37";
-import { sortItems, makeSortButton, attachDelete, loadSort } from "./vlist_ops.js?v=1120.37";
-import { PAGE, pageCount, slicePage, clampPage, makePager } from "./vlist_pager.js?v=1120.37";
-import { filterItems, makeFindBox, indexLetters, makeIndexBar, groupByEp, findTx } from "./vlist_find.js?v=1120.37";
-import { paths } from "./paths.js?v=1120.37";
-import { catalog, episode } from "./data.js?v=1120.37";
-import { VERSION } from "./version.js?v=1120.37";
-import { createMemo, memoBtns, TXM, firstSentence } from "./memo.js?v=1120.37"; // 외우기(대표님 11-20 15:10)
+import * as sfx from "./sfx.js?v=1120.38";
+import { uikoChip } from "./ui.js?v=1120.38";
+import { esc } from "./text.js?v=1120.38";
+import { attachDragScroll } from "./dragscroll.js?v=1120.38";
+import { sortItems, makeSortButton, attachDelete, loadSort } from "./vlist_ops.js?v=1120.38";
+import { PAGE, pageCount, slicePage, clampPage, makePager } from "./vlist_pager.js?v=1120.38";
+import { filterItems, makeFindBox, indexLetters, makeIndexBar, groupByEp, findTx } from "./vlist_find.js?v=1120.38";
+import { paths } from "./paths.js?v=1120.38";
+import { catalog, episode } from "./data.js?v=1120.38";
+import { VERSION } from "./version.js?v=1120.38";
+import { createMemo, memoBtns, TXM, firstSentence } from "./memo.js?v=1120.38"; // 외우기(대표님 11-20 15:10)
 
 const KEY = "malmun.vocab.ne";
 export const vocabOn = () => lang === "ne";
@@ -418,35 +418,30 @@ export function openVocabList() {
 
   };
   // ── 외우기(대표님 11-20 15:10~15:38) — 탭 줄 셋째 칩 「외우기」 → 전용 보기: 단어장 조각(낱낱 단어)만 · 순서대로 · 한국어 낱말 소리 → 짧은 뜻 소리(⇄ 순서) · 묶음 머리 없음 · 같은 조각은 처음 한 번만
-  let memoOn = false, mseq = [], mbar = null, mview = null, memoMap = null, tmpN = 0;
-  fetch("data/memo_map.json?v=" + VERSION).then(r => (r.ok ? r.json() : null)).then(j => { memoMap = j; }).catch(() => {});
-  const mapOf = it => { const m = memoMap; if (!m) return null; const c = clean(it.w), k = it.kind === "piece" ? "p:" + it.pid : "w:" + c; return m[it.ep]?.[k] || m[k] || m[it.ep]?.[c] || m[c] || null; };
-  const sndOf = (m, f) => { let v = m?.[f]; if (Array.isArray(v)) v = v[0]; return typeof v === "string" && /^snd\//.test(v) ? v : null; }; // 앱 안 상대 주소만 · 아직 없는 항목은 null → 뜻풀이 첫 문장(임시)
-  const mname = (it, m) => (m && m.mode === "word" && (m.ne_word || m.list_ne)) || it.mean || ""; // 뜻 낱말 · 짝 없으면 갈래 이름
+  let memoOn = false, mseq = [], mbar = null, mview = null;
   const mkSeq = () => { const out = [], seen = new Set(), add = x => { const k = x.kind === "piece" ? "p:" + x.pid : "w:" + clean(x.w); if (!seen.has(k)) { seen.add(k); out.push(x); } }; for (const x of view) { if (x.kind === "piece") { add(x); continue; } const sb = subs.get(x) || []; if (sb.length) sb.forEach(add); else add(x); } return out; }; // 묶음 머리는 빼고 조각만(조각 없는 낱말은 그 낱말 자체가 조각 하나)
   const meanOf = it => { if (it.kind === "piece") { const e = entMap?.get(it.pid); return e ? { note: pnote(e), url: l => `snd/dict/${it.pid}_${l}_mean.mp3?v=10` } : null; } const nt = N[it.ep], k = clean(it.w), no = (nt?._order || []).indexOf(k) + 1; return nt?.[k] && no ? { note: nt[k], url: l => `snd/wordnote/${it.ep}/${no}_${l}_mean.mp3?v=10` } : null; }
+  const mshow = i => { const lis = mview?.querySelectorAll("li") || []; lis.forEach(e => e.classList.remove("vm-on")); mview?.querySelectorAll(".vm-say").forEach(e => e.classList.remove("vm-say")); if (i < 0) return; const li = lis[i]; if (!li) return; li.classList.add("vm-on"); const u = mview, off = li.getBoundingClientRect().top - u.getBoundingClientRect().top - (u.clientHeight - li.offsetHeight) / 2; u.scrollTo ? u.scrollTo({ top: u.scrollTop + off, behavior: off && Math.abs(off) < 900 ? "smooth" : "auto" }) : (u.scrollTop += off); };
   const memo = createMemo({
-    seq: () => mseq, ko: () => uiKoOn(), host: () => document.querySelector(".learn") || document.body,
-    show: i => { const lis = mview?.querySelectorAll("li") || []; lis.forEach(e => e.classList.remove("vm-on")); mview?.querySelectorAll(".vm-say").forEach(e => e.classList.remove("vm-say")); if (i < 0) return; const li = lis[i]; if (!li) return; li.classList.add("vm-on"); const u = mview, off = li.getBoundingClientRect().top - u.getBoundingClientRect().top - (u.clientHeight - li.offsetHeight) / 2; u.scrollTo ? u.scrollTo({ top: u.scrollTop + off, behavior: off && Math.abs(off) < 900 ? "smooth" : "auto" }) : (u.scrollTop += off); },
-    side: (i, l) => { const li = mview?.querySelectorAll("li")[i]; li?.querySelectorAll(".vm-say").forEach(e => e.classList.remove("vm-say")); if (l && li) { const t = li.querySelector(l === "ko" ? ".vm-k" : ".vm-m"); if (t && !t.classList.contains("vm-sent")) t.classList.add("vm-say"); } },
-    tick: (i, t) => { const li = mview?.querySelectorAll("li")[i]; if (!li) return; const sp = [...li.querySelectorAll(".vm-wd")]; if (!sp.length) return; const it = mseq[i], w = it && firstSentence(meanOf(it)?.note, "ne").w; let j = -1; if (w && t >= 0) { w.forEach((x, n) => { if (x[0] <= t + 0.03) j = n; }); if (j >= 0 && t > w[j][1] + 0.3) j = -1; if (j >= sp.length) j = sp.length - 1; } sp.forEach((e, n) => e.classList.toggle("vm-say", n === j)); },
-    stopWord: () => stopWordSound(),
-    word: async (it, done, guard) => { const ids = it.kind !== "piece" && it.ep && it.n != null ? await unitsFor(it.ep, it.n, it.w) : null; if (!ids?.length && !(it.kind !== "piece" && it.af)) return done(); it.__done = done; guard(() => playSnd(it, null, null, ids || null)); },
+    seq: () => mseq, ko: () => uiKoOn(), two: () => twoOn(), host: () => document.querySelector(".learn") || document.body,
+    show: mshow,
+    tick: (i, l, t) => { const li = mview?.querySelectorAll("li")[i]; if (!li) return; const sp = [...li.querySelectorAll(`.vm-sl[data-l="${l}"] .vm-wd`)]; if (!sp.length) return; const it = mseq[i], w = it && firstSentence(meanOf(it)?.note, l).w; let j = -1; if (w && t >= 0) { w.forEach((x, n) => { if (x[0] <= t + 0.03) j = n; }); if (j >= 0 && t > w[j][1] + 0.3) j = -1; if (j >= sp.length) j = sp.length - 1; } li.querySelectorAll(".vm-say").forEach(e => e.classList.remove("vm-say")); if (j >= 0) sp[j].classList.add("vm-say"); }, // 읽는 문장의 읽는 낱말 하나만 진한 노랑
     mean: it => meanOf(it),
-    shortUrl: (it, l) => { const m = mapOf(it); if (!m) return null; if (l === "ko") return sndOf(m, "ko_snd"); return m.mode === "word" ? sndOf(m, "ne_word_snd") : null; }, // 짧은 소리(조각 한국어 낱말·짧은 뜻 낱말) · 없으면 뜻풀이 첫 문장(임시) · mean 항목은 뜻풀이 한 문장
     onState: () => drawMemo(),
   });
-  const mrow = (it, ko, i) => { const m = mapOf(it), d = devMap.get(it) || it.dev || "", k = `<span class="vm-k ko" lang="ko">${esc(it.w)}</span>`, r = d ? `<span class="vm-r" lang="ne">${esc(d)}</span>` : ""; let n; const mn = m && m.mode === "mean" && meanOf(it)?.note, fs = mn && firstSentence(mn, "ne"); if (fs && fs.tk.length) n = `<span class="vm-m vm-sent" lang="ne">${fs.tk.map(t => `<span class="vm-wd">${esc(t)}</span>`).join(" ")}</span>`; else n = `<span class="vm-m" lang="ne">${esc(mname(it, m))}</span>`; return `<li class="vm-row"><button type="button" class="vm-lb" data-i="${i}">${ko ? k + r + n : n + k + r}</button></li>`; }; // 짝 낱말 없는 조각(mean) = 읽는 뜻풀이 한 문장 글 그대로(낱말마다 칠이 따라감)
-  const drawMemoRows = () => { if (!mview) return; const ko = uiKoOn(); mview.innerHTML = mseq.map((it, i) => mrow(it, ko, i)).join(""); tmpN = mseq.filter(it => { const m = mapOf(it); return !(m && sndOf(m, "ko_snd") && (m.mode === "mean" || sndOf(m, "ne_word_snd"))); }).length; window.__memo.temp = tmpN; window.__memo.n = mseq.length; };
+  // 줄 = 뜻풀이 첫 문장(들)만 — 한 말이면 앞에 둔 말 문장 · 「두 말」 켜면 아래 ↳ 로 다른 말 문장 · 낱말마다 한 칸(읽는 낱말 칠)
+  const msent = (it, l) => { const fs = firstSentence(meanOf(it)?.note, l); return fs.tk.map(t => `<span class="vm-wd">${esc(t)}</span>`).join(" "); };
+  const mrow = (it, ko, i) => { const ls = ko ? ["ko", "ne"] : ["ne", "ko"], two = twoOn(), mk = (l, alt) => { const h = msent(it, l); return h ? `<span class="vm-sl ${alt ? "vm-alt" : "vm-l0"}" data-l="${l}" lang="${l}">${alt ? '<span class="arr" aria-hidden="true">↳</span> ' : ""}${h}</span>` : ""; }; const body = mk(ls[0], false) + (two ? mk(ls[1], true) : "") || `<span class="vm-sl vm-l0" lang="ko">${esc(it.w)}</span>`; return `<li class="vm-row"><button type="button" class="vm-lb" data-i="${i}">${body}</button></li>`; };
+  const drawMemoRows = () => { if (!mview) return; const ko = uiKoOn(); mview.innerHTML = mseq.map((it, i) => mrow(it, ko, i)).join(""); window.__memo.n = mseq.length; };
   const drawMemo = () => { // 전용 보기 갈색 막대(‹ 돌아가기 · ▶/⏸ · ×N) — 쪽 넘김 막대 자리(목록 화면에는 없음)
     if (listEl !== el) return; const host = stage ? document.querySelector(".learn .seek") : el.querySelector(".vk-sheet") || el; if (!host) return;
     if (!memoOn) { mbar?.remove(); mbar = null; host.classList.remove("vm-has", "vm-mv"); host.style.removeProperty("--vmw"); return; }
     if (!mbar || mbar.parentNode !== host) { mbar?.remove(); mbar = document.createElement("div"); mbar.className = "vm-bar" + (stage ? "" : " vm-foot"); mbar.setAttribute("role", "toolbar"); host.append(mbar); }
-    host.classList.add("vm-mv"); mbar.innerHTML = memoBtns(memo, uiKoOn());
+    host.classList.add("vm-mv"); mbar.innerHTML = memoBtns(memo, uiKoOn(), twoOn());
   };
   const enterMemo = (auto = true) => { memoOn = true; mseq = mkSeq(); el.classList.add("vk-mv"); mview = el.querySelector(".vm-view"); if (!mview) return; mview.hidden = false; drawMemoRows(); el.querySelectorAll(".vk-tab").forEach(b => b.setAttribute("aria-selected", String(b.dataset.t === "memo"))); drawMemo(); mview.scrollTop = 0; if (auto && mseq.length) memo.jump(0); };
   const leaveMemo = () => { memo.reset(); memoOn = false; el.classList.remove("vk-mv"); if (mview) { mview.hidden = true; mview.innerHTML = ""; } el.querySelectorAll(".vk-tab").forEach(b => b.setAttribute("aria-selected", String(b.dataset.t === tab))); drawMemo(); };
-  const memoClick = e => { const b = e.target.closest?.("[data-vm]"); if (!b || !mbar?.contains(b)) return; e.preventDefault(); e.stopPropagation(); if (b.dataset.vm === "rep") memo.cycle(); else if (b.dataset.vm === "back") leaveMemo(); else memo.toggle(); };
+  const memoClick = e => { const b = e.target.closest?.("[data-vm]"); if (!b || !mbar?.contains(b)) return; e.preventDefault(); e.stopPropagation(); if (b.dataset.vm === "rep") memo.cycle(); else if (b.dataset.vm === "two") { setTwo(!twoOn()); drawMemoRows(); const s0 = memo.st(); if (s0.on) mshow(s0.idx); drawMemo(); } else if (b.dataset.vm === "back") leaveMemo(); else memo.toggle(); };
   listOff.push(() => { memo.stop(); mbar?.remove(); mbar?.parentNode?.classList.remove("vm-has", "vm-mv"); mbar = null; document.querySelector(".learn .seek")?.classList.remove("vm-has", "vm-mv"); });
   on0("click", memoClick, true);
   const draw = async () => {
