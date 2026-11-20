@@ -246,7 +246,9 @@ export function switchRead(koFirst) {
   if (a && !ended && j.a === a && (a.currentTime > 0 || j.c0 >= 0 || j.ci1 >= 0)) { // 마디 소리가 막 시작(받는 중 · 시각 0)이어도 같은 소리 그대로 이어 읽음 — 처음부터·같은 마디 다시 읽지 않음(11-20 15:33 · D-127) // ⇄ = 지금 소리를 처음으로 안 돌리고 그대로 이어 읽음(칠도 이어짐) · 줄 끝나면 바뀐 순서대로 다음 블록(대표님 11-20 13:30 · D-125)
     const nl2 = koFirst ? "ko" : "ne", other = l => (l === "ko" ? "ne" : "ko"); j.lang = nl2; j.ph = j.pl === nl2 ? 0 : 1; j.pre = null;
     { const au = !!j.both?.(), nk = au && !j.ph ? k : k + 1, nph = au && !j.ph ? 1 : 0; if (!j.paused && j.bl[nk]) { try { const na = new Audio(j.url(nph ? other(j.lang) : j.lang, j.bl[nk].b)); na.preload = "auto"; na.load(); j.pre = { k: nk, ph: nph, a: na }; } catch {} } }
-    j.root.querySelectorAll(".vk-line .kw.kar, .kw.ks, .kw.kt").forEach(e => e.classList.remove("kar", "ks", "kt")); j.root.querySelectorAll(".pw.pk").forEach(w => w.classList.remove("pk")); clearHl(j.root); from = null; show(j); return;
+    j.root.querySelectorAll(".vk-line .kw.kar, .kw.ks, .kw.kt").forEach(e => e.classList.remove("kar", "ks", "kt")); j.root.querySelectorAll(".pw.pk").forEach(w => w.classList.remove("pk")); clearHl(j.root); from = null;
+    if (!j.ph) { const b = j.bl[k]?.b, wt = b ? wtOf(j.n, nl2, b, cntOf(j.n, nl2, b)) : null; if (wt) { let wi = 0; const tn = a.currentTime + LEAD; wt.forEach((x, i) => { if (x[0] <= tn) wi = i; }); from = { k, wi }; } } // ↳ 소리 중 ⇄ 로 그 말이 윗줄이 되면 ⇄ 순간 읽던 낱말에서만 칠이 이어짐(앞 낱말을 한꺼번에 새로 칠해 「다시 읽는 것」처럼 보이던 것 · 11-20 16:11 「이름은」)
+    show(j); return;
   }
   if (ended && !j.dead) { j.lang = koFirst ? "ko" : "ne"; j.pre = null; return; } // 소리가 막 끝난 틈(0.3초·⏸) 중 ⇄ = 아무것도 다시 안 틂 — 다음 차례는 finish 가 정한 대로(이미 읽은 말·마디는 건너뛰고 안 읽은 쪽부터) · 이후 블록·마디만 새 말 순서(대표님 11-20 15:06 · D-126)
   clearTimeout(j.gap); j.gap = 0; clearInterval(tick); j.pre = null; // 미리 받아 둔 다음 블록 소리는 옛 말 것 — 버림(블록 사이 틈에 ⇄ 하면 옛 말로 이어 읽던 것)
