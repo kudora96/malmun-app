@@ -668,7 +668,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
       return sync();
     }
     const k = sndOf(i), list = v9Items(i, { line: false, k }), from = fromSent(list, s); if (from < 0) return;
-    clearTimeout(st.gap); st.gap = 0; hushSay(); st.exLoop = list; markPlay(k);
+    clearTimeout(st.gap); st.gap = 0; hushSay(); st.exLoop = list; markPlay(k); st.userPaused = false; // 문장을 눌러 듣기 = 멈춤 해제(멈춰 둔 채 눌러도 끝에서 자동이 이어 감)
     ex.play(list.map((x, j) => (j === from ? { ...x, at } : x)), from);
     panel.querySelectorAll(".v9body .sn").forEach(x => x.classList.toggle("cur", +x.dataset.s === s)); setPair(panel.querySelector(".v9body"), i, code, s); setNum(s);
     sync();
@@ -735,6 +735,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   const clearPaint = () => { st.karFrom = null; panel.querySelectorAll(".v9body .kw.kar").forEach(el => el.classList.remove("kar")); panel.querySelectorAll(".v9body .sn.cur").forEach(el => el.classList.remove("cur")); };
   ex.ondone = () => {
     markPlay(); clearPaint(); // 끝나면 노란 칠 전부 지움
+    panel.querySelectorAll(".v9body .kw.kar, .v9body .kw.ks, .v9body .kw.kt, .v9body .pairln .pc.pcm, .v9body .pairln .pw.pk, .v9body .pairln .pc.pcx").forEach(e => e.classList.remove("kar", "ks", "kt", "on", "pcm", "pk", "pcx")); // 두 말: 마지막 ↳ 낱말도 바로 지움(소리가 until 에서 끝나 ended 가 아닌 때도)
     panel.querySelectorAll(".paras p.cur").forEach(el => el.classList.remove("cur"));
     // 🔁 반복은 「그 줄 설명 듣기」만(st.exLoop) — 카드 안 [본보기]·[내 목소리]·[저장됨 ▶]는 한 번만 나오고 끝(본부 10-04 「끝없이 되풀이」)
     const loop = st.exLoop;
