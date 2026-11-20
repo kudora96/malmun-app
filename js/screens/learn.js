@@ -40,7 +40,7 @@ function gameWords(vl, uw, lg, ep) {   // 뜻 조각(v9 pieces)과 소리 낱말
 import { setTx } from "../retext.js?v=1120.15";
 import { langfitRun } from "../langfit.js?v=1120.15";
 import { esc, renderText, glossCards, sayParts } from "../text.js?v=1120.15";
-import { clauseMap, commaMap, markClause, splitClause } from "../wordnote.js?v=1120.15"; // 쉼표 마디 칠하기 공용(카드와 같은 코드)
+import { clauseMap, commaMap, markClause, splitClause, hitText } from "../wordnote.js?v=1120.15"; // 쉼표 마디 칠하기 공용(카드와 같은 코드)
 import { episode } from "../data.js?v=1120.15";
 import { paths, MEDIA } from "../paths.js?v=1120.15";
 import { attachVq } from "../vq.js?v=1120.15";
@@ -1070,7 +1070,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
       return;
     }
     if (k === "gw") { const sn = x.closest(".sn"); if (sn && !tapWordV9(x.closest(".kw"))) playFromSent(sn); return hidePop(); } // 낱말 말풍선은 없앰(대표님 11-17) — 낱말을 톡 = 건너뜀·멈춤 규칙만 // 따옴표 낱말 = 그 문장부터 재생 + 뜻이 있으면 작은 말풍선(본부 10-05)
-    if (k === "sn") { hidePop(); if (st.tapKw && tapWordV9(st.tapKw)) return sync(); if (x.classList.contains("cur") && x.closest(".v9body")) return togglePlay(); return playFromSent(x); } // 문장 = 그 문장부터 재생 · 지금 읽는 문장을 누르면 멈춤⇄다시(본부 10-08)
+    if (k === "sn") { hidePop(); if (st.tapKw && tapWordV9(st.tapKw)) return sync(); if (st.tapBlank) { st.tapBlank = false; return togglePlay(); } if (x.classList.contains("cur") && x.closest(".v9body")) return togglePlay(); return playFromSent(x); } // 문장 = 그 문장부터 재생 · 지금 읽는 문장을 누르면 멈춤⇄다시(본부 10-08)
     if (k === "v9rom") { const on = x.getAttribute("aria-pressed") !== "true"; x.setAttribute("aria-pressed", String(on)); pref("malmun.rom", on ? "1" : "0"); panel.querySelector(".exv").classList.toggle("norom", !on); app.classList.toggle("norom", !on); hidePop(); return; } // 자리는 그대로(visibility) = 다시 맞춤 없음 // 로마자 켜기/끄기(기억) · 그 순간 글 크기 다시 맞춤(넘친 첫 그림이 보이지 않게)
     if (k === "rec") return spRec(i, x);
     if (k === "close") return closePanel(); // ✕ 닫기 — 녹음 중이면 버리고 영상으로
@@ -1132,7 +1132,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     const r = document.elementFromPoint(pdn.x, pdn.y)?.closest(".v9body [data-x]"); return r && /^(gw|sn)$/.test(r.dataset.x) && r.closest(".sn") !== x.closest(".sn") ? r : x; };
   panel.addEventListener("click", e => {
     if (st.panel?.kind !== "explain" || e.target.closest("[data-act=uiko]")) return; // ⇄한 은 ui.js 문서 한 곳이 받음(멈춤⇄다시로 새지 않게)
-    const x = realTap(e.target.closest("[data-x]")); st.tapKw = e.target.closest(".kw");
+    const x = realTap(e.target.closest("[data-x]")); st.tapKw = e.target.closest(".kw"); st.tapBlank = !st.tapKw && !!x && x.dataset.x === "sn" && !hitText(x, e); /* 글씨 없는 곳(상자 안) = 멈춤⇄이어서(11-20 13:34) */
     if (e.target.closest(".sayb")) { if (x) v9Click(x); else if (!sp?.ctl) togglePlay(); return; } // 말하기 칸 단추 밖 = 멈춤⇄다시(본부 10-08 투덜이 · 녹음 중은 빼고)
     if (x && st.panel.i != null && L[st.panel.i].v9) return v9Click(x);
     if (x) {

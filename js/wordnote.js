@@ -258,3 +258,13 @@ export function switchRead(koFirst) {
     if (pm) { j.nci = j.ci1; return play(j, j.k, 0, j.paused); } }
   play(j, k, fr, j.paused, sec != null && sec > 0 ? LEAD - 0.001 : 0, sec != null && sec > 0 ? sec : null);
 }
+// 누른 자리에 실제 글씨가 있나(대표님 11-20 13:34) — 블록 상자 안의 빈 곳은 글씨 아님(= 그 자리에서 멈춤⇄이어서) · 좌표 없는 합성 click(0,0)은 글씨로 봄
+export function hitText(root, e) {
+  const x = e?.clientX, y = e?.clientY; if (!root || typeof x !== "number" || (!x && !y)) return true;
+  const tw = document.createTreeWalker(root, NodeFilter.SHOW_TEXT), r = document.createRange();
+  for (let n = tw.nextNode(); n; n = tw.nextNode()) {
+    if (!/\S/.test(n.nodeValue)) continue; r.selectNodeContents(n);
+    for (const q of r.getClientRects()) if (x >= q.left - 2 && x <= q.right + 2 && y >= q.top - 2 && y <= q.bottom + 2) return true;
+  }
+  return false;
+}

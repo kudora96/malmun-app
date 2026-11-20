@@ -1,7 +1,7 @@
 // ⭐ 내 단어장(시험판 · 네팔어 1편 · 본부 11-16 대표님 승인) — 낱말 칸을 톡 누르면 작은 카드 · 단어장은 이 기기(localStorage)에만
 // 소리 = 이미 만들어 둔 낱말 소리를 이어 붙여(wordsnd.json) · 없는 편은 줄 소리의 그 낱말 구간 · 학습자 말이 네팔어가 아니면 아무것도 안 보임
 import { lang, uiKoOn, langShort } from "./i18n.js?v=1120.15";
-import { noteHTML, applyMode, fixSizes, readNote, stopRead, toggleRead, switchRead, tapBlock, tapWord, noteBlocks, curBlock, isReading, isPaused } from "./wordnote.js?v=1120.15"; // 단어 카드 설명(위 = 지금 말 · 아래 ↳ 다른 말) + 읽기 소리
+import { noteHTML, applyMode, fixSizes, readNote, stopRead, toggleRead, switchRead, tapBlock, tapWord, hitText, noteBlocks, curBlock, isReading, isPaused } from "./wordnote.js?v=1120.15"; // 단어 카드 설명(위 = 지금 말 · 아래 ↳ 다른 말) + 읽기 소리
 import { claim, onSound } from "./onesound.js?v=1120.15";
 import { twoOn, setTwo, autoOn, setAuto, autoSchedule, autoCancel, autoPending, autoHold, autoHeld, autoAt, markAuto, showAutoEnd } from "./autoplay.js?v=1120.15"; // 자동 이어 듣기 공용 엔진(설명·단어 카드·조각 카드 · 대표님 11-19 14:11)
 import { hold } from "./wake.js?v=1120.15"; // 단어장·카드 ▶ 도 소리 장치 깨워 둠(목록 화면에서 열 때는 학습 화면의 깨우기가 없었음 · 대표님 11-18 「다음 사람」 첫 「다」 안 들림)
@@ -277,7 +277,7 @@ export function openWordCard(it, { before, fromList = false, piece = null, ents:
   const sync = setInterval(() => { if (cardEl !== el) return clearInterval(sync); const b = document.querySelector(".vk-snd"), t = isReading() && !isPaused() ? "⏸" : "▶"; if (b && b.textContent !== t && curNote()) b.textContent = t; }, 100);
   el.addEventListener("click", e => {
     let b = e.target.closest("[data-v]"); if (b && !el.contains(b)) b = null; // 위쪽 칸의 data-v 를 잡지 않게
-    if (!b) { if (!e.target.closest(".vk-card")) closeCard(); else if (autoElig() && autoOn() && !e.target.closest(".vk-note") && !e.target.closest(".vk-uiko")) { if (!aTap() && !toggleRead()) startNote(); } else if (e.target.closest(".vk-note") && curNote()) { if (autoElig() && autoOn() && aTap()) return; const bk = e.target.closest(".vk-blk")?.dataset.b, kw = e.target.closest(".vk-line .kw"), wi = kw ? [...kw.parentNode.querySelectorAll(".kw")].indexOf(kw) : -1; autoHold(false); if (!(bk ? (wi >= 0 ? tapWord(bk, wi) : tapBlock(bk)) : toggleRead())) startNote(bk, wi); } return; } // 화면 밖 = 닫힘 · 다른 블록 톡 = 그 블록부터 · 읽는 블록 톡 = 멈춤⇄이어서 · 다 읽은 뒤 톡 = 처음부터
+    if (!b) { if (!e.target.closest(".vk-card")) closeCard(); else if (autoElig() && autoOn() && !e.target.closest(".vk-note") && !e.target.closest(".vk-uiko")) { if (!aTap() && !toggleRead()) startNote(); } else if (curNote() && !e.target.closest(".vk-uiko") && (e.target.closest(".vk-note") || !hitText(e.target.closest(".vk-card"), e))) { if (autoElig() && autoOn() && aTap()) return; const bk = e.target.closest(".vk-blk")?.dataset.b, kw = e.target.closest(".vk-line .kw"), wi = kw ? [...kw.parentNode.querySelectorAll(".kw")].indexOf(kw) : -1; autoHold(false); const blank = bk && wi < 0 && !hitText(e.target.closest(".vk-blk"), e); if (!(bk && !blank ? (wi >= 0 ? tapWord(bk, wi) : tapBlock(bk)) : toggleRead())) startNote(blank ? undefined : bk, wi); } return; } // 화면 밖 = 닫힘 · 다른 블록 톡 = 그 블록부터 · 읽는 블록 톡 = 멈춤⇄이어서 · 다 읽은 뒤 톡 = 처음부터
     e.stopPropagation(); act(b.dataset.v, b);
   });
   act = (v, b) => {
