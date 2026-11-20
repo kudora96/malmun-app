@@ -17,9 +17,10 @@ export class Sequence {
     const go = () => {
       const it = this.q[this.i];
       this.onstep?.(it, this.i);
+      let at = it.at; if (at) { try { const ps = this.a.src, pt = this.a.currentTime; if (ps && pt > at && pt - at < 0.6 && new URL(it.src, location.href).href === ps) at = pt; } catch {} } // 앞 조각이 끝(until)을 조금 넘겨 소리가 난 만큼 새 조각이 되감지 않음 — 같은 소리 구간을 두 번 들려 주던 것(두 말 켤 때 · 대표님 11-20 13:54 · D-129)
       this.a.src = it.src; this.a.playbackRate = this.rate;
       this.gapping = false; // 새 소리가 걸린 뒤부터 칠하기가 이 조각 시각을 읽음(사이 쉼 동안은 앞 소리 시각이라 읽지 않음 · 대표님 11-20 깜빡임)
-      if (it.at) { this.a.currentTime = it.at; this.a.addEventListener("loadedmetadata", () => { if (this.a.currentTime < it.at - 0.2) this.a.currentTime = it.at; }, { once: true }); } // 그 문장부터(설명 언어 바꿔 이어 읽기)
+      if (at) { this.a.currentTime = at; this.a.addEventListener("loadedmetadata", () => { if (this.a.currentTime < at - 0.2) this.a.currentTime = at; }, { once: true }); } // 그 문장부터(설명 언어 바꿔 이어 읽기)
       // 소리가 시작되기 전에 멈추거나 다른 소리로 바뀌면 앞 play() 가 AbortError 로 늦게 거절됨 → 그걸로 새 차례를 넘기지 않음(⇄·다음 줄을 열자마자 눌렀을 때 소리는 나는데 상태·칠이 안 따라가던 것)
       claim(this.owner); const gen = this.gen; this.arm(it); tv(this.a).play().catch(e => { if (gen === this.gen && e?.name !== "AbortError") this.next(); });
       const nx = this.q[this.i + 1];
