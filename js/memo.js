@@ -1,5 +1,5 @@
-// 외우기(대표님 11-20 15:10~15:13 「ㅇ」) — 단어장 낱말을 설명 없이 쭉 읽어 누워서 듣고 외우게
-// 줄마다 한 짝 = 한국어 낱말 소리 + 학습자 말 뜻 소리(⇄ 순서) · 반복 ×N 이면 그 짝을 N 번 · 짝 사이 0.4초 · 줄 사이 0.8초
+// 외우기(대표님 11-20 15:10~15:38) — 단어장의 조각(낱낱 단어)만 설명 없이 쭉 읽어 누워서 듣고 외우게 · 전용 보기(vocab.js 가 그림)
+// 줄마다 한 짝 = 한국어 낱말 소리 + 학습자 말 짧은 뜻 소리(⇄ 순서) · 반복 ×N 이면 그 짝을 N 번 · 짝 사이 0.4초 · 줄 사이 0.8초
 // 뜻 소리 = 짧은 뜻 낱말 소리(data/memo_map.json 이 알려 주는 것)가 있으면 그것 · 없으면 카드 뜻풀이 첫 문장(낱말 시각 w 로 자름)
 // 소리는 언제나 하나(onesound) — vocab.js 가 이 엔진에 줄 목록·낱말 소리·뜻 소리 자리를 건네 줌
 import { claim, onSound } from "./onesound.js?v=1120.30";
@@ -10,8 +10,8 @@ let repMem = 1; // 이 앱을 연 동안만(새로 열면 ×1)
 export const GAP_PAIR = 400, GAP_ROW = 800;
 const SENT_END = /[.!?。।॥][」"')”’』»]*$/;
 export const TXM = {
-  ko: { go: "외우기", rep: "반복", end: "끝까지 들었어요", again: "처음부터 다시", close: "닫기" },
-  ne: { go: "याद गर्नुहोस्", rep: "दोहोर्‍याउनुहोस्", end: "तपाईंले सबै सुन्नुभयो", again: "सुरुबाट फेरि", close: "बन्द" },
+  ko: { go: "외우기", rep: "반복", end: "끝까지 들었어요", again: "처음부터 다시", close: "닫기", back: "돌아가기" },
+  ne: { go: "याद गर्नुहोस्", tab: "याद गर्नु", rep: "दोहोर्‍याउनुहोस्", end: "तपाईंले सबै सुन्नुभयो", again: "सुरुबाट फेरि", close: "बन्द", back: "फिर्ता" },
 };
 
 // 뜻풀이 첫 문장 구간(초) — 낱말 시각 w[낱말][시작,끝] · 글 낱말 수와 같지 않아도 첫 마침표 낱말 번호로 자름
@@ -23,7 +23,7 @@ export function firstSentence(note, l) {
 }
 
 // api = { seq(): 줄 목록 · ko(): 한국어 먼저? · show(i): 그 줄이 보이게(쪽 넘김·금색 테두리) · word(it, done): 낱말 소리(없으면 done 바로) · stopWord() ·
-//         mean(it): {url(l), note} | null · shortUrl(it, l): 짧은 뜻 소리 주소 | null · host(): 끝 카드를 붙일 곳 · onState() · tx() }
+//         mean(it): {url(l), note} | null · shortUrl(it, l): 짧은 소리(조각 한국어 낱말·짧은 뜻 낱말) 주소 | null · side(i, l|null): 지금 소리 나는 쪽 칠 · host() · onState() }
 export function createMemo(api) {
   let tok = 0, idx = 0, running = false, started = false, curA = null, curRes = null, self = 0, timer = 0, repN = repMem;
   const st = () => ({ on: started, running, idx, rep: repN });
@@ -44,18 +44,18 @@ export function createMemo(api) {
   async function part(it, l) {
     log.log.push(`${it.kind === "piece" ? "p:" + it.pid : it.w}|${l}`);
     if (log.skip) return sleep(5);
-    if (l === "ko") return new Promise(res => { curRes = res; const t = setTimeout(res, 20000); api.word(it, () => { clearTimeout(t); res(); }, f => { self++; try { f(); } finally { self--; } }); });
-    const short = api.shortUrl?.(it, l); if (short) return clip(short, 0, 0);
-    const m = api.mean?.(it); if (!m?.note) return; const sp = firstSentence(m.note, l); return clip(m.url(l), sp.s, sp.e);
+    const short = api.shortUrl?.(it, l); if (short) return clip(short, 0, 0); // 짧은 소리(만들어진 것)
+    if (l === "ko" && it.kind !== "piece") return new Promise(res => { curRes = res; const t = setTimeout(res, 20000); api.word(it, () => { clearTimeout(t); res(); }, f => { self++; try { f(); } finally { self--; } }); }); // 단어 카드 낱말 소리
+    const m = api.mean?.(it); if (!m?.note) return; const sp = firstSentence(m.note, l); return clip(m.url(l), sp.s, sp.e); // 조각·뜻풀이 만 있는 항목(조사·어미) 또는 짧은 소리가 아직 없는 항목(임시) = 뜻풀이 첫 문장
   }
   async function run(i) {
-    const my = ++tok; idx = i; running = true; started = true; hideAutoEnd(); api.onState?.();
+    const my = ++tok; stopAu(); idx = i; running = true; started = true; hideAutoEnd(); api.onState?.();
     while (my === tok) {
       const sq = api.seq(); if (idx >= sq.length) { end(my); return; }
       const it = sq[idx]; api.show(idx); api.onState?.();
       for (let r = 0; r < repN && my === tok; r++) {
         const ls = api.ko() ? ["ko", "ne"] : ["ne", "ko"];
-        for (let p = 0; p < 2 && my === tok; p++) { await part(it, ls[p]); if (my !== tok) return; if (p === 0) { await sleep(GAP_PAIR); if (my !== tok) return; } }
+        for (let p = 0; p < 2 && my === tok; p++) { api.side?.(idx, ls[p]); await part(it, ls[p]); api.side?.(idx, null); if (my !== tok) return; if (p === 0) { await sleep(GAP_PAIR); if (my !== tok) return; } }
         if (r < repN - 1) { await sleep(GAP_ROW); if (my !== tok) return; }
       }
       if (my !== tok) return; await sleep(GAP_ROW); if (my !== tok) return;
@@ -66,7 +66,7 @@ export function createMemo(api) {
     if (my !== tok) return; running = false; started = false; idx = 0; api.onState?.(); const t = TXM[api.ko() ? "ko" : "ne"];
     showAutoEnd("word", api.host?.() || document.body, { title: t.end, again: t.again, close: t.close, onAgain: () => run(0), onClose: () => { api.show(-1); } });
   }
-  return {
+  const eng = {
     st,
     rep: () => repN,
     cycle() { repN = repN >= 4 ? 1 : repN + 1; repMem = repN; api.onState?.(); }, // ×1→×2→×3→×4→×1 (돌고 있어도 다음 줄부터 먹힘)
@@ -78,8 +78,10 @@ export function createMemo(api) {
     reset() { tok++; running = false; started = false; idx = 0; stopAu(); hideAutoEnd(); api.show(-1); api.onState?.(); },
     guard(f) { self++; try { return f(); } finally { self--; } }, // 내 소리를 시작하는 순간의 claim 은 나를 멈추지 않음
   };
+  log.jump = eng.jump; log.halt = eng.halt; // 검사용
+  return eng;
 }
-export const memoBtns = (m, ko) => { // 갈색 막대에 붙는 단추 둘 · 눌림 = 읽는 중(금색)
+export const memoBtns = (m, ko) => { // 외우기 전용 보기 갈색 막대: ‹ 돌아가기 · ▶/⏸ · ×N (⛶ 는 공용 막대 오른쪽 끝) · 눌림 = 읽는 중(금색)
   const t = TXM[ko ? "ko" : "ne"], s = m.st();
-  return `<button type="button" class="vm-go" data-vm="go" aria-pressed="${s.running}" aria-label="${esc(t.go)}" title="${esc(t.go)}"><span class="vm-ic" aria-hidden="true">${s.running ? "⏸" : "▶"}</span><span class="vm-t">${esc(t.go)}</span></button><button type="button" class="vm-rep" data-vm="rep" aria-label="${esc(t.rep)} ×${m.rep()}" title="${esc(t.rep)}">×${m.rep()}</button>`;
+  return `<button type="button" class="vm-back" data-vm="back" aria-label="${esc(t.back)}" title="${esc(t.back)}"><span class="vm-ic" aria-hidden="true">‹</span><span class="vm-t">${esc(t.back)}</span></button><button type="button" class="vm-go" data-vm="go" aria-pressed="${s.running}" aria-label="${s.running ? "⏸" : "▶"}" title="${esc(t.go)}"><span class="vm-ic" aria-hidden="true">${s.running ? "⏸" : "▶"}</span></button><button type="button" class="vm-rep" data-vm="rep" aria-label="${esc(t.rep)} ×${m.rep()}" title="${esc(t.rep)}">×${m.rep()}</button>`;
 };

@@ -2147,3 +2147,29 @@ html.vk-bglock{overscroll-behavior:none}.vk-card,.vk-sheet,.hk-sheet,.vk-pane,.v
 .vk-cbar .vp-b.vk-star{gap:4px;width:auto;min-height:0;height:22px;padding:0 10px;border-radius:999px;border:2px solid transparent;background:var(--card);color:var(--ink);font-size:12px;font-weight:800;box-shadow:none;cursor:pointer}.vk-star svg{fill:none;stroke:currentColor;stroke-width:2;pointer-events:none;flex:none}
 .vk-star.on svg{fill:#f2b01e;stroke:#b97a08}.vk-cbar .vp-b.vk-star.on{color:var(--ink);opacity:1;background:var(--card)}
 .vk-cbar[class*=" s"] :is(.vp-b,.vk-fs){min-width:0!important;max-width:none!important} /* langfit 이 단추 폭을 한 말 기준으로 고정해 둔 것을 풀어 줘야 줄인 글이 자리를 비움 */
+/* 외우기 전용 보기(대표님 11-20 15:38 · P0-173): 탭 줄 셋째 칩 → 조각 줄만 글로 · 읽는 줄 금색 테두리 · 지금 소리 나는 쪽만 진한 노랑 · ▶ 단추·별 없음 · 쪽 넘김 막대 대신 ‹ 돌아가기·▶/⏸·×N */
+.vk-pane.vk-mv .vp-frow,.vk-pane.vk-mv .vp-wrap,.vk-sheet.vk-mv .vp-frow,.vk-mv .vp-wrap,.vk-mv .vp-frow,.vk-mv .vp-idx{display:none}
+.vk-mv .vk-sortslot{display:none}
+.vm-view[hidden]{display:none}
+.vk-pane .vm-view,.vk-sheet .vm-view{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none;padding:2px 2px 8px}
+.vm-view::-webkit-scrollbar{display:none}
+.vm-row{flex:none;list-style:none;position:relative;border-radius:14px;border:1px solid var(--line);background:var(--card);color:var(--ink);box-shadow:0 3px 10px rgba(0,0,0,.18);overflow:hidden;transition:transform .1s ease,box-shadow .1s ease,background-color .12s ease}
+.vm-lb{display:flex;flex-wrap:wrap;align-items:baseline;column-gap:10px;row-gap:0;width:100%;min-height:52px;padding:8px 12px;box-sizing:border-box;border:0;background:transparent;color:inherit;font:inherit;text-align:start;cursor:pointer}
+.vm-k,.vm-m{font-size:20px;font-weight:800;line-height:1.35;padding:0 3px;border-radius:3px;overflow-wrap:anywhere}
+.vm-k{color:var(--ink)}.vm-m{color:var(--hi)}
+.vm-r{font-size:20px;font-weight:500;line-height:1.35;color:var(--mute)}
+.vm-row.vm-on{border-color:#f2c14e;box-shadow:0 0 0 3px #f2c14e,0 3px 10px rgba(0,0,0,.18)}
+.vm-row .vm-say{background:#ffd21f;color:#1b1b1b;box-shadow:0 2px 0 var(--hi)}
+@media (hover:hover){.vm-row:hover{background:rgba(255,210,31,.3)}}
+.vm-row:active{transform:scale(.97);box-shadow:0 1px 3px rgba(0,0,0,.18)}
+.vm-lb:focus-visible{outline:2px solid var(--hi);outline-offset:-3px}
+.vk-memotab{flex:none}
+.learn .seek.vm-mv>.vp-bar,.vk-sheet.vm-mv>.vp-bar,.vk-mv .vp-bar{display:none}
+.vm-bar .vm-back .vm-ic{font-size:15px;line-height:1}
+.vm-bar .vm-go{min-width:34px;justify-content:center;padding:0 8px}
+@media(max-width:430px){.vk-pane .vk-head{gap:3px}.vk-tab{padding:0 7px}.vk-pane .vk-tt{gap:3px}.vk-memotab b{font-size:13px}}
+@media(max-width:339px){.vm-bar .vm-back .vm-t{display:none}}
+/* 375 탭 줄: 모자라면 개수 글 → 정렬 글 순서로 줄임(겹침 0) · 네팔어 외우기 칩은 짧은 꼴 */
+.vm-short{display:none}
+@media(max-width:430px){.vk-memotab .vm-full{display:none}.vk-memotab .vm-short{display:inline}.vk-pane .vk-sortslot .vl-sortbtn{font-size:0;min-width:34px;padding:0 8px}.vk-pane .vk-sortslot .vl-sortbtn::before{content:"⇅";font-size:15px;line-height:1}}
+.learn .seek[data-off] .vm-bar span{visibility:visible}
