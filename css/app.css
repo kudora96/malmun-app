@@ -2173,3 +2173,6 @@ html.vk-bglock{overscroll-behavior:none}.vk-card,.vk-sheet,.hk-sheet,.vk-pane,.v
 .vm-short{display:none}
 @media(max-width:430px){.vk-memotab .vm-full{display:none}.vk-memotab .vm-short{display:inline}.vk-pane .vk-sortslot .vl-sortbtn{font-size:0;min-width:34px;padding:0 8px}.vk-pane .vk-sortslot .vl-sortbtn::before{content:"⇅";font-size:15px;line-height:1}}
 .learn .seek[data-off] .vm-bar span{visibility:visible}
+/* 판 번호(틀 잡는 동안만 · 대표님 11-20) — 「n / N」 바로 아래 · 자리 안 차지함(겹쳐 얹음) · 누를 수 없음 · 런칭 전 learn.js SHOW_VER=false */
+.learn .vtitle{position:relative}
+.learn .vtitle .ver{position:absolute;inset-inline-end:14px;top:14px;font-size:9px;line-height:11px;color:var(--mute);opacity:.55;pointer-events:none;user-select:none;white-space:nowrap;font-variant-numeric:tabular-nums;direction:ltr}
