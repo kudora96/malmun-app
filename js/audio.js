@@ -1,5 +1,5 @@
 // 음성 조각 이어 재생 — 조각 사이 간격은 앱이 넣는다(app_build_spec: 기본 400ms)
-import { claim } from "./onesound.js?v=1120.7";
+import { claim } from "./onesound.js?v=1120.8";
 export const GAP_MS = 400;
 
 // 점검 소리 끔(본부 10-17) — ?mute=1 이면 음소거 · window.__sfxVolume(점검기)이 있으면 그 크기 · 평소 학습자는 그대로(바꾸는 것 없음)
@@ -33,9 +33,9 @@ export class Sequence {
     this.onstep?.(it, from); this.a.src = it.src; this.a.playbackRate = this.rate;
     if (it.at) { this.a.currentTime = it.at; this.a.addEventListener("loadedmetadata", () => { if (this.a.currentTime < it.at - 0.2) this.a.currentTime = it.at; }, { once: true }); }
   }
-  pause() { this.gen++; this.gapping = false; this.on = false; clearTimeout(this.timer); clearInterval(this.ut); this.a.pause(); }
-  resume() { if (!this.q.length) return; this.on = true; if (this.a.src && !this.a.ended && this.a.currentTime > 0) { claim(this.owner); this.arm(this.q[this.i]); tv(this.a).play().catch(() => {}); } else { this.i--; this.next(); } }
-  stop() { this.gen++; this.gapping = false; this.on = false; clearTimeout(this.timer); clearInterval(this.ut); this.a.pause(); this.q = []; }
+  pause() { this.gen++; if (this.on) this.pgap = this.gapping; this.gapping = false; this.on = false; clearTimeout(this.timer); clearInterval(this.ut); this.a.pause(); }
+  resume() { if (!this.q.length) return; this.on = true; if (this.pgap) { this.pgap = false; this.i--; this.next(); return; } /* 조각 사이 쉼에 멈췄으면 다음 조각을 새로(앞 소리를 이어 틀며 다음 조각 until 을 걸어 통째로 빠지던 것 · D-122) */ if (this.a.src && !this.a.ended && this.a.currentTime > 0) { claim(this.owner); this.arm(this.q[this.i]); tv(this.a).play().catch(() => {}); } else { this.i--; this.next(); } }
+  stop() { this.gen++; this.pgap = false; this.gapping = false; this.on = false; clearTimeout(this.timer); clearInterval(this.ut); this.a.pause(); this.q = []; }
   setRate(r) { this.rate = r; this.a.playbackRate = r; }
   get playing() { return this.on; }
 }
