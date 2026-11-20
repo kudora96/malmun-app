@@ -1373,9 +1373,11 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     if (pend) { head = q.slice(0, ex.i); from = cur.pair && !want ? s + 1 : s; }
     else {
       head = q.slice(0, ex.i + 1); from = s + 1;
-      if (want && cur.sk === undefined) { const e = start(s + 1); if (!(e > 0)) return; cur.until = e; if (ex.playing) ex.arm(cur); } // 한 말(한 덩어리) 소리 중 켬 = 지금 문장 끝에서 끊고 남은 문장부터 두 말
+      if (want && cur.sk === undefined) { const e = start(s + 1); if (e > 0) { cur.until = e; if (ex.playing) ex.arm(cur); } from = s; } // 한 말(한 덩어리) 소리 중 켬 = 지금 문장 끝에서 끊고, 그 문장의 ↳(짝 말)부터 두 말(대표님 11-20 14:08 · 1120.18 — 누른 순간 읽던 그 문장부터)
     }
-    const items = v9Items(i, { line: false, k: sndOf(i) }), j = fromSent(items, from);
+    const items = v9Items(i, { line: false, k: sndOf(i) });
+    let j = fromSent(items, from);
+    if (!pend && want && cur.sk === undefined && from === s) { const jp = items.findIndex(x => x.pair && x.sk === s); if (jp >= 0) j = jp; else if (items.some(x => x.pair)) j = -1; else { from = s + 1; j = fromSent(items, from); } } // 읽던 문장의 ↳ 짝 조각부터 이어 붙임
     let tail = j < 0 ? [] : items.slice(j);
     if (tail[0] && tail[0].sk === undefined && from > 0) { const at = start(from); tail = at > 0 ? [{ ...tail[0], at }, ...tail.slice(1)] : []; } // 한 말 = 처음부터 말고 그 문장 시작 시각부터(D-113)
     ex.q = [...head, ...tail]; st.exLoop = ex.q;
