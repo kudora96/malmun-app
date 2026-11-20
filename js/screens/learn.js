@@ -488,10 +488,17 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   // v9 설명 소리 차례: (대사) → 설명 → 「이제 말해 보세요」 — 고른(마지막에 누른) 소리 언어
   // 두 말(대표님 11-19 14:55) — 문장마다 [듣는 말 구간] → [짝(↳) 말 구간] · 새 소리 없이 기존 설명 소리 두 개의 구간(ko_w·L_w 시각 + 앞 0.15·뒤 0.15초)만 이어 틀음 · 시각 없는 문장이 있으면 옛 방식(한 말 통째)
   const TWO_PAD = 0.15;
+  // 구간 끝·시작이 이웃 문장 낱말에 닿지 않게(대표님 11-20 14:57 · D-130) — 앞뒤 여유(0.15초)가 이웃 낱말 쪽으로 들어가거나, 끝(until)을 조금 넘겨 소리가 난 만큼 이웃 첫 낱말이 한 번 더 들리던 것 → 이웃 낱말과의 빈틈 가운데까지만(빈틈이 좁으면 여유도 좁게)
+  function segEdge(sn, q, code, w, e0) {
+    const pw = q > 0 ? wTimes(sn, q - 1, code) : null, nw = wTimes(sn, q + 1, code), r = {};
+    if (pw) { const pe = pw[pw.length - 1][1]; if (pe > 0 && pe < w[0][0]) r.at = Math.max(0, Math.max(w[0][0] - TWO_PAD, (pe + w[0][0]) / 2)); }
+    if (nw && nw[0][0] > e0) r.until = Math.min(e0 + TWO_PAD, (e0 + nw[0][0]) / 2);
+    return r;
+  }
   function twoItems(i, k) {
     const x = L[i].v9, sn = x?.sent || [], pc = v9code(k), sc = pc === "ko" ? v9L : "ko", ps = v9src(i, k, "ex"), ss = v9src(i, pc === "ko" ? "L" : "ko", "ex");
     if (!v9L || !sc || pc === sc || !sn.length || !ps || !ss) return null;
-    const seg = (code, q) => { const w = wTimes(sn, q, code); if (!w) return null; const e0 = w[w.length - 1][1] || w[w.length - 1][0] + 0.1, nx = sn[q + 1]?.[`${code}_s`], e = e0 + TWO_PAD; return { at: Math.max(0, w[0][0] - TWO_PAD), until: nx != null && nx > e0 ? Math.min(e, nx) : e }; };
+    const seg = (code, q) => { const w = wTimes(sn, q, code); if (!w) return null; const e0 = w[w.length - 1][1] || w[w.length - 1][0] + 0.1, nx = sn[q + 1]?.[`${code}_s`], e = e0 + TWO_PAD; return { at: Math.max(0, w[0][0] - TWO_PAD), until: nx != null && nx > e0 ? Math.min(e, nx) : e, ...segEdge(sn, q, code, w, e0) }; };
     const out = [];
     for (let q = 0; q < sn.length; q++) { const a = seg(pc, q), b = seg(sc, q); if (!a || !b) return null; out.push({ src: ps, p: 0, lang: pc, sk: q, ...a, gap: 250 }, { src: ss, p: 0, lang: sc, main: pc, pair: true, sk: q, ...b, gap: 250 }); }
     return out;
@@ -1373,7 +1380,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     if (pend) { head = q.slice(0, ex.i); from = cur.pair && !want ? s + 1 : s; }
     else {
       head = q.slice(0, ex.i + 1); from = s + 1;
-      if (want && cur.sk === undefined) { const e = start(s + 1); if (e > 0) { cur.until = e; if (ex.playing) ex.arm(cur); } from = s; } // 한 말(한 덩어리) 소리 중 켬 = 지금 문장 끝에서 끊고, 그 문장의 ↳(짝 말)부터 두 말(대표님 11-20 14:08 · 1120.18 — 누른 순간 읽던 그 문장부터)
+      if (want && cur.sk === undefined) { let e = start(s + 1); const sn0 = L[i].v9?.sent || [], cw = wTimes(sn0, s, cur.lang || code), nw = wTimes(sn0, s + 1, cur.lang || code); if (cw && nw) { const e0 = cw[cw.length - 1][1]; if (nw[0][0] > e0) e = Math.min(e0 + TWO_PAD, (e0 + nw[0][0]) / 2); } if (e > 0) { cur.until = e; if (ex.playing) ex.arm(cur); } from = s; } // 한 말(한 덩어리) 소리 중 켬 = 지금 문장 끝에서 끊고, 그 문장의 ↳(짝 말)부터 두 말(대표님 11-20 14:08 · 1120.18 — 누른 순간 읽던 그 문장부터)
     }
     const items = v9Items(i, { line: false, k: sndOf(i) });
     let j = fromSent(items, from);
