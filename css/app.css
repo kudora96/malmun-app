@@ -1942,20 +1942,19 @@ li.vl-row{position:relative;overflow:hidden;touch-action:pan-y}.vl-slide{display
 .learn.vk-open .seek>.vk-cbar{visibility:visible}
 .learn .seek>.vp-bar{padding:0 46px}
 .vk-cbar .vp-b,.vk-foot .vp-b{gap:4px;white-space:nowrap;font-size:12px;transition:transform .1s ease,background-color .12s ease,color .12s ease}
-.vk-cbar .vp-b:active:not(:disabled){transform:scale(.97);background:var(--hi);color:var(--on-hi)}
+.vk-cbar .vp-b:active:not(:disabled){transform:translateY(1px);background:var(--hi);color:var(--on-hi)}
 .vk-cbar .vk-snd{width:auto;min-width:36px;height:22px;border-radius:999px;border:2px solid transparent;background:var(--card);color:var(--ink);font-size:12px;box-shadow:none}
 .vk-cbar .vk-add:disabled{opacity:.7;color:var(--mute)}
 .vk-cbar .vk-fs{position:relative;right:auto;bottom:auto;top:auto;left:auto;flex:none;width:auto;min-width:32px;height:22px;border-radius:999px;border:2px solid transparent;background:var(--card);color:var(--ink);display:inline-grid;place-items:center;padding:0 8px;box-shadow:none;cursor:pointer}
 .vk-cbar .vk-fs::before{content:"";position:absolute;inset:-6px -3px}
-.vk-cbar .vk-fs svg{width:14px;height:14px}.vk-cbar .vk-fs:active{transform:scale(.97);background:var(--hi);color:var(--on-hi)}
+.vk-cbar .vk-fs svg{width:14px;height:14px}.vk-cbar .vk-fs:active{transform:translateY(1px);background:var(--hi);color:var(--on-hi)}
 .learn .stick .vstage:is(:fullscreen,.vk-pfs){display:flex;flex-direction:column}
 .learn .stick .vstage:is(:fullscreen,.vk-pfs)>.vk-cbar{position:relative;inset:auto;flex:none;height:44px;background:var(--wood)}
 .learn .stick .vstage:is(:fullscreen,.vk-pfs)>.vk-pane{flex:1;min-height:0;height:auto}
 .vk-foot{margin-top:12px}.vk-foot .vp-b{height:34px;border:1px solid var(--hi);background:var(--card);color:var(--hi);font-size:14px}.vk-foot .vk-snd{width:auto;border-radius:999px;box-shadow:none}
 .vk-ppane>.vk-card{padding-bottom:12px}
-@media (max-width:339px){.vk-cbar .t{display:none}}
-@media (max-width:420px){.vk-cbar .vk-next .t,.vk-cbar .vk-prev .t{display:none}} /* 「다음 ›」 = 좁은 폰에서는 › 만(글은 title·aria-label · 대표님 11-20 14:12) */
-@media (max-width:420px){.vk-cbar .vk-add .t{display:none}} /* 좁은 폰: 갈색 막대 한 줄에 ‹ ▶ 자동 두 말 ⭐ ⛶ 다 들어가게 ⭐ 는 그림만(글은 aria-label) */
+ /* 「다음 ›」 = 좁은 폰에서는 › 만(글은 title·aria-label · 대표님 11-20 14:12) */
+ /* 좁은 폰: 갈색 막대 한 줄에 ‹ ▶ 자동 두 말 ⭐ ⛶ 다 들어가게 ⭐ 는 그림만(글은 aria-label) */
 .learn .seek[data-off] .vk-cbar span{visibility:visible}.learn .seek[data-off] .vk-cbar .vk-fs svg{visibility:visible}
 .vk-cbar .vp-b.vk-back,.vk-cbar .vp-b.vk-add,.vk-cbar .vp-b.vk-snd,.vk-cbar .vp-b.vk-next,.vk-cbar .vp-b.vk-prev{width:auto;min-height:0;height:22px;padding:0 10px;border-radius:999px;border:2px solid transparent;background:var(--card);color:var(--ink);font-size:12px;font-weight:800;box-shadow:none}
 .vk-cbar .vp-b.vk-add:disabled{opacity:.75;color:var(--hi)}
@@ -1963,7 +1962,7 @@ li.vl-row{position:relative;overflow:hidden;touch-action:pan-y}.vl-slide{display
 .vk-cbar .vp-b.vk-two,.vk-cbar .vp-b.vk-auto{width:auto;min-width:0;min-height:0;height:22px;padding:0 10px;border-radius:999px;border:2px solid transparent;background:var(--card);color:var(--ink);font-size:12px;font-weight:800;box-shadow:none;white-space:nowrap;transition:transform .1s ease,background-color .12s ease,color .12s ease}
 .vk-cbar .vp-b.vk-two,.vk-cbar .vp-b.vk-auto{cursor:pointer}.vk-cbar .vp-b.vk-auto[aria-pressed=true],.vk-cbar .vp-b.vk-two[aria-pressed=true]{background:var(--hi);color:var(--on-hi)}
 @media(hover:hover){.vk-cbar .vp-b.vk-two:hover,.vk-cbar .vp-b.vk-auto:hover{background:var(--hi-soft);color:var(--ink)}.vk-cbar .vp-b.vk-two[aria-pressed=true]:hover,.vk-cbar .vp-b.vk-auto[aria-pressed=true]:hover{background:var(--wood);color:var(--on-hi)}}
-.vk-cbar .vp-b.vk-auto:active,.vk-cbar .vp-b.vk-two:active{transform:scale(.97)}
+.vk-cbar .vp-b.vk-auto:active,.vk-cbar .vp-b.vk-two:active{transform:translateY(1px)}
 .vk-foot .vp-b.vk-back,.vk-foot .vp-b.vk-add,.vk-foot .vp-b.vk-snd,.vk-foot .vp-b.vk-next,.vk-foot .vp-b.vk-prev{width:auto;min-height:0;height:34px;padding:0 14px;border-radius:999px}
 /* 조각 카드 「상자」+조사(11-18 16:27 대표님 「만나다는 사람을 띄어쓰기 이상」): 상자 오른쪽 여백 0 = 조사가 바짝 붙음 · 낱말(.kw)은 중간에 줄 안 갈림 · 낱말 사이 공백은 칠하기 밖 그대로 */
 .vk-note .gw{margin-right:0}
@@ -2017,7 +2016,7 @@ li.vl-row{position:relative;overflow:hidden;touch-action:pan-y}.vl-slide{display
   .vk-chip:hover{background:color-mix(in srgb,var(--hi) 16%,var(--bubble-cur));box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--hi) 70%,transparent),0 2px 6px rgba(23,48,42,.16)}
 }
 :where(button,[role=button],a[href],[data-act],[data-x],[data-vk],.vk-chip,.vk-li,.vk-lb,.ib,.lend):not(:disabled,[aria-disabled=true],[data-off]):active{box-shadow:inset 0 0 0 999px var(--pr-a);scale:.97;background-color:var(--pr-h)}
-.learn .seek :is(button,[role=button],a[href],[data-act],.vsubt,.chip,.ib):not(:disabled,[data-off]):active,.learn .vk-cbar :is(button,[data-act],.chip):not(:disabled):active,.learn .vp-bar :is(button,.vp-pn,.vp-mid):not(:disabled):active,.fsui :is(button,[data-act],.chip):not(:disabled):active{box-shadow:var(--sel-sh);background-color:var(--sel-bg);color:var(--sel-ink);scale:.97}
+.learn .seek :is(button,[role=button],a[href],[data-act],.vsubt,.chip,.ib):not(:disabled,[data-off]):active,.learn .vk-cbar :is(button,[data-act],.chip):not(:disabled):active,.learn .vp-bar :is(button,.vp-pn,.vp-mid):not(:disabled):active,.fsui :is(button,[data-act],.chip):not(:disabled):active{box-shadow:var(--sel-sh);background-color:var(--sel-bg);color:var(--sel-ink);scale:none;translate:0 1px}
 .learn .seek .trk:not([data-off]):active{background-color:rgba(0,0,0,.12)}
 .v9body :is(.sn,.gw)[data-x]:active{background-color:var(--hi-soft);scale:1;box-shadow:none}
 .vk-chip:active{background:var(--hi-soft);scale:.97}
@@ -2067,7 +2066,7 @@ li.vl-row{position:relative;overflow:hidden;touch-action:pan-y}.vl-slide{display
 /* 켜고 끄는 단추(대표님 11-19 15:49): 꺼짐 = 점선+빗금(자막 끔 CC 와 같은 모양·○ 없음) · 켜짐 = 금색 채움+안쪽 그림자+진한 글+○ (aria-pressed 로 구동 · 크기 그대로) */
 .learn .vk-cbar .vp-b[data-act=two],.learn .vk-cbar .vp-b[data-act=exauto],.learn .seek .vsubt[data-act=two],.learn .seek .vsubt[data-act=exauto]{border:2px solid #f6efe4;border-style:solid;background:transparent;color:#f6efe4;box-shadow:none;font-weight:800}
 .learn .vk-cbar .vp-b[data-act=two][aria-pressed=false],.learn .vk-cbar .vp-b[data-act=exauto][aria-pressed=false],.learn .seek .vsubt[data-act=two][aria-pressed=false],.learn .seek .vsubt[data-act=exauto][aria-pressed=false]{background:transparent;color:#f6efe4;border-color:rgba(246,239,228,.85);border-style:dashed;box-shadow:none}
-.learn .vk-cbar .vp-b[data-act=two][aria-pressed=true],.learn .vk-cbar .vp-b[data-act=exauto][aria-pressed=true],.learn .seek .vsubt[data-act=two][aria-pressed=true],.learn .seek .vsubt[data-act=exauto][aria-pressed=true]{background:#f2c14e;color:#2b1c0e;border-color:#f2c14e;box-shadow:inset 0 2px 4px rgba(60,35,10,.55),inset 0 0 0 1px rgba(60,35,10,.25)}
+.learn .vk-cbar .vp-b[data-act=two][aria-pressed=true],.learn .vk-cbar .vp-b[data-act=exauto][aria-pressed=true],.learn .seek .vsubt[data-act=two][aria-pressed=true],.learn .seek .vsubt[data-act=exauto][aria-pressed=true]{background:#f2c14e;color:#2b1c0e;border-color:#f2c14e;box-shadow:var(--press-sh)}
 .learn .vk-cbar .vp-b[data-act=two] .cc::before,.learn .vk-cbar .vp-b[data-act=exauto] .cc::before,.learn .seek .vsubt[data-act=two] .cc::before,.learn .seek .vsubt[data-act=exauto] .cc::before{content:none}
 .learn .vk-cbar .vp-b[data-act=two][aria-pressed=true] .cc::before,.learn .vk-cbar .vp-b[data-act=exauto][aria-pressed=true] .cc::before,.learn .seek .vsubt[data-act=two][aria-pressed=true] .cc::before,.learn .seek .vsubt[data-act=exauto][aria-pressed=true] .cc::before{content:"\25CB"}
 .learn .vk-cbar .vp-b[data-act=two] .cc,.learn .vk-cbar .vp-b[data-act=exauto] .cc,.learn .seek .vsubt[data-act=two] .cc,.learn .seek .vsubt[data-act=exauto] .cc{position:relative}
@@ -2075,7 +2074,7 @@ li.vl-row{position:relative;overflow:hidden;touch-action:pan-y}.vl-slide{display
 .learn .vk-cbar .vp-b[data-act=two][aria-pressed=true] .cc::after,.learn .vk-cbar .vp-b[data-act=exauto][aria-pressed=true] .cc::after,.learn .seek .vsubt[data-act=two][aria-pressed=true] .cc::after,.learn .seek .vsubt[data-act=exauto][aria-pressed=true] .cc::after{content:none!important}
 @media(hover:hover){.learn .vk-cbar .vp-b[data-act=two][aria-pressed=false]:hover,.learn .vk-cbar .vp-b[data-act=exauto][aria-pressed=false]:hover,.learn .seek .vsubt[data-act=two][aria-pressed=false]:hover,.learn .seek .vsubt[data-act=exauto][aria-pressed=false]:hover{background:rgba(246,239,228,.2);color:#fff}
 .learn .vk-cbar .vp-b[data-act=two][aria-pressed=true]:hover,.learn .vk-cbar .vp-b[data-act=exauto][aria-pressed=true]:hover,.learn .seek .vsubt[data-act=two][aria-pressed=true]:hover,.learn .seek .vsubt[data-act=exauto][aria-pressed=true]:hover{background:#ffd56b;color:#2b1c0e}}
-.learn .vk-cbar .vp-b[data-act=two]:active,.learn .vk-cbar .vp-b[data-act=exauto]:active,.learn .seek .vsubt[data-act=two]:active,.learn .seek .vsubt[data-act=exauto]:active{transform:scale(.97);background:#e0a93a;color:#2b1c0e}
+.learn .vk-cbar .vp-b[data-act=two]:active,.learn .vk-cbar .vp-b[data-act=exauto]:active,.learn .seek .vsubt[data-act=two]:active,.learn .seek .vsubt[data-act=exauto]:active{transform:translateY(1px);background:#e0a93a;color:#2b1c0e}
 .learn .seek .vsubt[data-act=two] .cc,.learn .seek .vsubt[data-act=exauto] .cc{max-width:70px}
 
 /* 뒤 화면 잠금(대표님 11-19 16:08 · P0-171) — 겹친 창이 열린 동안 뒤 화면은 안 움직임 · 창 안 스크롤이 뒤로 번지지 않음(js/vocab.js bgLock) */
@@ -2083,7 +2082,7 @@ html.vk-bglock{overscroll-behavior:none}.vk-card,.vk-sheet,.hk-sheet,.vk-pane,.v
 /* ↳ 소리 = 지금 낱말 하나만 진한 노랑(대표님 11-19 16:03 · 윗줄 .kar/.kt 와 같은 색) · 마디 엷은 칠은 그대로 */
 .vk-pair .pw.pk,.v9body .pairln .pw.pk{background:#ffd21f;color:#1b1b1b;border-radius:3px;box-shadow:0 2px 0 var(--hi)}.vk-pair .pw.pk .gw,.v9body .pairln .pw.pk .gw,.v9body .pairln .pw.pk b{background:#ffd21f;color:#1b1b1b;border-color:rgba(255,210,31,.75)}
 /* ── 고른 것은 모두 같은 금색 눌림 모양(대표님 11-19 16:13 · P0-171 · 검사 selected_states): 금색 채움 + 안쪽 그림자 + 진한 글 · 안 고른 것은 옅은 바탕·테두리 그대로 · 크기·자리 그대로 · 자동·두 말과 같은 값 */
-:root{--sel-hv:#f8e4ac;--sel-bg:#f2c14e;--sel-ink:#2b1c0e;--sel-sh:inset 0 2px 4px rgba(60,35,10,.55),inset 0 0 0 1px rgba(60,35,10,.25)}
+:root{--sel-hv:#f8e4ac;--sel-bg:#f2c14e;--sel-ink:#2b1c0e;--press-sh:inset 0 3px 6px rgba(60,35,10,.62),inset 0 0 0 1px rgba(60,35,10,.32);--sel-sh:var(--press-sh)} /* 눌림·켜짐 깊이 한 곳(대표님 11-20 15:18) */
 .hk-tab.on,.hk-tab[aria-pressed=true],.vk-tab[aria-selected=true],.vp-b.vp-pn.on,.vp-po.on,.vp-b[aria-current=page],.vp-po[aria-current=page],.mode button[aria-pressed=true],.toggles button[aria-pressed=true],.write .wmode button[aria-pressed=true],.write .wbtns button[aria-pressed=true],.write .stage .wbtns button[aria-pressed=true],.write .hbtns .htools button[aria-pressed=true],.write .stage .sub2 .htools button[aria-pressed=true],.write .sent .spkb[aria-pressed=true],.speak .sbtns button[aria-pressed=true],.speak .sbtns .mrate[aria-pressed=true],.v9body .sayb .sbtns .mrate[aria-pressed=true],.cmpw .cslow[aria-pressed=true],.crow .clab .crate[aria-pressed=true],.v9bar .romb[aria-pressed=true],.v9bar .pb[aria-pressed=true],.v9bar [data-x=txt][aria-selected=true],.exv .exhead button[aria-pressed=true],.speak .miclist button[aria-pressed=true],.learn .modemenu button[aria-pressed=true],.learn .ctrl .iconbtn[aria-pressed=true],.learn .ctrl .spd[aria-pressed=true],.ctrl [aria-pressed=true],.line .acts button.menu[aria-pressed=true],.keepov button[aria-pressed=true],.sheet.mbox .monoff[aria-pressed=true],.sheet.mbox li .mplay[aria-pressed=true],.chip.bgmb[aria-pressed=true],.learn .seek .vsubt[aria-pressed=true],.ks button[aria-pressed=true],.learn [data-mode][aria-pressed=true],.chip.vl-sortbtn.hit,.hk-tab.on:hover,.hk-tab[aria-pressed=true]:hover,.vk-tab[aria-selected=true]:hover,.vp-b.vp-pn.on:hover,.vp-po.on:hover,.vp-b[aria-current=page]:hover,.vp-po[aria-current=page]:hover,.mode button[aria-pressed=true]:hover,.toggles button[aria-pressed=true]:hover,.write .wmode button[aria-pressed=true]:hover,.write .wbtns button[aria-pressed=true]:hover,.write .stage .wbtns button[aria-pressed=true]:hover,.write .hbtns .htools button[aria-pressed=true]:hover,.write .stage .sub2 .htools button[aria-pressed=true]:hover,.write .sent .spkb[aria-pressed=true]:hover,.speak .sbtns button[aria-pressed=true]:hover,.speak .sbtns .mrate[aria-pressed=true]:hover,.v9body .sayb .sbtns .mrate[aria-pressed=true]:hover,.cmpw .cslow[aria-pressed=true]:hover,.crow .clab .crate[aria-pressed=true]:hover,.v9bar .romb[aria-pressed=true]:hover,.v9bar .pb[aria-pressed=true]:hover,.v9bar [data-x=txt][aria-selected=true]:hover,.exv .exhead button[aria-pressed=true]:hover,.speak .miclist button[aria-pressed=true]:hover,.learn .modemenu button[aria-pressed=true]:hover,.learn .ctrl .iconbtn[aria-pressed=true]:hover,.learn .ctrl .spd[aria-pressed=true]:hover,.ctrl [aria-pressed=true]:hover,.line .acts button.menu[aria-pressed=true]:hover,.keepov button[aria-pressed=true]:hover,.sheet.mbox .monoff[aria-pressed=true]:hover,.sheet.mbox li .mplay[aria-pressed=true]:hover,.chip.bgmb[aria-pressed=true]:hover,.learn .seek .vsubt[aria-pressed=true]:hover,.ks button[aria-pressed=true]:hover,.learn [data-mode][aria-pressed=true]:hover,.chip.vl-sortbtn.hit:hover{background:var(--sel-bg)!important;background-color:var(--sel-bg)!important;color:var(--sel-ink)!important;border-color:var(--sel-bg)!important;box-shadow:var(--sel-sh)!important;text-decoration:none!important}
 .mode button[aria-pressed=true]{border-radius:8px}
 .v9bar .romb[aria-pressed=true]::before,.toggles button[aria-pressed=true]::before,.keepov button[aria-pressed=true]::before{content:"\25CB";margin-inline-end:3px;font-weight:800}
@@ -2130,3 +2129,26 @@ html.vk-bglock{overscroll-behavior:none}.vk-card,.vk-sheet,.hk-sheet,.vk-pane,.v
 .learn .seek.vm-has>.vp-bar.n :is(.vp-pv,.vp-nx){font-size:0;min-width:30px}.learn .seek.vm-has>.vp-bar.n .vp-pv::before{content:"‹";font-size:16px}.learn .seek.vm-has>.vp-bar.n .vp-nx::before{content:"›";font-size:16px}
 .vk-li.vm-on,.vk-sub.vm-on{border-color:#f2c14e;box-shadow:0 0 0 3px #f2c14e,0 3px 10px rgba(0,0,0,.18)}
 @media(max-width:339px){.vm-bar .vm-ic{display:none}}
+
+/* ── 갈색 막대 정리(대표님 11-20 15:18~15:19) ─────────────────────────────── */
+/* 막대 = ‹ 돌아가기 · ▶ · 두 말 · 자동 · ‹ 이전 · 다음 › · ⛶ (⭐ 는 카드 머리로) · 모자라면 JS(fitCBar)가 단계로 줄임 */
+.vk-cbar.s1 .vk-prev .t,.vk-cbar.s1 .vk-next .t{display:none}
+.vk-cbar.s2 .vk-back .t{display:none}
+.vk-cbar.s3{gap:3px;padding:0 4px}.vk-cbar.s3>*{gap:3px}.vk-cbar.s3 .vp-b.vk-back,.vk-cbar.s3 .vp-b.vk-snd,.vk-cbar.s3 .vp-b.vk-next,.vk-cbar.s3 .vp-b.vk-prev,.vk-cbar.s3 .vp-b.vk-two,.vk-cbar.s3 .vp-b.vk-auto,.vk-cbar.s3 .vk-fs{padding:0 6px;min-width:0}
+.vk-cbar.s4{gap:2px}.vk-cbar.s4>*{gap:2px}.vk-cbar.s4 .vp-b,.vk-cbar.s4 .vk-fs{font-size:11px!important;padding:0 4px!important}
+.vk-cbar .vp-b{flex:none}
+/* 첫 카드의 이전 = 누를 수 없음이 보이되 어둡지 않게: 흰 알약 그대로 · 글씨만 옅은 회갈색 */
+.vk-navpair .vp-b.vk-off,.vk-cbar .vk-navpair .vp-b.vk-off{opacity:1;background:var(--card);color:#a8998a;cursor:default;box-shadow:none}
+.vk-cbar .vp-b.vk-off:active:not(:disabled){transform:none;background:var(--card);color:#a8998a;box-shadow:none}
+/* 눌림 = 정말 안으로 들어간 느낌(두 말·자동 켜짐과 같은 깊이 · 1px 내려앉음 · 크기 변화 0) */
+.learn .vk-cbar .vp-b:not(:disabled,.vk-off):active,.learn .vk-cbar .vk-fs:active,.vk-star:not([data-on="1"]):active{background:var(--sel-bg)!important;color:var(--sel-ink)!important;box-shadow:var(--press-sh)!important;transform:translateY(1px)!important;scale:none!important;border-color:var(--sel-bg)!important}
+/* 머리 ⭐ (⇄ 바로 왼쪽) */
+.vk-star{flex:none;position:relative;align-self:flex-start;width:36px;height:32px;padding:0;border-radius:999px;border:2px solid var(--hi);background:var(--card);color:var(--hi);display:inline-grid;place-items:center;cursor:pointer;box-shadow:none;transition:background-color .12s ease,box-shadow .12s ease}
+.vk-star::before{content:"";position:absolute;inset:-6px -4px}
+.vk-star svg{fill:none;stroke:currentColor;stroke-width:2;pointer-events:none}
+.vk-star[data-on="1"]{cursor:default;color:#b97a08}.vk-star[data-on="1"] svg{fill:#f2b01e;stroke:#b97a08}
+.vk-card .vk-uiko{margin-left:0}.vk-card .vk-star{margin-left:auto}
+/* 머리 한 줄: 표제·발음은 그대로 · 품사/뜻 글이 모자라면 말줄임 */
+.vk-card .vk-main{flex-wrap:nowrap}.vk-card .vk-main .vk-t,.vk-card .vk-main .vk-rom{flex:none}
+.vk-card .vk-main .vk-mean,.vk-card .vk-main .vk-pos{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vk-card .vk-main .vk-mean .vis,.vk-card .vk-main .vk-pos .vis{white-space:nowrap}
