@@ -16,7 +16,7 @@ import { filterItems, makeFindBox, indexLetters, makeIndexBar, groupByEp, findTx
 import { paths } from "./paths.js?v=1120.24";
 import { catalog, episode } from "./data.js?v=1120.24";
 import { VERSION } from "./version.js?v=1120.24";
-import { createMemo, memoBtns } from "./memo.js?v=0000";
+import { createMemo, memoBtns } from "./memo.js?v=1120.24"; // 외우기(대표님 11-20 15:10)
 
 const KEY = "malmun.vocab.ne";
 export const vocabOn = () => lang === "ne";
