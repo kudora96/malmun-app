@@ -135,7 +135,7 @@ const nxt = j => (!j.endPh && j.both?.() ? [j.endK, 1] : [j.endK + 1, 0]);
 function play(j, k, at, hold, lead = 0, sec = null) { // k 블록을 at(0~1 비율)부터 · hold = 멈춘 채 그 자리만
   if (j.dead) return;
   if (k >= j.bl.length) { const f = j.done; stopRead(); f?.(); return; } // 끝까지 읽음 = 자동 이어 듣기가 다음으로(대표님 11-19 14:11)
-  const ph = j.nph | 0; j.nph = 0; if (ph && !j.both?.()) return play(j, k + 1, 0, hold); j.ph = ph; // ↳ 차례인데 두 말이 꺼져 있으면(틈·⏸ 중 끔) 건너뜀(11-20) j.k = k; j.n = j.n || null; const blk = blkOf(j); if (!blk) return play(j, k + 1, 0, hold); setPair(j, k);
+  const ph = j.nph | 0; j.nph = 0; if (ph && !j.both?.()) /* ↳ 차례인데 두 말이 꺼져 있으면(틈·⏸ 중 끔) 건너뜀 */ return play(j, k + 1, 0, hold); j.ph = ph; j.k = k; j.n = j.n || null; const blk = blkOf(j); if (!blk) return play(j, k + 1, 0, hold); setPair(j, k);
   // 두 말 듣기(대표님 11-19 14:30 · 기본 켬 · 자동/손 둘 다) = 블록마다 지금 말 소리 → 이어서 ↳ 다른 말 소리 · 끄면 한 말만
   const other = l => (l === "ko" ? "ne" : "ko"), pl = ph ? other(j.lang) : j.lang; j.pl = pl;
   const pre = j.pre?.k === k && j.pre.ph === ph ? j.pre.a : null; j.pre = null; const a = (j.a = pre || new Audio(j.url(pl, j.bl[k].b))); a.preload = "auto"; j.resumeK = -1; j.resumePh = 0;
