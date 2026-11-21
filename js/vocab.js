@@ -127,7 +127,7 @@ function bgLock() {
   else if (!on && bgY != null) { const y = bgY; bgY = null; document.documentElement.classList.remove("vk-bglock"); if (Math.abs(se.scrollTop - y) > 0.5) se.scrollTop = y; }
 }
 new MutationObserver(bgLock).observe(document.body, { childList: true });
-const syncBar = () => { bgLock();  const L = document.querySelector(".learn"), on = !!stageOf()?.classList.contains("vk-on"); L?.classList.toggle("vk-open", on); L?.querySelectorAll(".lines,.ctrl").forEach(e => { e.inert = on; }); }; // 열려 있는 동안: 갈색 막대는 바탕만 · 아래 자막 줄·조작 줄은 흐리게 + 못 누름(inert = 누르기·키보드 포커스 둘 다 막음)
+const syncBar = () => { bgLock(); placeSeek();  const L = document.querySelector(".learn"), on = !!stageOf()?.classList.contains("vk-on"); L?.classList.toggle("vk-open", on); L?.querySelectorAll(".lines,.ctrl").forEach(e => { e.inert = on; }); }; // 열려 있는 동안: 갈색 막대는 바탕만 · 아래 자막 줄·조작 줄은 흐리게 + 못 누름(inert = 누르기·키보드 포커스 둘 다 막음)
 function stageLock(st) { const own = !st.classList.contains("vk-on"); if (own) { st.style.height = st.getBoundingClientRect().height + "px"; st.classList.add("vk-on"); } try { st.querySelector("video")?.pause(); } catch {} claim("vocab"); syncBar(); return own; }
 // ── 아래 갈색 막대 = 조작 막대(대표님 11-18 14:09) — 단어장·조각 카드가 영상 칸 안에 열려 있는 동안: 단어장 = 쪽 넘김(가운데) + ⛶(오른쪽 끝) · 카드 = ‹ 돌아가기(왼쪽) · ▶/⏸ · ⭐ 단어장에 담기(가운데) · ⛶(오른쪽 끝)
 //    전체 화면(영상 칸 통째)에서는 갈색 막대가 칸 밖이라 같은 막대를 칸 맨 아래로 옮겨 보여 줌
@@ -148,9 +148,15 @@ function ctlBtns(c) {
     + (c.two?.() ? twoBtn() : "") + (c.auto?.() ? autoBtn(autoOn()) : "") + starBtn(c, sv)
     + (c.next?.() ? `<span class="vk-navpair">` + (() => { const off = !c.prev?.(); return `<button type="button" class="vp-b vk-prev${off ? " vk-off" : ""}" data-v="prev" aria-label="${esc(t.prev)}" title="${esc(t.prev)}"${off ? ' aria-disabled="true"' : ""}><span aria-hidden="true">‹</span><span class="t">${esc(t.prev)}</span></button>`; })() + `<button type="button" class="vp-b vk-next" data-v="next" aria-label="${esc(t.next)}" title="${esc(t.next)}"><span class="t">${esc(t.next)}</span><span aria-hidden="true">›</span></button></span>` : "")];
 }
-function placeCBar() { // 평소 = 갈색 막대(.seek) 안 · 전체 화면 = 영상 칸 맨 아래
-  if (!cbar) return; const st = stageOf(), seek = document.querySelector(".learn .seek"), to = fsOn() ? st : seek;
-  if (to && cbar.parentNode !== to) to.append(cbar);
+let seekHome = null; // 전체 화면(⛶ · vk-pfs 포함)에선 영상 칸(.vstage)만 보임 → 갈색 막대(.seek) 통째로 칸 맨 아래로 옮김(안의 외우기 막대·쪽 넘김·카드 막대가 같이 따라가 보임·눌림 · 대표님 11-21 「풀 화면에서 막대 없음」) · 나오면 제자리
+function placeSeek() {
+  const st = stageOf(), seek = document.querySelector(".learn .seek") || st?.querySelector(":scope>.seek"); if (!st || !seek) return;
+  if (fsOn()) { if (seek.parentNode !== st) { seekHome = { p: seek.parentNode, n: seek.nextSibling }; st.append(seek); } }
+  else if (seekHome) { const { p, n } = seekHome; seekHome = null; if (seek.parentNode !== p) p.insertBefore(seek, n && n.parentNode === p ? n : null); }
+}
+function placeCBar() { // 갈색 막대(.seek) 안 — 전체 화면에선 .seek 자체가 영상 칸 맨 아래로 옮겨 감
+  placeSeek(); if (!cbar) return; const seek = document.querySelector(".learn .seek");
+  if (seek && cbar.parentNode !== seek) seek.append(cbar);
 }
 let cbarRO = null;
 function fitCBar() { // 막대 단추끼리 겹침·넘침 0 · 한 줄(대표님 11-20 15:18) — 실제 남는 자리를 재서 단계로 줄임: s1 이전/다음 글 숨김 → s2 ⭐ 글 숨김 → s3 돌아가기 글 숨김 → s3 간격·안쪽 여백 줄임 → s4 글자 11px

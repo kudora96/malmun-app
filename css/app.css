@@ -2187,3 +2187,10 @@ html.vk-bglock{overscroll-behavior:none}.vk-card,.vk-sheet,.hk-sheet,.vk-pane,.v
 .learn .seek,.vp-bar,.vk-cbar,.vm-bar{--card:#ffffff;--ink:#17302a;--mute:#5c726b;--line:rgba(23,48,42,.14);--hi-soft:rgba(168,106,18,.12);color-scheme:light}
 /* 갈색 막대 비활성 단추(단어장 쪽 넘김 첫 쪽 「‹ 이전」·끝 쪽 「다음 ›」·외우기 막대) = 반투명(opacity .4)이 갈색 위로 비쳐 탁해지던 것 → 카드 막대 비활성과 똑같이 흰 알약 + 옅은 회갈색 글씨(D-134) */
 .vp-bar .vp-b:disabled,.vm-bar button:disabled,.vk-cbar .vp-b:disabled:not(.vk-add){opacity:1;background:var(--card);color:#a8998a;-webkit-text-fill-color:currentColor;box-shadow:none;cursor:default}
+
+/* 전체 화면(⛶ · 대표님 11-21): 갈색 막대(.seek)가 영상 칸 맨 아래로 옮겨 와 외우기 막대·쪽 넘김·카드 막대가 보이고 눌림 */
+.learn .stick .vstage:is(:fullscreen,.vk-pfs)>.seek{flex:none;order:9;height:44px;position:relative;z-index:5}
+/* 설명 읽기 창 가로(크게 보기 자동): 갈색 막대(.seek)가 통째로 숨어 ▶·두 말·자동 단추를 못 누르던 것 → 막대만 맨 아래에 낮게(36px) 되살림 · 창은 그 위까지 (대표님 11-21) */
+.learn.big.rdr .seek{display:flex!important;position:fixed;left:0;right:0;bottom:0;z-index:31;height:36px;justify-content:center;gap:10px;padding:0 10px env(safe-area-inset-bottom,0px);box-sizing:content-box}
+.learn.big.rdr .seek :is(.t0,.t1,.trk){display:none}
+.learn.big.rdr .stick{padding-bottom:calc(36px + env(safe-area-inset-bottom,0px))}
