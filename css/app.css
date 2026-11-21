@@ -1881,7 +1881,7 @@ li.vl-row{position:relative;overflow:hidden;touch-action:pan-y}.vl-slide{display
 /* ── 공용 눌림(11-18 · 단어장 줄과 같은 값: scale .97 · 0.1초 · 그림자 줄임) — 모든 누르는 것 · 배치·크기 불변(특이도 0 = 각 단추 자기 규칙이 먼저) ── */
 :where(button,[role=button],summary){transition:transform .1s ease,background-color .12s ease,box-shadow .1s ease}
 :where(button,[role=button],summary):not(:disabled):active{transform:scale(.97);box-shadow:0 1px 3px rgba(0,0,0,.18)}
-/* 내 단어장 쪽 나누기·찾기·색인·편 묶음 (도우미 E · 11-18) — 색은 앱 변수만 · 갈색 막대 안 글·칩 색은 .seek 와 같은 말 */
+/* 내 단어장 쪽 나누기·찾기·편 묶음 (도우미 E · 11-18) — 색은 앱 변수만 · 갈색 막대 안 글·칩 색은 .seek 와 같은 말 */
 .vp-find{flex:none;display:flex;align-items:center;gap:6px;box-sizing:border-box;height:34px;margin:0 0 6px;padding:0 6px 0 11px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--mute);cursor:text;transition:border-color .15s,box-shadow .15s}
 .vp-find:focus-within{border-color:var(--hi);box-shadow:0 0 0 2px var(--hi-soft);color:var(--hi)}
 .vp-find .vp-mag{flex:none}
@@ -1894,9 +1894,6 @@ li.vl-row{position:relative;overflow:hidden;touch-action:pan-y}.vl-slide{display
 .vp-wrap{flex:1;min-height:0;display:flex}
 .vp-wrap .vk-ul{flex:1;min-width:0}
 .vp-grp{list-style:none;position:sticky;top:-3px;z-index:2;flex:none;margin:0 -2px;padding:4px 10px 3px;font-size:12px;font-weight:800;line-height:1.2;color:var(--hi);background:var(--bg);border-bottom:2px solid var(--hi-soft)}
-.vp-idx{flex:none;box-sizing:border-box;width:24px;margin-left:3px;padding:3px 0;display:flex;flex-direction:column;justify-content:space-between;align-items:center;touch-action:none;user-select:none;-webkit-user-select:none;cursor:pointer;font-size:11px;line-height:1;font-weight:800;color:var(--hi);overflow:hidden;border-radius:12px;background:var(--hi-soft)}
-.vp-idx span{display:flex;align-items:center;justify-content:center;width:18px;min-height:0;flex:1 1 0;max-height:20px;border-radius:50%;transition:transform .1s,background .1s}
-.vp-idx span.on{background:var(--hi);color:var(--on-hi);transform:scale(1.25)}
 /* 쪽 넘김 = 영상 칸 아래 갈색 조작 막대(.seek) 자리 — 막대 안 다른 것은 숨기고 쪽 넘김만 */
 .learn.vk-open .seek>.vp-bar{visibility:visible;pointer-events:auto}.learn:has(.vk-ppane) .vp-bar{display:none} /* 조각 카드가 칸을 차지하는 동안엔 쪽 넘김 없음 */
 .vp-bar{position:absolute;inset:0;z-index:6;display:flex;align-items:center;justify-content:center;gap:6px;padding:0 8px;background:var(--wood);color:#f6efe4;font-size:12px;font-variant-numeric:tabular-nums}
@@ -2158,7 +2155,7 @@ html.vk-bglock{overscroll-behavior:none}.vk-card,.vk-sheet,.hk-sheet,.vk-pane,.v
 .vk-star.on svg{fill:#f2b01e;stroke:#b97a08}.vk-cbar .vp-b.vk-star.on{color:var(--ink);opacity:1;background:var(--card)}
 .vk-cbar[class*=" s"] :is(.vp-b,.vk-fs){min-width:0!important;max-width:none!important} /* langfit 이 단추 폭을 한 말 기준으로 고정해 둔 것을 풀어 줘야 줄인 글이 자리를 비움 */
 /* 외우기 전용 보기(대표님 11-20 15:38 · P0-173): 탭 줄 셋째 칩 → 조각 줄만 글로 · 읽는 줄 금색 테두리 · 지금 소리 나는 쪽만 진한 노랑 · ▶ 단추·별 없음 · 쪽 넘김 막대 대신 ‹ 돌아가기·▶/⏸·×N */
-.vk-pane.vk-mv .vp-frow,.vk-pane.vk-mv .vp-wrap,.vk-sheet.vk-mv .vp-frow,.vk-mv .vp-wrap,.vk-mv .vp-frow,.vk-mv .vp-idx{display:none}
+.vk-pane.vk-mv .vp-frow,.vk-pane.vk-mv .vp-wrap,.vk-sheet.vk-mv .vp-frow,.vk-mv .vp-wrap,.vk-mv .vp-frow{display:none}
 .vk-mv .vk-sortslot{display:none}
 .vm-view[hidden]{display:none}
 .vk-pane .vm-view,.vk-sheet .vm-view{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none;padding:2px 2px 8px}

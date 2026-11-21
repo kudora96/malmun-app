@@ -12,7 +12,7 @@ import { esc } from "./text.js?v=1121.5";
 import { attachDragScroll } from "./dragscroll.js?v=1121.5";
 import { sortItems, makeSortButton, attachDelete, loadSort } from "./vlist_ops.js?v=1121.5";
 import { PAGE, pageCount, slicePage, clampPage, makePager } from "./vlist_pager.js?v=1121.5";
-import { filterItems, makeFindBox, indexLetters, makeIndexBar, groupByEp, findTx } from "./vlist_find.js?v=1121.5";
+import { filterItems, makeFindBox, groupByEp, findTx } from "./vlist_find.js?v=1121.5";
 import { paths } from "./paths.js?v=1121.5";
 import { catalog, episode } from "./data.js?v=1121.5";
 import { VERSION } from "./version.js?v=1121.5";
@@ -396,8 +396,7 @@ export function openVocabList() {
     pager?.destroy(); pager = makePager(host, p => { cur = p; drawList(); }, !seek); pager.host = host;
   };
   const filterGroups = q => all.filter(x => filterItems([x], q, d => devMap.get(d)).length || (subs.get(x) || []).some(sx => filterItems([sx], q, d => devMap.get(d)).length)); // 찾기 = 단어 또는 그 조각 어느 쪽이든 맞으면 단어째 남김(걸러내는 곳은 여기 한 곳)
-  const scrollToRow = i => { const li = ul?.querySelectorAll(".vk-li")[i]; if (li) ul.scrollTop += li.getBoundingClientRect().top - ul.getBoundingClientRect().top - (mode === "ep" ? 26 : 2); };
-  const drawList = (focusIdx = -1) => { // 쪽 안만 다시 그림 — 찾기·쪽 넘기기·색인은 여기(1만 개여도 20줄만 그림)
+  const drawList = () => { // 쪽 안만 다시 그림 — 찾기·쪽 넘기기는 여기(1만 개여도 20줄만 그림)
     if (listEl !== el || !ul) return;
     const ko = uiKoOn(), L = ko ? "ko" : "ne";
     view = filterGroups(find.value()); cur = clampPage(cur, view.length); // 쪽 = 단어(윗줄)만 셈 · 조각 줄은 단어 밑에 그대로
@@ -408,13 +407,9 @@ export function openVocabList() {
     const pg = slicePage(view, cur);
     ul.innerHTML = mode === "ep" ? groupByEp(pg, ko, view).map(g => (g.head ? `<li class="vp-grp" aria-hidden="true">${esc(g.head)}</li>` : "") + rows(g.x)).join("") : pg.map(rows).join("");
     wrap.querySelector(".vk-empty")?.remove(); ul.hidden = !pg.length;
-    const ik = mode === "abc" && pg.length ? `${L}|${find.value()}|${view.length}` : "", idx = wrap.querySelector(".vp-idx"); // 색인 막대는 같은 목록이면 그대로 둠(쪽이 바뀌어도 미끄러뜨리는 손가락이 안 끊김)
-    if (idx && idx.dataset.ik !== ik) idx.remove();
     if (!pg.length) wrap.insertAdjacentHTML("afterbegin", `<p class="vk-empty">${esc(findTx("nofound", ko))}</p>`);
-    else if (ik && !wrap.querySelector(".vp-idx")) { const ib = wrap.appendChild(makeIndexBar(indexLetters(view, L), i => { const p = Math.floor(i / PAGE); if (p !== cur) { cur = p; drawList(i % PAGE); } else scrollToRow(i % PAGE); }, ko)); ib.dataset.ik = ik; } // 가나다 색인 = 글자 있는 쪽·줄로
     ul.scrollTop = 0; if (!isAll) ul.querySelectorAll(".vk-li").forEach((li, i) => attachDelete(li, pg[i], it => drop(kOf(it)), L)); // 휴지통 = 「내가 담은」 탭만
     pager?.update(cur, pageCount(view.length), ko);
-    if (focusIdx >= 0) scrollToRow(focusIdx);
 
   };
   // ── 외우기(대표님 11-20 15:10~15:38) — 탭 줄 셋째 칩 「외우기」 → 전용 보기: 단어장 조각(낱낱 단어)만 · 순서대로 · 한국어 낱말 소리 → 짧은 뜻 소리(⇄ 순서) · 묶음 머리 없음 · 같은 조각은 처음 한 번만
