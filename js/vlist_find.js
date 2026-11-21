@@ -1,4 +1,4 @@
-// 내 단어장 찾기·색인·편 묶음 (도우미 E · 11-18) — vocab.js 가 불러 붙임. 이 파일은 다른 파일을 건드리지 않음.
+// 내 단어장 찾기·편 묶음 (도우미 E · 11-18) — vocab.js 가 불러 붙임. 이 파일은 다른 파일을 건드리지 않음.
 // 항목 모양: { w:단어, mean:뜻(네팔어), ep:편 ID, n/order/…:편 안 순서 } · 발음(데바나가리)은 vocab.js 의 devOf 가 줌
 
 import { vocabMatch } from "./search.js?v=1121.5"; // 찾기 규칙(초성·네팔어·로마자 · 대표님 11-19)
@@ -7,8 +7,8 @@ import { makeVoice, VOICE_TX } from "./voicefind.js?v=1121.5"; // 말로 찾기 
 
 // 새 글(네팔어 = Claude 도우미 2명 교차 · 11-18)
 export const FIND_TX = {
-  ko: { find: "찾기", clear: "지우기", nofound: "찾는 단어가 없어요", index: "가나다 색인", ep: n => `${n}편`, lesson: (l, n) => `${l}과 ${n}편` },
-  ne: { find: "खोज्नुहोस्", clear: "मेट्नुहोस्", nofound: "खोजेको शब्द भेटिएन", index: "वर्णमाला सूची", ep: n => `भाग ${n}`, lesson: (l, n) => `पाठ ${l}, भाग ${n}` },
+  ko: { find: "찾기", clear: "지우기", nofound: "찾는 단어가 없어요", ep: n => `${n}편`, lesson: (l, n) => `${l}과 ${n}편` },
+  ne: { find: "खोज्नुहोस्", clear: "मेट्नुहोस्", nofound: "खोजेको शब्द भेटिएन", ep: n => `भाग ${n}`, lesson: (l, n) => `पाठ ${l}, भाग ${n}` },
 };
 const T = ko => (ko ? FIND_TX.ko : FIND_TX.ne);
 export const findTx = (k, ko) => T(ko)[k];
@@ -54,37 +54,6 @@ export function makeFindBox(onInput, ko = true) {
   han.addEventListener("click", e => { e.preventDefault(); e.stopPropagation(); hold.kp ? closeKp() : openKp(); });
   inp.addEventListener("keydown", e => { e.stopPropagation(); if (e.key === "Enter") inp.blur(); }); // 글자·Esc 가 앞 화면 단축키로 새지 않게
   d.value = () => inp.value; d.setLang = lab; d.clear = () => { inp.value = ""; x.hidden = true; }; d.closeKeypad = closeKp; d.voice = voice;
-  return d;
-}
-
-// ── 가나다 색인 — 정렬된 목록 안에서 글자마다 첫 자리(번호)
-const CHO_G = "ㄱㄱㄴㄷㄷㄹㅁㅂㅂㅅㅅㅇㅈㅈㅊㅋㅌㅍㅎ"; // 초성 19개 → 기본 14글자(쌍자음은 짝 글자 밑)
-export function letterOf(s) {
-  const c = String(s || "").trim().charAt(0); if (!c) return "#";
-  const k = c.charCodeAt(0);
-  if (k >= 0xac00 && k <= 0xd7a3) return CHO_G[Math.floor((k - 0xac00) / 588)];
-  if (k >= 0x3131 && k <= 0x3163) return c; // 낱자모
-  if (k >= 0x0900 && k <= 0x097f) return c; // 데바나가리 첫 글자
-  return /[A-Za-z]/.test(c) ? c.toUpperCase() : "#";
-}
-// list = 정렬된 항목 · lang = 'ko'(단어 기준) | 'ne'(뜻 기준 · sortItems 와 같은 키) → [{ch, i}] (글자 나온 순 · i = 처음 나온 번호)
-export function indexLetters(list, lang) {
-  const out = [], seen = new Set();
-  for (let i = 0; i < list.length; i++) { const x = list[i], ch = letterOf(lang === "ne" ? x.mean || x.w : x.w); if (!seen.has(ch)) { seen.add(ch); out.push({ ch, i }); } }
-  return out;
-}
-// 오른쪽 끝 세로 색인 막대 — 누르거나 미끄러뜨리면 onPick(글자 처음 번호). 돌려줌 = <div class="vp-idx">
-export function makeIndexBar(letters, onPick, ko = true) {
-  const d = document.createElement("div"); d.className = "vp-idx"; d.setAttribute("role", "navigation"); d.setAttribute("aria-label", T(ko).index);
-  d.innerHTML = letters.map((l, k) => `<span data-k="${k}" lang="${/[ऀ-ॿ]/.test(l.ch) ? "ne" : "ko"}">${l.ch.replace(/&/g, "&amp;").replace(/</g, "&lt;")}</span>`).join("");
-  let id = null, last = -1;
-  const at = y => { const r = d.getBoundingClientRect(); if (!letters.length || r.height <= 0) return -1; return Math.max(0, Math.min(letters.length - 1, Math.floor(((y - r.top) / r.height) * letters.length))); };
-  const go = y => { const k = at(y); if (k < 0 || k === last) return; last = k; d.querySelectorAll("span.on").forEach(s => s.classList.remove("on")); d.children[k]?.classList.add("on"); onPick?.(letters[k].i, letters[k].ch); };
-  d.addEventListener("pointerdown", e => { id = e.pointerId; last = -1; try { d.setPointerCapture(id); } catch {} e.preventDefault(); e.stopPropagation(); go(e.clientY); });
-  d.addEventListener("pointermove", e => { if (e.pointerId === id) { e.preventDefault(); go(e.clientY); } });
-  const end = e => { if (e.pointerId !== id) return; id = null; setTimeout(() => { if (id == null) d.querySelectorAll("span.on").forEach(s => s.classList.remove("on")); }, 500); };
-  d.addEventListener("pointerup", end); d.addEventListener("pointercancel", end);
-  d.addEventListener("click", e => { e.preventDefault(); e.stopPropagation(); });
   return d;
 }
 
