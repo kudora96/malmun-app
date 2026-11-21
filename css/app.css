@@ -1742,7 +1742,7 @@ html:has(.scr.learn),html:has(.scr.learn) body{overflow-anchor:none} /* 배우�
 .vk-add:disabled{opacity:.6;border-color:var(--line);color:var(--mute);box-shadow:none}
 .vk-x{min-height:32px;font-weight:500;border-color:var(--line);color:var(--hi)}
 .vk-listdim{align-items:center}
-.vk-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;font-size:17px}
+.vk-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:4px 8px;margin-bottom:8px;font-size:17px}
 .vk-ul{list-style:none;margin:0;padding:2px 2px 6px;display:flex;flex-direction:column;gap:6px}
 .vk-sheet{position:relative}.vk-sheet>.vk-xw{position:sticky;top:0;height:0;z-index:5}.vk-sheet .vk-head{padding-right:36px;font-size:18px}
 /* 영상 칸 자리 안 단어장(대표님 11-18 13:07) — 읽기 창처럼 영상 칸을 덮음 · 다른 칸 크기·배치 불변 · 제목·정렬은 위에 고정, 줄만 넘김 */
@@ -1870,7 +1870,8 @@ li.vl-row{position:relative;overflow:hidden;touch-action:pan-y}.vl-slide{display
 .vk-pane>.vk-fs,.vk-ppane>.vk-fs{z-index:6;right:10px;bottom:10px}.vk-pane .vk-ul{padding-bottom:6px}.vk-ppane>.vk-card{padding-bottom:52px}
 /* 단어장 머리줄(대표님 11-18 13:41) - 제목 = 앱 갈색 / 숫자는 작은 둥근 배지 / 정렬 단추 = 오른쪽 ⇄ 칩과 같은 갈색 테두리·글·높이·둥글기 / 눌림 0.97 + 갈색 바탕이 잠깐 / ✕ 도 같은 갈색 / 새 색 없음(기존 변수) */
 .vk-cnt i{font-style:normal;font-weight:inherit;font-family:inherit}
-.vk-tt{display:inline-flex;align-items:center;gap:6px;min-width:0}.vk-tt b{color:var(--hi)}
+.vk-ctl{display:inline-flex;align-items:center;gap:6px;flex:none;margin-left:auto}.vk-ctl .vk-uik,.vk-pane .vk-ctl .vk-uik{margin-left:0}.vk-ctl .vk-sortslot{margin-left:0}
+.vk-tt{display:inline-flex;flex-wrap:wrap;align-items:center;gap:4px 6px;min-width:0;max-width:100%}.vk-tt b{color:var(--hi)}
 .vk-cnt{flex:none;padding:2px 9px;border-radius:999px;background:var(--hi-soft);color:var(--hi);font-size:12px;font-weight:700;line-height:1.4;white-space:nowrap}
 .vk-head .chip{min-height:32px;box-sizing:border-box;border-color:var(--hi);color:var(--hi);border-radius:999px}
 .vk-sortslot .chip.vl-sortbtn{padding:0 11px;font-size:12px;font-weight:800;background:var(--card);transition:transform .1s ease,background-color .12s ease,color .12s ease}
@@ -2175,11 +2176,11 @@ html.vk-bglock{overscroll-behavior:none}.vk-card,.vk-sheet,.hk-sheet,.vk-pane,.v
 .learn .seek.vm-mv>.vp-bar,.vk-sheet.vm-mv>.vp-bar,.vk-mv .vp-bar{display:none}
 .vm-bar .vm-back .vm-ic{font-size:15px;line-height:1}
 .vm-bar .vm-go{min-width:34px;justify-content:center;padding:0 8px}
-@media(max-width:430px){.vk-pane .vk-head{gap:3px}.vk-tab{padding:0 7px}.vk-pane .vk-tt{gap:3px}.vk-memotab b{font-size:13px}}
+@media(max-width:430px){.vk-pane .vk-head{gap:4px 3px}.vk-tab{padding:0 6px}.vk-pane .vk-tt{gap:4px 3px}.vk-memotab b{font-size:13px}}
 @media(max-width:339px){.vm-bar .vm-back .vm-t{display:none}}
 /* 375 탭 줄: 모자라면 개수 글 → 정렬 글 순서로 줄임(겹침 0) · 네팔어 외우기 칩은 짧은 꼴 */
 .vm-short{display:none}
-@media(max-width:430px){.vk-memotab .vm-full{display:none}.vk-memotab .vm-short{display:inline}.vk-pane .vk-sortslot .vl-sortbtn{font-size:0;min-width:34px;padding:0 8px}.vk-pane .vk-sortslot .vl-sortbtn::before{content:"⇅";font-size:15px;line-height:1}}
+@media(max-width:430px){.vk-memotab .vm-full:not(:only-child){display:none}.vk-memotab .vm-short{display:inline}.vk-pane .vk-sortslot .vl-sortbtn{font-size:0;min-width:34px;padding:0 8px}.vk-pane .vk-sortslot .vl-sortbtn::before{content:"⇅";font-size:15px;line-height:1}}
 .learn .seek[data-off] .vm-bar span{visibility:visible}
 /* 판 번호(틀 잡는 동안만 · 대표님 11-20) — 「n / N」 바로 아래 · 자리 안 차지함(겹쳐 얹음) · 누를 수 없음 · 런칭 전 learn.js SHOW_VER=false */
 .learn .vtitle{position:relative}
