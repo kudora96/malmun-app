@@ -2,8 +2,8 @@
 //  한국어 먼저 화면이면 ko-KR · 네팔어 먼저 화면이면 ne-NP · 네팔어 인식이 안 되면 한국어로 바꿔 듣고 부드러운 안내 한 줄
 //  마이크 규칙은 말하기와 같음: 기억한 마이크가 바뀌었으면 recorder.js guardMic 이 MicChangedError → 안내만 하고 안 듣음
 //  받은 글은 곧바로 찾기 칸에 넣어 목록이 걸러짐(말하는 중 중간 글도) · 듣는 동안 단추가 ■ 로 바뀌고 칸 안 글이 「듣는 중이에요…」 로 바뀜(다시 누르면 멈춤)
-import { guardMic, micWhy } from "./recorder.js?v=1120.38";
-import { t } from "./i18n.js?v=1120.38";
+import { guardMic, micWhy } from "./recorder.js?v=1121.1";
+import { t } from "./i18n.js?v=1121.1";
 
 export const VOICE_TX = {
   ko: { voice: "말로 찾기", stop: "그만 듣기", listening: "듣는 중이에요…", nosr: "이 브라우저에서는 말로 찾기가 안 돼요", nene: "이 기기는 네팔어를 못 알아들어서 한국어로 들어요", changed: "마이크가 바뀌었어요 · 마이크를 골라 주세요", nothing: "잘 못 들었어요 · 다시 말해 주세요" },
