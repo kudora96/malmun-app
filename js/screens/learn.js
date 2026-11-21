@@ -497,14 +497,30 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     if (nw && nw[0][0] > e0) r.until = Math.min(e0 + TWO_PAD, (e0 + nw[0][0]) / 2);
     return r;
   }
-  function twoItems(i, k) {
-    const x = L[i].v9, sn = x?.sent || [], pc = v9code(k), sc = pc === "ko" ? v9L : "ko", ps = v9src(i, k, "ex"), ss = v9src(i, pc === "ko" ? "L" : "ko", "ex");
-    if (!v9L || !sc || pc === sc || !sn.length || !ps || !ss) return null;
-    const seg = (code, q) => { const w = wTimes(sn, q, code); if (!w) return null; const e0 = w[w.length - 1][1] || w[w.length - 1][0] + 0.1, nx = sn[q + 1]?.[`${code}_s`], e = e0 + TWO_PAD; return { at: Math.max(0, w[0][0] - TWO_PAD), until: nx != null && nx > e0 ? Math.min(e, nx) : e, ...segEdge(sn, q, code, w, e0) }; };
-    const out = [];
-    for (let q = 0; q < sn.length; q++) { const a = seg(pc, q), b = seg(sc, q); if (!a || !b) return null; out.push({ src: ps, p: 0, lang: pc, sk: q, ...a, gap: 250 }, { src: ss, p: 0, lang: sc, main: pc, pair: true, sk: q, ...b, gap: 250 }); }
-    return out;
+  // 마디 통역(대표님 11-21 10:30 · 단어 카드 wordnote.js mkPlan 과 같은 3단계) — 문장마다 ① 쉼표·마침표 마디 수가 두 말 같으면 마디마다 「고른 말 마디 → 다른 말 같은 마디」 ② 아니면 문장 수가 같으면 문장 단위 ③ 아니면 문장 통째 · 새 소리 없이 저장된 낱말 시각(_w)의 마디 구간만(±TWO_PAD)
+  const wordsOf = t => String(t || "").match(/"[^"]*"\S*|\S+/g) || [], planCache = new Map();
+  const sentMapL = texts => { let cid = 0, q = false; const cl = []; texts.forEach(t => { cl.push(cid); if ((String(t).match(/"/g) || []).length % 2) q = !q; if (!q && /[.!?।॥][」"')”’』»]*$/.test(t)) cid++; }); return { cl }; }; // 문장 끝(. ? ! । ॥ · 따옴표 안은 안 끊음) — wordnote.js sentMap 과 같음
+  const grpOf = cl => { const g = []; cl.forEach((c, ix) => { (g[c] ||= []).push(ix); }); return g.filter(Boolean); };
+  function clausePlan(i, q) { // 한 문장의 마디 묶음 { ko:[낱말번호들…], <학습자말>:[…] } — 못 맞추면 null(문장 통째)
+    const key = i + ":" + q + ":" + v9L; if (planCache.has(key)) return planCache.get(key);
+    let res = null; try { const sn = L[i].v9.sent, codes = ["ko", v9L], ws = {};
+      if (v9L && sn[q] && codes.every(c => { const w = wTimes(sn, q, c), t = wordsOf(sn[q][c]); ws[c] = t; return w && w.length === t.length; }))
+        for (const mp of [commaMap, sentMapL]) { const g = codes.map(c => grpOf(mp(ws[c]).cl)); if (g[0].length > 1 && g[0].length === g[1].length) { res = { ko: g[0], [v9L]: g[1] }; break; } } } catch {}
+    planCache.set(key, res); return res;
   }
+  function sentSeg(sn, q, code) { const w = wTimes(sn, q, code); if (!w) return null; const e0 = w[w.length - 1][1] || w[w.length - 1][0] + 0.1, nx = sn[q + 1]?.[`${code}_s`], e = e0 + TWO_PAD; return { at: Math.max(0, w[0][0] - TWO_PAD), until: nx != null && nx > e0 ? Math.min(e, nx) : e, ...segEdge(sn, q, code, w, e0) }; }
+  function segsOf(i, code, q) { // 그 말 문장 q 의 마디 구간들 [{at, until}] (마디가 없으면 문장 통째 하나)
+    const sn = L[i].v9.sent, whole = sentSeg(sn, q, code); if (!whole) return null; const pl = clausePlan(i, q); if (!pl) return [whole];
+    const g = pl[code], w = wTimes(sn, q, code), n = g.length, endOf = x => w[x[x.length - 1]][1] || w[x[x.length - 1]][0] + 0.1;
+    return g.map((gg, c) => { const e0 = endOf(gg), st0 = w[gg[0]][0], nxt = g[c + 1] ? w[g[c + 1][0]][0] : null; return { at: c === 0 ? whole.at : Math.max(endOf(g[c - 1]), st0 - TWO_PAD), until: c === n - 1 ? whole.until : Math.max(e0, Math.min(e0 + TWO_PAD, nxt - 0.11)) }; });
+  }
+  const unitsOf = i => { const out = []; (L[i].v9?.sent || []).forEach((_, q) => { const pl = clausePlan(i, q), n = pl ? pl.ko.length : 1; for (let c = 0; c < n; c++) out.push({ s: q, c }); }); return out; };
+  function unitItems(i, k, s, c) { // 한 마디 = [고른 말 조각, 다른 말 짝 조각]
+    const pc = v9code(k), sc = pc === "ko" ? v9L : "ko", ps = v9src(i, k, "ex"), ss = v9src(i, pc === "ko" ? "L" : "ko", "ex"); if (!v9L || !sc || pc === sc || !ps || !ss) return null;
+    const a = segsOf(i, pc, s)?.[c], b = segsOf(i, sc, s)?.[c]; if (!a || !b) return null;
+    return [{ src: ps, p: 0, lang: pc, sk: s, ci: c, ...a, gap: 250 }, { src: ss, p: 0, lang: sc, main: pc, pair: true, sk: s, ci: c, ...b, gap: 250 }];
+  }
+  function twoItems(i, k) { const out = []; for (const u of unitsOf(i)) { const it = unitItems(i, k, u.s, u.c); if (!it) return null; out.push(...it); } return out.length ? out : null; }
   const fromSent = (items, s) => { const j = items.findIndex(x => x.p === 0 && !x.pair && (x.sk === undefined || x.sk === s)); return j; };
   const v9Items = (i, { line = true, k = sndOf(i), two = true } = {}) => [
     ...(line && L[i].lineAudio ? [{ src: paths.audio(ep, L[i].lineAudio), p: -1 }] : []),
@@ -675,7 +691,8 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
       items[i].querySelectorAll(".expl .sn").forEach(x => x.classList.toggle("cur", +x.dataset.s === s)); setPair(items[i].querySelector(".expl"), i, code, s);
       return sync();
     }
-    const k = sndOf(i), list = v9Items(i, { line: false, k }), from = fromSent(list, s); if (from < 0) return;
+    const k = sndOf(i), list = v9Items(i, { line: false, k }); let from = fromSent(list, s); if (from < 0) return;
+    if (atX != null) list.forEach((x, j) => { if (x.p === 0 && !x.pair && x.sk === s && x.ci !== undefined && (x.at || 0) <= atX + 0.01) from = j; }); // 눌린 낱말이 든 마디부터(마디 통역)
     clearTimeout(st.gap); st.gap = 0; hushSay(); st.exLoop = list; markPlay(k); st.userPaused = false; // 문장을 눌러 듣기 = 멈춤 해제(멈춰 둔 채 눌러도 끝에서 자동이 이어 감)
     ex.play(list.map((x, j) => (j === from ? { ...x, at } : x)), from);
     panel.querySelectorAll(".v9body .sn").forEach(x => x.classList.toggle("cur", +x.dataset.s === s)); setPair(panel.querySelector(".v9body"), i, code, s); setNum(s);
@@ -1316,32 +1333,14 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   };
   v.addEventListener("click", togglePlay);
   // 「ने⇄한」 = 언어 하나(안 A) — 어느 화면·창의 단추든(ui.js 문서 한 곳이 받음 · 다국어부 10-14) 앱 글이 바뀌면 설명 소리·본문도 그 언어로(듣는 중이면 같은 문장부터) · 설명 막대 안 고르기(uiLang)는 제 손잡이가 이미 맞춤
-  // 읽는 중 ⇄ (대표님 11-21 10:18·10:21) — 단어 카드(wordnote.js switchRead)와 같은 원리: 지금 나는 소리는 멈추지도 다시 틀지도 않고 「다음에 읽을 것」만 새 말 차례로 바꿈
-  // 읽던 조각(한 말이면 읽던 문장)을 끝까지 → 두 말이면 그 문장의 아직 안 읽은 짝 → 다음 문장부터 새 말 먼저 → 끝에서 자동이 다음 줄로(읽은 곳 다시 읽지 않음)
+  // 읽는 중 ⇄ (대표님 11-21 10:18·10:21·10:30) — 단어 카드(wordnote.js switchRead)와 같은 원리: 지금 나는 소리는 멈추지도 다시 틀지도 않고 「다음에 읽을 것」만 새 말 차례로 바꿈(requeue)
+  // 읽던 마디(한 말이면 읽던 마디까지)를 끝까지 → 두 말이면 같은 마디의 안 읽은 쪽 → 다음 마디부터 새 말 먼저 → 끝에서 자동이 다음 줄로(읽은 곳 다시 읽지 않음)
   // 글(윗줄·↳)은 ⇄ 순간 바로 바뀌고, 칠은 지금 나는 소리의 낱말을 따라감(소리 말이 윗줄이 아니게 된 동안은 pair 표시 = ↳ 칸에 칠 · 카드의 j.ph 와 같음)
   function flipRead(w) {
-    const p = st.panel, sn = p?.kind === "explain" && L[p.i]?.v9?.sent; if (!sn?.length) return false;
-    const i = p.i, q = ex.q, cur = q[ex.i]; if (!ex.playing || !cur || cur.p !== 0 || !cur.lang) return false;
-    const items = v9Items(i, { line: false, k: w }); if (!items.length) return false;
-    const code = v9code(w), pend = !!ex.gapping, startOf = (c, n) => sn[n]?.[`${c}_s`];
-    const F = n => { const j = fromSent(items, n); return j < 0 ? [] : items.slice(j); };
-    let head, tail;
-    if (cur.sk !== undefined) { // 두 말 큐 — 읽은(읽는 중) 말은 그 문장에서 빼고 남은 짝만 새 순서로, 그다음 문장부터 새 말 먼저
-      const s = cur.sk; head = q.slice(0, pend ? ex.i : ex.i + 1);
-      const done = new Set(head.filter(x => x.sk === s && x.p === 0).map(x => x.lang));
-      tail = [...items.filter(x => x.sk === s && x.p === 0 && !done.has(x.lang)), ...F(s + 1)];
-    } else { // 한 덩어리(두 말 끔) — 읽던 문장 끝까지 → 다음 문장부터 새 말
-      head = q.slice(0, pend ? ex.i : ex.i + 1);
-      if (pend) { const at = startOf(code, sentAt(i, cur.lang, cur.at || 0)); tail = [{ ...items[0], ...(at > 0 ? { at } : {}) }]; } // 쉼 중(조각이 아직 안 나옴) ⇄ = 그 자리 문장부터 새 말로
-      else {
-        const s = sentAt(i, cur.lang, ex.a.currentTime), nxt = startOf(cur.lang, s + 1), at = startOf(code, s + 1);
-        if (cur.lang === code) { delete cur.until; ex.arm(cur); tail = []; } // 이미 새 말로 읽는 중(⇄ 를 두 번 = 원래대로) — 그대로 끝까지
-        else { let e = nxt; const cw = wTimes(sn, s, cur.lang), nw = wTimes(sn, s + 1, cur.lang); if (cw && nw) { const e0 = cw[cw.length - 1][1]; if (nw[0][0] > e0) e = Math.min(e0 + TWO_PAD, (e0 + nw[0][0]) / 2); } if (nxt != null && e > 0) { cur.until = e; ex.arm(cur); } tail = at != null && nxt != null ? [{ ...items[0], at }] : []; }
-      }
-    }
-    if (!pend) { if (cur.lang !== code) { cur.pair = true; cur.main = code; } else { cur.pair = false; delete cur.main; } } // 지금 나는 소리가 윗줄 말이 아니면 ↳ 칸에 칠(카드 j.ph)
-    hushSay(); v9set("snd", w); v9set("txt", w); uiLang(w === "ko"); st.karFrom = null; v9Text(p.i, w); markPlay(w);
-    ex.q = [...head, ...tail]; st.exLoop = ex.q;
+    const p = st.panel; if (p?.kind !== "explain" || !L[p.i]?.v9?.sent?.length) return false;
+    const i = p.i, cur = ex.q[ex.i]; if (!ex.playing || !cur || cur.p !== 0 || !cur.lang) return false;
+    if (!requeue(i, w, twoOn())) return false;
+    hushSay(); v9set("snd", w); v9set("txt", w); uiLang(w === "ko"); st.karFrom = null; v9Text(i, w); markPlay(w);
     try { v9Hl(); } catch {} sync(); return true;
   }
   const onUiLang = e => {
@@ -1402,22 +1401,27 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     if (!q.length) return;
     if (ex.i >= q.length) { if (!st.gap) st.exLoop = exItems(i); return; } // 끝난 뒤 ▶(처음부터)·반복이 옛 목록을 안 쓰게
     const cur = q[ex.i]; if (!cur || cur.p !== 0) return;
-    const pend = (ex.playing && ex.gapping) || (!ex.playing && ex.pgap), rest = q.slice(pend ? ex.i : ex.i + 1); // pend = 쉼 중(지금 조각 아직 안 나옴)
+    const pend = (ex.playing && ex.gapping) || (!ex.playing && ex.pgap), rest = q.slice(pend ? ex.i : ex.i + 1);
     if ((rest.length ? rest.some(x => x.sk !== undefined) : cur.sk !== undefined) === want) return; // 남은 큐가 이미 지금 상태
-    const code = v9code(sndOf(i)), start = n => L[i].v9?.sent?.[n]?.[`${code}_s`];
-    const s = cur.sk ?? sentAt(i, cur.lang, pend ? (cur.at || 0) : ex.a.currentTime);
-    let head, from;
-    if (pend) { head = q.slice(0, ex.i); from = cur.pair && !want ? s + 1 : s; }
-    else {
-      head = q.slice(0, ex.i + 1); from = s + 1;
-      if (want && cur.sk === undefined) { let e = start(s + 1); const sn0 = L[i].v9?.sent || [], cw = wTimes(sn0, s, cur.lang || code), nw = wTimes(sn0, s + 1, cur.lang || code); if (cw && nw) { const e0 = cw[cw.length - 1][1]; if (nw[0][0] > e0) e = Math.min(e0 + TWO_PAD, (e0 + nw[0][0]) / 2); } if (e > 0) { cur.until = e; if (ex.playing) ex.arm(cur); } from = s; } // 한 말(한 덩어리) 소리 중 켬 = 지금 문장 끝에서 끊고, 그 문장의 ↳(짝 말)부터 두 말(대표님 11-20 14:08 · 1120.18 — 누른 순간 읽던 그 문장부터)
-    }
-    const items = v9Items(i, { line: false, k: sndOf(i) });
-    let j = fromSent(items, from);
-    if (!pend && want && cur.sk === undefined && from === s) { const jp = items.findIndex(x => x.pair && x.sk === s); if (jp >= 0) j = jp; else if (items.some(x => x.pair)) j = -1; else { from = s + 1; j = fromSent(items, from); } } // 읽던 문장의 ↳ 짝 조각부터 이어 붙임
-    let tail = j < 0 ? [] : items.slice(j);
-    if (tail[0] && tail[0].sk === undefined && from > 0) { const at = start(from); tail = at > 0 ? [{ ...tail[0], at }, ...tail.slice(1)] : []; } // 한 말 = 처음부터 말고 그 문장 시작 시각부터(D-113)
-    ex.q = [...head, ...tail]; st.exLoop = ex.q;
+    requeue(i, sndOf(i), want);
+  }
+  // 큐 다시 짜기(마디 단위 · 두 말 켜기/끄기와 ⇄ 가 같이 씀) — 지금 소리는 그대로 두고, 지금 읽던 마디의 안 읽은 쪽(두 말이면)과 그 뒤 마디들을 「k 말 먼저 · wantTwo 면 번갈아 / 아니면 한 덩어리」로 새로
+  function requeue(i, k, wantTwo) {
+    const q = ex.q, cur = q[ex.i], sn = L[i].v9?.sent; if (!cur || cur.p !== 0 || !cur.lang || !sn?.length) return false;
+    const pend = (ex.playing && ex.gapping) || (!ex.playing && ex.pgap), code = v9code(k), lang0 = cur.lang, units = unitsOf(i), head = q.slice(0, pend ? ex.i : ex.i + 1);
+    let s, c;
+    if (cur.sk !== undefined) { s = cur.sk; c = cur.ci || 0; }
+    else { const tm = pend ? (cur.at || 0) + TWO_PAD + 0.05 : ex.a.currentTime; s = sentAt(i, lang0, tm); c = 0; const pl = clausePlan(i, s), wt = wTimes(sn, s, lang0); if (pl && wt) pl[lang0].forEach((g, j) => { if (wt[g[0]][0] <= tm + 0.1) c = j; }); }
+    const u0 = units.findIndex(u => u.s === s && u.c === c); if (u0 < 0) return false;
+    const done = new Set(head.filter(x => x.sk === s && (x.ci || 0) === c && x.p === 0).map(x => x.lang)); if (!pend && cur.sk === undefined) done.add(lang0);
+    const nextUnits = units.slice(u0 + 1); let tail = [], keep = false, until = null;
+    if (wantTwo) { const f = unitItems(i, k, s, c); if (!f) return false; tail = f.filter(x => !done.has(x.lang)); for (const u of nextUnits) { const it = unitItems(i, k, u.s, u.c); if (!it) return false; tail.push(...it); } }
+    else if (!pend && cur.sk === undefined && lang0 === code) keep = true; // 한 말로 이미 새 말을 읽는 중(⇄ 를 두 번 = 원래대로) — 끝까지 그대로
+    else { const nu = nextUnits[0], src = v9src(i, k, "ex"); if (nu && src) { const sg = segsOf(i, code, nu.s)?.[nu.c], at = nu.c === 0 ? sn[nu.s]?.[`${code}_s`] ?? sg?.at : sg?.at; tail = [{ src, p: 0, lang: code, ...(at > 0 ? { at } : {}) }]; } }
+    if (!pend && cur.sk === undefined && !keep) { until = segsOf(i, lang0, s)?.[c]?.until; if (!(until > 0)) return false; }
+    // 여기부터 바꿈(앞에서 못 하면 아무것도 안 바꾸고 false)
+    if (!pend) { if (keep) { delete cur.until; if (ex.playing) ex.arm(cur); } else if (until != null) { cur.until = until; if (ex.playing) ex.arm(cur); } if (cur.lang !== code) { cur.pair = true; cur.main = code; } else { cur.pair = false; delete cur.main; } }
+    ex.q = [...head, ...tail]; st.exLoop = ex.q; return true;
   }
   app.querySelector("[data-act=two]").onclick = () => { if (st.panel?.kind !== "explain") return; setTwo(!twoOn()); syncTwoQ(); }; // 두 말 켬/끔 — 상태·단추만 바꾸고 큐는 남은 문장부터(다시 틀지 않음 · 대표님 11-19 16:40)
   app.querySelector("[data-act=exauto]").onclick = () => { if (st.panel?.kind !== "explain") return;
