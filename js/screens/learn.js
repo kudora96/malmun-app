@@ -512,7 +512,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   function segsOf(i, code, q) { // 그 말 문장 q 의 마디 구간들 [{at, until}] (마디가 없으면 문장 통째 하나)
     const sn = L[i].v9.sent, whole = sentSeg(sn, q, code); if (!whole) return null; const pl = clausePlan(i, q); if (!pl) return [whole];
     const g = pl[code], w = wTimes(sn, q, code), n = g.length, endOf = x => w[x[x.length - 1]][1] || w[x[x.length - 1]][0] + 0.1;
-    return g.map((gg, c) => { const e0 = endOf(gg), st0 = w[gg[0]][0], nxt = g[c + 1] ? w[g[c + 1][0]][0] : null; return { at: c === 0 ? whole.at : Math.max(endOf(g[c - 1]), st0 - TWO_PAD), until: c === n - 1 ? whole.until : Math.max(e0, Math.min(e0 + TWO_PAD, nxt - 0.11)) }; });
+    return g.map((gg, c) => { const e0 = endOf(gg), st0 = w[gg[0]][0], nxt = g[c + 1] ? w[g[c + 1][0]][0] : null; return { at: c === 0 ? whole.at : Math.max(endOf(g[c - 1]), st0 - TWO_PAD), until: c === n - 1 ? whole.until : Math.max(e0, Math.min(e0 + TWO_PAD, nxt - 0.11)), ...(c < n - 1 ? { nx: nxt } : {}) }; });
   }
   const unitsOf = i => { const out = []; (L[i].v9?.sent || []).forEach((_, q) => { const pl = clausePlan(i, q), n = pl ? pl.ko.length : 1; for (let c = 0; c < n; c++) out.push({ s: q, c }); }); return out; };
   function unitItems(i, k, s, c) { // 한 마디 = [고른 말 조각, 다른 말 짝 조각]
@@ -563,7 +563,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     if (st.panel?.kind === "explain" && L[st.panel.i]?.v9 && ex.playing) {
       const it = ex.q[ex.i];
       if (it && !ex.gapping) { // 조각 사이 쉼(0.4초)엔 소리가 아직 앞 조각이라 새 조각 칠을 하면 엉뚱한 낱말이 깜빡 켜졌다 꺼짐 → 앞 상태 그대로 둠
-        const tcl = it.until > 0 ? Math.min(ex.a.currentTime, it.until - 0.06) : ex.a.currentTime; // 조각 끝(until)을 넘겨 재생된 짧은 순간엔 칠을 끝 직전 시각에 붙박음 — 다음 문장 첫 낱말이 켜졌다 새 조각이 앞 시각으로 되감겨 꺼졌다 다시 켜지던 두 번 깜빡(두 말 켤 때 · 대표님 11-20 13:24 · D-125)
+        let tcl = it.until > 0 ? Math.min(ex.a.currentTime, it.until - 0.06) : ex.a.currentTime; if (it.nx != null) tcl = Math.min(tcl, it.nx - KAR_LEAD - 0.02); /* 마디 끝 구간(until)이 다음 마디 첫 낱말 시작에 닿는 때도 그 낱말을 미리 칠하지 않음(마디 통역 · 쉼이 0.11초보다 짧은 마디) */ // 조각 끝(until)을 넘겨 재생된 짧은 순간엔 칠을 끝 직전 시각에 붙박음 — 다음 문장 첫 낱말이 켜졌다 새 조각이 앞 시각으로 되감겨 꺼졌다 다시 켜지던 두 번 깜빡(두 말 켤 때 · 대표님 11-20 13:24 · D-125)
         const k = it.p === 0 ? (it.sk ?? sentAt(st.panel.i, it.lang, tcl)) : -1;
         panel.querySelectorAll(".v9body .sn").forEach(el => el.classList.toggle("cur", +el.dataset.s === k));
         // 문장 안 노래방 칠(본부 10-08) — 그 문장 시작 ~ 다음 문장 시작 사이를 낱말 글자 수 비례로
@@ -596,7 +596,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   function pairPaint(vb, i, it, k) {
     const pl = vb.querySelector(".pairln"); if (!pl) return; const sn = L[i].v9?.sent || [], wt = wTimes(sn, k, it.lang), ws = String(sn[k]?.[it.lang] || "").match(/"[^"]*"\S*|\S+/g) || [];
     if (!wt || wt.length !== ws.length) { return; }
-    const tm = ex.a.currentTime + KAR_LEAD; let j = 0; wt.forEach((w, q) => { if (tm >= w[0]) j = q; });
+    const tm = Math.min(ex.a.currentTime, it.nx != null ? it.nx - KAR_LEAD - 0.02 : Infinity) + KAR_LEAD; let j = 0; wt.forEach((w, q) => { if (tm >= w[0]) j = q; });
     pl.querySelectorAll(".pw").forEach(e => { const on = +e.dataset.w === j; e.classList.toggle("pk", on); if (e.classList.contains("pq")) qwMark(e, on ? (tm - wt[j][0]) / Math.max(0.1, (wt[j][1] || wt[j][0] + 0.1) - wt[j][0]) : null); });
     { const cm0 = commaMap(ws); markClause(pl, cm0.cl[j] ?? 0, cm0.n, null, true); clipPair(pl); } // 엷은 칠 없음 · 읽는 낱말 하나만 진한 노랑 · ↳ 칸은 지금 마디 한 줄만(지웠다 다시 켜지 않음 · 대표님 11-19 16:52)
   }
