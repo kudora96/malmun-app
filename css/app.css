@@ -1744,6 +1744,7 @@ html:has(.scr.learn),html:has(.scr.learn) body{overflow-anchor:none} /* 배우�
 .vk-listdim{align-items:center}
 .vk-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;font-size:17px}
 .vk-ul{list-style:none;margin:0;padding:2px 2px 6px;display:flex;flex-direction:column;gap:6px}
+.vk-ul>li.vk-li,.vk-ul>li.vk-sub{flex:none} /* 단어장 줄은 줄어들지 않음 — 세로 flex 목록에서 줄(overflow:hidden)이 칸에 맞춰 48px로 눌려 세 글(한국어·발음·뜻)이 잘리고 포개 보이던 것(대표님 11-21 · 줄 높이 = 글 높이) */
 .vk-sheet{position:relative}.vk-sheet>.vk-xw{position:sticky;top:0;height:0;z-index:5}.vk-sheet .vk-head{padding-right:36px;font-size:18px}
 /* 영상 칸 자리 안 단어장(대표님 11-18 13:07) — 읽기 창처럼 영상 칸을 덮음 · 다른 칸 크기·배치 불변 · 제목·정렬은 위에 고정, 줄만 넘김 */
 .learn .stick .vstage.vk-on>.vmain,.learn .stick .vstage.vk-on>.panel{display:none!important}
