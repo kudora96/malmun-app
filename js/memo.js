@@ -27,15 +27,30 @@ export function firstSentence(note, l) {
 
 // 마디 통역(대표님 11-21 10:30 「실시간 통역처럼 짧게 바로바로 1대1」 · 단어 카드 mkPlan 과 같은 규칙) — 뜻풀이 첫 문장을 쉼표·마침표 마디(따옴표 안 쉼표는 안 끊음)로 나눠 두 말의 마디 수가 같으면 마디별 구간표를 만듦(새 소리 0 · 낱말 시각 w) · 다르면(또는 낱말 시각 없음·마디 1개) null = 문장 통째 번갈아
 const PAD = 0.15, LEAD = 0.1, plans = new WeakMap();
-export function planFor(note) {
-  if (!note || typeof note !== "object") return null; if (plans.has(note)) return plans.get(note);
+// 통역 마디표(대표님 11-21 11:01·11:07 「동시 통역하듯 뜻 덩어리로」) — data/interp/<편>.ne.json 의 "M"+조각id 열쇠 = [{ko:[시작,끝), ne:[시작,끝)}…] 낱말 번호 구간 · 두 말 켬 + 열쇠 있고 구간이 글 낱말을 이어서 다 덮으면 표대로 · 덩어리 1개면 문장 통째 · 열쇠 없음·안 맞음·표 못 받음 = 쉼표 마디(옛 방식) · 못 받으면 조용히 옛 방식
+let table = null, tabVer = 0;
+export function loadInterp(ep = "L01-00-01", lang = "ne") {
+  try { const v = document.documentElement.dataset.v || ""; fetch(new URL(`data/interp/${ep}.${lang}.json?v=${v}`, document.baseURI)).then(r => (r.ok ? r.json() : null)).then(j => { if (j && typeof j === "object") { table = j; tabVer++; } }).catch(() => {}); } catch {}
+}
+export const setInterpTable = t => { table = t && typeof t === "object" ? t : null; tabVer++; }; // 검사용
+const tableGroups = (key, f) => { // 표 → 말마다 [[낱말번호…]…] · 안 맞으면 null · 덩어리 1개면 "one"
+  const ent = key && table && table["M" + key]; if (!Array.isArray(ent) || !ent.length) return null; const g = { ko: [], ne: [] };
+  for (const l of ["ko", "ne"]) { const n = f[l].tk.length; let pe = 0; for (const c of ent) { const r = c && c[l]; if (!Array.isArray(r) || r.length !== 2 || r[0] !== pe || !(r[1] > r[0])) return null; const a = []; for (let i = r[0]; i < r[1]; i++) a.push(i); g[l].push(a); pe = r[1]; } if (pe !== n) return null; if (f[l].w.length < n) return null; }
+  return ent.length === 1 ? "one" : g;
+};
+export function planFor(note, key = null) {
+  if (!note || typeof note !== "object") return null; const c0 = plans.get(note); if (c0 && c0.tv === tabVer && c0.key === key) return c0.out;
   let out = null; try {
     const f = { ko: firstSentence(note, "ko"), ne: firstSentence(note, "ne") }, seg = {};
-    if (f.ko.w && f.ne.w) { for (const l of ["ko", "ne"]) { const { tk, w } = f[l], cm = commaMap(tk), gs = []; tk.forEach((_, i) => { (gs[cm.cl[i]] ||= []).push(i); }); const g2 = gs.filter(Boolean); if (!g2.length) { seg[l] = null; break; }
-      let pe = 0; seg[l] = g2.map((g, ci) => { const st = w[g[0]][0], lw = w[g[g.length - 1]], e0 = lw[1] || lw[0] + 0.1, ns = g2[ci + 1] ? w[g2[ci + 1][0]][0] : null, e = e0 + PAD, o = { st, at: ci ? Math.max(pe, st - PAD) : f[l].s, until: ns != null ? Math.max(e0, Math.min(e, ns - LEAD - 0.01)) : f[l].e }; pe = e0; return o; }); }
-      if (seg.ko && seg.ne && seg.ko.length === seg.ne.length && seg.ko.length >= 2) out = { n: seg.ko.length, seg, f }; }
+    if (f.ko.w && f.ne.w) {
+      let G = tableGroups(key, f), src = "table"; if (G === "one") { plans.set(note, { tv: tabVer, key, out: null }); return null; }
+      if (!G) { src = "comma"; G = {}; for (const l of ["ko", "ne"]) { const { tk } = f[l], cm = commaMap(tk), gs = []; tk.forEach((_, i) => { (gs[cm.cl[i]] ||= []).push(i); }); G[l] = gs.filter(Boolean); } }
+      for (const l of ["ko", "ne"]) { const { w } = f[l], g2 = G[l]; if (!g2.length) { seg[l] = null; break; }
+        let pe = 0; seg[l] = g2.map((g, ci) => { const st = w[g[0]][0], lw = w[g[g.length - 1]], e0 = lw[1] || lw[0] + 0.1, ns = g2[ci + 1] ? w[g2[ci + 1][0]][0] : null, e = e0 + PAD, o = { st, at: ci ? Math.max(pe, st - PAD) : f[l].s, until: ns != null ? Math.max(e0, Math.min(e, ns - LEAD - 0.01)) : f[l].e }; pe = e0; return o; }); }
+      if (seg.ko && seg.ne && seg.ko.length === seg.ne.length && seg.ko.length >= 2) out = { n: seg.ko.length, seg, f, src };
+    }
   } catch { out = null; }
-  plans.set(note, out); return out;
+  plans.set(note, { tv: tabVer, key, out }); return out;
 }
 
 // api = { seq(): 줄 목록 · ko(): 한국어 먼저? · two(): 두 말? · show(i): 그 줄이 보이게(금색 테두리·저절로 스크롤) · mean(it): {url(l), note} | null · tick(i, l, t): 읽는 낱말 칠(t<0 = 지움) · host() · onState() }
@@ -43,6 +58,7 @@ export function createMemo(api) {
   // 대표님 11-21 10:18·10:21 「읽는 중 ⇄·두 말·⏸▶ 가 소리를 끊지 않는다」 — 단어 카드(wordnote.js)와 같은 원리:
   //  소리 요소는 그대로 두고, 다음에 무엇을 읽을지는 말(부분)이 끝나는 순간마다 지금 상태(⇄ 순서·두 말·×N)로 새로 정한다. 같은 줄에서 이미 읽은 말은 done 에 적어 다시 안 읽는다.
   //  ⏸ = 지금 소리·쉼 타이머를 얼려 두고(cur.freeze) ▶ = 그 자리에서 이어 감(cur.thaw). 소리를 끊고 처음부터 다시 틀지 않는다.
+  loadInterp(); // 표는 뒤에서 받음 — 외우기 시작을 안 늦춤(받기 전·못 받으면 옛 방식)
   let tok = 0, idx = 0, running = false, alive = false, started = false, cur = null, gateRes = null, self = 0, repN = repMem;
   const st = () => ({ on: started, running, idx, rep: repN, alive });
   const log = (window.__memo = { log: [], clips: [], skip: false, get state() { return st(); } });
@@ -86,7 +102,7 @@ export function createMemo(api) {
     const my = ++tok; cancelCur(); releaseGate(); idx = i; running = true; alive = true; started = true; hideAutoEnd(); api.onState?.();
     while (my === tok) {
       const sq = api.seq(); if (idx >= sq.length) { end(my); return; }
-      const it = sq[idx]; api.show(idx); api.onState?.(); const plan = planFor(api.mean?.(it)?.note);
+      const it = sq[idx]; api.show(idx); api.onState?.(); const plan = planFor(api.mean?.(it)?.note, it.kind === "piece" ? it.pid : null);
       for (let r = 0; r < repN && my === tok; r++) {
         const done = new Set(); let slept = false, ci = -1, played = false;
         for (;;) { // 말이 하나 끝날 때마다 지금 상태(⇄ 순서·두 말)로 다음 말을 정함 · 마디 통역 = 첫 말 마디 → 다른 말 같은 마디 → 다음 마디(새 순서의 첫 말부터)… · 마디 수가 다르면 문장 통째 번갈아
@@ -128,7 +144,7 @@ export function createMemo(api) {
     guard(f) { self++; try { return f(); } finally { self--; } }, // 내 소리를 시작하는 순간의 claim 은 나를 멈추지 않음
   };
   log.jump = eng.jump; log.halt = eng.halt; // 검사용
-  log.planAt = i => { const it = api.seq()[i], pl = it && planFor(api.mean?.(it)?.note); return pl ? { n: pl.n, seg: JSON.parse(JSON.stringify(pl.seg)) } : null; };
+  log.planAt = i => { const it = api.seq()[i], pl = it && planFor(api.mean?.(it)?.note, it.kind === "piece" ? it.pid : null); return pl ? { n: pl.n, src: pl.src, seg: JSON.parse(JSON.stringify(pl.seg)) } : null; };
   return eng;
 }
 export const memoBtns = (m, ko, two) => { // 외우기 전용 보기 갈색 막대: ‹ 돌아가기 · ▶/⏸ · 두 말 · ×N (⛶ 는 공용 막대 오른쪽 끝) · 눌림 = 읽는 중(금색) · 두 말 = 카드·설명 막대의 「두 말」과 같은 단추·같은 저장값
