@@ -16,7 +16,7 @@ import { filterItems, makeFindBox, indexLetters, makeIndexBar, groupByEp, findTx
 import { paths } from "./paths.js?v=1121.3";
 import { catalog, episode } from "./data.js?v=1121.3";
 import { VERSION } from "./version.js?v=1121.3";
-import { createMemo, memoBtns, TXM, firstSentence } from "./memo.js?v=1121.3"; // 외우기(대표님 11-20 15:10)
+import { createMemo, memoBtns, memoSync, TXM, firstSentence } from "./memo.js?v=1121.3"; // 외우기(대표님 11-20 15:10)
 
 const KEY = "malmun.vocab.ne";
 export const vocabOn = () => lang === "ne";
@@ -427,6 +427,7 @@ export function openVocabList() {
     show: mshow,
     tick: (i, l, t) => { const li = mview?.querySelectorAll("li")[i]; if (!li) return; const sp = [...li.querySelectorAll(`.vm-sl[data-l="${l}"] .vm-wd`)]; if (!sp.length) return; const it = mseq[i], w = it && firstSentence(meanOf(it)?.note, l).w; let j = -1; if (w && t >= 0) { w.forEach((x, n) => { if (x[0] <= t + 0.03) j = n; }); if (j >= 0 && t > w[j][1] + 0.3) j = -1; if (j >= sp.length) j = sp.length - 1; } li.querySelectorAll(".vm-say").forEach(e => e.classList.remove("vm-say")); if (j >= 0) sp[j].classList.add("vm-say"); }, // 읽는 문장의 읽는 낱말 하나만 진한 노랑
     mean: it => meanOf(it),
+    meta: it => { const n = meanOf(it)?.note, kt = firstSentence(n, "ko").tk, nt = firstSentence(n, "ne").tk; return { title: it.w || kt.slice(0, 3).join(" "), artist: (nt.length ? nt : kt).join(" ") }; }, // 잠금 화면: 한국어 낱말 · 뜻(학습자 말 첫 문장)
     onState: () => drawMemo(),
   });
   // 줄 = 뜻풀이 첫 문장(들)만 — 한 말이면 앞에 둔 말 문장 · 「두 말」 켜면 아래 ↳ 로 다른 말 문장 · 낱말마다 한 칸(읽는 낱말 칠)
@@ -438,12 +439,20 @@ export function openVocabList() {
     if (listEl !== el) return; const host = stage ? document.querySelector(".learn .seek") : el.querySelector(".vk-sheet") || el; if (!host) return;
     if (!memoOn) { mbar?.remove(); mbar = null; host.classList.remove("vm-has", "vm-mv"); host.style.removeProperty("--vmw"); return; }
     if (!mbar || mbar.parentNode !== host) { mbar?.remove(); mbar = document.createElement("div"); mbar.className = "vm-bar" + (stage ? "" : " vm-foot"); mbar.setAttribute("role", "toolbar"); host.append(mbar); }
-    host.classList.add("vm-mv"); mbar.innerHTML = memoBtns(memo, uiKoOn(), twoOn());
+    host.classList.add("vm-mv"); const ko = uiKoOn(), N = mseq.length;
+    if (!mbar.firstChild) mbar.innerHTML = memoBtns(memo, ko, twoOn(), N); else memoSync(mbar, memo, ko, twoOn(), N); // 한 번만 만들고 그 뒤엔 글·눌림만 바꿈(「n / N」 칸을 다시 그리지 않음)
+    fitMBar();
+  };
+  const fitMBar = () => { // 막대 단추·글끼리 겹침·넘침 0 — 남는 자리를 재서 단계로 줄임: m1 돌아가기 글 숨김 → m2 간격·여백 줄임 → m3 글자 11px·전체 반복 짧은 글 → m4 ‹ 도 숨김
+    if (!mbar || !mbar.isConnected) return; const bar = mbar, par = bar.parentNode, fs = par?.querySelector(".vk-fs, .vfs"), pr = par?.getBoundingClientRect();
+    const lim = () => { let r = Math.min(innerWidth, pr ? pr.right : innerWidth); const f = fs && fs.getBoundingClientRect(); if (f && f.width && f.left > bar.getBoundingClientRect().left) r = Math.min(r, f.left - 4); return r; };
+    const bad = () => { const kids = [...bar.children].filter(e => e.getBoundingClientRect().width && getComputedStyle(e).display !== "none").map(e => e.getBoundingClientRect()).sort((a, b) => a.left - b.left), L = lim(); return kids.some((x, i) => x.right > L + .5 || (i && x.left < kids[i - 1].right - .5)); };
+    bar.classList.remove("m1", "m2", "m3", "m4"); for (const c of ["m1", "m2", "m3", "m4"]) { if (!bad()) break; bar.classList.add(c); }
   };
   const itKey = x => (x.kind === "piece" ? "p:" + x.pid : "w:" + clean(x.w));
-  const enterMemo = (auto = true, keep = null) => { memoOn = true; mseq = mkSeq(); el.classList.add("vk-mv"); mview = el.querySelector(".vm-view"); if (!mview) return; mview.hidden = false; drawMemoRows(!!keep); el.querySelectorAll(".vk-tab").forEach(b => b.setAttribute("aria-selected", String(b.dataset.t === "memo"))); drawMemo(); mview.scrollTop = keep ? keep.sc : 0; if (keep) { const ni = mseq.findIndex(x => itKey(x) === keep.k); if (ni < 0) memo.reset(); else { memo.remap(ni); mshow(ni); memo.repaint(); } } else if (auto && mseq.length) memo.jump(0); }; // keep = ⇄·정렬로 다시 그릴 때 읽던 줄(같은 낱말)과 스크롤을 이어 받음 — 소리는 안 끊고 줄 글만 새 말 먼저로
+  const enterMemo = (auto = true, keep = null) => { if (!keep) memo.fresh(); memoOn = true; mseq = mkSeq(); el.classList.add("vk-mv"); mview = el.querySelector(".vm-view"); if (!mview) return; mview.hidden = false; drawMemoRows(!!keep); el.querySelectorAll(".vk-tab").forEach(b => b.setAttribute("aria-selected", String(b.dataset.t === "memo"))); drawMemo(); mview.scrollTop = keep ? keep.sc : 0; if (keep) { const ni = mseq.findIndex(x => itKey(x) === keep.k); if (ni < 0) memo.reset(); else { memo.remap(ni); mshow(ni); memo.repaint(); } } else if (auto && mseq.length) memo.jump(0); }; // keep = ⇄·정렬로 다시 그릴 때 읽던 줄(같은 낱말)과 스크롤을 이어 받음 — 소리는 안 끊고 줄 글만 새 말 먼저로
   const leaveMemo = () => { memo.reset(); memoOn = false; el.classList.remove("vk-mv"); if (mview) { mview.hidden = true; mview.innerHTML = ""; } el.querySelectorAll(".vk-tab").forEach(b => b.setAttribute("aria-selected", String(b.dataset.t === tab))); drawMemo(); };
-  const memoClick = e => { const b = e.target.closest?.("[data-vm]"); if (!b || !mbar?.contains(b)) return; e.preventDefault(); e.stopPropagation(); if (b.dataset.vm === "rep") memo.cycle(); else if (b.dataset.vm === "two") { setTwo(!twoOn()); drawMemoRows(true); const s0 = memo.st(); if (s0.on) { mshow(s0.idx); memo.repaint(); } drawMemo(); } else if (b.dataset.vm === "back") leaveMemo(); else memo.toggle(); };
+  const memoClick = e => { const b = e.target.closest?.("[data-vm]"); if (!b || !mbar?.contains(b)) return; e.preventDefault(); e.stopPropagation(); if (b.dataset.vm === "rep") memo.cycle(); else if (b.dataset.vm === "all") memo.setAll(!memo.all()); else if (b.dataset.vm === "two") { setTwo(!twoOn()); drawMemoRows(true); const s0 = memo.st(); if (s0.on) { mshow(s0.idx); memo.repaint(); } drawMemo(); } else if (b.dataset.vm === "back") leaveMemo(); else memo.toggle(); };
   listOff.push(() => { memo.stop(); mbar?.remove(); mbar?.parentNode?.classList.remove("vm-has", "vm-mv"); mbar = null; document.querySelector(".learn .seek")?.classList.remove("vm-has", "vm-mv"); });
   on0("click", memoClick, true);
   const draw = async () => {
