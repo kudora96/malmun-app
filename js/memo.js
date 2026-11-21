@@ -71,7 +71,7 @@ export function createMemo(api) {
   const ms = { handlers: {}, meta: () => (metaNow ? { ...metaNow } : null) }; let metaNow = null; log.ms = ms;
   Object.defineProperty(log, "keep", { get: () => keepEl, configurable: true });
   const startKeep = () => { try { if (keepEl && !keepEl.paused) return; // autoplay 로 시작(play() 를 직접 안 부름 · 안 되는 기계는 0.4초 뒤 play() 로 한 번 더) — 막히면 조용히 무시
-      const k = new Audio(); k.loop = true; k.autoplay = true; k.src = URL.createObjectURL(silentWav()); k.addEventListener("timeupdate", wake); k.addEventListener("ended", wake); keepEl = k;
+      const k = new Audio(); if (/[?&]mute=1(&|$)/.test(location.search)) k.muted = true; k.loop = true; k.autoplay = true; k.src = URL.createObjectURL(silentWav()); k.addEventListener("timeupdate", wake); k.addEventListener("ended", wake); keepEl = k;
       setTimeout(() => { if (k === keepEl && k.paused) { try { k.play()?.catch?.(() => {}); } catch {} } }, 400); } catch {} };
   const stopKeep = () => { const k = keepEl; keepEl = null; try { if (k) { k.pause(); const u = k.src; k.removeAttribute("src"); k.load(); if (u.startsWith("blob:")) URL.revokeObjectURL(u); } } catch {} };
   const msState = v => { const m = MSN(); if (m) { try { m.playbackState = v; } catch {} } };
@@ -95,7 +95,7 @@ export function createMemo(api) {
   function resume() { if (running || !alive) return; running = true; startKeep(); cur?.thaw(); releaseGate(); msState("playing"); api.onState?.(); }
   function clip(src, s, endFn, emax, tick) { // 이미 있는 소리 파일의 한 구간 · endFn(초) = 지금 끝낼 시각(두 말 켜고 끔에 따라 그때그때 정함) · tick(초) = 읽는 낱말 따라가기(끝나면 tick(-1)) · freeze/thaw = ⏸/▶ (같은 소리 요소 · 같은 자리)
     return new Promise(res => {
-      let done = false, frozen = false, iv = 0, tm = 0; const a = new Audio(src);
+      let done = false, frozen = false, iv = 0, tm = 0; const a = new Audio(src); if (/[?&]mute=1(&|$)/.test(location.search)) a.muted = true;
       const clear = () => { clearInterval(iv); clearTimeout(tm); iv = tm = 0; };
       const chk = () => { if (done || frozen || !iv) return; const e = endFn(a.currentTime); if (e > s && a.currentTime >= e) return fin(); if (tick) tick(a.currentTime); }; // 40ms 타이머가 늦어져도 timeupdate·화면 숨김 때 같은 끝 검사
       const fin = () => { if (done) return; done = true; clear(); wakers.delete(chk); a.removeEventListener("timeupdate", chk); if (tick) tick(-1); if (cur === o) cur = null; try { a.onended = a.onerror = null; a.pause(); } catch {} res(); };
