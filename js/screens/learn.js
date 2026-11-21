@@ -501,9 +501,18 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   const wordsOf = t => String(t || "").match(/"[^"]*"\S*|\S+/g) || [], planCache = new Map();
   const sentMapL = texts => { let cid = 0, q = false; const cl = []; texts.forEach(t => { cl.push(cid); if ((String(t).match(/"/g) || []).length % 2) q = !q; if (!q && /[.!?।॥][」"')”’』»]*$/.test(t)) cid++; }); return { cl }; }; // 문장 끝(. ? ! । ॥ · 따옴표 안은 안 끊음) — wordnote.js sentMap 과 같음
   const grpOf = cl => { const g = []; cl.forEach((c, ix) => { (g[c] ||= []).push(ix); }); return g.filter(Boolean); };
+  // 통역 마디표(대표님 11-21 11:01·11:07 · 「동시 통역하듯」 뜻 덩어리) — data/interp/<편>.<학습자말>.json: 열쇠 "E<줄>.<문장>" → [{ko:[시작,끝), <말>:[시작,끝)}…] · 덩어리 번호 = 조각 ci · 못 받으면(404·깨짐) 조용히 옛 3단계 · 읽기 시작을 늦추지 않으려 받는 즉시 쓰고 마디 계획 캐시를 비움
+  let itab = null; if (v9L) fetch("data/interp/" + ep + "." + v9L + ".json").then(r => (r.ok ? r.json() : null)).then(j => { if (j && typeof j === "object" && !Array.isArray(j)) { itab = j; planCache.clear(); } }).catch(() => {});
+  function tablePlan(i, q, sn, codes) { // 표가 있고 두 말 낱말 수·시각이 맞으면 { ko:[[낱말…]…], <말>:… } · 덩어리 1개면 null(통째) · 표가 맞지 않으면 undefined(옛 3단계)
+    const tb = itab?.[`E${i + 1}.${q}`]; if (!Array.isArray(tb) || !tb.length) return undefined;
+    const ok = codes.every(c => { const w = wTimes(sn, q, c), t = wordsOf(sn[q]?.[c]); if (!w || w.length !== t.length) return false; let pos = 0; return tb.every(ch => { const r = ch?.[c]; if (!Array.isArray(r) || r[0] !== pos || !(r[1] > r[0])) return false; pos = r[1]; return true; }) && pos === t.length; });
+    if (!ok) return undefined; if (tb.length < 2) return null;
+    const out = {}; codes.forEach(c => { out[c] = tb.map(ch => Array.from({ length: ch[c][1] - ch[c][0] }, (_, k) => ch[c][0] + k)); }); return out;
+  }
   function clausePlan(i, q) { // 한 문장의 마디 묶음 { ko:[낱말번호들…], <학습자말>:[…] } — 못 맞추면 null(문장 통째)
     const key = i + ":" + q + ":" + v9L; if (planCache.has(key)) return planCache.get(key);
     let res = null; try { const sn = L[i].v9.sent, codes = ["ko", v9L], ws = {};
+      const tp = v9L && sn[q] ? tablePlan(i, q, sn, codes) : undefined; if (tp !== undefined) { planCache.set(key, tp); return tp; }
       if (v9L && sn[q] && codes.every(c => { const w = wTimes(sn, q, c), t = wordsOf(sn[q][c]); ws[c] = t; return w && w.length === t.length; }))
         for (const mp of [commaMap, sentMapL]) { const g = codes.map(c => grpOf(mp(ws[c]).cl)); if (g[0].length > 1 && g[0].length === g[1].length) { res = { ko: g[0], [v9L]: g[1] }; break; } } } catch {}
     planCache.set(key, res); return res;
@@ -512,7 +521,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   function segsOf(i, code, q) { // 그 말 문장 q 의 마디 구간들 [{at, until}] (마디가 없으면 문장 통째 하나)
     const sn = L[i].v9.sent, whole = sentSeg(sn, q, code); if (!whole) return null; const pl = clausePlan(i, q); if (!pl) return [whole];
     const g = pl[code], w = wTimes(sn, q, code), n = g.length, endOf = x => w[x[x.length - 1]][1] || w[x[x.length - 1]][0] + 0.1;
-    return g.map((gg, c) => { const e0 = endOf(gg), st0 = w[gg[0]][0], nxt = g[c + 1] ? w[g[c + 1][0]][0] : null; return { at: c === 0 ? whole.at : Math.max(endOf(g[c - 1]), st0 - TWO_PAD), until: c === n - 1 ? whole.until : Math.max(e0, Math.min(e0 + TWO_PAD, nxt - 0.11)), ...(c < n - 1 ? { nx: nxt } : {}) }; });
+    return g.map((gg, c) => { const e0 = endOf(gg), st0 = w[gg[0]][0], nxt = g[c + 1] ? w[g[c + 1][0]][0] : null; return { at: c === 0 ? whole.at : Math.max(endOf(g[c - 1]), st0 - TWO_PAD), until: c === n - 1 ? whole.until : Math.max(e0, Math.min(e0 + TWO_PAD, nxt - 0.11)), cw: [gg[0], gg[gg.length - 1] + 1], ...(c < n - 1 ? { nx: nxt } : {}) }; });
   }
   const unitsOf = i => { const out = []; (L[i].v9?.sent || []).forEach((_, q) => { const pl = clausePlan(i, q), n = pl ? pl.ko.length : 1; for (let c = 0; c < n; c++) out.push({ s: q, c }); }); return out; };
   function unitItems(i, k, s, c) { // 한 마디 = [고른 말 조각, 다른 말 짝 조각]
@@ -569,7 +578,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
         // 문장 안 노래방 칠(본부 10-08) — 그 문장 시작 ~ 다음 문장 시작 사이를 낱말 글자 수 비례로
         if (it.pair) panel.querySelectorAll(".v9body .sn .kw.kar").forEach(e => e.classList.remove("kar")); else { const sn = L[st.panel.i].v9?.sent || [], tm = tcl, s0 = sn[k]?.[`${it.lang}_s`] ?? 0, s1 = sn[k + 1]?.[`${it.lang}_s`] ?? (ex.a.duration || s0 + 1), wt = wTimes(sn, k, it.lang), sp = wt ? wSpan(sn, k, it.lang) : speechSpans(it.src, sn.map(x => x[`${it.lang}_s`]), ex.a.duration)?.[k], a0 = sp ? sp[0] : s0, a1 = sp ? sp[1] : s1, fr = (tm + KAR_LEAD - a0) / Math.max(0.1, a1 - a0); // 대표님 11-16: 문장 끝 무음을 뺀 실제 말소리 구간에만 글자 수 비율 · 100ms 먼저 켬(소리를 못 받으면 옛 구간)
           panel.querySelectorAll(".v9body .sn").forEach(el => { const ws = [...el.querySelectorAll(".kw")], on = +el.dataset.s === k, tot = ws.reduce((a, w) => a + w.textContent.length, 0) || 1; let c = 0;
-            if (st.karFrom && st.karFrom.s !== k) st.karFrom = null; const gm = clauseMap(ws.map(w => w.textContent)).gi, sd = ws.map((w, j) => { const r = on && (wt && wt.length === ws.length ? tm + KAR_LEAD >= wt[j][0] : c / tot <= fr) && !(st.karFrom && on && j < st.karFrom.wi); c += w.textContent.length; return r; }); let cg = -1; sd.forEach((r, j) => { if (r) cg = Math.max(cg, gm[j]); }); ws.forEach((w, j) => w.classList.toggle("kar", sd[j] && gm[j] === cg)); { let cc = 0; ws.forEach((w, j) => { const len = w.textContent.length; if (w.classList.contains("kq")) qwMark(w, w.classList.contains("kar") ? (wt && wt.length === ws.length ? (tm + KAR_LEAD - wt[j][0]) / Math.max(0.1, (wt[j][1] || wt[j][0] + 0.1) - wt[j][0]) : (fr * tot - cc) / Math.max(1, len)) : null); cc += len; }); } }); } // 지금 마디(문장 끝·인용 끝·괄호 앞뒤·쉼표)만 칠 · 앞 마디는 지움(대표님 11-19 13:31)
+            if (st.karFrom && st.karFrom.s !== k) st.karFrom = null; const gm = clauseMap(ws.map(w => w.textContent)).gi, sd = ws.map((w, j) => { const r = on && (wt && wt.length === ws.length ? tm + KAR_LEAD >= wt[j][0] : c / tot <= fr) && !(st.karFrom && on && j < st.karFrom.wi) && !(it.cw && (j < it.cw[0] || j >= it.cw[1])); c += w.textContent.length; return r; }); let cg = -1; sd.forEach((r, j) => { if (r) cg = Math.max(cg, gm[j]); }); ws.forEach((w, j) => w.classList.toggle("kar", sd[j] && gm[j] === cg)); { let cc = 0; ws.forEach((w, j) => { const len = w.textContent.length; if (w.classList.contains("kq")) qwMark(w, w.classList.contains("kar") ? (wt && wt.length === ws.length ? (tm + KAR_LEAD - wt[j][0]) / Math.max(0.1, (wt[j][1] || wt[j][0] + 0.1) - wt[j][0]) : (fr * tot - cc) / Math.max(1, len)) : null); cc += len; }); } }); } // 지금 마디(문장 끝·인용 끝·괄호 앞뒤·쉼표)만 칠 · 앞 마디는 지움(대표님 11-19 13:31)
         // 「이제 말해 보세요」 문장 = 견본 소리 따라 글자 칠
         { const say2 = it.p === 1 && it.part !== "head"; paintAt(panel.querySelector(".v9body .sayp .saybig")?.children || [], say2 ? st.sayAt : null, ex.a.currentTime); }
         // 「이제 말해 보세요」 소리 = 그 칸 안내·한국어 문장에 불 + 짝 줄도 그 말 · [▶ नमुना](문장만 · 언어 없음) = 한국어 문장에만(본부 10-05)
@@ -596,7 +605,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   function pairPaint(vb, i, it, k) {
     const pl = vb.querySelector(".pairln"); if (!pl) return; const sn = L[i].v9?.sent || [], wt = wTimes(sn, k, it.lang), ws = String(sn[k]?.[it.lang] || "").match(/"[^"]*"\S*|\S+/g) || [];
     if (!wt || wt.length !== ws.length) { return; }
-    const tm = Math.min(ex.a.currentTime, it.nx != null ? it.nx - KAR_LEAD - 0.02 : Infinity) + KAR_LEAD; let j = 0; wt.forEach((w, q) => { if (tm >= w[0]) j = q; });
+    const tm = Math.min(ex.a.currentTime, it.nx != null ? it.nx - KAR_LEAD - 0.02 : Infinity) + KAR_LEAD; let j = 0; wt.forEach((w, q) => { if (tm >= w[0]) j = q; }); if (it.cw) j = Math.max(it.cw[0], Math.min(it.cw[1] - 1, j));
     pl.querySelectorAll(".pw").forEach(e => { const on = +e.dataset.w === j; e.classList.toggle("pk", on); if (e.classList.contains("pq")) qwMark(e, on ? (tm - wt[j][0]) / Math.max(0.1, (wt[j][1] || wt[j][0] + 0.1) - wt[j][0]) : null); });
     { const cm0 = commaMap(ws); markClause(pl, cm0.cl[j] ?? 0, cm0.n, null, true); clipPair(pl); } // 엷은 칠 없음 · 읽는 낱말 하나만 진한 노랑 · ↳ 칸은 지금 마디 한 줄만(지웠다 다시 켜지 않음 · 대표님 11-19 16:52)
   }
