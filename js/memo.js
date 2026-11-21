@@ -1,10 +1,10 @@
 // 외우기(대표님 11-20 15:10~17:06) — 단어장의 조각(낱낱 단어)만 쭉 읽어 누워서 듣고 외우게 · 전용 보기(vocab.js 가 그림)
 // 줄마다 = 그 조각 카드 뜻풀이의 첫 문장을 통째로(snd/dict/<조각>_<말>_mean.mp3 의 첫 문장 구간만 · 새 소리 0 · 낱말만 잘라 붙인 소리는 안 씀) · ⇄ 앞에 둔 말 한 문장 · 「두 말」 켜면 다른 말 문장도 이어서
 // 반복 ×N = 그 묶음(한 말이면 한 문장 · 두 말이면 두 문장)을 N 번 · 묶음 사이 0.4초 · 줄 사이 0.8초 · 소리는 언제나 하나(onesound)
-import { claim, onSound } from "./onesound.js?v=1121.1";
-import { showAutoEnd, hideAutoEnd } from "./autoplay.js?v=1121.1";
-import { esc } from "./text.js?v=1121.1";
-import { commaMap } from "./wordnote.js?v=1121.1";
+import { claim, onSound } from "./onesound.js?v=1121.2";
+import { showAutoEnd, hideAutoEnd } from "./autoplay.js?v=1121.2";
+import { esc } from "./text.js?v=1121.2";
+import { commaMap } from "./wordnote.js?v=1121.2";
 
 let repMem = 1; // 이 앱을 연 동안만(새로 열면 ×1)
 export const GAP_PAIR = 400, GAP_ROW = 800, GAP_CL = 300; // GAP_CL = 마디 사이(단어 카드와 같은 0.3초)
