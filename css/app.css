@@ -2182,3 +2182,7 @@ html.vk-bglock{overscroll-behavior:none}.vk-card,.vk-sheet,.hk-sheet,.vk-pane,.v
 /* 판 번호(틀 잡는 동안만 · 대표님 11-20) — 「n / N」 바로 아래 · 자리 안 차지함(겹쳐 얹음) · 누를 수 없음 · 런칭 전 learn.js SHOW_VER=false */
 .learn .vtitle{position:relative}
 .learn .vtitle .ver{position:absolute;inset-inline-end:14px;top:14px;font-size:9px;line-height:11px;color:var(--mute);opacity:.55;pointer-events:none;user-select:none;white-space:nowrap;font-variant-numeric:tabular-nums;direction:ltr}
+/* 갈색 막대 위 단추는 폰이 어두운 화면 설정이어도 낮 모양 그대로(흰 알약·짙은 글씨) — 갈색(--wood)은 어두운 화면에서도 그대로인데 --card·--ink 만 어두운 값(짙은 초록 알약·연한 글씨)으로 바뀌어, 비활성 「‹ 이전」·⭐·외우기 막대 단추가 시꺼멓게 보이던 것(D-134 재발 · 대표님 11-21 폰). 갈색 막대 안에서만 낮 값으로 되돌림 */
+.learn .seek,.vp-bar,.vk-cbar,.vm-bar{--card:#ffffff;--ink:#17302a;--mute:#5c726b;--line:rgba(23,48,42,.14);--hi-soft:rgba(168,106,18,.12);color-scheme:light}
+/* 갈색 막대 비활성 단추(단어장 쪽 넘김 첫 쪽 「‹ 이전」·끝 쪽 「다음 ›」·외우기 막대) = 반투명(opacity .4)이 갈색 위로 비쳐 탁해지던 것 → 카드 막대 비활성과 똑같이 흰 알약 + 옅은 회갈색 글씨(D-134) */
+.vp-bar .vp-b:disabled,.vm-bar button:disabled,.vk-cbar .vp-b:disabled:not(.vk-add){opacity:1;background:var(--card);color:#a8998a;-webkit-text-fill-color:currentColor;box-shadow:none;cursor:default}
