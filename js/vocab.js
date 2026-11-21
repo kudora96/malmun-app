@@ -439,9 +439,10 @@ export function openVocabList() {
     if (!mbar || mbar.parentNode !== host) { mbar?.remove(); mbar = document.createElement("div"); mbar.className = "vm-bar" + (stage ? "" : " vm-foot"); mbar.setAttribute("role", "toolbar"); host.append(mbar); }
     host.classList.add("vm-mv"); mbar.innerHTML = memoBtns(memo, uiKoOn(), twoOn());
   };
-  const enterMemo = (auto = true) => { memoOn = true; mseq = mkSeq(); el.classList.add("vk-mv"); mview = el.querySelector(".vm-view"); if (!mview) return; mview.hidden = false; drawMemoRows(); el.querySelectorAll(".vk-tab").forEach(b => b.setAttribute("aria-selected", String(b.dataset.t === "memo"))); drawMemo(); mview.scrollTop = 0; if (auto && mseq.length) memo.jump(0); };
+  const itKey = x => (x.kind === "piece" ? "p:" + x.pid : "w:" + clean(x.w));
+  const enterMemo = (auto = true, keep = null) => { memoOn = true; mseq = mkSeq(); el.classList.add("vk-mv"); mview = el.querySelector(".vm-view"); if (!mview) return; mview.hidden = false; drawMemoRows(); el.querySelectorAll(".vk-tab").forEach(b => b.setAttribute("aria-selected", String(b.dataset.t === "memo"))); drawMemo(); mview.scrollTop = keep ? keep.sc : 0; if (keep) { const ni = mseq.findIndex(x => itKey(x) === keep.k); if (ni < 0) memo.reset(); else { memo.remap(ni); mshow(ni); memo.repaint(); } } else if (auto && mseq.length) memo.jump(0); }; // keep = ⇄·정렬로 다시 그릴 때 읽던 줄(같은 낱말)과 스크롤을 이어 받음 — 소리는 안 끊고 줄 글만 새 말 먼저로
   const leaveMemo = () => { memo.reset(); memoOn = false; el.classList.remove("vk-mv"); if (mview) { mview.hidden = true; mview.innerHTML = ""; } el.querySelectorAll(".vk-tab").forEach(b => b.setAttribute("aria-selected", String(b.dataset.t === tab))); drawMemo(); };
-  const memoClick = e => { const b = e.target.closest?.("[data-vm]"); if (!b || !mbar?.contains(b)) return; e.preventDefault(); e.stopPropagation(); if (b.dataset.vm === "rep") memo.cycle(); else if (b.dataset.vm === "two") { setTwo(!twoOn()); drawMemoRows(); const s0 = memo.st(); if (s0.on) mshow(s0.idx); drawMemo(); } else if (b.dataset.vm === "back") leaveMemo(); else memo.toggle(); };
+  const memoClick = e => { const b = e.target.closest?.("[data-vm]"); if (!b || !mbar?.contains(b)) return; e.preventDefault(); e.stopPropagation(); if (b.dataset.vm === "rep") memo.cycle(); else if (b.dataset.vm === "two") { setTwo(!twoOn()); drawMemoRows(); const s0 = memo.st(); if (s0.on) { mshow(s0.idx); memo.repaint(); } drawMemo(); } else if (b.dataset.vm === "back") leaveMemo(); else memo.toggle(); };
   listOff.push(() => { memo.stop(); mbar?.remove(); mbar?.parentNode?.classList.remove("vm-has", "vm-mv"); mbar = null; document.querySelector(".learn .seek")?.classList.remove("vm-has", "vm-mv"); });
   on0("click", memoClick, true);
   const draw = async () => {
@@ -454,13 +455,14 @@ export function openVocabList() {
     const tb = (t, k) => `<button type="button" class="vk-tab" role="tab" data-v="tab" data-t="${t}" aria-selected="${tab === t && !memoOn}"><b>${esc(tx(k))}</b>${t === "mine" ? `<span class="vk-cnt vk-mn" data-n="${vocabCount()}">${cntHTML(vocabCount())}</span>` : tab === t ? `<span class="vk-cnt">${cntHTML(total)}</span>` : ""}</button>`; // 「내가 담은」 탭 배지 = 어느 탭에서도 늘 보임(담은 개수 · 단어+조각 각 1 · 대표님 11-19 15:53)
     const body = `<div class="vk-head"><span class="vk-tt" role="tablist">${tb("all", "tabAll")}${tb("mine", "tabMine")}${total ? `<button type="button" class="vk-tab vk-memotab" role="tab" data-v="tab" data-t="memo" aria-selected="${memoOn}" aria-label="${esc(TXM[uiKoOn() ? "ko" : "ne"].go)}"><b><span class="vm-full">${esc(TXM[uiKoOn() ? "ko" : "ne"].go)}</span>${uiKoOn() ? "" : `<span class="vm-short">${esc(TXM.ne.tab)}</span>`}</b></button>` : ""}</span><span class="vk-sortslot"></span><span class="vk-uik">${uikoChip()}</span></div>
       ${total ? `<div class="vp-frow"><span class="vp-findslot"></span></div><div class="vp-wrap"><ul class="vk-ul flick"></ul></div><ul class="vm-view vk-ul flick" hidden></ul>` : `<p class="vk-empty">${esc(tx("empty"))}</p>`}`;
+    const mviewSc = mview ? mview.scrollTop : 0;
     el.innerHTML = stage ? `${XBTN}${body}` : `<div class="vk-sheet">${XBTN}${body}</div>`;
     { const n = vocabCount(); if (shownN != null && shownN !== n) bump(el.querySelector(".vk-mn")); shownN = n; }
     offDrag?.(); offDrag = null; ul = el.querySelector(".vk-ul"); wrap = el.querySelector(".vp-wrap");
     el.querySelector(".vk-sortslot")?.append(makeSortButton(() => mode, m => { mode = m; cur = 0; draw(); }, L, k => (k.startsWith("vlist.") ? k : tx(k))));
     el.querySelector(".vp-findslot")?.replaceWith(find); mountPager();
     if (ul) { offDrag = attachDragScroll(ul, { friction: 0.95, threshold: 6, wheel: true }); drawList(); } else pager?.update(0, 1, ko);
-    const mWas = memoOn, mRun = memo.st().running, mIdx = memo.st().idx; memo.reset(); mview = null; el.classList.remove("vk-mv"); if (mWas && total) { enterMemo(false); if (mRun) memo.jump(Math.min(mIdx, mseq.length - 1)); } else { memoOn = false; drawMemo(); } // 탭·정렬로 새로 그려지면 외우기 닫힘 · ⇄ 로 새로 그리면 외우기 보기는 남아 지금 줄부터 바뀐 순서로
+    const mWas = memoOn, ms0 = memo.st(), mk0 = mWas && ms0.alive ? mseq[ms0.idx] : null, kp = mk0 ? { k: itKey(mk0), sc: mview ? 0 : 0 } : null; if (kp) kp.sc = mviewSc; if (!kp) memo.reset(); mview = null; el.classList.remove("vk-mv"); if (mWas && total) enterMemo(false, kp); else { memo.reset(); memoOn = false; drawMemo(); } // 탭·정렬로 새로 그려지면 외우기 닫힘 · ⇄ 로 새로 그리면 외우기 보기는 남아 지금 줄부터 바뀐 순서로
   };
   draw();
   el.addEventListener("click", e => {
