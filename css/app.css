@@ -2194,3 +2194,12 @@ html.vk-bglock{overscroll-behavior:none}.vk-card,.vk-sheet,.hk-sheet,.vk-pane,.v
 .learn.big.rdr .seek{display:flex!important;position:fixed;left:0;right:0;bottom:0;z-index:31;height:36px;justify-content:center;gap:10px;padding:0 10px env(safe-area-inset-bottom,0px);box-sizing:content-box}
 .learn.big.rdr .seek :is(.t0,.t1,.trk){display:none}
 .learn.big.rdr .stick{padding-bottom:calc(36px + env(safe-area-inset-bottom,0px))}
+
+/* dark-B — 어두운 화면에서만(낮 화면 계산된 색 불변) · 읽기·카드·끝 카드·학습 화면 아래 줄 글자 대비 보정(대표님 11-21 폰) */
+@media (prefers-color-scheme: dark){
+  .panel,.vk-card,.vk-pcard,.endcard,.line.cur{--mute:#b6c8c1}
+  .line:not(.cur){opacity:.86;--mute:#c9d8d2}
+  .line.past{opacity:.78}
+  .ctrl .iconbtn:disabled{opacity:.52}
+}
+/* /dark-B */
