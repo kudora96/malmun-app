@@ -1316,6 +1316,34 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
   };
   v.addEventListener("click", togglePlay);
   // 「ने⇄한」 = 언어 하나(안 A) — 어느 화면·창의 단추든(ui.js 문서 한 곳이 받음 · 다국어부 10-14) 앱 글이 바뀌면 설명 소리·본문도 그 언어로(듣는 중이면 같은 문장부터) · 설명 막대 안 고르기(uiLang)는 제 손잡이가 이미 맞춤
+  // 읽는 중 ⇄ (대표님 11-21 10:18·10:21) — 단어 카드(wordnote.js switchRead)와 같은 원리: 지금 나는 소리는 멈추지도 다시 틀지도 않고 「다음에 읽을 것」만 새 말 차례로 바꿈
+  // 읽던 조각(한 말이면 읽던 문장)을 끝까지 → 두 말이면 그 문장의 아직 안 읽은 짝 → 다음 문장부터 새 말 먼저 → 끝에서 자동이 다음 줄로(읽은 곳 다시 읽지 않음)
+  // 글(윗줄·↳)은 ⇄ 순간 바로 바뀌고, 칠은 지금 나는 소리의 낱말을 따라감(소리 말이 윗줄이 아니게 된 동안은 pair 표시 = ↳ 칸에 칠 · 카드의 j.ph 와 같음)
+  function flipRead(w) {
+    const p = st.panel, sn = p?.kind === "explain" && L[p.i]?.v9?.sent; if (!sn?.length) return false;
+    const i = p.i, q = ex.q, cur = q[ex.i]; if (!ex.playing || !cur || cur.p !== 0 || !cur.lang) return false;
+    const items = v9Items(i, { line: false, k: w }); if (!items.length) return false;
+    const code = v9code(w), pend = !!ex.gapping, startOf = (c, n) => sn[n]?.[`${c}_s`];
+    const F = n => { const j = fromSent(items, n); return j < 0 ? [] : items.slice(j); };
+    let head, tail;
+    if (cur.sk !== undefined) { // 두 말 큐 — 읽은(읽는 중) 말은 그 문장에서 빼고 남은 짝만 새 순서로, 그다음 문장부터 새 말 먼저
+      const s = cur.sk; head = q.slice(0, pend ? ex.i : ex.i + 1);
+      const done = new Set(head.filter(x => x.sk === s && x.p === 0).map(x => x.lang));
+      tail = [...items.filter(x => x.sk === s && x.p === 0 && !done.has(x.lang)), ...F(s + 1)];
+    } else { // 한 덩어리(두 말 끔) — 읽던 문장 끝까지 → 다음 문장부터 새 말
+      head = q.slice(0, pend ? ex.i : ex.i + 1);
+      if (pend) { const at = startOf(code, sentAt(i, cur.lang, cur.at || 0)); tail = [{ ...items[0], ...(at > 0 ? { at } : {}) }]; } // 쉼 중(조각이 아직 안 나옴) ⇄ = 그 자리 문장부터 새 말로
+      else {
+        const s = sentAt(i, cur.lang, ex.a.currentTime), nxt = startOf(cur.lang, s + 1), at = startOf(code, s + 1);
+        if (cur.lang === code) { delete cur.until; ex.arm(cur); tail = []; } // 이미 새 말로 읽는 중(⇄ 를 두 번 = 원래대로) — 그대로 끝까지
+        else { let e = nxt; const cw = wTimes(sn, s, cur.lang), nw = wTimes(sn, s + 1, cur.lang); if (cw && nw) { const e0 = cw[cw.length - 1][1]; if (nw[0][0] > e0) e = Math.min(e0 + TWO_PAD, (e0 + nw[0][0]) / 2); } if (nxt != null && e > 0) { cur.until = e; ex.arm(cur); } tail = at != null && nxt != null ? [{ ...items[0], at }] : []; }
+      }
+    }
+    if (!pend) { if (cur.lang !== code) { cur.pair = true; cur.main = code; } else { cur.pair = false; delete cur.main; } } // 지금 나는 소리가 윗줄 말이 아니면 ↳ 칸에 칠(카드 j.ph)
+    hushSay(); v9set("snd", w); v9set("txt", w); uiLang(w === "ko"); st.karFrom = null; v9Text(p.i, w); markPlay(w);
+    ex.q = [...head, ...tail]; st.exLoop = ex.q;
+    try { v9Hl(); } catch {} sync(); return true;
+  }
   const onUiLang = e => {
     const sr = e?.detail?.root; if (sr && sr !== panel) return; // 다른 창(쓰기 등) ⇄ = 배우기 화면·이 창 그대로
     const inP = sr === panel; // 설명·말하기 창 안 ⇄ = 그 창만(줄 카드·영상 그대로 · 대표님 10-22)
@@ -1331,7 +1359,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     const p = st.panel; if (p?.kind !== "explain" || !L[p.i]?.v9) return;
     panel.querySelectorAll(".v9bar [data-x=txt]").forEach(x => x.setAttribute("aria-selected", String(x.dataset.v === w)));
     const b = panel.querySelector(`.v9bar [data-x=ex][data-v="${w}"]`);
-    if (b && ex.playing && b.getAttribute("aria-pressed") !== "true") v9Click(b);
+    if (b && ex.playing && b.getAttribute("aria-pressed") !== "true") { if (!flipRead(w)) v9Click(b); } // 읽는 중 ⇄ = 소리를 끊지 않고 이어 읽기(flipRead) · 못 하는 때(대사 소리·말해 보세요)만 옛 길
     else { const snap = !ex.playing ? swapSnap(p.i) : null; v9Text(p.i, w);
       if (snap) { const items = v9Items(p.i, { line: false, k: w }), from = fromSent(items, snap.s), tg = swapTarget(snap); // 멈춘 채 ⇄ = 그 낱말 자리에 소리를 맞춰 두고 멈춘 채(다시 누르면 거기서)
         if (tg && from >= 0) { st.exLoop = items; markPlay(w); ex.cue(items.map((x, j) => (j === from ? { ...x, at: tg.at } : x)), from); swapPaint(tg); sync(); } } }
@@ -1375,7 +1403,7 @@ export default async function learn(app, ep, startId, opts = {}) { /* opts.expla
     if (ex.i >= q.length) { if (!st.gap) st.exLoop = exItems(i); return; } // 끝난 뒤 ▶(처음부터)·반복이 옛 목록을 안 쓰게
     const cur = q[ex.i]; if (!cur || cur.p !== 0) return;
     const pend = (ex.playing && ex.gapping) || (!ex.playing && ex.pgap), rest = q.slice(pend ? ex.i : ex.i + 1); // pend = 쉼 중(지금 조각 아직 안 나옴)
-    if ((rest.length ? rest.some(x => x.pair) : cur.sk !== undefined) === want) return; // 남은 큐가 이미 지금 상태
+    if ((rest.length ? rest.some(x => x.sk !== undefined) : cur.sk !== undefined) === want) return; // 남은 큐가 이미 지금 상태
     const code = v9code(sndOf(i)), start = n => L[i].v9?.sent?.[n]?.[`${code}_s`];
     const s = cur.sk ?? sentAt(i, cur.lang, pend ? (cur.at || 0) : ex.a.currentTime);
     let head, from;
