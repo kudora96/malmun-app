@@ -1775,7 +1775,7 @@ li.vl-row{position:relative;overflow:hidden;touch-action:pan-y}.vl-slide{display
 .vk-pl{flex:none;width:34px;height:34px;border-radius:50%;border:1px solid var(--hi);background:var(--hi);color:var(--on-hi);font-size:13px;line-height:1;padding:0 0 0 2px;box-shadow:0 1px 0 var(--line);cursor:pointer}
 .vk-pl.playing{animation:v9glow 1.4s ease-in-out infinite}
 .vk-lb{flex:1;min-width:0;align-content:center;display:flex;flex-direction:row;flex-wrap:wrap;align-items:baseline;column-gap:8px;row-gap:0;text-align:start;min-height:48px;padding:6px 2px;border:0;background:transparent;color:inherit;cursor:pointer}
-.vk-li .vk-t{font-size:16px;line-height:1.25;font-weight:800}.vk-li .vk-rom{font-size:16px;color:var(--mute);opacity:1;font-weight:500;line-height:1.25}.vk-li .vk-mean{font-size:16px;font-weight:600;color:var(--hi);line-height:1.25}
+.vk-li .vk-t{font-size:16px;line-height:1.5;font-weight:800}.vk-li .vk-rom{font-size:16px;color:var(--mute);opacity:1;font-weight:500;line-height:1.5}.vk-li .vk-mean{font-size:16px;font-weight:600;color:var(--hi);line-height:1.5}
 @media (hover:hover){.vk-li:hover{background:rgba(255,210,31,.3)}}
 .vk-li:active{transform:scale(.97);box-shadow:0 1px 3px rgba(0,0,0,.18)}
 /* 단어장 두 탭 + 조각 줄(대표님 11-19 14:42) — 탭은 정렬 칩·⇄ 와 한 줄 · 조각 줄은 흰 줄 그대로 조금 작게·안쪽으로·왼쪽 얇은 갈색 선 */
@@ -1786,7 +1786,7 @@ li.vl-row{position:relative;overflow:hidden;touch-action:pan-y}.vl-slide{display
 .vk-tab .vk-cnt{padding:1px 6px;font-size:11px}.vk-pane .vk-head .vk-tt{gap:3px}
 .vk-sub{position:relative;display:flex;align-items:center;gap:6px;min-height:44px;margin-left:22px;padding:0 6px 0 8px;border-radius:12px;border:1px solid var(--line);border-left:3px solid var(--hi);background:var(--card);color:var(--ink);box-shadow:0 2px 6px rgba(0,0,0,.14);overflow:hidden;transition:transform .1s ease,box-shadow .1s ease,background-color .12s ease}
 .vk-sub .vk-pl{width:28px;height:28px;font-size:11px}.vk-sub .vk-lb{min-height:44px}
-.vk-sub .vk-t{font-size:14.5px;line-height:1.25;font-weight:800}.vk-sub .vk-rom{font-size:14.5px;color:var(--mute);font-weight:500;line-height:1.25}.vk-sub .vk-mean{font-size:14.5px;font-weight:600;color:var(--hi);line-height:1.25}
+.vk-sub .vk-t{font-size:14.5px;line-height:1.5;font-weight:800}.vk-sub .vk-rom{font-size:14.5px;color:var(--mute);font-weight:500;line-height:1.5}.vk-sub .vk-mean{font-size:14.5px;font-weight:600;color:var(--hi);line-height:1.5}
 @media (hover:hover){.vk-sub:hover{background:rgba(255,210,31,.3)}}
 .vk-sub:active{transform:scale(.97);box-shadow:0 1px 3px rgba(0,0,0,.18)}
 .vk-st{flex:none;width:34px;height:34px;border:0;border-radius:8px;background:transparent;color:var(--hi);font-size:19px;line-height:1;padding:0;cursor:pointer;transition:transform .1s ease,background-color .12s ease}
@@ -2137,7 +2137,7 @@ html.vk-bglock{overscroll-behavior:none}.vk-card,.vk-sheet,.hk-sheet,.vk-pane,.v
 .learn .seek.vm-has>.vp-bar{padding-left:calc(var(--vmw,0px) + 14px)}
 .learn .seek.vm-has>.vp-bar.n :is(.vp-pv,.vp-nx){font-size:0;min-width:30px}.learn .seek.vm-has>.vp-bar.n .vp-pv::before{content:"‹";font-size:16px}.learn .seek.vm-has>.vp-bar.n .vp-nx::before{content:"›";font-size:16px}
 .vk-li.vm-on,.vk-sub.vm-on{border-color:#f2c14e;box-shadow:0 0 0 3px #f2c14e,0 3px 10px rgba(0,0,0,.18)}
-@media(max-width:339px){.vm-bar .vm-ic{display:none}}
+/* 320 폭: 돌아가기·▶ 글·그림 숨기던 규칙 뺌 — 속 빈 알약이 됐음(F2 11-21) · 모자라면 fitMBar 가 단계로 줄임 */
 
 /* ── 갈색 막대 정리(대표님 11-20 15:18~15:19) ─────────────────────────────── */
 /* 막대 = ‹ 돌아가기 · ▶ · 두 말 · 자동 · ‹ 이전 · 다음 › · ⛶ (⭐ 는 카드 머리로) · 모자라면 JS(fitCBar)가 단계로 줄임 */
@@ -2175,7 +2175,7 @@ html.vk-bglock{overscroll-behavior:none}.vk-card,.vk-sheet,.hk-sheet,.vk-pane,.v
 .vm-bar .vm-back .vm-ic{font-size:15px;line-height:1}
 .vm-bar .vm-go{min-width:34px;justify-content:center;padding:0 8px}
 @media(max-width:430px){.vk-pane .vk-head{gap:4px 3px}.vk-tab{padding:0 6px}.vk-pane .vk-tt{gap:4px 3px}.vk-memotab b{font-size:13px}}
-@media(max-width:339px){.vm-bar .vm-back .vm-t{display:none}}
+
 /* 375 탭 줄: 모자라면 개수 글 → 정렬 글 순서로 줄임(겹침 0) · 네팔어 외우기 칩은 짧은 꼴 */
 .vm-short{display:none}
 @media(max-width:430px){.vk-memotab .vm-full:not(:only-child){display:none}.vk-memotab .vm-short{display:inline}.vk-pane .vk-sortslot .vl-sortbtn{font-size:0;min-width:34px;padding:0 8px}.vk-pane .vk-sortslot .vl-sortbtn::before{content:"⇅";font-size:15px;line-height:1}}
